@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import UserDashboard from './pages/UserDashboard.jsx'
 import TextBasedQuestions from './pages/TextBasedQuestions.jsx'
 import SalesManagement from './pages/SalesManagement.jsx'
+import Campaigns from './pages/Campaigns.jsx'
 import PurchasePackage from './pages/PurchasePackage.jsx'
 import AskQuestion from './pages/AskQuestion.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
@@ -55,6 +56,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer" element={<Dashboard />} />
         <Route path="/astrologer/text-based-questions" element={<TextBasedQuestions />} />
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
+        <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />

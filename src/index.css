@@ -168,6 +168,32 @@ html[data-theme='dark'] {
   box-sizing: border-box;
 }
 
+@media (min-width: 1280px) {
+  .campaigns-details-column {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .campaigns-details-column::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--primary-light) 12%,
+      var(--secondary) 50%,
+      var(--accent) 88%,
+      transparent 100%
+    );
+    opacity: 0.72;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

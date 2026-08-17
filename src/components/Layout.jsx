@@ -61,6 +61,7 @@ const PAGE_META = {
     '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
+    '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },

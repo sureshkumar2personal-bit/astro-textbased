@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
+import CreateCampaignModal from '../components/CreateCampaignModal.jsx'
+import { defaultCampaignCategories } from '../utils/campaignCategories.js'
+import { CampaignCategoriesEditor } from '../components/CampaignCategoriesEditor.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -18,114 +22,14 @@ import {
   TempleShieldIcon,
 } from '../components/TempleIcons.jsx'
 
-const createBlankCategory = (overrides = {}) => ({
-  name: '',
-  normalPrice: 200,
-  discountPercent: 0,
-  compulsoryQuestions: 150,
-  ...overrides,
-})
-
-const defaultCampaignCategories = () => [
-  createBlankCategory({ name: 'Marriage', discountPercent: 70 }),
-  createBlankCategory({ name: 'Career', discountPercent: 80 }),
-  createBlankCategory({ name: 'Love', discountPercent: 90 }),
-  createBlankCategory({ name: 'Study', discountPercent: 40 }),
-]
-
-function CampaignCategoriesEditor({ categories, onChange }) {
-  const update = (index, patch) => onChange(categories.map((cat, i) => (i === index ? { ...cat, ...patch } : cat)))
-  const addCategory = () => {
-    if (categories.length < 6) onChange([...categories, createBlankCategory()])
-  }
-  const removeCategory = (index) => {
-    if (categories.length > 4) onChange(categories.filter((_, i) => i !== index))
-  }
-  const compulsoryTotal = categories.reduce((sum, cat) => sum + (Number(cat.compulsoryQuestions) || 0), 0)
-  const countValid = categories.length >= 4 && categories.length <= 6
-  const compulsoryValid = compulsoryTotal === 600
-  return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      {categories.map((cat, index) => (
-        <div
-          key={index}
-          style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 1fr) repeat(3, 110px) 36px', gap: 10, alignItems: 'end' }}
-        >
-          <label className="field-group" style={{ margin: 0 }}>
-            <span className="field-label-top">Category</span>
-            <input
-              className="text-input"
-              value={cat.name}
-              placeholder="e.g. Marriage"
-              onChange={(e) => update(index, { name: e.target.value })}
-            />
-          </label>
-          <label className="field-group" style={{ margin: 0 }}>
-            <span className="field-label-top">Normal ₹</span>
-            <input
-              type="number"
-              className="text-input"
-              min={0}
-              value={cat.normalPrice}
-              onChange={(e) => update(index, { normalPrice: Number(e.target.value) })}
-            />
-          </label>
-          <label className="field-group" style={{ margin: 0 }}>
-            <span className="field-label-top">Discount %</span>
-            <input
-              type="number"
-              className="text-input"
-              min={0}
-              max={100}
-              value={cat.discountPercent}
-              onChange={(e) => update(index, { discountPercent: Number(e.target.value) })}
-            />
-          </label>
-          <label className="field-group" style={{ margin: 0 }}>
-            <span className="field-label-top">Compulsory</span>
-            <input
-              type="number"
-              className="text-input"
-              min={0}
-              value={cat.compulsoryQuestions}
-              onChange={(e) => update(index, { compulsoryQuestions: Number(e.target.value) })}
-            />
-          </label>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            style={{ height: 38, padding: '0 8px' }}
-            onClick={() => removeCategory(index)}
-            disabled={categories.length <= 4}
-            title="Remove category"
-          >
-            ✕
-          </button>
-        </div>
-      ))}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <button type="button" className="btn btn-outline" onClick={addCategory} disabled={categories.length >= 6}>
-          + Add Category
-        </button>
-        <span className="muted" style={{ fontSize: 13 }}>
-          Categories: {categories.length}/6 · Compulsory total: <strong>{compulsoryTotal}</strong>/600
-          {!countValid && ' (need 4–6)'}
-          {countValid && !compulsoryValid && ' (must equal 600)'}
-          {countValid && compulsoryValid && ' ✓'}
-        </span>
-      </div>
-    </div>
-  )
-}
-
 export default function SalesManagement() {
   const { campaigns, selectedCampaignId, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
-  const [campaignId, setCampaignId] = useState(selectedCampaignId)
+  const [campaignId] = useState(selectedCampaignId)
   const [createOpen, setCreateOpen] = useState(false)
-  const [createError, setCreateError] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [created, setCreated] = useState(false)
   const [editCatsOpen, setEditCatsOpen] = useState(false)
   const [editCats, setEditCats] = useState([])
@@ -133,108 +37,20 @@ export default function SalesManagement() {
   const selectedCampaign = campaigns.find((campaign) => campaign.id === campaignId) || campaigns[0]
 
   useEffect(() => {
-    if (!createOpen && !editCatsOpen) return
+    if (!editCatsOpen) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [createOpen, editCatsOpen])
+  }, [editCatsOpen])
 
-  const toInputDate = (value) => {
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return ''
-    return date.toISOString().slice(0, 10)
-  }
-  const splitSlots = (total) => {
-    const general = Math.ceil(total / 2)
-    return { generalLimit: general, personalLimit: total - general }
-  }
-  const [createForm, setCreateForm] = useState({
-    name: '',
-    date: toInputDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
-    endDate: toInputDate(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)),
-    generalPrice: 99,
-    personalPrice: 99,
-    totalLimit: selectedCampaign.totalLimit,
-    ...splitSlots(selectedCampaign.totalLimit),
-    generalOffer: true,
-    personalOffer: true,
-    categories: defaultCampaignCategories(),
-  })
-
-  const openCreateCampaign = () => {
-    setCreateError('')
-    setCreateForm({
-      name: '',
-      date: toInputDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
-      endDate: toInputDate(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)),
-      priority: 'Medium',
-      generalPrice: 99,
-      personalPrice: 99,
-      totalLimit: selectedCampaign.totalLimit,
-      ...splitSlots(selectedCampaign.totalLimit),
-      generalOffer: true,
-      personalOffer: true,
-      categories: defaultCampaignCategories(),
-    })
-    setCreateOpen(true)
-  }
-
-  const setTotalSlots = (total) => {
-    setCreateForm((prev) => ({ ...prev, totalLimit: total, ...splitSlots(total) }))
-  }
-
-  const slotAllocated = createForm.generalLimit + createForm.personalLimit
-  const slotDifference = createForm.totalLimit - slotAllocated
-  const isSlotAllocationValid = slotDifference === 0
-
-  const categoryCount = createForm.categories.length
-  const isCategoryCountValid = categoryCount >= 4 && categoryCount <= 6
-  const compulsoryTotal = createForm.categories.reduce((sum, cat) => sum + (Number(cat.compulsoryQuestions) || 0), 0)
-  const isCompulsoryValid = compulsoryTotal === 600
-  const areCategoriesNamed = createForm.categories.every((cat) => cat.name.trim())
-  const isCategoriesValid = isCategoryCountValid && isCompulsoryValid && areCategoriesNamed
-
-  const handleCreateCampaign = () => {
-    try {
-      setCreateError('')
-      if (!createForm.name.trim()) {
-        throw new Error('Enter a campaign name.')
-      }
-      if (!createForm.date) {
-        throw new Error('Select a campaign start date.')
-      }
-      if (!createForm.endDate) {
-        throw new Error('Select a campaign closed date.')
-      }
-      if (new Date(createForm.endDate) < new Date(createForm.date)) {
-        throw new Error('Closed date must be on or after the start date.')
-      }
-      if (!isSlotAllocationValid) {
-        throw new Error('General Slots and Personal Slots must add up to the Total Slots.')
-      }
-      if (!isCategoryCountValid) {
-        throw new Error('Add at least 4 and at most 6 campaign categories.')
-      }
-      if (!areCategoriesNamed) {
-        throw new Error('Every campaign category needs a name.')
-      }
-      if (!isCompulsoryValid) {
-        throw new Error('Compulsory questions across categories must total 600.')
-      }
-
-      const newCampaign = actions.createCampaign({
-        ...createForm,
-        date: createForm.date,
-      })
-      setCampaignId(newCampaign.id)
-      setCreateOpen(false)
-      setCreated(true)
-    } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Unable to create campaign.')
+  useEffect(() => {
+    if (searchParams.get('create') === 'true') {
+      setCreateOpen(true)
+      setSearchParams({}, { replace: true })
     }
-  }
+  }, [searchParams, setSearchParams])
 
   const openEditCategories = () => {
     setEditCatsError('')
@@ -280,7 +96,7 @@ export default function SalesManagement() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
             <StatusBadge label={selectedCampaign.status} />
-            <button className="btn btn-primary" onClick={openCreateCampaign}>
+            <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
               <TempleDonationBoxIcon size={15} />Create New Campaign
             </button>
           </div>
@@ -496,137 +312,14 @@ export default function SalesManagement() {
         </div>
       </Section>
 
-      {createOpen && (
-        <div className="modal-overlay" onClick={() => setCreateOpen(false)}>
-          <div className="modal-card modal-card--scroll" style={{ width: 'min(920px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header">
-              <div className="section-title" style={{ marginBottom: 16 }}>Create New Campaign</div>
-            </div>
-            <div className="modal-card__content">
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Campaign Name</span>
-                  <input
-                    className="text-input"
-                    value={createForm.name}
-                    onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                    placeholder="Ram Navami Special"
-                  />
-                </label>
-                <div className="grid grid-cols-2 gap-4 md:col-span-2">
-                  <label className="field-group" style={{ margin: 0 }}>
-                    <span className="field-label-top">Start Date</span>
-                    <input
-                      type="date"
-                      className="text-input"
-                      value={createForm.date}
-                      onChange={(e) => setCreateForm({ ...createForm, date: e.target.value })}
-                    />
-                  </label>
-                  <label className="field-group" style={{ margin: 0 }}>
-                    <span className="field-label-top">Closed Date (End Date)</span>
-                    <input
-                      type="date"
-                      className="text-input"
-                      value={createForm.endDate}
-                      min={createForm.date}
-                      onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })}
-                    />
-                  </label>
-                </div>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">General Price</span>
-                  <input
-                    type="number"
-                    className="text-input"
-                    value={createForm.generalPrice}
-                    onChange={(e) => setCreateForm({ ...createForm, generalPrice: Number(e.target.value) })}
-                    placeholder="Enter price"
-                    min={0}
-                  />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Individual Price</span>
-                  <input
-                    type="number"
-                    className="text-input"
-                    value={createForm.personalPrice}
-                    onChange={(e) => setCreateForm({ ...createForm, personalPrice: Number(e.target.value) })}
-                    placeholder="Enter price"
-                    min={0}
-                  />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Total Slots</span>
-                  <input
-                    className="text-input"
-                    value={createForm.totalLimit}
-                    onChange={(e) => setTotalSlots(Number(e.target.value))}
-                  />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">General Slots</span>
-                  <input
-                    className="text-input"
-                    value={createForm.generalLimit}
-                    onChange={(e) => setCreateForm({ ...createForm, generalLimit: Number(e.target.value) })}
-                  />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Personal Slots</span>
-                  <input
-                    className="text-input"
-                    value={createForm.personalLimit}
-                    onChange={(e) => setCreateForm({ ...createForm, personalLimit: Number(e.target.value) })}
-                  />
-                </label>
-                <div className="md:col-span-2" style={{ marginTop: -6 }}>
-                  {slotDifference === 0 ? (
-                    <p className="text-sm font-medium text-[color:var(--success)]">
-                      Slots fully allocated ({slotAllocated}/{createForm.totalLimit}).
-                    </p>
-                  ) : slotDifference > 0 ? (
-                    <p className="text-sm font-medium text-[color:var(--warning)]">
-                      Remaining Slots: {slotDifference}
-                    </p>
-                  ) : (
-                    <p className="text-sm font-medium text-[color:var(--danger)]">
-                      Exceeded by {Math.abs(slotDifference)} Slots
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <Card className="section" style={{ padding: '16px 20px' }}>
-                <div className="section-title" style={{ fontSize: 15, marginBottom: 10 }}>Campaign Categories (4–6)</div>
-                <CampaignCategoriesEditor
-                  categories={createForm.categories}
-                  onChange={(cats) => setCreateForm((prev) => ({ ...prev, categories: cats }))}
-                />
-              </Card>
-
-              {createError && (
-                <div className="mt-4 rounded-[14px] border border-[color:var(--danger-bg)] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">
-                  {createError}
-                </div>
-              )}
-            </div>
-            <div className="modal-card__footer">
-              <button className="btn btn-ghost" type="button" onClick={() => setCreateOpen(false)}>
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                type="button"
-                disabled={!isSlotAllocationValid || !isCategoriesValid}
-                onClick={handleCreateCampaign}
-              >
-                Create Campaign
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateCampaignModal
+        open={createOpen}
+        onClose={(created) => {
+          setCreateOpen(false)
+          if (created) setCreated(true)
+        }}
+        defaultTotalLimit={selectedCampaign.totalLimit}
+      />
 
       {editCatsOpen && (
         <div className="modal-overlay" onClick={() => setEditCatsOpen(false)}>

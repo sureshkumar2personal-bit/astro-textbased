@@ -16,19 +16,21 @@ import { ChipGroup } from '../components/OptionGroup.jsx'
 import Card from '../components/ui/Card.jsx'
 import StatCard from '../components/ui/StatCard.jsx'
 import ActionCard from '../components/ui/ActionCard.jsx'
+import CreateCampaignModal from '../components/CreateCampaignModal.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 
 export default function Dashboard() {
-  const { campaigns, questions, selectedCampaignId, actions } = useAppData()
+  const { campaigns, questions, selectedCampaignId, selectedCampaign } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const [sortBy, setSortBy] = useState('Date')
   const [query, setQuery] = useState('')
-  const [campaignFilter, setCampaignFilter] = useState(selectedCampaignId)
+  const [campaignFilter] = useState(selectedCampaignId)
+  const [createOpen, setCreateOpen] = useState(false)
   const questionListRef = useRef(null)
 
   const stats = useMemo(() => {
@@ -39,7 +41,7 @@ export default function Dashboard() {
     return [
       { label: 'active campaigns', value: campaigns.length, icon: Megaphone, tone: 'violet', route: routes.salesManagement },
       { label: 'sold questions', value: sold, icon: ShoppingBag, tone: 'gold', route: routes.salesManagement },
-      { label: 'queued questions', value: pending, icon: MessageCircleReply, tone: 'sky', route: `${routes.answerQuestion}?status=pending_group` },
+      { label: 'pending questions', value: pending, icon: MessageCircleReply, tone: 'sky', route: `${routes.answerQuestion}?status=pending_group` },
       { label: 'answered questions', value: answered, icon: MessageCircleCheck, tone: 'green', route: `${routes.answerQuestion}?status=Answered` },
       { label: 'disputed questions', value: disputed, icon: ShieldAlert, tone: 'red', route: routes.disputeManagement },
     ]
@@ -58,9 +60,12 @@ export default function Dashboard() {
     return list.sort((a, b) => sortByDateDesc(a, b, (item) => item.date))
   }, [campaigns, sortBy])
 
+  const visibleCampaigns = sortedCampaigns.slice(0, 3)
+
   const filteredQuestions = useMemo(() => {
     const term = query.trim().toLowerCase()
     const priorityWeight = { High: 0, Medium: 1, Low: 2 }
+    const campaignById = new Map(campaigns.map((campaign) => [campaign.id, campaign]))
 
     return questions
       .filter((question) => {
@@ -69,7 +74,18 @@ export default function Dashboard() {
       })
       .filter((question) => {
         if (!term) return true
-        const haystack = [question.id, question.user, question.category, question.type, question.status, question.campaignName]
+        const campaign = campaignById.get(question.campaignId)
+        const campaignCategories = campaign?.categories?.map((category) => category.name) || []
+        const haystack = [
+          question.id,
+          question.user,
+          question.category,
+          question.type,
+          question.status,
+          question.campaignName,
+          campaign?.name,
+          ...campaignCategories,
+        ]
           .join(' ')
           .toLowerCase()
         return haystack.includes(term)
@@ -83,7 +99,30 @@ export default function Dashboard() {
         }
         return sortByDateDesc(a, b, (item) => item.raisedAt || item.raised)
       })
-  }, [query, campaignFilter, questions, sortBy])
+  }, [query, campaignFilter, campaigns, questions, sortBy])
+
+  const handleSearch = () => {
+    const term = query.trim().toLowerCase()
+    if (!term) {
+      questionListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+
+    const matchingCampaign = campaigns.find((campaign) => {
+      const categories = (campaign.categories || []).map((category) => category.name)
+      return [campaign.name, campaign.id, ...categories]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
+    })
+
+    if (matchingCampaign) {
+      navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(matchingCampaign.id)}`)
+      return
+    }
+
+    questionListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <div>
@@ -93,6 +132,12 @@ export default function Dashboard() {
         </div>
         <h2>Welcome, Astro ✨</h2>
         <p>Here&apos;s what&apos;s happening across your campaigns today.</p>
+      </div>
+
+      <div className="section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+          + Create Campaign
+        </button>
       </div>
 
       <div className="stat-grid section">
@@ -119,28 +164,21 @@ export default function Dashboard() {
             className="select-input"
             value={campaignFilter}
             onChange={(e) => {
-              setCampaignFilter(e.target.value)
-              actions.selectCampaign(e.target.value)
+              if (e.target.value === '__see_more__') {
+                navigate(routes.campaigns)
+                return
+              }
+              navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(e.target.value)}`)
             }}
             style={{ maxWidth: 340 }}
           >
-            {campaigns.map((campaign) => (
+            {visibleCampaigns.map((campaign) => (
               <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
             ))}
+            {campaigns.length > 3 && <option value="__see_more__">See More Campaigns...</option>}
           </select>
-          <div className="flex flex-wrap gap-2" style={{ marginTop: 16 }}>
-            {sortedCampaigns.map((campaign) => (
-              <div
-                key={campaign.id}
-                className={`badge ${campaign.id === campaignFilter ? 'badge-green' : 'badge-violet'}`}
-                style={{ width: 'fit-content' }}
-              >
-                {campaign.name} · {campaign.priority} · {campaign.date}
-              </div>
-            ))}
-          </div>
           <div style={{ marginTop: 20 }}>
-            <Link to={routes.textBasedQuestions} className="btn btn-primary">
+            <Link to={routes.textBasedQuestions} className="btn btn-outline">
               Text Based Questions <ArrowRight size={15} />
             </Link>
           </div>
@@ -151,19 +189,19 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-2.5">
             <input
               className="text-input"
-              placeholder="Search by question ID, user, category..."
+              placeholder="Search by question ID, user, campaign, category..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  questionListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  handleSearch()
                 }
               }}
             />
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => questionListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onClick={handleSearch}
             >
               Search
             </button>
@@ -230,6 +268,8 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      <CreateCampaignModal open={createOpen} onClose={() => setCreateOpen(false)} defaultTotalLimit={selectedCampaign?.totalLimit || 30} />
     </div>
   )
 }
