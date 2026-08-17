@@ -22,6 +22,7 @@ const initialCampaigns = [
     endDate: '31 Aug 2026',
     priority: 'High',
     status: 'Active',
+    discountPercent: 70,
     generalOffer: true,
     personalOffer: true,
     generalPrice: 100,
@@ -41,6 +42,7 @@ const initialCampaigns = [
     endDate: '20 Sep 2026',
     priority: 'Medium',
     status: 'Draft',
+    discountPercent: 80,
     generalOffer: true,
     personalOffer: false,
     generalPrice: 120,
@@ -60,6 +62,7 @@ const initialCampaigns = [
     endDate: '05 Oct 2026',
     priority: 'Low',
     status: 'Closed',
+    discountPercent: 0,
     generalOffer: false,
     personalOffer: true,
     generalPrice: 150,
@@ -511,8 +514,32 @@ export function AppDataProvider({ children }) {
     },
     updateCampaign(campaignId, patch) {
       setCampaigns((prev) => prev.map((campaign) => (campaign.id === campaignId ? { ...campaign, ...patch } : campaign)))
+      const discountChanged = Object.prototype.hasOwnProperty.call(patch, 'discountPercent')
+      const availabilityChanged = Object.prototype.hasOwnProperty.call(patch, 'status')
+      const priceChanged = Object.prototype.hasOwnProperty.call(patch, 'generalPrice') || Object.prototype.hasOwnProperty.call(patch, 'personalPrice')
+      if (discountChanged || availabilityChanged || priceChanged) {
+        const campaign = campaigns.find((item) => item.id === campaignId)
+        if (campaign && subscriptions.length) {
+          const nextDiscount = discountChanged ? Number(patch.discountPercent) || 0 : campaign.discountPercent || 0
+          const nextStatus = patch.status || campaign.status
+          setNotifications((prev) => [
+            ...subscriptions.map(() => ({
+              id: crypto.randomUUID(),
+              title: 'Subscribed campaign updated',
+              detail: `${campaign.name} changed${discountChanged ? ` to ${nextDiscount}% subscriber discount` : ''}${priceChanged ? ' with updated pricing' : ''}${availabilityChanged ? ` and is now ${nextStatus}` : ''}.`,
+              time: 'just now',
+              route: '/user/discount-questions',
+              audience: ROLES.USER,
+              category: 'offers',
+              read: false,
+            })),
+            ...prev,
+          ])
+        }
+      }
     },
     createCampaign(payload) {
+      const discountPercent = payload.discountEnabled ? Number(payload.discountPercent) || 0 : 0
       const campaign = {
         id: createCampaignId(payload.name),
         name: payload.name.trim(),
@@ -520,9 +547,12 @@ export function AppDataProvider({ children }) {
         endDate: formatCampaignDate(payload.endDate),
         priority: payload.priority || 'Medium',
         status: 'Draft',
-        categories: Array.isArray(payload.categories) ? payload.categories : DEFAULT_CAMPAIGN_CATEGORIES,
-        generalOffer: Boolean(payload.generalOffer),
-        personalOffer: Boolean(payload.personalOffer),
+        categories: Array.isArray(payload.categories)
+          ? payload.categories
+          : DEFAULT_CAMPAIGN_CATEGORIES.map((category) => ({ ...category, discountPercent })),
+        discountPercent,
+        generalOffer: Boolean(payload.discountEnabled ?? payload.generalOffer),
+        personalOffer: Boolean(payload.discountEnabled ?? payload.personalOffer),
         generalPrice: Number(payload.generalPrice) || 0,
         personalPrice: Number(payload.personalPrice) || 0,
         packagePrice: Number(payload.packagePrice) || 0,
@@ -556,6 +586,18 @@ export function AppDataProvider({ children }) {
           category: 'offers',
           read: false,
         },
+        ...(subscriptions.length
+          ? [{
+              id: crypto.randomUUID(),
+              title: 'New campaign available for subscribers',
+              detail: 'A new campaign is now available with subscriber pricing.',
+              time: 'just now',
+              route: '/user/discount-questions',
+              audience: ROLES.USER,
+              category: 'offers',
+              read: false,
+            }]
+          : []),
         ...prev,
       ])
       return campaign
@@ -564,6 +606,7 @@ export function AppDataProvider({ children }) {
       setCampaigns((prev) =>
         prev.map((campaign) => (campaign.id === campaignId ? { ...campaign, status: 'Active' } : campaign)),
       )
+      const campaign = campaigns.find((item) => item.id === campaignId)
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -575,6 +618,18 @@ export function AppDataProvider({ children }) {
           category: 'offers',
           read: false,
         },
+        ...(campaign && subscriptions.length
+          ? subscriptions.map(() => ({
+              id: crypto.randomUUID(),
+              title: 'Subscribed campaign is now available',
+              detail: `${campaign.name} is now active with ${campaign.discountPercent || 0}% subscriber discount.`,
+              time: 'just now',
+              route: '/user/discount-questions',
+              audience: ROLES.USER,
+              category: 'offers',
+              read: false,
+            }))
+          : []),
         ...prev,
       ])
     },

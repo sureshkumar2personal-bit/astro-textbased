@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
-import Card from './ui/Card.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
-import { defaultCampaignCategories } from '../utils/campaignCategories.js'
-import { CampaignCategoriesEditor } from './CampaignCategoriesEditor.jsx'
 
 function toInputDate(value) {
   const date = new Date(value)
@@ -20,14 +17,12 @@ function makeBlankForm(totalLimit) {
     name: '',
     date: toInputDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
     endDate: toInputDate(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)),
-    priority: 'Medium',
     generalPrice: 99,
     personalPrice: 99,
     totalLimit,
     ...splitSlots(totalLimit),
-    generalOffer: true,
-    personalOffer: true,
-    categories: defaultCampaignCategories(),
+    discountEnabled: true,
+    discountPercent: 60,
   }
 }
 
@@ -40,15 +35,10 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
     if (!open) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    setForm(makeBlankForm(defaultTotalLimit))
+    setError('')
     return () => {
       document.body.style.overflow = previousOverflow
-    }
-  }, [open])
-
-  useEffect(() => {
-    if (open) {
-      setForm(makeBlankForm(defaultTotalLimit))
-      setError('')
     }
   }, [open, defaultTotalLimit])
 
@@ -60,28 +50,28 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
 
   const slotAllocated = form.generalLimit + form.personalLimit
   const slotDifference = form.totalLimit - slotAllocated
-  const isSlotAllocationValid = slotDifference === 0
-
-  const categoryCount = form.categories.length
-  const isCategoryCountValid = categoryCount >= 4 && categoryCount <= 6
-  const compulsoryTotal = form.categories.reduce((sum, cat) => sum + (Number(cat.compulsoryQuestions) || 0), 0)
-  const isCompulsoryValid = compulsoryTotal === 600
-  const areCategoriesNamed = form.categories.every((cat) => cat.name.trim())
-  const isCategoriesValid = isCategoryCountValid && isCompulsoryValid && areCategoriesNamed
+  const isSlotAllocationValid = slotDifference === 0 && form.totalLimit > 0
+  const isDiscountValid = !form.discountEnabled || (form.discountPercent >= 0 && form.discountPercent <= 100)
+  const isFormValid = Boolean(
+    form.name.trim() &&
+    form.date &&
+    form.endDate &&
+    new Date(form.endDate) >= new Date(form.date) &&
+    isSlotAllocationValid &&
+    isDiscountValid,
+  )
 
   const handleCreate = () => {
     try {
       setError('')
       if (!form.name.trim()) throw new Error('Enter a campaign name.')
       if (!form.date) throw new Error('Select a campaign start date.')
-      if (!form.endDate) throw new Error('Select a campaign closed date.')
-      if (new Date(form.endDate) < new Date(form.date)) throw new Error('Closed date must be on or after the start date.')
-      if (!isSlotAllocationValid) throw new Error('General Slots and Personal Slots must add up to the Total Slots.')
-      if (!isCategoryCountValid) throw new Error('Add at least 4 and at most 6 campaign categories.')
-      if (!areCategoriesNamed) throw new Error('Every campaign category needs a name.')
-      if (!isCompulsoryValid) throw new Error('Compulsory questions across categories must total 600.')
+      if (!form.endDate) throw new Error('Select a campaign end date.')
+      if (new Date(form.endDate) < new Date(form.date)) throw new Error('End date must be on or after the start date.')
+      if (!isSlotAllocationValid) throw new Error('General Slots and Individual Slots must add up to Total Slots.')
+      if (!isDiscountValid) throw new Error('Discount must be between 0% and 100%.')
 
-      actions.createCampaign({ ...form, date: form.date })
+      actions.createCampaign(form)
       onClose(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to create campaign.')
@@ -90,131 +80,92 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
 
   return (
     <div className="modal-overlay" onClick={() => onClose(false)}>
-      <div className="modal-card modal-card--scroll" style={{ width: 'min(920px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-card modal-card--scroll" style={{ width: 'min(720px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header">
-          <div className="section-title" style={{ marginBottom: 16 }}>Create New Campaign</div>
+          <div className="section-title" style={{ marginBottom: 16 }}>Create Campaign</div>
         </div>
+
         <div className="modal-card__content">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4">
             <label className="field-group" style={{ margin: 0 }}>
               <span className="field-label-top">Campaign Name</span>
               <input
                 className="text-input"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(event) => setForm({ ...form, name: event.target.value })}
                 placeholder="Ram Navami Special"
               />
             </label>
-            <div className="grid grid-cols-2 gap-4 md:col-span-2">
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="field-group" style={{ margin: 0 }}>
                 <span className="field-label-top">Start Date</span>
-                <input
-                  type="date"
-                  className="text-input"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                />
+                <input type="date" className="text-input" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} />
               </label>
               <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">Closed Date (End Date)</span>
-                <input
-                  type="date"
-                  className="text-input"
-                  value={form.endDate}
-                  min={form.date}
-                  onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                />
+                <span className="field-label-top">End Date</span>
+                <input type="date" className="text-input" min={form.date} value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} />
               </label>
             </div>
-            <label className="field-group" style={{ margin: 0 }}>
-              <span className="field-label-top">General Price</span>
-              <input
-                type="number"
-                className="text-input"
-                value={form.generalPrice}
-                onChange={(e) => setForm({ ...form, generalPrice: Number(e.target.value) })}
-                placeholder="Enter price"
-                min={0}
-              />
-            </label>
-            <label className="field-group" style={{ margin: 0 }}>
-              <span className="field-label-top">Individual Price</span>
-              <input
-                type="number"
-                className="text-input"
-                value={form.personalPrice}
-                onChange={(e) => setForm({ ...form, personalPrice: Number(e.target.value) })}
-                placeholder="Enter price"
-                min={0}
-              />
-            </label>
+
             <label className="field-group" style={{ margin: 0 }}>
               <span className="field-label-top">Total Slots</span>
-              <input
-                className="text-input"
-                value={form.totalLimit}
-                onChange={(e) => setTotalSlots(Number(e.target.value))}
-              />
+              <input type="number" min="1" className="text-input" value={form.totalLimit} onChange={(event) => setTotalSlots(Number(event.target.value))} />
             </label>
-            <label className="field-group" style={{ margin: 0 }}>
-              <span className="field-label-top">General Slots</span>
-              <input
-                className="text-input"
-                value={form.generalLimit}
-                onChange={(e) => setForm({ ...form, generalLimit: Number(e.target.value) })}
-              />
-            </label>
-            <label className="field-group" style={{ margin: 0 }}>
-              <span className="field-label-top">Personal Slots</span>
-              <input
-                className="text-input"
-                value={form.personalLimit}
-                onChange={(e) => setForm({ ...form, personalLimit: Number(e.target.value) })}
-              />
-            </label>
-            <div className="md:col-span-2" style={{ marginTop: -6 }}>
-              {slotDifference === 0 ? (
-                <p className="text-sm font-medium text-[color:var(--success)]">
-                  Slots fully allocated ({slotAllocated}/{form.totalLimit}).
-                </p>
-              ) : slotDifference > 0 ? (
-                <p className="text-sm font-medium text-[color:var(--warning)]">
-                  Remaining Slots: {slotDifference}
-                </p>
-              ) : (
-                <p className="text-sm font-medium text-[color:var(--danger)]">
-                  Exceeded by {Math.abs(slotDifference)} Slots
-                </p>
-              )}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="field-group" style={{ margin: 0 }}>
+                <span className="field-label-top">General Price</span>
+                <input type="number" min="0" className="text-input" value={form.generalPrice} onChange={(event) => setForm({ ...form, generalPrice: Number(event.target.value) })} />
+              </label>
+              <label className="field-group" style={{ margin: 0 }}>
+                <span className="field-label-top">Individual Price</span>
+                <input type="number" min="0" className="text-input" value={form.personalPrice} onChange={(event) => setForm({ ...form, personalPrice: Number(event.target.value) })} />
+              </label>
             </div>
+
+            <div>
+              <div className="field-label-top">Slot Allocation</div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className="field-group" style={{ margin: 0 }}>
+                  <span className="field-label-top">General Slots</span>
+                  <input type="number" min="0" className="text-input" value={form.generalLimit} onChange={(event) => setForm({ ...form, generalLimit: Number(event.target.value) })} />
+                </label>
+                <label className="field-group" style={{ margin: 0 }}>
+                  <span className="field-label-top">Individual Slots</span>
+                  <input type="number" min="0" className="text-input" value={form.personalLimit} onChange={(event) => setForm({ ...form, personalLimit: Number(event.target.value) })} />
+                </label>
+              </div>
+              <p className={`mt-2 text-sm font-medium ${slotDifference === 0 ? 'text-[color:var(--success)]' : 'text-[color:var(--danger)]'}`}>
+                {slotDifference === 0 ? `Slots fully allocated (${slotAllocated}/${form.totalLimit}).` : `Slots must total ${form.totalLimit}. Current allocation: ${slotAllocated}.`}
+              </p>
+            </div>
+
+            <div>
+              <div className="field-label-top">Subscriber Discount</div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className={`btn ${form.discountEnabled ? 'btn-primary' : 'btn-outline'}`} onClick={() => setForm({ ...form, discountEnabled: true })}>Yes</button>
+                <button type="button" className={`btn ${!form.discountEnabled ? 'btn-primary' : 'btn-outline'}`} onClick={() => setForm({ ...form, discountEnabled: false })}>No</button>
+              </div>
+            </div>
+
+            {form.discountEnabled && (
+              <label className="field-group" style={{ margin: 0 }}>
+                <span className="field-label-top">Subscriber Discount Percentage</span>
+                <div className="flex items-center gap-2">
+                  <input type="number" min="0" max="100" className="text-input" value={form.discountPercent} onChange={(event) => setForm({ ...form, discountPercent: Number(event.target.value) })} />
+                  <span className="font-bold text-[color:var(--text-secondary)]">%</span>
+                </div>
+              </label>
+            )}
           </div>
 
-          <Card className="section" style={{ padding: '16px 20px' }}>
-            <div className="section-title" style={{ fontSize: 15, marginBottom: 10 }}>Campaign Categories (4–6)</div>
-            <CampaignCategoriesEditor
-              categories={form.categories}
-              onChange={(cats) => setForm((prev) => ({ ...prev, categories: cats }))}
-            />
-          </Card>
-
-          {error && (
-            <div className="mt-4 rounded-[14px] border border-[color:var(--danger-bg)] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">
-              {error}
-            </div>
-          )}
+          {error && <div className="mt-4 rounded-[14px] border border-[color:var(--danger-bg)] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">{error}</div>}
         </div>
+
         <div className="modal-card__footer">
-          <button className="btn btn-ghost" type="button" onClick={() => onClose(false)}>
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary"
-            type="button"
-            disabled={!isSlotAllocationValid || !isCategoriesValid}
-            onClick={handleCreate}
-          >
-            Create Campaign
-          </button>
+          <button className="btn btn-ghost" type="button" onClick={() => onClose(false)}>Cancel</button>
+          <button className="btn btn-primary" type="button" disabled={!isFormValid} onClick={handleCreate}>Create Campaign</button>
         </div>
       </div>
     </div>
