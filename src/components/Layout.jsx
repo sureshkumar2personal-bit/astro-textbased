@@ -52,6 +52,7 @@ const ROLE_CONFIG = {
       { to: 'ask-question', label: 'Ask Question', icon: CircleHelp },
       { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
       { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
+      { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
     ],
   },
 }
@@ -76,6 +77,8 @@ const PAGE_META = {
     '/user/raise-dispute': { title: 'Raise a Dispute', sub: 'Flag an issue with an answer' },
     '/user/dispute-management': { title: 'Dispute Management', sub: 'View dispute updates' },
     '/user/astrologer-profile': { title: 'Astrologer Profile', sub: 'Follow updates and ask a question' },
+    '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
+    '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },

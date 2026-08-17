@@ -18,6 +18,8 @@ import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
+import Astrologers from './pages/Astrologers.jsx'
+import DiscountQuestions from './pages/DiscountQuestions.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/LiveSession.jsx'
@@ -77,6 +79,8 @@ function UserRoutes() {
         <Route path="/user/track-questions" element={<TrackQuestions />} />
         <Route path="/user/raise-dispute" element={<RaiseDispute />} />
         <Route path="/user/astrologer-profile" element={<AstrologerProfile />} />
+        <Route path="/user/astrologers" element={<Astrologers />} />
+        <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />

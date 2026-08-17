@@ -23,13 +23,12 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 
 export default function Dashboard() {
-  const { campaigns, questions, selectedCampaignId, selectedCampaign } = useAppData()
+  const { campaigns, questions, selectedCampaign } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const [sortBy, setSortBy] = useState('Date')
   const [query, setQuery] = useState('')
-  const [campaignFilter] = useState(selectedCampaignId)
   const [createOpen, setCreateOpen] = useState(false)
   const questionListRef = useRef(null)
 
@@ -69,10 +68,6 @@ export default function Dashboard() {
 
     return questions
       .filter((question) => {
-        if (term) return true
-        return !campaignFilter || question.campaignId === campaignFilter
-      })
-      .filter((question) => {
         if (!term) return true
         const campaign = campaignById.get(question.campaignId)
         const campaignCategories = campaign?.categories?.map((category) => category.name) || []
@@ -99,7 +94,7 @@ export default function Dashboard() {
         }
         return sortByDateDesc(a, b, (item) => item.raisedAt || item.raised)
       })
-  }, [query, campaignFilter, campaigns, questions, sortBy])
+  }, [query, campaigns, questions, sortBy])
 
   const handleSearch = () => {
     const term = query.trim().toLowerCase()
@@ -157,71 +152,73 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="section grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <Card>
-          <div className="section-title"><Megaphone size={20} />Active Campaign</div>
-          <select
-            className="select-input"
-            value={campaignFilter}
-            onChange={(e) => {
-              if (e.target.value === '__see_more__') {
-                navigate(routes.campaigns)
-                return
-              }
-              navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(e.target.value)}`)
-            }}
-            style={{ maxWidth: 340 }}
-          >
-            {visibleCampaigns.map((campaign) => (
-              <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
-            ))}
-            {campaigns.length > 3 && <option value="__see_more__">See More Campaigns...</option>}
-          </select>
-          <div style={{ marginTop: 20 }}>
-            <Link to={routes.textBasedQuestions} className="btn btn-outline">
-              Text Based Questions <ArrowRight size={15} />
+      <div className="section">
+        <div className="section-title"><Megaphone size={20} />Campaigns</div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {visibleCampaigns.map((campaign) => (
+            <Card
+              key={campaign.id}
+              style={{ cursor: 'pointer', border: '1px solid var(--border)', borderRadius: 'var(--radius-l)', padding: 20 }}
+              onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}`)}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 15 }}>{campaign.name}</span>
+                <StatusBadge label={campaign.status} />
+              </div>
+              <div className="muted" style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span>{campaign.date} – {campaign.endDate}</span>
+                <span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span>
+                <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+        {campaigns.length > 3 && (
+          <div style={{ marginTop: 16 }}>
+            <Link to={routes.campaigns} className="btn btn-outline">
+              See More <ArrowRight size={15} />
             </Link>
           </div>
-        </Card>
-
-        <Card>
-          <div className="section-title"><Search size={20} />Search</div>
-          <div className="flex flex-wrap gap-2.5">
-            <input
-              className="text-input"
-              placeholder="Search by question ID, user, campaign, category..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearch()
-                }
-              }}
-            />
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
-          </div>
-          {query.trim() && (
-            <div className="muted" style={{ marginTop: 10, fontSize: 13 }}>
-              {filteredQuestions.length
-                ? `Found ${filteredQuestions.length} question${filteredQuestions.length === 1 ? '' : 's'} for "${query.trim()}"`
-                : `No questions found for "${query.trim()}"`}
-            </div>
-          )}
-          <div className="divider" />
-          <div className="section-title" style={{ marginBottom: 12 }}>Quick Actions</div>
-          <div className="grid gap-1">
-            <ActionCard icon={MessageCircleReply} title="Answer a question" to={routes.answerQuestion} />
-            <ActionCard icon={Gavel} title="Handle a dispute" to={routes.disputeManagement} />
-            <ActionCard icon={LineChart} title="Manage text sales" to={routes.salesManagement} />
-          </div>
-        </Card>
+        )}
       </div>
+
+      <Card>
+        <div className="section-title"><Search size={20} />Search</div>
+        <div className="flex flex-wrap gap-2.5">
+          <input
+            className="text-input"
+            placeholder="Search by question ID, user, campaign, category..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch()
+              }
+            }}
+          />
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSearch}
+          >
+            Search
+          </button>
+        </div>
+        {query.trim() && (
+          <div className="muted" style={{ marginTop: 10, fontSize: 13 }}>
+            {filteredQuestions.length
+              ? `Found ${filteredQuestions.length} question${filteredQuestions.length === 1 ? '' : 's'} for "${query.trim()}"`
+              : `No questions found for "${query.trim()}"`}
+          </div>
+        )}
+        <div className="divider" />
+        <div className="section-title" style={{ marginBottom: 12 }}>Quick Actions</div>
+        <div className="grid gap-1">
+          <ActionCard icon={MessageCircleReply} title="Answer a question" to={routes.answerQuestion} />
+          <ActionCard icon={Gavel} title="Handle a dispute" to={routes.disputeManagement} />
+          <ActionCard icon={LineChart} title="Manage text sales" to={routes.salesManagement} />
+        </div>
+      </Card>
 
       <div className="section">
         <div className="section-title">Sort By</div>

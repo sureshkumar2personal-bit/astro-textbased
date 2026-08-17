@@ -1030,12 +1030,24 @@ export function AppDataProvider({ children }) {
       ])
       return subscription
     },
-    getActiveDiscountQuestion(userId) {
+    getAvailableDiscountQuestions(userId) {
+      if (!userId) return []
+      return subscriptions
+        .filter((sub) => sub.userId === userId)
+        .flatMap((sub) => sub.discountQuestions
+          .filter((dq) => dq.status === 'Available' && dq.validUntil >= Date.now())
+          .map((dq) => ({ ...dq, astrologerId: sub.astrologerId, astrologerName: sub.astrologerName })))
+    },
+    getActiveDiscountQuestion(userId, discountQuestionId) {
       if (!userId) return null
       const sub = subscriptions.find((s) => s.userId === userId)
       if (!sub) return null
       return (
-        sub.discountQuestions.find((dq) => dq.status === 'Available' && dq.validUntil >= Date.now()) || null
+        sub.discountQuestions.find((dq) =>
+          dq.status === 'Available' &&
+          dq.validUntil >= Date.now() &&
+          (!discountQuestionId || dq.id === discountQuestionId),
+        ) || null
       )
     },
     getDiscountStatus(userId) {
@@ -1093,13 +1105,17 @@ export function AppDataProvider({ children }) {
         }),
       )
     },
-    useDiscountQuestion(userId) {
+    useDiscountQuestion(userId, discountQuestionId) {
       if (!userId) return null
       let used = null
       setSubscriptions((prev) =>
         prev.map((sub) => {
           if (sub.userId !== userId) return sub
-          const target = sub.discountQuestions.find((dq) => dq.status === 'Available' && dq.validUntil >= Date.now())
+          const target = sub.discountQuestions.find((dq) =>
+            dq.status === 'Available' &&
+            dq.validUntil >= Date.now() &&
+            (!discountQuestionId || dq.id === discountQuestionId),
+          )
           if (!target) return sub
           used = target
           return {

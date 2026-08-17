@@ -23,6 +23,8 @@ export function getRoleRoutes(role) {
     answerQuestion: `${base}/answer-question`,
     disputeManagement: `${base}/dispute-management`,
     astrologerProfile: `${base}/astrologer-profile`,
+    astrologers: `${base}/astrologers`,
+    discountQuestions: `${base}/discount-questions`,
     appointmentDetails: `${base}/appointment-details`,
     poojaDetails: `${base}/pooja-details`,
     liveSession: `${base}/live-session`,

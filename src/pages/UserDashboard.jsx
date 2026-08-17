@@ -11,7 +11,6 @@ import {
   Sparkles,
   Gift,
 } from 'lucide-react'
-import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -101,16 +100,16 @@ export default function UserDashboard() {
             <button
               className="btn btn-primary"
               type="button"
-              onClick={() => navigate(`${routes.askQuestion}?useDiscount=1`)}
+              onClick={() => navigate(routes.discountQuestions)}
             >
-              Use Discount Question
+              Use Discount Questions
             </button>
           )}
           {discountStatus.state === 'none' && (
             <button
               className="btn btn-outline"
               type="button"
-              onClick={() => navigate(`${routes.astrologerProfile}?id=${mockAstrologers[0].id}`)}
+              onClick={() => navigate(routes.astrologers)}
             >
               Explore Astrologers
             </button>
@@ -119,7 +118,7 @@ export default function UserDashboard() {
             <button
               className="btn btn-ghost"
               type="button"
-              onClick={() => navigate(`${routes.astrologerProfile}?id=${mockAstrologers[0].id}`)}
+              onClick={() => navigate(routes.astrologers)}
             >
               Subscribe / Manage
             </button>

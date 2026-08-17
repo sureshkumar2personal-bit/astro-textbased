@@ -102,18 +102,25 @@ export default function Campaigns() {
               <button
                 type="button"
                 key={campaign.id}
-                className={`card text-left transition ${campaign.id === selectedCampaign.id ? 'border-[color:var(--primary)] bg-[color:var(--primary-bg)]' : ''}`}
+                className="card text-left transition"
+                style={{
+                  cursor: 'pointer',
+                  border: campaign.id === selectedCampaign.id ? '2px solid var(--primary)' : '1px solid var(--border)',
+                  borderRadius: 'var(--radius-l)',
+                  padding: 20,
+                  background: campaign.id === selectedCampaign.id ? 'var(--primary-bg)' : 'transparent',
+                }}
                 onClick={() => selectCampaign(campaign.id)}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div>
-                    <div className="muted" style={{ marginTop: 5, fontSize: 13 }}>{campaign.id}</div>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 15 }}>{campaign.name}</span>
                   <StatusBadge label={campaign.status} />
                 </div>
-                <div className="muted" style={{ marginTop: 12, fontSize: 13 }}>
-                  {campaign.date} · {campaign.priority} priority
+                <div className="muted" style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span>{campaign.date} – {campaign.endDate}</span>
+                  <span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span>
+                  <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span>
+                  <span>{campaign.priority} priority</span>
                 </div>
               </button>
             ))}

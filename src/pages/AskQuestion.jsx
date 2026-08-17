@@ -25,6 +25,8 @@ export default function AskQuestion() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const editQuestionId = searchParams.get('editQuestionId')
+  const useDiscount = searchParams.get('useDiscount') === '1'
+  const discountQuestionId = searchParams.get('discountQuestionId')
   const editingQuestion = useMemo(() => questions.find((q) => q.id === editQuestionId) || null, [questions, editQuestionId])
   const isEditing = Boolean(editingQuestion)
   const [questionType, setQuestionType] = useState(editingQuestion?.type === 'General' ? 'General Question' : 'Individual (Personal) Question')
@@ -39,8 +41,8 @@ export default function AskQuestion() {
   const campaignId = searchParams.get('campaignId') || editingQuestion?.campaignId || campaigns[0]?.id
   const selectedCampaign = useMemo(() => campaigns.find((campaign) => campaign.id === campaignId) || campaigns[0], [campaignId, campaigns])
 
-  const activeDiscount = actions.getActiveDiscountQuestion(currentUser?.id)
-  const discountActive = Boolean(activeDiscount)
+  const activeDiscount = actions.getActiveDiscountQuestion(currentUser?.id, discountQuestionId)
+  const discountActive = useDiscount && Boolean(activeDiscount)
   const categoryOptions =
     discountActive && selectedCampaign?.categories?.length
       ? selectedCampaign.categories.map((cat) => cat.name)
@@ -64,7 +66,7 @@ export default function AskQuestion() {
       const purchaseType = applyingDiscount ? 'Paid' : (questionType.startsWith('General') ? 'Free' : 'Paid')
       const purchaseAmount = applyingDiscount ? discountPrice.youPay : 0
       if (applyingDiscount) {
-        actions.useDiscountQuestion(currentUser?.id)
+        actions.useDiscountQuestion(currentUser?.id, discountQuestionId)
         setSuccessMessage('Your Discount Question was used. The question was submitted at the discounted price.')
       } else {
         setSuccessMessage('Your question has been submitted successfully.')
@@ -215,8 +217,8 @@ export default function AskQuestion() {
       )}
 
       <div className="section" style={{ display: 'flex', justifyContent: 'center' }}>
-        <button className="btn btn-primary" onClick={handleSubmit}>
-          {isEditing ? 'Update Question' : 'Submit Question'}
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={submitted}>
+          {isEditing ? 'Update Question' : submitted && useDiscount ? 'Discount Question Submitted' : 'Submit Question'}
         </button>
       </div>
 
