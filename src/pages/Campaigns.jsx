@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, CalendarDays, CircleDollarSign, ListChecks, Megaphone, Users } from 'lucide-react'
+import { CalendarDays, CircleDollarSign, Gift, Megaphone, Users, X } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -14,9 +14,86 @@ function Detail({ label, value }) {
   return (
     <div className="field-group" style={{ margin: 0 }}>
       <span className="field-label-top">{label}</span>
-      <div className="text-input" style={{ minHeight: 42, display: 'flex', alignItems: 'center' }}>
-        {value ?? '—'}
-      </div>
+      <div className="text-input" style={{ minHeight: 42, display: 'flex', alignItems: 'center' }}>{value ?? '—'}</div>
+    </div>
+  )
+}
+
+function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDiscount }) {
+  const totalRemaining = Math.max(campaign.totalLimit - campaign.purchasedGeneral - campaign.purchasedPersonal, 0)
+  const generalRemaining = Math.max(campaign.generalLimit - campaign.purchasedGeneral, 0)
+  const personalRemaining = Math.max(campaign.personalLimit - campaign.purchasedPersonal, 0)
+  const discountPercent = Number(campaign.discountPercent) || 0
+  const generalDiscount = Math.round((Number(campaign.generalPrice) * discountPercent) / 100)
+  const personalDiscount = Math.round((Number(campaign.personalPrice) * discountPercent) / 100)
+
+  return (
+    <div className="grid gap-5">
+      <Card>
+        <div className="flex flex-wrap items-start justify-between gap-4" style={{ marginBottom: 18 }}>
+          <div><h2 className="text-xl font-bold">{campaign.name}</h2><p className="muted" style={{ margin: '6px 0 0' }}>{campaign.id}</p></div>
+          <StatusBadge label={campaign.status} />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Detail label="Start Date" value={campaign.date} />
+          <Detail label="Closed Date" value={campaign.endDate} />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="section-title" style={{ fontSize: 15 }}><CircleDollarSign size={18} />Pricing & Question Allocation</div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Detail label="General Price" value={`₹${campaign.generalPrice}`} />
+          <Detail label="Personal Price" value={`₹${campaign.personalPrice}`} />
+          <Detail label="Total Slots" value={campaign.totalLimit} />
+          <Detail label="Total Remaining Slots" value={totalRemaining} />
+          <Detail label="General Allocation Slots" value={campaign.generalLimit} />
+          <Detail label="General Remaining Slots" value={generalRemaining} />
+          <Detail label="Individual Allocation Slots" value={campaign.personalLimit} />
+          <Detail label="Individual Remaining Slots" value={personalRemaining} />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="section-title" style={{ fontSize: 15 }}><Gift size={18} />Subscriber Discount</div>
+        {discountPercent > 0 ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Detail label="Discount Percentage" value={`${discountPercent}%`} />
+            <Detail label="General After Discount" value={`₹${Number(campaign.generalPrice) - generalDiscount}`} />
+            <Detail label="Personal After Discount" value={`₹${Number(campaign.personalPrice) - personalDiscount}`} />
+          </div>
+        ) : (
+          <div className="muted">No subscriber discount is available for this campaign.</div>
+        )}
+      </Card>
+
+      <Card>
+        <div className="section-title" style={{ fontSize: 15 }}><Users size={18} />Sales Summary</div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Detail label="General Sold" value={campaign.purchasedGeneral} />
+          <Detail label="Personal Sold" value={campaign.purchasedPersonal} />
+          <Detail label="Total Revenue" value={`₹${((campaign.purchasedGeneral * campaign.generalPrice) + (campaign.purchasedPersonal * campaign.personalPrice)).toLocaleString('en-IN')}`} />
+        </div>
+        <div className="muted" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, fontSize: 13 }}><CalendarDays size={15} /> Campaign dates: {campaign.date} to {campaign.endDate || '—'}</div>
+      </Card>
+
+      <Card>
+        <div className="section-title" style={{ fontSize: 15 }}><Megaphone size={18} />Campaign Actions</div>
+        <div className="flex flex-wrap gap-3">
+          <button type="button" className={`btn ${campaign.status === 'Active' ? 'btn-success' : 'btn-success-outline'}`} onClick={onPublish}>
+            Publish
+          </button>
+          <button type="button" className={`btn ${campaign.status === 'Closed' ? 'btn-warning' : 'btn-warning-outline'}`} onClick={onFreeze}>
+            Freeze
+          </button>
+          <button type="button" className="btn btn-danger" onClick={onDelete}>
+            Delete Campaign
+          </button>
+          <button type="button" className={`btn ${discountPercent > 0 ? 'btn-primary' : 'btn-outline'}`} onClick={onToggleDiscount}>
+            {discountPercent > 0 ? `Discount ${discountPercent}%` : 'Enable Discount'}
+          </button>
+        </div>
+      </Card>
     </div>
   )
 }
@@ -25,189 +102,122 @@ export default function Campaigns() {
   const { campaigns, selectedCampaignId, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
-  const [campaignId, setCampaignId] = useState(selectedCampaignId || campaigns[0]?.id)
   const [searchParams] = useSearchParams()
   const [query, setQuery] = useState('')
+  const [selectedId, setSelectedId] = useState(selectedCampaignId || campaigns[0]?.id)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const filterType = searchParams.get('filter')
 
-  const sortedCampaigns = useMemo(
-    () => campaigns.slice().sort((a, b) => sortByDateDesc(a, b, (item) => item.date)),
-    [campaigns],
-  )
+  const sortedCampaigns = useMemo(() => campaigns.slice().sort((a, b) => sortByDateDesc(a, b, (item) => item.date)), [campaigns])
+  const filteredCampaigns = useMemo(() => {
+    const categorized = sortedCampaigns.filter((campaign) => {
+      if (filterType === 'active') return campaign.status === 'Active'
+      if (filterType === 'discount') return campaign.status === 'Active' && ((campaign.discountPercent || 0) > 0 || campaign.generalOffer || campaign.personalOffer)
+      if (filterType === 'non-discount') return campaign.status === 'Active' && (campaign.discountPercent || 0) <= 0 && !campaign.generalOffer && !campaign.personalOffer
+      return true
+    })
+    const term = query.trim().toLowerCase()
+    if (!term) return categorized
+    return categorized.filter((campaign) => [campaign.name, campaign.id, campaign.status, campaign.priority, ...(campaign.categories || []).map((category) => category.name)].join(' ').toLowerCase().includes(term))
+  }, [filterType, query, sortedCampaigns])
 
   useEffect(() => {
     const requestedCampaignId = searchParams.get('campaignId')
     if (requestedCampaignId && campaigns.some((campaign) => campaign.id === requestedCampaignId)) {
-      setCampaignId(requestedCampaignId)
+      setSelectedId(requestedCampaignId)
       actions.selectCampaign(requestedCampaignId)
+      setDetailsOpen(true)
     }
   }, [actions, campaigns, searchParams])
 
-  const filteredCampaigns = useMemo(() => {
-    const term = query.trim().toLowerCase()
-    if (!term) return sortedCampaigns
-    return sortedCampaigns.filter((campaign) => {
-      const categories = (campaign.categories || []).map((category) => category.name)
-      return [campaign.name, campaign.id, campaign.status, campaign.priority, ...categories]
-        .join(' ')
-        .toLowerCase()
-        .includes(term)
-    })
-  }, [query, sortedCampaigns])
+  useEffect(() => {
+    if (!detailsOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setDetailsOpen(false) }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [detailsOpen])
 
-  const selectedCampaign = campaigns.find((campaign) => campaign.id === campaignId) || sortedCampaigns[0]
-
-  if (!selectedCampaign) {
-    return (
-      <div>
-        <PageHeader eyebrow="Astrologer" title="All Campaigns" showBack backTo={routes.dashboard} />
-        <Card><p className="muted">No campaigns are available.</p></Card>
-      </div>
-    )
-  }
-
-  const remainingQuestions = Math.max(
-    selectedCampaign.totalLimit - selectedCampaign.generalLimit - selectedCampaign.personalLimit,
-    0,
-  )
-  const compulsoryTotal = (selectedCampaign.categories || []).reduce(
-    (sum, category) => sum + (Number(category.compulsoryQuestions) || 0),
-    0,
-  )
-
-  const selectCampaign = (id) => {
-    setCampaignId(id)
-    actions.selectCampaign(id)
+  const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedId) || null
+  const pageTitle = filterType === 'active' ? 'Active Campaigns' : filterType === 'discount' ? 'Discount Campaigns' : filterType === 'non-discount' ? 'Non-Discount Campaigns' : 'All Campaigns'
+  const openDetails = (campaign) => {
+    setSelectedId(campaign.id)
+    actions.selectCampaign(campaign.id)
+    setDetailsOpen(true)
   }
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Astrologer"
-        title="All Campaigns"
-        subtitle="Select a campaign to view its complete details."
-        actions={<Link to={routes.dashboard} className="btn btn-outline"><ArrowLeft size={15} />Back to Dashboard</Link>}
-      />
+      <PageHeader eyebrow="Astrologer" title={pageTitle} subtitle="Select a campaign card to view its complete details." actions={<Link to={routes.dashboard} className="btn btn-outline">Back to Dashboard</Link>} />
+      <Section title={`Campaigns (${filteredCampaigns.length})`} icon={Megaphone}>
+        <input className="text-input" placeholder="Search campaign or category..." value={query} onChange={(event) => setQuery(event.target.value)} style={{ marginBottom: 16, maxWidth: 420 }} />
+        <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {filteredCampaigns.map((campaign) => (
+            <button type="button" key={campaign.id} className="card flex h-full flex-col text-left transition hover:-translate-y-1 hover:border-[color:var(--secondary)]" onClick={() => openDetails(campaign)}>
+              <div className="flex items-start justify-between gap-3"><div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div><StatusBadge label={campaign.status} /></div>
+              <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm"><span>{campaign.date} – {campaign.endDate}</span><span>{campaign.priority} priority</span><span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span><span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span></div>
+              <div className="mt-4 font-semibold text-[color:var(--primary)]">View Full Details →</div>
+            </button>
+          ))}
+        </div>
+        {!filteredCampaigns.length && <p className="muted" style={{ marginTop: 16 }}>No campaigns match your search.</p>}
+      </Section>
 
-      <div className="campaigns-page-grid grid grid-cols-1 gap-6 xl:grid-cols-[minmax(260px,0.75fr)_minmax(0,1.7fr)]">
-        <Section title={`Campaigns (${campaigns.length})`} icon={Megaphone}>
-          <input
-            className="text-input"
-            placeholder="Search campaign or category..."
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            style={{ marginBottom: 12 }}
-          />
-          <div className="grid gap-3">
-            {filteredCampaigns.map((campaign) => (
+      {detailsOpen && selectedCampaign && (
+        <div className="modal-overlay" onClick={() => setDetailsOpen(false)}>
+          <div className="modal-card modal-card--scroll" style={{ width: 'min(980px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4"><div className="section-title" style={{ marginBottom: 0 }}>Campaign Details</div><button type="button" className="icon-btn" aria-label="Close details" onClick={() => setDetailsOpen(false)}><X size={18} /></button></div>
+            <div className="modal-card__content">
+              <CampaignDetails
+                campaign={selectedCampaign}
+                onPublish={() => actions.publishCampaign(selectedCampaign.id)}
+                onFreeze={() => actions.updateCampaign(selectedCampaign.id, { status: 'Closed' })}
+                onDelete={() => setDeleteOpen(true)}
+                onToggleDiscount={() => {
+                  const enabled = Number(selectedCampaign.discountPercent) > 0
+                  actions.updateCampaign(selectedCampaign.id, {
+                    discountPercent: enabled ? 0 : 60,
+                    generalOffer: !enabled,
+                    personalOffer: !enabled,
+                  })
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteOpen && selectedCampaign && (
+        <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setDeleteOpen(false)}>
+          <div className="modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header">
+              <div className="section-title" style={{ marginBottom: 0 }}>Delete Campaign?</div>
+            </div>
+            <div className="modal-card__content">
+              <p className="muted">Are you sure you want to delete <strong>{selectedCampaign.name}</strong>? Existing questions and records will remain unchanged.</p>
+            </div>
+            <div className="modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setDeleteOpen(false)}>Cancel</button>
               <button
                 type="button"
-                key={campaign.id}
-                className="card text-left transition"
-                style={{
-                  cursor: 'pointer',
-                  border: campaign.id === selectedCampaign.id ? '2px solid var(--primary)' : '1px solid var(--border)',
-                  borderRadius: 'var(--radius-l)',
-                  padding: 20,
-                  background: campaign.id === selectedCampaign.id ? 'var(--primary-bg)' : 'transparent',
+                className="btn btn-danger"
+                onClick={() => {
+                  actions.deleteCampaign(selectedCampaign.id)
+                  setDeleteOpen(false)
+                  setDetailsOpen(false)
                 }}
-                onClick={() => selectCampaign(campaign.id)}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 15 }}>{campaign.name}</span>
-                  <StatusBadge label={campaign.status} />
-                </div>
-                <div className="muted" style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span>{campaign.date} – {campaign.endDate}</span>
-                  <span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span>
-                  <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span>
-                  <span>{campaign.priority} priority</span>
-                </div>
+                Delete Campaign
               </button>
-            ))}
-            {!filteredCampaigns.length && <p className="muted" style={{ margin: 0 }}>No campaigns match your search.</p>}
+            </div>
           </div>
-        </Section>
-
-        <div className="campaigns-details-column">
-          <Section title="Campaign Details" icon={Megaphone}>
-            <Card>
-              <div className="flex flex-wrap items-start justify-between gap-4" style={{ marginBottom: 18 }}>
-                <div>
-                  <h2 className="text-xl font-bold">{selectedCampaign.name}</h2>
-                  <p className="muted" style={{ margin: '6px 0 0' }}>{selectedCampaign.id}</p>
-                </div>
-                <StatusBadge label={selectedCampaign.status} />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Detail label="Start Date" value={selectedCampaign.date} />
-                <Detail label="Closed Date" value={selectedCampaign.endDate} />
-                <Detail label="Priority" value={selectedCampaign.priority} />
-                <Detail label="Package Price" value={`₹${selectedCampaign.packagePrice || 0}`} />
-              </div>
-            </Card>
-          </Section>
-
-          <Section title="Pricing & Question Allocation" icon={CircleDollarSign}>
-            <Card>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Detail label="General Price" value={`₹${selectedCampaign.generalPrice}`} />
-                <Detail label="Personal Price" value={`₹${selectedCampaign.personalPrice}`} />
-                <Detail label="Total Questions" value={selectedCampaign.totalLimit} />
-                <Detail label="Remaining Questions" value={remainingQuestions} />
-                <Detail label="General Questions" value={`${selectedCampaign.generalLimit} (${selectedCampaign.purchasedGeneral} sold)`} />
-                <Detail label="Personal Questions" value={`${selectedCampaign.personalLimit} (${selectedCampaign.purchasedPersonal} sold)`} />
-              </div>
-            </Card>
-          </Section>
-
-          <Section title="Offers & Categories" icon={ListChecks}>
-            <Card>
-              <div className="flex flex-wrap gap-2" style={{ marginBottom: 18 }}>
-                <span className={`badge ${selectedCampaign.generalOffer ? 'badge-green' : 'badge-gray'}`}>
-                  General offer: {selectedCampaign.generalOffer ? 'Enabled' : 'Disabled'}
-                </span>
-                <span className={`badge ${selectedCampaign.personalOffer ? 'badge-green' : 'badge-gray'}`}>
-                  Personal offer: {selectedCampaign.personalOffer ? 'Enabled' : 'Disabled'}
-                </span>
-                <span className="badge badge-violet">Compulsory total: {compulsoryTotal}</span>
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>Category</th><th>Normal Price</th><th>Discount</th><th>Compulsory Questions</th></tr>
-                  </thead>
-                  <tbody>
-                    {(selectedCampaign.categories || []).map((category, index) => (
-                      <tr key={`${category.name}-${index}`}>
-                        <td>{category.name}</td>
-                        <td>₹{category.normalPrice}</td>
-                        <td>{category.discountPercent}%</td>
-                        <td>{category.compulsoryQuestions}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </Section>
-
-          <Section title="Sales Summary" icon={Users}>
-            <Card>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Detail label="General Sold" value={selectedCampaign.purchasedGeneral} />
-                <Detail label="Personal Sold" value={selectedCampaign.purchasedPersonal} />
-                <Detail
-                  label="Total Revenue"
-                  value={`₹${((selectedCampaign.purchasedGeneral * selectedCampaign.generalPrice) + (selectedCampaign.purchasedPersonal * selectedCampaign.personalPrice)).toLocaleString('en-IN')}`}
-                />
-              </div>
-              <div className="muted" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 16, fontSize: 13 }}>
-                <CalendarDays size={15} /> Campaign dates: {selectedCampaign.date} to {selectedCampaign.endDate || '—'}
-              </div>
-            </Card>
-          </Section>
         </div>
-      </div>
+      )}
     </div>
   )
 }

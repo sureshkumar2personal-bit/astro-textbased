@@ -9,7 +9,6 @@ import {
   BadgeCheck,
   ShieldAlert,
   Sparkles,
-  Gift,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -18,11 +17,6 @@ import StatCard from '../components/ui/StatCard.jsx'
 import ActionCard from '../components/ui/ActionCard.jsx'
 import Section from '../components/ui/Section.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
-
-function formatDateMs(ms) {
-  if (!ms) return ''
-  return new Date(ms).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-}
 
 export default function UserDashboard() {
   const { currentUser } = useAuth()
@@ -42,7 +36,6 @@ export default function UserDashboard() {
   const answered = questions.filter((question) => question.status === 'Answered').length
   const disputed = questions.filter((question) => question.status === 'Disputed').length
   const recentQuestions = questions.slice(0, 4)
-  const discountStatus = actions.getDiscountStatus(currentUser?.id)
 
   return (
     <div>
@@ -53,78 +46,6 @@ export default function UserDashboard() {
         <h2>Welcome, {currentUser?.name || 'User'} ✨</h2>
         <p>Browse packages, ask questions, and keep track of every update in one place.</p>
       </div>
-
-      <Section title="Subscriber Benefit" icon={Gift}>
-        <div
-          className="card"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            background: 'linear-gradient(135deg, var(--violet-50), var(--primary-bg))',
-            border: '1px solid var(--primary-border)',
-            padding: '18px 20px',
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 700, color: 'var(--ink)', fontSize: 16 }}>
-              <Gift size={18} color="var(--primary)" />
-              Discount Question
-            </div>
-            {discountStatus.state === 'available' && (
-              <div className="muted" style={{ marginTop: 8, lineHeight: 1.7 }}>
-                1 Discount Question Available<br />
-                Valid until: {formatDateMs(discountStatus.validUntil)}
-              </div>
-            )}
-            {discountStatus.state === 'used' && (
-              <div className="muted" style={{ marginTop: 8, lineHeight: 1.7 }}>
-                Used<br />
-                Next question available: {formatDateMs(discountStatus.nextAvailable)}
-              </div>
-            )}
-            {discountStatus.state === 'expired' && (
-              <div className="muted" style={{ marginTop: 8, lineHeight: 1.7 }}>
-                Expired
-              </div>
-            )}
-            {discountStatus.state === 'none' && (
-              <div className="muted" style={{ marginTop: 8, lineHeight: 1.7 }}>
-                Subscribe to an astrologer to unlock 1 Discount Question every month.
-              </div>
-            )}
-          </div>
-          {discountStatus.state === 'available' && (
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={() => navigate(routes.discountQuestions)}
-            >
-              Use Discount Questions
-            </button>
-          )}
-          {discountStatus.state === 'none' && (
-            <button
-              className="btn btn-outline"
-              type="button"
-              onClick={() => navigate(routes.astrologers)}
-            >
-              Explore Astrologers
-            </button>
-          )}
-          {(discountStatus.state === 'used' || discountStatus.state === 'expired') && (
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={() => navigate(routes.astrologers)}
-            >
-              Subscribe / Manage
-            </button>
-          )}
-        </div>
-      </Section>
 
       <div className="stat-grid section">
         <button

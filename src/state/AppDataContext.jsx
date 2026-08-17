@@ -538,6 +538,14 @@ export function AppDataProvider({ children }) {
         }
       }
     },
+    deleteCampaign(campaignId) {
+      setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId))
+      setSelectedCampaignId((currentId) => {
+        if (currentId !== campaignId) return currentId
+        const remainingCampaign = campaigns.find((campaign) => campaign.id !== campaignId)
+        return remainingCampaign?.id || null
+      })
+    },
     createCampaign(payload) {
       const discountPercent = payload.discountEnabled ? Number(payload.discountPercent) || 0 : 0
       const campaign = {

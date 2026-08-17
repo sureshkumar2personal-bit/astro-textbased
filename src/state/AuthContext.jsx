@@ -11,6 +11,7 @@ const defaultUsers = [
     role: ROLES.USER,
     name: 'Priya V.',
     email: 'user@astroconnect.com',
+    phone: '+91 98765 43210',
     password: 'User@123',
     specialization: '',
     experience: '',
@@ -20,6 +21,7 @@ const defaultUsers = [
     role: ROLES.ASTROLOGER,
     name: 'Dr. Rani',
     email: 'astro@astroconnect.com',
+    phone: '+91 98765 43210',
     password: 'Astro@123',
     specialization: 'Marriage, Career, Business',
     experience: '8 years',
@@ -29,6 +31,7 @@ const defaultUsers = [
     role: ROLES.ASTROLOGER,
     name: 'Dr. Rani',
     email: 'dr.rani@astroconnect.com',
+    phone: '+91 98765 43210',
     password: 'Astro@123',
     specialization: 'Marriage, Career, Business',
     experience: '8 years',
@@ -118,6 +121,7 @@ export function AuthProvider({ children }) {
         role,
         name: payload.name.trim(),
         email,
+        phone: payload.phone || '',
         password: payload.password,
         specialization: payload.specialization || '',
         experience: payload.experience || '',
@@ -126,6 +130,26 @@ export function AuthProvider({ children }) {
       setUsers((prev) => [user, ...prev])
       setCurrentUser(user)
       return user
+    },
+    updateProfile(payload) {
+      if (!currentUser) throw new Error('No profile is currently signed in.')
+      const name = String(payload.name || '').trim()
+      const email = normalizeEmail(payload.email)
+      if (!name) throw new Error('Enter your name.')
+      if (!email || !email.endsWith('.com')) throw new Error('Enter a valid .com email address.')
+      if (users.some((entry) => entry.id !== currentUser.id && entry.email.toLowerCase() === email)) {
+        throw new Error('An account with this email already exists.')
+      }
+
+      const updatedUser = {
+        ...currentUser,
+        name,
+        email,
+        phone: String(payload.phone || '').trim(),
+      }
+      setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
+      setCurrentUser(updatedUser)
+      return updatedUser
     },
     logout() {
       setCurrentUser(null)

@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Sparkles,
+  Gift,
   LayoutDashboard,
   ShoppingBag,
   CircleHelp,
@@ -53,6 +54,7 @@ const ROLE_CONFIG = {
       { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
       { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
       { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
+      { to: 'rewards', label: 'Rewards', icon: Gift },
     ],
   },
 }
@@ -63,6 +65,7 @@ const PAGE_META = {
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
+    '/astrologer/profile': { title: 'Profile', sub: 'Astrologer account details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
@@ -79,6 +82,8 @@ const PAGE_META = {
     '/user/astrologer-profile': { title: 'Astrologer Profile', sub: 'Follow updates and ask a question' },
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
+    '/user/rewards': { title: 'Rewards', sub: 'Subscriber benefits and discount questions' },
+    '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
@@ -216,16 +221,19 @@ export default function Layout() {
                     {isAstrologer ? <TempleLotusIcon size={24} /> : <UserCircle2 size={24} />}
                   </div>
                   <div>
-                    <div className="font-bold text-[color:var(--ink)]">{profile.name}</div>
-                    <div className="text-[color:var(--muted)]">{profile.role}</div>
+                    <div className="font-bold text-[color:var(--ink)]">{currentUser?.name || profile.name}</div>
+                    <div className="text-[color:var(--muted)]">{isAstrologer ? 'Astrologer' : 'User'}</div>
                   </div>
                 </div>
                 <div className="popover-list">
-                  <div className="popover-item"><strong>Rating</strong><div>{profile.rating}</div></div>
-                  <div className="popover-item"><strong>Reviews</strong><div>{profile.reviews}</div></div>
-                  <div className="popover-item"><strong>Email</strong><div>{profile.email}</div></div>
-                  <div className="popover-item"><strong>Phone</strong><div>{profile.phone}</div></div>
+                  {isAstrologer && <div className="popover-item"><strong>Rating</strong><div>{profile.rating}</div></div>}
+                  {isAstrologer && <div className="popover-item"><strong>Reviews</strong><div>{profile.reviews}</div></div>}
+                  <div className="popover-item"><strong>Email</strong><div>{currentUser?.email || profile.email}</div></div>
+                  <div className="popover-item"><strong>Phone</strong><div>{currentUser?.phone || 'Not added'}</div></div>
                 </div>
+                <button type="button" className="btn btn-outline mt-3 w-full" onClick={() => { setPanel(null); navigate(`${basePath}/profile`) }}>
+                  View Profile
+                </button>
               </div>
             )}
           </div>

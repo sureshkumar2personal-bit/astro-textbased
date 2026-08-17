@@ -59,7 +59,16 @@ export default function Dashboard() {
     return list.sort((a, b) => sortByDateDesc(a, b, (item) => item.date))
   }, [campaigns, sortBy])
 
-  const visibleCampaigns = sortedCampaigns.slice(0, 3)
+  const campaignGroups = useMemo(() => {
+    const active = sortedCampaigns.filter((campaign) => campaign.status === 'Active')
+    const discount = active.filter((campaign) => (campaign.discountPercent || 0) > 0 || campaign.generalOffer || campaign.personalOffer)
+    const nonDiscount = active.filter((campaign) => (campaign.discountPercent || 0) <= 0 && !campaign.generalOffer && !campaign.personalOffer)
+    return [
+      { key: 'active', title: 'Active Campaigns', campaigns: active },
+      { key: 'discount', title: 'Discount Campaigns', campaigns: discount },
+      { key: 'non-discount', title: 'Non-Discount Campaigns', campaigns: nonDiscount },
+    ]
+  }, [sortedCampaigns])
 
   const filteredQuestions = useMemo(() => {
     const term = query.trim().toLowerCase()
@@ -153,42 +162,48 @@ export default function Dashboard() {
       </div>
 
       <div className="section">
-        <div className="section-title"><Megaphone size={20} />Campaigns</div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleCampaigns.map((campaign) => (
-            <Card
-              key={campaign.id}
-              style={{ cursor: 'pointer', border: '1px solid var(--border)', borderRadius: 'var(--radius-l)', padding: 20 }}
-              onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}`)}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 15 }}>{campaign.name}</span>
-                <StatusBadge label={campaign.status} />
-              </div>
-              <div className="muted" style={{ fontSize: 13, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <span>{campaign.date} – {campaign.endDate}</span>
-                <span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span>
-                <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span>
-              </div>
-            </Card>
-          ))}
+        <div className="campaign-groups-grid grid grid-cols-1 gap-5 xl:grid-cols-3">
+          {campaignGroups.map((group) => {
+            const visibleCampaigns = group.campaigns.slice(0, 3)
+            return (
+              <Card key={group.key}>
+                <div className="section-title"><Megaphone size={20} />{group.title}</div>
+                <div className="grid gap-3">
+                  {visibleCampaigns.map((campaign) => (
+                    <button
+                      type="button"
+                      key={campaign.id}
+                      className="rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] p-3 text-left transition hover:-translate-y-0.5 hover:border-[color:var(--secondary)]"
+                      onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}`)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div>
+                        <StatusBadge label={campaign.status} />
+                      </div>
+                      <div className="muted" style={{ marginTop: 7, fontSize: 12 }}>{campaign.priority} priority · {campaign.date}</div>
+                    </button>
+                  ))}
+                  {!visibleCampaigns.length && <div className="muted" style={{ padding: '12px 0', fontSize: 13 }}>No campaigns available.</div>}
+                </div>
+                {group.campaigns.length > 3 && (
+                  <Link to={`${routes.campaigns}?filter=${group.key}`} className="btn btn-ghost mt-4 w-full">
+                    See More <ArrowRight size={15} />
+                  </Link>
+                )}
+              </Card>
+            )
+          })}
         </div>
-        {campaigns.length > 3 && (
-          <div style={{ marginTop: 16 }}>
-            <Link to={routes.campaigns} className="btn btn-outline">
-              See More <ArrowRight size={15} />
-            </Link>
-          </div>
-        )}
       </div>
 
-      <Card>
+      <Card className="section">
         <div className="section-title"><Search size={20} />Search</div>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
           <input
             className="text-input"
             placeholder="Search by question ID, user, campaign, category..."
             value={query}
+            style={{ flex: '0 1 360px', width: 'min(360px, 100%)', margin: 0 }}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -198,7 +213,7 @@ export default function Dashboard() {
           />
           <button
             type="button"
-            className="btn btn-primary"
+            className="btn btn-primary min-w-[110px]"
             onClick={handleSearch}
           >
             Search

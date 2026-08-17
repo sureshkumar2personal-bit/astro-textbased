@@ -34,7 +34,6 @@ export default function AnswerQuestion() {
 
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [sortBy, setSortBy] = useState('Newest')
   const [statusFilter, setStatusFilter] = useState(statusParam || 'All')
 
   const matchesStatusFilter = useCallback((questionStatus) => {
@@ -60,9 +59,9 @@ export default function AnswerQuestion() {
       .sort((a, b) => {
         const dateA = new Date(a.raisedAt || a.raised)
         const dateB = new Date(b.raisedAt || b.raised)
-        return sortBy === 'Oldest' ? dateA - dateB : dateB - dateA
+        return dateB - dateA
       })
-  }, [questions, appliedSearch, sortBy, matchesStatusFilter])
+  }, [questions, appliedSearch, matchesStatusFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -70,7 +69,7 @@ export default function AnswerQuestion() {
 
   useEffect(() => {
     setPage(1)
-  }, [appliedSearch, sortBy])
+  }, [appliedSearch])
 
   const panelQuestion = useMemo(
     () => questions.find((question) => question.id === panelQuestionId) || null,
@@ -145,10 +144,6 @@ export default function AnswerQuestion() {
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="badge badge-violet">Active filter: {statusFilter}</span>
               </div>
-            </div>
-            <div>
-              <div className="field-label-top">Sort By</div>
-              <ChipGroup options={['Newest', 'Oldest']} value={sortBy} onChange={setSortBy} />
             </div>
           </div>
         </Card>

@@ -25,6 +25,8 @@ export function getRoleRoutes(role) {
     astrologerProfile: `${base}/astrologer-profile`,
     astrologers: `${base}/astrologers`,
     discountQuestions: `${base}/discount-questions`,
+    rewards: `${base}/rewards`,
+    profile: `${base}/profile`,
     appointmentDetails: `${base}/appointment-details`,
     poojaDetails: `${base}/pooja-details`,
     liveSession: `${base}/live-session`,

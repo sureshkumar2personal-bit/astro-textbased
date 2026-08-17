@@ -169,6 +169,29 @@ html[data-theme='dark'] {
 }
 
 @media (min-width: 1280px) {
+  .campaign-groups-grid > .card {
+    position: relative;
+  }
+
+  .campaign-groups-grid > .card:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -11px;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--primary-light) 16%,
+      var(--secondary) 50%,
+      var(--accent) 84%,
+      transparent 100%
+    );
+    opacity: 0.7;
+  }
+
   .campaigns-details-column {
     position: relative;
     padding-left: 24px;
@@ -305,6 +328,17 @@ html[data-theme='dark'] .border-white\/70 {
 
 html[data-theme='dark'] .border-white\/90 {
   border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html[data-theme='dark'] .btn-outline {
+  background: var(--surface-strong);
+  color: var(--primary-light);
+  border-color: var(--secondary);
+}
+
+html[data-theme='dark'] .btn-outline:hover {
+  background: var(--primary-bg);
+  color: var(--text-primary);
 }
 
 button:focus-visible,

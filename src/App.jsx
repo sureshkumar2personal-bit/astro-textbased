@@ -20,6 +20,8 @@ import WalletHistory from './pages/WalletHistory.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import Astrologers from './pages/Astrologers.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
+import Rewards from './pages/Rewards.jsx'
+import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/LiveSession.jsx'
@@ -59,6 +61,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/text-based-questions" element={<TextBasedQuestions />} />
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
+        <Route path="/astrologer/profile" element={<Profile />} />
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
@@ -81,6 +84,8 @@ function UserRoutes() {
         <Route path="/user/astrologer-profile" element={<AstrologerProfile />} />
         <Route path="/user/astrologers" element={<Astrologers />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
+        <Route path="/user/rewards" element={<Rewards />} />
+        <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
