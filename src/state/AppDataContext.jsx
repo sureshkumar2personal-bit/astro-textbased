@@ -1,5 +1,5 @@
 /* oxlint-disable react/only-export-components */
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAstrologers, mockLiveSessions, mockPoojas } from '../data/notificationData.js'
@@ -12,6 +12,8 @@ const DEFAULT_CAMPAIGN_CATEGORIES = [
   { name: 'Love', normalPrice: 200, discountPercent: 90, compulsoryQuestions: 150 },
   { name: 'Study', normalPrice: 200, discountPercent: 40, compulsoryQuestions: 150 },
 ]
+
+const ANSWER_REVIEW_WINDOW_MS = 5 * 60 * 60 * 1000
 
 const initialCampaigns = [
   {
@@ -525,6 +527,25 @@ export function AppDataProvider({ children }) {
   const [subscriptions, setSubscriptions] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
 
+  useEffect(() => {
+    const publishScheduledCampaigns = () => {
+      const now = Date.now()
+      setCampaigns((prev) => {
+        const dueIds = new Set(prev
+          .filter((campaign) => campaign.status === 'Scheduled' && campaign.scheduledPublishAt && new Date(campaign.scheduledPublishAt).getTime() <= now)
+          .map((campaign) => campaign.id))
+        if (!dueIds.size) return prev
+        return prev.map((campaign) => dueIds.has(campaign.id)
+          ? { ...campaign, status: 'Active', scheduledPublishAt: null }
+          : campaign)
+      })
+    }
+
+    publishScheduledCampaigns()
+    const timer = window.setInterval(publishScheduledCampaigns, 30 * 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
 
@@ -584,7 +605,8 @@ export function AppDataProvider({ children }) {
         date: formatCampaignDate(payload.date),
         endDate: formatCampaignDate(payload.endDate),
         priority: payload.priority || 'Medium',
-        status: 'Draft',
+        status: payload.status || 'Draft',
+        scheduledPublishAt: payload.scheduledPublishAt || null,
         categories: Array.isArray(payload.categories)
           ? payload.categories
           : DEFAULT_CAMPAIGN_CATEGORIES.map((category) => ({ ...category, discountPercent })),
@@ -772,21 +794,62 @@ export function AppDataProvider({ children }) {
           ...question,
           answer,
           draftAnswer: '',
+          status: 'Under Review',
+          answerReviewStartedAt: Date.now(),
+          answerReviewUntil: Date.now() + ANSWER_REVIEW_WINDOW_MS,
+          answerEditUsed: false,
+          answerDeliveredAt: null,
+          history: [...question.history, 'Answer submitted for five-hour review'],
+        })),
+      )
+    },
+    editSubmittedQuestionAnswer(questionId, answer) {
+      const question = questions.find((item) => item.id === questionId)
+      if (!question || question.status !== 'Under Review' || question.answerEditUsed || !question.answerReviewUntil || question.answerReviewUntil <= Date.now()) return false
+      setQuestions((prev) =>
+        updateQuestion(prev, questionId, (currentQuestion) => ({
+          ...currentQuestion,
+          answer,
           status: 'Answered',
-          history: [...question.history, 'Answer submitted'],
+          answerReviewUntil: null,
+          answerEditUsed: true,
+          answerDeliveredAt: Date.now(),
+          history: [...currentQuestion.history, 'One-time answer correction saved', 'Corrected answer delivered to user'],
         })),
       )
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
-          title: 'Answer delivered',
-          detail: `Question ${questionId} has been answered and delivered to the user.`,
+          title: 'Corrected answer delivered',
+          detail: `Question ${questionId} has been updated and delivered to the user.`,
           time: 'just now',
           route: `/user/track-questions?questionId=${questionId}`,
           audience: ROLES.USER,
           category: 'questions',
           read: false,
         },
+        ...prev,
+      ])
+      return true
+    },
+    deliverDueQuestionAnswers() {
+      const now = Date.now()
+      const dueQuestions = questions.filter((question) => question.status === 'Under Review' && question.answerReviewUntil && question.answerReviewUntil <= now)
+      if (!dueQuestions.length) return
+      setQuestions((prev) => prev.map((question) => dueQuestions.some((dueQuestion) => dueQuestion.id === question.id)
+        ? { ...question, status: 'Answered', answerDeliveredAt: now, history: [...question.history, 'Answer automatically delivered to user'] }
+        : question))
+      setNotifications((prev) => [
+        ...dueQuestions.map((question) => ({
+          id: crypto.randomUUID(),
+          title: 'Answer delivered',
+          detail: `Question ${question.id} has been answered and delivered to the user.`,
+          time: 'just now',
+          route: `/user/track-questions?questionId=${question.id}`,
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        })),
         ...prev,
       ])
     },
@@ -1271,6 +1334,13 @@ export function AppDataProvider({ children }) {
       )
     },
   }), [campaigns, questions, subscriptions])
+
+  useEffect(() => {
+    const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
+    deliverDueAnswers()
+    const timer = window.setInterval(deliverDueAnswers, 30 * 1000)
+    return () => window.clearInterval(timer)
+  }, [actions])
 
   const value = useMemo(() => ({
     campaigns,
