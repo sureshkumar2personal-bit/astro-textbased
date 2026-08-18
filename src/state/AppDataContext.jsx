@@ -76,6 +76,18 @@ const initialCampaigns = [
   },
 ]
 
+const initialPurchasedSlots = initialCampaigns
+  .filter((campaign) => campaign.purchasedGeneral > 0 || campaign.purchasedPersonal > 0)
+  .map((campaign) => ({
+    id: `slots-user-demo-${campaign.id}`,
+    userId: 'user-demo',
+    campaignId: campaign.id,
+    generalPurchased: campaign.purchasedGeneral,
+    generalUsed: 0,
+    personalPurchased: campaign.purchasedPersonal,
+    personalUsed: 0,
+  }))
+
 const initialQuestions = [
   {
     id: 'QTN-2026-000123',
@@ -484,6 +496,20 @@ function firstOfNextMonthMs() {
   return new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime()
 }
 
+function updatePurchasedSlotBalance(list, userId, campaignId, slotType, amount) {
+  return list.map((slot) => {
+    if (slot.userId !== userId || slot.campaignId !== campaignId) return slot
+    if (slotType === 'General') {
+      return amount < 0
+        ? { ...slot, generalUsed: Math.min(slot.generalPurchased, slot.generalUsed - amount) }
+        : { ...slot, generalPurchased: slot.generalPurchased + amount }
+    }
+    return amount < 0
+      ? { ...slot, personalUsed: Math.min(slot.personalPurchased, slot.personalUsed - amount) }
+      : { ...slot, personalPurchased: slot.personalPurchased + amount }
+  })
+}
+
 export function AppDataProvider({ children }) {
   const [campaigns, setCampaigns] = useState(initialCampaigns)
   const [questions, setQuestions] = useState(initialQuestions)
@@ -497,6 +523,7 @@ export function AppDataProvider({ children }) {
   const [appointments, setAppointments] = useState(mockAppointments)
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo'])
   const [subscriptions, setSubscriptions] = useState([])
+  const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -537,6 +564,9 @@ export function AppDataProvider({ children }) {
           ])
         }
       }
+    },
+    consumePurchasedSlot(userId, campaignId, slotType) {
+      setPurchasedSlots((prev) => updatePurchasedSlotBalance(prev, userId, campaignId, slotType, -1))
     },
     deleteCampaign(campaignId) {
       setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId))
@@ -642,6 +672,31 @@ export function AppDataProvider({ children }) {
       ])
     },
     purchasePackage(campaignId, purchase) {
+      if (purchase.userId && purchase.source !== 'astrologer') {
+        setPurchasedSlots((prev) => {
+          const existing = prev.find((slot) => slot.userId === purchase.userId && slot.campaignId === campaignId)
+          if (existing) {
+            return updatePurchasedSlotBalance(
+              prev,
+              purchase.userId,
+              campaignId,
+              'General',
+              purchase.generalQty || 0,
+            ).map((slot) => slot.userId === purchase.userId && slot.campaignId === campaignId
+              ? { ...slot, personalPurchased: slot.personalPurchased + (purchase.personalQty || 0) }
+              : slot)
+          }
+          return [...prev, {
+            id: crypto.randomUUID(),
+            userId: purchase.userId,
+            campaignId,
+            generalPurchased: purchase.generalQty || 0,
+            generalUsed: 0,
+            personalPurchased: purchase.personalQty || 0,
+            personalUsed: 0,
+          }]
+        })
+      }
       setCampaigns((prev) =>
         prev.map((campaign) =>
           campaign.id === campaignId
@@ -777,6 +832,9 @@ export function AppDataProvider({ children }) {
         },
         ...prev,
       ])
+      if (payload.purchaseType === 'Purchased Slot' && payload.slotType) {
+        setPurchasedSlots((prev) => updatePurchasedSlotBalance(prev, payload.userId, payload.campaignId, payload.slotType, -1))
+      }
       setQuestionPreviewId(nextId)
       setNotifications((prev) => [
         {
@@ -1230,6 +1288,7 @@ export function AppDataProvider({ children }) {
     appointments,
     followedAstrologerIds,
     subscriptions,
+    purchasedSlots,
     setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
@@ -1254,6 +1313,7 @@ export function AppDataProvider({ children }) {
     appointments,
     followedAstrologerIds,
     subscriptions,
+    purchasedSlots,
     actions,
   ])
 

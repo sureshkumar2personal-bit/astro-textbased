@@ -19,7 +19,7 @@ function Detail({ label, value }) {
   )
 }
 
-function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDiscount }) {
+export function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDiscount }) {
   const totalRemaining = Math.max(campaign.totalLimit - campaign.purchasedGeneral - campaign.purchasedPersonal, 0)
   const generalRemaining = Math.max(campaign.generalLimit - campaign.purchasedGeneral, 0)
   const personalRemaining = Math.max(campaign.personalLimit - campaign.purchasedPersonal, 0)
@@ -41,15 +41,19 @@ function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDisc
       </Card>
 
       <Card>
-        <div className="section-title" style={{ fontSize: 15 }}><CircleDollarSign size={18} />Pricing & Question Allocation</div>
+        <div className="section-title" style={{ fontSize: 15 }}><CircleDollarSign size={18} />Slots & Pricing</div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Detail label="General Price" value={`₹${campaign.generalPrice}`} />
-          <Detail label="Personal Price" value={`₹${campaign.personalPrice}`} />
+          <Detail label="General Original Price" value={`₹${campaign.generalPrice}`} />
+          <Detail label="Individual Original Price" value={`₹${campaign.personalPrice}`} />
+          <Detail label="General Actual Price" value={`₹${Number(campaign.generalPrice) - generalDiscount}`} />
+          <Detail label="Individual Actual Price" value={`₹${Number(campaign.personalPrice) - personalDiscount}`} />
           <Detail label="Total Slots" value={campaign.totalLimit} />
           <Detail label="Total Remaining Slots" value={totalRemaining} />
           <Detail label="General Allocation Slots" value={campaign.generalLimit} />
+          <Detail label="General Sold-out Slots" value={campaign.purchasedGeneral} />
           <Detail label="General Remaining Slots" value={generalRemaining} />
           <Detail label="Individual Allocation Slots" value={campaign.personalLimit} />
+          <Detail label="Individual Sold-out Slots" value={campaign.purchasedPersonal} />
           <Detail label="Individual Remaining Slots" value={personalRemaining} />
         </div>
       </Card>
@@ -59,8 +63,8 @@ function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDisc
         {discountPercent > 0 ? (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Detail label="Discount Percentage" value={`${discountPercent}%`} />
-            <Detail label="General After Discount" value={`₹${Number(campaign.generalPrice) - generalDiscount}`} />
-            <Detail label="Personal After Discount" value={`₹${Number(campaign.personalPrice) - personalDiscount}`} />
+            <Detail label="Total Sold-out Slots" value={campaign.purchasedGeneral + campaign.purchasedPersonal} />
+            <Detail label="Total Remaining Slots" value={totalRemaining} />
           </div>
         ) : (
           <div className="muted">No subscriber discount is available for this campaign.</div>
@@ -160,7 +164,15 @@ export default function Campaigns() {
           {filteredCampaigns.map((campaign) => (
             <button type="button" key={campaign.id} className="card flex h-full flex-col text-left transition hover:-translate-y-1 hover:border-[color:var(--secondary)]" onClick={() => openDetails(campaign)}>
               <div className="flex items-start justify-between gap-3"><div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div><StatusBadge label={campaign.status} /></div>
-              <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm"><span>{campaign.date} – {campaign.endDate}</span><span>{campaign.priority} priority</span><span>General ₹{campaign.generalPrice} · Personal ₹{campaign.personalPrice}</span><span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} questions sold</span></div>
+              <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm">
+                <span>{campaign.date} – {campaign.endDate}</span>
+                <span>{campaign.priority} priority</span>
+                <span>General ₹{campaign.generalPrice} · Individual ₹{campaign.personalPrice}</span>
+                <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} slots sold</span>
+                <span className={Number(campaign.discountPercent) > 0 ? 'font-semibold text-[color:var(--primary)]' : ''}>
+                  {Number(campaign.discountPercent) > 0 ? `${campaign.discountPercent}% subscriber discount` : 'No subscriber discount'}
+                </span>
+              </div>
               <div className="mt-4 font-semibold text-[color:var(--primary)]">View Full Details →</div>
             </button>
           ))}

@@ -454,6 +454,31 @@ textarea:focus-visible {
   transition: transform 250ms var(--ease-premium);
 }
 
+.sidebar-link-label {
+  flex: 1;
+}
+
+.sidebar-notification-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 999px;
+  background: var(--red-500);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14), 0 0 12px rgba(239, 68, 68, 0.65);
+  animation: sidebar-reward-blink 1.35s ease-in-out infinite;
+}
+
+@keyframes sidebar-reward-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.76); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-notification-dot {
+    animation: none;
+  }
+}
+
 .sidebar-link:hover {
   color: #fff;
   transform: translateX(3px);

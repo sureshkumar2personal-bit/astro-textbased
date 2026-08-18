@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-export default function SidebarItem({ to, end, icon: Icon, label }) {
+export default function SidebarItem({ to, end, icon: Icon, label, showBadge = false }) {
   return (
     <NavLink to={to} end={end} className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}>
       {({ isActive }) => (
@@ -14,7 +14,8 @@ export default function SidebarItem({ to, end, icon: Icon, label }) {
             />
           )}
           <Icon size={18} />
-          {label}
+          <span className="sidebar-link-label">{label}</span>
+          {showBadge && <span className="sidebar-notification-dot" aria-label="Reward available" />}
         </>
       )}
     </NavLink>

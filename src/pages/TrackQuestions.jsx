@@ -19,7 +19,6 @@ export default function TrackQuestions() {
   const routes = getRoleRoutes(currentUser?.role)
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [sortBy, setSortBy] = useState('Newest')
   const [category, setCategory] = useState('All')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'All')
 
@@ -61,11 +60,8 @@ export default function TrackQuestions() {
       return matchesSearch && matchesCategory && matchesStatusFilter(question.status)
     })
 
-    return base.sort((a, b) => {
-      if (sortBy === 'Oldest') return new Date(a.raisedAt || a.raised) - new Date(b.raisedAt || b.raised)
-      return new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised)
-    })
-  }, [appliedSearch, category, currentUser?.email, currentUser?.id, currentUser?.role, questions, sortBy, matchesStatusFilter])
+    return base.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
+  }, [appliedSearch, category, currentUser?.email, currentUser?.id, currentUser?.role, questions, matchesStatusFilter])
 
   const categoryOptions = useMemo(() => {
     const labels = ownedQuestions
@@ -171,10 +167,6 @@ export default function TrackQuestions() {
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="badge badge-violet">Active filter: {activeCategory}</span>
               </div>
-            </div>
-            <div>
-              <div className="field-label-top">Sort By</div>
-              <ChipGroup options={['Newest', 'Oldest']} value={sortBy} onChange={setSortBy} />
             </div>
           </div>
         </Card>

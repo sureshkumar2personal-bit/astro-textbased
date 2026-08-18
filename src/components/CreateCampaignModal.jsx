@@ -113,17 +113,6 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
               <input type="number" min="1" className="text-input" value={form.totalLimit} onChange={(event) => setTotalSlots(Number(event.target.value))} />
             </label>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">General Price</span>
-                <input type="number" min="0" className="text-input" value={form.generalPrice} onChange={(event) => setForm({ ...form, generalPrice: Number(event.target.value) })} />
-              </label>
-              <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">Individual Price</span>
-                <input type="number" min="0" className="text-input" value={form.personalPrice} onChange={(event) => setForm({ ...form, personalPrice: Number(event.target.value) })} />
-              </label>
-            </div>
-
             <div>
               <div className="field-label-top">Slot Allocation</div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -139,6 +128,17 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
               <p className={`mt-2 text-sm font-medium ${slotDifference === 0 ? 'text-[color:var(--success)]' : 'text-[color:var(--danger)]'}`}>
                 {slotDifference === 0 ? `Slots fully allocated (${slotAllocated}/${form.totalLimit}).` : `Slots must total ${form.totalLimit}. Current allocation: ${slotAllocated}.`}
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <label className="field-group" style={{ margin: 0 }}>
+                <span className="field-label-top">General Price</span>
+                <input type="number" min="0" className="text-input" value={form.generalPrice} onChange={(event) => setForm({ ...form, generalPrice: Number(event.target.value) })} />
+              </label>
+              <label className="field-group" style={{ margin: 0 }}>
+                <span className="field-label-top">Individual Price</span>
+                <input type="number" min="0" className="text-input" value={form.personalPrice} onChange={(event) => setForm({ ...form, personalPrice: Number(event.target.value) })} />
+              </label>
             </div>
 
             <div>

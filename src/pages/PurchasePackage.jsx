@@ -49,6 +49,7 @@ export default function PurchasePackage() {
       generalQty,
       personalQty,
       totalAmount,
+      userId: currentUser?.id,
       source: source || currentUser?.role,
     })
     setPurchasedCampaignName(selectedCampaign.name)
