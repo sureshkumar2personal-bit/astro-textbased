@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Sparkles, Shield, UserRound } from 'lucide-react'
+import { Eye, EyeOff, Sparkles, Shield, UserRound } from 'lucide-react'
 import { useAuth } from '../state/AuthContext.jsx'
 import ThemeToggle from '../components/ThemeToggle.jsx'
 import { getRoleRoutes, inferRoleFromEmail, ROLES } from '../utils/roleRoutes.js'
@@ -10,6 +10,7 @@ export default function AuthPage({ mode }) {
   const { currentUser, login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
   const isLogin = mode === 'login'
@@ -116,13 +117,23 @@ export default function AuthPage({ mode }) {
 
                 <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">
                   Password
-                  <input
-                    type="password"
-                    className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)] shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_18px_rgba(15,23,42,0.04)] outline-none transition focus:border-[color:var(--secondary)] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.16)]"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={role === ROLES.USER ? 'User@123' : 'Astro@123'}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 pr-12 text-[color:var(--ink)] shadow-[0_1px_2px_rgba(15,23,42,0.06),0_8px_18px_rgba(15,23,42,0.04)] outline-none transition focus:border-[color:var(--secondary)] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.16)]"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={role === ROLES.USER ? 'User@123' : 'Astro@123'}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[color:var(--muted)] transition hover:text-[color:var(--primary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--secondary)]"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowPassword((visible) => !visible)}
+                    >
+                      {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                    </button>
+                  </div>
                 </label>
 
               </div>

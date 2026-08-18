@@ -1,6 +1,7 @@
+import { createPortal } from 'react-dom'
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, X } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -28,6 +29,8 @@ export default function PurchasePackage() {
   const [payment, setPayment] = useState('UPI')
   const [purchasedCampaignName, setPurchasedCampaignName] = useState(null)
   const [selectedId, setSelectedId] = useState(highlightCampaignId || null)
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(Boolean(highlightCampaignId))
+  const isUser = currentUser?.role === 'user'
 
   const activeCampaigns = useMemo(
     () => campaigns.filter((campaign) => campaign.status === 'Active'),
@@ -52,6 +55,7 @@ export default function PurchasePackage() {
       userId: currentUser?.id,
       source: source || currentUser?.role,
     })
+    setIsPurchaseModalOpen(false)
     setPurchasedCampaignName(selectedCampaign.name)
   }
 
@@ -75,7 +79,7 @@ export default function PurchasePackage() {
 
       <div className="section grid grid-cols-1 gap-4 md:grid-cols-2">
         {activeCampaigns.map((campaign) => {
-          const isSelected = selectedId === campaign.id
+          const isSelected = !isUser && selectedId === campaign.id
 
           return (
             <Card
@@ -89,7 +93,10 @@ export default function PurchasePackage() {
             >
               <button
                 type="button"
-                onClick={() => setSelectedId(campaign.id)}
+                onClick={() => {
+                  setSelectedId(campaign.id)
+                  if (isUser) setIsPurchaseModalOpen(true)
+                }}
                 style={{
                   display: 'flex',
                   width: '100%',
@@ -120,7 +127,7 @@ export default function PurchasePackage() {
         })}
       </div>
 
-      {selectedCampaign && (() => {
+      {!isUser && selectedCampaign && (() => {
         const { generalQty, personalQty } = getQty(selectedCampaign.id)
         const totalAmount = (generalQty * selectedCampaign.generalPrice) + (personalQty * selectedCampaign.personalPrice)
 
@@ -194,7 +201,7 @@ export default function PurchasePackage() {
         )
       })()}
 
-      {selectedCampaign && (
+      {!isUser && selectedCampaign && (
         <Section title="Payment Method">
           <Card>
             <RadioGroup
@@ -207,7 +214,7 @@ export default function PurchasePackage() {
         </Section>
       )}
 
-      <div className="section" style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+      {!isUser && <div className="section" style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
         <button
           className="btn btn-primary"
           disabled={!selectedCampaign}
@@ -216,7 +223,74 @@ export default function PurchasePackage() {
           Buy Now
         </button>
         <button className="btn btn-ghost" onClick={() => navigate(source === 'astrologer' ? routes.salesManagement : routes.dashboard)}>Cancel</button>
-      </div>
+      </div>}
+
+      {isUser && isPurchaseModalOpen && selectedCampaign && createPortal((() => {
+        const { generalQty, personalQty } = getQty(selectedCampaign.id)
+        const totalAmount = (generalQty * selectedCampaign.generalPrice) + (personalQty * selectedCampaign.personalPrice)
+
+        return (
+          <div className="modal-overlay user-modal-overlay" onClick={() => setIsPurchaseModalOpen(false)}>
+            <div
+              className="modal-card user-modal-card user-modal-card--scroll"
+              style={{ width: 'min(640px, calc(100vw - 32px))' }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="purchase-package-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="user-modal-card__header flex items-center justify-between gap-4">
+                <div>
+                  <div id="purchase-package-title" className="section-title" style={{ marginBottom: 0 }}>Buy Question Package</div>
+                  <div className="muted" style={{ marginTop: 4 }}>{selectedCampaign.name}</div>
+                </div>
+                <button type="button" className="icon-btn" aria-label="Close purchase popup" onClick={() => setIsPurchaseModalOpen(false)}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>Package Details</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, alignItems: 'stretch' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>General Questions Available</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.generalLimit}</div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Individual Questions Available</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.personalLimit}</div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Total Package Questions</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.totalLimit}</div></div>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>Purchase Options</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 18 }}>
+                    <div className="field-group"><label className="field-label-top">General Questions</label><select value={generalQty} onChange={(event) => setQty(selectedCampaign.id, { generalQty: Number(event.target.value) })} className="select-input">{QTY_OPTIONS.map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}</select></div>
+                    <div className="field-group"><label className="field-label-top">Individual Questions</label><select value={personalQty} onChange={(event) => setQty(selectedCampaign.id, { personalQty: Number(event.target.value) })} className="select-input">{QTY_OPTIONS.map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}</select></div>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>Price Summary</div>
+                  <div style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>General Questions</span><strong>₹{generalQty * selectedCampaign.generalPrice}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Individual Questions</span><strong>₹{personalQty * selectedCampaign.personalPrice}</strong></div>
+                    <div className="divider" style={{ margin: '4px 0' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Total Amount</span><strong>₹{totalAmount}</strong></div>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>Payment Method</div>
+                  <RadioGroup name="payment-method" options={['UPI', 'Credit / Debit Card', 'Net Banking', 'Wallet']} value={payment} onChange={setPayment} />
+                </Card>
+              </div>
+
+              <div className="user-modal-card__footer">
+                <button type="button" className="btn btn-ghost" onClick={() => setIsPurchaseModalOpen(false)}>Cancel</button>
+                <button type="button" className="btn btn-primary" onClick={handleBuyNow}>Buy Now</button>
+              </div>
+            </div>
+          </div>
+        )
+      })(), document.body)}
 
       {purchasedCampaignName && (
         <SuccessAlert

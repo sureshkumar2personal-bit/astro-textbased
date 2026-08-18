@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { X } from 'lucide-react'
 import { RadioGroup, ChipGroup } from '../components/OptionGroup.jsx'
 import UploadField from '../components/UploadField.jsx'
 import VoiceTextArea from '../components/VoiceTextArea.jsx'
@@ -66,6 +68,15 @@ export default function AskQuestion() {
       ? selectedCampaign.categories.map((cat) => cat.name)
       : categories
   const discountPrice = discountActive ? actions.getDiscountPrice(selectedCampaign?.id, category) : null
+  const isQuestionFormOpen = showQuestionForm || isEditing || discountActive
+
+  const closeQuestionForm = () => {
+    if (isEditing || discountActive) {
+      navigate(routes.trackQuestions)
+      return
+    }
+    setShowQuestionForm(false)
+  }
 
   const selectPurchasedCampaign = (campaign, type) => {
     setSelectedCampaignId(campaign.id)
@@ -172,133 +183,85 @@ export default function AskQuestion() {
         </Section>
       )}
 
-      {selectedCampaign && (showQuestionForm || isEditing || discountActive) && (
-        <Card className="section" style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <div>
-            <div className="section-title" style={{ marginBottom: 10 }}>Selected Package</div>
-            <div style={{ lineHeight: 1.7 }}>
-              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{selectedCampaign.name}</div>
-              <div className="muted">Question type: {questionType}</div>
+      {isQuestionFormOpen && createPortal((
+        <div className="modal-overlay user-modal-overlay" onClick={closeQuestionForm}>
+          <div
+            className="modal-card user-modal-card user-modal-card--scroll"
+            style={{ width: 'min(760px, calc(100vw - 32px))' }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ask-question-popup-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="user-modal-card__header flex items-center justify-between gap-4">
+              <div>
+                <div id="ask-question-popup-title" className="section-title" style={{ marginBottom: 0 }}>{isEditing ? 'Edit Question' : 'Ask a Question'}</div>
+                {selectedCampaign && <div className="muted" style={{ marginTop: 4 }}>{selectedCampaign.name} · {questionType}</div>}
+              </div>
+              <button type="button" className="icon-btn" aria-label="Close ask question popup" onClick={closeQuestionForm}>
+                <X size={16} />
+              </button>
             </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-            {discountActive && discountPrice && (
-              <div className="badge badge-green">🎁 Discount Question active</div>
-            )}
-            <div className="badge badge-green">Simple layout for General · Detailed layout for Personal</div>
-          </div>
-        </Card>
-      )}
 
-      {showQuestionForm && !isEditing && !discountActive && (
-        <div className="section" style={{ display: 'flex', justifyContent: 'flex-start' }}>
-          <button type="button" className="btn btn-ghost" onClick={() => setShowQuestionForm(false)}>← Back to Purchased Slots</button>
-        </div>
-      )}
-
-      {(showQuestionForm || isEditing || discountActive) && <Card className="section" style={{ padding: '16px 20px' }}>
-        <div className="section-title" style={{ fontSize: 15, marginBottom: 10 }}>Category</div>
-        <ChipGroup options={categoryOptions} value={category} onChange={setCategory} />
-      </Card>}
-
-      {discountActive && discountPrice && (
-        <Section title="Subscriber Discount">
-          <Card>
-            <div className="section-title" style={{ fontSize: 15 }}>Discount Question Applied</div>
-            <div style={{ display: 'grid', gap: 12, maxWidth: 360, marginTop: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Normal Price ({category})</span>
-                <strong>₹{discountPrice.normalPrice}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Subscriber Discount</span>
-                <strong>{discountPrice.discountPercent}%</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Discount</span>
-                <strong>-₹{discountPrice.discountAmount}</strong>
-              </div>
-              <div className="divider" style={{ margin: '4px 0' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}>
-                <span>You Pay</span>
-                <strong>₹{discountPrice.youPay}</strong>
-              </div>
-            </div>
-          </Card>
-        </Section>
-      )}
-
-      {(showQuestionForm || isEditing || discountActive) && (questionType.startsWith('General') ? (
-        <Section title="General Question">
-          <Card>
-            <div className="muted" style={{ marginBottom: 12 }}>Simple layout for general questions. Add the minimum required details and submit.</div>
-            <div className="field-group">
-              <label className="field-label-top">Preferred Language</label>
-              <select className="select-input" value={language} onChange={(e) => setLanguage(e.target.value)}>
-                {LANGUAGES.map((item) => <option key={item} value={item}>{item}</option>)}
-              </select>
-            </div>
-            <VoiceTextArea
-              placeholder="Type your general question here, or tap the mic to speak it..."
-              value={question}
-              onChange={setQuestion}
-              maxLength={QUESTION_CHAR_LIMIT}
-              lang={SPEECH_LANG_BY_LANGUAGE[language]}
-            />
-          </Card>
-        </Section>
-      ) : (
-        <>
-          <Section title="Question Raised For">
-            <Card>
-              <RadioGroup name="raised-for" options={RAISED_FOR} value={raisedFor} onChange={setRaisedFor} />
-              {raisedFor === 'Friend / Other Person' && (
-                <div className="field-group" style={{ marginTop: 16, marginBottom: 0 }}>
-                  <label className="field-label-top">Person's Name</label>
-                  <input
-                    type="text"
-                    className="text-input"
-                    placeholder="Enter their name"
-                    value={otherPersonName}
-                    onChange={(e) => setOtherPersonName(e.target.value)}
-                  />
-                </div>
+            <div className="user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {selectedCampaign && (
+                <Card style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                  <div><div className="section-title" style={{ marginBottom: 10 }}>Selected Package</div><div style={{ fontWeight: 700, color: 'var(--ink)' }}>{selectedCampaign.name}</div></div>
+                  {discountActive && discountPrice && <div className="badge badge-green">🎁 Discount Question active</div>}
+                </Card>
               )}
-            </Card>
-          </Section>
 
-          <Section title="Preferred Language">
-            <Card>
-              <RadioGroup name="language" options={LANGUAGES} value={language} onChange={setLanguage} />
-            </Card>
-          </Section>
+              <Card>
+                <div className="section-title" style={{ fontSize: 15, marginBottom: 10 }}>Category</div>
+                <ChipGroup options={categoryOptions} value={category} onChange={setCategory} />
+              </Card>
 
-          <Section title="Personal Question">
-            <Card>
-              <div className="muted" style={{ marginBottom: 12 }}>Detailed layout for personal questions. Add horoscope and supporting files.</div>
-              <RadioGroup name="horoscope" options={HOROSCOPE_OPTIONS} value={horoscope} onChange={setHoroscope} />
-              <div style={{ marginTop: 16 }}>
-                <UploadField label="Upload horoscope file" accept=".pdf,.jpg,.jpeg,.png" />
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <VoiceTextArea
-                  placeholder="Describe your question in detail, or tap the mic to speak it..."
-                  value={question}
-                  onChange={setQuestion}
-                  maxLength={QUESTION_CHAR_LIMIT}
-                  lang={SPEECH_LANG_BY_LANGUAGE[language]}
-                />
-              </div>
-            </Card>
-          </Section>
-        </>
-      ))}
+              {discountActive && discountPrice && (
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>Discount Question Applied</div>
+                  <div style={{ display: 'grid', gap: 12, maxWidth: 360, marginTop: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Normal Price ({category})</span><strong>₹{discountPrice.normalPrice}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Subscriber Discount</span><strong>{discountPrice.discountPercent}%</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Discount</span><strong>-₹{discountPrice.discountAmount}</strong></div>
+                    <div className="divider" style={{ margin: '4px 0' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>You Pay</span><strong>₹{discountPrice.youPay}</strong></div>
+                  </div>
+                </Card>
+              )}
 
-      {(showQuestionForm || isEditing || discountActive) && <div className="section" style={{ display: 'flex', justifyContent: 'center' }}>
-        <button className="btn btn-primary" onClick={handleSubmit} disabled={submitted}>
-          {isEditing ? 'Update Question' : submitted && useDiscount ? 'Discount Question Submitted' : 'Submit Question'}
-        </button>
-      </div>}
+              {questionType.startsWith('General') ? (
+                <Card>
+                  <div className="section-title" style={{ fontSize: 15 }}>General Question</div>
+                  <div className="muted" style={{ marginBottom: 12 }}>Simple layout for general questions. Add the minimum required details and submit.</div>
+                  <div className="field-group"><label className="field-label-top">Preferred Language</label><select className="select-input" value={language} onChange={(event) => setLanguage(event.target.value)}>{LANGUAGES.map((item) => <option key={item} value={item}>{item}</option>)}</select></div>
+                  <VoiceTextArea placeholder="Type your general question here, or tap the mic to speak it..." value={question} onChange={setQuestion} maxLength={QUESTION_CHAR_LIMIT} lang={SPEECH_LANG_BY_LANGUAGE[language]} />
+                </Card>
+              ) : (
+                <>
+                  <Card>
+                    <div className="section-title" style={{ fontSize: 15 }}>Question Raised For</div>
+                    <RadioGroup name="raised-for" options={RAISED_FOR} value={raisedFor} onChange={setRaisedFor} />
+                    {raisedFor === 'Friend / Other Person' && <div className="field-group" style={{ marginTop: 16, marginBottom: 0 }}><label className="field-label-top">Person's Name</label><input type="text" className="text-input" placeholder="Enter their name" value={otherPersonName} onChange={(event) => setOtherPersonName(event.target.value)} /></div>}
+                  </Card>
+                  <Card><div className="section-title" style={{ fontSize: 15 }}>Preferred Language</div><RadioGroup name="language" options={LANGUAGES} value={language} onChange={setLanguage} /></Card>
+                  <Card>
+                    <div className="section-title" style={{ fontSize: 15 }}>Personal Question</div>
+                    <div className="muted" style={{ marginBottom: 12 }}>Detailed layout for personal questions. Add horoscope and supporting files.</div>
+                    <RadioGroup name="horoscope" options={HOROSCOPE_OPTIONS} value={horoscope} onChange={setHoroscope} />
+                    <div style={{ marginTop: 16 }}><UploadField label="Upload horoscope file" accept=".pdf,.jpg,.jpeg,.png" /></div>
+                    <div style={{ marginTop: 16 }}><VoiceTextArea placeholder="Describe your question in detail, or tap the mic to speak it..." value={question} onChange={setQuestion} maxLength={QUESTION_CHAR_LIMIT} lang={SPEECH_LANG_BY_LANGUAGE[language]} /></div>
+                  </Card>
+                </>
+              )}
+            </div>
+
+            <div className="user-modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={closeQuestionForm}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitted}>{isEditing ? 'Update Question' : submitted && useDiscount ? 'Discount Question Submitted' : 'Submit Question'}</button>
+            </div>
+          </div>
+        </div>
+      ), document.body)}
 
       {submitted && (
         <SuccessAlert variant="user" message={successMessage} onDismiss={() => setSubmitted(false)} />
