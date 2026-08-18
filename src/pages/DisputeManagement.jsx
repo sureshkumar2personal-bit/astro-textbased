@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { History, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge.jsx'
@@ -123,20 +124,71 @@ export default function DisputeManagement() {
         )}
       </Card>
 
-      {detailsOpen && selectedQuestion?.dispute && (
+      {detailsOpen && selectedQuestion?.dispute && createPortal(
         <div className="modal-overlay" onClick={closeDetails}>
           <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4"><div className="section-title" style={{ marginBottom: 0 }}>Dispute Details</div><button type="button" className="icon-btn" aria-label="Close dispute details" onClick={closeDetails}><X size={18} /></button></div>
-            <div className="modal-card__content grid gap-4">
-              <Card><div className="flex flex-wrap items-center justify-between gap-3"><div><div>Campaign: {selectedQuestion.campaignName}</div><div className="muted">Dispute ID: DSP-{selectedQuestion.id}</div></div><StatusBadge label={status} /></div></Card>
-              <Card><div className="section-title" style={{ fontSize: 15 }}><TempleShieldIcon size={18} />User Details</div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><div><strong>User Name</strong><div className="muted">{selectedQuestion.user}</div></div><div><strong>Question ID</strong><div className="muted">{selectedQuestion.id}</div></div><div><strong>Question Type</strong><div className="muted">{selectedQuestion.type}</div></div><div><strong>Category</strong><div className="muted">{selectedQuestion.category}</div></div><div><strong>Raised On</strong><div className="muted">{selectedQuestion.raised}</div></div></div></Card>
-              <Card><div className="section-title" style={{ fontSize: 15 }}><TempleScrollIcon size={18} />Original Question</div><div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.question}&quot;</div></Card>
-              <Card><div className="section-title" style={{ fontSize: 15 }}><TempleLampIcon size={18} />Original Answer</div><div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.answer || 'Answer is being reviewed.'}&quot;</div></Card>
-              <Card><div className="section-title" style={{ fontSize: 15 }}><TempleShieldIcon size={18} />User Dispute Details</div><div className="grid gap-3"><div><strong>Reason:</strong> <span className="muted">{selectedQuestion.dispute.reason}</span></div>{selectedQuestion.dispute.description ? <div><strong>Description:</strong><div className="muted mt-1">{selectedQuestion.dispute.description}</div></div> : null}<button className="btn btn-outline" style={{ width: 'fit-content' }} onClick={() => setAttachmentOpen(true)}>Open {selectedQuestion.dispute.attachment}</button></div></Card>
-              <Card><div className="section-title" style={{ fontSize: 15 }}><TempleLampIcon size={18} />Astrologer Response</div><textarea className="textarea-box" placeholder="Write your clarification or resolution here..." value={response} readOnly={isSubmitted} onChange={(event) => setResponse(event.target.value)} /><div className="btn-row mt-4" style={{ alignItems: 'center' }}>{isSubmitted ? <span className="text-sm font-semibold text-[color:var(--green-600)]">Submitted Successfully</span> : <button className="btn btn-primary" onClick={() => updateResponse('Resolved')}>Answer</button>}<button className="btn btn-outline" onClick={() => updateResponse('Closed')}>Closed</button></div></Card>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <div className="astrologer-modal-title">Dispute Details</div>
+                <div className="muted" style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {selectedQuestion.campaignName} · DSP-{selectedQuestion.id}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 'auto' }}>
+                <StatusBadge label={status} />
+                <button type="button" className="icon-btn" aria-label="Close dispute details" onClick={closeDetails} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+              </div>
+            </div>
+
+            <div className="modal-card__content astrologer-modal-content">
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleShieldIcon size={14} />User Details</div>
+                <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+                  <div><strong>Name</strong><div className="muted">{selectedQuestion.user}</div></div>
+                  <div><strong>Question ID</strong><div className="muted">{selectedQuestion.id}</div></div>
+                  <div><strong>Question Type</strong><div className="muted">{selectedQuestion.type}</div></div>
+                  <div><strong>Category</strong><div className="muted">{selectedQuestion.category}</div></div>
+                  <div><strong>Raised On</strong><div className="muted">{selectedQuestion.raised}</div></div>
+                </div>
+              </div>
+
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleScrollIcon size={14} />Original Question</div>
+                <div className="astrologer-modal-highlight astrologer-modal-question">&quot;{selectedQuestion.question}&quot;</div>
+              </div>
+
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Original Answer</div>
+                <div className="astrologer-modal-highlight astrologer-modal-question">&quot;{selectedQuestion.answer || 'Answer is being reviewed.'}&quot;</div>
+              </div>
+
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleShieldIcon size={14} />User Dispute Details</div>
+                <div className="astrologer-modal-highlight" style={{ display: 'grid', gap: 12 }}>
+                  <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
+                  {selectedQuestion.dispute.description && <div><strong>Description</strong><div className="muted" style={{ marginTop: 4 }}>{selectedQuestion.dispute.description}</div></div>}
+                  {selectedQuestion.dispute.attachment && <button className="option-pill" style={{ width: 'fit-content' }} type="button" onClick={() => setAttachmentOpen(true)}><span className="option-mark"><TempleScrollIcon size={14} /></span>Open {selectedQuestion.dispute.attachment}</button>}
+                </div>
+              </div>
+
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Astrologer Response</div>
+                <textarea className="textarea-box" style={{ width: '100%' }} placeholder="Write your clarification or resolution here..." maxLength={3000} value={response} readOnly={isSubmitted} onChange={(event) => setResponse(event.target.value)} />
+                <div className="muted" style={{ fontSize: 12 }}>Characters: {response.length} / 3000</div>
+              </div>
+            </div>
+
+            <div className="modal-card__footer astrologer-modal-footer-actions">
+              {isSubmitted && <span style={{ color: 'var(--green-600)', fontSize: 13, fontWeight: 600, marginRight: 'auto' }}>Response submitted successfully</span>}
+              <button className="btn btn-ghost" onClick={closeDetails}>Cancel</button>
+              {!isSubmitted && <>
+                <button className="btn btn-outline" onClick={() => updateResponse('Closed')}>Close Dispute</button>
+                <button className="btn btn-primary" disabled={!response.trim()} onClick={() => updateResponse('Resolved')}>Submit Response</button>
+              </>}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {attachmentOpen && selectedQuestion?.dispute && <div className="modal-overlay" onClick={() => setAttachmentOpen(false)}><div className="modal-card" onClick={(event) => event.stopPropagation()}><div className="section-title">Attachment Preview</div><div className="muted" style={{ marginBottom: 16 }}>{selectedQuestion.dispute.attachment || 'Attachment.pdf'} is now open in the dispute viewer.</div><button className="btn btn-primary" onClick={() => setAttachmentOpen(false)}>Close</button></div></div>}
