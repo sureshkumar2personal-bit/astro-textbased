@@ -77,7 +77,7 @@ export default function AppointmentDetails() {
       </div>
 
       {cancelled && (
-        <SuccessAlert message="Appointment cancelled successfully." onDismiss={() => setCancelled(false)} />
+        <SuccessAlert variant="user" message="Appointment cancelled successfully." onDismiss={() => setCancelled(false)} />
       )}
     </div>
   )

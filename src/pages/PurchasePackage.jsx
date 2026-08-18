@@ -220,6 +220,7 @@ export default function PurchasePackage() {
 
       {purchasedCampaignName && (
         <SuccessAlert
+          variant="user"
           message={`Purchase completed successfully for ${purchasedCampaignName}.`}
           onDismiss={() => setPurchasedCampaignName(null)}
         />

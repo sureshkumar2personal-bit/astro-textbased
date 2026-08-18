@@ -1,5 +1,7 @@
+import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { X } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -9,7 +11,14 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
-const USER_PENDING_STATUSES = ['Pending', 'Submitted', 'Queued', 'In Progress', 'Under Review']
+const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered']
+
+function normalizeStatusFilter(value) {
+  if (STATUS_FILTERS.includes(value)) return value
+  if (value === 'Paid') return 'All'
+  if (value === 'Submitted') return 'Answered'
+  return 'All'
+}
 
 export default function TrackQuestions() {
   const navigate = useNavigate()
@@ -19,21 +28,29 @@ export default function TrackQuestions() {
   const routes = getRoleRoutes(currentUser?.role)
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [category, setCategory] = useState('All')
-  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'All')
+  const [statusFilter, setStatusFilter] = useState(() => normalizeStatusFilter(searchParams.get('status') || 'All'))
+  const [detailsOpen, setDetailsOpen] = useState(false)
 
-  const matchesStatusFilter = useCallback((questionStatus) => {
+  const matchesStatusFilter = useCallback((question) => {
     if (statusFilter === 'All') return true
-    if (statusFilter === 'pending_group') return USER_PENDING_STATUSES.includes(questionStatus)
-    return questionStatus === statusFilter
+    if (statusFilter === 'Pending') return question.status === 'Pending'
+    if (statusFilter === 'Dispute') return question.status === 'Disputed'
+    if (statusFilter === 'Answered') return question.status === 'Answered'
+    return false
   }, [statusFilter])
-  const [detailsClosed, setDetailsClosed] = useState(false)
+  const matchesSearchFilter = useCallback((question) => {
+    const term = appliedSearch.trim().toLowerCase()
+    if (!term) return true
+    if (term.includes('paid')) return question.purchaseType === 'Paid'
+    if (term.includes('individual') || term.includes('personal')) return question.type === 'Personal'
+    if (term.includes('general')) return question.type === 'General'
+    return false
+  }, [appliedSearch])
   const [rating, setRating] = useState(0)
   const [review, setReview] = useState('')
   const [ratingSaved, setRatingSaved] = useState(false)
 
   const ownedQuestions = useMemo(() => {
-    const term = appliedSearch.trim().toLowerCase()
     const scope = questions.filter((question) => {
       const isOwnQuestion =
         currentUser?.role !== 'user' ||
@@ -47,43 +64,17 @@ export default function TrackQuestions() {
     const source = currentUser?.role === 'user' && scope.length === 0 ? questions : scope
 
     const base = source.filter((question) => {
-      const categoryLabel = question.category || 'Others'
-      const matchesSearch = !term || [question.id, categoryLabel, question.question, question.status, question.campaignName]
-        .join(' ')
-        .toLowerCase()
-        .includes(term)
-      const matchesCategory =
-        category === 'All' ||
-        categoryLabel === category ||
-        categoryLabel.includes(category) ||
-        (category === 'Others' && categoryLabel === 'Others')
-      return matchesSearch && matchesCategory && matchesStatusFilter(question.status)
+      return matchesSearchFilter(question) && matchesStatusFilter(question)
     })
 
     return base.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
-  }, [appliedSearch, category, currentUser?.email, currentUser?.id, currentUser?.role, questions, matchesStatusFilter])
+  }, [currentUser?.email, currentUser?.id, currentUser?.role, questions, matchesSearchFilter, matchesStatusFilter])
 
-  const categoryOptions = useMemo(() => {
-    const labels = ownedQuestions
-      .map((question) => question.category || 'Others')
-      .filter((value, index, array) => array.indexOf(value) === index)
-      .sort((a, b) => a.localeCompare(b))
+  const visibleQuestions = ownedQuestions
 
-    return ['All', ...labels]
-  }, [ownedQuestions])
-
-  const activeCategory = categoryOptions.includes(category) ? category : 'All'
-  const visibleQuestions = useMemo(() => {
-    if (category === 'All' || !categoryOptions.includes(category)) {
-      return ownedQuestions
-    }
-
-    return ownedQuestions.filter((question) => (question.category || 'Others') === category)
-  }, [category, categoryOptions, ownedQuestions])
-
-  const selectedQuestion = detailsClosed
-    ? null
-    : visibleQuestions.find((question) => question.id === questionPreviewId) || visibleQuestions[0] || null
+  const selectedQuestion = detailsOpen
+    ? visibleQuestions.find((question) => question.id === questionPreviewId) || null
+    : null
 
   const selectedDisputeStatus = selectedQuestion?.dispute?.status || null
   const showRaiseDispute = selectedQuestion?.status === 'Answered' && !selectedQuestion?.dispute
@@ -120,12 +111,31 @@ export default function TrackQuestions() {
     setRating(0)
     setReview('')
     setRatingSaved(false)
-  }, [selectedQuestion?.answerRating, selectedQuestion?.answerReview, selectedQuestion?.dispute?.rating, selectedQuestion?.dispute?.status, selectedQuestion?.disputeRating, selectedQuestion?.id, selectedQuestion?.status])
+  }, [selectedQuestion, selectedQuestion?.answerRating, selectedQuestion?.answerReview, selectedQuestion?.dispute?.rating, selectedQuestion?.dispute?.status, selectedQuestion?.disputeRating, selectedQuestion?.id, selectedQuestion?.status])
 
   const openQuestion = (questionId) => {
-    setDetailsClosed(false)
     setQuestionPreviewId(questionId)
+    setDetailsOpen(true)
   }
+
+  const closeQuestion = useCallback(() => {
+    setDetailsOpen(false)
+    setQuestionPreviewId(null)
+  }, [setQuestionPreviewId])
+
+  useEffect(() => {
+    if (!detailsOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') closeQuestion()
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [closeQuestion, detailsOpen, selectedQuestion])
 
   return (
     <div>
@@ -137,7 +147,7 @@ export default function TrackQuestions() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search Question ID / Category / Keyword"
+              placeholder="Search Paid / Individual / General"
               className="text-input"
               style={{ flex: 1, minWidth: 240 }}
               onKeyDown={(e) => {
@@ -151,28 +161,13 @@ export default function TrackQuestions() {
         </Card>
       </Section>
 
-      <Section title="Filters">
+      <Section title="Status">
         <Card>
-          <div style={{ display: 'grid', gap: 16 }}>
-            <div>
-              <div className="field-label-top">Status</div>
-              <ChipGroup options={['All', 'Pending', 'Submitted', 'Queued', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Closed']} value={statusFilter} onChange={setStatusFilter} />
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="badge badge-violet">Active filter: {statusFilter}</span>
-              </div>
-            </div>
-            <div>
-              <div className="field-label-top">Category</div>
-              <ChipGroup options={categoryOptions} value={activeCategory} onChange={setCategory} />
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="badge badge-violet">Active filter: {activeCategory}</span>
-              </div>
-            </div>
-          </div>
+          <ChipGroup options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
         </Card>
       </Section>
 
-      <div className={`section grid grid-cols-1 gap-[22px] ${detailsClosed ? '' : 'lg:grid-cols-[1.3fr_1fr]'}`}>
+      <div className="section">
         <Card style={{ marginTop: 0 }}>
           <div className="section-title">My Questions</div>
           {visibleQuestions.length === 0 && (
@@ -182,14 +177,17 @@ export default function TrackQuestions() {
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {visibleQuestions.map((question) => {
-              const isSelected = selectedQuestion?.id === question.id
               return (
-                <Card key={question.id} hover={isSelected} className={isSelected ? 'card-selected' : ''}>
+                <Card
+                  key={question.id}
+                  hover
+                  className="cursor-pointer"
+                  onClick={() => openQuestion(question.id)}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                     <div style={{ display: 'grid', gap: 8 }}>
                       <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</div>
                       <div className="flex flex-wrap gap-2">
-                        <span className="badge badge-violet">Category: {question.category || 'Others'}</span>
                         <span className="badge badge-green">{question.type}</span>
                         <span className="badge badge-gold">{question.purchaseType}</span>
                       </div>
@@ -198,18 +196,18 @@ export default function TrackQuestions() {
                     <StatusBadge label={question.status} />
                   </div>
                   <div className="btn-row" style={{ marginTop: 14 }}>
-                    <button className="btn btn-outline" onClick={() => openQuestion(question.id)}>View</button>
+                    <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
                     {question.status === 'Pending' && (
                       <>
-                        <button className="btn btn-outline" onClick={() => navigate(`${routes.askQuestion}?editQuestionId=${question.id}`)}>Edit</button>
-                        <button className="btn btn-danger" onClick={() => actions.revokeQuestion(question.id)}>Delete</button>
+                        <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); navigate(`${routes.askQuestion}?editQuestionId=${question.id}`) }}>Edit</button>
+                        <button className="btn btn-danger" onClick={(event) => { event.stopPropagation(); actions.revokeQuestion(question.id) }}>Delete</button>
                       </>
                     )}
                     {question.status === 'Answered' && !question.dispute && (
-                      <button className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${question.id}`)}>Raise Dispute</button>
+                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); navigate(`${routes.raiseDispute}?questionId=${question.id}`) }}>Raise Dispute</button>
                     )}
                     {question.dispute?.status === 'Resolved' && (
-                      <button className="btn btn-primary" onClick={() => openQuestion(question.id)}>View</button>
+                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
                     )}
                   </div>
                 </Card>
@@ -217,39 +215,81 @@ export default function TrackQuestions() {
             })}
           </div>
         </Card>
+      </div>
 
-        {!detailsClosed && (
-        <Card style={{ marginTop: 0, alignSelf: 'start' }}>
-          <div className="section-title">Question Details</div>
-          {selectedQuestion ? (
-            <div style={{ display: 'grid', gap: 14 }}>
-              <div><strong>ID</strong><div className="muted">{selectedQuestion.id}</div></div>
-              <div><strong>User</strong><div className="muted">{selectedQuestion.user}</div></div>
-              <div><strong>Question</strong><div className="muted">{selectedQuestion.question}</div></div>
-              <div>
-                <strong>Category</strong>
-                <div className="mt-2">
-                  <span className="badge badge-violet">Category: {selectedQuestion.category || 'Others'}</span>
+      {detailsOpen && selectedQuestion && createPortal(
+        <div className="modal-overlay user-modal-overlay" onClick={closeQuestion}>
+          <div
+            className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll"
+            style={{ width: 'min(820px, calc(100vw - 32px))' }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div style={{ minWidth: 0 }}>
+                <div className="section-title" style={{ marginBottom: 0 }}>Question Details</div>
+                <div
+                  className="muted"
+                  style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {selectedQuestion.campaignName || 'User question'} · {selectedQuestion.id}
                 </div>
               </div>
-              <div><strong>Status</strong><StatusBadge label={selectedQuestion.status} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <StatusBadge label={selectedQuestion.status} />
+                <button type="button" className="icon-btn" aria-label="Close question details" onClick={closeQuestion}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
-                <strong>Answer</strong>
-                <div className="muted">
-                  {selectedQuestion.status === 'Under Review' ? 'The astrologer’s answer is being reviewed and will be delivered soon.' : (selectedQuestion.answer || 'No answer yet.')}
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question Details</div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',
+                    gap: 14,
+                    background: 'var(--violet-50)',
+                    borderRadius: 'var(--radius-s)',
+                    padding: 14,
+                    fontSize: 14,
+                  }}
+                >
+                  <div><strong>ID</strong><div className="muted">{selectedQuestion.id}</div></div>
+                  <div><strong>User</strong><div className="muted">{selectedQuestion.user}</div></div>
+                  <div><strong>Campaign</strong><div className="muted">{selectedQuestion.campaignName || 'No campaign'}</div></div>
+                  <div><strong>Category</strong><div className="muted">{selectedQuestion.category}</div></div>
+                  <div><strong>Type</strong><div className="muted">{selectedQuestion.type}</div></div>
+                  <div><strong>Status</strong><div className="muted">{selectedQuestion.status}</div></div>
                 </div>
               </div>
+
+              <div>
+                <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
+                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                  “{selectedQuestion.question}”
+                </div>
+              </div>
+
+              <div>
+                <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
+                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                  “{selectedQuestion.answer || 'No answer yet.'}”
+                </div>
+              </div>
+
               {selectedQuestion.dispute && (
                 <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
                   <div className="section-title" style={{ marginBottom: 2 }}>Dispute</div>
                   <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
                   <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
-                  <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div>
+                  {selectedQuestion.dispute.description ? <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div> : null}
                   <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || 'Attachment.pdf'}</div></div>
                   <div><strong>Dispute Status</strong><StatusBadge label={selectedQuestion.dispute.status || 'Open'} /></div>
                   <div><strong>Astrologer Response</strong><div className="muted">{selectedQuestion.dispute.response || 'Waiting for astrologer update.'}</div></div>
                 </Card>
               )}
+
               {ratingMode && (
                 <Card style={{ padding: 14, display: 'grid', gap: 12 }}>
                   <div className="section-title" style={{ marginBottom: 0 }}>
@@ -307,34 +347,24 @@ export default function TrackQuestions() {
                   )}
                 </Card>
               )}
-              <div className="btn-row">
-                {showRaiseDispute && (
-                  <button className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${selectedQuestion.id}`)}>
-                    Raise Dispute
-                  </button>
-                )}
-                {showViewDispute && (
-                  <button className="btn btn-primary" onClick={() => openQuestion(selectedQuestion.id)}>
-                    View
-                  </button>
-                )}
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => {
-                    setDetailsClosed(true)
-                    setQuestionPreviewId(null)
-                  }}
-                >
-                  Close
-                </button>
-              </div>
             </div>
-          ) : (
-            <div className="muted">Select a question to inspect the full details.</div>
-          )}
-        </Card>
-        )}
-      </div>
+            <div className="modal-card__footer user-modal-card__footer">
+              {showRaiseDispute && (
+                <button className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${selectedQuestion.id}`)}>
+                  Raise Dispute
+                </button>
+              )}
+              {showViewDispute && (
+                <button className="btn btn-primary" onClick={() => openQuestion(selectedQuestion.id)}>
+                  View
+                </button>
+              )}
+              <button className="btn btn-ghost" onClick={closeQuestion}>Close</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   )
 }

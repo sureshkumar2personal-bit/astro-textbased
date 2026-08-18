@@ -301,7 +301,7 @@ export default function AskQuestion() {
       </div>}
 
       {submitted && (
-        <SuccessAlert message={successMessage} onDismiss={() => setSubmitted(false)} />
+        <SuccessAlert variant="user" message={successMessage} onDismiss={() => setSubmitted(false)} />
       )}
     </div>
   )
