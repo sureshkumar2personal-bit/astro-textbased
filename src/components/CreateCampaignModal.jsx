@@ -7,6 +7,13 @@ function toInputDate(value) {
   return date.toISOString().slice(0, 10)
 }
 
+function toInputDateTime(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const offset = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16)
+}
+
 function splitSlots(total) {
   const general = Math.ceil(total / 2)
   return { generalLimit: general, personalLimit: total - general }
@@ -26,10 +33,12 @@ function makeBlankForm(totalLimit) {
   }
 }
 
-export default function CreateCampaignModal({ open, onClose, defaultTotalLimit = 30 }) {
+export default function CreateCampaignModal({ open, onClose, onComplete, defaultTotalLimit = 30 }) {
   const { actions } = useAppData()
   const [form, setForm] = useState(() => makeBlankForm(defaultTotalLimit))
   const [error, setError] = useState('')
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [scheduleDateTime, setScheduleDateTime] = useState(() => toInputDateTime(Date.now() + 60 * 60 * 1000))
 
   useEffect(() => {
     if (!open) return
@@ -37,6 +46,8 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
     document.body.style.overflow = 'hidden'
     setForm(makeBlankForm(defaultTotalLimit))
     setError('')
+    setScheduleOpen(false)
+    setScheduleDateTime(toInputDateTime(Date.now() + 60 * 60 * 1000))
     return () => {
       document.body.style.overflow = previousOverflow
     }
@@ -52,29 +63,51 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
   const slotDifference = form.totalLimit - slotAllocated
   const isSlotAllocationValid = slotDifference === 0 && form.totalLimit > 0
   const isDiscountValid = !form.discountEnabled || (form.discountPercent >= 0 && form.discountPercent <= 100)
-  const isFormValid = Boolean(
-    form.name.trim() &&
-    form.date &&
-    form.endDate &&
-    new Date(form.endDate) >= new Date(form.date) &&
-    isSlotAllocationValid &&
-    isDiscountValid,
-  )
+  const validatePublish = () => {
+    if (!form.name.trim()) throw new Error('Enter a campaign name.')
+    if (!form.date) throw new Error('Select a campaign start date.')
+    if (!form.endDate) throw new Error('Select a campaign end date.')
+    if (new Date(form.endDate) < new Date(form.date)) throw new Error('End date must be on or after the start date.')
+    if (!isSlotAllocationValid) throw new Error('General Slots and Individual Slots must add up to Total Slots.')
+    if (!isDiscountValid) throw new Error('Discount must be between 0% and 100%.')
+  }
 
-  const handleCreate = () => {
+  const handleDraft = () => {
     try {
       setError('')
-      if (!form.name.trim()) throw new Error('Enter a campaign name.')
-      if (!form.date) throw new Error('Select a campaign start date.')
-      if (!form.endDate) throw new Error('Select a campaign end date.')
-      if (new Date(form.endDate) < new Date(form.date)) throw new Error('End date must be on or after the start date.')
-      if (!isSlotAllocationValid) throw new Error('General Slots and Individual Slots must add up to Total Slots.')
-      if (!isDiscountValid) throw new Error('Discount must be between 0% and 100%.')
-
-      actions.createCampaign(form)
+      actions.createCampaign({ ...form, status: 'Draft' })
+      onComplete?.('Draft')
       onClose(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create campaign.')
+      setError(err instanceof Error ? err.message : 'Unable to save campaign draft.')
+    }
+  }
+
+  const handlePublish = () => {
+    try {
+      setError('')
+      validatePublish()
+      actions.createCampaign({ ...form, status: 'Active' })
+      onComplete?.('Published')
+      onClose(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to publish campaign.')
+    }
+  }
+
+  const handleSchedule = () => {
+    try {
+      setError('')
+      validatePublish()
+      const scheduledAt = new Date(scheduleDateTime)
+      if (!scheduleDateTime || Number.isNaN(scheduledAt.getTime()) || scheduledAt.getTime() <= Date.now()) {
+        throw new Error('Choose a future date and time for publishing.')
+      }
+      actions.createCampaign({ ...form, status: 'Scheduled', scheduledPublishAt: scheduledAt.toISOString() })
+      onComplete?.('Scheduled')
+      onClose(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to schedule campaign.')
     }
   }
 
@@ -163,9 +196,43 @@ export default function CreateCampaignModal({ open, onClose, defaultTotalLimit =
           {error && <div className="mt-4 rounded-[14px] border border-[color:var(--danger-bg)] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">{error}</div>}
         </div>
 
-        <div className="modal-card__footer">
+        <div className="modal-card__footer" style={{ position: 'relative' }}>
           <button className="btn btn-ghost" type="button" onClick={() => onClose(false)}>Cancel</button>
-          <button className="btn btn-primary" type="button" disabled={!isFormValid} onClick={handleCreate}>Create Campaign</button>
+          <button className="btn btn-outline" type="button" onClick={handleDraft}>Draft</button>
+          <div style={{ position: 'relative' }}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={handlePublish}
+              onContextMenu={(event) => {
+                event.preventDefault()
+                setScheduleOpen(true)
+                setError('')
+              }}
+            >
+              Publish
+            </button>
+            {scheduleOpen && (
+              <div
+                className="card"
+                style={{ position: 'absolute', zIndex: 20, right: 0, bottom: 'calc(100% + 10px)', width: 280, padding: 16, boxShadow: 'var(--shadow-lg)' }}
+                onContextMenu={(event) => event.preventDefault()}
+              >
+                <div className="field-label-top" style={{ marginBottom: 8 }}>Schedule Publish</div>
+                <input
+                  type="datetime-local"
+                  className="text-input"
+                  value={scheduleDateTime}
+                  min={toInputDateTime(Date.now() + 60 * 1000)}
+                  onChange={(event) => setScheduleDateTime(event.target.value)}
+                />
+                <div className="flex justify-end gap-2" style={{ marginTop: 12 }}>
+                  <button className="btn btn-ghost btn-sm" type="button" onClick={() => setScheduleOpen(false)}>Back</button>
+                  <button className="btn btn-primary btn-sm" type="button" onClick={handleSchedule}>Schedule</button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

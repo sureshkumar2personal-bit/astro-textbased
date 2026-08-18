@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CalendarDays, CircleDollarSign, Gift, Megaphone, Users, X } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -19,7 +20,7 @@ function Detail({ label, value }) {
   )
 }
 
-export function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDiscount }) {
+export function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onToggleDiscount, onBack }) {
   const totalRemaining = Math.max(campaign.totalLimit - campaign.purchasedGeneral - campaign.purchasedPersonal, 0)
   const generalRemaining = Math.max(campaign.generalLimit - campaign.purchasedGeneral, 0)
   const personalRemaining = Math.max(campaign.personalLimit - campaign.purchasedPersonal, 0)
@@ -37,6 +38,7 @@ export function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onTog
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Detail label="Start Date" value={campaign.date} />
           <Detail label="Closed Date" value={campaign.endDate} />
+          {campaign.status === 'Scheduled' && <Detail label="Scheduled Publish" value={new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')} />}
         </div>
       </Card>
 
@@ -84,6 +86,7 @@ export function CampaignDetails({ campaign, onPublish, onFreeze, onDelete, onTog
       <Card>
         <div className="section-title" style={{ fontSize: 15 }}><Megaphone size={18} />Campaign Actions</div>
         <div className="flex flex-wrap gap-3">
+          {onBack && <button type="button" className="btn btn-ghost" onClick={onBack}>Back</button>}
           <button type="button" className={`btn ${campaign.status === 'Active' ? 'btn-success' : 'btn-success-outline'}`} onClick={onPublish}>
             Publish
           </button>
@@ -106,12 +109,15 @@ export default function Campaigns() {
   const { campaigns, selectedCampaignId, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
-  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState(selectedCampaignId || campaigns[0]?.id)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [publishSuccess, setPublishSuccess] = useState(false)
   const filterType = searchParams.get('filter')
+  const fromDashboard = searchParams.get('from') === 'dashboard'
 
   const sortedCampaigns = useMemo(() => campaigns.slice().sort((a, b) => sortByDateDesc(a, b, (item) => item.date)), [campaigns])
   const filteredCampaigns = useMemo(() => {
@@ -126,6 +132,16 @@ export default function Campaigns() {
     return categorized.filter((campaign) => [campaign.name, campaign.id, campaign.status, campaign.priority, ...(campaign.categories || []).map((category) => category.name)].join(' ').toLowerCase().includes(term))
   }, [filterType, query, sortedCampaigns])
 
+  const closeDetails = useCallback(() => {
+    setDetailsOpen(false)
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.delete('campaignId')
+      next.delete('from')
+      return next
+    })
+  }, [setSearchParams])
+
   useEffect(() => {
     const requestedCampaignId = searchParams.get('campaignId')
     if (requestedCampaignId && campaigns.some((campaign) => campaign.id === requestedCampaignId)) {
@@ -139,13 +155,13 @@ export default function Campaigns() {
     if (!detailsOpen) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const closeOnEscape = (event) => { if (event.key === 'Escape') setDetailsOpen(false) }
+    const closeOnEscape = (event) => { if (event.key === 'Escape') closeDetails() }
     document.addEventListener('keydown', closeOnEscape)
     return () => {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [detailsOpen])
+  }, [detailsOpen, closeDetails])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedId) || null
   const pageTitle = filterType === 'active' ? 'Active Campaigns' : filterType === 'discount' ? 'Discount Campaigns' : filterType === 'non-discount' ? 'Non-Discount Campaigns' : 'All Campaigns'
@@ -153,6 +169,14 @@ export default function Campaigns() {
     setSelectedId(campaign.id)
     actions.selectCampaign(campaign.id)
     setDetailsOpen(true)
+  }
+
+  const handleDetailsBack = () => {
+    if (fromDashboard) {
+      navigate(routes.dashboard)
+      return
+    }
+    closeDetails()
   }
 
   return (
@@ -166,6 +190,7 @@ export default function Campaigns() {
               <div className="flex items-start justify-between gap-3"><div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div><StatusBadge label={campaign.status} /></div>
               <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm">
                 <span>{campaign.date} – {campaign.endDate}</span>
+                {campaign.status === 'Scheduled' && campaign.scheduledPublishAt && <span>Publishes: {new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')}</span>}
                 <span>{campaign.priority} priority</span>
                 <span>General ₹{campaign.generalPrice} · Individual ₹{campaign.personalPrice}</span>
                 <span>{campaign.purchasedGeneral + campaign.purchasedPersonal}/{campaign.totalLimit} slots sold</span>
@@ -181,15 +206,27 @@ export default function Campaigns() {
       </Section>
 
       {detailsOpen && selectedCampaign && (
-        <div className="modal-overlay" onClick={() => setDetailsOpen(false)}>
+        <div className="modal-overlay" onClick={fromDashboard ? handleDetailsBack : closeDetails}>
           <div className="modal-card modal-card--scroll" style={{ width: 'min(980px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4"><div className="section-title" style={{ marginBottom: 0 }}>Campaign Details</div><button type="button" className="icon-btn" aria-label="Close details" onClick={() => setDetailsOpen(false)}><X size={18} /></button></div>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Campaign Details</div>
+              <div className="flex items-center gap-2">
+                <button type="button" className="btn btn-outline btn-sm" onClick={handleDetailsBack}>
+                  {fromDashboard ? 'Back to Dashboard' : 'Back to Campaigns'}
+                </button>
+                <button type="button" className="icon-btn" aria-label="Close details" onClick={closeDetails}><X size={18} /></button>
+              </div>
+            </div>
             <div className="modal-card__content">
               <CampaignDetails
                 campaign={selectedCampaign}
-                onPublish={() => actions.publishCampaign(selectedCampaign.id)}
+                onPublish={() => {
+                  actions.publishCampaign(selectedCampaign.id)
+                  setPublishSuccess(true)
+                }}
                 onFreeze={() => actions.updateCampaign(selectedCampaign.id, { status: 'Closed' })}
                 onDelete={() => setDeleteOpen(true)}
+                onBack={handleDetailsBack}
                 onToggleDiscount={() => {
                   const enabled = Number(selectedCampaign.discountPercent) > 0
                   actions.updateCampaign(selectedCampaign.id, {
@@ -221,7 +258,7 @@ export default function Campaigns() {
                 onClick={() => {
                   actions.deleteCampaign(selectedCampaign.id)
                   setDeleteOpen(false)
-                  setDetailsOpen(false)
+                  closeDetails()
                 }}
               >
                 Delete Campaign
@@ -230,6 +267,8 @@ export default function Campaigns() {
           </div>
         </div>
       )}
+
+      {publishSuccess && <SuccessAlert message="Campaign published successfully." onDismiss={() => setPublishSuccess(false)} />}
     </div>
   )
 }

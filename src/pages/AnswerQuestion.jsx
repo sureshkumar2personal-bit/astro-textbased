@@ -31,10 +31,13 @@ export default function AnswerQuestion() {
   const questionIdParam = searchParams.get('questionId')
   const statusParam = searchParams.get('status')
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
+  const initialStatusFilter = statusParam === 'Pending' || statusParam === 'pending_group'
+    ? 'pending_group'
+    : ['All', 'Answered', 'Disputed'].includes(statusParam) ? statusParam : 'All'
 
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState(statusParam || 'All')
+  const [statusFilter, setStatusFilter] = useState(initialStatusFilter)
 
   const matchesStatusFilter = useCallback((questionStatus) => {
     if (statusFilter === 'All') return true
@@ -45,6 +48,8 @@ export default function AnswerQuestion() {
   const [panelQuestionId, setPanelQuestionId] = useState(questionIdParam || null)
   const [answer, setAnswer] = useState('')
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [editingSubmittedAnswer, setEditingSubmittedAnswer] = useState(false)
+  const [now, setNow] = useState(Date.now())
 
   const filteredQuestions = useMemo(() => {
     const term = appliedSearch.trim().toLowerCase()
@@ -78,7 +83,13 @@ export default function AnswerQuestion() {
 
   useEffect(() => {
     setAnswer(panelQuestion?.draftAnswer || panelQuestion?.answer || '')
+    setEditingSubmittedAnswer(false)
   }, [panelQuestion?.id, panelQuestion?.draftAnswer, panelQuestion?.answer])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30 * 1000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const openQuestion = (id) => {
     setPanelQuestionId(id)
@@ -99,6 +110,15 @@ export default function AnswerQuestion() {
   }
 
   const isAnswered = panelQuestion?.status === 'Answered'
+  const isUnderReview = panelQuestion?.status === 'Under Review'
+  const reviewActive = isUnderReview && panelQuestion?.answerReviewUntil > now
+  const canEditSubmittedAnswer = reviewActive && !panelQuestion?.answerEditUsed
+
+  const handleSaveCorrection = () => {
+    if (!panelQuestion || !answer.trim()) return
+    const saved = actions.editSubmittedQuestionAnswer(panelQuestion.id, answer)
+    if (saved) setEditingSubmittedAnswer(false)
+  }
 
   const handleSubmitAnswer = () => {
     if (!panelQuestion) return
@@ -140,9 +160,13 @@ export default function AnswerQuestion() {
           <div style={{ display: 'grid', gap: 16 }}>
             <div>
               <div className="field-label-top">Status</div>
-              <ChipGroup options={['All', 'Pending', 'Queued', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Closed']} value={statusFilter} onChange={setStatusFilter} />
+              <ChipGroup
+                options={['All', 'Pending', 'Answered', 'Disputed']}
+                value={statusFilter === 'pending_group' ? 'Pending' : statusFilter}
+                onChange={(value) => setStatusFilter(value === 'Pending' ? 'pending_group' : value)}
+              />
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="badge badge-violet">Active filter: {statusFilter}</span>
+                <span className="badge badge-violet">Active filter: {statusFilter === 'pending_group' ? 'Pending' : statusFilter}</span>
               </div>
             </div>
           </div>
@@ -208,23 +232,13 @@ export default function AnswerQuestion() {
       {panelQuestion && createPortal(
         <div className="modal-overlay" onClick={closePanel}>
           <div
-            className="modal-card"
-            style={{ width: 'min(640px, calc(100vw - 32px))', maxHeight: '88vh', overflowY: 'auto', padding: 0 }}
+            className="modal-card modal-card--scroll"
+            style={{ width: 'min(640px, calc(100vw - 32px))' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '8px 16px',
-                padding: '20px 24px',
-                borderBottom: '1px solid var(--border)',
-              }}
-            >
+            <div className="modal-card__header flex items-center justify-between gap-4">
               <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-                <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--ink)' }}>Answer Question</div>
+                <div className="astrologer-modal-title">Answer Question</div>
                 <div
                   className="muted"
                   style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -246,21 +260,13 @@ export default function AnswerQuestion() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '20px 24px' }}>
-              <div>
+            <div className="modal-card__content astrologer-modal-content">
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <TempleArchIcon size={14} />User Details
                 </div>
                 <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                    gap: 14,
-                    fontSize: 14,
-                    background: 'var(--violet-50)',
-                    borderRadius: 'var(--radius-s)',
-                    padding: 14,
-                  }}
+                  className="astrologer-modal-highlight astrologer-modal-details-grid"
                 >
                   <div><strong>Name</strong><div className="muted">{panelQuestion.user}</div></div>
                   <div><strong>Question Type</strong><div className="muted">{panelQuestion.type}</div></div>
@@ -270,25 +276,18 @@ export default function AnswerQuestion() {
                 </div>
               </div>
 
-              <div>
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <TempleScrollIcon size={14} />User Question
                 </div>
                 <div
-                  style={{
-                    fontSize: 15,
-                    fontStyle: 'italic',
-                    color: 'var(--ink)',
-                    background: 'var(--violet-50)',
-                    borderRadius: 'var(--radius-s)',
-                    padding: 14,
-                  }}
+                  className="astrologer-modal-highlight astrologer-modal-question"
                 >
                   "{panelQuestion.question}"
                 </div>
               </div>
 
-              <div>
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <TempleLotusIcon size={14} />Horoscope Details
                 </div>
@@ -306,7 +305,7 @@ export default function AnswerQuestion() {
                 </div>
               </div>
 
-              <div>
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <TempleLampIcon size={14} />Answer
                 </div>
@@ -316,31 +315,36 @@ export default function AnswerQuestion() {
                   placeholder="Type your answer here..."
                   maxLength={3000}
                   value={answer}
-                  readOnly={isAnswered}
+                  readOnly={isAnswered || (isUnderReview && !editingSubmittedAnswer)}
                   onChange={(e) => setAnswer(e.target.value)}
                 />
                 <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {answer.length} / 3000</div>
+                {isUnderReview && (
+                  <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+                    {reviewActive
+                      ? canEditSubmittedAnswer
+                        ? 'Answer is held for review. You can enable one correction before it is delivered.'
+                        : 'Correction saved. The answer is locked until automatic delivery.'
+                      : 'Review window ended. The answer will be delivered automatically.'}
+                  </div>
+                )}
               </div>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                gap: 10,
-                flexWrap: 'wrap',
-                padding: '16px 24px',
-                borderTop: '1px solid var(--border)',
-              }}
-            >
+            <div className="modal-card__footer astrologer-modal-footer-actions">
               {isAnswered && (
                 <span style={{ color: 'var(--green-600)', fontSize: 13, fontWeight: 600, marginRight: 'auto' }}>
                   Submitted Successfully
                 </span>
               )}
               <button className="btn btn-ghost" onClick={closePanel}>Cancel</button>
-              {!isAnswered && (
+              {isUnderReview && canEditSubmittedAnswer && !editingSubmittedAnswer && (
+                <button className="btn btn-outline" onClick={() => setEditingSubmittedAnswer(true)}>Enable One-Time Edit</button>
+              )}
+              {isUnderReview && editingSubmittedAnswer && (
+                <button className="btn btn-primary" disabled={!answer.trim()} onClick={handleSaveCorrection}>Save Correction</button>
+              )}
+              {!isAnswered && !isUnderReview && (
                 <button
                   className="btn btn-primary"
                   disabled={!answer.trim()}

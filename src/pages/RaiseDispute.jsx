@@ -157,7 +157,7 @@ export default function RaiseDispute() {
 
               <Card>
                 <div className="section-title" style={{ fontSize: 15 }}>Astrologer&apos;s Answer</div>
-                <div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.answer || 'No answer available.'}&quot;</div>
+                <div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.status === 'Under Review' ? 'The astrologer’s answer is being reviewed and will be delivered soon.' : (selectedQuestion.answer || 'No answer available.')}&quot;</div>
               </Card>
 
               {alreadyRaised ? (

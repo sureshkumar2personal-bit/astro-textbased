@@ -233,7 +233,12 @@ export default function TrackQuestions() {
                 </div>
               </div>
               <div><strong>Status</strong><StatusBadge label={selectedQuestion.status} /></div>
-              <div><strong>Answer</strong><div className="muted">{selectedQuestion.answer || 'No answer yet.'}</div></div>
+              <div>
+                <strong>Answer</strong>
+                <div className="muted">
+                  {selectedQuestion.status === 'Under Review' ? 'The astrologer’s answer is being reviewed and will be delivered soon.' : (selectedQuestion.answer || 'No answer yet.')}
+                </div>
+              </div>
               {selectedQuestion.dispute && (
                 <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
                   <div className="section-title" style={{ marginBottom: 2 }}>Dispute</div>
