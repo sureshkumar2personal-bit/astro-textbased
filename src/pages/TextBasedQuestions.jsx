@@ -21,7 +21,7 @@ import {
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-const STATUSES = ['All', 'Pending', 'Queued', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Closed']
+const STATUSES = ['All', 'Pending', 'Answered', 'Disputed']
 const ACTIVE_STATUSES = ['Pending', 'Queued', 'In Progress', 'Under Review']
 
 export default function TextBasedQuestions() {
@@ -38,6 +38,8 @@ export default function TextBasedQuestions() {
   const [answer, setAnswer] = useState('')
   const [draftSaved, setDraftSaved] = useState(false)
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [editingSubmittedAnswer, setEditingSubmittedAnswer] = useState(false)
+  const [now, setNow] = useState(Date.now())
 
   const filteredQuestions = useMemo(() => {
     const term = appliedSearch.trim().toLowerCase()
@@ -53,7 +55,9 @@ export default function TextBasedQuestions() {
           question.status,
         ].join(' ').toLowerCase()
         return (!term || searchable.includes(term))
-          && (statusFilter === 'All' || question.status === statusFilter)
+          && (statusFilter === 'All'
+            || (statusFilter === 'Pending' && ACTIVE_STATUSES.includes(question.status))
+            || question.status === statusFilter)
       })
       .sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
   }, [questions, appliedSearch, statusFilter])
@@ -79,11 +83,17 @@ export default function TextBasedQuestions() {
 
   useEffect(() => {
     setAnswer(panelAnswer)
+    setEditingSubmittedAnswer(false)
   }, [panelQuestion?.id, panelAnswer])
 
   useEffect(() => {
     setDraftSaved(false)
   }, [panelQuestion?.id])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30 * 1000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const openQuestion = (id) => {
     setPanelQuestionId(id)
@@ -104,7 +114,7 @@ export default function TextBasedQuestions() {
   }
 
   const saveDraft = () => {
-    if (!panelQuestion || !answer.trim()) return
+    if (!panelQuestion || panelQuestion.status === 'Under Review' || !answer.trim()) return
     actions.saveQuestionDraft(panelQuestion.id, answer)
     setDraftSaved(true)
   }
@@ -114,6 +124,15 @@ export default function TextBasedQuestions() {
     actions.submitQuestionAnswer(panelQuestion.id, answer)
     closePanel()
     setJustSubmitted(true)
+  }
+
+  const isUnderReview = panelQuestion?.status === 'Under Review'
+  const reviewActive = isUnderReview && panelQuestion?.answerReviewUntil > now
+  const canEditSubmittedAnswer = reviewActive && !panelQuestion?.answerEditUsed
+  const saveCorrection = () => {
+    if (!panelQuestion || !answer.trim()) return
+    const saved = actions.editSubmittedQuestionAnswer(panelQuestion.id, answer)
+    if (saved) setEditingSubmittedAnswer(false)
   }
 
   const statCards = [
@@ -243,10 +262,10 @@ export default function TextBasedQuestions() {
 
       {panelQuestion && createPortal(
         <div className="modal-overlay" onClick={closePanel}>
-          <div className="modal-card" style={{ width: 'min(680px, calc(100vw - 32px))', maxHeight: '88vh', overflowY: 'auto', padding: 0 }} onClick={(event) => event.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+          <div className="modal-card modal-card--scroll" style={{ width: 'min(680px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4">
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 19, fontWeight: 700, color: 'var(--ink)' }}>Question Details</div>
+                <div className="astrologer-modal-title">Question Details</div>
                 <div className="muted" style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{panelQuestion.user} · {panelQuestion.id}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -255,8 +274,8 @@ export default function TextBasedQuestions() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '20px 24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 14, background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, fontSize: 14 }}>
+            <div className="modal-card__content astrologer-modal-content">
+              <div className="astrologer-modal-highlight astrologer-modal-details-grid">
                 <div><strong>User</strong><div className="muted">{panelQuestion.user}</div></div>
                 <div><strong>Campaign</strong><div className="muted">{panelQuestion.campaignName || 'No campaign'}</div></div>
                 <div><strong>Category</strong><div className="muted">{panelQuestion.category}</div></div>
@@ -265,12 +284,12 @@ export default function TextBasedQuestions() {
                 <div><strong>Language</strong><div className="muted">{panelQuestion.language}</div></div>
               </div>
 
-              <div>
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleScrollIcon size={14} />User Question</div>
-                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>“{panelQuestion.question}”</div>
+                <div className="astrologer-modal-highlight astrologer-modal-question">“{panelQuestion.question}”</div>
               </div>
 
-              <div>
+              <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Answer</div>
                 <textarea
                   className="textarea-box"
@@ -278,18 +297,33 @@ export default function TextBasedQuestions() {
                   placeholder="Type your answer here..."
                   maxLength={3000}
                   value={answer}
-                  readOnly={panelQuestion.status === 'Answered'}
+                  readOnly={panelQuestion.status === 'Answered' || (isUnderReview && !editingSubmittedAnswer)}
                   onChange={(event) => setAnswer(event.target.value)}
                 />
                 <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {answer.length} / 3000</div>
+                {isUnderReview && (
+                  <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+                    {reviewActive
+                      ? canEditSubmittedAnswer
+                        ? 'Answer held for review. One correction is available before delivery.'
+                        : 'Correction saved. The answer is locked until automatic delivery.'
+                      : 'Review window ended. The answer will be delivered automatically.'}
+                  </div>
+                )}
                 {draftSaved && <div style={{ color: 'var(--green-600)', fontSize: 13, marginTop: 6 }}>Draft saved.</div>}
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, flexWrap: 'wrap', padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
+            <div className="modal-card__footer astrologer-modal-footer-actions">
               {panelQuestion.status === 'Answered' && <span style={{ color: 'var(--green-600)', fontSize: 13, fontWeight: 600, marginRight: 'auto' }}>Submitted Successfully</span>}
               <button className="btn btn-ghost" onClick={closePanel}>Close</button>
-              {panelQuestion.status !== 'Answered' && (
+              {isUnderReview && canEditSubmittedAnswer && !editingSubmittedAnswer && (
+                <button className="btn btn-outline" onClick={() => setEditingSubmittedAnswer(true)}>Enable One-Time Edit</button>
+              )}
+              {isUnderReview && editingSubmittedAnswer && (
+                <button className="btn btn-primary" disabled={!answer.trim()} onClick={saveCorrection}>Save Correction</button>
+              )}
+              {panelQuestion.status !== 'Answered' && !isUnderReview && (
                 <>
                   <button className="btn btn-outline" disabled={!answer.trim()} onClick={saveDraft}>Save Draft</button>
                   <button className="btn btn-primary" disabled={!answer.trim()} onClick={submitAnswer}>Submit Answer</button>

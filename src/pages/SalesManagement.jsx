@@ -19,7 +19,7 @@ export default function SalesManagement() {
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
   const [searchParams, setSearchParams] = useSearchParams()
   const [createOpen, setCreateOpen] = useState(false)
-  const [created, setCreated] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const [campaignQuery, setCampaignQuery] = useState('')
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [detailsCampaignId, setDetailsCampaignId] = useState(null)
@@ -83,6 +83,7 @@ export default function SalesManagement() {
               </div>
               <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm">
                 <span>{campaign.date} – {campaign.endDate}</span>
+                {campaign.status === 'Scheduled' && campaign.scheduledPublishAt && <span>Publishes: {new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')}</span>}
                 <span>Total slots: {campaign.totalLimit} · Sold: {campaign.purchasedGeneral + campaign.purchasedPersonal}</span>
                 <span>General ₹{campaign.generalPrice} · Individual ₹{campaign.personalPrice}</span>
                 <span className={Number(campaign.discountPercent) > 0 ? 'font-semibold text-[color:var(--primary)]' : ''}>
@@ -98,9 +99,11 @@ export default function SalesManagement() {
 
       <CreateCampaignModal
         open={createOpen}
-        onClose={(wasCreated) => {
+        onClose={() => {
           setCreateOpen(false)
-          if (wasCreated) setCreated(true)
+        }}
+        onComplete={(action) => {
+          setSuccessMessage(action === 'Published' ? 'Campaign published successfully.' : action === 'Scheduled' ? 'Campaign scheduled successfully.' : 'Campaign draft saved successfully.')
         }}
         defaultTotalLimit={selectedCampaign?.totalLimit || 30}
       />
@@ -115,7 +118,10 @@ export default function SalesManagement() {
             <div className="modal-card__content">
               <CampaignDetails
                 campaign={detailsCampaign}
-                onPublish={() => actions.publishCampaign(detailsCampaign.id)}
+                onPublish={() => {
+                  actions.publishCampaign(detailsCampaign.id)
+                  setSuccessMessage('Campaign published successfully.')
+                }}
                 onFreeze={() => actions.updateCampaign(detailsCampaign.id, { status: 'Closed' })}
                 onDelete={() => setDeleteOpen(true)}
                 onToggleDiscount={toggleDiscount}
@@ -138,7 +144,7 @@ export default function SalesManagement() {
         </div>
       )}
 
-      {created && <SuccessAlert message="Campaign created successfully." onDismiss={() => setCreated(false)} />}
+      {successMessage && <SuccessAlert message={successMessage} onDismiss={() => setSuccessMessage('')} />}
     </div>
   )
 }

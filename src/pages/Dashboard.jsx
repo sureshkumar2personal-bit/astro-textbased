@@ -174,7 +174,7 @@ export default function Dashboard() {
                       type="button"
                       key={campaign.id}
                       className="rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] p-3 text-left transition hover:-translate-y-0.5 hover:border-[color:var(--secondary)]"
-                      onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}`)}
+                      onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}&from=dashboard`)}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div>
