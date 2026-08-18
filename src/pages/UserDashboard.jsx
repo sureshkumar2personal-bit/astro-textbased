@@ -39,12 +39,23 @@ export default function UserDashboard() {
 
   return (
     <div>
-      <div className="hero-banner">
-        <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
-          User portal
+      <div className="hero-banner hero-banner-user">
+        <div className="hero-banner-content">
+          <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+            User portal
+          </div>
+          <h2>Welcome, {currentUser?.name || 'User'} ✨</h2>
+          <p>Browse packages, ask questions, and keep track of every update in one place.</p>
         </div>
-        <h2>Welcome, {currentUser?.name || 'User'} ✨</h2>
-        <p>Browse packages, ask questions, and keep track of every update in one place.</p>
+        <div className="hero-banner-cta">
+          <button
+            type="button"
+            className="btn btn-primary hero-banner-button"
+            onClick={() => navigate(routes.astrologers)}
+          >
+            Explore Astrologers
+          </button>
+        </div>
       </div>
 
       <div className="stat-grid section">
