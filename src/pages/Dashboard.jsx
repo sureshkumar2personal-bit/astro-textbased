@@ -138,10 +138,36 @@ export default function Dashboard() {
         <p>Here&apos;s what&apos;s happening across your campaigns today.</p>
       </div>
 
-      <div className="section" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="section" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', gap: 15, flexWrap: 'wrap' }}>
         <button type="button" className="btn btn-primary" onClick={() => setCreateOpen(true)}>
           + Create Campaign
         </button>
+        <div style={{ flex: '0 1 260px', width: 'min(260px, 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input
+              className="text-input"
+              placeholder="Search by question ID, user, campaign, category..."
+              value={query}
+              style={{ flex: 1, minWidth: 0, margin: 0 }}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch()
+                }
+              }}
+            />
+            <button type="button" className="icon-btn" aria-label="Search" onClick={handleSearch}>
+              <Search size={18} />
+            </button>
+          </div>
+          {query.trim() && (
+            <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
+              {filteredQuestions.length
+                ? `Found ${filteredQuestions.length} question${filteredQuestions.length === 1 ? '' : 's'} for "${query.trim()}"`
+                : `No questions found for "${query.trim()}"`}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="stat-grid section">
@@ -197,36 +223,6 @@ export default function Dashboard() {
       </div>
 
       <Card className="section">
-        <div className="section-title"><Search size={20} />Search</div>
-        <div className="flex flex-wrap items-center gap-3">
-          <input
-            className="text-input"
-            placeholder="Search by question ID, user, campaign, category..."
-            value={query}
-            style={{ flex: '0 1 360px', width: 'min(360px, 100%)', margin: 0 }}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleSearch()
-              }
-            }}
-          />
-          <button
-            type="button"
-            className="btn btn-primary min-w-[110px]"
-            onClick={handleSearch}
-          >
-            Search
-          </button>
-        </div>
-        {query.trim() && (
-          <div className="muted" style={{ marginTop: 10, fontSize: 13 }}>
-            {filteredQuestions.length
-              ? `Found ${filteredQuestions.length} question${filteredQuestions.length === 1 ? '' : 's'} for "${query.trim()}"`
-              : `No questions found for "${query.trim()}"`}
-          </div>
-        )}
-        <div className="divider" />
         <div className="section-title" style={{ marginBottom: 12 }}>Quick Actions</div>
         <div className="grid gap-1">
           <ActionCard icon={MessageCircleReply} title="Answer a question" to={routes.answerQuestion} />
