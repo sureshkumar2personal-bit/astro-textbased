@@ -24,6 +24,18 @@ import {
 const STATUSES = ['All', 'Pending', 'Answered', 'Disputed']
 const ACTIVE_STATUSES = ['Pending', 'Queued', 'In Progress', 'Under Review']
 
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
+}
+
 export default function TextBasedQuestions() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { questions, liveStreamOpen, setLiveStreamOpen, actions } = useAppData()
@@ -40,6 +52,7 @@ export default function TextBasedQuestions() {
   const [justSubmitted, setJustSubmitted] = useState(false)
   const [editingSubmittedAnswer, setEditingSubmittedAnswer] = useState(false)
   const [now, setNow] = useState(Date.now())
+  const [fullContent, setFullContent] = useState(null)
 
   const filteredQuestions = useMemo(() => {
     const term = appliedSearch.trim().toLowerCase()
@@ -106,6 +119,7 @@ export default function TextBasedQuestions() {
 
   const closePanel = () => {
     setPanelQuestionId(null)
+    setFullContent(null)
     setSearchParams((previous) => {
       const next = new URLSearchParams(previous)
       next.delete('questionId')
@@ -129,6 +143,7 @@ export default function TextBasedQuestions() {
   const isUnderReview = panelQuestion?.status === 'Under Review'
   const reviewActive = isUnderReview && panelQuestion?.answerReviewUntil > now
   const canEditSubmittedAnswer = reviewActive && !panelQuestion?.answerEditUsed
+  const answerIsReadOnly = panelQuestion?.status === 'Answered' || (isUnderReview && !editingSubmittedAnswer)
   const saveCorrection = () => {
     if (!panelQuestion || !answer.trim()) return
     const saved = actions.editSubmittedQuestionAnswer(panelQuestion.id, answer)
@@ -286,21 +301,41 @@ export default function TextBasedQuestions() {
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleScrollIcon size={14} />User Question</div>
-                <div className="astrologer-modal-highlight astrologer-modal-question">“{panelQuestion.question}”</div>
+                <div className="astrologer-modal-highlight astrologer-modal-question">
+                  {(() => {
+                    const { preview, isTruncated } = getWordPreview(panelQuestion.question)
+                    return <>
+                      “{preview}”
+                      {isTruncated && <button type="button" className="link-btn ml-1" aria-label="See full user question" onClick={() => setFullContent({ title: 'User Question', content: panelQuestion.question })}>See more…</button>}
+                    </>
+                  })()}
+                </div>
               </div>
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Answer</div>
-                <textarea
-                  className="textarea-box"
-                  style={{ width: '100%' }}
-                  placeholder="Type your answer here..."
-                  maxLength={3000}
-                  value={answer}
-                  readOnly={panelQuestion.status === 'Answered' || (isUnderReview && !editingSubmittedAnswer)}
-                  onChange={(event) => setAnswer(event.target.value)}
-                />
-                <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {answer.length} / 3000</div>
+                {answerIsReadOnly ? (
+                  <div className="astrologer-modal-highlight astrologer-modal-question">
+                    {(() => {
+                      const fullAnswer = answer || 'No answer was provided.'
+                      const { preview, isTruncated } = getWordPreview(fullAnswer)
+                      return <>
+                        “{preview}”
+                        {isTruncated && <button type="button" className="link-btn ml-1" aria-label="See full astrologer answer" onClick={() => setFullContent({ title: 'Astrologer Answer', content: fullAnswer })}>See more…</button>}
+                      </>
+                    })()}
+                  </div>
+                ) : <>
+                  <textarea
+                    className="textarea-box"
+                    style={{ width: '100%' }}
+                    placeholder="Type your answer here..."
+                    maxLength={3000}
+                    value={answer}
+                    onChange={(event) => setAnswer(event.target.value)}
+                  />
+                  <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {answer.length} / 3000</div>
+                </>}
                 {isUnderReview && (
                   <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
                     {reviewActive
@@ -336,6 +371,24 @@ export default function TextBasedQuestions() {
       )}
 
       {justSubmitted && <SuccessAlert message="Answer submitted successfully." onDismiss={() => setJustSubmitted(false)} />}
+
+      {fullContent && createPortal(
+        <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setFullContent(null)}>
+          <div className="modal-card modal-card--scroll" style={{ width: 'min(640px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div className="astrologer-modal-title">{fullContent.title}</div>
+              <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content">
+              <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+            </div>
+            <div className="modal-card__footer">
+              <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   )
 }

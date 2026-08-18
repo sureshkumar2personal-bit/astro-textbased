@@ -23,6 +23,18 @@ import {
 
 const PAGE_SIZE = 6
 
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
+}
+
 export default function AnswerQuestion() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { questions, actions } = useAppData()
@@ -50,6 +62,7 @@ export default function AnswerQuestion() {
   const [justSubmitted, setJustSubmitted] = useState(false)
   const [editingSubmittedAnswer, setEditingSubmittedAnswer] = useState(false)
   const [now, setNow] = useState(Date.now())
+  const [fullContent, setFullContent] = useState(null)
 
   const filteredQuestions = useMemo(() => {
     const term = appliedSearch.trim().toLowerCase()
@@ -102,6 +115,7 @@ export default function AnswerQuestion() {
 
   const closePanel = () => {
     setPanelQuestionId(null)
+    setFullContent(null)
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('questionId')
@@ -283,7 +297,13 @@ export default function AnswerQuestion() {
                 <div
                   className="astrologer-modal-highlight astrologer-modal-question"
                 >
-                  "{panelQuestion.question}"
+                  {(() => {
+                    const { preview, isTruncated } = getWordPreview(panelQuestion.question)
+                    return <>
+                      “{preview}”
+                      {isTruncated && <button type="button" className="link-btn ml-1" aria-label="See full user question" onClick={() => setFullContent({ title: 'User Question', content: panelQuestion.question })}>See more…</button>}
+                    </>
+                  })()}
                 </div>
               </div>
 
@@ -361,6 +381,24 @@ export default function AnswerQuestion() {
 
       {justSubmitted && (
         <SuccessAlert message="Answer submitted successfully." onDismiss={() => setJustSubmitted(false)} />
+      )}
+
+      {fullContent && createPortal(
+        <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setFullContent(null)}>
+          <div className="modal-card modal-card--scroll" style={{ width: 'min(640px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div className="astrologer-modal-title">{fullContent.title}</div>
+              <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content">
+              <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+            </div>
+            <div className="modal-card__footer">
+              <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

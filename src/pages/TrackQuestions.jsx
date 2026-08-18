@@ -20,6 +20,29 @@ function normalizeStatusFilter(value) {
   return 'All'
 }
 
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
+}
+
+function ContentPreview({ content, title, onViewFull, quoted = false, className = 'muted' }) {
+  const { preview, isTruncated } = getWordPreview(content)
+
+  return (
+    <div className={className}>
+      {quoted ? `“${preview}”` : preview}
+      {isTruncated && <button type="button" className="link-btn ml-1" aria-label={`See full ${title.toLowerCase()}`} onClick={() => onViewFull({ title, content })}>See more…</button>}
+    </div>
+  )
+}
+
 export default function TrackQuestions() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -49,6 +72,7 @@ export default function TrackQuestions() {
   const [rating, setRating] = useState(0)
   const [review, setReview] = useState('')
   const [ratingSaved, setRatingSaved] = useState(false)
+  const [fullContent, setFullContent] = useState(null)
 
   const ownedQuestions = useMemo(() => {
     const scope = questions.filter((question) => {
@@ -115,12 +139,14 @@ export default function TrackQuestions() {
 
   const openQuestion = (questionId) => {
     setQuestionPreviewId(questionId)
+    setFullContent(null)
     setDetailsOpen(true)
   }
 
   const closeQuestion = useCallback(() => {
     setDetailsOpen(false)
     setQuestionPreviewId(null)
+    setFullContent(null)
   }, [setQuestionPreviewId])
 
   useEffect(() => {
@@ -128,14 +154,19 @@ export default function TrackQuestions() {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape') closeQuestion()
+      if (event.key !== 'Escape') return
+      if (fullContent) {
+        setFullContent(null)
+        return
+      }
+      closeQuestion()
     }
     document.addEventListener('keydown', closeOnEscape)
     return () => {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [closeQuestion, detailsOpen, selectedQuestion])
+  }, [closeQuestion, detailsOpen, fullContent, selectedQuestion])
 
   return (
     <div>
@@ -267,14 +298,14 @@ export default function TrackQuestions() {
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
                 <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  “{selectedQuestion.question}”
+                  <ContentPreview content={selectedQuestion.question} title="Your Question" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                 </div>
               </div>
 
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
                 <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  “{selectedQuestion.answer || 'No answer yet.'}”
+                  <ContentPreview content={selectedQuestion.answer || 'No answer yet.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                 </div>
               </div>
 
@@ -282,11 +313,11 @@ export default function TrackQuestions() {
                 <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
                   <div className="section-title" style={{ marginBottom: 2 }}>Dispute</div>
                   <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
-                  <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
-                  {selectedQuestion.dispute.description ? <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div> : null}
+                  <div><strong>Reason</strong><ContentPreview content={selectedQuestion.dispute.reason} title="Dispute Reason" onViewFull={setFullContent} /></div>
+                  {selectedQuestion.dispute.description ? <div><strong>Description</strong><ContentPreview content={selectedQuestion.dispute.description} title="Dispute Description" onViewFull={setFullContent} /></div> : null}
                   <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || 'Attachment.pdf'}</div></div>
                   <div><strong>Dispute Status</strong><StatusBadge label={selectedQuestion.dispute.status || 'Open'} /></div>
-                  <div><strong>Astrologer Response</strong><div className="muted">{selectedQuestion.dispute.response || 'Waiting for astrologer update.'}</div></div>
+                  <div><strong>Astrologer Response</strong><ContentPreview content={selectedQuestion.dispute.response || 'Waiting for astrologer update.'} title="Astrologer Response" onViewFull={setFullContent} /></div>
                 </Card>
               )}
 
@@ -360,6 +391,24 @@ export default function TrackQuestions() {
                 </button>
               )}
               <button className="btn btn-ghost" onClick={closeQuestion}>Close</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {fullContent && createPortal(
+        <div className="modal-overlay user-modal-overlay" style={{ zIndex: 10000 }} onClick={() => setFullContent(null)}>
+          <div className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll" style={{ width: 'min(640px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>{fullContent.title}</div>
+              <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content user-modal-card__content">
+              <div style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+            </div>
+            <div className="modal-card__footer user-modal-card__footer">
+              <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
             </div>
           </div>
         </div>,

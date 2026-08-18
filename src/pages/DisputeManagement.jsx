@@ -11,6 +11,33 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
+}
+
+function ContentPreview({ content, title, onViewFull, quoted = false, className = 'astrologer-modal-question' }) {
+  const { preview, isTruncated } = getWordPreview(content)
+
+  return (
+    <div className={className}>
+      {quoted ? `“${preview}”` : preview}
+      {isTruncated && (
+        <button type="button" className="link-btn ml-1" aria-label={`See full ${title.toLowerCase()}`} onClick={() => onViewFull({ title, content })}>
+          See more…
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function DisputeManagement() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { questions, questionPreviewId, actions } = useAppData()
@@ -23,6 +50,7 @@ export default function DisputeManagement() {
   const [status, setStatus] = useState('Open')
   const [attachmentOpen, setAttachmentOpen] = useState(false)
   const [justSubmitted, setJustSubmitted] = useState(false)
+  const [fullContent, setFullContent] = useState(null)
 
   const disputedQuestions = useMemo(() => {
     if (disputeFilter === 'resolved') return questions.filter((question) => question.dispute?.status === 'Resolved')
@@ -54,6 +82,10 @@ export default function DisputeManagement() {
     document.body.style.overflow = 'hidden'
     const closeOnEscape = (event) => {
       if (event.key === 'Escape') {
+        if (fullContent) {
+          setFullContent(null)
+          return
+        }
         setDetailsOpen(false)
         setAttachmentOpen(false)
         setSearchParams({}, { replace: true })
@@ -64,17 +96,19 @@ export default function DisputeManagement() {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [detailsOpen])
+  }, [detailsOpen, fullContent, setSearchParams])
 
   const openDetails = (question) => {
     setSelectedId(question.id)
     setDetailsOpen(true)
+    setFullContent(null)
     setSearchParams({ questionId: question.id }, { replace: true })
   }
 
   function closeDetails() {
     setDetailsOpen(false)
     setAttachmentOpen(false)
+    setFullContent(null)
     setSearchParams({}, { replace: true })
   }
 
@@ -154,27 +188,36 @@ export default function DisputeManagement() {
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleScrollIcon size={14} />Original Question</div>
-                <div className="astrologer-modal-highlight astrologer-modal-question">&quot;{selectedQuestion.question}&quot;</div>
+                <div className="astrologer-modal-highlight">
+                  <ContentPreview content={selectedQuestion.question} title="Original Question" quoted onViewFull={setFullContent} />
+                </div>
               </div>
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Original Answer</div>
-                <div className="astrologer-modal-highlight astrologer-modal-question">&quot;{selectedQuestion.answer || 'Answer is being reviewed.'}&quot;</div>
+                <div className="astrologer-modal-highlight">
+                  <ContentPreview content={selectedQuestion.answer || 'Answer is being reviewed.'} title="Original Answer" quoted onViewFull={setFullContent} />
+                </div>
               </div>
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleShieldIcon size={14} />User Dispute Details</div>
                 <div className="astrologer-modal-highlight" style={{ display: 'grid', gap: 12 }}>
-                  <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
-                  {selectedQuestion.dispute.description && <div><strong>Description</strong><div className="muted" style={{ marginTop: 4 }}>{selectedQuestion.dispute.description}</div></div>}
+                  <div><strong>Dispute Content</strong><ContentPreview content={[selectedQuestion.dispute.reason, selectedQuestion.dispute.description].filter(Boolean).join('. ')} title="User Dispute Details" className="muted mt-1" onViewFull={setFullContent} /></div>
                   {selectedQuestion.dispute.attachment && <button className="option-pill" style={{ width: 'fit-content' }} type="button" onClick={() => setAttachmentOpen(true)}><span className="option-mark"><TempleScrollIcon size={14} /></span>Open {selectedQuestion.dispute.attachment}</button>}
                 </div>
               </div>
 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Astrologer Response</div>
-                <textarea className="textarea-box" style={{ width: '100%' }} placeholder="Write your clarification or resolution here..." maxLength={3000} value={response} readOnly={isSubmitted} onChange={(event) => setResponse(event.target.value)} />
-                <div className="muted" style={{ fontSize: 12 }}>Characters: {response.length} / 3000</div>
+                {isSubmitted ? (
+                  <div className="astrologer-modal-highlight">
+                    <ContentPreview content={response || 'No response was provided.'} title="Astrologer Response" quoted onViewFull={setFullContent} />
+                  </div>
+                ) : <>
+                  <textarea className="textarea-box" style={{ width: '100%' }} placeholder="Write your clarification or resolution here..." maxLength={3000} value={response} onChange={(event) => setResponse(event.target.value)} />
+                  <div className="muted" style={{ fontSize: 12 }}>Characters: {response.length} / 3000</div>
+                </>}
               </div>
             </div>
 
@@ -185,6 +228,24 @@ export default function DisputeManagement() {
                 <button className="btn btn-outline" onClick={() => updateResponse('Closed')}>Close Dispute</button>
                 <button className="btn btn-primary" disabled={!response.trim()} onClick={() => updateResponse('Resolved')}>Submit Response</button>
               </>}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {fullContent && createPortal(
+        <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setFullContent(null)}>
+          <div className="modal-card modal-card--scroll" style={{ width: 'min(640px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div className="astrologer-modal-title">{fullContent.title}</div>
+              <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content">
+              <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+            </div>
+            <div className="modal-card__footer">
+              <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
             </div>
           </div>
         </div>,

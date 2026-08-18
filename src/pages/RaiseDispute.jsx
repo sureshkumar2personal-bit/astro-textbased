@@ -18,6 +18,29 @@ function isQuestionOwnedByUser(question, user) {
   return (user.id && question.submittedByUserId === user.id) || (user.email && question.submittedByEmail === user.email)
 }
 
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
+}
+
+function ContentPreview({ content, title, onViewFull, quoted = false, className = 'muted' }) {
+  const { preview, isTruncated } = getWordPreview(content)
+
+  return (
+    <div className={className}>
+      {quoted ? `“${preview}”` : preview}
+      {isTruncated && <button type="button" className="link-btn ml-1" aria-label={`See full ${title.toLowerCase()}`} onClick={() => onViewFull({ title, content })}>See more…</button>}
+    </div>
+  )
+}
+
 export default function RaiseDispute() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -31,6 +54,7 @@ export default function RaiseDispute() {
   const [reason, setReason] = useState('')
   const [description, setDescription] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [fullContent, setFullContent] = useState(null)
 
   const answeredQuestions = useMemo(
     () => questions.filter((question) => question.status === 'Answered' && isQuestionOwnedByUser(question, currentUser)),
@@ -42,6 +66,7 @@ export default function RaiseDispute() {
 
   const closePopup = useCallback(() => {
     setPopupOpen(false)
+    setFullContent(null)
     setSearchParams({}, { replace: true })
   }, [setSearchParams])
 
@@ -58,14 +83,19 @@ export default function RaiseDispute() {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const closeOnEscape = (event) => {
-      if (event.key === 'Escape') closePopup()
+      if (event.key !== 'Escape') return
+      if (fullContent) {
+        setFullContent(null)
+        return
+      }
+      closePopup()
     }
     document.addEventListener('keydown', closeOnEscape)
     return () => {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [closePopup, popupOpen])
+  }, [closePopup, fullContent, popupOpen])
 
   useEffect(() => {
     setTarget(selectedQuestion?.dispute?.target || 'Astrologer')
@@ -76,6 +106,7 @@ export default function RaiseDispute() {
 
   function openPopup(question) {
     setSelectedId(question.id)
+    setFullContent(null)
     setPopupOpen(true)
     setSearchParams({ questionId: question.id }, { replace: true })
   }
@@ -184,24 +215,24 @@ export default function RaiseDispute() {
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
                 <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  “{selectedQuestion.question}”
+                  <ContentPreview content={selectedQuestion.question} title="Your Question" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                 </div>
               </div>
 
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
                 <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  “{selectedQuestion.answer || 'No answer available.'}”
+                  <ContentPreview content={selectedQuestion.answer || 'No answer available.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                 </div>
               </div>
 
               {alreadyRaised ? (
                 <Card>
-                  <div className="section-title" style={{ fontSize: 15 }}>Existing Dispute</div>
-                  <div className="grid gap-3">
-                    <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
-                    <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
-                    {selectedQuestion.dispute.description ? <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div> : null}
+                    <div className="section-title" style={{ fontSize: 15 }}>Existing Dispute</div>
+                    <div className="grid gap-3">
+                      <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
+                    <div><strong>Reason</strong><ContentPreview content={selectedQuestion.dispute.reason} title="Dispute Reason" onViewFull={setFullContent} /></div>
+                    {selectedQuestion.dispute.description ? <div><strong>Description</strong><ContentPreview content={selectedQuestion.dispute.description} title="Dispute Description" onViewFull={setFullContent} /></div> : null}
                     <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || 'Screenshot.pdf'}</div></div>
                     <div><strong>Status</strong><StatusBadge label={selectedQuestion.dispute.status || 'Open'} /></div>
                   </div>
@@ -252,6 +283,24 @@ export default function RaiseDispute() {
                   <button type="button" className="btn btn-primary" disabled={!reason || !description.trim() || submitted} onClick={handleSubmit}>Submit Dispute</button>
                 </>
               )}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {fullContent && createPortal(
+        <div className="modal-overlay user-modal-overlay" style={{ zIndex: 10000 }} onClick={() => setFullContent(null)}>
+          <div className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll" style={{ width: 'min(640px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>{fullContent.title}</div>
+              <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content user-modal-card__content">
+              <div style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+            </div>
+            <div className="modal-card__footer user-modal-card__footer">
+              <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
             </div>
           </div>
         </div>,
