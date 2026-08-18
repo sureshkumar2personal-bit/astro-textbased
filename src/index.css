@@ -1628,6 +1628,14 @@ tbody tr:hover {
 .modal-card__header {
   flex-shrink: 0;
   padding: var(--space-3) var(--space-3) 0;
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.modal-card__header .section-title,
+.modal-card__content > .section-title {
+  color: var(--text-primary);
 }
 
 .modal-card__content {
@@ -1645,6 +1653,68 @@ tbody tr:hover {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.astrologer-modal-title {
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.astrologer-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.astrologer-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.astrologer-modal-highlight {
+  background: var(--primary-bg);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  padding: 14px;
+}
+
+.astrologer-modal-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  font-size: 14px;
+}
+
+.astrologer-modal-question {
+  font-size: 15px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.astrologer-modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .modal-card__header,
+  .modal-card__content,
+  .modal-card__footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .astrologer-modal-details-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 }
 
 .user-modal-overlay {
