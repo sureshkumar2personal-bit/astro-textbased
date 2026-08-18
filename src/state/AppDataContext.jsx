@@ -200,7 +200,7 @@ const initialQuestions = [
     dispute: {
       target: 'Astrologer',
       reason: 'The response is too generic and lacks personalization',
-      description: 'The answer is too general. I need more details related to my horoscope.',
+      description: '',
       response: '',
       status: 'Open',
       attachment: 'Screenshot.pdf',

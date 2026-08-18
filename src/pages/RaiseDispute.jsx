@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { X } from 'lucide-react'
 import { RadioGroup } from '../components/OptionGroup.jsx'
 import UploadField from '../components/UploadField.jsx'
 import { disputeReasons, platformDisputeReasons } from '../data/mockData.js'
@@ -131,34 +133,67 @@ export default function RaiseDispute() {
         )}
       </section>
 
-      {popupOpen && selectedQuestion && (
-        <div className="modal-overlay" onClick={closePopup}>
-          <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
-              <div className="section-title" style={{ marginBottom: 0 }}>{alreadyRaised ? 'Dispute Details' : 'Raise Dispute'}</div>
-              <button type="button" className="icon-btn" aria-label="Close dispute popup" onClick={closePopup}>×</button>
+      {popupOpen && selectedQuestion && createPortal(
+        <div className="modal-overlay user-modal-overlay" onClick={closePopup}>
+          <div
+            className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll"
+            style={{ width: 'min(820px, calc(100vw - 32px))' }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div style={{ minWidth: 0 }}>
+                <div className="section-title" style={{ marginBottom: 0 }}>{alreadyRaised ? 'Dispute Details' : 'Raise Dispute'}</div>
+                <div
+                  className="muted"
+                  style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {selectedQuestion.campaignName || 'User question'} · {selectedQuestion.id}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <StatusBadge label={selectedQuestion.status} />
+                <button type="button" className="icon-btn" aria-label="Close dispute popup" onClick={closePopup}>
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
-            <div className="modal-card__content grid gap-4">
-              <Card>
-                <div className="section-title" style={{ fontSize: 15 }}>Question Details</div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div>
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question Details</div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',
+                    gap: 14,
+                    background: 'var(--violet-50)',
+                    borderRadius: 'var(--radius-s)',
+                    padding: 14,
+                    fontSize: 14,
+                  }}
+                >
                   <div><strong>Question ID</strong><div className="muted">{selectedQuestion.id}</div></div>
-                  <div><strong>Campaign</strong><div className="muted">{selectedQuestion.campaignName}</div></div>
+                  <div><strong>Campaign</strong><div className="muted">{selectedQuestion.campaignName || 'No campaign'}</div></div>
                   <div><strong>Category</strong><div className="muted">{selectedQuestion.category}</div></div>
                   <div><strong>Question Type</strong><div className="muted">{selectedQuestion.type}</div></div>
+                  <div><strong>Question For</strong><div className="muted">{selectedQuestion.questionFor}</div></div>
+                  <div><strong>Language</strong><div className="muted">{selectedQuestion.language}</div></div>
                 </div>
-              </Card>
+              </div>
 
-              <Card>
-                <div className="section-title" style={{ fontSize: 15 }}>Your Question</div>
-                <div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.question}&quot;</div>
-              </Card>
+              <div>
+                <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
+                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                  “{selectedQuestion.question}”
+                </div>
+              </div>
 
-              <Card>
-                <div className="section-title" style={{ fontSize: 15 }}>Astrologer&apos;s Answer</div>
-                <div style={{ fontStyle: 'italic', color: 'var(--ink)' }}>&quot;{selectedQuestion.answer || 'No answer available.'}&quot;</div>
-              </Card>
+              <div>
+                <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
+                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                  “{selectedQuestion.answer || 'No answer available.'}”
+                </div>
+              </div>
 
               {alreadyRaised ? (
                 <Card>
@@ -166,7 +201,7 @@ export default function RaiseDispute() {
                   <div className="grid gap-3">
                     <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
                     <div><strong>Reason</strong><div className="muted">{selectedQuestion.dispute.reason}</div></div>
-                    <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div>
+                    {selectedQuestion.dispute.description ? <div><strong>Description</strong><div className="muted">{selectedQuestion.dispute.description}</div></div> : null}
                     <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || 'Screenshot.pdf'}</div></div>
                     <div><strong>Status</strong><StatusBadge label={selectedQuestion.dispute.status || 'Open'} /></div>
                   </div>
@@ -208,7 +243,7 @@ export default function RaiseDispute() {
               )}
             </div>
 
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               {alreadyRaised ? (
                 <button type="button" className="btn btn-primary" onClick={closePopup}>Close</button>
               ) : (
@@ -219,10 +254,11 @@ export default function RaiseDispute() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
-      {submitted && <SuccessAlert message="Dispute submitted successfully." onDismiss={() => setSubmitted(false)} />}
+      {submitted && <SuccessAlert variant="user" message="Dispute submitted successfully." onDismiss={() => setSubmitted(false)} />}
     </div>
   )
 }

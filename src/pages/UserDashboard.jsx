@@ -67,7 +67,7 @@ export default function UserDashboard() {
         </button>
         <button
           className="stat-card-clickable"
-          onClick={() => navigate(`${routes.trackQuestions}?status=pending_group`)}
+          onClick={() => navigate(`${routes.trackQuestions}?status=Pending`)}
         >
           <StatCard icon={MessagesSquare} label="questions pending" value={pending} tone="sky" />
         </button>

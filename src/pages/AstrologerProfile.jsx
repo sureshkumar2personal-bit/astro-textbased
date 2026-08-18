@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, Users, CalendarPlus, BadgeCheck } from 'lucide-react'
+import { UserPlus, UserCheck, Star, Users, CalendarPlus, BadgeCheck, X } from 'lucide-react'
 import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -144,12 +144,18 @@ export default function AstrologerProfile() {
       </div>
 
       {bookingOpen && (
-        <div className="modal-overlay" onClick={() => setBookingOpen(false)}>
-          <div className="modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="section-title" style={{ marginBottom: 16 }}>Book Appointment</div>
-            <div style={{ display: 'grid', gap: 16 }}>
-              <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">Consultation Type</span>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setBookingOpen(false)}>
+          <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Book Appointment</div>
+              <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={() => setBookingOpen(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-card__content user-modal-card__content">
+              <div style={{ display: 'grid', gap: 16 }}>
+                <label className="field-group" style={{ margin: 0 }}>
+                  <span className="field-label-top">Consultation Type</span>
                 <select
                   className="select-input"
                   value={bookingForm.type}
@@ -169,16 +175,17 @@ export default function AstrologerProfile() {
               </label>
               <label className="field-group" style={{ margin: 0 }}>
                 <span className="field-label-top">Time</span>
-                <input
-                  type="text"
-                  className="text-input"
-                  placeholder="10:00 AM"
-                  value={bookingForm.time}
-                  onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
-                />
-              </label>
+                  <input
+                    type="text"
+                    className="text-input"
+                    placeholder="10:00 AM"
+                    value={bookingForm.time}
+                    onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
+                  />
+                </label>
+              </div>
             </div>
-            <div className="mt-5 flex flex-wrap justify-end gap-3">
+            <div className="modal-card__footer user-modal-card__footer">
               <button className="btn btn-ghost" type="button" onClick={() => setBookingOpen(false)}>
                 Cancel
               </button>
@@ -191,20 +198,27 @@ export default function AstrologerProfile() {
       )}
 
       {subscribeSuccess && (
-        <div className="modal-overlay" onClick={() => setSubscribeSuccess(false)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSubscribeSuccess(false)}>
           <div
-            className="modal-card"
-            style={{ width: 'min(420px, calc(100vw - 32px))', textAlign: 'center' }}
+            className="modal-card user-modal-card"
+            style={{ width: 'min(420px, calc(100vw - 32px))' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
-            <div className="section-title" style={{ marginBottom: 12 }}>Subscription Successful</div>
-            <p className="muted" style={{ lineHeight: 1.7 }}>
-              You are now a subscriber of <strong style={{ color: 'var(--ink)' }}>{astrologer.name}</strong>.<br />
-              You get <strong style={{ color: 'var(--ink)' }}>1 Discount Question</strong> valid for{' '}
-              <strong style={{ color: 'var(--ink)' }}>15 days</strong>.
-            </p>
-            <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Subscription Successful</div>
+              <button type="button" className="icon-btn" aria-label="Close subscription popup" onClick={() => setSubscribeSuccess(false)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-card__content user-modal-card__content" style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
+              <p className="muted" style={{ lineHeight: 1.7 }}>
+                You are now a subscriber of <strong style={{ color: 'var(--ink)' }}>{astrologer.name}</strong>.<br />
+                You get <strong style={{ color: 'var(--ink)' }}>1 Discount Question</strong> valid for{' '}
+                <strong style={{ color: 'var(--ink)' }}>15 days</strong>.
+              </p>
+            </div>
+            <div className="modal-card__footer user-modal-card__footer" style={{ justifyContent: 'center' }}>
               <button className="btn btn-ghost" type="button" onClick={() => setSubscribeSuccess(false)}>
                 Later
               </button>
