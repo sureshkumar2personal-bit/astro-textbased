@@ -61,7 +61,9 @@ function AstrologerRoutes() {
         <Route path="/astrologer/text-based-questions" element={<TextBasedQuestions />} />
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
-        <Route path="/astrologer/profile" element={<Profile />} />
+        <Route path="/astrologer/profile" element={<AstrologerProfile />} />
+        <Route path="/astrologer/astrologer-profile" element={<AstrologerProfile />} />
+        <Route path="/astrologer/account-profile" element={<Profile />} />
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />

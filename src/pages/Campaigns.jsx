@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarDays, CircleDollarSign, Gift, Megaphone, Users, X } from 'lucide-react'
+import { CalendarDays, CircleDollarSign, Gift, Megaphone, Search, Users, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -112,6 +113,7 @@ export default function Campaigns() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [query, setQuery] = useState('')
+  const [appliedQuery, setAppliedQuery] = useState('')
   const [selectedId, setSelectedId] = useState(selectedCampaignId || campaigns[0]?.id)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -127,10 +129,10 @@ export default function Campaigns() {
       if (filterType === 'non-discount') return campaign.status === 'Active' && (campaign.discountPercent || 0) <= 0 && !campaign.generalOffer && !campaign.personalOffer
       return true
     })
-    const term = query.trim().toLowerCase()
+    const term = appliedQuery.trim().toLowerCase()
     if (!term) return categorized
     return categorized.filter((campaign) => [campaign.name, campaign.id, campaign.status, campaign.priority, ...(campaign.categories || []).map((category) => category.name)].join(' ').toLowerCase().includes(term))
-  }, [filterType, query, sortedCampaigns])
+  }, [appliedQuery, filterType, sortedCampaigns])
 
   const closeDetails = useCallback(() => {
     setDetailsOpen(false)
@@ -183,7 +185,20 @@ export default function Campaigns() {
     <div>
       <PageHeader eyebrow="Astrologer" title={pageTitle} subtitle="Select a campaign card to view its complete details." actions={<Link to={routes.dashboard} className="btn btn-outline">Back to Dashboard</Link>} />
       <Section title={`Campaigns (${filteredCampaigns.length})`} icon={Megaphone}>
-        <input className="text-input" placeholder="Search campaign or category..." value={query} onChange={(event) => setQuery(event.target.value)} style={{ marginBottom: 16, maxWidth: 420 }} />
+        <div className="search-bar search-bar--campaigns">
+          <input
+            className="text-input search-bar__input"
+            placeholder="Search campaign or category..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') setAppliedQuery(query)
+            }}
+          />
+          <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedQuery(query)}>
+            <Search size={18} />
+          </button>
+        </div>
         <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredCampaigns.map((campaign) => (
             <button type="button" key={campaign.id} className="card flex h-full flex-col text-left transition hover:-translate-y-1 hover:border-[color:var(--secondary)]" onClick={() => openDetails(campaign)}>
@@ -205,7 +220,7 @@ export default function Campaigns() {
         {!filteredCampaigns.length && <p className="muted" style={{ marginTop: 16 }}>No campaigns match your search.</p>}
       </Section>
 
-      {detailsOpen && selectedCampaign && (
+      {detailsOpen && selectedCampaign && createPortal((
         <div className="modal-overlay" onClick={fromDashboard ? handleDetailsBack : closeDetails}>
           <div className="modal-card modal-card--scroll" style={{ width: 'min(980px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
@@ -239,9 +254,9 @@ export default function Campaigns() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
-      {deleteOpen && selectedCampaign && (
+      {deleteOpen && selectedCampaign && createPortal((
         <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setDeleteOpen(false)}>
           <div className="modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
             <div className="modal-card__header">
@@ -266,7 +281,7 @@ export default function Campaigns() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
       {publishSuccess && <SuccessAlert message="Campaign published successfully." onDismiss={() => setPublishSuccess(false)} />}
     </div>

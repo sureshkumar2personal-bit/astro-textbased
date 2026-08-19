@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Search } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -21,18 +23,19 @@ export default function SalesManagement() {
   const [createOpen, setCreateOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [campaignQuery, setCampaignQuery] = useState('')
+  const [appliedCampaignQuery, setAppliedCampaignQuery] = useState('')
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [detailsCampaignId, setDetailsCampaignId] = useState(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
 
   const campaignCards = useMemo(() => {
-    const term = campaignQuery.trim().toLowerCase()
+    const term = appliedCampaignQuery.trim().toLowerCase()
     return campaigns
       .slice()
       .sort((a, b) => sortByDateDesc(a, b, (item) => item.date))
       .filter((campaign) => !term || [campaign.name, campaign.id, campaign.status, ...(campaign.categories || []).map((category) => category.name)].join(' ').toLowerCase().includes(term))
-  }, [campaignQuery, campaigns])
+  }, [appliedCampaignQuery, campaigns])
 
   const detailsCampaign = campaigns.find((campaign) => campaign.id === detailsCampaignId) || null
 
@@ -66,11 +69,24 @@ export default function SalesManagement() {
       <Section title={`All Campaigns (${campaignCards.length})`} icon={TempleDonationBoxIcon}>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="muted">Select a campaign card to view complete details.</div>
-          <div className="flex flex-wrap items-center gap-3">
-            <input className="text-input" placeholder="Search campaigns" value={campaignQuery} onChange={(event) => setCampaignQuery(event.target.value)} style={{ width: 240 }} />
+          <div className="campaign-toolbar">
             <button className="btn btn-primary" type="button" onClick={() => setCreateOpen(true)}>
               <TempleDonationBoxIcon size={15} />Create Campaign
             </button>
+            <div className="search-bar">
+              <input
+                className="text-input search-bar__input"
+                placeholder="Search campaigns"
+                value={campaignQuery}
+                onChange={(event) => setCampaignQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') setAppliedCampaignQuery(campaignQuery)
+                }}
+              />
+              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedCampaignQuery(campaignQuery)}>
+                <Search size={18} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -108,7 +124,7 @@ export default function SalesManagement() {
         defaultTotalLimit={selectedCampaign?.totalLimit || 30}
       />
 
-      {detailsOpen && detailsCampaign && (
+      {detailsOpen && detailsCampaign && createPortal((
         <div className="modal-overlay" onClick={() => setDetailsOpen(false)}>
           <div className="modal-card modal-card--scroll" style={{ width: 'min(980px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
@@ -129,9 +145,9 @@ export default function SalesManagement() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
-      {deleteOpen && detailsCampaign && (
+      {deleteOpen && detailsCampaign && createPortal((
         <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setDeleteOpen(false)}>
           <div className="modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
             <div className="modal-card__header"><div className="section-title" style={{ marginBottom: 0 }}>Delete Campaign?</div></div>
@@ -142,7 +158,7 @@ export default function SalesManagement() {
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
       {successMessage && <SuccessAlert message={successMessage} onDismiss={() => setSuccessMessage('')} />}
     </div>

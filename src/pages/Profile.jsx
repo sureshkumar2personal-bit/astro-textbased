@@ -12,13 +12,13 @@ export default function Profile() {
   const navigate = useNavigate()
   const routes = getRoleRoutes(currentUser?.role)
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
-  const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '' })
+  const [editing, setEditing] = useState(isAstrologer)
+  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
 
   const startEditing = () => {
-    setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '' })
+    setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
     setError('')
     setSaved(false)
     setEditing(true)
@@ -63,11 +63,15 @@ export default function Profile() {
               <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Name</span><input className="text-input" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
               <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Email Address</span><input type="email" className="text-input" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
               <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Phone Number</span><input type="tel" className="text-input" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
+              {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><input className="text-input" value={form.specialization} onChange={(event) => setForm({ ...form, specialization: event.target.value })} /></label>}
+              {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><input className="text-input" value={form.experience} onChange={(event) => setForm({ ...form, experience: event.target.value })} placeholder="8 years" /></label>}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Email Address</span><div className="flex min-h-[42px] items-center gap-2 rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 text-[color:var(--text-primary)]"><Mail size={16} className="text-[color:var(--primary)]" />{currentUser?.email || '—'}</div></div>
               <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Phone Number</span><div className="flex min-h-[42px] items-center gap-2 rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 text-[color:var(--text-primary)]"><Phone size={16} className="text-[color:var(--primary)]" />{currentUser?.phone || 'Not added'}</div></div>
+              {isAstrologer && <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><div className="min-h-[42px] rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 py-3 text-[color:var(--text-primary)]">{currentUser?.specialization || 'Not added'}</div></div>}
+              {isAstrologer && <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><div className="min-h-[42px] rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 py-3 text-[color:var(--text-primary)]">{currentUser?.experience || 'Not added'}</div></div>}
             </div>
           )}
           {error && <div className="mt-4 rounded-[14px] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">{error}</div>}

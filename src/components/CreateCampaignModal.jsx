@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAppData } from '../state/AppDataContext.jsx'
 
 function toInputDate(value) {
@@ -111,7 +112,7 @@ export default function CreateCampaignModal({ open, onClose, onComplete, default
     }
   }
 
-  return (
+  return createPortal((
     <div className="modal-overlay" onClick={() => onClose(false)}>
       <div className="modal-card modal-card--scroll" style={{ width: 'min(720px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header">
@@ -236,5 +237,5 @@ export default function CreateCampaignModal({ open, onClose, onComplete, default
         </div>
       </div>
     </div>
-  )
+  ), document.body)
 }
