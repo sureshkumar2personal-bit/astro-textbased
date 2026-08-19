@@ -380,11 +380,6 @@ export default function AskQuestion() {
             </div>
 
             <div className="user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              <Card>
-                <div className="section-title" style={{ fontSize: 15, marginBottom: 10 }}>Category</div>
-                <ChipGroup options={categoryOptions} value={category} onChange={setCategory} />
-              </Card>
-
               {discountActive && discountPrice && (
                 <Card>
                   <div className="section-title" style={{ fontSize: 15 }}>Discount Question Applied</div>
