@@ -146,6 +146,8 @@ export function AuthProvider({ children }) {
         name,
         email,
         phone: String(payload.phone || '').trim(),
+        specialization: String(payload.specialization || '').trim(),
+        experience: String(payload.experience || '').trim(),
       }
       setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
       setCurrentUser(updatedUser)

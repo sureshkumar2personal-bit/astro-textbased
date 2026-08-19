@@ -27,6 +27,7 @@ export function getRoleRoutes(role) {
     discountQuestions: `${base}/discount-questions`,
     rewards: `${base}/rewards`,
     profile: `${base}/profile`,
+    accountProfile: `${base}/account-profile`,
     appointmentDetails: `${base}/appointment-details`,
     poojaDetails: `${base}/pooja-details`,
     liveSession: `${base}/live-session`,

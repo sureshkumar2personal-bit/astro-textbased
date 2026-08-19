@@ -143,12 +143,11 @@ export default function Dashboard() {
           + Create Campaign
         </button>
         <div style={{ flex: '0 1 260px', width: 'min(260px, 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="search-bar">
             <input
-              className="text-input"
               placeholder="Search by question ID, user, campaign, category..."
               value={query}
-              style={{ flex: 1, minWidth: 0, margin: 0 }}
+              className="text-input search-bar__input"
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {

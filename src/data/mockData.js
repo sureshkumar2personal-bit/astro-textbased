@@ -7,7 +7,7 @@ export const dashboardStats = [
 ]
 
 export const campaignList = [
-  'Festival Special Campaign',
+  'Career Campaign',
   'New User Offer',
   'Marriage Special',
   'Business Consultation',

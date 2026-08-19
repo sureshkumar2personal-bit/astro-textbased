@@ -13,13 +13,21 @@ const DEFAULT_CAMPAIGN_CATEGORIES = [
   { name: 'Study', normalPrice: 200, discountPercent: 40, compulsoryQuestions: 150 },
 ]
 
+const HEALTH_CAMPAIGN_CATEGORIES = [
+  { name: 'Health', normalPrice: 200, discountPercent: 70, compulsoryQuestions: 150 },
+]
+
+const CAREER_CAMPAIGN_CATEGORIES = [
+  { name: 'Career', normalPrice: 200, discountPercent: 80, compulsoryQuestions: 150 },
+]
+
 const ANSWER_REVIEW_WINDOW_MS = 5 * 60 * 60 * 1000
 
 const initialCampaigns = [
   {
     id: 'july-premium',
-    categories: DEFAULT_CAMPAIGN_CATEGORIES,
-    name: 'July Premium Campaign',
+    categories: HEALTH_CAMPAIGN_CATEGORIES,
+    name: 'Health Campaign',
     date: '31 Jul 2026',
     endDate: '31 Aug 2026',
     priority: 'High',
@@ -38,8 +46,8 @@ const initialCampaigns = [
   },
   {
     id: 'festival-special',
-    categories: DEFAULT_CAMPAIGN_CATEGORIES,
-    name: 'Festival Special Campaign',
+    categories: CAREER_CAMPAIGN_CATEGORIES,
+    name: 'Career Campaign',
     date: '15 Aug 2026',
     endDate: '20 Sep 2026',
     priority: 'Medium',
@@ -96,7 +104,7 @@ const initialQuestions = [
     user: 'Priya V.',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
-    category: 'Marriage',
+    category: 'Health',
     type: 'Personal',
     purchaseType: 'Paid',
     purchaseAmount: 250,
@@ -107,7 +115,7 @@ const initialQuestions = [
     status: 'In Progress',
     priority: 'High',
     campaignId: 'july-premium',
-    campaignName: 'July Premium Campaign',
+    campaignName: 'Health Campaign',
     raised: '21-Jul-2026 10:30 AM',
     question: 'When is the right time for my marriage?',
     answer: '',
@@ -124,7 +132,7 @@ const initialQuestions = [
     user: 'Kannan',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
-    category: 'Business',
+    category: 'Health',
     type: 'General',
     purchaseType: 'Free',
     purchaseAmount: 0,
@@ -135,7 +143,7 @@ const initialQuestions = [
     status: 'Pending',
     priority: 'Medium',
     campaignId: 'july-premium',
-    campaignName: 'July Premium Campaign',
+    campaignName: 'Health Campaign',
     raised: '22-Jul-2026 01:15 PM',
     question: 'Should I expand my business this quarter?',
     answer: '',
@@ -152,7 +160,7 @@ const initialQuestions = [
     user: 'Devi',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
-    category: 'Job / Health',
+    category: 'Career',
     type: 'Personal',
     purchaseType: 'Paid',
     purchaseAmount: 250,
@@ -163,7 +171,7 @@ const initialQuestions = [
     status: 'Answered',
     priority: 'High',
     campaignId: 'festival-special',
-    campaignName: 'Festival Special Campaign',
+    campaignName: 'Career Campaign',
     raised: '18-Jul-2026 06:45 PM',
     question: 'Will my interview go well next week?',
     answer: 'Yes. Prepare for the first 48 hours of the week and keep your documents ready.',
@@ -180,7 +188,7 @@ const initialQuestions = [
     user: 'Priya V.',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
-    category: 'Marriage',
+    category: 'Health',
     type: 'Personal',
     purchaseType: 'Paid',
     purchaseAmount: 250,
@@ -191,7 +199,7 @@ const initialQuestions = [
     status: 'Disputed',
     priority: 'High',
     campaignId: 'july-premium',
-    campaignName: 'July Premium Campaign',
+    campaignName: 'Health Campaign',
     raised: '21-Jul-2026 10:30 AM',
     question: 'When is the right time for my marriage? I would like to know which months are most favorable. Please consider whether family discussions will be supportive. I am also worried about delays caused by my career plans. Could you suggest how I should prepare for this period?',
     answer: 'Based on your horoscope, the favorable period begins in the coming months. The most supportive window appears after you complete an important work commitment. Family conversations should become easier when you approach them calmly and with clear expectations. Avoid making a rushed decision during the current period of uncertainty. A more detailed consultation can help you review the timing with your full birth details.',
@@ -215,7 +223,7 @@ const initialQuestions = [
     user: 'Arun',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
-    category: 'Job',
+    category: 'Career',
     type: 'General',
     purchaseType: 'Paid',
     purchaseAmount: 100,
@@ -226,7 +234,7 @@ const initialQuestions = [
     status: 'In Progress',
     priority: 'Low',
     campaignId: 'festival-special',
-    campaignName: 'Festival Special Campaign',
+    campaignName: 'Career Campaign',
     raised: '20-Jul-2026 04:20 PM',
     question: 'Can I switch jobs this month?',
     answer: '',
@@ -264,7 +272,7 @@ const initialNotifications = [
   {
     id: 'n3',
     title: 'Package purchased',
-    detail: 'A new purchase was recorded for July Premium Campaign.',
+    detail: 'A new purchase was recorded for Health Campaign.',
     time: '3h ago',
     route: '/astrologer/sales-management',
     audience: ROLES.ASTROLOGER,
@@ -393,8 +401,8 @@ const initialNotifications = [
   },
   {
     id: 'n16',
-    title: 'Festival Special Campaign is live',
-    detail: 'New question packages are now available at festival pricing.',
+    title: 'Career Campaign is live',
+    detail: 'New career question packages are now available.',
     time: '6h ago',
     route: '/user/purchase-package?campaignId=festival-special',
     audience: ROLES.USER,
@@ -403,8 +411,8 @@ const initialNotifications = [
   },
   {
     id: 'n17',
-    title: '20% off on Marriage packages',
-    detail: 'Limited-time discount on the July Premium Campaign.',
+    title: '20% off on Health packages',
+    detail: 'Limited-time discount on Health Campaign.',
     time: '1 day ago',
     route: '/user/purchase-package?campaignId=july-premium',
     audience: ROLES.USER,
@@ -420,7 +428,7 @@ const initialAstrologerWallet = {
   earnings: 52150,
   withdrawn: 18000,
   transactions: [
-    { id: 'aw1', label: 'Question package sale - July Premium', amount: '+₹2,000', time: 'Today', date: '2026-07-27', type: 'earning' },
+    { id: 'aw1', label: 'Question package sale - Health', amount: '+₹2,000', time: 'Today', date: '2026-07-27', type: 'earning' },
     { id: 'aw2', label: 'Personal question - Marriage', amount: '+₹250', time: 'Yesterday', date: '2026-07-26', type: 'earning' },
     { id: 'aw3', label: 'Consultation payout - Video call', amount: '+₹4,000', time: '24 Jul 2026', date: '2026-07-24', type: 'earning' },
     { id: 'aw4', label: 'General question - Business', amount: '+₹100', time: '23 Jul 2026', date: '2026-07-23', type: 'earning' },
@@ -526,6 +534,22 @@ export function AppDataProvider({ children }) {
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo'])
   const [subscriptions, setSubscriptions] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+
+  useEffect(() => {
+    setCampaigns((prev) => prev.map((campaign) => {
+      if (campaign.id === 'july-premium') return { ...campaign, name: 'Health Campaign', categories: HEALTH_CAMPAIGN_CATEGORIES }
+      if (campaign.id === 'festival-special') return { ...campaign, name: 'Career Campaign', categories: CAREER_CAMPAIGN_CATEGORIES }
+      return campaign
+    }))
+    setQuestions((prev) => prev.map((question) => {
+      if (question.campaignId === 'july-premium') return { ...question, category: 'Health', campaignName: 'Health Campaign' }
+      if (question.campaignId === 'festival-special') return { ...question, category: 'Career', campaignName: 'Career Campaign' }
+      return question
+    }))
+    setNotifications((prev) => prev.map((notification) => notification.id === 'n16'
+      ? { ...notification, title: 'Career Campaign is live', detail: 'New career question packages are now available.' }
+      : notification))
+  }, [])
 
   useEffect(() => {
     const publishScheduledCampaigns = () => {
@@ -1175,6 +1199,7 @@ export function AppDataProvider({ children }) {
       if (existing) return existing
       const subscription = {
         userId,
+        userName: userName || userId || 'Subscriber',
         astrologerId,
         astrologerName,
         subscribedAt: new Date().toISOString(),

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -182,10 +182,12 @@ export default function TextBasedQuestions() {
         ))}
       </div>
 
-      <Section title="Search & Filter">
+      <Section>
         <Card>
-          <div style={{ display: 'grid', gap: 16 }}>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div className="search-filter-row">
+            <div className="search-filter-row__group">
+              <div className="search-filter-row__heading">Search</div>
+              <div className="search-bar">
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -193,16 +195,18 @@ export default function TextBasedQuestions() {
                   if (event.key === 'Enter') setAppliedSearch(search)
                 }}
                 placeholder="Search question ID, user, campaign, category, or question"
-                className="text-input"
-                style={{ flex: '1 1 280px', minWidth: 220 }}
+                className="text-input search-bar__input"
               />
-              <button className="btn btn-primary" onClick={() => setAppliedSearch(search)}>Search</button>
+              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
+                <Search size={18} />
+              </button>
               {appliedSearch && (
                 <button className="btn btn-outline" onClick={() => { setSearch(''); setAppliedSearch('') }}>Clear</button>
               )}
+              </div>
             </div>
-            <div>
-              <div className="field-label-top">Status</div>
+            <div className="search-filter-row__group search-filter-row__status">
+              <div className="search-filter-row__heading">Status</div>
               <ChipGroup options={STATUSES} value={statusFilter} onChange={setStatusFilter} />
             </div>
           </div>

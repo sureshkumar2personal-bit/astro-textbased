@@ -65,7 +65,9 @@ const PAGE_META = {
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
-    '/astrologer/profile': { title: 'Profile', sub: 'Astrologer account details' },
+    '/astrologer/astrologer-profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
+    '/astrologer/profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
+    '/astrologer/account-profile': { title: 'Profile Settings', sub: 'Astrologer account details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
@@ -233,7 +235,7 @@ export default function Layout() {
                   <div className="popover-item"><strong>Email</strong><div>{currentUser?.email || profile.email}</div></div>
                   <div className="popover-item"><strong>Phone</strong><div>{currentUser?.phone || 'Not added'}</div></div>
                 </div>
-                <button type="button" className="btn btn-outline mt-3 w-full" onClick={() => { setPanel(null); navigate(`${basePath}/profile`) }}>
+                <button type="button" className="btn btn-outline mt-3 w-full" onClick={() => { setPanel(null); navigate(isAstrologer ? `${basePath}/profile` : `${basePath}/profile`) }}>
                   View Profile
                 </button>
               </div>

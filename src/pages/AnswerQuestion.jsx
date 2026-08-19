@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -151,29 +151,28 @@ export default function AnswerQuestion() {
         backIcon={backIcon}
       />
 
-      <Section title="Search">
+      <Section>
         <Card>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by user name, question ID, category, or keyword"
-              className="text-input"
-              style={{ flex: 1, minWidth: 240 }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setAppliedSearch(search)
-              }}
-            />
-            <button className="btn btn-primary" onClick={() => setAppliedSearch(search)}>Search</button>
-          </div>
-        </Card>
-      </Section>
-
-      <Section title="Filters">
-        <Card>
-          <div style={{ display: 'grid', gap: 16 }}>
-            <div>
-              <div className="field-label-top">Status</div>
+          <div className="search-filter-row">
+            <div className="search-filter-row__group">
+              <div className="search-filter-row__heading">Search</div>
+              <div className="search-bar">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by user name, question ID, category, or keyword"
+                className="text-input search-bar__input"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setAppliedSearch(search)
+                }}
+              />
+              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
+                <Search size={18} />
+              </button>
+              </div>
+            </div>
+            <div className="search-filter-row__group search-filter-row__status">
+              <div className="search-filter-row__heading">Status</div>
               <ChipGroup
                 options={['All', 'Pending', 'Answered', 'Disputed']}
                 value={statusFilter === 'pending_group' ? 'Pending' : statusFilter}
