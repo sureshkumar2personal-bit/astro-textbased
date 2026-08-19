@@ -35,6 +35,7 @@ const initialCampaigns = [
     totalLimit: 30,
     generalLimit: 18,
     personalLimit: 12,
+    astrologerId: 'astrologer-demo',
   },
   {
     id: 'festival-special',
@@ -55,6 +56,7 @@ const initialCampaigns = [
     totalLimit: 20,
     generalLimit: 10,
     personalLimit: 10,
+    astrologerId: 'acharya-meena',
   },
   {
     id: 'vip-subscribers',
@@ -75,6 +77,7 @@ const initialCampaigns = [
     totalLimit: 10,
     generalLimit: 5,
     personalLimit: 5,
+    astrologerId: 'astrologer-demo',
   },
 ]
 
@@ -84,6 +87,7 @@ const initialPurchasedSlots = initialCampaigns
     id: `slots-user-demo-${campaign.id}`,
     userId: 'user-demo',
     campaignId: campaign.id,
+    astrologerId: 'astrologer-demo',
     generalPurchased: campaign.purchasedGeneral,
     generalUsed: 0,
     personalPurchased: campaign.purchasedPersonal,
@@ -512,9 +516,29 @@ function updatePurchasedSlotBalance(list, userId, campaignId, slotType, amount) 
   })
 }
 
+function loadFromStorage(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key)
+    if (!raw) return fallback
+    return JSON.parse(raw)
+  } catch {
+    return fallback
+  }
+}
+
+function saveToStorage(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // ignore
+  }
+}
+
+const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
+
 export function AppDataProvider({ children }) {
   const [campaigns, setCampaigns] = useState(initialCampaigns)
-  const [questions, setQuestions] = useState(initialQuestions)
+  const [questions, setQuestions] = useState(() => loadFromStorage(QUESTIONS_STORAGE_KEY, initialQuestions))
   const [notifications, setNotifications] = useState(initialNotifications)
   const [astrologerWallet, setAstrologerWallet] = useState(initialAstrologerWallet)
   const [userWallet, setUserWallet] = useState(initialUserWallet)
@@ -545,6 +569,10 @@ export function AppDataProvider({ children }) {
     const timer = window.setInterval(publishScheduledCampaigns, 30 * 1000)
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    saveToStorage(QUESTIONS_STORAGE_KEY, questions)
+  }, [questions])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -712,6 +740,7 @@ export function AppDataProvider({ children }) {
             id: crypto.randomUUID(),
             userId: purchase.userId,
             campaignId,
+            astrologerId: purchase.astrologerId || 'astrologer-demo',
             generalPurchased: purchase.generalQty || 0,
             generalUsed: 0,
             personalPurchased: purchase.personalQty || 0,
@@ -863,7 +892,8 @@ export function AppDataProvider({ children }) {
       )
     },
     createQuestion(payload) {
-      const nextId = `QTN-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`
+      const nextId = `QTN-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
+      const submittedAt = new Date().toISOString()
       setQuestions((prev) => [
         {
           id: nextId,
@@ -879,8 +909,10 @@ export function AppDataProvider({ children }) {
           priority: 'Medium',
           campaignId: payload.campaignId || campaigns[0]?.id,
           campaignName: payload.campaignName || campaigns[0]?.name || 'Campaign',
+          astrologerId: payload.astrologerId || null,
           raised: 'Just now',
-          raisedAt: new Date().toISOString(),
+          raisedAt: submittedAt,
+          submittedAt,
           question: payload.question,
           answer: '',
           draftAnswer: '',

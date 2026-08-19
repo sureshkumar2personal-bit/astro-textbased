@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { X, Clock, AlertTriangle } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -12,6 +12,8 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered']
+const EDIT_TIME_LIMIT_MS = 30 * 60 * 1000
+const DELETE_TIME_LIMIT_MS = 60 * 60 * 1000
 
 function normalizeStatusFilter(value) {
   if (STATUS_FILTERS.includes(value)) return value
@@ -32,13 +34,54 @@ function getWordPreview(content) {
   }
 }
 
+function formatTimeRemaining(ms) {
+  if (ms <= 0) return 'Expired'
+  const totalSeconds = Math.floor(ms / 1000)
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  if (hours > 0) return `${hours}h ${minutes}m`
+  return `${minutes}m`
+}
+
 function ContentPreview({ content, title, onViewFull, quoted = false, className = 'muted' }) {
   const { preview, isTruncated } = getWordPreview(content)
 
   return (
     <div className={className}>
-      {quoted ? `“${preview}”` : preview}
+      {quoted ? `\u201C${preview}\u201D` : preview}
       {isTruncated && <button type="button" className="link-btn ml-1" aria-label={`See full ${title.toLowerCase()}`} onClick={() => onViewFull({ title, content })}>See more…</button>}
+    </div>
+  )
+}
+
+function TimeLimitBadge({ label, timeRemaining, tooltip, isEnabled }) {
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  return (
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <span
+        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+          isEnabled
+            ? 'bg-[color:var(--primary-bg)] text-[color:var(--primary)]'
+            : 'bg-[color:var(--surface-soft)] text-[color:var(--text-muted)]'
+        }`}
+      >
+        <Clock size={12} />
+        {label}: {formatTimeRemaining(timeRemaining)}
+      </span>
+      {showTooltip && (
+        <div
+          className="absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[color:var(--ink)] px-3 py-2 text-xs text-white shadow-lg"
+          style={{ pointerEvents: 'none' }}
+        >
+          {tooltip}
+          <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[color:var(--ink)]" />
+        </div>
+      )}
     </div>
   )
 }
@@ -53,6 +96,7 @@ export default function TrackQuestions() {
   const [appliedSearch, setAppliedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState(() => normalizeStatusFilter(searchParams.get('status') || 'All'))
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const [timeElapsed, setTimeElapsed] = useState(0)
 
   const matchesStatusFilter = useCallback((question) => {
     if (statusFilter === 'All') return true
@@ -73,6 +117,7 @@ export default function TrackQuestions() {
   const [review, setReview] = useState('')
   const [ratingSaved, setRatingSaved] = useState(false)
   const [fullContent, setFullContent] = useState(null)
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 
   const ownedQuestions = useMemo(() => {
     const scope = questions.filter((question) => {
@@ -109,6 +154,27 @@ export default function TrackQuestions() {
       : selectedQuestion?.status === 'Answered'
         ? 'answer'
         : null
+
+  const getQuestionTimeLimits = useCallback((question) => {
+    if (!question.submittedAt) return { editTimeRemaining: 0, deleteTimeRemaining: 0, isEditEnabled: false, isDeleteEnabled: false }
+    const submittedAt = new Date(question.submittedAt).getTime()
+    const editTimeRemaining = Math.max(0, EDIT_TIME_LIMIT_MS - (Date.now() - submittedAt))
+    const deleteTimeRemaining = Math.max(0, DELETE_TIME_LIMIT_MS - (Date.now() - submittedAt))
+    return {
+      editTimeRemaining,
+      deleteTimeRemaining,
+      isEditEnabled: editTimeRemaining > 0,
+      isDeleteEnabled: deleteTimeRemaining > 0,
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!visibleQuestions.some((q) => q.status === 'Pending' && q.submittedAt)) return
+    const interval = setInterval(() => {
+      setTimeElapsed(Date.now())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [visibleQuestions])
 
   useEffect(() => {
     if (!selectedQuestion) {
@@ -148,6 +214,11 @@ export default function TrackQuestions() {
     setQuestionPreviewId(null)
     setFullContent(null)
   }, [setQuestionPreviewId])
+
+  const confirmDelete = (questionId) => {
+    actions.revokeQuestion(questionId)
+    setDeleteConfirmId(null)
+  }
 
   useEffect(() => {
     if (!detailsOpen) return
@@ -228,12 +299,6 @@ export default function TrackQuestions() {
                   </div>
                   <div className="btn-row" style={{ marginTop: 14 }}>
                     <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
-                    {question.status === 'Pending' && (
-                      <>
-                        <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); navigate(`${routes.askQuestion}?editQuestionId=${question.id}`) }}>Edit</button>
-                        <button className="btn btn-danger" onClick={(event) => { event.stopPropagation(); actions.revokeQuestion(question.id) }}>Delete</button>
-                      </>
-                    )}
                     {question.status === 'Answered' && !question.dispute && (
                       <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); navigate(`${routes.raiseDispute}?questionId=${question.id}`) }}>Raise Dispute</button>
                     )}
@@ -302,12 +367,41 @@ export default function TrackQuestions() {
                 </div>
               </div>
 
-              <div>
-                <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
-                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  <ContentPreview content={selectedQuestion.answer || 'No answer yet.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
+              {selectedQuestion.status === 'Answered' && (
+                <div>
+                  <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
+                  <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                    <ContentPreview content={selectedQuestion.answer || 'No answer yet.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {selectedQuestion.status === 'Pending' && selectedQuestion.submittedAt && (
+                <div>
+                  <div className="field-label-top" style={{ marginBottom: 8 }}>Time Limits</div>
+                  <div className="flex flex-wrap gap-3">
+                    {(() => {
+                      const { editTimeRemaining, deleteTimeRemaining, isEditEnabled, isDeleteEnabled } = getQuestionTimeLimits(selectedQuestion)
+                      return (
+                        <>
+                          <TimeLimitBadge
+                            label="Edit"
+                            timeRemaining={editTimeRemaining}
+                            tooltip="You can edit this question within 30 minutes."
+                            isEnabled={isEditEnabled}
+                          />
+                          <TimeLimitBadge
+                            label="Delete"
+                            timeRemaining={deleteTimeRemaining}
+                            tooltip="You can delete this question within 1 hour."
+                            isEnabled={isDeleteEnabled}
+                          />
+                        </>
+                      )
+                    })()}
+                  </div>
+                </div>
+              )}
 
               {selectedQuestion.dispute && (
                 <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
@@ -380,6 +474,23 @@ export default function TrackQuestions() {
               )}
             </div>
             <div className="modal-card__footer user-modal-card__footer">
+              {selectedQuestion.status === 'Pending' && selectedQuestion.submittedAt && (() => {
+                const { isEditEnabled, isDeleteEnabled } = getQuestionTimeLimits(selectedQuestion)
+                return (
+                  <>
+                    {isEditEnabled && (
+                      <button className="btn btn-outline" onClick={() => { closeQuestion(); navigate(`${routes.askQuestion}?editQuestionId=${selectedQuestion.id}`) }}>
+                        Edit
+                      </button>
+                    )}
+                    {isDeleteEnabled && (
+                      <button className="btn btn-danger" onClick={() => setDeleteConfirmId(selectedQuestion.id)}>
+                        Delete
+                      </button>
+                    )}
+                  </>
+                )
+              })()}
               {showRaiseDispute && (
                 <button className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${selectedQuestion.id}`)}>
                   Raise Dispute
@@ -391,6 +502,40 @@ export default function TrackQuestions() {
                 </button>
               )}
               <button className="btn btn-ghost" onClick={closeQuestion}>Close</button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {deleteConfirmId && createPortal(
+        <div className="modal-overlay user-modal-overlay" onClick={() => setDeleteConfirmId(null)}>
+          <div
+            className="modal-card user-modal-card"
+            style={{ width: 'min(400px, calc(100vw - 32px))' }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-confirm-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="user-modal-card__header flex items-center justify-between gap-4">
+              <div id="delete-confirm-title" className="section-title" style={{ marginBottom: 0 }}>Delete Question?</div>
+              <button type="button" className="icon-btn" aria-label="Close" onClick={() => setDeleteConfirmId(null)}>
+                <X size={16} />
+              </button>
+            </div>
+            <div className="user-modal-card__content">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="text-[color:var(--red-500)] mt-0.5" />
+                <div>
+                  <div>Are you sure you want to delete this question?</div>
+                  <div className="muted text-sm" style={{ marginTop: 8 }}>This action cannot be undone.</div>
+                </div>
+              </div>
+            </div>
+            <div className="user-modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setDeleteConfirmId(null)}>Cancel</button>
+              <button type="button" className="btn btn-danger" onClick={() => confirmDelete(deleteConfirmId)}>Delete Question</button>
             </div>
           </div>
         </div>,
