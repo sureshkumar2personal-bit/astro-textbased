@@ -69,7 +69,10 @@ export default function SalesManagement() {
       <Section title={`All Campaigns (${campaignCards.length})`} icon={TempleDonationBoxIcon}>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="muted">Select a campaign card to view complete details.</div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="campaign-toolbar">
+            <button className="btn btn-primary" type="button" onClick={() => setCreateOpen(true)}>
+              <TempleDonationBoxIcon size={15} />Create Campaign
+            </button>
             <div className="search-bar">
               <input
                 className="text-input search-bar__input"
@@ -84,9 +87,6 @@ export default function SalesManagement() {
                 <Search size={18} />
               </button>
             </div>
-            <button className="btn btn-primary" type="button" onClick={() => setCreateOpen(true)}>
-              <TempleDonationBoxIcon size={15} />Create Campaign
-            </button>
           </div>
         </div>
 

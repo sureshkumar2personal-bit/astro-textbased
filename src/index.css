@@ -1501,6 +1501,13 @@ textarea:focus-visible {
   margin-bottom: 16px;
 }
 
+.campaign-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
 .search-filter-row {
   display: flex;
   align-items: flex-start;
@@ -1534,6 +1541,8 @@ textarea:focus-visible {
 }
 
 @media (max-width: 720px) {
+  .campaign-toolbar { flex-wrap: wrap; }
+
   .search-filter-row {
     flex-wrap: wrap;
     gap: 16px;
