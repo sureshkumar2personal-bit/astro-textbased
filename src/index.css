@@ -1049,6 +1049,21 @@ textarea:focus-visible {
   text-align: center;
 }
 
+.followed-astrologers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 24px;
+  justify-items: center;
+}
+
+@media (max-width: 1023px) {
+  .followed-astrologers-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .followed-astrologers-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 .astrologer-card__avatar-wrap {
   position: relative;
   margin-bottom: 7px;

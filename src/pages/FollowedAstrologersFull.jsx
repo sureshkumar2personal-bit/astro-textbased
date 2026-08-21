@@ -23,7 +23,7 @@ export default function FollowedAstrologersFull() {
         <BackButton to={routes.astrologers} />
       </div>
 
-      <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="followed-astrologers-grid">
         {followedAstrologers.map((astrologer) => (
           <AstrologerCard
             key={astrologer.id}
