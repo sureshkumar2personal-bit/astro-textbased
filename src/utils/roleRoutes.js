@@ -30,6 +30,7 @@ export function getRoleRoutes(role) {
     suggestedAstrologers: `${base}/suggested-astrologers`,
     callPackages: `${base}/call-packages`,
     walletPayment: `${base}/wallet-payment`,
+    call: `${base}/call`,
     chatWalletPayment: `${base}/chat-wallet-payment`,
     chatBooking: `${base}/chat-booking`,
     chat: `${base}/chat`,

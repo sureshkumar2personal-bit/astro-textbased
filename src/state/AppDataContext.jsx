@@ -603,7 +603,7 @@ export function AppDataProvider({ children }) {
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
   const [questionPreviewId, setQuestionPreviewId] = useState(null)
   const [appointments, setAppointments] = useState(mockAppointments)
-  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo'])
+  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
   const [subscriptions, setSubscriptions] = useState([])
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
@@ -663,6 +663,29 @@ export function AppDataProvider({ children }) {
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
+    debitUserWallet({ amount, astrologer, duration, service = 'Call', transactionId }) {
+      setUserWallet((prev) => {
+        if (transactionId && prev.transactions.some((transaction) => transaction.id === transactionId)) return prev
+        const value = Number(amount) || 0
+        return {
+          ...prev,
+          balance: prev.balance - value,
+          spent: (prev.spent || 0) + value,
+          transactions: [
+            {
+              id: transactionId || crypto.randomUUID(),
+              label: `${service} with ${astrologer}`,
+              amount: `-₹${value.toLocaleString('en-IN')}`,
+              time: 'just now',
+              date: new Date().toISOString(),
+              type: 'purchase',
+              duration,
+            },
+            ...prev.transactions,
+          ],
+        }
+      })
+    },
     updateAstrologerServices(patch) {
       setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, ...patch }))
     },

@@ -5,6 +5,7 @@ import { CALL_PACKAGES, mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import PaymentSuccess from '../components/PaymentSuccess.jsx'
 
 function money(value) { return `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` }
 export default function WalletPayment() {
@@ -19,40 +20,23 @@ export default function WalletPayment() {
   const balance = Number(userWallet?.balance || 0)
   const remainingBalance = balance - amount
   const sufficient = balance >= amount
+  const paymentKey = `astro-connect:call-payment:${currentUser?.id || 'guest'}:${astrologer.id}:${selectedPackage.id}`
   const [confirming, setConfirming] = useState(false)
-  const [paid, setPaid] = useState(false)
+  const [paid, setPaid] = useState(() => localStorage.getItem(paymentKey) === 'successful')
   const [processing, setProcessing] = useState(false)
 
   const confirmPayment = () => {
     if (!sufficient || processing || paid) return
     setProcessing(true)
-    actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: selectedPackage.duration })
+    const transactionId = paymentKey
+    actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: selectedPackage.duration, service: 'Call', transactionId })
+    localStorage.setItem(paymentKey, 'successful')
     setPaid(true)
     setConfirming(false)
     setProcessing(false)
   }
 
-  if (paid) {
-    return (
-      <main className="wallet-payment-page">
-        <section className="wallet-success-card">
-          <span className="wallet-success-card__icon"><Check size={25} aria-hidden="true" /></span>
-          <h1>Call Booked Successfully</h1>
-          <p>Your call booking with {astrologer.name} has been confirmed.</p>
-          <dl>
-            <div><dt>Astrologer</dt><dd>{astrologer.name}</dd></div>
-            <div><dt>Duration</dt><dd>{selectedPackage.duration} Minutes</dd></div>
-            <div><dt>Amount Paid</dt><dd>{money(amount)}</dd></div>
-            <div><dt>Payment</dt><dd>Wallet</dd></div>
-          </dl>
-          <div className="wallet-success-card__actions">
-            <button type="button" className="btn btn-primary" onClick={() => navigate(`${routes.astrologerProfile}?id=${astrologer.id}`)}>View Booking</button>
-            <button type="button" className="btn btn-outline" onClick={() => navigate(routes.astrologers)}>Back to Astrologers</button>
-          </div>
-        </section>
-      </main>
-    )
-  }
+  if (paid) return <PaymentSuccess service="call" astrologer={astrologer} details={{ packageMinutes: selectedPackage.duration, rate: selectedPackage.rate, amount }} onPrimary={() => navigate(`${routes.call}?id=${astrologer.id}&package=${selectedPackage.id}`)} onBack={() => navigate(routes.astrologers)} />
 
   return (
     <main className="wallet-payment-page">
