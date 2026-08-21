@@ -25,6 +25,7 @@ import SuggestedAstrologers from './pages/SuggestedAstrologers.jsx'
 import CallPackageSelection from './pages/CallPackageSelection.jsx'
 import ChatBooking from './pages/ChatBooking.jsx'
 import ChatScreen from './pages/ChatScreen.jsx'
+import CallScreen from './pages/CallScreen.jsx'
 import WalletPayment from './pages/WalletPayment.jsx'
 import ChatWalletPayment from './pages/ChatWalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
@@ -101,6 +102,7 @@ function UserRoutes() {
         <Route path="/user/call-packages" element={<CallPackageSelection />} />
         <Route path="/user/chat-booking" element={<ChatBooking />} />
         <Route path="/user/chat" element={<ChatScreen />} />
+        <Route path="/user/call" element={<CallScreen />} />
         <Route path="/user/wallet-payment" element={<WalletPayment />} />
         <Route path="/user/chat-wallet-payment" element={<ChatWalletPayment />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />

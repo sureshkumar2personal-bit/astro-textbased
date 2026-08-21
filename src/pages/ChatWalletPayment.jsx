@@ -5,6 +5,7 @@ import { CHAT_PACKAGES, mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import PaymentSuccess from '../components/PaymentSuccess.jsx'
 
 const FREE_SECONDS = 120
 const money = (value) => `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -21,6 +22,16 @@ function readFreeSession(key) {
       return used
     }
     return session
+  } catch {
+    return null
+  }
+}
+
+function readPayment(key) {
+  try {
+    const value = localStorage.getItem(key)
+    if (value === 'successful') return { status: 'successful' }
+    return JSON.parse(value || 'null')
   } catch {
     return null
   }
@@ -44,22 +55,25 @@ export default function ChatWalletPayment() {
   const paymentKey = `astro-connect:chat-payment:${currentUser?.id || 'guest'}:${astrologer.id}:${selectedPackage.id}`
   const [confirming, setConfirming] = useState(false)
   const [processing, setProcessing] = useState(false)
-  const [paid, setPaid] = useState(() => localStorage.getItem(paymentKey) === 'successful')
+  const [paymentDetails, setPaymentDetails] = useState(() => readPayment(paymentKey))
+  const [paid, setPaid] = useState(() => readPayment(paymentKey)?.status === 'successful')
 
   const confirmPayment = () => {
     if (!sufficient || processing || paid) return
     setProcessing(true)
-    actions.debitUserWallet({ amount: selectedPackage.total, astrologer: astrologer.name, duration: selectedPackage.duration })
+    const purchasedFreeSeconds = freeSeconds
+    const transactionId = paymentKey
+    actions.debitUserWallet({ amount: selectedPackage.total, astrologer: astrologer.name, duration: selectedPackage.duration, service: 'Chat', transactionId })
     localStorage.setItem(sessionKey, JSON.stringify({ startedAt: Date.now(), freeUsed: true, freeRemaining: 0, paidDuration: selectedPackage.duration * 60, totalDuration: totalSeconds }))
-    localStorage.setItem(paymentKey, 'successful')
+    const details = { status: 'successful', amount: selectedPackage.total, packageMinutes: selectedPackage.duration, freeMinutes: Math.ceil(purchasedFreeSeconds / 60), totalMinutes: Math.floor((selectedPackage.duration * 60 + purchasedFreeSeconds) / 60) }
+    localStorage.setItem(paymentKey, JSON.stringify(details))
+    setPaymentDetails(details)
     setPaid(true)
     setConfirming(false)
     setProcessing(false)
   }
 
-  if (paid) {
-    return <main className="wallet-payment-page"><section className="wallet-success-card"><span className="wallet-success-card__icon"><Check size={25} aria-hidden="true" /></span><h1>Payment Successful</h1><p>Your chat package with {astrologer.name} is ready.</p><dl><div><dt>Package</dt><dd>{selectedPackage.duration} Minutes</dd></div><div><dt>Free Time</dt><dd>{freeSeconds ? '2 Minutes Included' : 'Used'}</dd></div><div><dt>Total Chat</dt><dd>{Math.floor(totalSeconds / 60)} Minutes</dd></div><div><dt>Amount Paid</dt><dd>{money(selectedPackage.total)}</dd></div><div><dt>Payment Method</dt><dd>Wallet</dd></div></dl><button type="button" className="btn btn-primary wallet-payment-page__pay" onClick={() => navigate(`${routes.chat}?id=${astrologer.id}&mode=paid&package=${selectedPackage.id}`)}>Enter Chat →</button></section></main>
-  }
+  if (paid) return <PaymentSuccess service="chat" astrologer={astrologer} details={paymentDetails || { packageMinutes: selectedPackage.duration, freeMinutes: 0, totalMinutes: selectedPackage.duration, amount: selectedPackage.total }} onPrimary={() => navigate(`${routes.chat}?id=${astrologer.id}&mode=paid&package=${selectedPackage.id}`)} onBack={() => navigate(routes.astrologers)} />
 
   return (
     <main className="wallet-payment-page">

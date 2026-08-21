@@ -1695,6 +1695,27 @@ textarea:focus-visible {
 .wallet-success-card h1 { margin-top: 12px; font-size: 22px; }
 .wallet-success-card dl { margin: 20px 0; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .wallet-success-card__actions { display: flex; justify-content: center; gap: 9px; }
+.payment-success-page { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 120px); padding: 24px 16px 40px; }
+.payment-success-card { max-width: 460px; padding: 28px 30px; }
+.payment-success-card > p { margin-bottom: 18px; }
+.payment-success-card__astrologer { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 13px 0; border-bottom: 1px solid var(--border); text-align: left; }
+.payment-success-card__astrologer > div:last-child { display: grid; gap: 2px; }
+.payment-success-card__astrologer strong { color: var(--ink); font-size: 15px; }
+.payment-success-card__astrologer span { color: var(--primary); font-size: 12px; font-weight: 600; }
+.payment-success-card__astrologer small { color: var(--muted); font-size: 11px; }
+.payment-success-card__astrologer em { color: var(--text-secondary); font-size: 11px; font-style: normal; font-weight: 600; }
+.payment-success-card dl { margin: 0 0 20px; padding: 0 0 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.payment-success-card dl > div { padding: 5px 0; }
+.payment-success-card__actions { flex-direction: column; }
+.payment-success-card__actions .btn { width: 100%; }
+.consultation-call { display: flex; justify-content: center; padding: 30px 16px; }
+.consultation-call__card { display: flex; width: min(100%, 460px); flex-direction: column; align-items: center; gap: 12px; padding: 24px; border: 1px solid var(--surface-border); border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-float); text-align: center; }
+.consultation-call__card .wallet-payment-page__back { align-self: flex-start; }
+.consultation-call__avatar { display: flex; width: 76px; height: 76px; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); color: #fff; font-size: 24px; font-weight: 700; }
+.consultation-call__status { display: inline-flex; align-items: center; gap: 5px; color: var(--success); font-size: 12px; font-weight: 700; }
+.consultation-call__card h1 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; }
+.consultation-call__card p { margin: 0 0 8px; color: var(--muted); font-size: 14px; }
+.consultation-call__card .btn { width: 100%; }
 
 @media (max-width: 640px) {
   .wallet-payment-page { padding-bottom: 20px; }

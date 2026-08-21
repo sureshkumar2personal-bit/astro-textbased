@@ -663,6 +663,29 @@ export function AppDataProvider({ children }) {
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
+    debitUserWallet({ amount, astrologer, duration, service = 'Call', transactionId }) {
+      setUserWallet((prev) => {
+        if (transactionId && prev.transactions.some((transaction) => transaction.id === transactionId)) return prev
+        const value = Number(amount) || 0
+        return {
+          ...prev,
+          balance: prev.balance - value,
+          spent: (prev.spent || 0) + value,
+          transactions: [
+            {
+              id: transactionId || crypto.randomUUID(),
+              label: `${service} with ${astrologer}`,
+              amount: `-₹${value.toLocaleString('en-IN')}`,
+              time: 'just now',
+              date: new Date().toISOString(),
+              type: 'purchase',
+              duration,
+            },
+            ...prev.transactions,
+          ],
+        }
+      })
+    },
     updateAstrologerServices(patch) {
       setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, ...patch }))
     },
