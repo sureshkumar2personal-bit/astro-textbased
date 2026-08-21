@@ -6,29 +6,6 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
-const followedAstrologerAdditions = [
-  {
-    id: 'followed-nandini-kapoor',
-    name: 'Nandini Kapoor',
-    specialization: 'KP Astrology',
-    experience: '11 years',
-    availability: 'Online',
-    languages: ['English', 'Hindi', 'Punjabi'],
-    followers: 3200,
-    consultationRate: 20,
-  },
-  {
-    id: 'followed-dev-malhotra',
-    name: 'Dev Malhotra',
-    specialization: 'Western Astrology',
-    experience: '9 years',
-    availability: 'Online',
-    languages: ['English', 'Hindi'],
-    followers: 2800,
-    consultationRate: 15,
-  },
-]
-
 function AstrologerSection({ title, astrologers, viewMoreTo, onViewProfile, onCall, onChat }) {
   return (
     <section className="astrologer-list-section" aria-labelledby={`${title.toLowerCase().replaceAll(' ', '-')}-heading`}>
@@ -52,10 +29,7 @@ export default function Astrologers() {
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const { followedAstrologerIds, subscriptions } = useAppData()
-  const followedAstrologers = [
-    mockAstrologers.find((astrologer) => astrologer.id === 'astrologer-demo'),
-    ...followedAstrologerAdditions,
-  ].filter(Boolean)
+  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id))
   const subscribedAstrologerIds = subscriptions
     .filter((subscription) => subscription.userId === currentUser?.id)
     .map((subscription) => subscription.astrologerId)

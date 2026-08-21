@@ -603,7 +603,7 @@ export function AppDataProvider({ children }) {
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
   const [questionPreviewId, setQuestionPreviewId] = useState(null)
   const [appointments, setAppointments] = useState(mockAppointments)
-  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo'])
+  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11'])
   const [subscriptions, setSubscriptions] = useState([])
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
