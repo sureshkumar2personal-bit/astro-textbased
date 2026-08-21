@@ -12,6 +12,7 @@ import {
   Bell,
   Wallet,
   LogOut,
+  History,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -40,6 +41,7 @@ const ROLE_CONFIG = {
       { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
       { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
       { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+      { to: 'consultation-history', label: 'Consultation History', icon: History },
     ],
   },
   [ROLES.USER]: {
@@ -70,6 +72,7 @@ const PAGE_META = {
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {
@@ -125,6 +128,22 @@ export default function Layout() {
   const unreadNotificationCount = visibleNotifications.filter((item) => !item.read).length
   const [panel, setPanel] = useState(null)
   const actionRef = useRef(null)
+
+  useEffect(() => {
+    if (!isAstrologer) return undefined
+
+    const updatePresence = () => actions.setAstrologerPresence(document.visibilityState === 'visible')
+    updatePresence()
+    document.addEventListener('visibilitychange', updatePresence)
+    window.addEventListener('focus', updatePresence)
+    window.addEventListener('blur', updatePresence)
+    return () => {
+      document.removeEventListener('visibilitychange', updatePresence)
+      window.removeEventListener('focus', updatePresence)
+      window.removeEventListener('blur', updatePresence)
+      actions.setAstrologerPresence(false)
+    }
+  }, [actions, isAstrologer])
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -205,6 +224,7 @@ export default function Layout() {
               className="icon-btn danger"
               aria-label="Logout"
               onClick={() => {
+                if (isAstrologer) actions.setAstrologerPresence(false)
                 logout()
                 navigate('/login')
               }}

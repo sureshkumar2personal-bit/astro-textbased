@@ -25,6 +25,7 @@ import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/LiveSession.jsx'
+import ConsultationHistory from './pages/ConsultationHistory.jsx'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -68,6 +69,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
         <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
+        <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
       </Route>
     </Route>
   )

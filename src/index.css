@@ -1685,6 +1685,11 @@ button.social-profile__audience-item { cursor: pointer; }
 .service-toggle.is-locked .toggle-switch { background: var(--border); }
 .service-lock-message { margin: -8px 0 16px; padding: 10px 12px; border-radius: var(--radius-s); background: var(--warning-bg); color: var(--amber-600); font-size: 13px; font-weight: 600; }
 .hero-services-guidance { overflow: hidden; text-overflow: ellipsis; color: #fed7aa; }
+.dashboard-service-controls { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; }
+.dashboard-service-controls label { display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; }
+.dashboard-service-controls input { accent-color: var(--accent); width: 11px; height: 11px; margin: 0; }
+.dashboard-service-controls label:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+.dashboard-service-control--dnd { color: #fed7aa !important; }
 
 .profile-service-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--text-secondary); font-size: 13px; font-weight: 700; }
 .service-status-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--danger); }
@@ -2043,6 +2048,15 @@ tbody tr:hover {
   padding-left: 12px;
   padding-right: 12px;
 }
+
+.consultation-history-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.consultation-history-toolbar .search-bar { flex: 1 1 240px; }
+.history-date-filter { display: inline-flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 13px; }
+.history-date-filter input { height: 40px; min-width: 132px; padding: 0 8px; border: 1px solid var(--surface-border); border-radius: var(--radius-xs); color: var(--text-primary); background: var(--surface-strong); }
+.consultation-customer-row { width: 100%; border: 0; border-bottom: 1px solid var(--divider); background: transparent; text-align: left; cursor: pointer; }
+.consultation-customer-row:last-child { border-bottom: 0; }
+.consultation-customer-row .text-right { margin-left: auto; }
+.consultation-history-stats { margin-bottom: 16px; }
 
 .activity-id {
   font-weight: 700;

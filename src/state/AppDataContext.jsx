@@ -545,6 +545,15 @@ function saveToStorage(key, value) {
 const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 
+const initialConsultationHistory = [
+  { id: 'consult-chat-001', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-20T10:30:00+05:30', durationMinutes: 24, pricePerMinute: 15, amount: 360, status: 'Completed' },
+  { id: 'consult-audio-001', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-18T18:15:00+05:30', durationMinutes: 32, pricePerMinute: 25, amount: 800, status: 'Completed' },
+  { id: 'consult-chat-002', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Chat', startedAt: '2026-08-19T14:10:00+05:30', durationMinutes: 18, pricePerMinute: 15, amount: 270, status: 'Completed' },
+  { id: 'consult-audio-002', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Audio Call', startedAt: '2026-08-16T09:00:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
+  { id: 'consult-chat-003', customerId: 'customer-devi', customerName: 'Devi', type: 'Chat', startedAt: '2026-08-17T20:45:00+05:30', durationMinutes: 41, pricePerMinute: 15, amount: 615, status: 'Completed' },
+  { id: 'consult-audio-003', customerId: 'customer-arun', customerName: 'Arun', type: 'Audio Call', startedAt: '2026-08-15T16:20:00+05:30', durationMinutes: 28, pricePerMinute: 25, amount: 700, status: 'Completed' },
+]
+
 export const DEFAULT_ASTROLOGER_SERVICES = {
   isOnline: true,
   callEnabled: true,
@@ -571,13 +580,15 @@ function normalizeAstrologerServices(value) {
   }
 }
 
-export function getEffectiveAstrologerServices(settings) {
+export function getEffectiveAstrologerServices(settings, presenceActive = undefined) {
   const normalized = normalizeAstrologerServices(settings)
+  const isPresent = presenceActive === undefined ? normalized.isOnline : presenceActive
   return {
     ...normalized,
-    available: normalized.isOnline && !normalized.dndEnabled,
-    callAvailable: normalized.isOnline && !normalized.dndEnabled && normalized.callEnabled,
-    chatAvailable: normalized.isOnline && !normalized.dndEnabled && normalized.chatEnabled,
+    isOnline: isPresent,
+    available: isPresent && !normalized.dndEnabled,
+    callAvailable: isPresent && !normalized.dndEnabled && normalized.callEnabled,
+    chatAvailable: isPresent && !normalized.dndEnabled && normalized.chatEnabled,
   }
 }
 
@@ -596,6 +607,8 @@ export function AppDataProvider({ children }) {
   const [subscriptions, setSubscriptions] = useState([])
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [consultationHistory] = useState(initialConsultationHistory)
+  const [presenceActive, setPresenceActive] = useState(false)
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
   ))
@@ -652,6 +665,9 @@ export function AppDataProvider({ children }) {
     setQuestionPreviewId,
     updateAstrologerServices(patch) {
       setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, ...patch }))
+    },
+    setAstrologerPresence(active) {
+      setPresenceActive(Boolean(active))
     },
     toggleCampaignOffer(campaignId, offerKey) {
       setCampaigns((prev) =>
@@ -1471,7 +1487,9 @@ export function AppDataProvider({ children }) {
     subscriptions,
     blockedUserIds,
     purchasedSlots,
-    astrologerServices: getEffectiveAstrologerServices(astrologerServices),
+    consultationHistory,
+    presenceActive,
+    astrologerServices: getEffectiveAstrologerServices(astrologerServices, presenceActive),
     setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
@@ -1498,6 +1516,8 @@ export function AppDataProvider({ children }) {
     subscriptions,
     blockedUserIds,
     purchasedSlots,
+    consultationHistory,
+    presenceActive,
     astrologerServices,
     actions,
   ])

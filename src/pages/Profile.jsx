@@ -78,7 +78,10 @@ export default function Profile() {
         throw new Error('Service prices must be zero or greater.')
       }
       updateProfile(form)
-      if (isAstrologer) actions.updateAstrologerServices(servicesForm)
+      if (isAstrologer) actions.updateAstrologerServices({
+        callPricePerMinute: servicesForm.callPricePerMinute,
+        chatPricePerMinute: servicesForm.chatPricePerMinute,
+      })
       setEditing(false)
       setSaved(true)
       setError('')
@@ -101,17 +104,10 @@ export default function Profile() {
           </div>
           {isAstrologer && (
             <div className="profile-services-editor">
-              <div className="profile-edit-card__heading"><PhoneCall size={20} /><div><h2>Services & Availability</h2><p>Choose how users can reach you and set separate per-minute prices.</p></div></div>
-              {servicesForm.dndEnabled && <div className="service-lock-message">Dyan/DND mode is active. Turn it off to change availability or services.</div>}
-              <div className="profile-services-grid">
-                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Online</strong><small>Accept online services</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.isOnline} onChange={(event) => setServicesForm({ ...servicesForm, isOnline: event.target.checked })} /><span className="toggle-switch" /></label>
-                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Call</strong><small>Voice consultation</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.callEnabled} onChange={(event) => setServicesForm({ ...servicesForm, callEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
-                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Chat</strong><small>Text consultation</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.chatEnabled} onChange={(event) => setServicesForm({ ...servicesForm, chatEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
-                <label className="service-toggle service-toggle--dnd"><span><strong>Dyan / DND mode</strong><small>Everything becomes unavailable</small></span><input type="checkbox" checked={servicesForm.dndEnabled} onChange={(event) => setServicesForm({ ...servicesForm, dndEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
-              </div>
+              <div className="profile-edit-card__heading"><PhoneCall size={20} /><div><h2>Service Pricing</h2><p>Set separate per-minute prices for calls and chats. Availability controls are on the dashboard.</p></div></div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2" style={{ marginTop: 16 }}>
-                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Call price per minute (₹)</span><input type="number" min="0" disabled={servicesForm.dndEnabled} className="text-input" value={servicesForm.callPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, callPricePerMinute: Number(event.target.value) })} /></label>
-                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Chat price per minute (₹)</span><input type="number" min="0" disabled={servicesForm.dndEnabled} className="text-input" value={servicesForm.chatPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, chatPricePerMinute: Number(event.target.value) })} /></label>
+                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Call price per minute (₹)</span><input type="number" min="0" className="text-input" value={servicesForm.callPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, callPricePerMinute: Number(event.target.value) })} /></label>
+                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Chat price per minute (₹)</span><input type="number" min="0" className="text-input" value={servicesForm.chatPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, chatPricePerMinute: Number(event.target.value) })} /></label>
               </div>
             </div>
           )}

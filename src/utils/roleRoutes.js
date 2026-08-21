@@ -22,6 +22,7 @@ export function getRoleRoutes(role) {
     campaigns: `${base}/campaigns`,
     answerQuestion: `${base}/answer-question`,
     disputeManagement: `${base}/dispute-management`,
+    consultationHistory: `${base}/consultation-history`,
     astrologerProfile: `${base}/astrologer-profile`,
     astrologers: `${base}/astrologers`,
     discountQuestions: `${base}/discount-questions`,
