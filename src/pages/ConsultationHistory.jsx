@@ -75,14 +75,14 @@ export default function ConsultationHistory() {
       <Section>
         <Card>
           <div className="consultation-history-toolbar">
-            <div className="search-bar">
-              <input className="text-input search-bar__input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customer or session" />
-              <span className="icon-btn" aria-hidden="true"><Search size={17} /></span>
-            </div>
             <div className="chip-grid">
               {FILTER_TYPES.map((option) => <button key={option} type="button" className={`chip${type === option ? ' selected' : ''}`} onClick={() => setType(option)}>{option}</button>)}
             </div>
             <label className="history-date-filter"><CalendarDays size={15} /><input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} aria-label="From date" /><span>to</span><input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} aria-label="To date" /></label>
+            <div className="search-bar">
+              <input className="text-input search-bar__input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customer or session" />
+              <span className="icon-btn" aria-hidden="true"><Search size={17} /></span>
+            </div>
           </div>
         </Card>
       </Section>

@@ -2790,13 +2790,17 @@ tbody tr:hover {
 }
 
 .consultation-history-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.consultation-history-toolbar .search-bar { flex: 1 1 240px; }
+.consultation-history-toolbar .search-bar { flex: 0 0 220px; width: 220px; }
 .history-date-filter { display: inline-flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 13px; }
 .history-date-filter input { height: 40px; min-width: 132px; padding: 0 8px; border: 1px solid var(--surface-border); border-radius: var(--radius-xs); color: var(--text-primary); background: var(--surface-strong); }
 .consultation-customer-row { width: 100%; border: 0; border-bottom: 1px solid var(--divider); background: transparent; text-align: left; cursor: pointer; }
 .consultation-customer-row:last-child { border-bottom: 0; }
 .consultation-customer-row .text-right { margin-left: auto; }
 .consultation-history-stats { margin-bottom: 16px; }
+
+@media (max-width: 720px) {
+  .consultation-history-toolbar .search-bar { flex: 1 1 100%; width: 100%; }
+}
 
 .activity-id {
   font-weight: 700;
