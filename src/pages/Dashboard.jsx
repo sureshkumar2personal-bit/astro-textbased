@@ -9,6 +9,7 @@ import {
   MessageCircleReply,
   Gavel,
   LineChart,
+  History,
   ArrowRight,
   MessageCircle,
   PhoneCall,
@@ -249,6 +250,7 @@ export default function Dashboard() {
           <ActionCard icon={MessageCircleReply} title="Answer a question" to={routes.answerQuestion} />
           <ActionCard icon={Gavel} title="Handle a dispute" to={routes.disputeManagement} />
           <ActionCard icon={LineChart} title="Manage text sales" to={routes.salesManagement} />
+          <ActionCard icon={History} title="Consultation History" to={routes.consultationHistory} />
         </div>
       </Card>
 
