@@ -10,6 +10,8 @@ import {
   Gavel,
   LineChart,
   ArrowRight,
+  MessageCircle,
+  PhoneCall,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
@@ -23,7 +25,7 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 
 export default function Dashboard() {
-  const { campaigns, questions, selectedCampaign } = useAppData()
+  const { campaigns, questions, selectedCampaign, astrologerServices } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
@@ -131,6 +133,21 @@ export default function Dashboard() {
   return (
     <div>
       <div className="hero-banner">
+        <div className="hero-services-summary" aria-label="Service availability">
+          <span className={`hero-services-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`}>
+            <span className="service-status-dot" />
+            {astrologerServices.dndEnabled ? 'Dyan / DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
+          </span>
+          {astrologerServices.dndEnabled ? (
+            <span className="hero-services-guidance">Turn off Dyan/DND in Profile → Services</span>
+          ) : (
+            <span className="hero-services-modes">
+              {astrologerServices.callAvailable && <span><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
+              {astrologerServices.chatAvailable && <span><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
+              {!astrologerServices.callAvailable && !astrologerServices.chatAvailable && <span>Services unavailable</span>}
+            </span>
+          )}
+        </div>
         <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
           Welcome back
         </div>

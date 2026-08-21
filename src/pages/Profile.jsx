@@ -1,4 +1,4 @@
-import { BadgeCheck, Grid3X3, Info, Mail, MapPin, Phone, Radio, UserCircle2, X } from 'lucide-react'
+import { BadgeCheck, Grid3X3, Info, Mail, MapPin, MessageCircle, Phone, PhoneCall, Radio, UserCircle2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import Card from '../components/ui/Card.jsx'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
@@ -24,13 +24,14 @@ function initials(name) {
 
 export default function Profile() {
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, blockedUserIds, actions } = useAppData()
+  const { subscriptions, blockedUserIds, actions, astrologerServices } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const [editing, setEditing] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
   const [selectedMember, setSelectedMember] = useState(null)
   const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
+  const [servicesForm, setServicesForm] = useState(astrologerServices)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
 
@@ -67,12 +68,17 @@ export default function Profile() {
     setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
     setError('')
     setSaved(false)
+    setServicesForm(astrologerServices)
     setEditing(true)
   }
 
   const handleSave = () => {
     try {
+      if (servicesForm.callPricePerMinute < 0 || servicesForm.chatPricePerMinute < 0) {
+        throw new Error('Service prices must be zero or greater.')
+      }
       updateProfile(form)
+      if (isAstrologer) actions.updateAstrologerServices(servicesForm)
       setEditing(false)
       setSaved(true)
       setError('')
@@ -93,6 +99,22 @@ export default function Profile() {
             {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><input className="text-input" value={form.specialization} onChange={(event) => setForm({ ...form, specialization: event.target.value })} /></label>}
             {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><input className="text-input" value={form.experience} onChange={(event) => setForm({ ...form, experience: event.target.value })} placeholder="8 years" /></label>}
           </div>
+          {isAstrologer && (
+            <div className="profile-services-editor">
+              <div className="profile-edit-card__heading"><PhoneCall size={20} /><div><h2>Services & Availability</h2><p>Choose how users can reach you and set separate per-minute prices.</p></div></div>
+              {servicesForm.dndEnabled && <div className="service-lock-message">Dyan/DND mode is active. Turn it off to change availability or services.</div>}
+              <div className="profile-services-grid">
+                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Online</strong><small>Accept online services</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.isOnline} onChange={(event) => setServicesForm({ ...servicesForm, isOnline: event.target.checked })} /><span className="toggle-switch" /></label>
+                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Call</strong><small>Voice consultation</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.callEnabled} onChange={(event) => setServicesForm({ ...servicesForm, callEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
+                <label className={`service-toggle${servicesForm.dndEnabled ? ' is-locked' : ''}`}><span><strong>Chat</strong><small>Text consultation</small></span><input type="checkbox" disabled={servicesForm.dndEnabled} checked={servicesForm.chatEnabled} onChange={(event) => setServicesForm({ ...servicesForm, chatEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
+                <label className="service-toggle service-toggle--dnd"><span><strong>Dyan / DND mode</strong><small>Everything becomes unavailable</small></span><input type="checkbox" checked={servicesForm.dndEnabled} onChange={(event) => setServicesForm({ ...servicesForm, dndEnabled: event.target.checked })} /><span className="toggle-switch" /></label>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2" style={{ marginTop: 16 }}>
+                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Call price per minute (₹)</span><input type="number" min="0" disabled={servicesForm.dndEnabled} className="text-input" value={servicesForm.callPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, callPricePerMinute: Number(event.target.value) })} /></label>
+                <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Chat price per minute (₹)</span><input type="number" min="0" disabled={servicesForm.dndEnabled} className="text-input" value={servicesForm.chatPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, chatPricePerMinute: Number(event.target.value) })} /></label>
+              </div>
+            </div>
+          )}
           {error && <div className="profile-message profile-message--error">{error}</div>}
           <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={handleSave}>Save Changes</button></div>
         </Card>
@@ -125,12 +147,13 @@ export default function Profile() {
           </Card>
 
           <div className="social-profile__tabs" role="tablist" aria-label="Profile sections">
-            {[['Posts', Grid3X3], ['Live', Radio], ['Other', Info]].map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
+            {[['Posts', Grid3X3], ['Live', Radio], [isAstrologer ? 'Services' : 'Other', Info]].map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
           </div>
 
           {activeTab === 'Posts' && <div className="social-profile__posts">{isAstrologer ? PROFILE_POSTS.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone}`}><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>{post.title}</h2><p>{post.body}</p><span className="muted">Astrology insight · 2 days ago</span></Card>) : <Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card>}</div>}
           {activeTab === 'Live' && <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>}
-          {activeTab === 'Other' && <Card className="social-profile__panel"><div className="section-title">Profile details</div><div className="social-profile__details"><div><strong>Email</strong><span><Mail size={14} /> {currentUser?.email || 'Not added'}</span></div><div><strong>Phone</strong><span><Phone size={14} /> {currentUser?.phone || 'Not added'}</span></div>{isAstrologer && <><div><strong>Specialization</strong><span>{currentUser?.specialization || 'Not added'}</span></div><div><strong>Experience</strong><span>{currentUser?.experience || 'Not added'}</span></div></>}</div></Card>}
+          {activeTab === 'Other' && !isAstrologer && <Card className="social-profile__panel"><div className="section-title">Profile details</div><div className="social-profile__details"><div><strong>Email</strong><span><Mail size={14} /> {currentUser?.email || 'Not added'}</span></div><div><strong>Phone</strong><span><Phone size={14} /> {currentUser?.phone || 'Not added'}</span></div></div></Card>}
+          {activeTab === 'Services' && isAstrologer && <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{currentUser?.specialization || 'Not added'}</span></div><div><strong>Experience</strong><span>{currentUser?.experience || 'Not added'}</span></div></div></Card>}
           {saved && <div className="profile-message profile-message--success">Profile updated successfully.</div>}
         </div>
       )}

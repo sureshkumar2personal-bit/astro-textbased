@@ -106,7 +106,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, logout } = useAuth()
-  const { notifications, actions } = useAppData()
+  const { notifications, actions, astrologerServices } = useAppData()
   const role = currentUser?.role || ROLES.ASTROLOGER
   const basePath = getRoleBasePath(role)
   const routes = {
@@ -192,7 +192,13 @@ export default function Layout() {
               <span className="avatar-circle">
                 {currentUser?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'DR'}
               </span>
-              {currentUser?.name || 'Dashboard'}
+              <span>{currentUser?.name || 'Dashboard'}</span>
+              {isAstrologer && (
+                <span className={`topbar-service-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} title="Astrologer service status">
+                  <span className="service-status-dot" />
+                  {astrologerServices.dndEnabled ? 'DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
+                </span>
+              )}
             </button>
             <button
               type="button"

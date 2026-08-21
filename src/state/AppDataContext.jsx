@@ -543,6 +543,43 @@ function saveToStorage(key, value) {
 }
 
 const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
+const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
+
+export const DEFAULT_ASTROLOGER_SERVICES = {
+  isOnline: true,
+  callEnabled: true,
+  chatEnabled: true,
+  dndEnabled: false,
+  callPricePerMinute: 25,
+  chatPricePerMinute: 15,
+}
+
+function normalizeAstrologerServices(value) {
+  const source = value && typeof value === 'object' ? value : {}
+  const toPrice = (input, fallback) => {
+    const price = Number(input)
+    return Number.isFinite(price) && price >= 0 ? price : fallback
+  }
+
+  return {
+    isOnline: source.isOnline !== false,
+    callEnabled: source.callEnabled !== false,
+    chatEnabled: source.chatEnabled !== false,
+    dndEnabled: source.dndEnabled === true,
+    callPricePerMinute: toPrice(source.callPricePerMinute, DEFAULT_ASTROLOGER_SERVICES.callPricePerMinute),
+    chatPricePerMinute: toPrice(source.chatPricePerMinute, DEFAULT_ASTROLOGER_SERVICES.chatPricePerMinute),
+  }
+}
+
+export function getEffectiveAstrologerServices(settings) {
+  const normalized = normalizeAstrologerServices(settings)
+  return {
+    ...normalized,
+    available: normalized.isOnline && !normalized.dndEnabled,
+    callAvailable: normalized.isOnline && !normalized.dndEnabled && normalized.callEnabled,
+    chatAvailable: normalized.isOnline && !normalized.dndEnabled && normalized.chatEnabled,
+  }
+}
 
 export function AppDataProvider({ children }) {
   const [campaigns, setCampaigns] = useState(initialCampaigns)
@@ -559,6 +596,9 @@ export function AppDataProvider({ children }) {
   const [subscriptions, setSubscriptions] = useState([])
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
+    loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
+  ))
 
   useEffect(() => {
     setCampaigns((prev) => prev.map((campaign) => {
@@ -599,6 +639,10 @@ export function AppDataProvider({ children }) {
     saveToStorage(QUESTIONS_STORAGE_KEY, questions)
   }, [questions])
 
+  useEffect(() => {
+    saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
+  }, [astrologerServices])
+
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
 
@@ -606,6 +650,9 @@ export function AppDataProvider({ children }) {
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
+    updateAstrologerServices(patch) {
+      setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, ...patch }))
+    },
     toggleCampaignOffer(campaignId, offerKey) {
       setCampaigns((prev) =>
         prev.map((campaign) =>
@@ -1424,6 +1471,7 @@ export function AppDataProvider({ children }) {
     subscriptions,
     blockedUserIds,
     purchasedSlots,
+    astrologerServices: getEffectiveAstrologerServices(astrologerServices),
     setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
@@ -1450,6 +1498,7 @@ export function AppDataProvider({ children }) {
     subscriptions,
     blockedUserIds,
     purchasedSlots,
+    astrologerServices,
     actions,
   ])
 
