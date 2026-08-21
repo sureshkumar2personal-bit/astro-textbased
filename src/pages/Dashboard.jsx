@@ -12,7 +12,6 @@ import {
   ArrowRight,
   MessageCircle,
   PhoneCall,
-  History,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
@@ -250,7 +249,6 @@ export default function Dashboard() {
           <ActionCard icon={MessageCircleReply} title="Answer a question" to={routes.answerQuestion} />
           <ActionCard icon={Gavel} title="Handle a dispute" to={routes.disputeManagement} />
           <ActionCard icon={LineChart} title="Manage text sales" to={routes.salesManagement} />
-          <ActionCard icon={History} title="History" description="View chat and audio call history" to={routes.consultationHistory} />
         </div>
       </Card>
 
