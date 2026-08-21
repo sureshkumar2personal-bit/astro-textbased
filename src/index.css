@@ -963,6 +963,746 @@ textarea:focus-visible {
   margin: 0 -16px;
 }
 
+/* ---------- Explore astrologers ---------- */
+
+.explore-astrologers {
+  width: 100%;
+  max-width: 100%;
+}
+
+.page-header-row.explore-astrologers__header {
+  margin-bottom: 40px;
+}
+
+.astrologer-list-section {
+  margin: 0 0 40px;
+}
+
+.astrologer-list-section__title {
+  margin: 0 0 16px;
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.astrologer-list-section__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(136px, 0.58fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.astrologer-list-section__action {
+  display: flex;
+  min-height: 264px;
+  align-items: center;
+  justify-content: center;
+}
+
+.astrologer-list-section__view-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1.5px solid var(--secondary);
+  border-radius: var(--radius-s);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-xs);
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 200ms var(--ease-premium), background 200ms var(--ease-premium), border-color 200ms var(--ease-premium);
+}
+
+.astrologer-list-section__view-more:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.astrologer-card {
+  display: flex;
+  position: relative;
+  width: min(100%, 276px);
+  min-height: 264px;
+  height: 100%;
+  justify-self: center;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-l);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.astrologer-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 14px 10px;
+  text-align: center;
+}
+
+.astrologer-card__avatar-wrap {
+  position: relative;
+  margin-bottom: 7px;
+}
+
+.astrologer-card__name {
+  margin: 0 0 3px;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.astrologer-card__specialization {
+  margin: 0 0 4px;
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.astrologer-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.astrologer-card__meta strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.astrologer-card__languages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.astrologer-card__stats {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: auto;
+  padding: 6px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.astrologer-card__rate {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  animation: astrologer-rate-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes astrologer-rate-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: scale(0.97);
+  }
+}
+
+.astrologer-card__stats > div {
+  width: 100%;
+}
+
+.astrologer-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.astrologer-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 180ms var(--ease-premium);
+}
+
+.astrologer-card__action:hover {
+  color: var(--primary);
+}
+
+.astrologer-card__action-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.astrologer-card__profile-button {
+  width: auto;
+  min-width: 0;
+  margin: 0 14px 10px;
+  align-self: stretch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .astrologer-card__rate {
+    animation: none;
+  }
+}
+
+@media (max-width: 1279px) {
+  .astrologer-list-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header-row.explore-astrologers__header,
+  .astrologer-list-section {
+    margin-bottom: 32px;
+  }
+
+  .astrologer-list-section__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .astrologer-list-section__action {
+    min-height: auto;
+    justify-content: flex-start;
+  }
+}
+
+/* ---------- Call package booking ---------- */
+
+.call-booking-page {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 4px 0 32px;
+}
+
+.call-booking-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.call-booking-page__back:hover {
+  color: var(--primary-dark);
+}
+
+.call-booking-page__panel {
+  padding: 28px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-l);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.call-booking-page__astrologer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.call-booking-page__avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.call-booking-page__avatar {
+  display: flex;
+  width: 62px;
+  height: 62px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet-500), var(--violet-700));
+  box-shadow: var(--shadow-card);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.call-booking-page__status {
+  position: absolute;
+  right: 1px;
+  bottom: 2px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--surface-strong);
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.call-booking-page__status--online {
+  background: var(--success);
+}
+
+.call-booking-page__astrologer h1,
+.call-booking-page__packages h2,
+.call-booking-page__summary h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.call-booking-page__astrologer h1 {
+  font-size: 23px;
+  line-height: 1.25;
+}
+
+.call-booking-page__astrologer p {
+  margin: 5px 0 4px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.call-booking-page__availability {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.call-booking-page__availability::before {
+  content: '●';
+  margin-right: 5px;
+}
+
+.call-booking-page__availability--online {
+  color: var(--success);
+}
+
+.call-booking-page__packages,
+.call-booking-page__summary {
+  margin-top: 26px;
+}
+
+.call-booking-page__packages h2,
+.call-booking-page__summary h2 {
+  font-size: 18px;
+}
+
+.call-booking-page__package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.call-package {
+  position: relative;
+  display: flex;
+  min-height: 162px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px 15px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms var(--ease-premium), background 180ms var(--ease-premium), transform 180ms var(--ease-premium);
+}
+
+.call-package:hover {
+  transform: translateY(-2px);
+  border-color: var(--secondary);
+}
+
+.call-package--selected {
+  border: 2px solid var(--primary);
+  background: var(--primary-bg);
+  padding: 17px 14px 13px;
+}
+
+.call-package__best-value {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.call-package__selected-icon {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  display: flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+}
+
+.call-package__duration {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.call-package > strong {
+  margin-top: 13px;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.call-package__rate {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.call-package__select-label {
+  margin-top: auto;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.call-booking-page__summary {
+  padding: 20px;
+  border-radius: var(--radius-m);
+  background: var(--surface-soft);
+}
+
+.call-booking-page__summary dl {
+  margin: 14px 0 20px;
+}
+
+.call-booking-page__summary dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 7px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.call-booking-page__summary dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+  text-align: right;
+}
+
+.call-booking-page__summary .call-booking-page__total {
+  margin-top: 5px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.call-booking-page__total dd {
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.call-booking-page__book-button {
+  width: 100%;
+  min-height: 46px;
+}
+
+.call-booking-page__note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .call-booking-page {
+    padding-bottom: 20px;
+  }
+
+  .call-booking-page__panel {
+    padding: 20px 16px;
+  }
+
+  .call-booking-page__astrologer h1 {
+    font-size: 20px;
+  }
+
+  .call-booking-page__package-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .call-package {
+    min-height: 128px;
+  }
+}
+
+/* ---------- Chat booking and consultation ---------- */
+
+.chat-booking-page {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 4px 0 32px;
+}
+
+.chat-booking-page__back,
+.consultation-chat__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-booking-page__back { margin-bottom: 20px; padding: 0; }
+.chat-booking-page__back:hover, .consultation-chat__back:hover { color: var(--primary-dark); }
+
+.chat-booking-page__panel {
+  padding: 28px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-l);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.chat-booking-page__profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 23px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-booking-page__avatar-wrap { position: relative; flex: 0 0 auto; }
+.chat-booking-page__avatar, .consultation-chat__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet-500), var(--violet-700));
+  color: #fff;
+  font-weight: 700;
+}
+.chat-booking-page__avatar { width: 60px; height: 60px; font-size: 18px; }
+.chat-booking-page__status { position: absolute; right: 1px; bottom: 2px; width: 14px; height: 14px; border: 2px solid var(--surface-strong); border-radius: 50%; background: var(--muted); }
+.chat-booking-page__status--online { background: var(--success); }
+.chat-booking-page__profile h1, .free-chat-offer h2, .chat-booking-page__packages h2, .chat-booking-page__summary h2 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; }
+.chat-booking-page__profile h1 { font-size: 23px; line-height: 1.25; }
+.chat-booking-page__profile p { margin: 4px 0; color: var(--primary); font-size: 14px; font-weight: 600; }
+.chat-booking-page__profile > div:last-child > span { color: var(--text-secondary); font-size: 13px; }
+.chat-booking-page__profile strong { color: var(--ink); }
+
+.free-chat-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--secondary);
+  border-radius: var(--radius-m);
+  background: linear-gradient(135deg, var(--primary-bg), rgba(249, 115, 22, 0.08));
+}
+.free-chat-offer--in-progress { border-color: var(--primary); }
+.free-chat-offer__eyebrow { color: var(--primary); font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.free-chat-offer h2 { margin-top: 4px; font-size: 18px; }
+.free-chat-offer p { margin: 5px 0 0; color: var(--text-secondary); font-size: 14px; }
+.free-chat-offer .btn { flex: 0 0 auto; white-space: nowrap; }
+.chat-booking-page__used-note { margin: 20px 0 -2px; color: var(--muted); font-size: 13px; text-align: center; }
+
+.chat-booking-page__packages, .chat-booking-page__summary { margin-top: 26px; }
+.chat-booking-page__packages h2, .chat-booking-page__summary h2 { font-size: 18px; }
+.chat-booking-page__package-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 14px; }
+.chat-package {
+  position: relative;
+  display: flex;
+  min-height: 158px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms var(--ease-premium), border-color 180ms var(--ease-premium), background 180ms var(--ease-premium);
+}
+.chat-package:hover { transform: translateY(-2px); border-color: var(--secondary); }
+.chat-package--selected { padding: 16px; border: 2px solid var(--primary); background: var(--primary-bg); }
+.chat-package > strong { margin-top: 15px; color: var(--ink); font-size: 24px; line-height: 1; }
+.chat-package small { margin-top: 6px; color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+.chat-package em { margin-top: auto; color: var(--primary); font-size: 13px; font-style: normal; font-weight: 700; }
+.chat-package__check { position: absolute; top: 10px; right: 10px; display: flex; width: 21px; height: 21px; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: #fff; }
+
+.chat-booking-page__summary { padding: 20px; border-radius: var(--radius-m); background: var(--surface-soft); }
+.chat-booking-page__summary dl { margin: 13px 0 19px; }
+.chat-booking-page__summary dl > div { display: flex; justify-content: space-between; gap: 18px; padding: 6px 0; color: var(--text-secondary); font-size: 14px; }
+.chat-booking-page__summary dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
+.chat-booking-page__summary .chat-booking-page__total { margin-top: 5px; padding-top: 13px; border-top: 1px solid var(--border); color: var(--ink); font-size: 16px; font-weight: 700; }
+.chat-booking-page__total dd { color: var(--primary); font-size: 22px; }
+.chat-booking-page__start-button, .chat-booking-page__confirmation .btn { width: 100%; min-height: 46px; }
+.chat-booking-page__confirmation { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--secondary); border-radius: var(--radius-s); background: var(--surface-strong); }
+.chat-booking-page__confirmation p { margin: 0; color: var(--text-secondary); font-size: 14px; text-align: center; }
+
+.consultation-chat { display: flex; min-height: calc(100vh - 140px); align-items: center; justify-content: center; padding: 12px 0 30px; }
+.consultation-chat__shell { display: flex; width: min(100%, 760px); height: min(680px, calc(100vh - 170px)); min-height: 520px; flex-direction: column; overflow: hidden; border: 1px solid var(--surface-border); border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-float); }
+.consultation-chat__header { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.consultation-chat__back { padding: 6px 0; }
+.consultation-chat__identity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.consultation-chat__avatar { width: 39px; height: 39px; flex: 0 0 auto; font-size: 13px; }
+.consultation-chat__identity > div:last-child { display: grid; min-width: 0; }
+.consultation-chat__identity strong { overflow: hidden; color: var(--ink); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.consultation-chat__identity span { color: var(--primary); font-size: 12px; font-weight: 600; }
+.consultation-chat__identity small { color: var(--muted); font-size: 11px; }
+.consultation-chat__identity .consultation-chat__online { color: var(--success); }
+.consultation-chat__timer { display: grid; justify-items: end; gap: 2px; padding: 7px 10px; border-radius: var(--radius-s); background: var(--primary-bg); color: var(--primary-dark); }
+.consultation-chat__timer span { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.consultation-chat__timer strong { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+.consultation-chat__timer--paid { background: rgba(249, 115, 22, 0.1); color: var(--accent); }
+.consultation-chat__messages { display: flex; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; padding: 20px; background: linear-gradient(180deg, rgba(143, 77, 255, 0.025), transparent 35%); }
+.consultation-message { max-width: min(78%, 440px); padding: 10px 12px 7px; border-radius: 14px; }
+.consultation-message--astrologer { align-self: flex-start; border-bottom-left-radius: 4px; background: var(--surface-soft); color: var(--ink); }
+.consultation-message--user { align-self: flex-end; border-bottom-right-radius: 4px; background: var(--primary); color: #fff; }
+.consultation-message p { margin: 0; font-size: 14px; line-height: 1.45; }
+.consultation-message time { display: block; margin-top: 4px; color: inherit; font-size: 10px; opacity: 0.65; text-align: right; }
+.consultation-chat__composer { display: flex; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--border); }
+.consultation-chat__composer input { min-width: 0; flex: 1; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-s); background: var(--surface-soft); color: var(--ink); font: inherit; font-size: 14px; }
+.consultation-chat__composer input:focus { outline: 2px solid rgba(143, 77, 255, 0.22); border-color: var(--primary); }
+.consultation-chat__composer .btn { display: inline-flex; align-items: center; gap: 6px; }
+.consultation-chat__composer .btn:disabled { cursor: not-allowed; opacity: 0.55; }
+.consultation-chat__overlay { position: fixed; z-index: 20; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(27, 13, 46, 0.48); }
+.consultation-chat__ended-modal { width: min(100%, 440px); padding: 26px; border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-float); text-align: center; }
+.consultation-chat__ended-icon { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary-bg); color: var(--primary); }
+.consultation-chat__ended-modal h1 { margin: 12px 0 5px; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 21px; }
+.consultation-chat__ended-modal > p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.45; }
+.consultation-chat__ended-modal h2 { margin: 20px 0 12px; color: var(--ink); font-size: 16px; }
+.consultation-chat__continue-packages { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+.consultation-chat__continue-package { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px; padding: 11px; border: 1px solid var(--border); border-radius: var(--radius-s); background: var(--surface-strong); color: var(--text-secondary); font-size: 13px; text-align: left; cursor: pointer; }
+.consultation-chat__continue-package strong { color: var(--ink); }
+.consultation-chat__continue-package--selected { border-color: var(--primary); background: var(--primary-bg); }
+.consultation-chat__continue-package svg { grid-row: span 2; color: var(--primary); }
+.consultation-chat__choose-button { width: 100%; margin-top: 16px; min-height: 44px; }
+
+@media (max-width: 640px) {
+  .chat-booking-page { padding-bottom: 20px; }
+  .chat-booking-page__panel { padding: 20px 16px; }
+  .chat-booking-page__profile h1 { font-size: 20px; }
+  .free-chat-offer { align-items: flex-start; flex-direction: column; }
+  .free-chat-offer .btn { width: 100%; }
+  .consultation-chat { min-height: calc(100vh - 120px); padding: 0; }
+  .consultation-chat__shell { width: 100%; height: calc(100vh - 120px); min-height: 480px; border-radius: var(--radius-m); }
+  .consultation-chat__header { grid-template-columns: auto 1fr; gap: 9px; padding: 11px 12px; }
+  .consultation-chat__timer { grid-column: 1 / -1; grid-row: 2; justify-items: start; width: fit-content; padding: 5px 8px; }
+  .consultation-chat__composer { padding: 10px 12px; }
+  .consultation-chat__composer .btn { padding-right: 10px; padding-left: 10px; }
+}
+
+.wallet-payment-page { width: min(100%, 760px); margin: 0 auto; padding: 4px 0 32px; }
+.wallet-payment-page__back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 20px; padding: 0; border: 0; background: transparent; color: var(--primary); font-size: 14px; font-weight: 600; cursor: pointer; }
+.wallet-payment-page__heading { margin-bottom: 20px; }
+.wallet-payment-page__heading h1 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 25px; }
+.wallet-payment-page__heading p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+.wallet-balance-card, .wallet-payment-page__astrologer, .wallet-detail-card { border: 1px solid var(--surface-border); border-radius: var(--radius-m); background: var(--surface-strong); box-shadow: var(--shadow-card); }
+.wallet-balance-card { position: relative; margin-bottom: 14px; padding: 20px; }
+.wallet-balance-card__label { display: flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 13px; font-weight: 700; }
+.wallet-balance-card__label svg { color: var(--primary); }
+.wallet-balance-card > strong { display: block; margin-top: 8px; color: var(--ink); font-size: 28px; }
+.wallet-balance-card > span { color: var(--muted); font-size: 12px; }
+.wallet-balance-card__add { position: absolute; top: 20px; right: 20px; }
+.wallet-payment-page__astrologer { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; padding: 16px 20px; }
+.wallet-payment-page__avatar { display: flex; width: 48px; height: 48px; align-items: center; justify-content: center; flex: 0 0 auto; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); color: #fff; font-weight: 700; }
+.wallet-payment-page__astrologer > div:last-child { display: grid; gap: 2px; }
+.wallet-payment-page__astrologer strong { color: var(--ink); font-size: 16px; }
+.wallet-payment-page__astrologer span { color: var(--primary); font-size: 13px; font-weight: 600; }
+.wallet-payment-page__astrologer small { color: var(--muted); font-size: 11px; }
+.wallet-payment-page__astrologer .wallet-payment-page__online { color: var(--success); }
+.wallet-payment-page__astrologer em { margin-top: 5px; color: var(--text-secondary); font-size: 12px; font-style: normal; font-weight: 600; }
+.wallet-detail-card { margin-bottom: 14px; padding: 20px; }
+.wallet-detail-card h2 { margin: 0 0 12px; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; }
+.wallet-detail-card dl, .wallet-confirm-modal dl, .wallet-success-card dl { margin: 0; }
+.wallet-detail-card dl > div, .wallet-confirm-modal dl > div, .wallet-success-card dl > div { display: flex; justify-content: space-between; gap: 18px; padding: 7px 0; color: var(--text-secondary); font-size: 14px; }
+.wallet-detail-card dd, .wallet-confirm-modal dd, .wallet-success-card dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
+.wallet-detail-card__total { margin-top: 7px; padding-top: 14px !important; border-top: 1px solid var(--border); color: var(--ink) !important; font-size: 16px !important; font-weight: 700; }
+.wallet-detail-card__total dd { color: var(--primary); font-size: 21px; }
+.wallet-payment-summary__deduction { color: var(--accent) !important; }
+.chat-wallet-package { display: grid; gap: 5px; }
+.chat-wallet-package > strong { color: var(--ink); font-size: 20px; }
+.chat-wallet-package > b { color: var(--primary); font-size: 26px; }
+.chat-wallet-package > span { color: var(--text-secondary); font-size: 13px; }
+.wallet-payment-page__sufficient { display: flex; align-items: center; justify-content: center; gap: 5px; margin: 5px 0 12px; color: var(--success); font-size: 13px; font-weight: 600; }
+.wallet-payment-page__insufficient { display: grid; gap: 5px; margin: 8px 0 14px; padding: 14px 16px; border: 1px solid rgba(220, 38, 38, 0.25); border-radius: var(--radius-s); background: rgba(220, 38, 38, 0.06); color: var(--danger, #b91c1c); font-size: 13px; }
+.wallet-payment-page__insufficient .btn { width: fit-content; margin-top: 4px; }
+.wallet-payment-page__pay { width: 100%; min-height: 48px; }
+.wallet-payment-page__pay:disabled { cursor: not-allowed; opacity: .55; }
+.wallet-payment-page__overlay { position: fixed; z-index: 30; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(27, 13, 46, .48); }
+.wallet-confirm-modal, .wallet-success-card { width: min(100%, 460px); padding: 26px; border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-float); }
+.wallet-confirm-modal h2, .wallet-success-card h1 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; }
+.wallet-confirm-modal > p, .wallet-success-card > p { margin: 7px 0 16px; color: var(--text-secondary); font-size: 14px; }
+.wallet-confirm-modal > div:last-child { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+.wallet-success-card { margin: auto; text-align: center; }
+.wallet-success-card__icon { display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 50%; background: rgba(22, 163, 74, .12); color: var(--success); }
+.wallet-success-card h1 { margin-top: 12px; font-size: 22px; }
+.wallet-success-card dl { margin: 20px 0; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.wallet-success-card__actions { display: flex; justify-content: center; gap: 9px; }
+
+@media (max-width: 640px) {
+  .wallet-payment-page { padding-bottom: 20px; }
+  .wallet-balance-card__add { top: 18px; right: 16px; padding: 8px 10px; font-size: 12px; }
+  .wallet-payment-page__heading h1 { font-size: 21px; }
+  .wallet-success-card__actions { flex-direction: column; }
+}
+
 .hero-banner {
   background:
     radial-gradient(circle at 88% 8%, rgba(255, 255, 255, 0.16), transparent 45%),

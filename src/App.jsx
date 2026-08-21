@@ -19,6 +19,14 @@ import DisputeManagement from './pages/DisputeManagement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import Astrologers from './pages/Astrologers.jsx'
+import AstrologersFull from './pages/astrologer/astrologers/AstrologersFull.jsx'
+import FollowedAstrologersFull from './pages/FollowedAstrologersFull.jsx'
+import SuggestedAstrologers from './pages/SuggestedAstrologers.jsx'
+import CallPackageSelection from './pages/CallPackageSelection.jsx'
+import ChatBooking from './pages/ChatBooking.jsx'
+import ChatScreen from './pages/ChatScreen.jsx'
+import WalletPayment from './pages/WalletPayment.jsx'
+import ChatWalletPayment from './pages/ChatWalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
 import Rewards from './pages/Rewards.jsx'
 import Profile from './pages/Profile.jsx'
@@ -87,6 +95,14 @@ function UserRoutes() {
         <Route path="/user/raise-dispute" element={<RaiseDispute />} />
         <Route path="/user/astrologer-profile" element={<AstrologerProfile />} />
         <Route path="/user/astrologers" element={<Astrologers />} />
+        <Route path="/user/astrologers-full" element={<AstrologersFull />} />
+        <Route path="/user/followed-astrologers" element={<FollowedAstrologersFull />} />
+        <Route path="/user/suggested-astrologers" element={<SuggestedAstrologers />} />
+        <Route path="/user/call-packages" element={<CallPackageSelection />} />
+        <Route path="/user/chat-booking" element={<ChatBooking />} />
+        <Route path="/user/chat" element={<ChatScreen />} />
+        <Route path="/user/wallet-payment" element={<WalletPayment />} />
+        <Route path="/user/chat-wallet-payment" element={<ChatWalletPayment />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/rewards" element={<Rewards />} />
         <Route path="/user/profile" element={<Profile />} />
