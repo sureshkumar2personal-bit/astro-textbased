@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, MapPin, Languages, Pencil } from 'lucide-react'
-import { mockAstrologers } from '../data/notificationData.js'
+import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, Radio, MapPin, Languages, Pencil } from 'lucide-react'
+import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -14,12 +14,6 @@ const PROFILE_POSTS = [
   { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },
   { id: 'post-2', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.' },
   { id: 'post-3', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.' },
-]
-
-const PROFILE_REVIEWS = [
-  { id: 'review-1', name: 'Priya V.', rating: 5, text: 'Thoughtful guidance and a very clear explanation of the timing.' },
-  { id: 'review-2', name: 'Kannan', rating: 5, text: 'The consultation felt personal, practical, and easy to understand.' },
-  { id: 'review-3', name: 'Devi', rating: 4, text: 'Helpful perspective with suggestions I could actually follow.' },
 ]
 
 const PROFILE_FOLLOWERS = ['Priya V.', 'Kannan', 'Devi', 'Arun']
@@ -68,6 +62,7 @@ export default function AstrologerProfile() {
   const subscriberNames = subscriptions
     .filter((subscription) => subscription.astrologerId === astrologer.id)
     .map((subscription) => subscription.userName || subscription.userId || 'Subscriber')
+  const liveSessions = mockLiveSessions.filter((session) => session.astrologerId === astrologer.id)
 
   const handleSubscribe = () => {
     actions.subscribeToAstrologer(astrologer.id, astrologer.name, currentUser?.id, currentUser?.name)
@@ -102,7 +97,7 @@ export default function AstrologerProfile() {
 
   return (
     <div>
-      <PageHeader eyebrow={isOwner ? 'Astrologer' : 'User portal'} title="Astrologer Profile" showBack backTo={routes.dashboard} />
+      {!isOwner && <PageHeader eyebrow="User portal" title="Astrologer Profile" showBack />}
 
       {isOwner ? (
       <div className="section social-profile">
@@ -145,8 +140,8 @@ export default function AstrologerProfile() {
         <div className="social-profile__tabs" role="tablist" aria-label="Astrologer profile sections">
           {[
             ['Posts', Grid3X3],
-            ['About', Info],
-            ['Reviews', MessageCircle],
+            ['Live', Radio],
+            ['Other', Info],
           ].map(([label, Icon]) => (
             <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}>
               <Icon size={16} /> {label}
@@ -159,11 +154,11 @@ export default function AstrologerProfile() {
             {PROFILE_POSTS.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone}`}><div className="social-profile__post-icon"><Star size={20} /></div><h2>{post.title}</h2><p>{post.body}</p><span className="muted">Astrology insight · 2 days ago</span></Card>)}
           </div>
         )}
-        {activeTab === 'About' && (
-          <Card className="social-profile__panel"><div className="section-title">About {astrologer.name}</div><p className="muted">{astrologer.bio}</p><div className="social-profile__details"><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div><div><strong>Availability</strong><span>{astrologer.availability}</span></div><div><strong>Consultations</strong><span>{CONSULTATION_TYPES.join(' · ')}</span></div></div></Card>
+        {activeTab === 'Live' && (
+          <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>
         )}
-        {activeTab === 'Reviews' && (
-          <div className="social-profile__reviews">{PROFILE_REVIEWS.map((review) => <Card key={review.id} className="social-profile__review"><div className="flex items-center justify-between gap-3"><strong>{review.name}</strong><span className="social-profile__rating"><Star size={14} /> {review.rating}.0</span></div><p className="muted">{review.text}</p></Card>)}</div>
+        {activeTab === 'Other' && (
+          <Card className="social-profile__panel"><div className="section-title">Profile details</div><p className="muted">{astrologer.bio}</p><div className="social-profile__details"><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div><div><strong>Availability</strong><span>{astrologer.availability}</span></div><div><strong>Consultations</strong><span>{CONSULTATION_TYPES.join(' · ')}</span></div></div></Card>
         )}
 
         {!isOwner && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button><Link to={routes.askQuestion} className="btn btn-primary">Ask a Question</Link></div>}

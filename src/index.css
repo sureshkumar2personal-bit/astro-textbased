@@ -510,6 +510,134 @@ textarea:focus-visible {
   position: relative;
 }
 
+.app-shell--profile {
+  min-height: 100vh;
+  background: var(--bg-solid);
+}
+
+.app-shell--profile .sidebar {
+  display: none;
+}
+
+.app-shell--profile .main-column {
+  width: 100%;
+}
+
+.app-shell--profile .topbar-header {
+  height: 64px;
+  margin: 0;
+  padding: 0 28px;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: var(--surface-overlay);
+  box-shadow: none;
+}
+
+.app-shell--profile .topbar-heading {
+  display: none;
+}
+
+.profile-topbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.profile-topbar-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+}
+
+.profile-home-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-right: 8px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-primary);
+  background: transparent;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-home-btn:hover { background: var(--surface-soft); color: var(--primary); }
+
+.app-shell--profile .profile-wallet-action { display: none; }
+
+.app-shell--profile .page-content {
+  max-width: 1120px;
+  padding: 44px 32px 72px;
+}
+
+.app-shell--profile .social-profile {
+  max-width: 1000px;
+}
+
+.app-shell--profile .social-profile__header {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.app-shell--profile .social-profile__cover { display: none; }
+
+.app-shell--profile .social-profile__identity {
+  padding: 0 0 24px;
+}
+
+.app-shell--profile .social-profile__avatar {
+  border-color: var(--bg-solid);
+}
+
+.app-shell--profile .social-profile__stats {
+  padding-left: 0;
+  padding-right: 0;
+  border-color: var(--divider);
+}
+
+.app-shell--profile .social-profile__bio {
+  padding-left: 0;
+  padding-right: 0;
+  white-space: pre-line;
+}
+
+.app-shell--profile .social-profile__tabs {
+  margin-top: 12px;
+  border-color: var(--divider);
+}
+
+.app-shell--profile .social-profile__posts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 300px;
+  align-items: start;
+}
+
+.app-shell--profile .social-profile__post {
+  min-height: 220px;
+  border: 1px solid var(--divider);
+  border-top-width: 1px;
+  background: var(--surface-soft);
+}
+
+.app-shell--profile .social-profile__panel {
+  border: 1px solid var(--divider);
+  background: transparent;
+}
+
 .topbar-header {
   display: flex;
   align-items: center;
@@ -1393,8 +1521,16 @@ textarea:focus-visible {
 .social-profile__stat-button { display: flex; flex-direction: column; gap: 3px; padding: 0; text-align: left; }
 .social-profile__stat-button:hover strong, .social-profile__stat-button:focus-visible strong { color: var(--primary); }
 .social-profile__audience-list { display: grid; gap: 10px; }
-.social-profile__audience-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius-s); background: var(--surface-soft); color: var(--text-primary); }
+.social-profile__audience-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 1px solid transparent; border-radius: var(--radius-s); background: var(--surface-soft); color: var(--text-primary); text-align: left; }
+button.social-profile__audience-item { cursor: pointer; }
+.social-profile__audience-item:hover { border-color: var(--primary); }
 .social-profile__audience-avatar { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--primary-bg); color: var(--primary); font-weight: 800; }
+.follower-profile-modal { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 8px 4px; text-align: center; }
+.follower-profile-modal__avatar { width: 76px; height: 76px; font-size: 26px; margin-bottom: 4px; }
+.follower-profile-modal h2 { font-size: 21px; }
+.follower-profile-modal p { max-width: 320px; margin: 8px 0 10px; color: var(--text-secondary); line-height: 1.6; }
+.subscriber-tier-badge { padding: 5px 10px; border-radius: var(--radius-pill); background: var(--gold-100); color: var(--gold-600); font-size: 12px; font-weight: 800; }
+.audience-tier-label { display: block; margin-top: 3px; color: var(--text-secondary); font-size: 12px; font-weight: 600; }
 
 .social-profile__bio { padding: 18px 24px 22px; color: var(--text-secondary); line-height: 1.7; }
 
@@ -1439,7 +1575,21 @@ textarea:focus-visible {
 .social-profile__rating { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-dark); font-weight: 700; }
 .social-profile__footer-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
 
+.profile-edit-card { max-width: 980px; margin: 0 auto 20px; }
+.profile-edit-card__heading { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; color: var(--primary); }
+.profile-edit-card__heading h2 { font-size: 20px; }
+.profile-edit-card__heading p { margin: 3px 0 0; color: var(--text-secondary); font-size: 13px; }
+.profile-edit-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.profile-message { max-width: 980px; margin: 16px auto 0; padding: 12px 16px; border-radius: var(--radius-s); font-size: 14px; font-weight: 600; }
+.profile-message--error { background: var(--danger-bg); color: var(--danger); }
+.profile-message--success { background: var(--success-bg); color: var(--green-600); }
+.social-profile__details span { display: inline-flex; align-items: center; gap: 6px; }
+
 @media (max-width: 720px) {
+  .app-shell--profile .topbar-header { padding: 0 16px; }
+  .app-shell--profile .page-content { padding: 28px 16px 52px; }
+  .app-shell--profile .social-profile__identity { padding-bottom: 18px; }
+  .app-shell--profile .social-profile__posts { grid-template-columns: 1fr; min-height: 220px; }
   .social-profile__cover { height: 140px; }
   .social-profile__identity { align-items: flex-start; flex-wrap: wrap; padding: 0 16px 18px; }
   .social-profile__avatar { width: 88px; height: 88px; flex-basis: 88px; margin-top: -44px; font-size: 24px; }
@@ -1453,6 +1603,8 @@ textarea:focus-visible {
   .social-profile__tabs button { padding: 12px 15px; white-space: nowrap; }
   .social-profile__posts, .social-profile__reviews { grid-template-columns: 1fr; }
   .social-profile__details { grid-template-columns: 1fr; }
+  .profile-edit-actions { justify-content: stretch; }
+  .profile-edit-actions .btn { flex: 1; }
 }
 
 .text-input, .select-input, .textarea-box {

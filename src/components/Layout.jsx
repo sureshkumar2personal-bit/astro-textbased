@@ -12,7 +12,6 @@ import {
   Bell,
   Wallet,
   LogOut,
-  UserCircle2,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -107,7 +106,7 @@ export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, logout } = useAuth()
-  const { notifications, profile, actions } = useAppData()
+  const { notifications, actions } = useAppData()
   const role = currentUser?.role || ROLES.ASTROLOGER
   const basePath = getRoleBasePath(role)
   const routes = {
@@ -116,6 +115,7 @@ export default function Layout() {
   const config = ROLE_CONFIG[role]
   const meta = PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
+  const isOwnerProfile = location.pathname === '/user/profile' || (location.pathname === '/astrologer/profile' && isAstrologer)
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
   const showRewardBadge = rewardStatus?.state === 'available'
   const visibleNotifications = notifications.filter(
@@ -138,7 +138,7 @@ export default function Layout() {
   }, [])
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
@@ -156,7 +156,9 @@ export default function Layout() {
 
       <div className="main-column">
         <header className="topbar-header">
-          <div>
+          {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to dashboard" onClick={() => navigate(basePath)}><span aria-hidden="true">‹</span></button>}
+          {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
+          <div className="topbar-heading">
             <div className="topbar-crumb">{meta.title}</div>
             <div className="topbar-crumb-sub">{meta.sub}</div>
           </div>
@@ -174,14 +176,17 @@ export default function Layout() {
                 </span>
               )}
             </button>
-            <button type="button" className="icon-btn" aria-label="Wallet" onClick={() => navigate(routes.walletHistory)}>
+            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(routes.walletHistory)}>
               {isAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
             </button>
             <ThemeToggle />
             <button
               type="button"
               className="avatar-chip"
-              onClick={() => setPanel(panel === 'profile' ? null : 'profile')}
+              onClick={() => {
+                setPanel(null)
+                navigate(`${basePath}/profile`)
+              }}
             >
               <span className="avatar-circle">
                 {currentUser?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'DR'}
@@ -217,29 +222,6 @@ export default function Layout() {
               </div>
             )}
 
-            {panel === 'profile' && (
-              <div className="topbar-popover">
-                <div className="popover-title">Profile</div>
-                <div className="profile-summary">
-                  <div className="profile-avatar">
-                    {isAstrologer ? <TempleLotusIcon size={24} /> : <UserCircle2 size={24} />}
-                  </div>
-                  <div>
-                    <div className="font-bold text-[color:var(--ink)]">{currentUser?.name || profile.name}</div>
-                    <div className="text-[color:var(--muted)]">{isAstrologer ? 'Astrologer' : 'User'}</div>
-                  </div>
-                </div>
-                <div className="popover-list">
-                  {isAstrologer && <div className="popover-item"><strong>Rating</strong><div>{profile.rating}</div></div>}
-                  {isAstrologer && <div className="popover-item"><strong>Reviews</strong><div>{profile.reviews}</div></div>}
-                  <div className="popover-item"><strong>Email</strong><div>{currentUser?.email || profile.email}</div></div>
-                  <div className="popover-item"><strong>Phone</strong><div>{currentUser?.phone || 'Not added'}</div></div>
-                </div>
-                <button type="button" className="btn btn-outline mt-3 w-full" onClick={() => { setPanel(null); navigate(isAstrologer ? `${basePath}/profile` : `${basePath}/profile`) }}>
-                  View Profile
-                </button>
-              </div>
-            )}
           </div>
         </header>
 

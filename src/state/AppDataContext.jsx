@@ -533,6 +533,7 @@ export function AppDataProvider({ children }) {
   const [appointments, setAppointments] = useState(mockAppointments)
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo'])
   const [subscriptions, setSubscriptions] = useState([])
+  const [blockedUserIds, setBlockedUserIds] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
 
   useEffect(() => {
@@ -1193,15 +1194,21 @@ export function AppDataProvider({ children }) {
         ])
       }
     },
-    subscribeToAstrologer(astrologerId, astrologerName, userId, userName) {
+    toggleUserBlock(userId) {
+      if (!userId) return
+      setBlockedUserIds((prev) => prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId])
+    },
+    subscribeToAstrologer(astrologerId, astrologerName, userId, userName, tier = 'Silver') {
       if (!userId) return null
       const existing = subscriptions.find((sub) => sub.userId === userId && sub.astrologerId === astrologerId)
       if (existing) return existing
+      const normalizedTier = ['Silver', 'Gold', 'Platinum'].includes(tier) ? tier : 'Silver'
       const subscription = {
         userId,
         userName: userName || userId || 'Subscriber',
         astrologerId,
         astrologerName,
+        tier: normalizedTier,
         subscribedAt: new Date().toISOString(),
         discountQuestions: [
           {
@@ -1383,6 +1390,7 @@ export function AppDataProvider({ children }) {
     appointments,
     followedAstrologerIds,
     subscriptions,
+    blockedUserIds,
     purchasedSlots,
     setSelectedCampaignId,
     setLiveStreamOpen,
@@ -1408,6 +1416,7 @@ export function AppDataProvider({ children }) {
     appointments,
     followedAstrologerIds,
     subscriptions,
+    blockedUserIds,
     purchasedSlots,
     actions,
   ])
