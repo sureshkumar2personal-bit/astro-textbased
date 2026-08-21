@@ -22,7 +22,8 @@ export const mockAstrologers = [
   {
     id: 'astrologer-demo',
     name: 'Dr. Rani',
-    specialization: 'Marriage, Career, Business',
+    specialization: 'Vedic Astrology',
+    type: 'Marriage, Career, Business',
     experience: '8 years',
     availability: 'Online',
     languages: ['English', 'Tamil', 'Hindi'],
@@ -30,11 +31,13 @@ export const mockAstrologers = [
     reviews: '2,345 reviews',
     bio: 'Dr. Rani blends traditional Vedic astrology with modern counselling to guide you through marriage, career, and business decisions.',
     followers: 8420,
+    subscribers: 350,
   },
   {
     id: 'acharya-meena',
     name: 'Acharya Meena',
-    specialization: 'Health, Family, Remedies',
+    specialization: 'Vedic Astrology',
+    type: 'Health, Family, Remedies',
     experience: '12 years',
     availability: 'Offline',
     languages: ['English', 'Malayalam', 'Hindi'],
@@ -42,6 +45,7 @@ export const mockAstrologers = [
     reviews: '1,980 reviews',
     bio: 'Acharya Meena specialises in health and family remedies, combining horoscope readings with practical guidance.',
     followers: 6210,
+    subscribers: 280,
   },
 ]
 

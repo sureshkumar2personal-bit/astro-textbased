@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { CheckCircle2, X } from 'lucide-react'
 
-export default function SuccessAlert({ message, onDismiss, variant = 'legacy' }) {
+export default function SuccessAlert({ message, onDismiss, variant = 'legacy', actionLabel, onAction }) {
   if (variant === 'user') {
     return createPortal(
       <div className="modal-overlay user-modal-overlay" onClick={onDismiss}>
@@ -25,9 +25,15 @@ export default function SuccessAlert({ message, onDismiss, variant = 'legacy' })
             </div>
           </div>
           <div className="user-modal-card__footer">
-            <button className="btn btn-primary" style={{ width: 'fit-content' }} onClick={onDismiss}>
-              Okay
-            </button>
+            {actionLabel && onAction ? (
+              <button className="btn btn-primary" style={{ width: 'fit-content' }} onClick={onAction}>
+                {actionLabel}
+              </button>
+            ) : (
+              <button className="btn btn-primary" style={{ width: 'fit-content' }} onClick={onDismiss}>
+                Okay
+              </button>
+            )}
           </div>
         </div>
       </div>,

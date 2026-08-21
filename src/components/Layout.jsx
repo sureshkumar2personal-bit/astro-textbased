@@ -91,12 +91,12 @@ const PAGE_META = {
   },
 }
 
-function NavGroup({ links, basePath, showRewardBadge = false }) {
+function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   return (
     <nav className="sidebar-nav">
       {links.map(({ to, label, icon, end }) => {
         const route = `${basePath}/${to}`.replace(/\/$/, '')
-        return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} />
+        return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} badgeCount={label === 'Rewards' ? rewardCount : 0} />
       })}
     </nav>
   )
@@ -118,6 +118,7 @@ export default function Layout() {
   const isOwnerProfile = location.pathname === '/user/profile' || (location.pathname === '/astrologer/profile' && isAstrologer)
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
   const showRewardBadge = rewardStatus?.state === 'available'
+  const rewardCount = role === ROLES.USER ? actions.getAvailableDiscountQuestions(currentUser?.id).length : 0
   const visibleNotifications = notifications.filter(
     (item) => !item.audience || item.audience === 'all' || item.audience === role,
   )
@@ -151,7 +152,7 @@ export default function Layout() {
         </div>
 
         <div className="sidebar-group-label">{config.navLabel}</div>
-        <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} />
+        <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
       </aside>
 
       <div className="main-column">
