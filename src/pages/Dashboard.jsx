@@ -26,7 +26,7 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 
 export default function Dashboard() {
-  const { campaigns, questions, selectedCampaign, astrologerServices, actions } = useAppData()
+  const { campaigns, questions, selectedCampaign, astrologerServices } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
@@ -148,11 +148,6 @@ export default function Dashboard() {
               {!astrologerServices.callAvailable && !astrologerServices.chatAvailable && <span>Services unavailable</span>}
             </span>
           )}
-          <span className="dashboard-service-controls" aria-label="Service controls">
-            <label title="Enable or disable instant calls"><input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} /><span>Call</span></label>
-            <label title="Enable or disable instant chat"><input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} /><span>Chat</span></label>
-            <label className="dashboard-service-control--dnd" title="Make all services unavailable"><input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} /><span>DND</span></label>
-          </span>
         </div>
         <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
           Welcome back
