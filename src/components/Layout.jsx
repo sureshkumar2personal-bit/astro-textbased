@@ -12,7 +12,6 @@ import {
   Bell,
   Wallet,
   LogOut,
-  History,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -41,7 +40,6 @@ const ROLE_CONFIG = {
       { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
       { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
       { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
-      { to: 'consultation-history', label: 'Consultation History', icon: History },
     ],
   },
   [ROLES.USER]: {

@@ -1,5 +1,5 @@
-import { BadgeCheck, Grid3X3, Info, Mail, MapPin, MessageCircle, Phone, PhoneCall, Radio, UserCircle2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { BadgeCheck, Grid3X3, Info, Mail, MapPin, MessageCircle, MoreVertical, Phone, PhoneCall, Radio, UserCircle2, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import Card from '../components/ui/Card.jsx'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -12,14 +12,17 @@ const PROFILE_FOLLOWERS = [
   { id: 'follower-devi', name: 'Devi', username: 'devi.guidance', bio: 'Following astrology insights and live sessions.' },
   { id: 'follower-arun', name: 'Arun', username: 'arun.connect', bio: 'Astro Connect community member.' },
 ]
-const PROFILE_POSTS = [
-  { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },
-  { id: 'post-2', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.' },
-  { id: 'post-3', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.' },
+const PROFILE_SUBSCRIBERS = [
+  { id: 'subscriber-meena', name: 'Meena R.', username: 'meena.guidance', bio: 'Astro Connect subscriber following astrology guidance and live sessions.', tier: 'Gold' },
+  { id: 'subscriber-arjun', name: 'Arjun D.', username: 'arjun.astro', bio: 'Subscriber interested in practical guidance for career and family decisions.', tier: 'Silver' },
 ]
-
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
+}
+
+function accountHandle(member) {
+  const source = member.username || member.id || 'account'
+  return String(source).toLowerCase().replace(/^@/, '').replace(/[^a-z0-9._-]+/g, '-')
 }
 
 export default function Profile() {
@@ -27,9 +30,11 @@ export default function Profile() {
   const { subscriptions, blockedUserIds, actions, astrologerServices } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const [editing, setEditing] = useState(false)
-  const [activeTab, setActiveTab] = useState('Posts')
+  const [activeTab, setActiveTab] = useState(isAstrologer ? 'Services' : 'Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
   const [selectedMember, setSelectedMember] = useState(null)
+  const [memberMenuOpen, setMemberMenuOpen] = useState(false)
+  const [memberActionMessage, setMemberActionMessage] = useState('')
   const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
   const [servicesForm, setServicesForm] = useState(astrologerServices)
   const [error, setError] = useState('')
@@ -42,15 +47,16 @@ export default function Profile() {
     : 'Astro Connect member\nAsk questions, explore astrologers, and follow your journey with clarity.'
   const liveSessions = useMemo(() => mockLiveSessions.filter((session) => !isAstrologer || session.astrologerId === 'astrologer-demo'), [isAstrologer])
   const astrologerProfile = mockAstrologers.find((profile) => profile.id === currentUser?.id) || mockAstrologers[0]
-  const subscriberEntries = subscriptions
+  const liveSubscriberEntries = subscriptions
     .filter((subscription) => subscription.astrologerId === currentUser?.id || (isAstrologer && subscription.astrologerId === astrologerProfile.id))
     .map((subscription) => ({
       id: subscription.userId,
       name: subscription.userName || subscription.userId || 'Subscriber',
-      username: String(subscription.userName || subscription.userId || 'subscriber').toLowerCase().replace(/[^a-z0-9]+/g, ''),
+      username: accountHandle({ username: subscription.userUsername, id: subscription.userId }),
       bio: 'Astro Connect subscriber following astrology guidance and live sessions.',
       tier: subscription.tier || 'Silver',
     }))
+  const subscriberEntries = [...new Map([...PROFILE_SUBSCRIBERS, ...liveSubscriberEntries].map((subscriber) => [subscriber.id, subscriber])).values()]
   const subscriberNames = subscriberEntries.map((subscriber) => subscriber.name)
   const audienceEntries = audiencePanel === 'Followers'
     ? PROFILE_FOLLOWERS
@@ -58,10 +64,57 @@ export default function Profile() {
   const closeAudience = () => {
     setAudiencePanel(null)
     setSelectedMember(null)
+    setMemberMenuOpen(false)
+    setMemberActionMessage('')
   }
   const openAudience = (panel) => {
     setSelectedMember(null)
     setAudiencePanel(panel)
+    setMemberMenuOpen(false)
+    setMemberActionMessage('')
+  }
+
+  useEffect(() => {
+    if (!memberMenuOpen) return undefined
+
+    const closeMenu = () => setMemberMenuOpen(false)
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') closeMenu()
+    }
+
+    document.addEventListener('click', closeMenu)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('click', closeMenu)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [memberMenuOpen])
+
+  const selectMember = (member) => {
+    setSelectedMember(member)
+    setMemberMenuOpen(false)
+    setMemberActionMessage('')
+  }
+
+  const handleMemberAction = (action) => {
+    if (!selectedMember) return
+    setMemberMenuOpen(false)
+
+    if (action === 'block') {
+      const isBlocked = blockedUserIds.includes(selectedMember.id)
+      actions.toggleUserBlock(selectedMember.id)
+      setMemberActionMessage(isBlocked ? `${selectedMember.name} has been unblocked.` : `${selectedMember.name} has been blocked.`)
+      return
+    }
+
+    const messages = {
+      restrict: `${selectedMember.name} has been restricted.`,
+      report: 'Report submitted for review.',
+      share: 'Share options opened.',
+      about: 'Account information displayed.',
+      warning: `Warning sent to ${selectedMember.name}.`,
+    }
+    setMemberActionMessage(messages[action])
   }
 
   const startEditing = () => {
@@ -104,7 +157,7 @@ export default function Profile() {
           </div>
           {isAstrologer && (
             <div className="profile-services-editor">
-              <div className="profile-edit-card__heading"><PhoneCall size={20} /><div><h2>Service Pricing</h2><p>Set separate per-minute prices for calls and chats. Availability controls are on the dashboard.</p></div></div>
+              <div className="profile-edit-card__heading"><PhoneCall size={20} /><div><h2>Service Pricing</h2><p>Set separate per-minute prices for calls and chats. Availability controls are in Profile → Services.</p></div></div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2" style={{ marginTop: 16 }}>
                 <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Call price per minute (₹)</span><input type="number" min="0" className="text-input" value={servicesForm.callPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, callPricePerMinute: Number(event.target.value) })} /></label>
                 <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Chat price per minute (₹)</span><input type="number" min="0" className="text-input" value={servicesForm.chatPricePerMinute} onChange={(event) => setServicesForm({ ...servicesForm, chatPricePerMinute: Number(event.target.value) })} /></label>
@@ -128,7 +181,7 @@ export default function Profile() {
               <div className="social-profile__actions"><button type="button" className="btn btn-primary" onClick={startEditing}>Edit Profile</button></div>
             </div>
             <div className="social-profile__stats">
-              <div><strong>{isAstrologer ? PROFILE_POSTS.length : 0}</strong><span>Posts</span></div>
+              {!isAstrologer && <div><strong>0</strong><span>Posts</span></div>}
               {isAstrologer ? (
                 <>
                   <button type="button" className="social-profile__stat-button" onClick={() => openAudience('Followers')}><strong>{astrologerProfile.followers.toLocaleString('en-IN')}</strong><span>Followers</span></button>
@@ -143,13 +196,13 @@ export default function Profile() {
           </Card>
 
           <div className="social-profile__tabs" role="tablist" aria-label="Profile sections">
-            {[['Posts', Grid3X3], ['Live', Radio], [isAstrologer ? 'Services' : 'Other', Info]].map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
+            {(isAstrologer ? [['Services', Info], ['Live', Radio]] : [['Posts', Grid3X3], ['Live', Radio], ['Other', Info]]).map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
           </div>
 
-          {activeTab === 'Posts' && <div className="social-profile__posts">{isAstrologer ? PROFILE_POSTS.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone}`}><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>{post.title}</h2><p>{post.body}</p><span className="muted">Astrology insight · 2 days ago</span></Card>) : <Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card>}</div>}
+          {activeTab === 'Posts' && !isAstrologer && <div className="social-profile__posts"><Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card></div>}
           {activeTab === 'Live' && <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>}
           {activeTab === 'Other' && !isAstrologer && <Card className="social-profile__panel"><div className="section-title">Profile details</div><div className="social-profile__details"><div><strong>Email</strong><span><Mail size={14} /> {currentUser?.email || 'Not added'}</span></div><div><strong>Phone</strong><span><Phone size={14} /> {currentUser?.phone || 'Not added'}</span></div></div></Card>}
-          {activeTab === 'Services' && isAstrologer && <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{currentUser?.specialization || 'Not added'}</span></div><div><strong>Experience</strong><span>{currentUser?.experience || 'Not added'}</span></div></div></Card>}
+          {activeTab === 'Services' && isAstrologer && <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><p className="profile-services-help">Control which instant consultation services are available to users.</p><div className="profile-services-grid" aria-label="Service controls"><label className={`service-toggle${astrologerServices.dndEnabled ? ' is-locked' : ''}`}><span><strong><PhoneCall size={14} /> Instant Call</strong><small>{astrologerServices.callAvailable ? 'Available to users' : 'Unavailable to users'}</small></span><input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} aria-label="Enable instant calls" /><span className="toggle-switch" /></label><label className={`service-toggle${astrologerServices.dndEnabled ? ' is-locked' : ''}`}><span><strong><MessageCircle size={14} /> Instant Chat</strong><small>{astrologerServices.chatAvailable ? 'Available to users' : 'Unavailable to users'}</small></span><input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} aria-label="Enable instant chat" /><span className="toggle-switch" /></label><label className="service-toggle service-toggle--dnd"><span><strong>Dyan / DND</strong><small>{astrologerServices.dndEnabled ? 'All services paused' : 'Pause all instant services'}</small></span><input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} aria-label="Enable Dyan or DND mode" /><span className="toggle-switch" /></label></div>{astrologerServices.dndEnabled && <div className="service-lock-message">Turn off Dyan / DND to enable Call and Chat controls.</div>}<div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{currentUser?.specialization || 'Not added'}</span></div><div><strong>Experience</strong><span>{currentUser?.experience || 'Not added'}</span></div></div></Card>}
           {saved && <div className="profile-message profile-message--success">Profile updated successfully.</div>}
         </div>
       )}
@@ -157,10 +210,18 @@ export default function Profile() {
       {isAstrologer && audiencePanel && <div className="modal-overlay user-modal-overlay" onClick={closeAudience}>
         <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
           <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">{selectedMember && <button type="button" className="icon-btn" aria-label={`Back to ${audiencePanel.toLowerCase()}`} onClick={() => setSelectedMember(null)}>←</button>}<div className="section-title" style={{ marginBottom: 0 }}>{selectedMember ? selectedMember.name : audiencePanel}</div></div>
+            <div className="flex items-center gap-2">{selectedMember && <button type="button" className="icon-btn" aria-label={`Back to ${audiencePanel.toLowerCase()}`} onClick={() => { setSelectedMember(null); setMemberMenuOpen(false); setMemberActionMessage('') }}>←</button>}<div className="section-title" style={{ marginBottom: 0 }}>{selectedMember ? selectedMember.name : audiencePanel}</div></div>
+            {selectedMember && <div className="member-profile-menu-wrap"><button type="button" className="icon-btn" aria-label="Open account actions" aria-expanded={memberMenuOpen} onClick={(event) => { event.stopPropagation(); setMemberMenuOpen((open) => !open) }}><MoreVertical size={18} /></button>{memberMenuOpen && <div className="member-profile-menu" role="menu" onClick={(event) => event.stopPropagation()}>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('block')}>{blockedUserIds.includes(selectedMember.id) ? 'Unblock' : 'Block'}</button>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('restrict')}>Restrict</button>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('report')}>Report</button>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('share')}>Share to</button>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('about')}>About this account</button>
+              <button type="button" role="menuitem" onClick={() => handleMemberAction('warning')}>Send warning</button>
+            </div>}</div>}
             <button type="button" className="icon-btn" aria-label={`Close ${audiencePanel} list`} onClick={closeAudience}><X size={16} /></button>
           </div>
-          <div className="modal-card__content user-modal-card__content">{selectedMember ? <div className="follower-profile-modal"><div className="social-profile__audience-avatar follower-profile-modal__avatar">{selectedMember.name.slice(0, 1).toUpperCase()}</div><h2>{selectedMember.name}</h2><div className="muted">@{selectedMember.username}</div>{audiencePanel === 'Subscribers' && <div className="subscriber-tier-badge">{selectedMember.tier || 'Silver'} Subscriber</div>}<p>{selectedMember.bio}</p><button type="button" className={blockedUserIds.includes(selectedMember.id) ? 'btn btn-outline' : 'btn btn-primary'} onClick={() => actions.toggleUserBlock(selectedMember.id)}>{blockedUserIds.includes(selectedMember.id) ? 'Unblock' : 'Block'}</button></div> : <div className="social-profile__audience-list">{audienceEntries.length ? audienceEntries.map((entry) => <button key={entry.id} type="button" className="social-profile__audience-item" onClick={() => setSelectedMember(entry)}><div className="social-profile__audience-avatar">{entry.name.slice(0, 1).toUpperCase()}</div><div><strong>{entry.name}</strong>{audiencePanel === 'Subscribers' && <span className="audience-tier-label">{entry.tier || 'Silver'}</span>}</div></button>) : <div className="muted">No {audiencePanel.toLowerCase()} yet.</div>}</div>}</div>
+          <div className="modal-card__content user-modal-card__content">{selectedMember ? <div className="follower-profile-modal"><div className="social-profile__audience-avatar follower-profile-modal__avatar">{selectedMember.name.slice(0, 1).toUpperCase()}</div><h2>{selectedMember.name}</h2><div className="muted">@{accountHandle(selectedMember)}</div><div className="follower-profile-modal__account-id">ID: {selectedMember.id}</div>{audiencePanel === 'Subscribers' && <div className="subscriber-tier-badge">{selectedMember.tier || 'Silver'} Subscriber</div>}<p>{selectedMember.bio}</p><div className="follower-profile-modal__details"><div><strong>Account type</strong><span>{audiencePanel === 'Subscribers' ? 'Subscriber' : 'Follower'}</span></div><div><strong>Account status</strong><span>{blockedUserIds.includes(selectedMember.id) ? 'Blocked' : 'Active'}</span></div></div>{memberActionMessage && <div className="profile-message profile-message--success follower-profile-modal__message">{memberActionMessage}</div>}</div> : <div className="social-profile__audience-list">{audienceEntries.length ? audienceEntries.map((entry) => <button key={entry.id} type="button" className="social-profile__audience-item" onClick={() => selectMember(entry)}><div className="social-profile__audience-avatar">{entry.name.slice(0, 1).toUpperCase()}</div><div><strong>{entry.name}</strong><span className="audience-username">@{accountHandle(entry)}</span><span className="audience-account-id">ID: {entry.id}</span>{audiencePanel === 'Subscribers' && <span className="audience-tier-label">{entry.tier || 'Silver'}</span>}</div></button>) : <div className="muted">No {audiencePanel.toLowerCase()} yet.</div>}</div>}</div>
         </div>
       </div>}
 
