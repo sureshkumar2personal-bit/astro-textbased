@@ -1,89 +1,33 @@
-import { Mail, Phone, UserCircle2 } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Card from '../../../../components/ui/Card.jsx'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import Section from '../../../../components/ui/Section.jsx'
+import { Link } from 'react-router-dom'
+import { Activity, BookOpen, CalendarDays, ChevronRight, CircleHelp, Globe2, Languages, MapPin, MoreHorizontal, Pencil, Settings, Sparkles, UserRound, Users } from 'lucide-react'
 import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes, ROLES } from '../../../../utils/roleRoutes.js'
+import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+
+const initials = (name = '') => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'
 
 export default function Profile() {
   const { currentUser, updateProfile } = useAuth()
-  const navigate = useNavigate()
   const routes = getRoleRoutes(currentUser?.role)
-  const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
-  const [editing, setEditing] = useState(isAstrologer)
-  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
-  const [error, setError] = useState('')
+  const [editing, setEditing] = useState(false)
   const [saved, setSaved] = useState(false)
-
-  const startEditing = () => {
-    setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
-    setError('')
-    setSaved(false)
-    setEditing(true)
-  }
-
-  const handleSave = () => {
-    try {
-      updateProfile(form)
-      setEditing(false)
-      setSaved(true)
-      setError('')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update your profile.')
-    }
-  }
-
-  return (
-    <div>
-      <PageHeader
-        eyebrow={isAstrologer ? 'Astrologer' : 'User portal'}
-        title="Profile"
-        subtitle="View your account and contact details."
-        showBack
-        backTo={routes.dashboard}
-        actions={!editing && <button type="button" className="btn btn-primary" onClick={startEditing}>Edit Profile</button>}
-      />
-
-      <Section title="Account Details" icon={UserCircle2}>
-        <Card>
-          <div className="flex flex-wrap items-center gap-4" style={{ marginBottom: 24 }}>
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-xl font-bold text-white">
-              {currentUser?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">{currentUser?.name || 'User'}</h2>
-              <div className="muted" style={{ marginTop: 5 }}>{isAstrologer ? 'Astrologer' : 'User'}</div>
-            </div>
-          </div>
-
-          {editing ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Name</span><input className="text-input" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-              <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Email Address</span><input type="email" className="text-input" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
-              <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Phone Number</span><input type="tel" className="text-input" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
-              {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><input className="text-input" value={form.specialization} onChange={(event) => setForm({ ...form, specialization: event.target.value })} /></label>}
-              {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><input className="text-input" value={form.experience} onChange={(event) => setForm({ ...form, experience: event.target.value })} placeholder="8 years" /></label>}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Email Address</span><div className="flex min-h-[42px] items-center gap-2 rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 text-[color:var(--text-primary)]"><Mail size={16} className="text-[color:var(--primary)]" />{currentUser?.email || '—'}</div></div>
-              <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Phone Number</span><div className="flex min-h-[42px] items-center gap-2 rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 text-[color:var(--text-primary)]"><Phone size={16} className="text-[color:var(--primary)]" />{currentUser?.phone || 'Not added'}</div></div>
-              {isAstrologer && <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><div className="min-h-[42px] rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 py-3 text-[color:var(--text-primary)]">{currentUser?.specialization || 'Not added'}</div></div>}
-              {isAstrologer && <div className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><div className="min-h-[42px] rounded-[14px] border border-[color:var(--surface-border)] bg-[color:var(--surface-soft)] px-4 py-3 text-[color:var(--text-primary)]">{currentUser?.experience || 'Not added'}</div></div>}
-            </div>
-          )}
-          {error && <div className="mt-4 rounded-[14px] bg-[color:var(--danger-bg)] px-4 py-3 text-sm font-medium text-[color:var(--danger)]">{error}</div>}
-          {saved && <div className="mt-4 rounded-[14px] bg-[color:var(--success-bg)] px-4 py-3 text-sm font-medium text-[color:var(--green-600)]">Profile updated successfully.</div>}
-        </Card>
-      </Section>
-
-      <div className="flex justify-center">
-        {editing ? (
-          <div className="mt-5 flex w-full justify-center gap-4"><button type="button" className="btn btn-ghost min-w-[120px]" onClick={() => setEditing(false)}>Cancel</button><button type="button" className="btn btn-primary min-w-[150px]" onClick={handleSave}>Save Changes</button></div>
-        ) : <button type="button" className="btn btn-outline" onClick={() => navigate(routes.dashboard)}>Back to Dashboard</button>}
-      </div>
-    </div>
-  )
+  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '' })
+  const [tab, setTab] = useState('Overview')
+  const save = () => { updateProfile(form); setEditing(false); setSaved(true) }
+  const stats = [['12', 'Posts'], ['28', 'Following'], ['146', 'Followers'], ['8', 'Questions Asked'], ['5', 'Consultations']]
+  const actions = [[CircleHelp, 'Ask a Question', routes.askQuestion], [Sparkles, 'Explore Astrologers', routes.astrologers], [BookOpen, 'My Questions', routes.trackQuestions], [CalendarDays, 'My Consultations', routes.consultationHistory]]
+  return <div className="member-profile">
+    <div className="member-profile__intro"><div><span className="profile-kicker">YOUR ASTRO CONNECT SPACE</span><h1>Profile</h1><p>Keep your journey, questions and consultations in one place.</p></div><button className="icon-btn" aria-label="Profile settings"><Settings size={18} /></button></div>
+    <section className="member-profile__hero">
+      <div className="member-profile__identity"><div className="member-avatar">{initials(currentUser?.name)}</div><div><div className="member-profile__name-row"><h2>{currentUser?.name || 'Astro Connect Member'}</h2><span className="member-badge">✦ Astro Connect Member</span></div><p className="profile-handle">@{(currentUser?.name || 'member').toLowerCase().replace(/[^a-z0-9]+/g, '')}</p><div className="profile-meta"><span><MapPin size={14} /> India</span><span><Globe2 size={14} /> Exploring the stars</span></div><p className="member-bio">Curious about the patterns shaping your next chapter. Ask, reflect and find clarity with trusted astrologers.</p></div></div>
+      <div className="member-profile__hero-actions"><button className="btn btn-primary" onClick={() => setEditing(true)}><Pencil size={15} /> Edit Profile</button><button className="icon-btn" aria-label="More profile actions"><MoreHorizontal size={19} /></button></div>
+      <div className="profile-stats">{stats.map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div>
+    </section>
+    <div className="member-profile__layout"><main>
+      <section className="profile-section"><div className="section-heading"><div><span className="profile-kicker">MAKE YOUR NEXT MOVE</span><h2>Quick actions</h2></div></div><div className="quick-actions">{actions.map(([Icon, label, to]) => <Link to={to} key={label}><span><Icon size={18} /></span><b>{label}</b><ChevronRight size={15} /></Link>)}</div></section>
+      <section className="profile-section"><div className="profile-tabs">{['Overview', 'Questions', 'Posts', 'Following', 'Activity'].map((item) => <button className={tab === item ? 'is-active' : ''} onClick={() => setTab(item)} key={item}>{item}</button>)}</div><div className="profile-empty"><span><Sparkles size={20} /></span><h3>{tab === 'Questions' ? 'No questions yet' : `Your ${tab.toLowerCase()} will appear here`}</h3><p>Ask an astrologer and start your journey toward greater clarity.</p><Link to={routes.askQuestion} className="btn btn-primary">Ask a Question</Link></div></section>
+    </main><aside><section className="about-card"><div className="section-heading"><h2>About</h2><button className="icon-btn" onClick={() => setEditing(true)}><Pencil size={15} /></button></div><p className="about-copy">{currentUser?.bio || 'A thoughtful space for reflection, questions and meaningful guidance.'}</p><div className="about-list"><div><Languages size={16} /><span><b>Languages</b>English, Hindi</span></div><div><Sparkles size={16} /><span><b>Interests</b>Relationships · Career · Wellbeing</span></div><div><Activity size={16} /><span><b>Member since</b>January 2025</span></div></div></section><section className="profile-tip"><Sparkles size={18} /><div><b>Your journey is personal</b><p>Save questions and revisit guidance whenever you need a little perspective.</p></div></section></aside></div>
+    {editing && <div className="modal-overlay" onClick={() => setEditing(false)}><div className="modal-card" onClick={(e) => e.stopPropagation()}><div className="modal-card__header"><h2>Edit Profile</h2></div><div className="modal-card__content profile-edit-form">{[['name','Name'],['email','Email address'],['phone','Phone number']].map(([key, label]) => <label className="field-group" key={key}><span className="field-label-top">{label}</span><input className="text-input" value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} /></label>)}</div><div className="modal-card__footer"><button className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button><button className="btn btn-primary" onClick={save}>Save Changes</button></div></div></div>}
+    {saved && <div className="profile-toast">Profile updated successfully.</div>}
+  </div>
 }

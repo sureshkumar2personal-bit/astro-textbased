@@ -39,13 +39,11 @@ export default function ChatBooking() {
   const storageKey = `astro-connect:free-chat:${currentUser?.id || 'guest'}:${astrologer.id}`
   const initialPackage = CHAT_PACKAGES.some(({ id }) => id === searchParams.get('package')) ? searchParams.get('package') : null
   const [selectedPackageId, setSelectedPackageId] = useState(initialPackage)
-  const [showConfirmation, setShowConfirmation] = useState(false)
   const freeChatSession = getFreeChatSession(storageKey)
   const selectedPackage = CHAT_PACKAGES.find(({ id }) => id === selectedPackageId)
   const freeChatAvailable = !freeChatSession
   const freeChatInProgress = freeChatSession && !freeChatSession.freeUsed
   const freeRemaining = freeChatSession ? Math.max(0, Math.ceil((FREE_CHAT_DURATION_MS - (Date.now() - freeChatSession.startedAt)) / 1000)) : 120
-  const totalMinutes = selectedPackage ? selectedPackage.duration + (freeChatAvailable ? 2 : freeChatInProgress ? Math.ceil(freeRemaining / 60) : 0) : null
 
   const startFreeChat = () => {
     if (!freeChatInProgress) {
@@ -74,37 +72,13 @@ export default function ChatBooking() {
           </div>
         </header>
 
-        {freeChatAvailable && (
-          <section className="free-chat-offer" aria-labelledby="free-chat-heading">
-            <div>
-              <span className="free-chat-offer__eyebrow">2 Minutes Free</span>
-              <h2 id="free-chat-heading">Try a free chat with this astrologer</h2>
-              <p>Start your consultation with 2 free minutes.</p>
-            </div>
-            <button type="button" className="btn btn-primary" onClick={startFreeChat}>Start Free Chat →</button>
-          </section>
-        )}
-
-        {freeChatInProgress && (
-          <section className="free-chat-offer free-chat-offer--in-progress">
-            <div>
-              <span className="free-chat-offer__eyebrow">Free Chat In Progress</span>
-              <h2>Continue your free chat</h2>
-              <p>Your two-minute free chat is already underway.</p>
-            </div>
-            <button type="button" className="btn btn-primary" onClick={startFreeChat}>Resume Free Chat →</button>
-          </section>
-        )}
-
-        {freeChatSession?.used && <p className="chat-booking-page__used-note">Free 2-minute chat used. Choose a package to continue chatting.</p>}
-
         <section className="chat-booking-page__packages" aria-labelledby="chat-packages-heading">
-          <h2 id="chat-packages-heading">Chat Packages</h2>
+          <h2 id="chat-packages-heading">Choose Your Chat Duration</h2>
           <div className="chat-booking-page__package-grid">
             {CHAT_PACKAGES.map((chatPackage) => {
               const selected = chatPackage.id === selectedPackageId
               return (
-                <button key={chatPackage.id} type="button" aria-pressed={selected} onClick={() => { setSelectedPackageId(chatPackage.id); setShowConfirmation(false) }} className={`chat-package ${selected ? 'chat-package--selected' : ''}`}>
+                <button key={chatPackage.id} type="button" aria-pressed={selected} onClick={() => setSelectedPackageId(chatPackage.id)} className={`chat-package ${selected ? 'chat-package--selected' : ''}`}>
                   {selected && <span className="chat-package__check"><Check size={13} aria-hidden="true" /></span>}
                   <span>{chatPackage.duration} Minutes</span>
                   <strong>₹{chatPackage.total}</strong>
@@ -116,27 +90,7 @@ export default function ChatBooking() {
           </div>
         </section>
 
-        {selectedPackage && (
-          <section className="chat-booking-page__summary" aria-labelledby="chat-summary-heading">
-            <h2 id="chat-summary-heading">Chat Summary</h2>
-            <dl>
-              <div><dt>Astrologer</dt><dd>{astrologer.name}</dd></div>
-              <div><dt>Free Time</dt><dd>{freeChatAvailable ? '2 Minutes' : freeChatInProgress ? `${Math.ceil(freeRemaining / 60)} Minutes remaining` : 'Used'}</dd></div>
-              <div><dt>Paid Package</dt><dd>{selectedPackage.duration} Minutes</dd></div>
-              <div><dt>Total Chat</dt><dd>{totalMinutes} Minutes</dd></div>
-              <div><dt>Rate</dt><dd>₹{selectedPackage.rate}/min</dd></div>
-              <div className="chat-booking-page__total"><dt>Amount</dt><dd>₹{selectedPackage.total}</dd></div>
-            </dl>
-            {showConfirmation ? (
-              <div className="chat-booking-page__confirmation">
-                <p>Confirm your ₹{selectedPackage.total} chat package with {astrologer.name}.</p>
-                <button type="button" className="btn btn-primary" onClick={() => navigate(`${routes.chatWalletPayment}?id=${astrologer.id}&package=${selectedPackage.id}`)}>Start Chat →</button>
-              </div>
-            ) : (
-              <button type="button" className="btn btn-primary chat-booking-page__start-button" onClick={() => setShowConfirmation(true)}>Start Chat →</button>
-            )}
-          </section>
-        )}
+        {selectedPackage && <><button type="button" className="btn btn-primary chat-booking-page__start-button" onClick={() => navigate(`${routes.chatWalletPayment}?id=${astrologer.id}&package=${selectedPackage.id}`)}>Start Chat →</button><p className="chat-booking-page__note">You will be connected with the astrologer after your payment is confirmed.</p></>}
       </section>
     </main>
   )

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil } from 'lucide-react'
+import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Users } from 'lucide-react'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -161,38 +161,39 @@ export default function AstrologerProfile() {
           <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div></div></Card>
         )}
 
-        {!isOwner && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button><Link to={routes.askQuestion} className="btn btn-primary">Ask a Question</Link></div>}
+        {!isOwner && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
       </div>
       ) : (
-        <>
-          <Card className="section" style={{ display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div className="astrologer-profile-compact">
+          <Card className="section astrologer-compact-header">
+            <div className="astrologer-compact-identity">
               <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-[18px] font-bold text-white">
                 {astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
               </div>
-              <div>
+              <div className="astrologer-compact-identity-copy">
                 <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>{astrologer.name}</div>
                 <div className="muted">{astrologer.specialization}</div>
+                <div className="astrologer-inline-about"><span>About</span>{astrologer.bio}</div>
+                <div className="astrologer-profile-highlights"><span><strong>{astrologer.experience}</strong> Experience</span><span><Star size={13} /> <strong>{astrologer.rating}</strong><small>{astrologer.reviews}</small></span></div>
               </div>
             </div>
-            <button type="button" className="btn btn-primary" onClick={subscribed ? () => setSubscribeSuccess(true) : handleSubscribe}>
+            <div className="astrologer-compact-actions"><button type="button" className="btn btn-primary" onClick={subscribed ? () => setSubscribeSuccess(true) : handleSubscribe}>
               <BadgeCheck size={15} /> {subscribed ? 'Subscribed' : 'Subscribe'}
-            </button>
-            <button type="button" className="btn btn-outline" onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}>
+            </button><button type="button" className="btn btn-outline" onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}>
               {following ? <UserCheck size={15} /> : <UserPlus size={15} />} {following ? 'Following' : 'Follow'}
-            </button>
+            </button></div>
           </Card>
-          <Card className="section"><div className="section-title">About</div><div className="muted" style={{ lineHeight: 1.7 }}>{astrologer.bio}</div></Card>
-          <Card className="section">
+          <Card className="section astrologer-compact-stats">
             <div className="section-title">Stats</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-gold"><Star size={18} /></div><div><div className="stat-value">{astrologer.rating}</div><div className="stat-label">{astrologer.reviews}</div></div></div>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><Star size={18} /></div><div><div className="stat-value">{astrologer.followers.toLocaleString('en-IN')}</div><div className="stat-label">followers</div></div></div>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-sky"><Star size={18} /></div><div><div className="stat-value">{astrologer.experience}</div><div className="stat-label">experience</div></div></div>
+              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><Users size={16} /></div><div><div className="stat-value">{astrologer.followers.toLocaleString('en-IN')}</div><div className="stat-label">followers</div></div></div>
+              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><BadgeCheck size={16} /></div><div><div className="stat-value">{subscriberNames.length.toLocaleString('en-IN')}</div><div className="stat-label">subscribers</div></div></div>
+              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><CalendarPlus size={16} /></div><div><div className="stat-value">3,850</div><div className="stat-label">consultations</div></div></div>
             </div>
           </Card>
-          <div className="section" style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button><Link to={routes.askQuestion} className="btn btn-primary">Ask a Question</Link></div>
-        </>
+          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button></div></section>
+          <section className="astrologer-content"><div className="astrologer-content__heading"><span className="profile-kicker">LATEST FROM {astrologer.name.toUpperCase()}</span><h2>Posts &amp; Live Sessions</h2></div><div className="astrologer-content__grid">{PROFILE_POSTS.slice(0, 2).map((post) => <article className="astrologer-content-card" key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>Astrology insight · 2 days ago</small></span></div><h3>{post.title}</h3><p>{post.body}</p></article>)}{liveSessions.slice(0, 1).map((session) => <article className="astrologer-content-card astrologer-content-card--live" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> LIVE</span><h3>{session.title}</h3><p>{session.status}</p><small>{session.time}</small></article>)}</div></section>
+        </div>
       )}
 
       {isOwner && audiencePanel && (

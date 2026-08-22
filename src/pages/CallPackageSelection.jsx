@@ -69,21 +69,14 @@ export default function CallPackageSelection() {
           </div>
         </section>
 
-        <section className="call-booking-page__summary" aria-labelledby="call-summary-heading">
-          <h2 id="call-summary-heading">Call Summary</h2>
-          <dl>
-            <div><dt>Astrologer</dt><dd>{astrologer.name}</dd></div>
-            <div><dt>Duration</dt><dd>{selectedPackage.duration} Minutes</dd></div>
-            <div><dt>Call Rate</dt><dd>₹{selectedPackage.rate}/min</dd></div>
-            <div className="call-booking-page__total"><dt>Total Amount</dt><dd>₹{selectedPackage.total}</dd></div>
-          </dl>
+        <div className="call-booking-page__cta">
           <button type="button" className="btn btn-primary call-booking-page__book-button" onClick={() => navigate(`${routes.walletPayment}?id=${astrologer.id}&package=${selectedPackage.id}`)}>Book Call Now →</button>
           <p className="call-booking-page__note">
             {isOnline
               ? 'You will be connected with the astrologer after your booking is confirmed.'
               : 'Astrologer is currently offline. Your call will start when the astrologer becomes available.'}
           </p>
-        </section>
+        </div>
       </section>
     </main>
   )

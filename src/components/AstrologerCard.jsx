@@ -43,7 +43,7 @@ export default function AstrologerCard({ astrologer, onViewProfile, onCall, onCh
         <p className="astrologer-card__specialization">{astrologer.specialization}</p>
 
         <div className="astrologer-card__meta" aria-label="Astrologer details">
-          <span>Ex {formatExperience(astrologer.experience)}</span>
+          <span>Exp {formatExperience(astrologer.experience)}</span>
           <span aria-hidden="true">·</span>
           <strong>{formatCount(astrologer.followers)} Followers</strong>
         </div>

@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, WalletCards } from 'lucide-react'
+import { ArrowLeft, Check, CreditCard, LockKeyhole, Radio, Smartphone } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CHAT_PACKAGES, mockAstrologers } from '../data/notificationData.js'
@@ -9,84 +9,15 @@ import PaymentSuccess from '../components/PaymentSuccess.jsx'
 
 const FREE_SECONDS = 120
 const money = (value) => `₹${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-const count = (value) => value >= 1000 ? `${(value / 1000).toFixed(1)}K` : String(value)
-const experience = (value) => String(value).match(/\d+/)?.[0] || value
-
-function readFreeSession(key) {
-  try {
-    const session = JSON.parse(localStorage.getItem(key) || 'null')
-    if (!session) return null
-    if (!session.freeUsed && Date.now() - session.startedAt >= FREE_SECONDS * 1000) {
-      const used = { ...session, freeUsed: true, freeRemaining: 0 }
-      localStorage.setItem(key, JSON.stringify(used))
-      return used
-    }
-    return session
-  } catch {
-    return null
-  }
-}
-
-function readPayment(key) {
-  try {
-    const value = localStorage.getItem(key)
-    if (value === 'successful') return { status: 'successful' }
-    return JSON.parse(value || 'null')
-  } catch {
-    return null
-  }
-}
+function readPayment(key) { try { const value = localStorage.getItem(key); return value ? JSON.parse(value) : null } catch { return null } }
 
 export default function ChatWalletPayment() {
-  const { currentUser } = useAuth()
-  const routes = getRoleRoutes(currentUser?.role)
-  const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const { userWallet, actions } = useAppData()
-  const astrologer = mockAstrologers.find(({ id }) => id === params.get('id')) || mockAstrologers[0]
-  const selectedPackage = CHAT_PACKAGES.find(({ id }) => id === params.get('package')) || CHAT_PACKAGES[0]
-  const sessionKey = `astro-connect:free-chat:${currentUser?.id || 'guest'}:${astrologer.id}`
-  const freeSession = readFreeSession(sessionKey)
-  const freeSeconds = !freeSession ? FREE_SECONDS : freeSession.freeUsed ? 0 : Math.max(0, Math.ceil((FREE_SECONDS * 1000 - (Date.now() - freeSession.startedAt)) / 1000))
-  const totalSeconds = freeSeconds + selectedPackage.duration * 60
-  const balance = Number(userWallet?.balance || 0)
-  const remainingBalance = balance - selectedPackage.total
-  const sufficient = balance >= selectedPackage.total
-  const paymentKey = `astro-connect:chat-payment:${currentUser?.id || 'guest'}:${astrologer.id}:${selectedPackage.id}`
-  const [confirming, setConfirming] = useState(false)
-  const [processing, setProcessing] = useState(false)
-  const [paymentDetails, setPaymentDetails] = useState(() => readPayment(paymentKey))
-  const [paid, setPaid] = useState(() => readPayment(paymentKey)?.status === 'successful')
-
-  const confirmPayment = () => {
-    if (!sufficient || processing || paid) return
-    setProcessing(true)
-    const purchasedFreeSeconds = freeSeconds
-    const transactionId = paymentKey
-    actions.debitUserWallet({ amount: selectedPackage.total, astrologer: astrologer.name, duration: selectedPackage.duration, service: 'Chat', transactionId })
-    localStorage.setItem(sessionKey, JSON.stringify({ startedAt: Date.now(), freeUsed: true, freeRemaining: 0, paidDuration: selectedPackage.duration * 60, totalDuration: totalSeconds }))
-    const details = { status: 'successful', amount: selectedPackage.total, packageMinutes: selectedPackage.duration, freeMinutes: Math.ceil(purchasedFreeSeconds / 60), totalMinutes: Math.floor((selectedPackage.duration * 60 + purchasedFreeSeconds) / 60) }
-    localStorage.setItem(paymentKey, JSON.stringify(details))
-    setPaymentDetails(details)
-    setPaid(true)
-    setConfirming(false)
-    setProcessing(false)
-  }
-
-  if (paid) return <PaymentSuccess service="chat" astrologer={astrologer} details={paymentDetails || { packageMinutes: selectedPackage.duration, freeMinutes: 0, totalMinutes: selectedPackage.duration, amount: selectedPackage.total }} onPrimary={() => navigate(`${routes.chat}?id=${astrologer.id}&mode=paid&package=${selectedPackage.id}`)} onBack={() => navigate(routes.astrologers)} />
-
-  return (
-    <main className="wallet-payment-page">
-      <button type="button" className="wallet-payment-page__back" onClick={() => navigate(`${routes.chatBooking}?id=${astrologer.id}`)}><ArrowLeft size={16} aria-hidden="true" /> Back to Chat Packages</button>
-      <header className="wallet-payment-page__heading"><h1>Confirm Your Chat</h1><p>Review your chat package and complete the payment using your wallet.</p></header>
-      <section className="wallet-balance-card"><div className="wallet-balance-card__label"><WalletCards size={19} aria-hidden="true" /><span>Wallet Balance</span></div><strong>{money(balance)}</strong><span>Available Balance</span><button type="button" className="btn btn-outline wallet-balance-card__add">+ Add Money</button></section>
-      <section className="wallet-payment-page__astrologer"><div className="wallet-payment-page__avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><div><strong>{astrologer.name}</strong><span>{astrologer.specialization}</span><small className={astrologer.availability === 'Online' ? 'wallet-payment-page__online' : ''}>● {astrologer.availability}</small><em>Ex {experience(astrologer.experience)} · {count(astrologer.followers)} Followers</em></div></section>
-      <section className="wallet-detail-card chat-wallet-package"><h2>Selected Chat Package</h2><strong>{selectedPackage.duration} Minutes</strong><b>{money(selectedPackage.total)}</b><span>₹{selectedPackage.rate}/min</span></section>
-      <section className="wallet-detail-card"><h2>Payment Summary</h2><dl><div><dt>Wallet Balance</dt><dd>{money(balance)}</dd></div><div><dt>Chat Package</dt><dd className="wallet-payment-summary__deduction">-{money(selectedPackage.total)}</dd></div><div><dt>Free Chat</dt><dd>{freeSeconds ? '2 Minutes' : 'Used'}</dd></div><div><dt>Paid Package</dt><dd>{selectedPackage.duration} Minutes</dd></div><div><dt>Total Chat</dt><dd>{Math.floor(totalSeconds / 60)} Minutes</dd></div><div className="wallet-detail-card__total"><dt>Total Payable</dt><dd>{money(selectedPackage.total)}</dd></div><div><dt>Remaining Balance</dt><dd>{money(Math.max(0, remainingBalance))}</dd></div></dl></section>
-      {sufficient ? <p className="wallet-payment-page__sufficient"><Check size={15} aria-hidden="true" /> Sufficient wallet balance</p> : <div className="wallet-payment-page__insufficient"><strong>Insufficient Wallet Balance</strong><span>Your wallet balance is {money(balance)}. You need {money(selectedPackage.total - balance)} more to continue.</span><button type="button" className="btn btn-outline">Add {money(selectedPackage.total - balance)} to Wallet →</button></div>}
-      <button type="button" className="btn btn-primary wallet-payment-page__pay" disabled={!sufficient || processing} onClick={() => setConfirming(true)}>Confirm &amp; Pay {money(selectedPackage.total)} →</button>
-      <p className="call-booking-page__note">Secure wallet payment</p>
-      {confirming && <div className="wallet-payment-page__overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-chat-payment-heading"><section className="wallet-confirm-modal"><h2 id="confirm-chat-payment-heading">Confirm Chat Payment</h2><p>You are about to pay {money(selectedPackage.total)} from your wallet for a {selectedPackage.duration}-minute chat package with {astrologer.name}.</p><dl><div><dt>Wallet Balance</dt><dd>{money(balance)}</dd></div><div><dt>Payment</dt><dd>{money(selectedPackage.total)}</dd></div><div><dt>Remaining Balance</dt><dd>{money(remainingBalance)}</dd></div><div><dt>Total Chat Time</dt><dd>{Math.floor(totalSeconds / 60)} Minutes</dd></div></dl>{freeSeconds > 0 && <p>Includes 2 free minutes.</p>}<div><button type="button" className="btn btn-outline" onClick={() => setConfirming(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={confirmPayment}>Confirm Payment</button></div></section></div>}
-    </main>
-  )
+  const { currentUser } = useAuth(); const routes = getRoleRoutes(currentUser?.role); const navigate = useNavigate(); const [params] = useSearchParams(); const { userWallet, actions } = useAppData()
+  const astrologer = mockAstrologers.find(({ id }) => id === params.get('id')) || mockAstrologers[0]; const selectedPackage = CHAT_PACKAGES.find(({ id }) => id === params.get('package')) || CHAT_PACKAGES[0]; const bookingAmount = Number(selectedPackage.total); const gst = bookingAmount * .18; const totalPayable = bookingAmount + gst; const balance = Number(userWallet?.balance || 0); const sufficient = balance >= totalPayable
+  const paymentKey = `astro-connect:chat-payment:${currentUser?.id || 'guest'}:${astrologer.id}:${selectedPackage.id}`; const sessionKey = `astro-connect:free-chat:${currentUser?.id || 'guest'}:${astrologer.id}`; const freeSession = (() => { try { return JSON.parse(localStorage.getItem(sessionKey) || 'null') } catch { return null } })(); const freeSeconds = freeSession && !freeSession.freeUsed ? Math.max(0, Math.ceil((FREE_SECONDS * 1000 - (Date.now() - freeSession.startedAt)) / 1000)) : 0
+  const [paymentMethod, setPaymentMethod] = useState('upi'); const [coupon, setCoupon] = useState(''); const [confirming, setConfirming] = useState(false); const [processing, setProcessing] = useState(false); const [paymentDetails, setPaymentDetails] = useState(() => readPayment(paymentKey)); const [paid, setPaid] = useState(() => readPayment(paymentKey)?.status === 'successful')
+  const confirmPayment = () => { if (!sufficient || processing || paid) return; setProcessing(true); const totalMinutes = selectedPackage.duration + Math.ceil(freeSeconds / 60); const details = { status: 'successful', amount: totalPayable, packageMinutes: selectedPackage.duration, freeMinutes: Math.ceil(freeSeconds / 60), totalMinutes }; actions.debitUserWallet({ amount: totalPayable, astrologer: astrologer.name, duration: selectedPackage.duration, service: 'Chat', transactionId: paymentKey }); localStorage.setItem(sessionKey, JSON.stringify({ startedAt: Date.now(), freeUsed: true, freeRemaining: 0, paidDuration: selectedPackage.duration * 60, totalDuration: totalMinutes * 60 })); localStorage.setItem(paymentKey, JSON.stringify(details)); setPaymentDetails(details); setPaid(true); setConfirming(false); setProcessing(false) }
+  if (paid) return <PaymentSuccess service="chat" astrologer={astrologer} details={paymentDetails || { packageMinutes: selectedPackage.duration, freeMinutes: 0, totalMinutes: selectedPackage.duration, amount: totalPayable }} onPrimary={() => navigate(`${routes.chat}?id=${astrologer.id}&mode=paid&package=${selectedPackage.id}`)} onBack={() => navigate(routes.astrologers)} />
+  const methods = [['upi', Smartphone, 'UPI', 'Pay using UPI'], ['card', CreditCard, 'Credit / Debit Card', 'Pay securely using your card'], ['netbanking', Radio, 'Net Banking', 'Pay using Net Banking']]
+  return <main className="call-payment-page"><button type="button" className="call-payment-page__back" onClick={() => navigate(`${routes.chatBooking}?id=${astrologer.id}`)}><ArrowLeft size={16} /> Back to Chat Packages</button><header className="call-payment-page__heading"><span>CHAT BOOKING</span><h1>Payment Information</h1><p>{astrologer.name} · {astrologer.specialization} · {selectedPackage.duration} Minutes · ₹{selectedPackage.rate}/min</p></header><div className="call-payment-checkout"><section className="call-payment-page__card"><h2>Payment Information</h2><dl className="call-payment-page__amounts"><div><dt>Chat Booking Amount</dt><dd>{money(bookingAmount)}</dd></div><div><dt>GST (18%)</dt><dd>{money(gst)}</dd></div><div className="is-total"><dt>Total Amount</dt><dd>{money(totalPayable)}</dd></div></dl><p className="call-payment-page__secure"><LockKeyhole size={15} /> 100% Safe and Secure</p></section><section className="call-payment-page__card call-payment-page__coupon"><h2>Have a coupon code?</h2><div><input className="text-input" value={coupon} onChange={(e) => setCoupon(e.target.value)} placeholder="Enter Coupon Code" /><button type="button" className="btn btn-outline">Apply</button></div></section><section className="call-payment-page__card"><h2>Payment Methods</h2><div className="call-payment-page__methods">{methods.map(([id, Icon, title, description]) => <button type="button" key={id} className={`call-payment-method ${paymentMethod === id ? 'is-selected' : ''}`} onClick={() => setPaymentMethod(id)}><span className="call-payment-method__icon"><Icon size={18} /></span><span><b>{title}</b><small>{description}</small></span><span className="call-payment-method__radio">{paymentMethod === id && <Check size={12} />}</span></button>)}</div></section>{!sufficient && <p className="call-payment-page__insufficient">Payment failed. Your chat has not been started. You need {money(totalPayable - balance)} more.</p>}<div className="call-payment-page__sticky-pay"><button type="button" className="btn btn-primary call-payment-page__pay" disabled={!sufficient || processing} onClick={() => setConfirming(true)}>Pay and Chat {money(totalPayable)} →</button></div></div>{confirming && <div className="wallet-payment-page__overlay"><section className="wallet-confirm-modal"><h2>Confirm Payment</h2><p>You are about to pay {money(totalPayable)} for your chat package.</p><div><button type="button" className="btn btn-outline" onClick={() => setConfirming(false)}>Try Again</button><button type="button" className="btn btn-primary" onClick={confirmPayment}>Confirm Payment</button></div></section></div>}</main>
 }
