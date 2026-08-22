@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, CalendarDays, Clock3, Headphones, MessageCircle, Search, Wallet } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -17,6 +17,13 @@ function formatAmount(value) {
   return `₹${Number(value || 0).toLocaleString('en-IN')}`
 }
 
+function formatMessageTime(value) {
+  return new Date(value).toLocaleString('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+}
+
 function sessionIcon(type) {
   return type === 'Chat' ? MessageCircle : Headphones
 }
@@ -28,6 +35,24 @@ export default function ConsultationHistory() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [selectedCustomerId, setSelectedCustomerId] = useState(null)
+  const [contextMenu, setContextMenu] = useState(null)
+  const [historySessionId, setHistorySessionId] = useState(null)
+
+  useEffect(() => {
+    if (!contextMenu) return undefined
+
+    const closeMenu = () => setContextMenu(null)
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') closeMenu()
+    }
+
+    document.addEventListener('click', closeMenu)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('click', closeMenu)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [contextMenu])
 
   const filteredSessions = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -67,6 +92,23 @@ export default function ConsultationHistory() {
   const selectedSessions = selectedCustomer
     ? filteredSessions.filter((session) => session.customerId === selectedCustomer.customerId)
     : []
+  const historySession = selectedSessions.find((session) => session.id === historySessionId) || null
+
+  const openHistory = (session) => {
+    setContextMenu(null)
+    setHistorySessionId(session.id)
+  }
+
+  const handleSessionContextMenu = (event, session) => {
+    if (session.type !== 'Chat') return
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({
+      session,
+      x: Math.min(event.clientX, window.innerWidth - 180),
+      y: Math.min(event.clientY, window.innerHeight - 70),
+    })
+  }
 
   return (
     <div>
@@ -89,19 +131,41 @@ export default function ConsultationHistory() {
 
       {selectedCustomer ? (
         <Section title={`${selectedCustomer.customerName}'s History`} titleRight={<button type="button" className="btn btn-outline btn-sm" onClick={() => setSelectedCustomerId(null)}><ArrowLeft size={14} /> All Customers</button>}>
-          <div className="stat-grid consultation-history-stats">
-            <div className="stat-card"><div className="stat-icon tone-violet"><Wallet size={19} /></div><div><div className="stat-value">{formatAmount(selectedCustomer.amount)}</div><div className="stat-label">Total Earned</div></div></div>
-            <div className="stat-card"><div className="stat-icon tone-sky"><Clock3 size={19} /></div><div><div className="stat-value">{selectedCustomer.minutes} min</div><div className="stat-label">Total Duration</div></div></div>
-            <div className="stat-card"><div className="stat-icon tone-gold"><MessageCircle size={19} /></div><div><div className="stat-value">{selectedCustomer.sessions}</div><div className="stat-label">Sessions</div></div></div>
-          </div>
-          <Card>
-            <div className="activity-list">
-              {selectedSessions.map((session) => {
-                const Icon = sessionIcon(session.type)
-                return <div className="activity-row" key={session.id}><div className="flex items-center gap-3"><div className="stat-icon tone-violet" style={{ width: 36, height: 36 }}><Icon size={17} /></div><div><div className="activity-id">{session.type}</div><div className="activity-meta">{formatDate(session.startedAt)} · {session.status}</div></div></div><div className="text-right"><div className="font-semibold text-[color:var(--text-primary)]">{formatAmount(session.amount)}</div><div className="activity-meta">{session.durationMinutes} min · {formatAmount(session.pricePerMinute)}/min</div></div></div>
-              })}
-            </div>
-          </Card>
+          {historySession ? (
+            <Card className="consultation-chat-history">
+              <div className="consultation-chat-history__header">
+                <div>
+                  <div className="activity-id">Chat History</div>
+                  <div className="activity-meta">{formatDate(historySession.startedAt)} · {historySession.durationMinutes} min · {historySession.status}</div>
+                </div>
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => setHistorySessionId(null)}><ArrowLeft size={14} /> Back to sessions</button>
+              </div>
+              <div className="consultation-chat-history__messages" aria-label={`${selectedCustomer.customerName} chat history`}>
+                {historySession.messages?.length ? historySession.messages.map((message) => (
+                  <div className={`consultation-history-message consultation-history-message--${message.sender}`} key={message.id}>
+                    <div className="consultation-history-message__bubble">{message.text}</div>
+                    <time>{formatMessageTime(message.sentAt)}</time>
+                  </div>
+                )) : <div className="muted" style={{ padding: 20, textAlign: 'center' }}>No chat messages are available for this session.</div>}
+              </div>
+            </Card>
+          ) : (
+            <>
+              <div className="stat-grid consultation-history-stats">
+                <div className="stat-card"><div className="stat-icon tone-violet"><Wallet size={19} /></div><div><div className="stat-value">{formatAmount(selectedCustomer.amount)}</div><div className="stat-label">Total Earned</div></div></div>
+                <div className="stat-card"><div className="stat-icon tone-sky"><Clock3 size={19} /></div><div><div className="stat-value">{selectedCustomer.minutes} min</div><div className="stat-label">Total Duration</div></div></div>
+                <div className="stat-card"><div className="stat-icon tone-gold"><MessageCircle size={19} /></div><div><div className="stat-value">{selectedCustomer.sessions}</div><div className="stat-label">Sessions</div></div></div>
+              </div>
+              <Card>
+                <div className="activity-list">
+                  {selectedSessions.map((session) => {
+                    const Icon = sessionIcon(session.type)
+                    return <div className={`activity-row consultation-session-row${session.type === 'Chat' ? ' consultation-session-row--chat' : ''}`} key={session.id} onContextMenu={(event) => handleSessionContextMenu(event, session)}><div className="flex items-center gap-3"><div className="stat-icon tone-violet" style={{ width: 36, height: 36 }}><Icon size={17} /></div><div><div className="activity-id">{session.type}</div><div className="activity-meta">{formatDate(session.startedAt)} · {session.status}</div></div></div><div className="text-right"><div className="font-semibold text-[color:var(--text-primary)]">{formatAmount(session.amount)}</div><div className="activity-meta">{session.durationMinutes} min · {formatAmount(session.pricePerMinute)}/min</div></div></div>
+                  })}
+                </div>
+              </Card>
+            </>
+          )}
         </Section>
       ) : (
         <Section title="Customers" titleRight={<span className="muted">{customers.length} customer{customers.length === 1 ? '' : 's'}</span>}>
@@ -112,6 +176,12 @@ export default function ConsultationHistory() {
             </div>
           </Card>
         </Section>
+      )}
+
+      {contextMenu && (
+        <div className="consultation-context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} onClick={(event) => event.stopPropagation()}>
+          <button type="button" onClick={() => openHistory(contextMenu.session)}>History</button>
+        </div>
       )}
     </div>
   )
