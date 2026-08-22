@@ -2481,6 +2481,7 @@ button.social-profile__audience-item { cursor: pointer; }
 .dashboard-service-control--dnd { color: #fed7aa !important; }
 
 .profile-service-status { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--text-secondary); font-size: 13px; font-weight: 700; }
+.profile-services-help { margin: 8px 0 16px; color: var(--text-secondary); font-size: 13px; }
 .service-status-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--danger); }
 .service-status-dot.is-available { background: var(--success); box-shadow: 0 0 0 3px var(--success-bg); }
 
