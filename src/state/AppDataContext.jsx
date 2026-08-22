@@ -546,11 +546,59 @@ const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 
 const initialConsultationHistory = [
-  { id: 'consult-chat-001', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-20T10:30:00+05:30', durationMinutes: 24, pricePerMinute: 15, amount: 360, status: 'Completed' },
+  {
+    id: 'consult-chat-001',
+    customerId: 'customer-priya',
+    customerName: 'Priya V.',
+    type: 'Chat',
+    startedAt: '2026-08-20T10:30:00+05:30',
+    durationMinutes: 24,
+    pricePerMinute: 15,
+    amount: 360,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-001-1', sender: 'user', text: 'I have been feeling uncertain about my career direction. Should I consider a change this year?', sentAt: '2026-08-20T10:31:00+05:30' },
+      { id: 'consult-chat-001-2', sender: 'astrologer', text: 'Your chart shows a period of exploration before the next strong growth phase. Take time to compare options rather than making a rushed move.', sentAt: '2026-08-20T10:34:00+05:30' },
+      { id: 'consult-chat-001-3', sender: 'user', text: 'Would the second half of the year be more supportive?', sentAt: '2026-08-20T10:41:00+05:30' },
+      { id: 'consult-chat-001-4', sender: 'astrologer', text: 'Yes. July onward looks more supportive for interviews, networking, and a deliberate transition.', sentAt: '2026-08-20T10:45:00+05:30' },
+    ],
+  },
   { id: 'consult-audio-001', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-18T18:15:00+05:30', durationMinutes: 32, pricePerMinute: 25, amount: 800, status: 'Completed' },
-  { id: 'consult-chat-002', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Chat', startedAt: '2026-08-19T14:10:00+05:30', durationMinutes: 18, pricePerMinute: 15, amount: 270, status: 'Completed' },
+  {
+    id: 'consult-chat-002',
+    customerId: 'customer-kannan',
+    customerName: 'Kannan',
+    type: 'Chat',
+    startedAt: '2026-08-19T14:10:00+05:30',
+    durationMinutes: 18,
+    pricePerMinute: 15,
+    amount: 270,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-002-1', sender: 'user', text: 'Is this a good time to expand my business?', sentAt: '2026-08-19T14:11:00+05:30' },
+      { id: 'consult-chat-002-2', sender: 'astrologer', text: 'The coming months are better for preparation and strengthening your current foundation. Expand in phases and keep your cash flow protected.', sentAt: '2026-08-19T14:15:00+05:30' },
+      { id: 'consult-chat-002-3', sender: 'user', text: 'I will start with a smaller expansion first. Thank you.', sentAt: '2026-08-19T14:24:00+05:30' },
+    ],
+  },
   { id: 'consult-audio-002', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Audio Call', startedAt: '2026-08-16T09:00:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
-  { id: 'consult-chat-003', customerId: 'customer-devi', customerName: 'Devi', type: 'Chat', startedAt: '2026-08-17T20:45:00+05:30', durationMinutes: 41, pricePerMinute: 15, amount: 615, status: 'Completed' },
+  {
+    id: 'consult-chat-003',
+    customerId: 'customer-devi',
+    customerName: 'Devi',
+    type: 'Chat',
+    startedAt: '2026-08-17T20:45:00+05:30',
+    durationMinutes: 41,
+    pricePerMinute: 15,
+    amount: 615,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-003-1', sender: 'user', text: 'I am waiting for an important interview result. Do you see a positive outcome?', sentAt: '2026-08-17T20:46:00+05:30' },
+      { id: 'consult-chat-003-2', sender: 'astrologer', text: 'There is encouraging movement around your career prospects. Stay prepared and follow up calmly if you do not hear back immediately.', sentAt: '2026-08-17T20:52:00+05:30' },
+      { id: 'consult-chat-003-3', sender: 'user', text: 'Should I continue applying for other roles while I wait?', sentAt: '2026-08-17T21:04:00+05:30' },
+      { id: 'consult-chat-003-4', sender: 'astrologer', text: 'Yes, keep your options open. A second opportunity may give you a stronger choice and better timing.', sentAt: '2026-08-17T21:12:00+05:30' },
+      { id: 'consult-chat-003-5', sender: 'user', text: 'That gives me clarity. Thank you for the guidance.', sentAt: '2026-08-17T21:25:00+05:30' },
+    ],
+  },
   { id: 'consult-audio-003', customerId: 'customer-arun', customerName: 'Arun', type: 'Audio Call', startedAt: '2026-08-15T16:20:00+05:30', durationMinutes: 28, pricePerMinute: 25, amount: 700, status: 'Completed' },
 ]
 
