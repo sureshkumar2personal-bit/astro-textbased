@@ -66,6 +66,8 @@ const PAGE_META = {
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
     '/astrologer/astrologer-profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
     '/astrologer/profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
+    '/astrologer/audience/follower': { title: 'Follower Profile', sub: 'Audience member details' },
+    '/astrologer/audience/subscriber': { title: 'Subscriber Profile', sub: 'Audience member details' },
     '/astrologer/account-profile': { title: 'Profile Settings', sub: 'Astrologer account details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
@@ -114,7 +116,10 @@ export default function Layout() {
     walletHistory: `${basePath}/wallet-history`,
   }
   const config = ROLE_CONFIG[role]
-  const meta = PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
+  const audienceMeta = role === ROLES.ASTROLOGER && location.pathname.startsWith('/astrologer/audience/')
+    ? (location.pathname.includes('/subscriber/') ? PAGE_META[role]['/astrologer/audience/subscriber'] : PAGE_META[role]['/astrologer/audience/follower'])
+    : null
+  const meta = audienceMeta || PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
   const isOwnerProfile = location.pathname === '/user/profile' || (location.pathname === '/astrologer/profile' && isAstrologer)
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
