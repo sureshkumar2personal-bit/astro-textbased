@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { getSuggestedAstrologers, mockAstrologers, subscribedAstrologers } from '../data/notificationData.js'
+import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -24,15 +24,22 @@ function AstrologerSection({ title, astrologers, viewMoreTo, onViewProfile, onCa
   )
 }
 
+function isActiveSubscription(subscription) {
+  const expiry = subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil
+  return Number.isFinite(new Date(expiry).getTime()) && new Date(expiry).getTime() > Date.now()
+}
+
 export default function Astrologers() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const { followedAstrologerIds, subscriptions } = useAppData()
-  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id))
-  const subscribedAstrologerIds = subscriptions
-    .filter((subscription) => subscription.userId === currentUser?.id)
+  const activeSubscriptions = subscriptions
+    .filter((subscription) => subscription.userId === currentUser?.id && isActiveSubscription(subscription))
+  const subscribedAstrologerIds = activeSubscriptions
     .map((subscription) => subscription.astrologerId)
+  const subscribedAstrologers = mockAstrologers.filter((astrologer) => subscribedAstrologerIds.includes(astrologer.id))
+  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
   const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds })
 
   const handleViewProfile = (astrologerId) => {

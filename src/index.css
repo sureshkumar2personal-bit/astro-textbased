@@ -3744,6 +3744,9 @@ tbody tr:hover {
 .astrologer-profile-compact .subscription-status > span { display:flex; flex-direction:column; gap:1px; line-height:1.15; }
 .astrologer-profile-compact .subscription-status strong { font-size:11px; font-weight:800; }
 .astrologer-profile-compact .subscription-status small { color:#68558b; font-size:10px; white-space:nowrap; }
+.appointment-action--locked { opacity:.58; filter:saturate(.65); }
+.appointment-subscription-hint { margin:8px 0 0; color:var(--text-secondary); font-size:11px; text-align:center; }
+.subscription-prompt-card__icon { margin-bottom:8px; font-size:30px; }
 .profile-consultation-actions { margin-top: 12px; }
 .profile-consultation-actions__grid { display:flex; flex-wrap:wrap; gap:10px; }
 .profile-consultation-actions__grid .btn { min-height:36px; }

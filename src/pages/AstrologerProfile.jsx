@@ -70,6 +70,7 @@ export default function AstrologerProfile() {
   const canBookAppointment = subscribed
   const [bookingOpen, setBookingOpen] = useState(false)
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
+  const [subscriptionPromptOpen, setSubscriptionPromptOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
   const [footerTab, setFooterTab] = useState('Posts')
@@ -111,6 +112,10 @@ export default function AstrologerProfile() {
   })
 
   const openBooking = () => {
+    if (!subscribed) {
+      setSubscriptionPromptOpen(true)
+      return
+    }
     setBookingForm({
       type: APPOINTMENT_TYPE,
       date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
@@ -197,7 +202,7 @@ export default function AstrologerProfile() {
           <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div></div></Card>
         )}
 
-        {!isOwner && canBookAppointment && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
+          {!isOwner && <div className="social-profile__footer-actions"><button type="button" className={`btn btn-outline${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={15} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>}
       </div>
       ) : (
         <div className="astrologer-profile-compact">
@@ -227,7 +232,7 @@ export default function AstrologerProfile() {
               <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><CalendarPlus size={16} /></div><div><div className="stat-value">3,850</div><div className="stat-label">consultations</div></div></div>
             </div>
           </Card>
-          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link>{canBookAppointment && <button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button>}</div></section>
+          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className={`btn btn-primary${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={16} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>{!canBookAppointment && <p className="appointment-subscription-hint">Subscribe to this astrologer to book an appointment.</p>}</section>
           <section className="astrologer-content astrologer-footer-content"><div className="astrologer-footer-tabs" role="tablist" aria-label="Astrologer content"><button type="button" className={footerTab === 'Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Posts')}><Grid3X3 size={15} /> Posts</button><button type="button" className={footerTab === 'Live' ? 'is-active' : ''} onClick={() => setFooterTab('Live')}><Radio size={15} /> Live</button><button type="button" className={footerTab === 'Saved Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Saved Posts')}><Bookmark size={15} /> Saved Posts</button></div>
             {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions"><button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {post.likeCount + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button><button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button><button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div>{commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article>) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
             {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
@@ -296,6 +301,25 @@ export default function AstrologerProfile() {
               <button className="btn btn-primary" type="button" onClick={handleConfirmBooking}>
                 Confirm Booking
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {subscriptionPromptOpen && (
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSubscriptionPromptOpen(false)}>
+          <div className="modal-card user-modal-card subscription-prompt-card" onClick={(event) => event.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Subscription required</div>
+              <button type="button" className="icon-btn" aria-label="Close subscription prompt" onClick={() => setSubscriptionPromptOpen(false)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content user-modal-card__content" style={{ textAlign: 'center' }}>
+              <div className="subscription-prompt-card__icon">🔒</div>
+              <p className="muted">Subscribe to this astrologer to book an appointment.</p>
+            </div>
+            <div className="modal-card__footer user-modal-card__footer" style={{ justifyContent: 'center' }}>
+              <button type="button" className="btn btn-ghost" onClick={() => setSubscriptionPromptOpen(false)}>Not now</button>
+              <button type="button" className="btn btn-primary" onClick={() => { setSubscriptionPromptOpen(false); handleSubscribe() }}>Subscribe Now</button>
             </div>
           </div>
         </div>

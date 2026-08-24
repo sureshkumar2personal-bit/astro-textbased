@@ -1,14 +1,17 @@
 import { useNavigate } from 'react-router-dom'
-import { subscribedAstrologers } from '../../../data/notificationData.js'
+import { mockAstrologers } from '../../../data/notificationData.js'
 import AstrologerCard from '../../../components/AstrologerCard.jsx'
 import BackButton from '../../../components/BackButton.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 export default function AstrologersFull() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const { subscriptions } = useAppData()
+  const subscribedAstrologers = mockAstrologers.filter((astrologer) => subscriptions.some((subscription) => subscription.userId === currentUser?.id && subscription.astrologerId === astrologer.id && new Date(subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil).getTime() > Date.now()))
 
   return (
     <div className="space-y-8">
