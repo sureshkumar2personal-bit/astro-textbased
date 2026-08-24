@@ -1376,6 +1376,7 @@ export function AppDataProvider({ children }) {
         astrologerName,
         tier: normalizedTier,
         subscribedAt: new Date().toISOString(),
+        expiresAt: addDaysMs(30),
         discountQuestions: [
           {
             id: crypto.randomUUID(),

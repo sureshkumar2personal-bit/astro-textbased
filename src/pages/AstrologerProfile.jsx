@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Users } from 'lucide-react'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Users } from 'lucide-react'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -8,7 +8,7 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
-const CONSULTATION_TYPES = ['Video Consultation', 'Voice Consultation', 'Chat Consultation']
+const APPOINTMENT_TYPE = 'Audio Call'
 
 const PROFILE_POSTS = [
   { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },
@@ -28,6 +28,16 @@ function formatAppointmentDate(value) {
   const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) return value
   return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function getSubscriptionExpiry(subscription) {
+  return subscription?.expiresAt || subscription?.discountQuestions?.[0]?.validUntil
+}
+
+function getSubscriptionDaysRemaining(expiry) {
+  const expiryTime = new Date(expiry).getTime()
+  if (!Number.isFinite(expiryTime) || expiryTime <= Date.now()) return 0
+  return Math.ceil((expiryTime - Date.now()) / (24 * 60 * 60 * 1000))
 }
 
 export default function AstrologerProfile() {
@@ -52,9 +62,12 @@ export default function AstrologerProfile() {
   )
   const isOwner = currentUser?.role === 'astrologer' && astrologer.id === mockAstrologers[0].id
   const following = followedAstrologerIds.includes(astrologer.id)
-  const subscribed = subscriptions.some(
+  const subscription = subscriptions.find(
     (sub) => sub.userId === currentUser?.id && sub.astrologerId === astrologer.id,
   )
+  const subscriptionDaysRemaining = getSubscriptionDaysRemaining(getSubscriptionExpiry(subscription))
+  const subscribed = Boolean(subscription && subscriptionDaysRemaining > 0)
+  const canBookAppointment = subscribed
   const [bookingOpen, setBookingOpen] = useState(false)
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
@@ -69,14 +82,14 @@ export default function AstrologerProfile() {
     setSubscribeSuccess(true)
   }
   const [bookingForm, setBookingForm] = useState({
-    type: CONSULTATION_TYPES[0],
+    type: APPOINTMENT_TYPE,
     date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
     time: '10:00 AM',
   })
 
   const openBooking = () => {
     setBookingForm({
-      type: CONSULTATION_TYPES[0],
+      type: APPOINTMENT_TYPE,
       date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
       time: '10:00 AM',
     })
@@ -87,7 +100,7 @@ export default function AstrologerProfile() {
     const newId = actions.bookAppointment({
       astrologerId: astrologer.id,
       astrologerName: astrologer.name,
-      type: bookingForm.type,
+      type: APPOINTMENT_TYPE,
       date: formatAppointmentDate(bookingForm.date),
       time: bookingForm.time,
     })
@@ -161,7 +174,7 @@ export default function AstrologerProfile() {
           <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div></div></Card>
         )}
 
-        {!isOwner && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
+        {!isOwner && canBookAppointment && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
       </div>
       ) : (
         <div className="astrologer-profile-compact">
@@ -181,7 +194,7 @@ export default function AstrologerProfile() {
               <BadgeCheck size={15} /> {subscribed ? 'Subscribed' : 'Subscribe'}
             </button><button type="button" className="btn btn-outline" onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}>
               {following ? <UserCheck size={15} /> : <UserPlus size={15} />} {following ? 'Following' : 'Follow'}
-            </button></div>
+            </button>{subscribed && <div className="subscription-status" role="status"><CalendarClock size={15} /><span><strong>Subscribed</strong><small>Subscription ends {subscriptionDaysRemaining === 1 ? 'tomorrow' : `in ${subscriptionDaysRemaining} days`}</small></span></div>}</div>
           </Card>
           <Card className="section astrologer-compact-stats">
             <div className="section-title">Stats</div>
@@ -191,7 +204,7 @@ export default function AstrologerProfile() {
               <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><CalendarPlus size={16} /></div><div><div className="stat-value">3,850</div><div className="stat-label">consultations</div></div></div>
             </div>
           </Card>
-          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button></div></section>
+          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link>{canBookAppointment && <button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button>}</div></section>
           <section className="astrologer-content"><div className="astrologer-content__heading"><span className="profile-kicker">LATEST FROM {astrologer.name.toUpperCase()}</span><h2>Posts &amp; Live Sessions</h2></div><div className="astrologer-content__grid">{PROFILE_POSTS.slice(0, 2).map((post) => <article className="astrologer-content-card" key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>Astrology insight · 2 days ago</small></span></div><h3>{post.title}</h3><p>{post.body}</p></article>)}{liveSessions.slice(0, 1).map((session) => <article className="astrologer-content-card astrologer-content-card--live" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> LIVE</span><h3>{session.title}</h3><p>{session.status}</p><small>{session.time}</small></article>)}</div></section>
         </div>
       )}
@@ -225,16 +238,10 @@ export default function AstrologerProfile() {
             </div>
             <div className="modal-card__content user-modal-card__content">
               <div style={{ display: 'grid', gap: 16 }}>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Consultation Type</span>
-                <select
-                  className="select-input"
-                  value={bookingForm.type}
-                  onChange={(e) => setBookingForm({ ...bookingForm, type: e.target.value })}
-                >
-                  {CONSULTATION_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
-                </select>
-              </label>
+                <div className="field-group" style={{ margin: 0 }}>
+                  <span className="field-label-top">Appointment Type</span>
+                  <div className="text-input" aria-label="Appointment Type">{APPOINTMENT_TYPE}</div>
+                </div>
               <label className="field-group" style={{ margin: 0 }}>
                 <span className="field-label-top">Date</span>
                 <input
