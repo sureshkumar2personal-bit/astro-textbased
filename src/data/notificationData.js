@@ -268,7 +268,8 @@ export const mockAppointments = [
     id: 'apt-1',
     astrologerId: 'astrologer-demo',
     astrologer: 'Dr. Rani',
-    type: 'Video Consultation',
+    type: 'Audio Call',
+    duration: '30 min',
     date: '25 Jul 2026',
     time: '10:00 AM',
     status: 'Confirmed',
@@ -277,11 +278,15 @@ export const mockAppointments = [
     id: 'apt-2',
     astrologerId: 'acharya-meena',
     astrologer: 'Acharya Meena',
-    type: 'Voice Consultation',
+    type: 'Audio Call',
+    duration: '20 min',
     date: '26 Jul 2026',
     time: '05:30 PM',
     status: 'Rescheduled',
   },
+  { id: 'apt-3', astrologerId: 'astrologer-demo-3', astrologer: 'Arjun Sharma', type: 'Audio Call', duration: '45 min', date: '27 Aug 2026', time: '11:30 AM', status: 'Pending' },
+  { id: 'apt-4', astrologerId: 'acharya-meena', astrologer: 'Acharya Meena', type: 'Audio Call', duration: '30 min', date: '28 Aug 2026', time: '04:00 PM', status: 'Confirmed' },
+  { id: 'apt-5', astrologerId: 'astrologer-demo', astrologer: 'Dr. Rani', type: 'Audio Call', duration: '20 min', date: '20 Aug 2026', time: '09:00 AM', status: 'Completed' },
 ]
 
 export const mockPoojas = [
@@ -320,4 +325,16 @@ export const mockLiveSessions = [
     status: 'Upcoming',
     time: 'Today, 06:00 PM',
   },
+  { id: 'live-3', astrologerId: 'astrologer-demo', astrologer: 'Dr. Rani', title: 'Weekly Guidance Circle', status: 'Upcoming', time: 'Tomorrow, 07:30 PM' },
+  { id: 'live-4', astrologerId: 'astrologer-demo', astrologer: 'Dr. Rani', title: 'Full Moon Reflection', status: 'Past', time: '18 Aug 2026, 08:00 PM' },
+  { id: 'live-5', astrologerId: 'acharya-meena', astrologer: 'Acharya Meena', title: 'Remedies for Peace and Balance', status: 'Past', time: '15 Aug 2026, 06:30 PM' },
+]
+
+export const mockAstrologerPosts = [
+  { id: 'post-rani-1', astrologerId: 'astrologer-demo', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', tone: 'violet', createdAt: '2026-08-24T10:00:00+05:30', likeCount: 128, comments: [{ id: 'comment-rani-1', author: 'Priya V.', text: 'This was exactly what I needed today.' }] },
+  { id: 'post-rani-2', astrologerId: 'astrologer-demo', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', tone: 'coral', createdAt: '2026-08-21T10:00:00+05:30', likeCount: 94, comments: [] },
+  { id: 'post-meena-1', astrologerId: 'acharya-meena', title: 'Small rituals for a calmer week', body: 'A few quiet minutes of reflection can help you return to your priorities with steadiness and confidence.', tone: 'gold', createdAt: '2026-08-23T10:00:00+05:30', likeCount: 76, comments: [] },
+  { id: 'post-meena-2', astrologerId: 'acharya-meena', title: 'When patience becomes progress', body: 'Not every delay is a setback. Some pauses create the space needed for a stronger beginning.', tone: 'violet', createdAt: '2026-08-19T10:00:00+05:30', likeCount: 61, comments: [] },
+  { id: 'post-arjun-1', astrologerId: 'astrologer-demo-3', title: 'Your numbers and your next step', body: 'Use patterns as a prompt for awareness, then let your choices give those patterns direction.', tone: 'coral', createdAt: '2026-08-22T10:00:00+05:30', likeCount: 53, comments: [] },
+  { id: 'post-arjun-2', astrologerId: 'astrologer-demo-3', title: 'Three questions for clarity', body: 'Ask what you want, what is possible now, and which small action can move you forward this week.', tone: 'gold', createdAt: '2026-08-16T10:00:00+05:30', likeCount: 48, comments: [] },
 ]
