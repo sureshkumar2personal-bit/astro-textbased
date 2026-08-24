@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Users } from 'lucide-react'
-import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users } from 'lucide-react'
+import { mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
-const CONSULTATION_TYPES = ['Video Consultation', 'Voice Consultation', 'Chat Consultation']
+const APPOINTMENT_TYPE = 'Audio Call'
 
 const PROFILE_POSTS = [
   { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },
@@ -30,10 +30,20 @@ function formatAppointmentDate(value) {
   return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function getSubscriptionExpiry(subscription) {
+  return subscription?.expiresAt || subscription?.discountQuestions?.[0]?.validUntil
+}
+
+function getSubscriptionDaysRemaining(expiry) {
+  const expiryTime = new Date(expiry).getTime()
+  if (!Number.isFinite(expiryTime) || expiryTime <= Date.now()) return 0
+  return Math.ceil((expiryTime - Date.now()) / (24 * 60 * 60 * 1000))
+}
+
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, astrologerServices } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, astrologerServices, postLikes, savedPostIds, postComments } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = searchParams.get('id') || mockAstrologers[0].id
@@ -52,31 +62,57 @@ export default function AstrologerProfile() {
   )
   const isOwner = currentUser?.role === 'astrologer' && astrologer.id === mockAstrologers[0].id
   const following = followedAstrologerIds.includes(astrologer.id)
-  const subscribed = subscriptions.some(
+  const subscription = subscriptions.find(
     (sub) => sub.userId === currentUser?.id && sub.astrologerId === astrologer.id,
   )
+  const subscriptionDaysRemaining = getSubscriptionDaysRemaining(getSubscriptionExpiry(subscription))
+  const subscribed = Boolean(subscription && subscriptionDaysRemaining > 0)
+  const canBookAppointment = subscribed
   const [bookingOpen, setBookingOpen] = useState(false)
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
+  const [footerTab, setFooterTab] = useState('Posts')
+  const [commentOpen, setCommentOpen] = useState({})
+  const [commentDrafts, setCommentDrafts] = useState({})
+  const [shareMessage, setShareMessage] = useState('')
   const subscriberNames = subscriptions
     .filter((subscription) => subscription.astrologerId === astrologer.id)
     .map((subscription) => subscription.userName || subscription.userId || 'Subscriber')
   const liveSessions = mockLiveSessions.filter((session) => session.astrologerId === astrologer.id)
+  const astrologerPosts = mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
+  const savedPosts = mockAstrologerPosts.filter((post) => savedPostIds.includes(post.id))
+  const visiblePosts = footerTab === 'Saved Posts' ? savedPosts : astrologerPosts
+  const liveGroups = [
+    ['Upcoming', liveSessions.filter((session) => session.status === 'Upcoming')],
+    ['Present / Live Now', liveSessions.filter((session) => ['Live now', 'Present', 'Live'].includes(session.status))],
+    ['Past', liveSessions.filter((session) => session.status === 'Past' || session.status === 'Completed')],
+  ]
+  const toggleComment = (postId) => setCommentOpen((current) => ({ ...current, [postId]: !current[postId] }))
+  const submitComment = (postId) => {
+    const text = commentDrafts[postId]?.trim()
+    if (!text) return
+    actions.addPostComment(postId, text, currentUser?.name || 'You')
+    setCommentDrafts((current) => ({ ...current, [postId]: '' }))
+  }
+  const sharePost = (post) => {
+    setShareMessage(`Shared “${post.title}”`)
+    window.setTimeout(() => setShareMessage(''), 2200)
+  }
 
   const handleSubscribe = () => {
     actions.subscribeToAstrologer(astrologer.id, astrologer.name, currentUser?.id, currentUser?.name)
     setSubscribeSuccess(true)
   }
   const [bookingForm, setBookingForm] = useState({
-    type: CONSULTATION_TYPES[0],
+    type: APPOINTMENT_TYPE,
     date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
     time: '10:00 AM',
   })
 
   const openBooking = () => {
     setBookingForm({
-      type: CONSULTATION_TYPES[0],
+      type: APPOINTMENT_TYPE,
       date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
       time: '10:00 AM',
     })
@@ -87,7 +123,7 @@ export default function AstrologerProfile() {
     const newId = actions.bookAppointment({
       astrologerId: astrologer.id,
       astrologerName: astrologer.name,
-      type: bookingForm.type,
+      type: APPOINTMENT_TYPE,
       date: formatAppointmentDate(bookingForm.date),
       time: bookingForm.time,
     })
@@ -161,7 +197,7 @@ export default function AstrologerProfile() {
           <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Available · ₹${astrologerServices.callPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Available · ₹${astrologerServices.chatPricePerMinute}/min` : 'Unavailable'}</span></div><div><strong>Specialization</strong><span>{astrologer.specialization}</span></div><div><strong>Languages</strong><span>{astrologer.languages.join(' · ')}</span></div></div></Card>
         )}
 
-        {!isOwner && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
+        {!isOwner && canBookAppointment && <div className="social-profile__footer-actions"><button type="button" className="btn btn-outline" onClick={openBooking}><CalendarPlus size={15} /> Book Appointment</button></div>}
       </div>
       ) : (
         <div className="astrologer-profile-compact">
@@ -181,7 +217,7 @@ export default function AstrologerProfile() {
               <BadgeCheck size={15} /> {subscribed ? 'Subscribed' : 'Subscribe'}
             </button><button type="button" className="btn btn-outline" onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}>
               {following ? <UserCheck size={15} /> : <UserPlus size={15} />} {following ? 'Following' : 'Follow'}
-            </button></div>
+            </button>{subscribed && <div className="subscription-status" role="status"><CalendarClock size={15} /><span><strong>Subscribed</strong><small>Subscription ends {subscriptionDaysRemaining === 1 ? 'tomorrow' : `in ${subscriptionDaysRemaining} days`}</small></span></div>}</div>
           </Card>
           <Card className="section astrologer-compact-stats">
             <div className="section-title">Stats</div>
@@ -191,8 +227,11 @@ export default function AstrologerProfile() {
               <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><CalendarPlus size={16} /></div><div><div className="stat-value">3,850</div><div className="stat-label">consultations</div></div></div>
             </div>
           </Card>
-          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button></div></section>
-          <section className="astrologer-content"><div className="astrologer-content__heading"><span className="profile-kicker">LATEST FROM {astrologer.name.toUpperCase()}</span><h2>Posts &amp; Live Sessions</h2></div><div className="astrologer-content__grid">{PROFILE_POSTS.slice(0, 2).map((post) => <article className="astrologer-content-card" key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>Astrology insight · 2 days ago</small></span></div><h3>{post.title}</h3><p>{post.body}</p></article>)}{liveSessions.slice(0, 1).map((session) => <article className="astrologer-content-card astrologer-content-card--live" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> LIVE</span><h3>{session.title}</h3><p>{session.status}</p><small>{session.time}</small></article>)}</div></section>
+          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link>{canBookAppointment && <button type="button" className="btn btn-primary" onClick={openBooking}><CalendarPlus size={16} /> Book Appointment</button>}</div></section>
+          <section className="astrologer-content astrologer-footer-content"><div className="astrologer-footer-tabs" role="tablist" aria-label="Astrologer content"><button type="button" className={footerTab === 'Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Posts')}><Grid3X3 size={15} /> Posts</button><button type="button" className={footerTab === 'Live' ? 'is-active' : ''} onClick={() => setFooterTab('Live')}><Radio size={15} /> Live</button><button type="button" className={footerTab === 'Saved Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Saved Posts')}><Bookmark size={15} /> Saved Posts</button></div>
+            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions"><button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {post.likeCount + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button><button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button><button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div>{commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article>) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
+            {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
+          </section>
         </div>
       )}
 
@@ -225,16 +264,10 @@ export default function AstrologerProfile() {
             </div>
             <div className="modal-card__content user-modal-card__content">
               <div style={{ display: 'grid', gap: 16 }}>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Consultation Type</span>
-                <select
-                  className="select-input"
-                  value={bookingForm.type}
-                  onChange={(e) => setBookingForm({ ...bookingForm, type: e.target.value })}
-                >
-                  {CONSULTATION_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
-                </select>
-              </label>
+                <div className="field-group" style={{ margin: 0 }}>
+                  <span className="field-label-top">Appointment Type</span>
+                  <div className="text-input" aria-label="Appointment Type">{APPOINTMENT_TYPE}</div>
+                </div>
               <label className="field-group" style={{ margin: 0 }}>
                 <span className="field-label-top">Date</span>
                 <input

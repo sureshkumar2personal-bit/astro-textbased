@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
 import { ROLES } from '../utils/roleRoutes.js'
-import { mockAppointments, mockAstrologers, mockLiveSessions, mockPoojas } from '../data/notificationData.js'
+import { mockAppointments, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
 
 const AppDataContext = createContext(null)
@@ -752,6 +752,10 @@ const initialConsultationHistory = [
     ],
   },
   { id: 'consult-audio-004', userId: 'customer-arjun-subscriber', astrologerId: 'astrologer-demo', customerId: 'customer-arjun-subscriber', customerName: 'Arjun D.', type: 'Audio Call', startedAt: '2026-08-12T17:30:00+05:30', durationMinutes: 35, pricePerMinute: 25, amount: 875, status: 'Completed' },
+  { id: 'consult-chat-user-004', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-21T12:15:00+05:30', durationMinutes: 18, pricePerMinute: 15, amount: 270, status: 'Completed', messages: [{ id: 'consult-chat-user-004-1', sender: 'user', text: 'I would like some guidance about my next career step.', sentAt: '2026-08-21T12:16:00+05:30' }, { id: 'consult-chat-user-004-2', sender: 'astrologer', text: 'This is a good time to focus on preparation and choose the opportunity that gives you steady growth.', sentAt: '2026-08-21T12:21:00+05:30' }] },
+  { id: 'consult-chat-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-24T19:10:00+05:30', durationMinutes: 26, pricePerMinute: 15, amount: 390, status: 'Completed', messages: [{ id: 'consult-chat-user-006-1', sender: 'user', text: 'I have been seeing repeated changes at work. How should I approach them?', sentAt: '2026-08-24T19:11:00+05:30' }, { id: 'consult-chat-user-006-2', sender: 'astrologer', text: 'Take each change one step at a time and keep your long-term priorities visible while you adapt.', sentAt: '2026-08-24T19:18:00+05:30' }] },
+  { id: 'consult-audio-user-004', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-23T10:00:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
+  { id: 'consult-audio-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T09:30:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
 ]
 
 export const DEFAULT_ASTROLOGER_SERVICES = {
@@ -814,6 +818,9 @@ export function AppDataProvider({ children }) {
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
   const [consultationHistory] = useState(initialConsultationHistory)
+  const [postLikes, setPostLikes] = useState({})
+  const [savedPostIds, setSavedPostIds] = useState([])
+  const [postComments, setPostComments] = useState(() => Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])))
   const [presenceActive, setPresenceActive] = useState(false)
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
@@ -882,6 +889,17 @@ export function AppDataProvider({ children }) {
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
 
   const actions = useMemo(() => ({
+    togglePostLike(postId) {
+      setPostLikes((prev) => ({ ...prev, [postId]: !prev[postId] }))
+    },
+    toggleSavedPost(postId) {
+      setSavedPostIds((prev) => prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId])
+    },
+    addPostComment(postId, text, author = 'You') {
+      const trimmed = String(text || '').trim()
+      if (!trimmed) return
+      setPostComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), { id: `comment-${Date.now()}`, author, text: trimmed }] }))
+    },
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
     setQuestionPreviewId,
@@ -1652,6 +1670,7 @@ export function AppDataProvider({ children }) {
         astrologerName,
         tier: normalizedTier,
         subscribedAt: new Date().toISOString(),
+        expiresAt: addDaysMs(30),
         discountQuestions: [
           {
             id: crypto.randomUUID(),
@@ -1836,6 +1855,9 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    postLikes,
+    savedPostIds,
+    postComments,
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,
@@ -1868,6 +1890,9 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    postLikes,
+    savedPostIds,
+    postComments,
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,

@@ -1,12 +1,12 @@
-import { BadgeCheck, Grid3X3, Info, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Square, Trash2, UserCircle2, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, CalendarDays, CalendarPlus, Clock3, Grid3X3, Headphones, Info, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Square, Trash2, UserCircle2, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import { PROFILE_FOLLOWERS, PROFILE_SUBSCRIBERS, accountHandle } from '../data/audienceMembers.js'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
-import { ROLES } from '../utils/roleRoutes.js'
+import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
 
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
@@ -51,8 +51,9 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, actions, astrologerServices, astrologerPosts, astrologerLiveSessions } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
+  const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
   const [activeTab, setActiveTab] = useState(isAstrologer ? 'Services' : 'Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
@@ -65,6 +66,8 @@ export default function Profile() {
   const [liveForm, setLiveForm] = useState(blankLiveForm)
   const [editingContent, setEditingContent] = useState(null)
   const [contentError, setContentError] = useState('')
+  const [consultationTab, setConsultationTab] = useState('appointments')
+  const [selectedConsultationAstrologerId, setSelectedConsultationAstrologerId] = useState(null)
 
   const name = currentUser?.name || (isAstrologer ? 'Astrologer' : 'User')
   const username = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'profile'
@@ -89,6 +92,21 @@ export default function Profile() {
   const audienceEntries = audiencePanel === 'Followers'
     ? PROFILE_FOLLOWERS
     : subscriberEntries
+  const appointmentHistory = isAstrologer ? [] : appointments
+  const userConsultationHistory = useMemo(() => {
+    if (isAstrologer) return []
+    const ownedSessions = consultationHistory.filter((session) => session.customerId === currentUser?.id || (currentUser?.id === 'user-demo' && session.customerId === 'customer-priya'))
+    if (ownedSessions.length) return ownedSessions
+    return consultationHistory.filter((session) => session.customerId === 'user-demo' || session.customerId === 'customer-priya')
+  }, [consultationHistory, currentUser?.id, isAstrologer])
+  const filteredConsultationHistory = userConsultationHistory.filter((session) => consultationTab === 'chat' ? session.type === 'Chat' : consultationTab === 'call' ? session.type === 'Audio Call' : false)
+  const consultationAstrologers = [...new Map(filteredConsultationHistory.map((session) => [session.astrologerId, session.astrologerId])).values()].map((astrologerId) => {
+    const astrologerSessions = filteredConsultationHistory.filter((session) => session.astrologerId === astrologerId)
+    const astrologer = mockAstrologers.find((item) => item.id === astrologerId)
+    return { id: astrologerId, name: astrologer?.name || 'Astrologer', sessions: astrologerSessions, latest: astrologerSessions.reduce((latest, session) => new Date(session.startedAt) > new Date(latest) ? session.startedAt : latest, astrologerSessions[0]?.startedAt) }
+  })
+  const selectedConsultationAstrologer = consultationAstrologers.find((item) => item.id === selectedConsultationAstrologerId) || null
+  const cancellableAppointmentStatuses = ['Pending', 'Confirmed', 'Rescheduled']
   const closeAudience = () => {
     setAudiencePanel(null)
     navigate('/astrologer/profile', { replace: true })
@@ -247,6 +265,39 @@ export default function Profile() {
             </div>
             <div className="social-profile__bio">{bio}</div>
           </Card>
+
+          {!isAstrologer && <Card className="profile-consultation-actions">
+            <div className="section-title">Consultation</div>
+            <div className="profile-consultation-actions__grid">
+              <button type="button" className={`btn ${consultationTab === 'chat' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('chat'); setSelectedConsultationAstrologerId(null) }}><MessageCircle size={16} /> Chat</button>
+              <button type="button" className={`btn ${consultationTab === 'call' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('call'); setSelectedConsultationAstrologerId(null) }}><PhoneCall size={16} /> Call</button>
+              <button type="button" className={`btn ${consultationTab === 'appointments' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('appointments'); setSelectedConsultationAstrologerId(null) }}><CalendarDays size={16} /> Appointment History</button>
+            </div>
+          </Card>}
+
+          {!isAstrologer && <section className="profile-consultation-history" aria-live="polite">
+            {consultationTab === 'appointments' ? <>
+              <div className="profile-appointment-history__heading"><div><span className="profile-kicker">YOUR CONSULTATIONS</span><h2>Appointment History</h2></div><CalendarPlus size={20} /></div>
+              {appointmentHistory.length ? <div className="profile-appointment-history__list">{appointmentHistory.map((appointment) => {
+                const status = appointment.status || 'Pending'
+                const canCancel = cancellableAppointmentStatuses.includes(status)
+                const canJoin = status === 'Confirmed'
+                return <Card key={appointment.id} className="profile-appointment-card">
+                  <div className="profile-appointment-card__top"><div><h3>{appointment.astrologer}</h3><span className="profile-appointment-card__type">Audio Call · {appointment.duration || appointment.package || '30 min'}</span></div><span className={`profile-appointment-status profile-appointment-status--${status.toLowerCase()}`}>{status}</span></div>
+                  <div className="profile-appointment-card__schedule"><span><b>Appointment Date</b>{appointment.date}</span><span><b>Appointment Time</b>{appointment.time}</span><span><b>Status</b>{status}</span></div>
+                  <div className="profile-appointment-card__actions"><Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-outline">Appointment Details</Link>{canJoin && <Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-primary"><PhoneCall size={15} /> Join Audio Call</Link>}{canCancel && <button type="button" className="btn btn-ghost" onClick={() => actions.cancelAppointment(appointment.id, appointment)}>Cancel Appointment</button>}</div>
+                </Card>
+              })}</div> : <Card className="profile-appointment-empty"><CalendarDays size={22} /><h3>No appointments yet</h3><p>Your booked astrologer appointments will appear here.</p></Card>}
+            </> : selectedConsultationAstrologer ? <>
+              <div className="profile-history-detail-heading"><button type="button" className="btn btn-outline btn-sm" onClick={() => setSelectedConsultationAstrologerId(null)}><ArrowLeft size={14} /> All {consultationTab === 'chat' ? 'Chat' : 'Call'} History</button><div><span className="profile-kicker">{consultationTab === 'chat' ? 'CHAT HISTORY' : 'AUDIO CALL HISTORY'}</span><h2>{selectedConsultationAstrologer.name}</h2></div></div>
+              <div className="profile-session-list">{selectedConsultationAstrologer.sessions.map((session) => <Card className={`profile-session-card${consultationTab === 'chat' ? ' profile-session-card--chat' : ''}`} key={session.id}>
+                <div className="profile-session-card__icon">{consultationTab === 'chat' ? <MessageCircle size={18} /> : <Headphones size={18} />}</div><div className="profile-session-card__body"><div className="profile-session-card__top"><div><h3>{consultationTab === 'chat' ? 'Chat Session' : 'Audio Call'}</h3><span>{new Date(session.startedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div><span className="profile-session-status">{session.status}</span></div><div className="profile-session-card__meta"><span><Clock3 size={14} /> {session.durationMinutes} min</span><span>{session.messages?.length || 0} messages</span></div>{consultationTab === 'chat' && session.messages?.length ? <div className="profile-chat-messages">{session.messages.map((message) => <div className={`profile-chat-message profile-chat-message--${message.sender}`} key={message.id}><span>{message.text}</span><small>{new Date(message.sentAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}</small></div>)}</div> : null}</div>
+              </Card>)}</div>
+            </> : <>
+              <div className="profile-consultation-history__heading"><div><span className="profile-kicker">{consultationTab === 'chat' ? 'CHAT HISTORY' : 'AUDIO CALL HISTORY'}</span><h2>{consultationTab === 'chat' ? 'Your Chats' : 'Your Calls'}</h2></div>{consultationTab === 'chat' ? <MessageCircle size={20} /> : <Headphones size={20} />}</div>
+              {consultationAstrologers.length ? <div className="profile-astrologer-history-list">{consultationAstrologers.map((entry) => <button type="button" className="profile-astrologer-history-row" key={entry.id} onClick={() => setSelectedConsultationAstrologerId(entry.id)}><span className="profile-astrologer-history-avatar">{initials(entry.name)}</span><span><strong>{entry.name}</strong><small>{entry.sessions.length} {consultationTab === 'chat' ? 'chat' : 'audio call'} session{entry.sessions.length === 1 ? '' : 's'} · Last session {new Date(entry.latest).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span><ArrowLeft size={16} className="profile-history-chevron" /></button>)}</div> : <Card className="profile-appointment-empty">{consultationTab === 'chat' ? <MessageCircle size={22} /> : <Headphones size={22} />}<h3>No {consultationTab === 'chat' ? 'chat' : 'call'} history yet</h3><p>Your astrologer {consultationTab === 'chat' ? 'chat' : 'call'} history will appear here.</p></Card>}
+            </>}
+          </section>}
 
           <div className="social-profile__tabs" role="tablist" aria-label="Profile sections">
             {(isAstrologer ? [['Posts', Grid3X3], ['Services', Info], ['Live', Radio]] : [['Posts', Grid3X3], ['Live', Radio], ['Other', Info]]).map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
