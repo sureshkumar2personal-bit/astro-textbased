@@ -6,6 +6,7 @@ import { ROLES } from '../utils/roleRoutes.js'
 const CATEGORY_META = {
   follow: { icon: UserPlus, tone: 'tone-coral', label: 'Follow' },
   appointments: { icon: CalendarCheck, tone: 'tone-sky', label: 'Appointments' },
+  consultations: { icon: MessagesSquare, tone: 'tone-violet', label: 'Consultations' },
   questions: { icon: MessagesSquare, tone: 'tone-violet', label: 'Questions' },
   pooja: { icon: Flame, tone: 'tone-gold', label: 'Pooja' },
   live: { icon: Radio, tone: 'tone-red', label: 'Live' },

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CHAT_PACKAGES, mockAstrologers } from '../data/notificationData.js'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useAppData } from '../state/AppDataContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 const FREE_CHAT_DURATION_MS = 2 * 60 * 1000
@@ -32,6 +33,7 @@ function getFreeChatSession(key) {
 
 export default function ChatBooking() {
   const { currentUser } = useAuth()
+  const { actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -48,6 +50,13 @@ export default function ChatBooking() {
   const startFreeChat = () => {
     if (!freeChatInProgress) {
       localStorage.setItem(storageKey, JSON.stringify({ startedAt: Date.now(), freeUsed: false, freeRemaining: 120, paidDuration: 0, totalDuration: 120 }))
+      actions.createIncomingRequest({
+        type: 'chat',
+        userId: currentUser?.id,
+        userName: currentUser?.name,
+        userUsername: currentUser?.id,
+        astrologerId: astrologer.id,
+      })
     }
     navigate(`${routes.chat}?id=${astrologer.id}&mode=free`)
   }
