@@ -14,6 +14,7 @@ export const ASTROLOGER_NOTIFICATION_TABS = [
   { key: 'unread', label: 'Unread' },
   { key: 'questions', label: 'Questions' },
   { key: 'appointments', label: 'Appointments' },
+  { key: 'consultations', label: 'Consultations' },
   { key: 'follow', label: 'Follow' },
   { key: 'offers', label: 'Offers' },
 ]

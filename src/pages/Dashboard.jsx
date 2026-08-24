@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Megaphone,
@@ -13,6 +13,7 @@ import {
   ArrowRight,
   MessageCircle,
   PhoneCall,
+  ChevronDown,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
@@ -26,14 +27,32 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 
 export default function Dashboard() {
-  const { campaigns, questions, selectedCampaign, astrologerServices } = useAppData()
+  const { campaigns, questions, selectedCampaign, astrologerServices, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const [sortBy, setSortBy] = useState('Date')
   const [query, setQuery] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
+  const [serviceMenuOpen, setServiceMenuOpen] = useState(false)
   const questionListRef = useRef(null)
+  const serviceMenuRef = useRef(null)
+
+  useEffect(() => {
+    if (!serviceMenuOpen) return undefined
+    const closeOnOutsideClick = (event) => {
+      if (!serviceMenuRef.current?.contains(event.target)) setServiceMenuOpen(false)
+    }
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setServiceMenuOpen(false)
+    }
+    document.addEventListener('mousedown', closeOnOutsideClick)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutsideClick)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [serviceMenuOpen])
 
   const stats = useMemo(() => {
     const pending = questions.filter((q) => q.status === 'Pending').length
@@ -134,20 +153,22 @@ export default function Dashboard() {
   return (
     <div>
       <div className="hero-banner">
-        <div className="hero-services-summary" aria-label="Service availability">
+        <div className="hero-services-summary" aria-label="Service availability" ref={serviceMenuRef}>
           <span className={`hero-services-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`}>
             <span className="service-status-dot" />
             {astrologerServices.dndEnabled ? 'Dyan / DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
           </span>
-          {astrologerServices.dndEnabled ? (
-            <span className="hero-services-guidance">Turn off Dyan/DND in Profile → Services</span>
-          ) : (
-            <span className="hero-services-modes">
-              {astrologerServices.callAvailable && <span><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
-              {astrologerServices.chatAvailable && <span><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
-              {!astrologerServices.callAvailable && !astrologerServices.chatAvailable && <span>Services unavailable</span>}
-            </span>
-          )}
+          {!astrologerServices.dndEnabled && <span className="hero-services-modes" aria-label="Enabled service prices">
+            {astrologerServices.chatAvailable && <span title="Chat"><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
+            {astrologerServices.callAvailable && <span title="Call"><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
+          </span>}
+          <button type="button" className="hero-services-trigger" aria-label="Open service controls" aria-expanded={serviceMenuOpen} onClick={() => setServiceMenuOpen((open) => !open)}><ChevronDown size={14} /></button>
+          {serviceMenuOpen && <div className="hero-services-menu" role="dialog" aria-label="Service controls">
+            <div className="hero-services-menu__heading">Service availability</div>
+            <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}><span><strong><MessageCircle size={14} /> Chat</strong><small>{astrologerServices.chatAvailable ? 'Enabled' : 'Disabled'}</small></span><input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} aria-label="Enable chat" /><span className="toggle-switch" /></label>
+            <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}><span><strong><PhoneCall size={14} /> Call</strong><small>{astrologerServices.callAvailable ? 'Enabled' : 'Disabled'}</small></span><input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} aria-label="Enable call" /><span className="toggle-switch" /></label>
+            <label className="hero-service-option hero-service-option--dnd"><span><strong>Dyan / DND</strong><small>{astrologerServices.dndEnabled ? 'All services paused' : 'Pause all services'}</small></span><input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} aria-label="Enable Dyan or DND" /><span className="toggle-switch" /></label>
+          </div>}
         </div>
         <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
           Welcome back

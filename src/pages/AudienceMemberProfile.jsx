@@ -1,4 +1,4 @@
-import { Activity, ArrowLeft, Ban, BadgeCheck, CalendarDays, CircleAlert, MoreVertical, Share2, ShieldAlert, UserRoundX } from 'lucide-react'
+import { Activity, ArrowLeft, Ban, BadgeCheck, CircleAlert, Headphones, MessageCircle, MoreVertical, PhoneCall, Share2, ShieldAlert, UserRoundX } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
@@ -6,16 +6,11 @@ import { PROFILE_FOLLOWERS, PROFILE_SUBSCRIBERS, TIER_PRICES, accountHandle } fr
 import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
+import { ACTIVITY_TYPES, getMemberCommunicationActivity } from '../utils/memberCommunicationActivity.js'
 
 const POSTS = [
   { title: 'A calm start changes everything', body: 'Beginning the day with a quiet intention helps me return to clarity when life feels busy.', time: '2 days ago' },
   { title: 'A little gratitude today', body: 'Feeling thankful for the guidance, reflection, and supportive community I have found here.', time: '1 week ago' },
-]
-
-const ACTIVITIES = [
-  { icon: BadgeCheck, text: 'Started following this astrologer', time: 'This month' },
-  { icon: CalendarDays, text: 'Joined an Astro Connect live session', time: 'Last week' },
-  { icon: Activity, text: 'Saved guidance for later reflection', time: 'Earlier this month' },
 ]
 
 function initials(name) {
@@ -33,11 +28,25 @@ function memberDetails(member, isSubscriber) {
   return isSubscriber ? [['Subscription', `${member.tier || 'Silver'} membership is active today`], ...base.slice(1)] : base
 }
 
+function activityIcon(entry) {
+  if (entry.type === ACTIVITY_TYPES.QUESTION) return MessageCircle
+  if (entry.type === ACTIVITY_TYPES.ANSWER) return BadgeCheck
+  if (entry.type === ACTIVITY_TYPES.DISPUTE) return CircleAlert
+  if (entry.type === ACTIVITY_TYPES.CONSULTATION) return entry.sessionType === 'Audio Call' ? PhoneCall : Headphones
+  return Activity
+}
+
+function activityDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value || 'Unknown date'
+  return date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+}
+
 export default function AudienceMemberProfile() {
   const { audienceType, memberId } = useParams()
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const { subscriptions, blockedUserIds, actions } = useAppData()
+  const { subscriptions, blockedUserIds, actions, questions, consultationHistory } = useAppData()
   const [activeTab, setActiveTab] = useState('Posts')
   const [menuOpen, setMenuOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -61,6 +70,12 @@ export default function AudienceMemberProfile() {
   }, [astrologer.id, currentUser?.id, subscriptions])
 
   const member = (isSubscriber ? subscribers : isFollower ? PROFILE_FOLLOWERS : []).find((entry) => entry.id === memberId)
+  const communicationActivity = useMemo(() => getMemberCommunicationActivity({
+    questions,
+    consultationHistory,
+    userId: member?.userId || member?.id,
+    astrologerId: astrologer.id,
+  }), [astrologer.id, consultationHistory, member?.id, member?.userId, questions])
 
   useEffect(() => {
     const close = (event) => {
@@ -128,7 +143,7 @@ export default function AudienceMemberProfile() {
     </div>
     <section className="audience-member-content">
       {activeTab === 'Posts' && <div className="audience-member-posts">{POSTS.map((post) => <Card key={post.title} className="audience-member-post"><div className="audience-member-post__avatar">{initials(member.name)}</div><div><div className="audience-member-post__meta"><strong>{member.name}</strong><span>{post.time}</span></div><h2>{post.title}</h2><p>{post.body}</p></div></Card>)}</div>}
-      {activeTab === 'Activity' && <Card className="audience-member-panel"><h2>Recent activity</h2><div className="audience-member-activity">{ACTIVITIES.map(({ icon: Icon, text, time }) => <div key={text}><span><Icon size={17} /></span><p>{text}<small>{time}</small></p></div>)}</div></Card>}
+      {activeTab === 'Activity' && <Card className="audience-member-panel"><h2>Communication history</h2><p className="muted">History between {member.name} and this astrologer.</p>{communicationActivity.length ? <div className="audience-member-activity">{communicationActivity.map((entry) => { const Icon = activityIcon(entry); return <div key={entry.id} className="audience-member-activity__item"><span><Icon size={17} /></span><p><strong>{entry.title}</strong><em>{entry.summary}</em><small>{activityDate(entry.occurredAt)} · {entry.status}{entry.metadata ? ` · ${entry.metadata}` : ''}</small></p></div> })}</div> : <div className="audience-member-activity-empty"><Activity size={20} /><p>No communication history with this astrologer yet.</p></div>}</Card>}
       {activeTab === 'About' && <Card className="audience-member-panel"><h2>About {member.name}</h2><div className="audience-member-details">{memberDetails(member, isSubscriber).map(([label, value]) => <div key={label}><strong>{label}</strong><span>{value}</span></div>)}</div></Card>}
       {message && <div className="profile-message profile-message--success audience-member-message">{message}</div>}
     </section>

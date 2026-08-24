@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas } from '../data/notificationData.js'
+import { TIER_PRICES } from '../data/audienceMembers.js'
 
 const AppDataContext = createContext(null)
 
@@ -105,6 +106,8 @@ const initialPurchasedSlots = initialCampaigns
 const initialQuestions = [
   {
     id: 'QTN-2026-000123',
+    userId: 'customer-priya',
+    astrologerId: 'astrologer-demo',
     user: 'Priya V.',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
@@ -133,6 +136,8 @@ const initialQuestions = [
   },
   {
     id: 'QTN-2026-000124',
+    userId: 'customer-kannan',
+    astrologerId: 'astrologer-demo',
     user: 'Kannan',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
@@ -161,6 +166,8 @@ const initialQuestions = [
   },
   {
     id: 'QTN-2026-000125',
+    userId: 'customer-devi',
+    astrologerId: 'astrologer-demo',
     user: 'Devi',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
@@ -189,6 +196,8 @@ const initialQuestions = [
   },
   {
     id: 'QTN-2026-001245',
+    userId: 'customer-priya',
+    astrologerId: 'astrologer-demo',
     user: 'Priya V.',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
@@ -224,6 +233,8 @@ const initialQuestions = [
   },
   {
     id: 'QTN-2026-001246',
+    userId: 'customer-arun',
+    astrologerId: 'astrologer-demo',
     user: 'Arun',
     submittedByUserId: 'user-demo',
     submittedByEmail: 'user@astroconnect.com',
@@ -249,6 +260,75 @@ const initialQuestions = [
     dispute: null,
     history: ['Assigned to astrologer'],
     raisedAt: '2026-07-20T16:20:00+05:30',
+  },
+  {
+    id: 'QTN-2026-001247',
+    userId: 'customer-meena',
+    astrologerId: 'astrologer-demo',
+    user: 'Meena R.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Family',
+    type: 'Personal',
+    purchaseType: 'Paid',
+    purchaseAmount: 250,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'Medium',
+    campaignId: 'july-premium',
+    campaignName: 'Health Campaign',
+    raised: '16-Jul-2026 11:10 AM',
+    question: 'How can I bring more peace into my family relationships?',
+    answer: 'Start with calm conversations and give each person room to be heard. The next few weeks are better for rebuilding trust slowly.',
+    answeredAt: '2026-07-16T14:30:00+05:30',
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: '2026-07-16T11:10:00+05:30',
+  },
+  {
+    id: 'QTN-2026-001248',
+    userId: 'customer-arjun-subscriber',
+    astrologerId: 'astrologer-demo',
+    user: 'Arjun D.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Disputed',
+    priority: 'Medium',
+    campaignId: 'festival-special',
+    campaignName: 'Career Campaign',
+    raised: '14-Jul-2026 03:20 PM',
+    question: 'Is this a good time to accept a new role?',
+    answer: 'The opportunity looks promising, but review the responsibilities carefully before deciding.',
+    answeredAt: '2026-07-14T17:00:00+05:30',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: {
+      target: 'Astrologer',
+      reason: 'Please clarify the timing and responsibilities.',
+      description: 'The answer was helpful but I would like more specific guidance.',
+      response: '',
+      status: 'Open',
+      raisedAt: '2026-07-15T09:00:00+05:30',
+    },
+    history: ['Created by user', 'Answered by astrologer', 'User raised dispute'],
+    raisedAt: '2026-07-14T15:20:00+05:30',
   },
 ]
 
@@ -542,12 +622,61 @@ function saveToStorage(key, value) {
   }
 }
 
+export function normalizeVisibility(value) {
+  return ['public', 'followers', 'subscribers', 'private'].includes(value) ? value : 'public'
+}
+
+export function normalizePost(post) {
+  const now = new Date().toISOString()
+  return {
+    id: post.id || crypto.randomUUID(),
+    astrologerId: post.astrologerId || 'astrologer-demo',
+    tone: post.tone || 'violet',
+    title: String(post.title || '').trim(),
+    body: String(post.body || '').trim(),
+    visibility: normalizeVisibility(post.visibility),
+    createdAt: post.createdAt || now,
+    updatedAt: post.updatedAt || post.createdAt || now,
+  }
+}
+
+export function normalizeLiveSession(session) {
+  const now = new Date().toISOString()
+  return {
+    id: session.id || crypto.randomUUID(),
+    astrologerId: session.astrologerId || 'astrologer-demo',
+    title: String(session.title || '').trim(),
+    description: String(session.description || '').trim(),
+    visibility: normalizeVisibility(session.visibility),
+    scheduledStartAt: session.scheduledStartAt || now,
+    scheduledEndAt: session.scheduledEndAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    status: ['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming',
+    startedAt: session.startedAt || null,
+    endedAt: session.endedAt || null,
+    createdAt: session.createdAt || now,
+  }
+}
+
 const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
+const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
+const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
+
+const initialAstrologerPosts = [
+  { id: 'post-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', createdAt: '2026-08-22T10:00:00+05:30', updatedAt: '2026-08-22T10:00:00+05:30' },
+  { id: 'post-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', createdAt: '2026-08-20T10:00:00+05:30', updatedAt: '2026-08-20T10:00:00+05:30' },
+  { id: 'post-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
+]
+
+const initialAstrologerLiveSessions = [
+  { id: 'live-1', astrologerId: 'astrologer-demo', title: 'Marriage & Career Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', visibility: 'public', scheduledStartAt: '2026-08-24T10:00:00+05:30', scheduledEndAt: '2026-08-24T11:00:00+05:30', status: 'past', startedAt: '2026-08-24T10:00:00+05:30', endedAt: '2026-08-24T11:00:00+05:30', createdAt: '2026-08-20T10:00:00+05:30' },
+  { id: 'live-2', astrologerId: 'astrologer-demo', title: 'Health & Remedies Live Session', description: 'A practical session on health-focused astrology and remedies.', visibility: 'subscribers', scheduledStartAt: '2026-08-28T18:00:00+05:30', scheduledEndAt: '2026-08-28T19:00:00+05:30', status: 'upcoming', startedAt: null, endedAt: null, createdAt: '2026-08-21T10:00:00+05:30' },
+]
 
 const initialConsultationHistory = [
   {
     id: 'consult-chat-001',
+    userId: 'customer-priya',
     astrologerId: 'astrologer-demo',
     customerId: 'customer-priya',
     customerName: 'Priya V.',
@@ -564,10 +693,11 @@ const initialConsultationHistory = [
       { id: 'consult-chat-001-4', sender: 'astrologer', text: 'Yes. July onward looks more supportive for interviews, networking, and a deliberate transition.', sentAt: '2026-08-20T10:45:00+05:30' },
     ],
   },
-  { id: 'consult-audio-001', astrologerId: 'astrologer-demo', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-18T18:15:00+05:30', durationMinutes: 32, pricePerMinute: 25, amount: 800, status: 'Completed' },
+  { id: 'consult-audio-001', userId: 'customer-priya', astrologerId: 'astrologer-demo', customerId: 'customer-priya', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-18T18:15:00+05:30', durationMinutes: 32, pricePerMinute: 25, amount: 800, status: 'Completed' },
   {
     id: 'consult-chat-002',
-    astrologerId: 'acharya-meena',
+    userId: 'customer-kannan',
+    astrologerId: 'astrologer-demo',
     customerId: 'customer-kannan',
     customerName: 'Kannan',
     type: 'Chat',
@@ -582,10 +712,11 @@ const initialConsultationHistory = [
       { id: 'consult-chat-002-3', sender: 'user', text: 'I will start with a smaller expansion first. Thank you.', sentAt: '2026-08-19T14:24:00+05:30' },
     ],
   },
-  { id: 'consult-audio-002', astrologerId: 'acharya-meena', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Audio Call', startedAt: '2026-08-16T09:00:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
+  { id: 'consult-audio-002', userId: 'customer-kannan', astrologerId: 'astrologer-demo', customerId: 'customer-kannan', customerName: 'Kannan', type: 'Audio Call', startedAt: '2026-08-16T09:00:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
   {
     id: 'consult-chat-003',
-    astrologerId: 'astrologer-demo-3',
+    userId: 'customer-devi',
+    astrologerId: 'astrologer-demo',
     customerId: 'customer-devi',
     customerName: 'Devi',
     type: 'Chat',
@@ -602,47 +733,29 @@ const initialConsultationHistory = [
       { id: 'consult-chat-003-5', sender: 'user', text: 'That gives me clarity. Thank you for the guidance.', sentAt: '2026-08-17T21:25:00+05:30' },
     ],
   },
-  { id: 'consult-audio-003', astrologerId: 'astrologer-demo-3', customerId: 'customer-arun', customerName: 'Arun', type: 'Audio Call', startedAt: '2026-08-15T16:20:00+05:30', durationMinutes: 28, pricePerMinute: 25, amount: 700, status: 'Completed' },
+  { id: 'consult-audio-003', userId: 'customer-arun', astrologerId: 'astrologer-demo', customerId: 'customer-arun', customerName: 'Arun', type: 'Audio Call', startedAt: '2026-08-15T16:20:00+05:30', durationMinutes: 28, pricePerMinute: 25, amount: 700, status: 'Completed' },
   {
-    id: 'consult-chat-user-004',
-    astrologerId: 'acharya-meena',
-    customerId: 'user-demo',
-    customerName: 'Priya V.',
+    id: 'consult-chat-004',
+    userId: 'customer-meena',
+    astrologerId: 'astrologer-demo',
+    customerId: 'customer-meena',
+    customerName: 'Meena R.',
     type: 'Chat',
-    startedAt: '2026-08-21T12:15:00+05:30',
-    durationMinutes: 18,
+    startedAt: '2026-08-14T12:00:00+05:30',
+    durationMinutes: 26,
     pricePerMinute: 15,
-    amount: 270,
+    amount: 390,
     status: 'Completed',
     messages: [
-      { id: 'consult-chat-user-004-1', sender: 'user', text: 'I would like some guidance about my next career step.', sentAt: '2026-08-21T12:16:00+05:30' },
-      { id: 'consult-chat-user-004-2', sender: 'astrologer', text: 'This is a good time to focus on preparation and choose the opportunity that gives you steady growth.', sentAt: '2026-08-21T12:21:00+05:30' },
+      { id: 'consult-chat-004-1', sender: 'user', text: 'I want to understand how to handle a family decision.', sentAt: '2026-08-14T12:01:00+05:30' },
+      { id: 'consult-chat-004-2', sender: 'astrologer', text: 'Take the decision step by step and allow space for everyone’s perspective.', sentAt: '2026-08-14T12:20:00+05:30' },
     ],
   },
-  {
-    id: 'consult-chat-user-005',
-    astrologerId: 'astrologer-demo-3',
-    customerId: 'user-demo',
-    customerName: 'Priya V.',
-    type: 'Chat',
-    startedAt: '2026-08-22T18:40:00+05:30',
-    durationMinutes: 12,
-    pricePerMinute: 15,
-    amount: 180,
-    status: 'Completed',
-    messages: [
-      { id: 'consult-chat-user-005-1', sender: 'user', text: 'Can numerology help me choose a business name?', sentAt: '2026-08-22T18:41:00+05:30' },
-      { id: 'consult-chat-user-005-2', sender: 'astrologer', text: 'Yes, we can compare names against your life path and business intention.', sentAt: '2026-08-22T18:45:00+05:30' },
-    ],
-  },
-  { id: 'consult-audio-user-004', astrologerId: 'acharya-meena', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-23T10:00:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
-  { id: 'consult-audio-user-005', astrologerId: 'astrologer-demo-3', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-24T16:30:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
-  { id: 'consult-chat-user-006', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-24T19:10:00+05:30', durationMinutes: 26, pricePerMinute: 15, amount: 390, status: 'Completed', messages: [{ id: 'consult-chat-user-006-1', sender: 'user', text: 'I have been seeing repeated changes at work. How should I approach them?', sentAt: '2026-08-24T19:11:00+05:30' }, { id: 'consult-chat-user-006-2', sender: 'astrologer', text: 'Take each change one step at a time and keep your long-term priorities visible while you adapt.', sentAt: '2026-08-24T19:18:00+05:30' }] },
-  { id: 'consult-chat-user-007', astrologerId: 'acharya-meena', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-25T11:25:00+05:30', durationMinutes: 15, pricePerMinute: 15, amount: 225, status: 'Completed', messages: [{ id: 'consult-chat-user-007-1', sender: 'user', text: 'Is this month a good time to make a family decision?', sentAt: '2026-08-25T11:26:00+05:30' }, { id: 'consult-chat-user-007-2', sender: 'astrologer', text: 'Have an open conversation first. Clarity will come when everyone has space to share their view.', sentAt: '2026-08-25T11:32:00+05:30' }] },
-  { id: 'consult-chat-user-008', astrologerId: 'astrologer-demo-3', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-25T20:05:00+05:30', durationMinutes: 10, pricePerMinute: 15, amount: 150, status: 'Completed', messages: [{ id: 'consult-chat-user-008-1', sender: 'user', text: 'Which direction should I explore for a new personal project?', sentAt: '2026-08-25T20:06:00+05:30' }, { id: 'consult-chat-user-008-2', sender: 'astrologer', text: 'Start with the idea that combines your strongest skills with a clear everyday purpose.', sentAt: '2026-08-25T20:10:00+05:30' }] },
-  { id: 'consult-audio-user-006', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T09:30:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
-  { id: 'consult-audio-user-007', astrologerId: 'acharya-meena', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T14:00:00+05:30', durationMinutes: 20, pricePerMinute: 25, amount: 500, status: 'Completed' },
-  { id: 'consult-audio-user-008', astrologerId: 'astrologer-demo-3', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T18:15:00+05:30', durationMinutes: 45, pricePerMinute: 25, amount: 1125, status: 'Completed' },
+  { id: 'consult-audio-004', userId: 'customer-arjun-subscriber', astrologerId: 'astrologer-demo', customerId: 'customer-arjun-subscriber', customerName: 'Arjun D.', type: 'Audio Call', startedAt: '2026-08-12T17:30:00+05:30', durationMinutes: 35, pricePerMinute: 25, amount: 875, status: 'Completed' },
+  { id: 'consult-chat-user-004', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-21T12:15:00+05:30', durationMinutes: 18, pricePerMinute: 15, amount: 270, status: 'Completed', messages: [{ id: 'consult-chat-user-004-1', sender: 'user', text: 'I would like some guidance about my next career step.', sentAt: '2026-08-21T12:16:00+05:30' }, { id: 'consult-chat-user-004-2', sender: 'astrologer', text: 'This is a good time to focus on preparation and choose the opportunity that gives you steady growth.', sentAt: '2026-08-21T12:21:00+05:30' }] },
+  { id: 'consult-chat-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-24T19:10:00+05:30', durationMinutes: 26, pricePerMinute: 15, amount: 390, status: 'Completed', messages: [{ id: 'consult-chat-user-006-1', sender: 'user', text: 'I have been seeing repeated changes at work. How should I approach them?', sentAt: '2026-08-24T19:11:00+05:30' }, { id: 'consult-chat-user-006-2', sender: 'astrologer', text: 'Take each change one step at a time and keep your long-term priorities visible while you adapt.', sentAt: '2026-08-24T19:18:00+05:30' }] },
+  { id: 'consult-audio-user-004', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-23T10:00:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
+  { id: 'consult-audio-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T09:30:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
 ]
 
 export const DEFAULT_ASTROLOGER_SERVICES = {
@@ -685,7 +798,12 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
 
 export function AppDataProvider({ children }) {
   const [campaigns, setCampaigns] = useState(initialCampaigns)
-  const [questions, setQuestions] = useState(() => loadFromStorage(QUESTIONS_STORAGE_KEY, initialQuestions))
+  const [questions, setQuestions] = useState(() => {
+    const stored = loadFromStorage(QUESTIONS_STORAGE_KEY, null)
+    if (!Array.isArray(stored)) return initialQuestions
+    const storedIds = new Set(stored.map((question) => question.id))
+    return [...stored, ...initialQuestions.filter((question) => !storedIds.has(question.id))]
+  })
   const [notifications, setNotifications] = useState(initialNotifications)
   const [astrologerWallet, setAstrologerWallet] = useState(initialAstrologerWallet)
   const [userWallet, setUserWallet] = useState(initialUserWallet)
@@ -697,6 +815,7 @@ export function AppDataProvider({ children }) {
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
   const [subscriptions, setSubscriptions] = useState([])
   const [blockedUserIds, setBlockedUserIds] = useState([])
+  const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
   const [consultationHistory] = useState(initialConsultationHistory)
   const [postLikes, setPostLikes] = useState({})
@@ -706,6 +825,14 @@ export function AppDataProvider({ children }) {
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
   ))
+  const [astrologerPosts, setAstrologerPosts] = useState(() => {
+    const stored = loadFromStorage(ASTROLOGER_POSTS_STORAGE_KEY, initialAstrologerPosts)
+    return Array.isArray(stored) ? stored.map(normalizePost) : initialAstrologerPosts.map(normalizePost)
+  })
+  const [astrologerLiveSessions, setAstrologerLiveSessions] = useState(() => {
+    const stored = loadFromStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, initialAstrologerLiveSessions)
+    return Array.isArray(stored) ? stored.map(normalizeLiveSession) : initialAstrologerLiveSessions.map(normalizeLiveSession)
+  })
 
   useEffect(() => {
     setCampaigns((prev) => prev.map((campaign) => {
@@ -749,6 +876,14 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
   }, [astrologerServices])
+
+  useEffect(() => {
+    saveToStorage(ASTROLOGER_POSTS_STORAGE_KEY, astrologerPosts)
+  }, [astrologerPosts])
+
+  useEffect(() => {
+    saveToStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, astrologerLiveSessions)
+  }, [astrologerLiveSessions])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -796,6 +931,108 @@ export function AppDataProvider({ children }) {
     },
     setAstrologerPresence(active) {
       setPresenceActive(Boolean(active))
+    },
+    createIncomingRequest(payload) {
+      const isSubscriber = subscriptions.some((subscription) => subscription.userId === payload.userId && subscription.astrologerId === payload.astrologerId)
+      const relationship = payload.relationship || (isSubscriber ? 'subscriber' : followedAstrologerIds.includes(payload.astrologerId) ? 'follower' : 'user')
+      const subscription = subscriptions.find((entry) => entry.userId === payload.userId && entry.astrologerId === payload.astrologerId)
+      const request = {
+        id: crypto.randomUUID(),
+        type: payload.type === 'call' ? 'call' : 'chat',
+        userId: payload.userId,
+        userName: payload.userName || 'Astro Connect user',
+        userUsername: payload.userUsername || payload.userId || 'user',
+        astrologerId: payload.astrologerId,
+        relationship,
+        subscriberTier: payload.subscriberTier || subscription?.tier || null,
+        subscriptionPrice: payload.subscriptionPrice || (subscription ? TIER_PRICES[subscription.tier] : null),
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        message: payload.message || '',
+        messages: [],
+        notificationsSaved: false,
+      }
+      setIncomingRequests((prev) => [request, ...prev])
+      return request
+    },
+    acceptIncomingRequest(requestId) {
+      setIncomingRequests((prev) => prev.map((request) => request.id === requestId ? { ...request, status: 'accepted', acceptedAt: new Date().toISOString() } : request))
+    },
+    declineIncomingRequest(requestId) {
+      setIncomingRequests((prev) => prev.map((request) => request.id === requestId ? { ...request, status: 'declined', declinedAt: new Date().toISOString() } : request))
+    },
+    saveIncomingRequestNotification(requestId) {
+      const request = incomingRequests.find((entry) => entry.id === requestId)
+      if (!request || request.notificationsSaved || request.status !== 'pending') return
+      setIncomingRequests((prev) => prev.map((entry) => entry.id === requestId ? { ...entry, notificationsSaved: true } : entry))
+      setNotifications((prev) => [{
+        id: `incoming-${request.id}`,
+        title: `New ${request.type} request from ${request.userName}`,
+        detail: `${request.relationship === 'subscriber' ? `${request.subscriberTier || 'Subscriber'} subscriber` : request.relationship} request waiting for your response.`,
+        time: 'just now',
+        route: `/astrologer?incomingRequestId=${request.id}`,
+        audience: ROLES.ASTROLOGER,
+        category: 'consultations',
+        read: false,
+        incomingRequestId: request.id,
+      }, ...prev])
+    },
+    sendIncomingMessage(requestId, message) {
+      const text = String(message || '').trim()
+      if (!text) return
+      setIncomingRequests((prev) => prev.map((request) => request.id === requestId
+        ? { ...request, messages: [...(request.messages || []), { id: crypto.randomUUID(), sender: 'astrologer', text, sentAt: new Date().toISOString() }] }
+        : request))
+    },
+    createPost(payload) {
+      const now = new Date().toISOString()
+      const post = normalizePost({
+        ...payload,
+        id: crypto.randomUUID(),
+        createdAt: now,
+        updatedAt: now,
+      })
+      setAstrologerPosts((prev) => [post, ...prev])
+      return post
+    },
+    updatePost(postId, patch) {
+      const now = new Date().toISOString()
+      setAstrologerPosts((prev) => prev.map((post) => post.id === postId
+        ? normalizePost({ ...post, ...patch, id: post.id, updatedAt: now })
+        : post))
+    },
+    deletePost(postId) {
+      setAstrologerPosts((prev) => prev.filter((post) => post.id !== postId))
+    },
+    createLiveSession(payload) {
+      const session = normalizeLiveSession({
+        ...payload,
+        id: crypto.randomUUID(),
+        status: 'upcoming',
+        startedAt: null,
+        endedAt: null,
+        createdAt: new Date().toISOString(),
+      })
+      setAstrologerLiveSessions((prev) => [session, ...prev])
+      return session
+    },
+    updateLiveSession(sessionId, patch) {
+      setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
+        ? normalizeLiveSession({ ...session, ...patch, id: session.id })
+        : session))
+    },
+    deleteLiveSession(sessionId) {
+      setAstrologerLiveSessions((prev) => prev.filter((session) => session.id !== sessionId))
+    },
+    startLiveSession(sessionId) {
+      setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
+        ? { ...session, status: 'live', startedAt: new Date().toISOString(), endedAt: null }
+        : session))
+    },
+    endLiveSession(sessionId) {
+      setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
+        ? { ...session, status: 'past', endedAt: new Date().toISOString() }
+        : session))
     },
     toggleCampaignOffer(campaignId, offerKey) {
       setCampaigns((prev) =>
@@ -1589,7 +1826,7 @@ export function AppDataProvider({ children }) {
         prev.map((notification) => (notification.audience === role ? { ...notification, read: true } : notification)),
       )
     },
-  }), [campaigns, questions, subscriptions])
+  }), [campaigns, followedAstrologerIds, incomingRequests, questions, subscriptions])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -1615,12 +1852,15 @@ export function AppDataProvider({ children }) {
     followedAstrologerIds,
     subscriptions,
     blockedUserIds,
+    incomingRequests,
     purchasedSlots,
     consultationHistory,
     postLikes,
     savedPostIds,
     postComments,
     presenceActive,
+    astrologerPosts,
+    astrologerLiveSessions,
     astrologerServices: getEffectiveAstrologerServices(astrologerServices, presenceActive),
     setSelectedCampaignId,
     setLiveStreamOpen,
@@ -1647,12 +1887,15 @@ export function AppDataProvider({ children }) {
     followedAstrologerIds,
     subscriptions,
     blockedUserIds,
+    incomingRequests,
     purchasedSlots,
     consultationHistory,
     postLikes,
     savedPostIds,
     postComments,
     presenceActive,
+    astrologerPosts,
+    astrologerLiveSessions,
     astrologerServices,
     actions,
   ])
