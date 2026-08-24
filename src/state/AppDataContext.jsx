@@ -2,8 +2,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
 import { ROLES } from '../utils/roleRoutes.js'
-import { mockAppointments, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas } from '../data/notificationData.js'
+import { mockAppointments, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
+import { useAuth } from './AuthContext.jsx'
 
 const AppDataContext = createContext(null)
 
@@ -797,6 +798,7 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
 }
 
 export function AppDataProvider({ children }) {
+  const { currentUser } = useAuth()
   const [campaigns, setCampaigns] = useState(initialCampaigns)
   const [questions, setQuestions] = useState(() => {
     const stored = loadFromStorage(QUESTIONS_STORAGE_KEY, null)
@@ -812,8 +814,21 @@ export function AppDataProvider({ children }) {
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
   const [questionPreviewId, setQuestionPreviewId] = useState(null)
   const [appointments, setAppointments] = useState(mockAppointments)
-  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
-  const [subscriptions, setSubscriptions] = useState([])
+  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
+  const [subscriptions, setSubscriptions] = useState(() => {
+    if (currentUser?.role !== ROLES.USER || !currentUser?.id) return []
+    return subscribedAstrologers.map((astrologer, index) => ({
+      id: `demo-subscription-${astrologer.id}`,
+      userId: currentUser.id,
+      userName: currentUser.name || currentUser.id,
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      tier: index % 3 === 0 ? 'Gold' : 'Silver',
+      subscribedAt: new Date().toISOString(),
+      expiresAt: addDaysMs(30),
+      discountQuestions: [],
+    }))
+  })
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)

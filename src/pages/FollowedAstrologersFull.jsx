@@ -8,10 +8,13 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 export default function FollowedAstrologersFull() {
   const { currentUser } = useAuth()
-  const { followedAstrologerIds } = useAppData()
+  const { followedAstrologerIds, subscriptions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id))
+  const subscribedAstrologerIds = subscriptions
+    .filter((subscription) => subscription.userId === currentUser?.id && new Date(subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil).getTime() > Date.now())
+    .map((subscription) => subscription.astrologerId)
+  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
 
   return (
     <div className="space-y-8">

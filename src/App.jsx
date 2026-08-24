@@ -136,15 +136,15 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AppDataProvider>
-      <ThemeProvider>
-        <AuthProvider>
+    <AuthProvider>
+      <AppDataProvider>
+        <ThemeProvider>
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </AppDataProvider>
+        </ThemeProvider>
+      </AppDataProvider>
+    </AuthProvider>
   )
 }
 
