@@ -10,7 +10,7 @@ const STATUS_TONES = {
   'in review': 'badge-violet',
 }
 
-export default function StatusBadge({ label }) {
+export default function StatusBadge({ label, className = '' }) {
   const clean = label.replace(/^[^\w]+/, '').trim()
   const tone = STATUS_TONES[clean.toLowerCase()] || 'badge-violet'
   return (
@@ -23,6 +23,7 @@ export default function StatusBadge({ label }) {
         tone === 'badge-red' ? 'bg-[color:var(--danger-bg)] text-[color:var(--red-600)]' : '',
         tone === 'badge-gray' ? 'bg-[color:var(--neutral-bg)] text-[color:var(--muted)]' : '',
         tone === 'badge-violet' ? 'bg-[color:var(--primary-bg)] text-[color:var(--primary)]' : '',
+        className,
       ].join(' ')}
     >
       <span className="h-[7px] w-[7px] rounded-full bg-current" />

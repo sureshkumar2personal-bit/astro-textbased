@@ -366,16 +366,7 @@ export default function Profile() {
             <div className="social-profile__bio">{bio}</div>
           </Card>
 
-          {!isAstrologer && <Card className="profile-consultation-actions">
-            <div className="section-title">Consultation</div>
-            <div className="profile-consultation-actions__grid">
-              <button type="button" className={`btn ${consultationTab === 'chat' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('chat'); setSelectedConsultationAstrologerId(null) }}><MessageCircle size={16} /> Chat</button>
-              <button type="button" className={`btn ${consultationTab === 'call' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('call'); setSelectedConsultationAstrologerId(null) }}><PhoneCall size={16} /> Call</button>
-              <button type="button" className={`btn ${consultationTab === 'appointments' ? 'btn-primary' : 'btn-outline'}`} onClick={() => { setConsultationTab('appointments'); setSelectedConsultationAstrologerId(null) }}><CalendarDays size={16} /> Appointment History</button>
-            </div>
-          </Card>}
-
-          {!isAstrologer && <section className="profile-consultation-history" aria-live="polite">
+          {false && !isAstrologer && <section className="profile-consultation-history" aria-live="polite">
             {consultationTab === 'appointments' ? <>
               <div className="profile-appointment-history__heading"><div><span className="profile-kicker">YOUR CONSULTATIONS</span><h2>Appointment History</h2></div><CalendarPlus size={20} /></div>
               {appointmentHistory.length ? <div className="profile-appointment-history__list">{appointmentHistory.map((appointment) => {
@@ -384,7 +375,7 @@ export default function Profile() {
                 const canJoin = status === 'Confirmed'
                 return <Card key={appointment.id} className="profile-appointment-card">
                   <div className="profile-appointment-card__top"><div><h3>{appointment.astrologer}</h3><span className="profile-appointment-card__type">Audio Call · {appointment.duration || appointment.package || '30 min'}</span></div><span className={`profile-appointment-status profile-appointment-status--${status.toLowerCase()}`}>{status}</span></div>
-                  <div className="profile-appointment-card__schedule"><span><b>Appointment Date</b>{appointment.date}</span><span><b>Appointment Time</b>{appointment.time}</span><span><b>Status</b>{status}</span></div>
+                  <div className="profile-appointment-card__schedule"><span><b>Appointment Date</b>{appointment.date}</span><span><b>Appointment Time</b>{appointment.time}</span><span><b>Price</b>₹{appointment.price || 499}</span><span><b>Status</b>{status}</span></div>
                   <div className="profile-appointment-card__actions"><Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-outline">Appointment Details</Link>{canJoin && <Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-primary"><PhoneCall size={15} /> Join Audio Call</Link>}{canCancel && <button type="button" className="btn btn-ghost" onClick={() => actions.cancelAppointment(appointment.id, appointment)}>Cancel Appointment</button>}</div>
                 </Card>
               })}</div> : <Card className="profile-appointment-empty"><CalendarDays size={22} /><h3>No appointments yet</h3><p>Your booked astrologer appointments will appear here.</p></Card>}

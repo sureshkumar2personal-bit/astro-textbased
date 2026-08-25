@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Sparkles,
@@ -17,6 +17,8 @@ import {
   PhoneCall,
   PhoneOff,
   X,
+  ChevronDown,
+  UserRound,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -59,12 +61,18 @@ const ROLE_CONFIG = {
     navLabel: 'User',
     nav: [
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
-      { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
-      { to: 'ask-question', label: 'Ask Question', icon: CircleHelp },
-      { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
-      { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
+      {
+        label: 'Ask Question',
+        icon: CircleHelp,
+        children: [
+          { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
+          { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
+          { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
+        ],
+      },
       { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
       { to: 'rewards', label: 'Rewards', icon: Gift },
+      { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
 }
@@ -100,6 +108,7 @@ const PAGE_META = {
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
     '/user/rewards': { title: 'Rewards', sub: 'Subscriber benefits and discount questions' },
+    '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
@@ -108,9 +117,37 @@ const PAGE_META = {
 }
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
+  const location = useLocation()
+  const isAskQuestionSection = location.pathname.startsWith(`${basePath}/ask-question`) || location.pathname.startsWith(`${basePath}/purchase-package`) || location.pathname.startsWith(`${basePath}/track-questions`) || location.pathname.startsWith(`${basePath}/raise-dispute`)
+  const [askQuestionOpen, setAskQuestionOpen] = useState(isAskQuestionSection)
+
+  useEffect(() => {
+    if (isAskQuestionSection) setAskQuestionOpen(true)
+  }, [isAskQuestionSection])
+
   return (
     <nav className="sidebar-nav">
-      {links.map(({ to, label, icon, end }) => {
+      {links.map(({ to, label, icon, end, children }) => {
+        if (children) {
+          const Icon = icon
+          const submenuActive = children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+          const parentActive = submenuActive || location.pathname.startsWith(`${basePath}/ask-question`)
+          return <div className="sidebar-nav-group" key={label}>
+            <div className={`sidebar-link sidebar-link-toggle${parentActive ? ' active' : ''}`}>
+              {parentActive && <span className="sidebar-active-pill" />}
+              <NavLink to={`${basePath}/ask-question`} className="sidebar-parent-link">
+                <Icon size={18} />
+                <span className="sidebar-link-label">{label}</span>
+              </NavLink>
+              <button type="button" className="sidebar-chevron-button" aria-label={`${askQuestionOpen ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={askQuestionOpen} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setAskQuestionOpen((open) => !open) }}>
+                <ChevronDown size={16} className={`sidebar-chevron${askQuestionOpen ? ' is-open' : ''}`} />
+              </button>
+            </div>
+            <motion.div className="sidebar-subnav" initial={false} animate={{ height: askQuestionOpen ? 'auto' : 0, opacity: askQuestionOpen ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
+              {children.map((child) => <SidebarItem key={child.to} to={`${basePath}/${child.to}`} icon={child.icon} label={child.label} subItem />)}
+            </motion.div>
+          </div>
+        }
         const route = `${basePath}/${to}`.replace(/\/$/, '')
         return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} badgeCount={label === 'Rewards' ? rewardCount : 0} />
       })}

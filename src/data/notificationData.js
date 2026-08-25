@@ -270,14 +270,33 @@ export const mockAstrologers = [
 export const subscribedAstrologers = mockAstrologers.slice(0, 9)
 export const suggestedAstrologerIds = suggestedAstrologerProfiles.map((astrologer) => astrologer.id)
 
-export function getSuggestedAstrologers({ followedAstrologerIds = [], subscribedAstrologerIds = [] } = {}) {
+export function getSuggestedAstrologers({ followedAstrologerIds = [], subscribedAstrologerIds = [], preferencesEnabled = false, preferences = {} } = {}) {
   const excludedIds = new Set([
     ...subscribedAstrologers.map((astrologer) => astrologer.id),
     ...followedAstrologerIds,
     ...subscribedAstrologerIds,
   ])
 
-  return mockAstrologers.filter((astrologer) => suggestedAstrologerIds.includes(astrologer.id) && !excludedIds.has(astrologer.id))
+  const defaultCandidates = mockAstrologers.filter((astrologer) => suggestedAstrologerIds.includes(astrologer.id) && !excludedIds.has(astrologer.id))
+  const candidates = preferencesEnabled ? mockAstrologers.filter((astrologer) => !excludedIds.has(astrologer.id)) : defaultCandidates
+  if (!preferencesEnabled) return candidates
+  const normalize = (value) => String(value).trim().toLowerCase()
+  const selected = {
+    languages: (preferences.languages || []).map(normalize),
+    methods: (preferences.astrologerTypes || preferences.methods || []).map(normalize),
+    topics: (preferences.consultationTitles || preferences.topics || []).map(normalize),
+  }
+  const hasPreferences = Object.values(selected).some((values) => values.length)
+  if (!hasPreferences) return defaultCandidates
+  const ranked = candidates.map((astrologer, index) => {
+    const methodScore = selected.methods.some((method) => normalize(astrologer.specialization) === method) ? 2 : 0
+    const topicScore = selected.topics.filter((topic) => astrologer.type.split(',').map((item) => normalize(item)).includes(topic)).length * 2
+    const languageScore = selected.languages.filter((language) => astrologer.languages.some((item) => normalize(item) === language)).length
+    return { astrologer, score: methodScore + topicScore + languageScore, index }
+  }).sort((a, b) => b.score - a.score || a.index - b.index)
+    .filter((entry) => entry.score > 0)
+    .map(({ astrologer }) => astrologer)
+  return ranked.length ? ranked : defaultCandidates
 }
 
 export const mockAppointments = [
@@ -358,3 +377,32 @@ export const mockAstrologerPosts = [
   { id: 'post-nandini-1', astrologerId: 'astrologer-10', title: 'The Importance of Moon Sign', body: 'Your Moon sign helps explain your emotional patterns, instincts, and inner responses.', tone: 'coral', createdAt: '2026-08-23T10:00:00+05:30', likeCount: 73, comments: [] },
   { id: 'post-dev-1', astrologerId: 'astrologer-11', title: 'Planetary Transits This Week', body: "This week's planetary movements may bring changes in communication, relationships, and personal decisions.", tone: 'gold', createdAt: '2026-08-22T10:00:00+05:30', likeCount: 64, comments: [] },
 ]
+
+export const mockAstrologerAvailability = {
+  'astrologer-demo': {
+    '2026-08-25': ['10:00 AM', '11:00 AM', '04:00 PM'],
+    '2026-08-27': ['09:00 AM', '02:00 PM', '06:00 PM'],
+    '2026-08-29': ['11:00 AM', '03:00 PM'],
+  },
+  'acharya-meena': {
+    '2026-08-26': ['10:00 AM', '01:00 PM'],
+    '2026-08-28': ['11:00 AM', '04:00 PM'],
+    '2026-09-02': ['09:00 AM', '06:00 PM'],
+  },
+  'astrologer-demo-3': {
+    '2026-08-25': ['12:00 PM', '05:00 PM'],
+    '2026-08-30': ['10:00 AM', '02:00 PM'],
+  },
+  'astrologer-10': {
+    '2026-08-27': ['10:00 AM', '03:00 PM'],
+    '2026-09-01': ['11:00 AM', '05:00 PM'],
+  },
+  'astrologer-11': {
+    '2026-08-26': ['09:00 AM', '04:00 PM'],
+    '2026-08-29': ['01:00 PM', '06:00 PM'],
+  },
+  'astrologer-13': {
+    '2026-08-25': ['10:00 AM', '02:00 PM'],
+    '2026-08-28': ['09:00 AM', '05:00 PM'],
+  },
+}

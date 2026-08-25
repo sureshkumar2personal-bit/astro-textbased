@@ -1,9 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-export default function SidebarItem({ to, end, icon: Icon, label, showBadge = false, badgeCount = 0, nested = false }) {
+export default function SidebarItem({ to, end, icon: Icon, label, showBadge = false, badgeCount = 0, nested = false, subItem = false }) {
   return (
-    <NavLink to={to} end={end} className={({ isActive }) => `sidebar-link${nested ? ' sidebar-link--nested' : ''}${isActive ? ' active' : ''}`}>
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) => `sidebar-link${nested || subItem ? ' sidebar-link--nested' : ''}${subItem ? ' sidebar-subnav-link' : ''}${isActive ? ' active' : ''}`}
+    >
       {({ isActive }) => (
         <>
           {isActive && (

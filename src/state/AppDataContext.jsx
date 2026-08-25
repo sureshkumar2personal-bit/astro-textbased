@@ -1688,6 +1688,7 @@ export function AppDataProvider({ children }) {
         type: payload.type || 'Video Consultation',
         date: payload.date,
         time: payload.time,
+        price: Number(payload.price) || 499,
         status: 'Confirmed',
       }
       setAppointments((prev) => [appointment, ...prev])

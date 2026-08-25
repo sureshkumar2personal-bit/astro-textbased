@@ -60,6 +60,10 @@ export default function AppointmentDetails() {
               <div className="field-label-top">Consultation Type</div>
               <div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700 }}>{appointment.type}</div>
             </div>
+            <div>
+              <div className="field-label-top">Price</div>
+              <div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700 }}>₹{appointment.price || 499}</div>
+            </div>
           </div>
         </Card>
       </Section>

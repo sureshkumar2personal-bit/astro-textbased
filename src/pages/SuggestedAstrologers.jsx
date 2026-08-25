@@ -18,7 +18,7 @@ export default function SuggestedAstrologers() {
   const subscribedAstrologerIds = subscriptions
     .filter((subscription) => subscription.userId === currentUser?.id)
     .map((subscription) => subscription.astrologerId)
-  const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds })
+  const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
   const visibleAstrologers = suggestedAstrologers.slice(0, visibleCount)
   const hasMore = visibleCount < suggestedAstrologers.length
 
@@ -27,6 +27,7 @@ export default function SuggestedAstrologers() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[color:var(--ink)]">Suggested Astrologers</h1>
+          <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Recommended based on your preferences</p>
         </div>
         <BackButton to={routes.astrologers} />
       </div>

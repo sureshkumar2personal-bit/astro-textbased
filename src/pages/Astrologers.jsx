@@ -6,10 +6,11 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
-function AstrologerSection({ title, astrologers, viewMoreTo, onViewProfile, onCall, onChat }) {
+function AstrologerSection({ title, subtitle, astrologers, viewMoreTo, onViewProfile, onCall, onChat }) {
   return (
     <section className="astrologer-list-section" aria-labelledby={`${title.toLowerCase().replaceAll(' ', '-')}-heading`}>
       <h2 id={`${title.toLowerCase().replaceAll(' ', '-')}-heading`} className="astrologer-list-section__title">{title}</h2>
+      {subtitle && <p className="astrologer-list-section__subtitle">{subtitle}</p>}
       <div className="astrologer-list-section__grid">
         {astrologers.slice(0, 3).map((astrologer) => (
           <AstrologerCard key={astrologer.id} astrologer={astrologer} onViewProfile={onViewProfile} onCall={onCall} onChat={onChat} />
@@ -40,7 +41,7 @@ export default function Astrologers() {
     .map((subscription) => subscription.astrologerId)
   const subscribedAstrologers = mockAstrologers.filter((astrologer) => subscribedAstrologerIds.includes(astrologer.id))
   const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
-  const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds })
+  const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
 
   const handleViewProfile = (astrologerId) => {
     navigate(`${routes.astrologerProfile}?id=${astrologerId}`)
@@ -59,7 +60,7 @@ export default function Astrologers() {
       <PageHeader title="Explore Astrologers" subtitle="Find an astrologer for your next consultation" className="explore-astrologers__header" />
       <AstrologerSection title="Subscribed Astrologers" astrologers={subscribedAstrologers} viewMoreTo={routes.astrologersFull} onViewProfile={handleViewProfile} onCall={handleCall} onChat={handleChat} />
       <AstrologerSection title="Followed Astrologers" astrologers={followedAstrologers} viewMoreTo={routes.followedAstrologersFull} onViewProfile={handleViewProfile} onCall={handleCall} onChat={handleChat} />
-      <AstrologerSection title="Suggested Astrologers" astrologers={suggestedAstrologers} viewMoreTo={routes.suggestedAstrologers} onViewProfile={handleViewProfile} onCall={handleCall} onChat={handleChat} />
+      <AstrologerSection title="Suggested Astrologers" subtitle="Recommended based on your preferences" astrologers={suggestedAstrologers} viewMoreTo={routes.suggestedAstrologers} onViewProfile={handleViewProfile} onCall={handleCall} onChat={handleChat} />
     </div>
   )
 }
