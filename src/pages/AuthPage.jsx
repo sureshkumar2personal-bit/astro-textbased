@@ -1,20 +1,29 @@
 import { useMemo, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Sparkles, Shield, UserRound } from 'lucide-react'
 import { useAuth } from '../state/AuthContext.jsx'
 import ThemeToggle from '../components/ThemeToggle.jsx'
-import { getRoleRoutes, inferRoleFromEmail, ROLES } from '../utils/roleRoutes.js'
+import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
 
-export default function AuthPage({ mode }) {
+export default function AuthPage({ mode, selectedRole }) {
   const navigate = useNavigate()
-  const { currentUser, login } = useAuth()
+  const { currentUser, login, register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [registering, setRegistering] = useState(false)
+  const [name, setName] = useState('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [birthTime, setBirthTime] = useState('')
+  const [birthPlace, setBirthPlace] = useState('')
+  const [horoscopeDetails, setHoroscopeDetails] = useState('')
+  const [specialization, setSpecialization] = useState('')
+  const [experience, setExperience] = useState('')
+  const [languages, setLanguages] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
-  const isLogin = mode === 'login'
-  const role = inferRoleFromEmail(email) || ROLES.USER
+  const isLogin = mode === 'login' && !registering
+  const role = selectedRole === ROLES.ASTROLOGER ? ROLES.ASTROLOGER : ROLES.USER
   const routes = useMemo(() => getRoleRoutes(role), [role])
 
   if (currentUser) {
@@ -27,7 +36,12 @@ export default function AuthPage({ mode }) {
 
     try {
       if (isLogin) {
-        login({ email, password })
+        login({ email, password, role })
+      } else {
+        if (!name.trim()) throw new Error('Enter your name.')
+        if (role === ROLES.USER && (!dateOfBirth || !birthTime || !birthPlace)) throw new Error('Complete your birth details to create a User account.')
+        if (role === ROLES.ASTROLOGER && (!specialization.trim() || !experience.trim() || !languages.trim())) throw new Error('Complete your professional details to create an Astrologer account.')
+        register({ role, name, email, password, dateOfBirth, birthTime, birthPlace, horoscopeDetails, specialization, experience, languages: languages.split(',').map((value) => value.trim()).filter(Boolean) })
       }
 
       navigate(routes.dashboard, { replace: true })
@@ -89,19 +103,20 @@ export default function AuthPage({ mode }) {
           <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
             <div>
               <div className="text-sm font-bold uppercase tracking-[0.08em] text-[color:var(--violet-700)]">
-                Login
+                {role === ROLES.USER ? 'User Login' : 'Astrologer Login'}
               </div>
               <h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-[color:var(--ink)]">
                 Welcome back
               </h2>
               <p className="mt-2 text-sm text-[color:var(--muted)]">
-                Pick the role that matches your account and continue.
+                Sign in to your {role === ROLES.USER ? 'user' : 'astrologer'} portal.
               </p>
             </div>
 
             <div className="rounded-[24px] border border-[color:var(--border)] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
               <div className="grid gap-4">
                 <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">
+                  {!isLogin && <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Name<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={name} onChange={(event) => setName(event.target.value)} placeholder={role === ROLES.USER ? 'Your name' : 'Your professional name'} /></label>}
                   Email
                   <input
                     type="email"
@@ -114,6 +129,9 @@ export default function AuthPage({ mode }) {
                     Use your email and password to sign in.
                   </div>
                 </label>
+
+                {!isLogin && role === ROLES.USER && <><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Date of Birth<input required type="date" className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Time of Birth<input required type="time" className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={birthTime} onChange={(event) => setBirthTime(event.target.value)} /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Place of Birth<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={birthPlace} onChange={(event) => setBirthPlace(event.target.value)} placeholder="City, Country" /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Horoscope / Kundli Details<textarea className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={horoscopeDetails} onChange={(event) => setHoroscopeDetails(event.target.value)} rows="2" /></label></>}
+                {!isLogin && role === ROLES.ASTROLOGER && <><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Specializations<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={specialization} onChange={(event) => setSpecialization(event.target.value)} placeholder="Vedic, Marriage, Career" /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Experience<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={experience} onChange={(event) => setExperience(event.target.value)} placeholder="8 years" /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Languages<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={languages} onChange={(event) => setLanguages(event.target.value)} placeholder="English, Hindi" /></label></>}
 
                 <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">
                   Password
@@ -148,9 +166,11 @@ export default function AuthPage({ mode }) {
                   type="submit"
                   className="mt-5 inline-flex w-full items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,var(--primary),var(--primary-light))] px-4 py-3.5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(109,40,217,0.24)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_34px_rgba(109,40,217,0.28)]"
                 >
-                Login
+                {isLogin ? 'Login' : 'Create Account'}
                 </button>
             </div>
+            <button type="button" className="block w-full text-center text-sm font-semibold text-[color:var(--primary)]" onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
+            <Link to="/" className="block text-center text-sm font-semibold text-[color:var(--primary)]">← Choose a different role</Link>
           </form>
         </div>
       </div>

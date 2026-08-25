@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './state/AuthContext.jsx'
 import { ThemeProvider } from './state/ThemeContext.jsx'
 import { getRoleRoutes, ROLES } from './utils/roleRoutes.js'
 import Login from './pages/Login.jsx'
+import RoleSelection from './pages/RoleSelection.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import UserDashboard from './pages/UserDashboard.jsx'
 import TextBasedQuestions from './pages/TextBasedQuestions.jsx'
@@ -17,6 +18,7 @@ import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
+import AstrologerWallet from './pages/AstrologerWallet.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import Astrologers from './pages/Astrologers.jsx'
 import AstrologersFull from './pages/astrologer/astrologers/AstrologersFull.jsx'
@@ -25,6 +27,7 @@ import SuggestedAstrologers from './pages/SuggestedAstrologers.jsx'
 import CallPackageSelection from './pages/CallPackageSelection.jsx'
 import ChatBooking from './pages/ChatBooking.jsx'
 import ChatScreen from './pages/ChatScreen.jsx'
+import ChatDetails from './pages/ChatDetails.jsx'
 import CallScreen from './pages/CallScreen.jsx'
 import WalletPayment from './pages/WalletPayment.jsx'
 import ChatWalletPayment from './pages/ChatWalletPayment.jsx'
@@ -35,7 +38,9 @@ import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
+import MyAccount from './pages/MyAccount.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
+import AstrologerLiveSession from './pages/astrologer/live/AstrologerLiveSession.jsx'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -73,6 +78,8 @@ function AstrologerRoutes() {
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/profile" element={<Profile />} />
+        <Route path="/astrologer/wallet" element={<AstrologerWallet />} />
+        <Route path="/astrologer/live-session" element={<AstrologerLiveSession />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
         <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
@@ -104,11 +111,13 @@ function UserRoutes() {
         <Route path="/user/call-packages" element={<CallPackageSelection />} />
         <Route path="/user/chat-booking" element={<ChatBooking />} />
         <Route path="/user/chat" element={<ChatScreen />} />
+        <Route path="/user/chat-details" element={<ChatDetails />} />
         <Route path="/user/call" element={<CallScreen />} />
         <Route path="/user/wallet-payment" element={<WalletPayment />} />
         <Route path="/user/chat-wallet-payment" element={<ChatWalletPayment />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/rewards" element={<Rewards />} />
+        <Route path="/user/my-account" element={<MyAccount />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
@@ -121,8 +130,9 @@ function UserRoutes() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<RoleSelection />} />
+      <Route path="/login" element={<RoleSelection />} />
+      <Route path="/login/:role" element={<Login />} />
 
       <Route element={<RequireAuth />}>
         {AstrologerRoutes()}

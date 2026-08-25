@@ -97,18 +97,21 @@ export function AuthProvider({ children }) {
   const auth = useMemo(() => ({
     currentUser,
     users,
-    login({ email, password }) {
+    login({ email, password, role }) {
       const normalizedEmail = normalizeEmail(email)
       const user = users.find((entry) => entry.email.toLowerCase() === normalizedEmail)
       if (!user || user.password !== password) {
         throw new Error('Invalid email or password.')
+      }
+      if (role && user.role !== role) {
+        throw new Error(`This account is registered as a ${user.role === ROLES.ASTROLOGER ? 'Astrologer' : 'User'}. Choose the correct login portal.`)
       }
       setCurrentUser(user)
       return user
     },
     register(payload) {
       const email = normalizeEmail(payload.email)
-      const role = inferRoleFromEmail(email)
+      const role = payload.role || inferRoleFromEmail(email)
       if (!role) {
         throw new Error('Use a .com email. Astrologer accounts should start with astro@.')
       }
@@ -122,9 +125,16 @@ export function AuthProvider({ children }) {
         name: payload.name.trim(),
         email,
         phone: payload.phone || '',
+        dateOfBirth: payload.dateOfBirth || '',
+        birthTime: payload.birthTime || '',
+        birthPlace: payload.birthPlace || '',
+        horoscopeDetails: payload.horoscopeDetails || '',
         password: payload.password,
         specialization: payload.specialization || '',
+        languages: payload.languages || [],
         experience: payload.experience || '',
+        astrologerPreferencesEnabled: false,
+        astrologerPreferences: { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
       }
 
       setUsers((prev) => [user, ...prev])
@@ -148,6 +158,8 @@ export function AuthProvider({ children }) {
         phone: String(payload.phone || '').trim(),
         specialization: String(payload.specialization || '').trim(),
         experience: String(payload.experience || '').trim(),
+        astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
+        astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
       }
       setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
       setCurrentUser(updatedUser)

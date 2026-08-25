@@ -528,6 +528,29 @@ const initialAstrologerWallet = {
   ],
 }
 
+const initialPayoutMethods = [
+  { id: 'pm-hdfc', type: 'bank', bankName: 'HDFC Bank', accountNumber: '4589', ifsc: 'HDFC0001234', accountHolder: 'Dr. Rani', isDefault: true },
+  { id: 'pm-sbi', type: 'bank', bankName: 'State Bank of India', accountNumber: '2567', ifsc: 'SBIN0005678', accountHolder: 'Dr. Rani', isDefault: false },
+  { id: 'pm-upi', type: 'upi', upiId: 'rani@upi', isDefault: false },
+]
+
+const initialSettlementHistory = [
+  { id: 'STL-001', date: '2026-07-25', period: '01 Jul – 25 Jul 2026', grossEarnings: 18500, platformCommission: 2775, taxes: 0, netSettlement: 15725, status: 'Completed' },
+  { id: 'STL-002', date: '2026-06-28', period: '01 Jun – 28 Jun 2026', grossEarnings: 14200, platformCommission: 2130, taxes: 0, netSettlement: 12070, status: 'Completed' },
+  { id: 'STL-003', date: '2026-05-30', period: '01 May – 30 May 2026', grossEarnings: 21300, platformCommission: 3195, taxes: 0, netSettlement: 18105, status: 'Completed' },
+]
+
+const initialWithdrawalHistory = [
+  { id: 'WD-001', amount: 8000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-22T14:30:00+05:30', completedAt: '2026-07-23T10:15:00+05:30', fee: 0 },
+  { id: 'WD-002', amount: 10000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-18T11:00:00+05:30', completedAt: '2026-07-19T09:30:00+05:30', fee: 0 },
+]
+
+const initialEarningsBySource = {
+  thisMonth: { consultations: 6330, calls: 5475, textQuestions: 5200, liveSessions: 2000, virtualGifts: 300, other: 445, total: 19750 },
+  lastMonth: { consultations: 5800, calls: 4900, textQuestions: 4600, liveSessions: 1800, virtualGifts: 250, other: 350, total: 17700 },
+  thisYear: { consultations: 38200, calls: 31500, textQuestions: 28400, liveSessions: 12000, virtualGifts: 1800, other: 2450, total: 114350 },
+}
+
 const initialUserWallet = {
   balance: 4500,
   toppedUp: 10000,
@@ -627,18 +650,59 @@ export function normalizeVisibility(value) {
   return ['public', 'followers', 'subscribers', 'private'].includes(value) ? value : 'public'
 }
 
+export function normalizeInteractionAccess(post = {}) {
+  const legacyCommentsEnabled = post.commentsEnabled !== false
+  const access = post.interactionAccess || {}
+  return {
+    like: access.like !== false,
+    comment: access.comment !== undefined ? access.comment !== false : legacyCommentsEnabled,
+    share: access.share !== false,
+    save: access.save !== false,
+  }
+}
+
 export function normalizePost(post) {
   const now = new Date().toISOString()
+  const media = Array.isArray(post.media)
+    ? post.media
+      .filter((item) => item && typeof item.dataUrl === 'string' && (item.type?.startsWith('image/') || item.type?.startsWith('video/')))
+      .map((item) => ({
+        id: item.id || crypto.randomUUID(),
+        name: String(item.name || 'Media file'),
+        type: item.type,
+        dataUrl: item.dataUrl,
+      }))
+    : []
   return {
     id: post.id || crypto.randomUUID(),
     astrologerId: post.astrologerId || 'astrologer-demo',
     tone: post.tone || 'violet',
     title: String(post.title || '').trim(),
     body: String(post.body || '').trim(),
+    likeCount: Number(post.likeCount) || 0,
+    media,
     visibility: normalizeVisibility(post.visibility),
+    commentsEnabled: post.commentsEnabled !== false,
+    interactionAccess: normalizeInteractionAccess(post),
     createdAt: post.createdAt || now,
     updatedAt: post.updatedAt || post.createdAt || now,
   }
+}
+
+export function selectVisiblePosts(posts, { userId, followedAstrologerIds = [], subscriptions = [], astrologerId } = {}) {
+  const followed = new Set(followedAstrologerIds)
+  const now = Date.now()
+  const subscribed = new Set(subscriptions
+    .filter((subscription) => subscription.userId === userId && (!subscription.expiresAt || new Date(subscription.expiresAt).getTime() > now))
+    .map((subscription) => subscription.astrologerId))
+
+  return posts.filter((post) => {
+    if (astrologerId && post.astrologerId !== astrologerId) return false
+    if (post.visibility === 'public') return true
+    if (post.visibility === 'followers') return followed.has(post.astrologerId)
+    if (post.visibility === 'subscribers') return subscribed.has(post.astrologerId) && Boolean(userId)
+    return post.astrologerId === userId
+  })
 }
 
 export function normalizeLiveSession(session) {
@@ -662,11 +726,13 @@ const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
 const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
+const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
+const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 
 const initialAstrologerPosts = [
-  { id: 'post-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', createdAt: '2026-08-22T10:00:00+05:30', updatedAt: '2026-08-22T10:00:00+05:30' },
-  { id: 'post-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', createdAt: '2026-08-20T10:00:00+05:30', updatedAt: '2026-08-20T10:00:00+05:30' },
-  { id: 'post-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
+  { id: 'post-rani-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', likeCount: 128, comments: [{ id: 'comment-rani-1', author: 'Priya V.', text: 'This was exactly what I needed today.' }], createdAt: '2026-08-24T10:00:00+05:30', updatedAt: '2026-08-24T10:00:00+05:30' },
+  { id: 'post-rani-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', likeCount: 94, comments: [], createdAt: '2026-08-21T10:00:00+05:30', updatedAt: '2026-08-21T10:00:00+05:30' },
+  { id: 'post-rani-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', likeCount: 0, comments: [], createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
 ]
 
 const initialAstrologerLiveSessions = [
@@ -832,10 +898,17 @@ export function AppDataProvider({ children }) {
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [payoutMethods, setPayoutMethods] = useState(initialPayoutMethods)
+  const [withdrawalHistory, setWithdrawalHistory] = useState(initialWithdrawalHistory)
+  const [settlementHistory] = useState(initialSettlementHistory)
+  const [earningsBySource] = useState(initialEarningsBySource)
   const [consultationHistory] = useState(initialConsultationHistory)
-  const [postLikes, setPostLikes] = useState({})
-  const [savedPostIds, setSavedPostIds] = useState([])
-  const [postComments, setPostComments] = useState(() => Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])))
+  const [postLikes, setPostLikes] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${currentUser?.id || 'guest'}`, {}))
+  const [savedPostIds, setSavedPostIds] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${currentUser?.id || 'guest'}`, []))
+  const [postComments, setPostComments] = useState(() => loadFromStorage(
+    POST_COMMENTS_STORAGE_KEY,
+    Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])),
+  ))
   const [presenceActive, setPresenceActive] = useState(false)
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
@@ -897,6 +970,22 @@ export function AppDataProvider({ children }) {
   }, [astrologerPosts])
 
   useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    setPostLikes(loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${userKey}`, {}))
+    setSavedPostIds(loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${userKey}`, []))
+  }, [currentUser?.id])
+
+  useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    saveToStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${userKey}`, postLikes)
+    saveToStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${userKey}`, savedPostIds)
+  }, [currentUser?.id, postLikes, savedPostIds])
+
+  useEffect(() => {
+    saveToStorage(POST_COMMENTS_STORAGE_KEY, postComments)
+  }, [postComments])
+
+  useEffect(() => {
     saveToStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, astrologerLiveSessions)
   }, [astrologerLiveSessions])
 
@@ -905,15 +994,21 @@ export function AppDataProvider({ children }) {
 
   const actions = useMemo(() => ({
     togglePostLike(postId) {
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post?.interactionAccess?.like === false) return
       setPostLikes((prev) => ({ ...prev, [postId]: !prev[postId] }))
     },
     toggleSavedPost(postId) {
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post?.interactionAccess?.save === false) return
       setSavedPostIds((prev) => prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId])
     },
     addPostComment(postId, text, author = 'You') {
       const trimmed = String(text || '').trim()
       if (!trimmed) return
-      setPostComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), { id: `comment-${Date.now()}`, author, text: trimmed }] }))
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post && post.interactionAccess?.comment === false) return
+      setPostComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), { id: `comment-${Date.now()}`, author, userId: currentUser?.id || null, text: trimmed }] }))
     },
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
@@ -1593,6 +1688,7 @@ export function AppDataProvider({ children }) {
         type: payload.type || 'Video Consultation',
         date: payload.date,
         time: payload.time,
+        price: Number(payload.price) || 499,
         status: 'Confirmed',
       }
       setAppointments((prev) => [appointment, ...prev])
@@ -1841,7 +1937,66 @@ export function AppDataProvider({ children }) {
         prev.map((notification) => (notification.audience === role ? { ...notification, read: true } : notification)),
       )
     },
-  }), [campaigns, followedAstrologerIds, incomingRequests, questions, subscriptions])
+    addPayoutMethod(payload) {
+      const method = {
+        id: `pm-${Date.now().toString(36)}`,
+        type: payload.type || 'bank',
+        isDefault: payoutMethods.length === 0,
+        ...payload,
+      }
+      setPayoutMethods((prev) => [...prev, method])
+      return method
+    },
+    updatePayoutMethod(methodId, patch) {
+      setPayoutMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, ...patch } : m)))
+    },
+    removePayoutMethod(methodId) {
+      setPayoutMethods((prev) => {
+        const remaining = prev.filter((m) => m.id !== methodId)
+        if (remaining.length && !remaining.some((m) => m.isDefault)) {
+          remaining[0].isDefault = true
+        }
+        return remaining
+      })
+    },
+    setDefaultPayoutMethod(methodId) {
+      setPayoutMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
+    },
+    initiateWithdrawal(amount, payoutMethodId) {
+      const withdrawal = {
+        id: `WD-${String(withdrawalHistory.length + 1).padStart(3, '0')}`,
+        amount,
+        payoutMethodId,
+        status: 'Processing',
+        initiatedAt: new Date().toISOString(),
+        completedAt: null,
+        fee: 0,
+      }
+      setWithdrawalHistory((prev) => [withdrawal, ...prev])
+      setAstrologerWallet((prev) => ({
+        ...prev,
+        balance: prev.balance - amount,
+        withdrawn: prev.withdrawn + amount,
+        transactions: [
+          {
+            id: crypto.randomUUID(),
+            label: `Withdrawal initiated`,
+            amount: `-₹${amount.toLocaleString('en-IN')}`,
+            time: 'just now',
+            date: new Date().toISOString(),
+            type: 'withdrawal',
+          },
+          ...prev.transactions,
+        ],
+      }))
+      setTimeout(() => {
+        setWithdrawalHistory((prev) =>
+          prev.map((w) => (w.id === withdrawal.id ? { ...w, status: 'Completed', completedAt: new Date().toISOString() } : w)),
+        )
+      }, 3000)
+      return withdrawal
+    },
+  }), [astrologerPosts, campaigns, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, withdrawalHistory])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -1870,6 +2025,10 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    payoutMethods,
+    withdrawalHistory,
+    settlementHistory,
+    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,
@@ -1905,6 +2064,10 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    payoutMethods,
+    withdrawalHistory,
+    settlementHistory,
+    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,

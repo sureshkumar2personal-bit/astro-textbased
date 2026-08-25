@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Sparkles,
@@ -10,12 +10,15 @@ import {
   ListChecks,
   Gavel,
   Bell,
+  ChevronRight,
   Wallet,
   LogOut,
   MessageCircle,
   PhoneCall,
   PhoneOff,
   X,
+  ChevronDown,
+  UserRound,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -40,10 +43,16 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
-      { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
-      { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
-      { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+      {
+        label: 'Text Based',
+        icon: TempleScrollIcon,
+        children: [
+          { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
+          { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
+          { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
+          { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+        ],
+      },
     ],
   },
   [ROLES.USER]: {
@@ -52,12 +61,18 @@ const ROLE_CONFIG = {
     navLabel: 'User',
     nav: [
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
-      { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
-      { to: 'ask-question', label: 'Ask Question', icon: CircleHelp },
-      { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
-      { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
+      {
+        label: 'Ask Question',
+        icon: CircleHelp,
+        children: [
+          { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
+          { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
+          { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
+        ],
+      },
       { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
       { to: 'rewards', label: 'Rewards', icon: Gift },
+      { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
 }
@@ -65,6 +80,7 @@ const ROLE_CONFIG = {
 const PAGE_META = {
   [ROLES.ASTROLOGER]: {
     '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
+    '/astrologer/wallet': { title: 'Wallet Management', sub: 'Manage earnings, payouts and transactions' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
@@ -77,6 +93,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {
@@ -91,6 +108,7 @@ const PAGE_META = {
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
     '/user/rewards': { title: 'Rewards', sub: 'Subscriber benefits and discount questions' },
+    '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
@@ -99,11 +117,77 @@ const PAGE_META = {
 }
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
+  const location = useLocation()
+  const isAskQuestionSection = location.pathname.startsWith(`${basePath}/ask-question`) || location.pathname.startsWith(`${basePath}/purchase-package`) || location.pathname.startsWith(`${basePath}/track-questions`) || location.pathname.startsWith(`${basePath}/raise-dispute`)
+  const [askQuestionOpen, setAskQuestionOpen] = useState(isAskQuestionSection)
+
+  useEffect(() => {
+    if (isAskQuestionSection) setAskQuestionOpen(true)
+  }, [isAskQuestionSection])
+
   return (
     <nav className="sidebar-nav">
-      {links.map(({ to, label, icon, end }) => {
+      {links.map(({ to, label, icon, end, children }) => {
+        if (children) {
+          const Icon = icon
+          const submenuActive = children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+          const parentActive = submenuActive || location.pathname.startsWith(`${basePath}/ask-question`)
+          return <div className="sidebar-nav-group" key={label}>
+            <div className={`sidebar-link sidebar-link-toggle${parentActive ? ' active' : ''}`}>
+              {parentActive && <span className="sidebar-active-pill" />}
+              <NavLink to={`${basePath}/ask-question`} className="sidebar-parent-link">
+                <Icon size={18} />
+                <span className="sidebar-link-label">{label}</span>
+              </NavLink>
+              <button type="button" className="sidebar-chevron-button" aria-label={`${askQuestionOpen ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={askQuestionOpen} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setAskQuestionOpen((open) => !open) }}>
+                <ChevronDown size={16} className={`sidebar-chevron${askQuestionOpen ? ' is-open' : ''}`} />
+              </button>
+            </div>
+            <motion.div className="sidebar-subnav" initial={false} animate={{ height: askQuestionOpen ? 'auto' : 0, opacity: askQuestionOpen ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
+              {children.map((child) => <SidebarItem key={child.to} to={`${basePath}/${child.to}`} icon={child.icon} label={child.label} subItem />)}
+            </motion.div>
+          </div>
+        }
         const route = `${basePath}/${to}`.replace(/\/$/, '')
         return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} badgeCount={label === 'Rewards' ? rewardCount : 0} />
+      })}
+    </nav>
+  )
+}
+
+function AstrologerNav({ links, basePath }) {
+  const [textBasedOpen, setTextBasedOpen] = useState(false)
+
+  return (
+    <nav className="sidebar-nav">
+      {links.map((link) => {
+        if (!link.children) {
+          const route = `${basePath}/${link.to}`.replace(/\/$/, '')
+          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} />
+        }
+
+        return (
+          <div className="sidebar-nav-section" key={link.label}>
+            <button
+              type="button"
+              className={`sidebar-nav-section-title${textBasedOpen ? ' is-open' : ''}`}
+              aria-expanded={textBasedOpen}
+              onClick={() => setTextBasedOpen((isOpen) => !isOpen)}
+            >
+              <link.icon size={18} />
+              <span>{link.label}</span>
+              <ChevronRight size={17} className="sidebar-nav-section-arrow" aria-hidden="true" />
+            </button>
+            {textBasedOpen && (
+              <div className="sidebar-nav-subgroup">
+                {link.children.map(({ to, label, icon }) => {
+                  const route = `${basePath}/${to}`
+                  return <SidebarItem key={route} to={route} icon={icon} label={label} nested />
+                })}
+              </div>
+            )}
+          </div>
+        )
       })}
     </nav>
   )
@@ -153,6 +237,7 @@ export default function Layout() {
   const basePath = getRoleBasePath(role)
   const routes = {
     walletHistory: `${basePath}/wallet-history`,
+    wallet: `${basePath}/wallet`,
   }
   const config = ROLE_CONFIG[role]
   const audienceMeta = role === ROLES.ASTROLOGER && location.pathname.startsWith('/astrologer/audience/')
@@ -232,7 +317,11 @@ export default function Layout() {
         </div>
 
         <div className="sidebar-group-label">{config.navLabel}</div>
-        <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+        {isAstrologer ? (
+          <AstrologerNav links={config.nav} basePath={basePath} />
+        ) : (
+          <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+        )}
       </aside>
 
       <div className="main-column">
@@ -257,7 +346,7 @@ export default function Layout() {
                 </span>
               )}
             </button>
-            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(routes.walletHistory)}>
+            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(isAstrologer ? routes.wallet : routes.walletHistory)}>
               {isAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
             </button>
             <ThemeToggle />

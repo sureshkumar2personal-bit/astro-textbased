@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users } from 'lucide-react'
-import { mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
-import { useAppData } from '../state/AppDataContext.jsx'
+import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
+import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
 const APPOINTMENT_TYPE = 'Audio Call'
+const APPOINTMENT_PRICE = 499
 
 const PROFILE_POSTS = [
   { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },
@@ -30,6 +31,28 @@ function formatAppointmentDate(value) {
   return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+function dateKey(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function dateFromKey(value) {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function displayDateKey(value) {
+  return dateFromKey(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function calendarDays(month) {
+  const first = new Date(month.getFullYear(), month.getMonth(), 1)
+  const start = new Date(month.getFullYear(), month.getMonth(), 1 - first.getDay())
+  return Array.from({ length: 42 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index))
+}
+
 function getSubscriptionExpiry(subscription) {
   return subscription?.expiresAt || subscription?.discountQuestions?.[0]?.validUntil
 }
@@ -43,7 +66,7 @@ function getSubscriptionDaysRemaining(expiry) {
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, astrologerServices, postLikes, savedPostIds, postComments } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, appointments, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = searchParams.get('id') || mockAstrologers[0].id
@@ -69,6 +92,15 @@ export default function AstrologerProfile() {
   const subscribed = Boolean(subscription && subscriptionDaysRemaining > 0)
   const canBookAppointment = subscribed
   const [bookingOpen, setBookingOpen] = useState(false)
+  const [bookingStep, setBookingStep] = useState('form')
+  const [paymentMethod, setPaymentMethod] = useState('UPI')
+  const [bookedAppointmentId, setBookedAppointmentId] = useState(null)
+  const [calendarMonth, setCalendarMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const [bookingForm, setBookingForm] = useState({
+    type: APPOINTMENT_TYPE,
+    date: '',
+    time: '',
+  })
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
   const [subscriptionPromptOpen, setSubscriptionPromptOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
@@ -81,9 +113,20 @@ export default function AstrologerProfile() {
     .filter((subscription) => subscription.astrologerId === astrologer.id)
     .map((subscription) => subscription.userName || subscription.userId || 'Subscriber')
   const liveSessions = mockLiveSessions.filter((session) => session.astrologerId === astrologer.id)
-  const astrologerPosts = mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
-  const savedPosts = mockAstrologerPosts.filter((post) => savedPostIds.includes(post.id))
+  const accessiblePosts = selectVisiblePosts(sharedPosts, { userId: currentUser?.id, followedAstrologerIds, subscriptions, astrologerId: astrologer.id })
+  const hasSharedPosts = sharedPosts.some((post) => post.astrologerId === astrologer.id)
+  const astrologerPosts = hasSharedPosts ? accessiblePosts : mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
+  const savedPosts = accessiblePosts.filter((post) => savedPostIds.includes(post.id))
+  const availability = mockAstrologerAvailability[astrologer.id] || {}
+  const monthDays = calendarDays(calendarMonth)
+  const todayKey = dateKey(new Date())
+  const selectedDateSlots = bookingForm.date ? availability[bookingForm.date] || [] : []
+  const bookedSlots = new Set(appointments.filter((appointment) => appointment.astrologerId === astrologer.id).map((appointment) => `${appointment.date}|${appointment.time}`))
   const visiblePosts = footerTab === 'Saved Posts' ? savedPosts : astrologerPosts
+  const selectedAstrologerTypes = currentUser?.astrologerPreferences?.astrologerTypes || currentUser?.astrologerPreferences?.methods || []
+  const selectedConsultationTitles = currentUser?.astrologerPreferences?.consultationTitles || currentUser?.astrologerPreferences?.topics || []
+  const suggestedForUser = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds: subscriptions.filter((subscription) => subscription.userId === currentUser?.id).map((subscription) => subscription.astrologerId), preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
+  const showPreferenceChips = !isOwner && suggestedForUser.some((suggested) => suggested.id === astrologer.id) && (selectedAstrologerTypes.length || selectedConsultationTitles.length) > 0
   const liveGroups = [
     ['Upcoming', liveSessions.filter((session) => session.status === 'Upcoming')],
     ['Present / Live Now', liveSessions.filter((session) => ['Live now', 'Present', 'Live'].includes(session.status))],
@@ -97,43 +140,56 @@ export default function AstrologerProfile() {
     setCommentDrafts((current) => ({ ...current, [postId]: '' }))
   }
   const sharePost = (post) => {
-    setShareMessage(`Shared “${post.title}”`)
-    window.setTimeout(() => setShareMessage(''), 2200)
+    const shareUrl = `${window.location.origin}/user/astrologer-profile?id=${encodeURIComponent(astrologer.id)}&post=${encodeURIComponent(post.id)}`
+    const shareData = { title: post.title, text: post.body, url: shareUrl }
+    const completeShare = () => {
+      setShareMessage(`Shared “${post.title}”`)
+      window.setTimeout(() => setShareMessage(''), 2200)
+    }
+    if (navigator.share) navigator.share(shareData).then(completeShare).catch(() => {})
+    else if (navigator.clipboard?.writeText) navigator.clipboard.writeText(shareUrl).then(completeShare).catch(completeShare)
+    else completeShare()
   }
 
   const handleSubscribe = () => {
     actions.subscribeToAstrologer(astrologer.id, astrologer.name, currentUser?.id, currentUser?.name)
     setSubscribeSuccess(true)
   }
-  const [bookingForm, setBookingForm] = useState({
-    type: APPOINTMENT_TYPE,
-    date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
-    time: '10:00 AM',
-  })
-
   const openBooking = () => {
     if (!subscribed) {
       setSubscriptionPromptOpen(true)
       return
     }
+    const firstAvailableDate = Object.keys(availability).filter((date) => date >= todayKey).sort()[0] || ''
     setBookingForm({
       type: APPOINTMENT_TYPE,
-      date: toInputDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
-      time: '10:00 AM',
+      date: firstAvailableDate,
+      time: '',
     })
+    if (firstAvailableDate) setCalendarMonth(new Date(dateFromKey(firstAvailableDate).getFullYear(), dateFromKey(firstAvailableDate).getMonth(), 1))
+    setBookingStep('form')
+    setPaymentMethod('UPI')
+    setBookedAppointmentId(null)
     setBookingOpen(true)
   }
 
   const handleConfirmBooking = () => {
+    if (!bookingForm.date || !bookingForm.time) return
+    setBookingStep('payment')
+  }
+
+  const handlePayment = () => {
     const newId = actions.bookAppointment({
       astrologerId: astrologer.id,
       astrologerName: astrologer.name,
       type: APPOINTMENT_TYPE,
       date: formatAppointmentDate(bookingForm.date),
       time: bookingForm.time,
+      price: APPOINTMENT_PRICE,
     })
-    setBookingOpen(false)
-    navigate(`${routes.appointmentDetails}?id=${newId}`)
+    setBookedAppointmentId(newId)
+    setBookingStep('success')
+    return newId
   }
 
   return (
@@ -214,6 +270,7 @@ export default function AstrologerProfile() {
               <div className="astrologer-compact-identity-copy">
                 <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>{astrologer.name}</div>
                 <div className="muted">{astrologer.specialization}</div>
+                {showPreferenceChips && <div className="astrologer-preference-chips"><div><small>Astrologer Type</small><div>{selectedAstrologerTypes.map((value) => <span key={value}>{value}</span>)}</div></div><div><small>Consultation For</small><div>{selectedConsultationTitles.map((value) => <span key={value}>{value}</span>)}</div></div></div>}
                 <div className="astrologer-inline-about"><span>About</span>{astrologer.bio}</div>
                 <div className="astrologer-profile-highlights"><span><strong>{astrologer.experience}</strong> Experience</span><span><Star size={13} /> <strong>{astrologer.rating}</strong><small>{astrologer.reviews}</small></span></div>
               </div>
@@ -234,7 +291,7 @@ export default function AstrologerProfile() {
           </Card>
           <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className={`btn btn-primary${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={16} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>{!canBookAppointment && <p className="appointment-subscription-hint">Subscribe to this astrologer to book an appointment.</p>}</section>
           <section className="astrologer-content astrologer-footer-content"><div className="astrologer-footer-tabs" role="tablist" aria-label="Astrologer content"><button type="button" className={footerTab === 'Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Posts')}><Grid3X3 size={15} /> Posts</button><button type="button" className={footerTab === 'Live' ? 'is-active' : ''} onClick={() => setFooterTab('Live')}><Radio size={15} /> Live</button><button type="button" className={footerTab === 'Saved Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Saved Posts')}><Bookmark size={15} /> Saved Posts</button></div>
-            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions"><button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {post.likeCount + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button><button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button><button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div>{commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article>) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
+            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => { const access = post.interactionAccess || { like: true, comment: post.commentsEnabled !== false, share: true, save: true }; return <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions">{access.like && <button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button>}{access.share && <button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button>}{access.comment && <button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button>}{access.save && <button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button>}</div>{!access.comment && (postComments[post.id] || []).length > 0 && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><p className="muted">Comments are turned off for this post.</p></div>}{access.comment && commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article> }) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
             {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
           </section>
         </div>
@@ -260,47 +317,48 @@ export default function AstrologerProfile() {
 
       {bookingOpen && (
         <div className="modal-overlay user-modal-overlay" onClick={() => setBookingOpen(false)}>
-          <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
-              <div className="section-title" style={{ marginBottom: 0 }}>Book Appointment</div>
+          <div className="modal-card user-modal-card appointment-booking-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header appointment-booking-modal__header flex items-start justify-between gap-4">
+              <div><div className="section-title" style={{ marginBottom: 3 }}>Book Appointment</div><p>Choose your preferred date and time</p></div>
               <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={() => setBookingOpen(false)}>
                 <X size={16} />
               </button>
             </div>
             <div className="modal-card__content user-modal-card__content">
-              <div style={{ display: 'grid', gap: 16 }}>
-                <div className="field-group" style={{ margin: 0 }}>
+              {bookingStep === 'form' && <div className="appointment-booking-form">
+                <label className="field-group appointment-booking-field" style={{ margin: 0 }}>
                   <span className="field-label-top">Appointment Type</span>
-                  <div className="text-input" aria-label="Appointment Type">{APPOINTMENT_TYPE}</div>
-                </div>
-              <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">Date</span>
-                <input
-                  type="date"
-                  className="text-input"
-                  value={bookingForm.date}
-                  onChange={(e) => setBookingForm({ ...bookingForm, date: e.target.value })}
-                />
-              </label>
-              <label className="field-group" style={{ margin: 0 }}>
-                <span className="field-label-top">Time</span>
-                  <input
-                    type="text"
-                    className="text-input"
-                    placeholder="10:00 AM"
-                    value={bookingForm.time}
-                    onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
-                  />
+                  <select className="select-input appointment-type-select" aria-label="Appointment Type" value={APPOINTMENT_TYPE} disabled><option value={APPOINTMENT_TYPE}>{APPOINTMENT_TYPE}</option></select>
                 </label>
-              </div>
+                <div className="appointment-booking-section-label">Select Date</div>
+                <div className="field-group availability-picker" style={{ margin: 0 }}>
+                  <span className="sr-only">Select Available Date</span>
+                  <div className="availability-calendar">
+                    <div className="availability-calendar__header"><button type="button" className="icon-btn" aria-label="Previous month" disabled={calendarMonth.getFullYear() === new Date().getFullYear() && calendarMonth.getMonth() <= new Date().getMonth()} onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}>‹</button><strong>{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong><button type="button" className="icon-btn" aria-label="Next month" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}>›</button></div>
+                    <div className="availability-calendar__weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div>
+                    <div className="availability-calendar__days">{monthDays.map((day) => { const key = dateKey(day); const available = Boolean(availability[key]?.length) && key >= todayKey; const inMonth = day.getMonth() === calendarMonth.getMonth(); return <button type="button" key={key} className={`${available ? 'is-available' : ''}${bookingForm.date === key ? ' is-selected' : ''}${!inMonth ? ' is-outside' : ''}`} disabled={!available} onClick={() => setBookingForm({ ...bookingForm, date: key, time: '' })}>{day.getDate()}</button> })}</div>
+                  </div>
+                </div>
+                <div className="appointment-booking-section-label">Available Time Slots</div>
+                <div className="field-group availability-picker" style={{ margin: 0 }}>
+                  {bookingForm.date ? <div className="availability-slots"><strong>{displayDateKey(bookingForm.date)}</strong>{selectedDateSlots.length ? <div>{selectedDateSlots.map((slot) => { const booked = bookedSlots.has(`${displayDateKey(bookingForm.date)}|${slot}`); return <button type="button" key={slot} className={bookingForm.time === slot ? 'is-selected' : ''} disabled={booked} onClick={() => setBookingForm({ ...bookingForm, time: slot })}>{slot}{booked && <small>Booked</small>}</button> })}</div> : <p className="availability-empty">No available slots for this date.</p>}</div> : <p className="availability-empty">Select an available date to see time slots.</p>}
+                </div>
+                <div className="appointment-price-summary"><span>Appointment Price</span><strong>₹{APPOINTMENT_PRICE}</strong></div>
+                {bookingForm.date && bookingForm.time && <div className="appointment-booking-summary"><div className="appointment-booking-section-label">Booking Summary</div><div><span>Appointment</span><strong>{APPOINTMENT_TYPE}</strong></div><div><span>Date</span><strong>{displayDateKey(bookingForm.date)}</strong></div><div><span>Time</span><strong>{bookingForm.time}</strong></div><div><span>Price</span><strong>₹{APPOINTMENT_PRICE}</strong></div></div>}
+              </div>}
+              {bookingStep === 'payment' && <div className="appointment-payment-step">
+                <div className="appointment-payment-summary"><strong>{astrologer.name}</strong><span>{APPOINTMENT_TYPE}</span><span>{formatAppointmentDate(bookingForm.date)} · {bookingForm.time}</span><b>₹{APPOINTMENT_PRICE}</b></div>
+                <div className="field-label-top">Payment Method</div>
+                <div className="appointment-payment-methods">{['UPI', 'Card', 'Wallet'].map((method) => <button type="button" key={method} className={paymentMethod === method ? 'is-selected' : ''} onClick={() => setPaymentMethod(method)}>{method}</button>)}</div>
+                <div className="appointment-payment-total"><span>Total payable</span><strong>₹{APPOINTMENT_PRICE}</strong></div>
+              </div>}
+              {bookingStep === 'success' && <div className="appointment-booking-success"><div>✓</div><h3>Appointment booked successfully</h3><p>Your Audio Call appointment with {astrologer.name} is confirmed.</p><span>{formatAppointmentDate(bookingForm.date)} · {bookingForm.time} · ₹{APPOINTMENT_PRICE}</span></div>}
             </div>
-            <div className="modal-card__footer user-modal-card__footer">
-              <button className="btn btn-ghost" type="button" onClick={() => setBookingOpen(false)}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" type="button" onClick={handleConfirmBooking}>
-                Confirm Booking
-              </button>
+            <div className="modal-card__footer user-modal-card__footer appointment-booking-modal__footer">
+              {bookingStep !== 'success' && <button className="btn btn-ghost" type="button" onClick={() => setBookingOpen(false)}>Cancel</button>}
+              {bookingStep === 'form' && <button className="btn btn-primary" type="button" disabled={!bookingForm.date || !bookingForm.time} onClick={handleConfirmBooking}>Confirm Booking</button>}
+              {bookingStep === 'payment' && <button className="btn btn-primary" type="button" onClick={handlePayment}>Pay ₹{APPOINTMENT_PRICE} &amp; Book</button>}
+              {bookingStep === 'success' && <button className="btn btn-primary" type="button" onClick={() => { setBookingOpen(false); navigate(`${routes.appointmentDetails}?id=${bookedAppointmentId}`) }}>Done</button>}
             </div>
           </div>
         </div>
