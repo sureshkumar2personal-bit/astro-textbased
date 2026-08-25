@@ -629,12 +629,23 @@ export function normalizeVisibility(value) {
 
 export function normalizePost(post) {
   const now = new Date().toISOString()
+  const media = Array.isArray(post.media)
+    ? post.media
+      .filter((item) => item && typeof item.dataUrl === 'string' && (item.type?.startsWith('image/') || item.type?.startsWith('video/')))
+      .map((item) => ({
+        id: item.id || crypto.randomUUID(),
+        name: String(item.name || 'Media file'),
+        type: item.type,
+        dataUrl: item.dataUrl,
+      }))
+    : []
   return {
     id: post.id || crypto.randomUUID(),
     astrologerId: post.astrologerId || 'astrologer-demo',
     tone: post.tone || 'violet',
     title: String(post.title || '').trim(),
     body: String(post.body || '').trim(),
+    media,
     visibility: normalizeVisibility(post.visibility),
     createdAt: post.createdAt || now,
     updatedAt: post.updatedAt || post.createdAt || now,

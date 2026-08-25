@@ -84,6 +84,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {
