@@ -72,6 +72,7 @@ const ROLE_CONFIG = {
 const PAGE_META = {
   [ROLES.ASTROLOGER]: {
     '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
+    '/astrologer/wallet': { title: 'Wallet Management', sub: 'Manage earnings, payouts and transactions' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
@@ -199,6 +200,7 @@ export default function Layout() {
   const basePath = getRoleBasePath(role)
   const routes = {
     walletHistory: `${basePath}/wallet-history`,
+    wallet: `${basePath}/wallet`,
   }
   const config = ROLE_CONFIG[role]
   const audienceMeta = role === ROLES.ASTROLOGER && location.pathname.startsWith('/astrologer/audience/')
@@ -307,7 +309,7 @@ export default function Layout() {
                 </span>
               )}
             </button>
-            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(routes.walletHistory)}>
+            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(isAstrologer ? routes.wallet : routes.walletHistory)}>
               {isAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
             </button>
             <ThemeToggle />

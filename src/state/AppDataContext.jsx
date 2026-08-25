@@ -528,6 +528,29 @@ const initialAstrologerWallet = {
   ],
 }
 
+const initialPayoutMethods = [
+  { id: 'pm-hdfc', type: 'bank', bankName: 'HDFC Bank', accountNumber: '4589', ifsc: 'HDFC0001234', accountHolder: 'Dr. Rani', isDefault: true },
+  { id: 'pm-sbi', type: 'bank', bankName: 'State Bank of India', accountNumber: '2567', ifsc: 'SBIN0005678', accountHolder: 'Dr. Rani', isDefault: false },
+  { id: 'pm-upi', type: 'upi', upiId: 'rani@upi', isDefault: false },
+]
+
+const initialSettlementHistory = [
+  { id: 'STL-001', date: '2026-07-25', period: '01 Jul – 25 Jul 2026', grossEarnings: 18500, platformCommission: 2775, taxes: 0, netSettlement: 15725, status: 'Completed' },
+  { id: 'STL-002', date: '2026-06-28', period: '01 Jun – 28 Jun 2026', grossEarnings: 14200, platformCommission: 2130, taxes: 0, netSettlement: 12070, status: 'Completed' },
+  { id: 'STL-003', date: '2026-05-30', period: '01 May – 30 May 2026', grossEarnings: 21300, platformCommission: 3195, taxes: 0, netSettlement: 18105, status: 'Completed' },
+]
+
+const initialWithdrawalHistory = [
+  { id: 'WD-001', amount: 8000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-22T14:30:00+05:30', completedAt: '2026-07-23T10:15:00+05:30', fee: 0 },
+  { id: 'WD-002', amount: 10000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-18T11:00:00+05:30', completedAt: '2026-07-19T09:30:00+05:30', fee: 0 },
+]
+
+const initialEarningsBySource = {
+  thisMonth: { consultations: 6330, calls: 5475, textQuestions: 5200, liveSessions: 2000, virtualGifts: 300, other: 445, total: 19750 },
+  lastMonth: { consultations: 5800, calls: 4900, textQuestions: 4600, liveSessions: 1800, virtualGifts: 250, other: 350, total: 17700 },
+  thisYear: { consultations: 38200, calls: 31500, textQuestions: 28400, liveSessions: 12000, virtualGifts: 1800, other: 2450, total: 114350 },
+}
+
 const initialUserWallet = {
   balance: 4500,
   toppedUp: 10000,
@@ -875,6 +898,10 @@ export function AppDataProvider({ children }) {
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [payoutMethods, setPayoutMethods] = useState(initialPayoutMethods)
+  const [withdrawalHistory, setWithdrawalHistory] = useState(initialWithdrawalHistory)
+  const [settlementHistory] = useState(initialSettlementHistory)
+  const [earningsBySource] = useState(initialEarningsBySource)
   const [consultationHistory] = useState(initialConsultationHistory)
   const [postLikes, setPostLikes] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${currentUser?.id || 'guest'}`, {}))
   const [savedPostIds, setSavedPostIds] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${currentUser?.id || 'guest'}`, []))
@@ -1909,7 +1936,66 @@ export function AppDataProvider({ children }) {
         prev.map((notification) => (notification.audience === role ? { ...notification, read: true } : notification)),
       )
     },
-  }), [astrologerPosts, campaigns, currentUser?.id, followedAstrologerIds, incomingRequests, questions, subscriptions])
+    addPayoutMethod(payload) {
+      const method = {
+        id: `pm-${Date.now().toString(36)}`,
+        type: payload.type || 'bank',
+        isDefault: payoutMethods.length === 0,
+        ...payload,
+      }
+      setPayoutMethods((prev) => [...prev, method])
+      return method
+    },
+    updatePayoutMethod(methodId, patch) {
+      setPayoutMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, ...patch } : m)))
+    },
+    removePayoutMethod(methodId) {
+      setPayoutMethods((prev) => {
+        const remaining = prev.filter((m) => m.id !== methodId)
+        if (remaining.length && !remaining.some((m) => m.isDefault)) {
+          remaining[0].isDefault = true
+        }
+        return remaining
+      })
+    },
+    setDefaultPayoutMethod(methodId) {
+      setPayoutMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
+    },
+    initiateWithdrawal(amount, payoutMethodId) {
+      const withdrawal = {
+        id: `WD-${String(withdrawalHistory.length + 1).padStart(3, '0')}`,
+        amount,
+        payoutMethodId,
+        status: 'Processing',
+        initiatedAt: new Date().toISOString(),
+        completedAt: null,
+        fee: 0,
+      }
+      setWithdrawalHistory((prev) => [withdrawal, ...prev])
+      setAstrologerWallet((prev) => ({
+        ...prev,
+        balance: prev.balance - amount,
+        withdrawn: prev.withdrawn + amount,
+        transactions: [
+          {
+            id: crypto.randomUUID(),
+            label: `Withdrawal initiated`,
+            amount: `-₹${amount.toLocaleString('en-IN')}`,
+            time: 'just now',
+            date: new Date().toISOString(),
+            type: 'withdrawal',
+          },
+          ...prev.transactions,
+        ],
+      }))
+      setTimeout(() => {
+        setWithdrawalHistory((prev) =>
+          prev.map((w) => (w.id === withdrawal.id ? { ...w, status: 'Completed', completedAt: new Date().toISOString() } : w)),
+        )
+      }, 3000)
+      return withdrawal
+    },
+  }), [astrologerPosts, campaigns, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, withdrawalHistory])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -1938,6 +2024,10 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    payoutMethods,
+    withdrawalHistory,
+    settlementHistory,
+    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,
@@ -1973,6 +2063,10 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    payoutMethods,
+    withdrawalHistory,
+    settlementHistory,
+    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,
