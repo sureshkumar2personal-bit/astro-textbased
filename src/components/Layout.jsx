@@ -10,6 +10,7 @@ import {
   ListChecks,
   Gavel,
   Bell,
+  ChevronRight,
   Wallet,
   LogOut,
   MessageCircle,
@@ -40,10 +41,16 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
-      { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
-      { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
-      { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+      {
+        label: 'Text Based',
+        icon: TempleScrollIcon,
+        children: [
+          { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
+          { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
+          { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
+          { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+        ],
+      },
     ],
   },
   [ROLES.USER]: {
@@ -104,6 +111,44 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
       {links.map(({ to, label, icon, end }) => {
         const route = `${basePath}/${to}`.replace(/\/$/, '')
         return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} badgeCount={label === 'Rewards' ? rewardCount : 0} />
+      })}
+    </nav>
+  )
+}
+
+function AstrologerNav({ links, basePath }) {
+  const [textBasedOpen, setTextBasedOpen] = useState(false)
+
+  return (
+    <nav className="sidebar-nav">
+      {links.map((link) => {
+        if (!link.children) {
+          const route = `${basePath}/${link.to}`.replace(/\/$/, '')
+          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} />
+        }
+
+        return (
+          <div className="sidebar-nav-section" key={link.label}>
+            <button
+              type="button"
+              className={`sidebar-nav-section-title${textBasedOpen ? ' is-open' : ''}`}
+              aria-expanded={textBasedOpen}
+              onClick={() => setTextBasedOpen((isOpen) => !isOpen)}
+            >
+              <link.icon size={18} />
+              <span>{link.label}</span>
+              <ChevronRight size={17} className="sidebar-nav-section-arrow" aria-hidden="true" />
+            </button>
+            {textBasedOpen && (
+              <div className="sidebar-nav-subgroup">
+                {link.children.map(({ to, label, icon }) => {
+                  const route = `${basePath}/${to}`
+                  return <SidebarItem key={route} to={route} icon={icon} label={label} nested />
+                })}
+              </div>
+            )}
+          </div>
+        )
       })}
     </nav>
   )
@@ -232,7 +277,11 @@ export default function Layout() {
         </div>
 
         <div className="sidebar-group-label">{config.navLabel}</div>
-        <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+        {isAstrologer ? (
+          <AstrologerNav links={config.nav} basePath={basePath} />
+        ) : (
+          <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+        )}
       </aside>
 
       <div className="main-column">
