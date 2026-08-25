@@ -36,6 +36,7 @@ import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
+import AstrologerLiveSession from './pages/astrologer/live/AstrologerLiveSession.jsx'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -73,6 +74,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/profile" element={<Profile />} />
+        <Route path="/astrologer/live-session" element={<AstrologerLiveSession />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
         <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
