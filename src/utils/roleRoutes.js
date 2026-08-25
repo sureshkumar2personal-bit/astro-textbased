@@ -13,6 +13,7 @@ export function getRoleRoutes(role) {
     base,
     dashboard: base,
     walletHistory: `${base}/wallet-history`,
+    walletManagement: `${base}/wallet`,
     purchasePackage: `${base}/purchase-package`,
     askQuestion: `${base}/ask-question`,
     trackQuestions: `${base}/track-questions`,

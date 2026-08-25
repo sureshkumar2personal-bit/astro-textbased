@@ -17,6 +17,7 @@ import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
+import AstrologerWallet from './pages/AstrologerWallet.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import Astrologers from './pages/Astrologers.jsx'
 import AstrologersFull from './pages/astrologer/astrologers/AstrologersFull.jsx'
@@ -74,6 +75,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/profile" element={<Profile />} />
+        <Route path="/astrologer/wallet" element={<AstrologerWallet />} />
         <Route path="/astrologer/live-session" element={<AstrologerLiveSession />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
         <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
