@@ -627,6 +627,17 @@ export function normalizeVisibility(value) {
   return ['public', 'followers', 'subscribers', 'private'].includes(value) ? value : 'public'
 }
 
+export function normalizeInteractionAccess(post = {}) {
+  const legacyCommentsEnabled = post.commentsEnabled !== false
+  const access = post.interactionAccess || {}
+  return {
+    like: access.like !== false,
+    comment: access.comment !== undefined ? access.comment !== false : legacyCommentsEnabled,
+    share: access.share !== false,
+    save: access.save !== false,
+  }
+}
+
 export function normalizePost(post) {
   const now = new Date().toISOString()
   const media = Array.isArray(post.media)
@@ -645,11 +656,30 @@ export function normalizePost(post) {
     tone: post.tone || 'violet',
     title: String(post.title || '').trim(),
     body: String(post.body || '').trim(),
+    likeCount: Number(post.likeCount) || 0,
     media,
     visibility: normalizeVisibility(post.visibility),
+    commentsEnabled: post.commentsEnabled !== false,
+    interactionAccess: normalizeInteractionAccess(post),
     createdAt: post.createdAt || now,
     updatedAt: post.updatedAt || post.createdAt || now,
   }
+}
+
+export function selectVisiblePosts(posts, { userId, followedAstrologerIds = [], subscriptions = [], astrologerId } = {}) {
+  const followed = new Set(followedAstrologerIds)
+  const now = Date.now()
+  const subscribed = new Set(subscriptions
+    .filter((subscription) => subscription.userId === userId && (!subscription.expiresAt || new Date(subscription.expiresAt).getTime() > now))
+    .map((subscription) => subscription.astrologerId))
+
+  return posts.filter((post) => {
+    if (astrologerId && post.astrologerId !== astrologerId) return false
+    if (post.visibility === 'public') return true
+    if (post.visibility === 'followers') return followed.has(post.astrologerId)
+    if (post.visibility === 'subscribers') return subscribed.has(post.astrologerId) && Boolean(userId)
+    return post.astrologerId === userId
+  })
 }
 
 export function normalizeLiveSession(session) {
@@ -673,11 +703,13 @@ const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
 const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
+const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
+const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 
 const initialAstrologerPosts = [
-  { id: 'post-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', createdAt: '2026-08-22T10:00:00+05:30', updatedAt: '2026-08-22T10:00:00+05:30' },
-  { id: 'post-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', createdAt: '2026-08-20T10:00:00+05:30', updatedAt: '2026-08-20T10:00:00+05:30' },
-  { id: 'post-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
+  { id: 'post-rani-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', likeCount: 128, comments: [{ id: 'comment-rani-1', author: 'Priya V.', text: 'This was exactly what I needed today.' }], createdAt: '2026-08-24T10:00:00+05:30', updatedAt: '2026-08-24T10:00:00+05:30' },
+  { id: 'post-rani-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', likeCount: 94, comments: [], createdAt: '2026-08-21T10:00:00+05:30', updatedAt: '2026-08-21T10:00:00+05:30' },
+  { id: 'post-rani-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', likeCount: 0, comments: [], createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
 ]
 
 const initialAstrologerLiveSessions = [
@@ -844,9 +876,12 @@ export function AppDataProvider({ children }) {
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
   const [consultationHistory] = useState(initialConsultationHistory)
-  const [postLikes, setPostLikes] = useState({})
-  const [savedPostIds, setSavedPostIds] = useState([])
-  const [postComments, setPostComments] = useState(() => Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])))
+  const [postLikes, setPostLikes] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${currentUser?.id || 'guest'}`, {}))
+  const [savedPostIds, setSavedPostIds] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${currentUser?.id || 'guest'}`, []))
+  const [postComments, setPostComments] = useState(() => loadFromStorage(
+    POST_COMMENTS_STORAGE_KEY,
+    Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])),
+  ))
   const [presenceActive, setPresenceActive] = useState(false)
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
@@ -908,6 +943,22 @@ export function AppDataProvider({ children }) {
   }, [astrologerPosts])
 
   useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    setPostLikes(loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${userKey}`, {}))
+    setSavedPostIds(loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${userKey}`, []))
+  }, [currentUser?.id])
+
+  useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    saveToStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${userKey}`, postLikes)
+    saveToStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${userKey}`, savedPostIds)
+  }, [currentUser?.id, postLikes, savedPostIds])
+
+  useEffect(() => {
+    saveToStorage(POST_COMMENTS_STORAGE_KEY, postComments)
+  }, [postComments])
+
+  useEffect(() => {
     saveToStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, astrologerLiveSessions)
   }, [astrologerLiveSessions])
 
@@ -916,15 +967,21 @@ export function AppDataProvider({ children }) {
 
   const actions = useMemo(() => ({
     togglePostLike(postId) {
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post?.interactionAccess?.like === false) return
       setPostLikes((prev) => ({ ...prev, [postId]: !prev[postId] }))
     },
     toggleSavedPost(postId) {
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post?.interactionAccess?.save === false) return
       setSavedPostIds((prev) => prev.includes(postId) ? prev.filter((id) => id !== postId) : [...prev, postId])
     },
     addPostComment(postId, text, author = 'You') {
       const trimmed = String(text || '').trim()
       if (!trimmed) return
-      setPostComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), { id: `comment-${Date.now()}`, author, text: trimmed }] }))
+      const post = astrologerPosts.find((entry) => entry.id === postId)
+      if (post && post.interactionAccess?.comment === false) return
+      setPostComments((prev) => ({ ...prev, [postId]: [...(prev[postId] || []), { id: `comment-${Date.now()}`, author, userId: currentUser?.id || null, text: trimmed }] }))
     },
     selectCampaign: setSelectedCampaignId,
     setLiveStreamOpen,
@@ -1852,7 +1909,7 @@ export function AppDataProvider({ children }) {
         prev.map((notification) => (notification.audience === role ? { ...notification, read: true } : notification)),
       )
     },
-  }), [campaigns, followedAstrologerIds, incomingRequests, questions, subscriptions])
+  }), [astrologerPosts, campaigns, currentUser?.id, followedAstrologerIds, incomingRequests, questions, subscriptions])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()

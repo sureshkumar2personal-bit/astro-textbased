@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users } from 'lucide-react'
 import { mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
-import { useAppData } from '../state/AppDataContext.jsx'
+import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -43,7 +43,7 @@ function getSubscriptionDaysRemaining(expiry) {
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, astrologerServices, postLikes, savedPostIds, postComments } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = searchParams.get('id') || mockAstrologers[0].id
@@ -81,8 +81,10 @@ export default function AstrologerProfile() {
     .filter((subscription) => subscription.astrologerId === astrologer.id)
     .map((subscription) => subscription.userName || subscription.userId || 'Subscriber')
   const liveSessions = mockLiveSessions.filter((session) => session.astrologerId === astrologer.id)
-  const astrologerPosts = mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
-  const savedPosts = mockAstrologerPosts.filter((post) => savedPostIds.includes(post.id))
+  const accessiblePosts = selectVisiblePosts(sharedPosts, { userId: currentUser?.id, followedAstrologerIds, subscriptions, astrologerId: astrologer.id })
+  const hasSharedPosts = sharedPosts.some((post) => post.astrologerId === astrologer.id)
+  const astrologerPosts = hasSharedPosts ? accessiblePosts : mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
+  const savedPosts = accessiblePosts.filter((post) => savedPostIds.includes(post.id))
   const visiblePosts = footerTab === 'Saved Posts' ? savedPosts : astrologerPosts
   const liveGroups = [
     ['Upcoming', liveSessions.filter((session) => session.status === 'Upcoming')],
@@ -97,8 +99,15 @@ export default function AstrologerProfile() {
     setCommentDrafts((current) => ({ ...current, [postId]: '' }))
   }
   const sharePost = (post) => {
-    setShareMessage(`Shared “${post.title}”`)
-    window.setTimeout(() => setShareMessage(''), 2200)
+    const shareUrl = `${window.location.origin}/user/astrologer-profile?id=${encodeURIComponent(astrologer.id)}&post=${encodeURIComponent(post.id)}`
+    const shareData = { title: post.title, text: post.body, url: shareUrl }
+    const completeShare = () => {
+      setShareMessage(`Shared “${post.title}”`)
+      window.setTimeout(() => setShareMessage(''), 2200)
+    }
+    if (navigator.share) navigator.share(shareData).then(completeShare).catch(() => {})
+    else if (navigator.clipboard?.writeText) navigator.clipboard.writeText(shareUrl).then(completeShare).catch(completeShare)
+    else completeShare()
   }
 
   const handleSubscribe = () => {
@@ -234,7 +243,7 @@ export default function AstrologerProfile() {
           </Card>
           <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><Link to={`${routes.chatBooking}?id=${astrologer.id}`} className="btn btn-primary"><MessageCircle size={16} /> Chat</Link><Link to={`${routes.callPackages}?id=${astrologer.id}`} className="btn btn-primary"><PhoneCall size={16} /> Call</Link><button type="button" className={`btn btn-primary${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={16} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>{!canBookAppointment && <p className="appointment-subscription-hint">Subscribe to this astrologer to book an appointment.</p>}</section>
           <section className="astrologer-content astrologer-footer-content"><div className="astrologer-footer-tabs" role="tablist" aria-label="Astrologer content"><button type="button" className={footerTab === 'Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Posts')}><Grid3X3 size={15} /> Posts</button><button type="button" className={footerTab === 'Live' ? 'is-active' : ''} onClick={() => setFooterTab('Live')}><Radio size={15} /> Live</button><button type="button" className={footerTab === 'Saved Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Saved Posts')}><Bookmark size={15} /> Saved Posts</button></div>
-            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions"><button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {post.likeCount + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button><button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button><button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div>{commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article>) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
+            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => { const access = post.interactionAccess || { like: true, comment: post.commentsEnabled !== false, share: true, save: true }; return <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions">{access.like && <button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button>}{access.share && <button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button>}{access.comment && <button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button>}{access.save && <button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button>}</div>{!access.comment && (postComments[post.id] || []).length > 0 && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><p className="muted">Comments are turned off for this post.</p></div>}{access.comment && commentOpen[post.id] && <div className="astrologer-post-comments"><div className="astrologer-post-comments__list">{(postComments[post.id] || []).map((comment) => <p key={comment.id}><b>{comment.author}</b> {comment.text}</p>)}</div><div className="astrologer-post-comment-form"><input value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Write a comment" /><button type="button" className="btn btn-primary" onClick={() => submitComment(post.id)}>Post</button></div></div>}</article> }) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>{footerTab === 'Saved Posts' ? 'Posts you save from astrologers will appear here.' : 'New posts from this astrologer will appear here.'}</p></div>}</div>}
             {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
           </section>
         </div>

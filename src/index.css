@@ -2563,6 +2563,24 @@ button.social-profile__audience-item { cursor: pointer; }
 .profile-content-heading p { margin: 0; }
 .profile-content-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
 .profile-content-actions { display: inline-flex; gap: 6px; }
+.profile-post-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 13px; color: var(--text-secondary); font-size: 11px; }
+.profile-post-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.profile-post-access { display: grid; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--surface-border); }
+.profile-post-access > strong { color: var(--text-primary); font-size: 12px; }
+.profile-post-access__controls { display: flex; flex-wrap: wrap; gap: 7px; }
+.profile-post-access__controls label { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 1px solid var(--surface-border); border-radius: 999px; color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.profile-post-access__controls label:has(input:checked) { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+.profile-post-access__controls input { accent-color: var(--primary); }
+.profile-toggle-field { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
+.profile-toggle-field span { display: grid; gap: 4px; }
+.profile-toggle-field strong { color: var(--text-primary); font-size: 13px; }
+.profile-toggle-field small { color: var(--text-secondary); font-size: 11px; }
+.profile-toggle-field input { width: 38px; height: 20px; accent-color: var(--primary); }
+.profile-access-fieldset { display: grid; gap: 8px; margin: 0; padding: 14px; border: 1px solid var(--surface-border); border-radius: 12px; }
+.profile-access-fieldset legend { padding: 0 4px; color: var(--text-primary); font-size: 13px; font-weight: 800; }
+.profile-access-fieldset > p { margin: 0 0 4px; font-size: 11px; }
+.profile-access-grid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 600px) { .profile-access-grid { grid-template-columns: 1fr; } }
 .profile-visibility-badge { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 999px; background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 700; }
 .profile-visibility-badge--live { background: var(--danger-bg); color: var(--danger); }
 .profile-live-groups { display: grid; gap: 22px; }
@@ -2593,7 +2611,16 @@ button.social-profile__audience-item { cursor: pointer; }
 .post-media-clear { justify-self: end; border: 0; background: transparent; color: var(--danger); cursor: pointer; font-size: 11px; font-weight: 700; }
 .profile-post-media { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 14px 0; }
 .profile-post-media img, .profile-post-media video { width: 100%; max-height: 220px; border-radius: 10px; object-fit: cover; background: var(--surface-soft); }
-.profile-content-composer { width: min(560px, calc(100vw - 32px)); }
+.profile-content-composer { position: relative; width: min(560px, calc(100vw - 32px)); overflow: visible; }
+.user-modal-card.profile-content-composer { overflow: visible; }
+.profile-post-access-panel { position: absolute; top: 16px; left: calc(100% + 16px); z-index: 2; display: grid; gap: 16px; width: min(350px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-strong); box-shadow: var(--shadow-lg); }
+.profile-post-access-panel__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.profile-post-access-panel__header > div { display: grid; gap: 4px; }
+.profile-post-access-panel__header strong { color: var(--text-primary); font-size: 15px; }
+.profile-post-access-panel__header small { color: var(--text-secondary); font-size: 11px; line-height: 1.45; }
+.profile-post-access-panel__options { display: grid; gap: 8px; }
+.profile-post-access-panel__actions { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 1320px) { .profile-post-access-panel { top: auto; bottom: 16px; left: 16px; right: 16px; width: auto; } }
 .profile-composer-fields { display: grid; gap: 16px; }
 @media (max-width: 600px) { .profile-content-heading { align-items: stretch; flex-direction: column; }.profile-content-heading .btn { justify-content: center; } }
 

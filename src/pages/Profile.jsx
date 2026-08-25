@@ -19,6 +19,13 @@ const VISIBILITY_OPTIONS = [
   ['private', 'Private'],
 ]
 
+const POST_INTERACTION_OPTIONS = [
+  ['like', 'Likes', 'Allow users to like this post.'],
+  ['comment', 'Comments', 'Allow users to add comments.'],
+  ['share', 'Shares', 'Allow users to share this post.'],
+  ['save', 'Saves', 'Allow users to save this post.'],
+]
+
 function dateTimeLocal(value) {
   const date = value ? new Date(value) : new Date(Date.now() + 24 * 60 * 60 * 1000)
   if (Number.isNaN(date.getTime())) return ''
@@ -51,7 +58,7 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
@@ -62,7 +69,8 @@ export default function Profile() {
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
   const [composer, setComposer] = useState(null)
-  const [postForm, setPostForm] = useState({ title: '', body: '', visibility: 'public', media: [] })
+  const [postForm, setPostForm] = useState({ title: '', body: '', visibility: 'public', interactionAccess: { like: true, comment: true, share: true, save: true }, media: [] })
+  const [postAccessPanelOpen, setPostAccessPanelOpen] = useState(false)
   const [isRecordingPost, setIsRecordingPost] = useState(false)
   const [liveForm, setLiveForm] = useState(blankLiveForm)
   const [editingContent, setEditingContent] = useState(null)
@@ -153,8 +161,9 @@ export default function Profile() {
 
   const openPostComposer = (post = null) => {
     setContentError('')
+    setPostAccessPanelOpen(false)
     setEditingContent(post ? { type: 'post', id: post.id } : null)
-    setPostForm(post ? { title: post.title, body: post.body, visibility: post.visibility, media: post.media || [] } : { title: '', body: '', visibility: 'public', media: [] })
+    setPostForm(post ? { title: post.title, body: post.body, visibility: post.visibility, interactionAccess: { like: true, comment: true, share: true, save: true, ...(post.interactionAccess || {}), ...(post.commentsEnabled === false ? { comment: false } : {}) }, media: post.media || [] } : { title: '', body: '', visibility: 'public', interactionAccess: { like: true, comment: true, share: true, save: true }, media: [] })
     setComposer('post')
   }
 
@@ -179,13 +188,19 @@ export default function Profile() {
     setComposer(null)
     setEditingContent(null)
     setContentError('')
+    setPostAccessPanelOpen(false)
   }
 
-  const savePost = () => {
+  const openPostAccessPanel = () => {
     if (!postForm.title.trim() || !postForm.body.trim()) {
       setContentError('Add a title and message before publishing.')
       return
     }
+    setContentError('')
+    setPostAccessPanelOpen(true)
+  }
+
+  const confirmPostPublish = () => {
     if (editingContent?.type === 'post') actions.updatePost(editingContent.id, postForm)
     else actions.createPost({ ...postForm, astrologerId: currentUser.id })
     closeComposer()
@@ -391,7 +406,7 @@ export default function Profile() {
           {activeTab === 'Posts' && !isAstrologer && <div className="social-profile__posts"><Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card></div>}
           {activeTab === 'Posts' && isAstrologer && <section className="profile-content-section">
             <div className="profile-content-heading"><div><div className="section-title">Posts</div><p className="muted">Share insights with your audience.</p></div><button type="button" className="btn btn-primary" onClick={() => openPostComposer()}><Plus size={16} /> Create Post</button></div>
-            <div className="social-profile__posts">{ownerPosts.length ? ownerPosts.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone || 'violet'}`}><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><div className="profile-content-card-actions"><span className="profile-visibility-badge">{visibilityLabel(post.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${post.title}`} onClick={() => openPostComposer(post)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${post.title}`} onClick={() => deleteContent('post', post.id)}><Trash2 size={14} /></button></span></div><h2>{post.title}</h2><p>{post.body}</p>{post.media?.length > 0 && <div className="profile-post-media">{post.media.map((item) => item.type.startsWith('video/') ? <video key={item.id} src={item.dataUrl} controls preload="metadata" aria-label={item.name} /> : <img key={item.id} src={item.dataUrl} alt={item.name} />)}</div>}<span className="muted">Published {displayDate(post.createdAt)}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No posts yet</div><p className="muted">Create your first post to share an astrology insight.</p></Card>}</div>
+            <div className="social-profile__posts">{ownerPosts.length ? ownerPosts.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone || 'violet'}`}><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><div className="profile-content-card-actions"><span className="profile-visibility-badge">{visibilityLabel(post.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${post.title}`} onClick={() => openPostComposer(post)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${post.title}`} onClick={() => deleteContent('post', post.id)}><Trash2 size={14} /></button></span></div><h2>{post.title}</h2><p>{post.body}</p>{post.media?.length > 0 && <div className="profile-post-media">{post.media.map((item) => item.type.startsWith('video/') ? <video key={item.id} src={item.dataUrl} controls preload="metadata" aria-label={item.name} /> : <img key={item.id} src={item.dataUrl} alt={item.name} />)}</div>}<div className="profile-post-meta"><span><MessageCircle size={13} /> {postComments[post.id]?.length || 0} comments</span><span>Published {displayDate(post.createdAt)}</span></div></Card>) : <Card className="social-profile__panel"><div className="section-title">No posts yet</div><p className="muted">Create your first post to share an astrology insight.</p></Card>}</div>
           </section>}
           {activeTab === 'Live' && !isAstrologer && <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>}
           {activeTab === 'Live' && isAstrologer && <section className="profile-content-section">
@@ -452,8 +467,9 @@ export default function Profile() {
               </div>
             )}
             {contentError && <div className="profile-message profile-message--error">{contentError}</div>}
-            <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={closeComposer}>Cancel</button><button type="button" className="btn btn-primary" onClick={composer === 'post' ? savePost : saveLive}>{editingContent ? 'Save Changes' : 'Publish'}</button></div>
+            <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={closeComposer}>Cancel</button><button type="button" className="btn btn-primary" onClick={composer === 'post' ? openPostAccessPanel : saveLive}>{editingContent ? 'Save Changes' : 'Publish'}</button></div>
           </div>
+          {composer === 'post' && postAccessPanelOpen && <div className="profile-post-access-panel" role="dialog" aria-modal="true" aria-label="Post access settings"><div className="profile-post-access-panel__header"><div><strong>Set post access</strong><small>Choose what users can do after this post is published.</small></div><button type="button" className="icon-btn" aria-label="Close post access settings" onClick={() => setPostAccessPanelOpen(false)}><X size={16} /></button></div><div className="profile-post-access-panel__options">{POST_INTERACTION_OPTIONS.map(([key, label, description]) => <label className="profile-toggle-field" key={key}><span><strong>{label}</strong><small>{description}</small></span><input type="checkbox" checked={postForm.interactionAccess[key]} onChange={(event) => setPostForm({ ...postForm, interactionAccess: { ...postForm.interactionAccess, [key]: event.target.checked } })} /></label>)}</div><div className="profile-post-access-panel__actions"><button type="button" className="btn btn-ghost" onClick={() => setPostAccessPanelOpen(false)}>Back</button><button type="button" className="btn btn-primary" onClick={confirmPostPublish}>OK &amp; {editingContent ? 'Save' : 'Publish'}</button></div></div>}
         </div>
       </div>}
 
