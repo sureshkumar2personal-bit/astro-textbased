@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
 import Card from '../../../../components/ui/Card.jsx'
 import Section from '../../../../components/ui/Section.jsx'
 import PageHeader from '../../../../components/ui/PageHeader.jsx'
@@ -186,7 +185,6 @@ export default function AnswerQuestion() {
                     <span className="muted" style={{ fontSize: 12 }}>Submitted: {question.raised}</span>
                   </div>
                 </div>
-                <StatusBadge label={question.status} />
               </div>
             </Card>
           ))}
@@ -231,7 +229,6 @@ export default function AnswerQuestion() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 'auto' }}>
-                <StatusBadge label={panelQuestion.status} />
                 <button
                   type="button"
                   className="icon-btn"
