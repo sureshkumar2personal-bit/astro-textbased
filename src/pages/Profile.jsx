@@ -181,7 +181,7 @@ export default function Profile() {
   }
 
   const openLiveWorkspace = (session = null) => {
-    navigate(session ? `${routes.liveSession}?sessionId=${encodeURIComponent(session.id)}` : routes.liveSession)
+    navigate(session ? `${routes.liveSessionSetup}?sessionId=${encodeURIComponent(session.id)}` : routes.liveSessionSetup)
   }
 
   const closeComposer = () => {
