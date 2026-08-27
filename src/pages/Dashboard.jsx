@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [query, setQuery] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false)
+  const [showAllQuestions, setShowAllQuestions] = useState(false)
   const questionListRef = useRef(null)
   const serviceMenuRef = useRef(null)
 
@@ -126,6 +127,8 @@ export default function Dashboard() {
         return sortByDateDesc(a, b, (item) => item.raisedAt || item.raised)
       })
   }, [query, campaigns, questions, sortBy])
+
+  const visibleQuestions = showAllQuestions ? filteredQuestions : filteredQuestions.slice(0, 3)
 
   const handleSearch = () => {
     const term = query.trim().toLowerCase()
@@ -270,10 +273,12 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      <div className="section">
-        <div className="section-title">Sort By</div>
-        <ChipGroup options={['Date', 'Priority', 'Campaign']} value={sortBy} onChange={setSortBy} />
-      </div>
+      {showAllQuestions && (
+        <div className="section">
+          <div className="section-title">Sort By</div>
+          <ChipGroup options={['Date', 'Priority', 'Campaign']} value={sortBy} onChange={setSortBy} />
+        </div>
+      )}
 
       <div className="section" ref={questionListRef}>
         <div className="section-title">Question List</div>
@@ -292,7 +297,7 @@ export default function Dashboard() {
                   </td>
                 </tr>
               )}
-              {filteredQuestions.map((question) => {
+              {visibleQuestions.map((question) => {
                 const actionLabel = question.status === 'Disputed' ? 'Resolve' : question.status === 'Pending' ? 'Open' : 'View'
                 const actionRoute = question.status === 'Disputed' ? routes.disputeManagement : routes.answerQuestion
                 return (
@@ -314,6 +319,17 @@ export default function Dashboard() {
             </tbody>
           </table>
         </div>
+        {filteredQuestions.length > 3 && (
+          <button
+            type="button"
+            className="link-btn mt-4 group"
+            onClick={() => setShowAllQuestions((prev) => !prev)}
+          >
+            {showAllQuestions
+              ? 'Show Less'
+              : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><span className="group-hover:underline">More</span> <ArrowRight size={15} /></span>}
+          </button>
+        )}
       </div>
 
       <CreateCampaignModal open={createOpen} onClose={() => setCreateOpen(false)} defaultTotalLimit={selectedCampaign?.totalLimit || 30} />

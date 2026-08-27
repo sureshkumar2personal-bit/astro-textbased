@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
-import { ChipGroup } from '../components/OptionGroup.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -12,17 +11,12 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import {
-  TempleArchIcon,
-  TempleBellIcon,
-  TempleDonationBoxIcon,
   TempleLampIcon,
-  TempleLotusIcon,
   TempleReturnIcon,
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-const STATUSES = ['All', 'Pending', 'Answered', 'Disputed']
-const ACTIVE_STATUSES = ['Pending', 'Queued', 'In Progress', 'Under Review']
+
 
 function getWordPreview(content) {
   const text = String(content || '').trim()
@@ -38,14 +32,13 @@ function getWordPreview(content) {
 
 export default function TextBasedQuestions() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { questions, liveStreamOpen, setLiveStreamOpen, actions } = useAppData()
+  const { questions, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
 
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
   const [panelQuestionId, setPanelQuestionId] = useState(searchParams.get('questionId'))
   const [answer, setAnswer] = useState('')
   const [draftSaved, setDraftSaved] = useState(false)
@@ -67,13 +60,10 @@ export default function TextBasedQuestions() {
           question.question,
           question.status,
         ].join(' ').toLowerCase()
-        return (!term || searchable.includes(term))
-          && (statusFilter === 'All'
-            || (statusFilter === 'Pending' && ACTIVE_STATUSES.includes(question.status))
-            || question.status === statusFilter)
+        return !term || searchable.includes(term)
       })
       .sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
-  }, [questions, appliedSearch, statusFilter])
+  }, [questions, appliedSearch])
 
   const panelQuestion = useMemo(
     () => questions.find((question) => question.id === panelQuestionId) || null,
@@ -81,11 +71,7 @@ export default function TextBasedQuestions() {
   )
   const panelAnswer = panelQuestion?.draftAnswer || panelQuestion?.answer || ''
 
-  const totalCount = questions.length
-  const pendingCount = questions.filter((question) => ACTIVE_STATUSES.includes(question.status)).length
-  const inProgressCount = questions.filter((question) => question.status === 'In Progress').length
-  const answeredCount = questions.filter((question) => question.status === 'Answered').length
-  const disputedCount = questions.filter((question) => question.status === 'Disputed').length
+
 
   useEffect(() => {
     const questionId = searchParams.get('questionId')
@@ -150,13 +136,7 @@ export default function TextBasedQuestions() {
     if (saved) setEditingSubmittedAnswer(false)
   }
 
-  const statCards = [
-    { label: 'Total Questions', value: totalCount, icon: TempleScrollIcon, tone: 'tone-violet' },
-    { label: 'Pending Queue', value: pendingCount, icon: TempleDonationBoxIcon, tone: 'tone-gold' },
-    { label: 'In Progress', value: inProgressCount, icon: TempleLampIcon, tone: 'tone-sky' },
-    { label: 'Answered', value: answeredCount, icon: TempleLotusIcon, tone: 'tone-green' },
-    { label: 'Disputed', value: disputedCount, icon: TempleArchIcon, tone: 'tone-red' },
-  ]
+
 
   return (
     <div>
@@ -168,25 +148,12 @@ export default function TextBasedQuestions() {
         backIcon={backIcon}
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        {statCards.map(({ label, value, icon: Icon, tone }) => (
-          <Card key={label} style={{ padding: 16 }}>
-            <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}>
-              <div className={`stat-icon ${tone}`}><Icon size={18} /></div>
-              <div>
-                <div className="stat-value">{value}</div>
-                <div className="stat-label">{label}</div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+
 
       <Section>
         <Card>
           <div className="search-filter-row">
             <div className="search-filter-row__group">
-              <div className="search-filter-row__heading">Search</div>
               <div className="search-bar">
               <input
                 value={search}
@@ -194,7 +161,7 @@ export default function TextBasedQuestions() {
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') setAppliedSearch(search)
                 }}
-                placeholder="Search question ID, user, campaign, category, or question"
+                placeholder="Search by question ID, user, campaign, category, status, or question text"
                 className="text-input search-bar__input"
               />
               <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
@@ -204,10 +171,6 @@ export default function TextBasedQuestions() {
                 <button className="btn btn-outline" onClick={() => { setSearch(''); setAppliedSearch('') }}>Clear</button>
               )}
               </div>
-            </div>
-            <div className="search-filter-row__group search-filter-row__status">
-              <div className="search-filter-row__heading">Status</div>
-              <ChipGroup options={STATUSES} value={statusFilter} onChange={setStatusFilter} />
             </div>
           </div>
         </Card>
@@ -219,7 +182,7 @@ export default function TextBasedQuestions() {
         titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>{filteredQuestions.length} questions</span>}
       >
         {filteredQuestions.length === 0 ? (
-          <Card><div className="muted">No matching questions found. Adjust your search or status filter.</div></Card>
+          <Card><div className="muted">No matching questions found. Try a different search term.</div></Card>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredQuestions.map((question) => (
@@ -257,27 +220,6 @@ export default function TextBasedQuestions() {
           </div>
         )}
       </Section>
-
-      <Section title="Live Streaming" icon={TempleBellIcon}>
-        <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div className="muted">Keep your live schedule visible while managing the question queue.</div>
-          <button className="btn btn-gold" onClick={() => setLiveStreamOpen(!liveStreamOpen)}>
-            {liveStreamOpen ? 'Hide Live Schedule' : 'Show Live Schedule'}
-          </button>
-        </Card>
-      </Section>
-
-      {liveStreamOpen && (
-        <Section title="Live Schedule">
-          <Card>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div className="badge badge-violet" style={{ width: 'fit-content' }}>08:00 AM - Tamil General Reading</div>
-              <div className="badge badge-green" style={{ width: 'fit-content' }}>10:30 AM - Business Strategy Session</div>
-              <div className="badge badge-blue" style={{ width: 'fit-content' }}>06:00 PM - Personal Guidance Live</div>
-            </div>
-          </Card>
-        </Section>
-      )}
 
       {panelQuestion && createPortal(
         <div className="modal-overlay" onClick={closePanel}>
