@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
 import StatusBadge from '../../../../components/StatusBadge.jsx'
-import { ChipGroup } from '../../../../components/OptionGroup.jsx'
 import Card from '../../../../components/ui/Card.jsx'
 import Section from '../../../../components/ui/Section.jsx'
 import PageHeader from '../../../../components/ui/PageHeader.jsx'
@@ -12,7 +11,7 @@ import { useAppData } from '../../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
 
-const ASTROLOGER_PENDING_STATUSES = ['Pending', 'Queued', 'In Progress', 'Under Review']
+
 import {
   TempleArchIcon,
   TempleLampIcon,
@@ -41,21 +40,10 @@ export default function AnswerQuestion() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const questionIdParam = searchParams.get('questionId')
-  const statusParam = searchParams.get('status')
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
-  const initialStatusFilter = statusParam === 'Pending' || statusParam === 'pending_group'
-    ? 'pending_group'
-    : ['All', 'Answered', 'Disputed'].includes(statusParam) ? statusParam : 'All'
 
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState(initialStatusFilter)
-
-  const matchesStatusFilter = useCallback((questionStatus) => {
-    if (statusFilter === 'All') return true
-    if (statusFilter === 'pending_group') return ASTROLOGER_PENDING_STATUSES.includes(questionStatus)
-    return questionStatus === statusFilter
-  }, [statusFilter])
   const [page, setPage] = useState(1)
   const [panelQuestionId, setPanelQuestionId] = useState(questionIdParam || null)
   const [answer, setAnswer] = useState('')
@@ -68,18 +56,13 @@ export default function AnswerQuestion() {
     const term = appliedSearch.trim().toLowerCase()
     return questions
       .filter((question) => {
-        const matchesSearch = !term || [question.id, question.user, question.category, question.question, question.status]
+        const searchable = [question.id, question.user, question.category, question.type, question.question, question.status]
           .join(' ')
           .toLowerCase()
-          .includes(term)
-        return matchesSearch && matchesStatusFilter(question.status)
+        return !term || searchable.includes(term)
       })
-      .sort((a, b) => {
-        const dateA = new Date(a.raisedAt || a.raised)
-        const dateB = new Date(b.raisedAt || b.raised)
-        return dateB - dateA
-      })
-  }, [questions, appliedSearch, matchesStatusFilter])
+      .sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
+  }, [questions, appliedSearch])
 
   const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
@@ -155,12 +138,11 @@ export default function AnswerQuestion() {
         <Card>
           <div className="search-filter-row">
             <div className="search-filter-row__group">
-              <div className="search-filter-row__heading">Search</div>
               <div className="search-bar">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by user name, question ID, category, or keyword"
+                placeholder="Search by user name, question ID, category, status, or keyword"
                 className="text-input search-bar__input"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setAppliedSearch(search)
@@ -171,17 +153,6 @@ export default function AnswerQuestion() {
               </button>
               </div>
             </div>
-            <div className="search-filter-row__group search-filter-row__status">
-              <div className="search-filter-row__heading">Status</div>
-              <ChipGroup
-                options={['All', 'Pending', 'Answered', 'Disputed']}
-                value={statusFilter === 'pending_group' ? 'Pending' : statusFilter}
-                onChange={(value) => setStatusFilter(value === 'Pending' ? 'pending_group' : value)}
-              />
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="badge badge-violet">Active filter: {statusFilter === 'pending_group' ? 'Pending' : statusFilter}</span>
-              </div>
-            </div>
           </div>
         </Card>
       </Section>
@@ -189,7 +160,7 @@ export default function AnswerQuestion() {
       <Section title="Questions" icon={TempleScrollIcon} titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>({filteredQuestions.length})</span>}>
         {pagedQuestions.length === 0 && (
           <Card>
-            <div className="muted">No matching questions found. Adjust your search or filters.</div>
+            <div className="muted">No matching questions found. Try a different search term.</div>
           </Card>
         )}
 
