@@ -40,7 +40,12 @@ import LiveSession from './pages/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
-import AstrologerLiveSession from './pages/astrologer/live/AstrologerLiveSession.jsx'
+import AstrologerLiveSessionShell, {
+  AstrologerLiveSessionConfigure,
+  AstrologerLiveSessionRoom,
+  AstrologerLiveSessionSetup,
+  AstrologerLiveSessionSummary,
+} from './pages/astrologer/live/AstrologerLiveSession.jsx'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -79,7 +84,6 @@ function AstrologerRoutes() {
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/profile" element={<Profile />} />
         <Route path="/astrologer/wallet" element={<AstrologerWallet />} />
-        <Route path="/astrologer/live-session" element={<AstrologerLiveSession />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
         <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
@@ -88,6 +92,13 @@ function AstrologerRoutes() {
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
         <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
+        <Route path="/astrologer/live-session" element={<AstrologerLiveSessionShell />}>
+          <Route index element={<Navigate to="setup" replace />} />
+          <Route path="setup" element={<AstrologerLiveSessionSetup />} />
+          <Route path="configure" element={<AstrologerLiveSessionConfigure />} />
+          <Route path="room" element={<AstrologerLiveSessionRoom />} />
+          <Route path="summary" element={<AstrologerLiveSessionSummary />} />
+        </Route>
       </Route>
     </Route>
   )

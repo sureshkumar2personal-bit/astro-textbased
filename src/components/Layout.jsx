@@ -94,6 +94,10 @@ const PAGE_META = {
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
+    '/astrologer/live-session/setup': { title: 'Create Live', sub: 'Check camera and microphone before continuing' },
+    '/astrologer/live-session/configure': { title: 'Live Configuration', sub: 'Set title, category, and pricing' },
+    '/astrologer/live-session/room': { title: 'Live Room', sub: 'Manage the broadcast and audience queue' },
+    '/astrologer/live-session/summary': { title: 'Live Summary', sub: 'Review the results of this broadcast' },
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {

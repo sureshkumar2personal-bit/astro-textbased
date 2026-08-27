@@ -44,6 +44,10 @@ export function getRoleRoutes(role) {
     appointmentDetails: `${base}/appointment-details`,
     poojaDetails: `${base}/pooja-details`,
     liveSession: `${base}/live-session`,
+    liveSessionSetup: `${base}/live-session/setup`,
+    liveSessionConfigure: `${base}/live-session/configure`,
+    liveSessionRoom: `${base}/live-session/room`,
+    liveSessionSummary: `${base}/live-session/summary`,
   }
 }
 
