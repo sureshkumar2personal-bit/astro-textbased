@@ -7541,7 +7541,8 @@ button.apt-week-day:focus-visible {
   .apt-drawer-head {
     padding: 15px 16px;
   }
-=======
+}
+
 /* Consultation history is a single compact tabbed section on My Account. */
 .my-account-consultation-history { display:grid; gap:14px; padding:16px 18px; border:1px solid var(--surface-border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-sm); }
 .my-account-consultation-heading .section-title { margin-bottom:3px; font-size:18px; }
@@ -7597,8 +7598,6 @@ button.apt-week-day:focus-visible {
   .my-account-inline-chat-header { flex-direction:row; }
   .my-account-inline-chat-header > span { flex:none; }
   .my-account-inline-message { max-width:90%; }
-
+}
 
 /* Astrologer Appointments section */
-.pt-page { ... } /* appointment calendar */
-}
