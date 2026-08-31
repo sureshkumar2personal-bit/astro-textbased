@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users } from 'lucide-react'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles } from 'lucide-react'
 import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -19,18 +20,6 @@ const PROFILE_POSTS = [
 
 const PROFILE_FOLLOWERS = ['Priya V.', 'Kannan', 'Devi', 'Arun']
 
-function toInputDate(value) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return date.toISOString().slice(0, 10)
-}
-
-function formatAppointmentDate(value) {
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return value
-  return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
 function dateKey(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -45,6 +34,34 @@ function dateFromKey(value) {
 
 function displayDateKey(value) {
   return dateFromKey(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function formatSlotRange(time) {
+  const [clock, meridiem] = time.split(' ')
+  const [hours, minutes] = clock.split(':').map(Number)
+  const date = new Date(2026, 0, 1, (hours % 12) + (meridiem === 'PM' ? 12 : 0), minutes + 30)
+  return `${time} – ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
+}
+
+function timeToMinutes(value) {
+  const [clock, meridiem] = String(value).split(' ')
+  const [hours, minutes] = clock.split(':').map(Number)
+  return ((hours % 12) + (meridiem === 'PM' ? 12 : 0)) * 60 + minutes
+}
+
+const RASHI_OPTIONS = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)']
+const NAKSHATRA_OPTIONS = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati']
+
+function appointmentStartTime(slot) {
+  if (!slot) return 0
+  const [clock, meridiem] = slot.time.split(' ')
+  const [hours, minutes] = clock.split(':').map(Number)
+  return new Date(dateFromKey(slot.date).setHours((hours % 12) + (meridiem === 'PM' ? 12 : 0), minutes, 0, 0)).getTime()
+}
+
+function formatCountdown(milliseconds) {
+  const totalMinutes = Math.max(0, Math.ceil(milliseconds / 60000))
+  return `Starts in ${totalMinutes} minutes`
 }
 
 function calendarDays(month) {
@@ -63,10 +80,38 @@ function getSubscriptionDaysRemaining(expiry) {
   return Math.ceil((expiryTime - Date.now()) / (24 * 60 * 60 * 1000))
 }
 
+function slotButton(date, time, { selectedSlots, toggleSlot, bookedSlots }) {
+  const booked = bookedSlots.has(`${displayDateKey(date)}|${time}`)
+  const selected = selectedSlots.some((slot) => slot.key === `${date}|${time}`)
+  return <button type="button" key={`${date}-${time}`} className={`appointment-slot-button ${selected ? 'is-selected' : ''} ${booked ? 'is-booked' : ''}`} disabled={booked} onClick={() => toggleSlot(date, time)}><span>{selected ? <Check size={13} /> : <Clock3 size={13} />} {time}</span><small>{booked ? 'Booked' : 'Available'} · 30 Minutes · ₹{APPOINTMENT_PRICE}</small></button>
+}
+
+function DayAvailability({ date, availability, selectedSlots, toggleSlot, bookedSlots }) {
+  const slots = date ? availability[date] || [] : []
+  return <div className="appointment-timeline"><div className="appointment-booking-section-label">Day timeline {date && <span className="muted">· {displayDateKey(date)}</span>}</div>{slots.length ? slots.map((time) => slotButton(date, time, { selectedSlots, toggleSlot, bookedSlots })) : <p className="availability-empty">Select an available date in Month view first.</p>}</div>
+}
+
+function WeekAvailability({ month, focusDate, availability, selectedSlots, toggleSlot, bookedSlots }) {
+  const focus = focusDate ? dateFromKey(focusDate) : new Date(month.getFullYear(), month.getMonth(), 1)
+  const start = new Date(focus.getFullYear(), focus.getMonth(), focus.getDate() - focus.getDay())
+  const days = Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index))
+  const times = [...new Set(days.flatMap((day) => availability[dateKey(day)] || []))].sort((a, b) => timeToMinutes(a) - timeToMinutes(b))
+  return <div className="appointment-week-grid"><div className="appointment-week-header"><span>Time</span>{days.map((day) => <strong key={dateKey(day)}>{day.toLocaleDateString('en-US', { weekday: 'short' })}<small>{day.getDate()}</small></strong>)}</div>{times.length ? times.map((time) => <div className="appointment-week-row" key={time}><span>{time}</span>{days.map((day) => { const key = dateKey(day); return (availability[key] || []).includes(time) ? slotButton(key, time, { selectedSlots, toggleSlot, bookedSlots }) : <span className="appointment-week-unavailable" key={`${key}-${time}`}>—</span> })}</div>) : <p className="availability-empty">No appointments are available this week.</p>}</div>
+}
+
+function ConsultationDetails({ details, setDetails, onSkip }) {
+  const update = (key, value) => setDetails((current) => ({ ...current, [key]: value }))
+  return <div className="appointment-details-form"><div><div className="appointment-booking-section-label">Consultation Details</div><p className="muted">Would you like to submit your question and horoscope details before the appointment?</p></div><label>Question type<select className="select-input" value={details.questionType} onChange={(event) => update('questionType', event.target.value)}><option>Personal</option><option>General</option></select></label><label>Question description<textarea className="text-input" rows="3" value={details.question} onChange={(event) => update('question', event.target.value)} placeholder="Share what you would like guidance on (optional)" /></label><div className="appointment-form-divider">Horoscope Details <span>Optional</span></div><div className="appointment-form-grid"><label>Date of Birth<input className="text-input" type="date" value={details.dob} onChange={(event) => update('dob', event.target.value)} /></label><label>Time of Birth<input className="text-input" type="time" value={details.birthTime} onChange={(event) => update('birthTime', event.target.value)} /></label><label>Place of Birth<input className="text-input" type="text" value={details.birthPlace} onChange={(event) => update('birthPlace', event.target.value)} placeholder="Enter place of birth" /></label><label>Rashi<select className="select-input" value={details.rashi} onChange={(event) => update('rashi', event.target.value)}><option value="">Select Rashi</option>{RASHI_OPTIONS.map((option) => <option key={option}>{option}</option>)}</select></label><label>Nakshatra<select className="select-input" value={details.nakshatra} onChange={(event) => update('nakshatra', event.target.value)}><option value="">Select Nakshatra</option>{NAKSHATRA_OPTIONS.map((option) => <option key={option}>{option}</option>)}</select></label></div><label className="appointment-upload">Upload Horoscope / Kundli<input type="file" /></label><button type="button" className="btn btn-ghost appointment-skip-action" onClick={onSkip}>Skip for Now</button></div>
+}
+
+function BookingReview({ selectedSlots }) {
+  return <div className="appointment-review"><div className="appointment-booking-section-label">Selected Appointments</div>{selectedSlots.map((slot, index) => <div className="appointment-review-slot" key={slot.key}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{displayDateKey(slot.date)}</strong><small>{formatSlotRange(slot.time)}</small><small>{slot.duration} · {slot.type === 'Audio Call' ? 'Audio Consultation' : slot.type}</small></div><b>₹{slot.price}</b></div>)}</div>
+}
+
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, appointments, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, appointments, userWallet, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = searchParams.get('id') || mockAstrologers[0].id
@@ -93,14 +138,21 @@ export default function AstrologerProfile() {
   const canBookAppointment = subscribed
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState('form')
-  const [paymentMethod, setPaymentMethod] = useState('UPI')
+  const [calendarView, setCalendarView] = useState('month')
+  const [paymentMethod, setPaymentMethod] = useState('Wallet')
   const [bookedAppointmentId, setBookedAppointmentId] = useState(null)
-  const [calendarMonth, setCalendarMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const [currentTime, setCurrentTime] = useState(Date.now())
+  const [bookingIdCopied, setBookingIdCopied] = useState(false)
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 7, 1))
+  const [bookingNotice, setBookingNotice] = useState('')
+  const [consultationDetails, setConsultationDetails] = useState({ questionType: 'Personal', question: '', dob: '', birthTime: '', birthPlace: '', rashi: '', nakshatra: '' })
   const [bookingForm, setBookingForm] = useState({
     type: APPOINTMENT_TYPE,
     date: '',
     time: '',
   })
+  const [selectedSlots, setSelectedSlots] = useState([])
+  const bookingContentRef = useRef(null)
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
   const [subscriptionPromptOpen, setSubscriptionPromptOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('Posts')
@@ -120,7 +172,7 @@ export default function AstrologerProfile() {
   const availability = mockAstrologerAvailability[astrologer.id] || {}
   const monthDays = calendarDays(calendarMonth)
   const todayKey = dateKey(new Date())
-  const selectedDateSlots = bookingForm.date ? availability[bookingForm.date] || [] : []
+  const selectedDateSlots = bookingForm.date ? [...(availability[bookingForm.date] || [])].sort((a, b) => timeToMinutes(a) - timeToMinutes(b)) : []
   const bookedSlots = new Set(appointments.filter((appointment) => appointment.astrologerId === astrologer.id).map((appointment) => `${appointment.date}|${appointment.time}`))
   const visiblePosts = footerTab === 'Saved Posts' ? savedPosts : astrologerPosts
   const selectedAstrologerTypes = currentUser?.astrologerPreferences?.astrologerTypes || currentUser?.astrologerPreferences?.methods || []
@@ -166,30 +218,66 @@ export default function AstrologerProfile() {
       date: firstAvailableDate,
       time: '',
     })
+    setSelectedSlots([])
+    setCalendarView('month')
     if (firstAvailableDate) setCalendarMonth(new Date(dateFromKey(firstAvailableDate).getFullYear(), dateFromKey(firstAvailableDate).getMonth(), 1))
     setBookingStep('form')
-    setPaymentMethod('UPI')
+    setPaymentMethod('Wallet')
+    setBookingNotice('')
+    setBookingIdCopied(false)
     setBookedAppointmentId(null)
     setBookingOpen(true)
   }
 
-  const handleConfirmBooking = () => {
-    if (!bookingForm.date || !bookingForm.time) return
-    setBookingStep('payment')
+  useEffect(() => {
+    if (!bookingOpen || bookingStep !== 'success') return undefined
+    const updateTime = () => setCurrentTime(Date.now())
+    updateTime()
+    const timer = window.setInterval(updateTime, 30000)
+    return () => window.clearInterval(timer)
+  }, [bookingOpen, bookingStep])
+
+  useEffect(() => {
+    if (!bookingOpen) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [bookingOpen])
+
+  useLayoutEffect(() => {
+    if (!bookingOpen || bookingStep !== 'details') return undefined
+    if (bookingContentRef.current) bookingContentRef.current.scrollTop = 0
+    return undefined
+  }, [bookingOpen, bookingStep])
+
+  const toggleSlot = (date, time) => {
+    const key = `${date}|${time}`
+    if (selectedSlots.some((slot) => slot.key === key)) {
+      setSelectedSlots((current) => current.filter((slot) => slot.key !== key))
+      return
+    }
+    if (selectedSlots.length >= 4) {
+      setBookingNotice('You can book a maximum of 4 slots for this astrologer.')
+      window.setTimeout(() => setBookingNotice(''), 2800)
+      return
+    }
+    setSelectedSlots((current) => [...current, { key, date, time, duration: '30 Minutes', type: APPOINTMENT_TYPE, package: '30 Min Consultation', price: APPOINTMENT_PRICE }])
+    setBookingForm((current) => ({ ...current, date, time }))
   }
 
   const handlePayment = () => {
-    const newId = actions.bookAppointment({
-      astrologerId: astrologer.id,
-      astrologerName: astrologer.name,
-      type: APPOINTMENT_TYPE,
-      date: formatAppointmentDate(bookingForm.date),
-      time: bookingForm.time,
-      price: APPOINTMENT_PRICE,
+    const total = selectedSlots.reduce((sum, slot) => sum + slot.price, 0)
+    if (paymentMethod !== 'Wallet' || (userWallet?.balance || 0) < total) return
+    const bookingGroup = `#BOOK-${selectedSlots[0].date.replaceAll('-', '')}-001`
+    let firstId = null
+    selectedSlots.forEach((slot, index) => {
+      const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: slot.type, date: displayDateKey(slot.date), time: slot.time, price: slot.price, duration: slot.duration, package: slot.package, bookingGroup, bookingSequence: index + 1, questionDetails: consultationDetails.question ? consultationDetails : null })
+      if (!firstId) firstId = id
     })
-    setBookedAppointmentId(newId)
+    actions.debitUserWallet({ amount: total, astrologer: astrologer.name, duration: `${selectedSlots.length} appointment${selectedSlots.length > 1 ? 's' : ''}`, service: 'Appointment', transactionId: `appointment-${bookingGroup}` })
+    setBookedAppointmentId(firstId)
     setBookingStep('success')
-    return newId
+    return firstId
   }
 
   return (
@@ -315,54 +403,45 @@ export default function AstrologerProfile() {
         </div>
       )}
 
-      {bookingOpen && (
+      {bookingOpen && createPortal((
         <div className="modal-overlay user-modal-overlay" onClick={() => setBookingOpen(false)}>
-          <div className="modal-card user-modal-card appointment-booking-modal" onClick={(e) => e.stopPropagation()}>
+          <div className={`modal-card user-modal-card appointment-booking-modal${bookingStep === 'details' ? ' appointment-booking-modal--details' : ''}${bookingStep === 'review' ? ' appointment-booking-modal--review' : ''}${bookingStep === 'payment' ? ' appointment-booking-modal--payment' : ''}${bookingStep === 'success' ? ' appointment-booking-modal--success' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header user-modal-card__header appointment-booking-modal__header flex items-start justify-between gap-4">
-              <div><div className="section-title" style={{ marginBottom: 3 }}>Book Appointment</div><p>Choose your preferred date and time</p></div>
+              <div className="appointment-booking-heading"><div className="appointment-booking-avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><div><div className="section-title" style={{ marginBottom: 3 }}>{bookingStep === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div><strong>{astrologer.name}</strong><span>{astrologer.specialization} · {APPOINTMENT_TYPE}</span></div></div>
               <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={() => setBookingOpen(false)}>
                 <X size={16} />
               </button>
             </div>
-            <div className="modal-card__content user-modal-card__content">
+            <div ref={bookingContentRef} className={`modal-card__content user-modal-card__content${bookingStep === 'details' ? ' appointment-details-content' : ''}`}>
               {bookingStep === 'form' && <div className="appointment-booking-form">
-                <label className="field-group appointment-booking-field" style={{ margin: 0 }}>
-                  <span className="field-label-top">Appointment Type</span>
-                  <select className="select-input appointment-type-select" aria-label="Appointment Type" value={APPOINTMENT_TYPE} disabled><option value={APPOINTMENT_TYPE}>{APPOINTMENT_TYPE}</option></select>
-                </label>
-                <div className="appointment-booking-section-label">Select Date</div>
-                <div className="field-group availability-picker" style={{ margin: 0 }}>
-                  <span className="sr-only">Select Available Date</span>
-                  <div className="availability-calendar">
-                    <div className="availability-calendar__header"><button type="button" className="icon-btn" aria-label="Previous month" disabled={calendarMonth.getFullYear() === new Date().getFullYear() && calendarMonth.getMonth() <= new Date().getMonth()} onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}>‹</button><strong>{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong><button type="button" className="icon-btn" aria-label="Next month" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}>›</button></div>
-                    <div className="availability-calendar__weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div>
-                    <div className="availability-calendar__days">{monthDays.map((day) => { const key = dateKey(day); const available = Boolean(availability[key]?.length) && key >= todayKey; const inMonth = day.getMonth() === calendarMonth.getMonth(); return <button type="button" key={key} className={`${available ? 'is-available' : ''}${bookingForm.date === key ? ' is-selected' : ''}${!inMonth ? ' is-outside' : ''}`} disabled={!available} onClick={() => setBookingForm({ ...bookingForm, date: key, time: '' })}>{day.getDate()}</button> })}</div>
-                  </div>
+                <div className="appointment-view-tabs">{['day', 'week', 'month', 'year'].map((view) => <button type="button" key={view} className={calendarView === view ? 'is-active' : ''} onClick={() => setCalendarView(view)}>{view[0].toUpperCase() + view.slice(1)}</button>)}</div>
+                <div className="availability-calendar appointment-calendar-extended">
+                  <div className="availability-calendar__header"><button type="button" className="icon-btn" aria-label="Previous" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1))}><ChevronLeft size={16} /></button><strong>{calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong><div className="appointment-calendar-nav"><button type="button" className="btn btn-ghost btn-sm" onClick={() => setCalendarMonth(new Date(2026, 7, 1))}>Today</button><button type="button" className="icon-btn" aria-label="Next" onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1))}><ChevronRight size={16} /></button></div></div>
+                  {calendarView === 'month' && <><div className="availability-calendar__weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div><div className="availability-calendar__days appointment-month-days">{monthDays.map((day) => { const key = dateKey(day); const available = Boolean(availability[key]?.length) && key >= todayKey; const inMonth = day.getMonth() === calendarMonth.getMonth(); const selected = bookingForm.date === key; return <button type="button" key={key} className={`${available ? 'is-available' : ''}${selected ? ' is-selected' : ''}${!inMonth ? ' is-outside' : ''}`} disabled={!available} onClick={() => setBookingForm({ ...bookingForm, date: key, time: '' })}><b>{day.getDate()}</b>{available && <small>● {availability[key].length} slots</small>}</button> })}</div></>}
+                  {calendarView === 'year' && <div className="appointment-year-grid">{Array.from({ length: 12 }, (_, index) => { const month = new Date(calendarMonth.getFullYear(), index, 1); const count = Object.entries(availability).filter(([key]) => key.startsWith(`${calendarMonth.getFullYear()}-${String(index + 1).padStart(2, '0')}`)).reduce((sum, [, slots]) => sum + slots.length, 0); return <button type="button" key={index} onClick={() => { setCalendarMonth(month); setCalendarView('month') }}><strong>{month.toLocaleDateString('en-US', { month: 'short' })}</strong><span>{count ? `${count} slots` : 'No availability'}</span></button> })}</div>}
+                  {calendarView === 'day' && <DayAvailability date={bookingForm.date} availability={availability} selectedSlots={selectedSlots} toggleSlot={toggleSlot} bookedSlots={bookedSlots} />}
+                  {calendarView === 'week' && <WeekAvailability month={calendarMonth} focusDate={bookingForm.date} availability={availability} selectedSlots={selectedSlots} toggleSlot={toggleSlot} bookedSlots={bookedSlots} />}
                 </div>
-                <div className="appointment-booking-section-label">Available Time Slots</div>
-                <div className="field-group availability-picker" style={{ margin: 0 }}>
-                  {bookingForm.date ? <div className="availability-slots"><strong>{displayDateKey(bookingForm.date)}</strong>{selectedDateSlots.length ? <div>{selectedDateSlots.map((slot) => { const booked = bookedSlots.has(`${displayDateKey(bookingForm.date)}|${slot}`); return <button type="button" key={slot} className={bookingForm.time === slot ? 'is-selected' : ''} disabled={booked} onClick={() => setBookingForm({ ...bookingForm, time: slot })}>{slot}{booked && <small>Booked</small>}</button> })}</div> : <p className="availability-empty">No available slots for this date.</p>}</div> : <p className="availability-empty">Select an available date to see time slots.</p>}
-                </div>
-                <div className="appointment-price-summary"><span>Appointment Price</span><strong>₹{APPOINTMENT_PRICE}</strong></div>
-                {bookingForm.date && bookingForm.time && <div className="appointment-booking-summary"><div className="appointment-booking-section-label">Booking Summary</div><div><span>Appointment</span><strong>{APPOINTMENT_TYPE}</strong></div><div><span>Date</span><strong>{displayDateKey(bookingForm.date)}</strong></div><div><span>Time</span><strong>{bookingForm.time}</strong></div><div><span>Price</span><strong>₹{APPOINTMENT_PRICE}</strong></div></div>}
+                {calendarView !== 'day' && calendarView !== 'week' && <><div className="appointment-booking-section-label">Available Time Slots {bookingForm.date && <span className="muted">· {displayDateKey(bookingForm.date)}</span>}</div><div className="availability-slots">{bookingForm.date && selectedDateSlots.length ? <div>{selectedDateSlots.map((slot) => { const booked = bookedSlots.has(`${displayDateKey(bookingForm.date)}|${slot}`); const selected = selectedSlots.some((item) => item.key === `${bookingForm.date}|${slot}`); return <button type="button" key={slot} className={selected ? 'is-selected' : ''} disabled={booked} onClick={() => toggleSlot(bookingForm.date, slot)}><span>{selected && <Check size={13} />} {slot} – {slot === '06:00 PM' ? '06:30 PM' : '30 min'}</span><small>30 Minutes · Audio Call · ₹{APPOINTMENT_PRICE}</small>{booked && <small>Booked</small>}</button> })}</div> : <p className="availability-empty">Select an available date to see time slots.</p>}</div></>}
+                <div className="appointment-selected-panel"><div><strong>Selected Slots</strong>{selectedSlots.length > 0 && <span>· {selectedSlots.length} of 4</span>}</div>{selectedSlots.length ? selectedSlots.map((slot) => <div className="appointment-selected-row" key={slot.key}><Check size={14} /> <span><b>{displayDateKey(slot.date)} · {slot.time}</b><small>30 min · Audio Call · ₹{slot.price}</small></span><button type="button" aria-label="Remove slot" onClick={() => toggleSlot(slot.date, slot.time)}><X size={13} /></button></div>) : <div className="appointment-selected-empty"><strong>No slot selected.</strong><span>Choose an available time slot to continue.</span></div>}{selectedSlots.length === 4 && <small className="appointment-max-note">Maximum 4 slots selected</small>}</div>
+                {bookingNotice && <div className="appointment-booking-notice" role="status"><CircleAlert size={15} /> {bookingNotice}</div>}
               </div>}
-              {bookingStep === 'payment' && <div className="appointment-payment-step">
-                <div className="appointment-payment-summary"><strong>{astrologer.name}</strong><span>{APPOINTMENT_TYPE}</span><span>{formatAppointmentDate(bookingForm.date)} · {bookingForm.time}</span><b>₹{APPOINTMENT_PRICE}</b></div>
-                <div className="field-label-top">Payment Method</div>
-                <div className="appointment-payment-methods">{['UPI', 'Card', 'Wallet'].map((method) => <button type="button" key={method} className={paymentMethod === method ? 'is-selected' : ''} onClick={() => setPaymentMethod(method)}>{method}</button>)}</div>
-                <div className="appointment-payment-total"><span>Total payable</span><strong>₹{APPOINTMENT_PRICE}</strong></div>
-              </div>}
-              {bookingStep === 'success' && <div className="appointment-booking-success"><div>✓</div><h3>Appointment booked successfully</h3><p>Your Audio Call appointment with {astrologer.name} is confirmed.</p><span>{formatAppointmentDate(bookingForm.date)} · {bookingForm.time} · ₹{APPOINTMENT_PRICE}</span></div>}
+              {bookingStep === 'details' && <ConsultationDetails details={consultationDetails} setDetails={setConsultationDetails} onSkip={() => setBookingStep('review')} />}
+              {bookingStep === 'review' && <BookingReview selectedSlots={selectedSlots} />}
+              {bookingStep === 'payment' && (() => { const amount = selectedSlots.reduce((sum, slot) => sum + slot.price, 0); const balance = userWallet?.balance || 0; const sufficient = balance >= amount; return <div className="appointment-payment-step"><div className="appointment-payment-title">Pay with Wallet</div><div className="appointment-wallet-card"><div className="appointment-wallet-balance"><div><WalletCards size={16} /><span>Wallet Balance</span></div><strong>₹{balance.toLocaleString('en-IN')}</strong></div><div className="appointment-wallet-divider" /><div className="appointment-wallet-line"><span>Appointment Amount</span><strong>₹{amount.toLocaleString('en-IN')}</strong></div><div className="appointment-wallet-line appointment-wallet-line--secondary"><span>Remaining Balance</span><strong>₹{(balance - amount).toLocaleString('en-IN')}</strong></div><div className={`appointment-wallet-status ${sufficient ? 'is-sufficient' : 'is-insufficient'}`} role="status">{sufficient ? <><Check size={14} /> Sufficient wallet balance</> : <><CircleAlert size={14} /> Insufficient wallet balance</>}</div></div>{!sufficient && <button type="button" className="btn btn-outline appointment-add-money" onClick={() => navigate(routes.walletHistory)}>Add Money to Wallet</button>}<p className="appointment-charge-note">You will be charged ₹{amount.toLocaleString('en-IN')} from your wallet.</p></div> })()}
+              {bookingStep === 'success' && (() => { const slot = selectedSlots[0]; const amount = selectedSlots.reduce((sum, item) => sum + item.price, 0); const bookingId = slot?.date ? `#BOOK-${slot.date.replaceAll('-', '')}-001` : ''; const startTime = appointmentStartTime(slot); const active = currentTime >= startTime && currentTime < startTime + 30 * 60000; const copyBookingId = () => { navigator.clipboard?.writeText(bookingId); setBookingIdCopied(true); window.setTimeout(() => setBookingIdCopied(false), 1800) }; return <div className="appointment-booking-success"><div className="appointment-success-heading"><div className="appointment-success-mark"><Check size={21} /></div><div className="appointment-success-title"><Sparkles size={14} /><h3>Appointment Confirmed!</h3><Sparkles size={14} /></div><p>Your appointment with {astrologer.name} has been confirmed.</p></div><div className="appointment-success-details"><strong>Appointment Details</strong><div className="appointment-success-detail-list">{selectedSlots.map((item, index) => <div className="appointment-success-detail-entry" key={item.key}><div className="appointment-success-detail-column"><CalendarPlus size={17} className="appointment-detail-icon" /><small>Date &amp; Time</small><b>{displayDateKey(item.date)}</b><b className="appointment-detail-time">{formatSlotRange(item.time)}</b></div><div className="appointment-success-detail-column"><PhoneCall size={17} className="appointment-detail-icon" /><small>Consultation Type</small><span className="appointment-consultation-pill">{item.type}</span></div><div className="appointment-success-detail-column"><Clock3 size={17} className="appointment-detail-icon" /><small>Duration</small><b>{item.duration}</b></div>{index === 0 && <div className="appointment-success-detail-column appointment-detail-booking-id"><small>Booking ID</small><span>{bookingId}<button type="button" aria-label="Copy booking ID" onClick={copyBookingId}><Copy size={13} /></button>{bookingIdCopied && <em>Copied</em>}</span></div>}</div>)}</div></div><div className="appointment-paid-card"><div><WalletCards size={17} /><span>Amount Paid</span><strong>₹{amount.toLocaleString('en-IN')}</strong></div><span className="appointment-paid-badge"><Check size={13} /> Paid &amp; Confirmed</span></div><div className="appointment-upcoming-status" role="status">{active ? 'Appointment Started' : formatCountdown(startTime - currentTime)}{active && <button type="button" className="btn btn-primary appointment-join-call" onClick={() => { setBookingOpen(false); navigate(routes.call) }}><PhoneCall size={14} /> Join Call</button>}</div></div> })()}
             </div>
             <div className="modal-card__footer user-modal-card__footer appointment-booking-modal__footer">
               {bookingStep !== 'success' && <button className="btn btn-ghost" type="button" onClick={() => setBookingOpen(false)}>Cancel</button>}
-              {bookingStep === 'form' && <button className="btn btn-primary" type="button" disabled={!bookingForm.date || !bookingForm.time} onClick={handleConfirmBooking}>Confirm Booking</button>}
-              {bookingStep === 'payment' && <button className="btn btn-primary" type="button" onClick={handlePayment}>Pay ₹{APPOINTMENT_PRICE} &amp; Book</button>}
-              {bookingStep === 'success' && <button className="btn btn-primary" type="button" onClick={() => { setBookingOpen(false); navigate(`${routes.appointmentDetails}?id=${bookedAppointmentId}`) }}>Done</button>}
+              {bookingStep === 'form' && <><button className="btn btn-outline" type="button" disabled={!selectedSlots.length} onClick={() => setBookingStep('details')}>Add Details</button><button className="btn btn-primary" type="button" disabled={!selectedSlots.length} onClick={() => setBookingStep('review')}>Review Appointment</button></>}
+              {bookingStep === 'details' && <button className="btn btn-primary" type="button" onClick={() => setBookingStep('review')}>Save Details</button>}
+              {bookingStep === 'review' && <><button className="btn btn-outline" type="button" onClick={() => setBookingStep('form')}>Edit Appointment</button><button className="btn btn-primary" type="button" onClick={() => setBookingStep('payment')}>Proceed to Payment</button></>}
+              {bookingStep === 'payment' && <button className="btn btn-primary" type="button" disabled={paymentMethod !== 'Wallet' || (userWallet?.balance || 0) < selectedSlots.reduce((sum, slot) => sum + slot.price, 0)} onClick={handlePayment}>Confirm &amp; Pay ₹{selectedSlots.reduce((sum, slot) => sum + slot.price, 0)}</button>}
+              {bookingStep === 'success' && <><button className="btn btn-primary" type="button" onClick={() => { setBookingOpen(false); navigate(`${routes.appointmentDetails}?id=${bookedAppointmentId}`) }}><CalendarPlus size={15} /> View Appointment</button><button className="btn btn-outline" type="button" onClick={() => setBookingOpen(false)}>Done</button></>}
             </div>
           </div>
         </div>
-      )}
+      ), document.body)}
 
       {subscriptionPromptOpen && (
         <div className="modal-overlay user-modal-overlay" onClick={() => setSubscriptionPromptOpen(false)}>

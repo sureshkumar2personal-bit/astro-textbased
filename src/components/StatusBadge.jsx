@@ -1,5 +1,7 @@
 const STATUS_TONES = {
   pending: 'badge-amber',
+  confirmed: 'badge-green',
+  analysed: 'badge-blue',
   'in progress': 'badge-violet',
   answered: 'badge-green',
   active: 'badge-green',

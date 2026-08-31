@@ -1823,7 +1823,12 @@ export function AppDataProvider({ children }) {
         date: payload.date,
         time: payload.time,
         price: Number(payload.price) || 499,
-        status: 'Confirmed',
+        duration: payload.duration || '30 Minutes',
+        package: payload.package || '30 Min Consultation',
+        bookingGroup: payload.bookingGroup || null,
+        bookingSequence: payload.bookingSequence || 1,
+        questionDetails: payload.questionDetails || null,
+        status: 'Pending',
       }
       setAppointments((prev) => [appointment, ...prev])
       setNotifications((prev) => [
