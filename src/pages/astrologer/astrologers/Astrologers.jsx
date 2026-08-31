@@ -1,11 +1,11 @@
 import { ArrowLeft, Users, UserCheck } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { mockAstrologers } from '../../../../data/notificationData.js'
-import Card from '../../../../components/ui/Card.jsx'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import Section from '../../../../components/ui/Section.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import Card from '../../../components/ui/Card.jsx'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import Section from '../../../components/ui/Section.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 function formatCount(count) {
   if (count >= 1000) {

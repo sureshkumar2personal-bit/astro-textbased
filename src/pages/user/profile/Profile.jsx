@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Activity, BookOpen, CalendarDays, ChevronRight, CircleHelp, Globe2, Languages, MapPin, MoreHorizontal, Pencil, Settings, Sparkles, UserRound, Users } from 'lucide-react'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const initials = (name = '') => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'
 

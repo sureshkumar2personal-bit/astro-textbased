@@ -299,15 +299,59 @@ export function getSuggestedAstrologers({ followedAstrologerIds = [], subscribed
   return ranked.length ? ranked : defaultCandidates
 }
 
+const __now = new Date()
+const __pad = (n) => String(n).padStart(2, '0')
+const __todayIso = `${__now.getFullYear()}-${__pad(__now.getMonth() + 1)}-${__pad(__now.getDate())}`
+const __MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const __displayDate = (iso) => {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} ${__MONTHS[m - 1]} ${y}`
+}
+// Build a live, today-relative appointment window from a minute offset.
+const __slot = (minOffset, durationMin, meta) => {
+  const s = new Date(__now.getTime() + minOffset * 60000)
+  const startMin = s.getHours() * 60 + s.getMinutes()
+  const e = new Date(s.getTime() + durationMin * 60000)
+  const endMin = e.getHours() * 60 + e.getMinutes()
+  const to12h = (mins) => {
+    let h = Math.floor(mins / 60)
+    const mm = mins % 60
+    const period = h >= 12 ? 'PM' : 'AM'
+    if (h === 0) h = 12
+    else if (h > 12) h -= 12
+    return `${h}:${__pad(mm)} ${period}`
+  }
+  return {
+    dateIso: __todayIso,
+    date: __displayDate(__todayIso),
+    start: `${__pad(Math.floor(startMin / 60))}:${__pad(startMin % 60)}`,
+    end: `${__pad(Math.floor(endMin / 60))}:${__pad(endMin % 60)}`,
+    time: to12h(startMin),
+    duration: `${durationMin} min`,
+    ...meta,
+  }
+}
+
 export const mockAppointments = [
+  // ---- Static historical / upcoming appointments (shared with user side) ----
   {
     id: 'apt-1',
     astrologerId: 'astrologer-demo',
     astrologer: 'Dr. Rani',
     type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Aarav Singh',
+    customerPhone: '+91 98111 22334',
+    orderId: '#A1001',
+    amount: 799,
+    language: 'Hindi',
+    topic: 'Career & Finance',
     duration: '30 min',
     date: '25 Jul 2026',
+    dateIso: '2026-07-25',
     time: '10:00 AM',
+    start: '10:00',
+    end: '10:30',
     status: 'Confirmed',
   },
   {
@@ -315,14 +359,137 @@ export const mockAppointments = [
     astrologerId: 'acharya-meena',
     astrologer: 'Acharya Meena',
     type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Meera Nair',
+    customerPhone: '+91 98450 11223',
+    orderId: '#A1002',
+    amount: 699,
+    language: 'Malayalam',
+    topic: 'Marriage',
     duration: '20 min',
     date: '26 Jul 2026',
+    dateIso: '2026-07-26',
     time: '05:30 PM',
+    start: '17:30',
+    end: '17:50',
     status: 'Rescheduled',
   },
-  { id: 'apt-3', astrologerId: 'astrologer-demo-3', astrologer: 'Arjun Sharma', type: 'Audio Call', duration: '45 min', date: '27 Aug 2026', time: '11:30 AM', status: 'Pending' },
-  { id: 'apt-4', astrologerId: 'acharya-meena', astrologer: 'Acharya Meena', type: 'Audio Call', duration: '30 min', date: '28 Aug 2026', time: '04:00 PM', status: 'Confirmed' },
-  { id: 'apt-5', astrologerId: 'astrologer-demo', astrologer: 'Dr. Rani', type: 'Audio Call', duration: '20 min', date: '20 Aug 2026', time: '09:00 AM', status: 'Completed' },
+  {
+    id: 'apt-3',
+    astrologerId: 'astrologer-demo-3',
+    astrologer: 'Arjun Sharma',
+    type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Kabir Rao',
+    customerPhone: '+91 90000 12345',
+    orderId: '#A1003',
+    amount: 999,
+    language: 'English',
+    topic: 'Health',
+    duration: '45 min',
+    date: '27 Aug 2026',
+    dateIso: '2026-08-27',
+    time: '11:30 AM',
+    start: '11:30',
+    end: '12:15',
+    status: 'Pending',
+  },
+  {
+    id: 'apt-4',
+    astrologerId: 'acharya-meena',
+    astrologer: 'Acharya Meena',
+    type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Sneha Iyer',
+    customerPhone: '+91 98402 55667',
+    orderId: '#A1004',
+    amount: 799,
+    language: 'Tamil',
+    topic: 'Wealth',
+    duration: '30 min',
+    date: '28 Aug 2026',
+    dateIso: '2026-08-28',
+    time: '04:00 PM',
+    start: '16:00',
+    end: '16:30',
+    status: 'Confirmed',
+  },
+  {
+    id: 'apt-5',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Rohan Mehta',
+    customerPhone: '+91 98200 33445',
+    orderId: '#A1005',
+    amount: 699,
+    language: 'Hindi',
+    topic: 'Education',
+    duration: '20 min',
+    date: '20 Aug 2026',
+    dateIso: '2026-08-20',
+    time: '09:00 AM',
+    start: '09:00',
+    end: '09:20',
+    status: 'Completed',
+  },
+
+  // ---- Live, today-relative appointments for the signed-in astrologer -------
+  // Currently in its call window → "Call Now".
+  __slot(-4, 30, {
+    id: 'apt-live',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    topic: 'Career & Finance',
+    status: 'Confirmed',
+  }),
+  // Starts in ~12 minutes → disabled call button with live countdown.
+  __slot(12, 30, {
+    id: 'apt-soon',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    type: 'Audio Call',
+    callType: 'Audio',
+    customerName: 'Priya Mehta',
+    customerPhone: '+91 98120 76543',
+    orderId: '#A1288',
+    amount: 799,
+    language: 'English',
+    topic: 'Relationship',
+    status: 'Confirmed',
+  }),
+  // Starts in ~90 minutes → "Starts in 1h 30m".
+  __slot(90, 30, {
+    id: 'apt-later',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    type: 'Text / Chat',
+    callType: 'Text',
+    customerName: 'Karan Verma',
+    customerPhone: '+91 99300 11298',
+    orderId: '#A1289',
+    amount: 599,
+    language: 'Hindi',
+    topic: 'Business',
+    status: 'Confirmed',
+  }),
+  // Already completed earlier today.
+  __slot(-180, 30, {
+    id: 'apt-done-today',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    topic: 'Health',
+    status: 'Completed',
+  }),
+  // Pending confirmation (still bookable by customer flow) — shown as Pending.
+  __slot(240, 30, {
+    id: 'apt-pending',
+    astrologerId: 'astrologer-demo',
+    astrologer: 'Dr. Rani',
+    topic: 'Marriage',
+    status: 'Pending',
+  }),
 ]
 
 export const mockPoojas = [

@@ -11,16 +11,16 @@ import {
   LineChart,
   ArrowRight,
 } from 'lucide-react'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
-import { ChipGroup } from '../../../../components/OptionGroup.jsx'
-import Card from '../../../../components/ui/Card.jsx'
-import StatCard from '../../../../components/ui/StatCard.jsx'
-import ActionCard from '../../../../components/ui/ActionCard.jsx'
-import CreateCampaignModal from '../../../../components/CreateCampaignModal.jsx'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
-import { sortByDateDesc } from '../../../../utils/date.js'
+import StatusBadge from '../../../components/StatusBadge.jsx'
+import { ChipGroup } from '../../../components/OptionGroup.jsx'
+import Card from '../../../components/ui/Card.jsx'
+import StatCard from '../../../components/ui/StatCard.jsx'
+import ActionCard from '../../../components/ui/ActionCard.jsx'
+import CreateCampaignModal from '../../../components/CreateCampaignModal.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { sortByDateDesc } from '../../../utils/date.js'
 
 export default function Dashboard() {
   const { campaigns, questions, selectedCampaign } = useAppData()

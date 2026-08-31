@@ -166,12 +166,12 @@ function CameraPreview({ videoRef, streamReady, audioReady, permissionWarning, c
       )}
       {streamReady && (
         <div className="live-camera-label">
-          <Video size={13} /> Astrologer feed
+          <div>Astrologer feed</div>
         </div>
       )}
       <div className="live-camera-status">
         <span className={streamReady ? 'is-good' : 'is-warning'}>
-          <Video size={13} /> {streamReady ? 'Camera active' : 'Camera pending'}
+          {streamReady ? 'Camera active' : 'Camera pending'}
         </span>
         <span className={audioReady ? 'is-good' : 'is-warning'}>
           {audioReady ? <Mic size={13} /> : <MicOff size={13} />} {audioReady ? 'Audio input OK' : 'Audio pending'}
@@ -377,7 +377,7 @@ function LiveSessionShellInner({ children }) {
       const nextStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       setStream(nextStream)
       setMediaStatus({
-        camera: nextStream.getVideoTracks().length > 0,
+        camera: false,
         audio: nextStream.getAudioTracks().length > 0,
         warning: '',
       })

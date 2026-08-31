@@ -515,7 +515,7 @@ const initialAstrologerWallet = {
   transactions: [
     { id: 'aw1', label: 'Question package sale - Health', amount: '+₹2,000', time: 'Today', date: '2026-07-27', type: 'earning' },
     { id: 'aw2', label: 'Personal question - Marriage', amount: '+₹250', time: 'Yesterday', date: '2026-07-26', type: 'earning' },
-    { id: 'aw3', label: 'Consultation payout - Video call', amount: '+₹4,000', time: '24 Jul 2026', date: '2026-07-24', type: 'earning' },
+    
     { id: 'aw4', label: 'General question - Business', amount: '+₹100', time: '23 Jul 2026', date: '2026-07-23', type: 'earning' },
     { id: 'aw5', label: 'Withdrawal to bank', amount: '-₹8,000', time: '22 Jul 2026', date: '2026-07-22', type: 'withdrawal' },
     { id: 'aw6', label: 'Escrow hold - QTN-2026-000123', amount: '+₹250', time: '21 Jul 2026', date: '2026-07-21', type: 'escrow' },
@@ -730,8 +730,130 @@ const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
 const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
+const APPOINTMENT_AVAILABILITY_STORAGE_KEY = 'astroconnect-appointment-availability'
 const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
+
+const APPOINTMENT_WEEKDAYS = [
+  { dayIndex: 0, label: 'Sun' },
+  { dayIndex: 1, label: 'Mon' },
+  { dayIndex: 2, label: 'Tue' },
+  { dayIndex: 3, label: 'Wed' },
+  { dayIndex: 4, label: 'Thu' },
+  { dayIndex: 5, label: 'Fri' },
+  { dayIndex: 6, label: 'Sat' },
+]
+
+const DEFAULT_APPOINTMENT_SLOT_WINDOWS = {
+  0: [],
+  1: [
+    { start: '09:00', end: '13:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  2: [
+    { start: '09:00', end: '13:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  3: [
+    { start: '09:00', end: '13:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  4: [
+    { start: '09:00', end: '13:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  5: [
+    { start: '09:00', end: '13:00' },
+    { start: '16:00', end: '20:00' },
+  ],
+  6: [
+    { start: '10:00', end: '14:00' },
+  ],
+}
+
+function monthKeyFromDate(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
+function monthLabelFromKey(monthKey) {
+  if (!monthKey) return 'Not available'
+  const [year, month] = String(monthKey).split('-').map(Number)
+  if (!year || !month) return 'Not available'
+  return new Date(year, month - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
+function normalizeAppointmentSlot(slot) {
+  const start = typeof slot?.start === 'string' && slot.start.trim() ? slot.start.trim() : '09:00'
+  const end = typeof slot?.end === 'string' && slot.end.trim() ? slot.end.trim() : '10:00'
+  return { start, end }
+}
+
+function normalizeAppointmentScheduleDay(day, dayIndex) {
+  const fallbackSlots = DEFAULT_APPOINTMENT_SLOT_WINDOWS[dayIndex] || []
+  const slots = Array.isArray(day?.slots) && day.slots.length
+    ? day.slots.map(normalizeAppointmentSlot)
+    : fallbackSlots.map(normalizeAppointmentSlot)
+  return {
+    dayIndex,
+    enabled: day?.enabled !== false && slots.length > 0,
+    slots,
+  }
+}
+
+function normalizeAppointmentDateOverride(override) {
+  if (!override || typeof override !== 'object') return null
+  const status = ['Available', 'Leave', 'Dyaan'].includes(override.status) ? override.status : 'Available'
+  const windows = Array.isArray(override.windows)
+    ? override.windows.map(normalizeAppointmentSlot).filter((slot) => slot.start < slot.end)
+    : []
+  return { status, windows }
+}
+
+function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, status = 'Draft') {
+  const normalizedMonthKey = monthKey || monthKeyFromDate(new Date())
+  return {
+    id: `appointment-availability-${astrologerId || 'astrologer'}-${normalizedMonthKey}`,
+    astrologerId: astrologerId || 'astrologer-demo',
+    monthKey: normalizedMonthKey,
+    monthLabel: monthLabelFromKey(normalizedMonthKey),
+    timezone: 'Asia/Kolkata',
+    status,
+    publishedAt: null,
+    updatedAt: new Date().toISOString(),
+    dateOverrides: {},
+    weeklySchedule: APPOINTMENT_WEEKDAYS.map((day) => normalizeAppointmentScheduleDay(null, day.dayIndex)),
+  }
+}
+
+function normalizeAppointmentAvailabilityTemplate(template) {
+  if (!template || typeof template !== 'object') return null
+  const monthKey = template.monthKey || monthKeyFromDate(new Date())
+  const normalized = createDefaultAppointmentAvailabilityTemplate(template.astrologerId, monthKey, template.status === 'Published' ? 'Published' : 'Draft')
+  const weeklySchedule = Array.isArray(template.weeklySchedule)
+    ? APPOINTMENT_WEEKDAYS.map((day) => normalizeAppointmentScheduleDay(template.weeklySchedule.find((item) => Number(item?.dayIndex) === day.dayIndex), day.dayIndex))
+    : normalized.weeklySchedule
+  const dateOverrides = template.dateOverrides && typeof template.dateOverrides === 'object'
+    ? Object.fromEntries(Object.entries(template.dateOverrides)
+      .map(([dateIso, override]) => [dateIso, normalizeAppointmentDateOverride(override)])
+      .filter(([, override]) => override))
+    : {}
+  return {
+    ...normalized,
+    ...template,
+    id: template.id || normalized.id,
+    astrologerId: template.astrologerId || normalized.astrologerId,
+    monthKey,
+    monthLabel: monthLabelFromKey(monthKey),
+    status: template.status === 'Published' ? 'Published' : 'Draft',
+    publishedAt: template.publishedAt || null,
+    updatedAt: template.updatedAt || normalized.updatedAt,
+    reminderDismissedForMonthKey: template.reminderDismissedForMonthKey || null,
+    dateOverrides,
+    weeklySchedule,
+  }
+}
 
 const initialAstrologerPosts = [
   { id: 'post-rani-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', likeCount: 128, comments: [{ id: 'comment-rani-1', author: 'Priya V.', text: 'This was exactly what I needed today.' }], createdAt: '2026-08-24T10:00:00+05:30', updatedAt: '2026-08-24T10:00:00+05:30' },
@@ -925,6 +1047,10 @@ export function AppDataProvider({ children }) {
     const stored = loadFromStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, initialAstrologerLiveSessions)
     return Array.isArray(stored) ? stored.map(normalizeLiveSession) : initialAstrologerLiveSessions.map(normalizeLiveSession)
   })
+  const [appointmentAvailabilityTemplates, setAppointmentAvailabilityTemplates] = useState(() => {
+    const stored = loadFromStorage(APPOINTMENT_AVAILABILITY_STORAGE_KEY, [])
+    return Array.isArray(stored) ? stored.map(normalizeAppointmentAvailabilityTemplate).filter(Boolean) : []
+  })
 
   useEffect(() => {
     setCampaigns((prev) => prev.map((campaign) => {
@@ -992,6 +1118,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, astrologerLiveSessions)
   }, [astrologerLiveSessions])
+
+  useEffect(() => {
+    saveToStorage(APPOINTMENT_AVAILABILITY_STORAGE_KEY, appointmentAvailabilityTemplates)
+  }, [appointmentAvailabilityTemplates])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -1689,7 +1819,7 @@ export function AppDataProvider({ children }) {
         id: `apt-${Date.now().toString(36)}`,
         astrologerId: payload.astrologerId,
         astrologer: payload.astrologerName,
-        type: payload.type || 'Video Consultation',
+        type: payload.type || 'Audio Consultation',
         date: payload.date,
         time: payload.time,
         price: Number(payload.price) || 499,
@@ -1748,6 +1878,56 @@ export function AppDataProvider({ children }) {
         },
         ...prev,
       ])
+    },
+    setAppointmentStatus(appointmentId, status, meta = {}) {
+      setAppointments((prev) =>
+        prev.map((appointment) =>
+          appointment.id === appointmentId ? { ...appointment, status, ...meta } : appointment,
+        ),
+      )
+    },
+    saveAppointmentAvailabilityTemplate(template) {
+      const normalized = normalizeAppointmentAvailabilityTemplate(template)
+      if (!normalized) return null
+      setAppointmentAvailabilityTemplates((prev) => {
+        const index = prev.findIndex((item) => item.id === normalized.id || (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey))
+        if (index === -1) return [normalized, ...prev]
+        const next = prev.slice()
+        next[index] = normalized
+        return next
+      })
+      return normalized
+    },
+    publishAppointmentAvailabilityTemplate(template) {
+      const normalized = normalizeAppointmentAvailabilityTemplate(template)
+      if (!normalized) return null
+      const published = {
+        ...normalized,
+        status: 'Published',
+        publishedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      setAppointmentAvailabilityTemplates((prev) => {
+        const index = prev.findIndex((item) => item.id === published.id || (item.astrologerId === published.astrologerId && item.monthKey === published.monthKey))
+        if (index === -1) return [published, ...prev]
+        const next = prev.slice()
+        next[index] = published
+        return next
+      })
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Availability published',
+          detail: `Your appointment availability for ${published.monthLabel} is now published.`,
+          time: 'just now',
+          route: '/astrologer/appointments',
+          audience: ROLES.ASTROLOGER,
+          category: 'appointments',
+          read: false,
+        },
+        ...prev,
+      ])
+      return published
     },
     toggleFollow(astrologerId, astrologerName, isCurrentlyFollowing) {
       setFollowedAstrologerIds((prev) =>
@@ -2039,6 +2219,7 @@ export function AppDataProvider({ children }) {
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,
+    appointmentAvailabilityTemplates,
     astrologerServices: getEffectiveAstrologerServices(astrologerServices, presenceActive),
     setSelectedCampaignId,
     setLiveStreamOpen,
@@ -2078,6 +2259,7 @@ export function AppDataProvider({ children }) {
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,
+    appointmentAvailabilityTemplates,
     astrologerServices,
     actions,
   ])

@@ -48,7 +48,7 @@ const MOCK_ENRICHED_TRANSACTIONS = [
   { id: 'txn1', date: '2026-07-27 10:30 AM', type: 'Earning', description: 'Chat Consultation with Rahul', amount: 1250, status: 'Completed', balance: 34650 },
   { id: 'txn2', date: '2026-07-26 03:15 PM', type: 'Earning', description: 'Call with Priya', amount: 850, status: 'Completed', balance: 33400 },
   { id: 'txn3', date: '2026-07-25 11:00 AM', type: 'Settlement', description: 'Monthly settlement – Jul 2026', amount: 15725, status: 'Completed', balance: 32550 },
-  { id: 'txn4', date: '2026-07-24 02:20 PM', type: 'Earning', description: 'Video Consultation with Kannan', amount: 4000, status: 'Completed', balance: 16825 },
+  { id: 'txn4', date: '2026-07-24 02:20 PM', type: 'Earning', description: 'Consultation with Kannan', amount: 4000, status: 'Completed', balance: 16825 },
   { id: 'txn5', date: '2026-07-22 02:30 PM', type: 'Withdrawal', description: 'Withdrawal to HDFC Bank •••• 4589', amount: -8000, status: 'Completed', balance: 12825 },
   { id: 'txn6', date: '2026-07-21 10:00 AM', type: 'Platform Commission', description: 'Commission on Chat Consultation – Rahul', amount: -187.50, status: 'Completed', balance: 20825 },
   { id: 'txn7', date: '2026-07-20 04:45 PM', type: 'Virtual Gift', description: 'Virtual Gift from Customer Meena', amount: 300, status: 'Completed', balance: 21012.50 },

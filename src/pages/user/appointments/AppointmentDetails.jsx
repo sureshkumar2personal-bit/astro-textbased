@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
-import Card from '../../../../components/ui/Card.jsx'
-import Section from '../../../../components/ui/Section.jsx'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import SuccessAlert from '../../../../components/ui/SuccessAlert.jsx'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import StatusBadge from '../../../components/StatusBadge.jsx'
+import Card from '../../../components/ui/Card.jsx'
+import Section from '../../../components/ui/Section.jsx'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const CANCELLABLE_STATUSES = ['Confirmed', 'Rescheduled']
 

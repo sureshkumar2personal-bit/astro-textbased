@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, BadgeCheck, X, Grid3X3, Info, MessageCircle, MapPin, Languages, Pencil } from 'lucide-react'
 import { mockAstrologers } from '../../../../data/notificationData.js'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import Card from '../../../../components/ui/Card.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import Card from '../../../components/ui/Card.jsx'
 
-const CONSULTATION_TYPES = ['Video Consultation', 'Voice Consultation', 'Chat Consultation']
+const CONSULTATION_TYPES = ['Voice Consultation', 'Chat Consultation']
 
 const PROFILE_POSTS = [
   { id: 'post-1', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.' },

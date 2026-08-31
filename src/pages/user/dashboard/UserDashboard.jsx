@@ -10,13 +10,13 @@ import {
   ShieldAlert,
   Sparkles,
 } from 'lucide-react'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
-import StatCard from '../../../../components/ui/StatCard.jsx'
-import ActionCard from '../../../../components/ui/ActionCard.jsx'
-import Section from '../../../../components/ui/Section.jsx'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import StatCard from '../../../components/ui/StatCard.jsx'
+import ActionCard from '../../../components/ui/ActionCard.jsx'
+import Section from '../../../components/ui/Section.jsx'
+import StatusBadge from '../../../components/StatusBadge.jsx'
 
 export default function UserDashboard() {
   const { currentUser } = useAuth()

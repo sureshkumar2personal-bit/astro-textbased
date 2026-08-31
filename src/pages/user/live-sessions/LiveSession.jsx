@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Radio } from 'lucide-react'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import Card from '../../../../components/ui/Card.jsx'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import Card from '../../../components/ui/Card.jsx'
+import StatusBadge from '../../../components/StatusBadge.jsx'
 import { mockLiveSessions } from '../../../../data/notificationData.js'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 export default function LiveSession() {
   const [searchParams] = useSearchParams()

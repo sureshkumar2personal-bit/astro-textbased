@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, CheckCircle2, CircleDollarSign, Gift, Languages, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import Card from '../../../../components/ui/Card.jsx'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import Section from '../../../../components/ui/Section.jsx'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
+import Card from '../../../components/ui/Card.jsx'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import Section from '../../../components/ui/Section.jsx'
+import StatusBadge from '../../../components/StatusBadge.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
 import { mockAstrologers } from '../../../../data/notificationData.js'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 function getRemainingDays(validUntil) {
   return Math.max(0, Math.ceil((validUntil - Date.now()) / (24 * 60 * 60 * 1000)))

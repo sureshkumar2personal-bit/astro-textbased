@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Sparkles, Shield, UserRound } from 'lucide-react'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import ThemeToggle from '../../../../components/ThemeToggle.jsx'
-import { getRoleRoutes, inferRoleFromEmail, ROLES } from '../../../../utils/roleRoutes.js'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import ThemeToggle from '../../../components/ThemeToggle.jsx'
+import { getRoleRoutes, inferRoleFromEmail, ROLES } from '../../../utils/roleRoutes.js'
 
 export default function AuthPage({ mode }) {
   const navigate = useNavigate()

@@ -42,10 +42,11 @@ import MyAccount from './pages/MyAccount.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import AstrologerLiveSessionShell, {
   AstrologerLiveSessionConfigure,
-  AstrologerLiveSessionRoom,
   AstrologerLiveSessionSetup,
+  AstrologerLiveSessionRoom,
   AstrologerLiveSessionSummary,
 } from './pages/astrologer/live/AstrologerLiveSession.jsx'
+import AstrologerAppointments from './pages/astrologer/appointments/Appointments.jsx'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -92,6 +93,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
         <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
+        <Route path="/astrologer/appointments" element={<AstrologerAppointments />} />
         <Route path="/astrologer/live-session" element={<AstrologerLiveSessionShell />}>
           <Route index element={<Navigate to="setup" replace />} />
           <Route path="setup" element={<AstrologerLiveSessionSetup />} />

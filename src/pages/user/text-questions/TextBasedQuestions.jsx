@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Search, X } from 'lucide-react'
-import StatusBadge from '../../../../components/StatusBadge.jsx'
-import { ChipGroup } from '../../../../components/OptionGroup.jsx'
-import Card from '../../../../components/ui/Card.jsx'
-import Section from '../../../../components/ui/Section.jsx'
-import PageHeader from '../../../../components/ui/PageHeader.jsx'
-import SuccessAlert from '../../../../components/ui/SuccessAlert.jsx'
-import { useAppData } from '../../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../../utils/roleRoutes.js'
+import StatusBadge from '../../../components/StatusBadge.jsx'
+import { ChipGroup } from '../../../components/OptionGroup.jsx'
+import Card from '../../../components/ui/Card.jsx'
+import Section from '../../../components/ui/Section.jsx'
+import PageHeader from '../../../components/ui/PageHeader.jsx'
+import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import {
   TempleArchIcon,
   TempleBellIcon,
@@ -19,7 +19,7 @@ import {
   TempleLotusIcon,
   TempleReturnIcon,
   TempleScrollIcon,
-} from '../../../../components/TempleIcons.jsx'
+} from '../../../components/TempleIcons.jsx'
 
 const STATUSES = ['All', 'Pending', 'Answered', 'Disputed']
 const ACTIVE_STATUSES = ['Pending', 'Queued', 'In Progress', 'Under Review']

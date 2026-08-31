@@ -19,6 +19,7 @@ import {
   X,
   ChevronDown,
   UserRound,
+  CalendarDays,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -43,6 +44,7 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
+      { to: 'appointments', label: 'Appointments', icon: CalendarDays },
       {
         label: 'Text Based',
         icon: TempleScrollIcon,
@@ -93,6 +95,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
     '/astrologer/live-session/setup': { title: 'Create Live', sub: 'Check camera and microphone before continuing' },
     '/astrologer/live-session/configure': { title: 'Live Configuration', sub: 'Set title, category, and pricing' },
