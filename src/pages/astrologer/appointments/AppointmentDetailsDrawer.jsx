@@ -8,6 +8,7 @@ import {
   formatTimeRange,
   formatDisplayDate,
 } from '../../../utils/appointments.js'
+import { formatRemedyHour } from '../../../utils/remedyNotes.js'
 
 function Avatar({ name }) {
   const initials = String(name || '?')
@@ -111,6 +112,51 @@ export default function AppointmentDetailsDrawer({ appointment, now, inProgress,
             <DetailRow icon={Wallet} label="Payment" value={<span className="apt-paid">Paid</span>} />
             <DetailRow icon={Wallet} label="Amount" value={amountLabel} />
           </section>
+
+          {appointment.remedyNotes && (
+            <section className="apt-detail-card apt-detail-card--notes">
+              <div className="apt-detail-notes-head">
+                <div className="section-title">Remedy Notes</div>
+                <span className="muted">Recorded at session end</span>
+              </div>
+              <div className="apt-detail-notes-grid">
+                <div className="apt-detail-note">
+                  <span>Summary</span>
+                  <strong>{appointment.remedyNotes.summary || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note">
+                  <span>Program day</span>
+                  <strong>{appointment.remedyNotes.day || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note">
+                  <span>Program hour</span>
+                  <strong>{formatRemedyHour(appointment.remedyNotes.hour) || appointment.remedyNotes.hour || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note">
+                  <span>Place</span>
+                  <strong>{appointment.remedyNotes.place || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note">
+                  <span>God / deity</span>
+                  <strong>{appointment.remedyNotes.god || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note apt-detail-note--full">
+                  <span>Things to keep</span>
+                  <strong>{appointment.remedyNotes.things || 'Not available'}</strong>
+                </div>
+                <div className="apt-detail-note apt-detail-note--full">
+                  <span>Do poojas</span>
+                  <strong>{appointment.remedyNotes.poojas || 'Not available'}</strong>
+                </div>
+                {appointment.remedyNotes.extraNotes && (
+                  <div className="apt-detail-note apt-detail-note--full">
+                    <span>Additional notes</span>
+                    <strong>{appointment.remedyNotes.extraNotes}</strong>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
 
           <div className="apt-drawer-call">
             <CallButton

@@ -44,7 +44,15 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'appointments', label: 'Appointments', icon: CalendarDays },
+      {
+        label: 'Appointments',
+        icon: CalendarDays,
+        children: [
+          { to: 'appointments/schedule', label: 'Schedule', icon: TempleScrollIcon },
+          { to: 'appointments/calendar', label: 'Calendar', icon: CalendarDays },
+          { to: 'appointments/history', label: 'History', icon: ListChecks },
+        ],
+      },
       {
         label: 'Text Based',
         icon: TempleScrollIcon,
@@ -55,6 +63,7 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
+      { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
   [ROLES.USER]: {
@@ -96,6 +105,9 @@ const PAGE_META = {
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
+    '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
+    '/astrologer/appointments/calendar': { title: 'Calendar', sub: 'Review and manage published appointments' },
+    '/astrologer/appointments/history': { title: 'History', sub: 'Appointment records and status history' },
     '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
     '/astrologer/live-session/setup': { title: 'Create Live', sub: 'Check camera and microphone before continuing' },
     '/astrologer/live-session/configure': { title: 'Live Configuration', sub: 'Set title, category, and pricing' },
@@ -163,7 +175,20 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
 }
 
 function AstrologerNav({ links, basePath }) {
-  const [textBasedOpen, setTextBasedOpen] = useState(false)
+  const location = useLocation()
+  const [openSections, setOpenSections] = useState({})
+
+  useEffect(() => {
+    setOpenSections((current) => {
+      const next = { ...current }
+      links.forEach((link) => {
+        if (!link.children) return
+        const isActive = link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+        if (isActive) next[link.label] = true
+      })
+      return next
+    })
+  }, [basePath, links, location.pathname])
 
   return (
     <nav className="sidebar-nav">
@@ -173,19 +198,21 @@ function AstrologerNav({ links, basePath }) {
           return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} />
         }
 
+        const isOpen = Boolean(openSections[link.label])
+
         return (
           <div className="sidebar-nav-section" key={link.label}>
             <button
               type="button"
-              className={`sidebar-nav-section-title${textBasedOpen ? ' is-open' : ''}`}
-              aria-expanded={textBasedOpen}
-              onClick={() => setTextBasedOpen((isOpen) => !isOpen)}
+              className={`sidebar-nav-section-title${isOpen ? ' is-open' : ''}`}
+              aria-expanded={isOpen}
+              onClick={() => setOpenSections((current) => ({ ...current, [link.label]: !current[link.label] }))}
             >
               <link.icon size={18} />
               <span>{link.label}</span>
               <ChevronRight size={17} className="sidebar-nav-section-arrow" aria-hidden="true" />
             </button>
-            {textBasedOpen && (
+            {isOpen && (
               <div className="sidebar-nav-subgroup">
                 {link.children.map(({ to, label, icon }) => {
                   const route = `${basePath}/${to}`

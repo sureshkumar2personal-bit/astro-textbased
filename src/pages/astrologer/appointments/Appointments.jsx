@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Bell, Eye } from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
-import PageHeader from '../../../components/ui/PageHeader.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import AppointmentCalendar from './AppointmentCalendar.jsx'
-import AppointmentAvailabilityPanel, { TemplatePreview } from './AppointmentAvailabilityPanel.jsx'
+import { TemplatePreview } from './AppointmentAvailabilityPanel.jsx'
 import AppointmentDetailsDrawer from './AppointmentDetailsDrawer.jsx'
 import AppointmentCallScreen from './AppointmentCallScreen.jsx'
 import { callTypeMeta } from './meta.jsx'
@@ -86,7 +86,7 @@ function CallReadyToast({ appointment, onStart }) {
   )
 }
 
-export default function AstrologerAppointments() {
+export default function AppointmentCalendarTab() {
   const { currentUser } = useAuth()
   const { appointments, actions, astrologerServices, appointmentAvailabilityTemplates } = useAppData()
   const now = useNow(1000)
@@ -183,8 +183,14 @@ export default function AstrologerAppointments() {
   }
 
   // Handle end call -> complete
-  const handleEndCall = (appointment) => {
-    actions.setAppointmentStatus(appointment.id, 'Completed')
+  const handleEndCall = (appointment, remedyNotes) => {
+    const completedAt = new Date().toISOString()
+    actions.setAppointmentStatus(appointment.id, 'Completed', {
+      completedAt,
+      endedAt: completedAt,
+      remedyNotes,
+      history: [...(appointment.history || []), 'Remedy notes recorded'],
+    })
     setInProgressAppointment(null)
   }
 
@@ -212,23 +218,29 @@ export default function AstrologerAppointments() {
     : filteredAppointments
 
   return (
-    <div className={`apt-page${selectedAppointment ? ' is-drawer-open' : ''}`}>
-      <PageHeader
-        eyebrow="Astrologer Workspace"
-        title="Appointments"
-        showBack
-        backTo={routes.dashboard}
-      />
-
+    <div className={`apt-calendar-page${selectedAppointment ? ' is-drawer-open' : ''}`}>
       {astrologerServices.dndEnabled && (
         <div className="apt-dyaan-banner">
           <Bell size={16} /> <strong>Dyaan Mode: ON</strong> — New bookings are paused. Existing appointments remain active.
         </div>
       )}
 
-      {!hasPublishedAvailability && <AppointmentAvailabilityPanel astrologerId={astrologerId} />}
-
-      {hasPublishedAvailability && <>
+      {!hasPublishedAvailability ? (
+        <Card className="apt-calendar-locked">
+          <div className="apt-calendar-locked__icon">
+            <Bell size={20} />
+          </div>
+          <div>
+            <h2>Publish schedule before viewing the calendar</h2>
+            <p>
+              The appointment calendar becomes active after you publish availability for the month. Use the Schedule tab to create and publish your availability first.
+            </p>
+            <Link to={routes.appointmentSchedule} className="btn btn-primary">
+              Open Schedule
+            </Link>
+          </div>
+        </Card>
+      ) : (
         <div className="apt-main">
           <div className="apt-calendar-col">
             <AppointmentCalendar
@@ -254,7 +266,7 @@ export default function AstrologerAppointments() {
             <TodayPanel appointments={calendarAppointments} now={now} onSelect={setSelectedAppointment} />
           </aside>
         </div>
-      </>}
+      )}
 
       {selectedAppointment && (
         <AppointmentDetailsDrawer
