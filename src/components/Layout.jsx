@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  Activity,
   Sparkles,
   Gift,
   LayoutDashboard,
@@ -63,6 +64,7 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
+      { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
@@ -103,6 +105,7 @@ const PAGE_META = {
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },

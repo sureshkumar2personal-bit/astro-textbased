@@ -23,6 +23,7 @@ export function getRoleRoutes(role) {
     campaigns: `${base}/campaigns`,
     answerQuestion: `${base}/answer-question`,
     disputeManagement: `${base}/dispute-management`,
+    activity: `${base}/activity`,
     appointments: `${base}/appointments`,
     appointmentSchedule: `${base}/appointments/schedule`,
     appointmentCalendar: `${base}/appointments/calendar`,
