@@ -1,6 +1,7 @@
 import AuthPage from './AuthPage.jsx'
+import { useParams } from 'react-router-dom'
 
 export default function Login() {
-  return <AuthPage mode="login" />
+  const { role } = useParams()
+  return <AuthPage mode="login" selectedRole={role} />
 }
-
