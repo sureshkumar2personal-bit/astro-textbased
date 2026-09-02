@@ -17,6 +17,7 @@ import AnswerQuestion from './pages/AnswerQuestion.jsx'
 import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
+import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import AstrologerWallet from './pages/AstrologerWallet.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
@@ -95,6 +96,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
         <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
+        <Route path="/astrologer/activity" element={<AstrologerActivity />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
         <Route path="/astrologer/appointments" element={<AppointmentsShell />}>
           <Route index element={<Navigate to="schedule" replace />} />
