@@ -333,23 +333,25 @@ export default function Profile() {
         <div className="mt-8 grid grid-cols-1 gap-4 border-t border-[color:var(--surface-border)] pt-6 sm:grid-cols-3">
 
           <ProfileStat
-            icon={Users}
-            value="0"
-            label="Following"
-          />
+  icon={Users}
+  value="0"
+  label="Following"
+  onClick={() => navigate('/user/following')}
+/>
 
-          <ProfileStat
-            icon={Star}
-            value="0"
-            label="Subscriptions"
-          />
+<ProfileStat
+  icon={Star}
+  value="0"
+  label="Subscriptions"
+  onClick={() => navigate('/user/subscriptions')}
+/>
 
-          <ProfileStat
-            icon={CalendarDays}
-            value="0"
-            label="Consultations"
-          />
-
+<ProfileStat
+  icon={CalendarDays}
+  value="0"
+  label="Consultations"
+  onClick={() => navigate('/user/consultations')}
+/>
         </div>
 
       </section>
@@ -649,9 +651,21 @@ function ProfileStat({
   icon: Icon,
   value,
   label,
+  onClick,
 }) {
   return (
-    <div className="rounded-[18px] bg-[color:var(--surface-soft)] p-5 text-center">
+    <div
+  role="button"
+  tabIndex={0}
+  onClick={onClick}
+  onKeyDown={(event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onClick?.()
+    }
+  }}
+  className="cursor-pointer rounded-[18px] bg-[color:var(--surface-soft)] p-5 text-center transition hover:-translate-y-0.5 hover:shadow-md"
+>
 
       <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--violet-100)] text-[color:var(--primary)]">
         <Icon size={19} />
