@@ -65,9 +65,6 @@ export default function AppointmentDetails() {
       </Section>
 
       <div className="section" style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <Link to={`${routes.astrologerProfile}?id=${appointment.astrologerId}`} className="btn btn-outline">
-          View Astrologer
-        </Link>
         {CANCELLABLE_STATUSES.includes(appointment.status) && (
           <button type="button" className="btn btn-danger" onClick={handleCancel}>
             Cancel Appointment

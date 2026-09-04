@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { getSuggestedAstrologers } from '../data/notificationData.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import BackButton from '../components/BackButton.jsx'
@@ -8,6 +9,7 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 const PAGE_SIZE = 4
+const MAX_VISIBLE = PAGE_SIZE * 3
 
 export default function SuggestedAstrologers() {
   const { currentUser } = useAuth()
@@ -20,7 +22,7 @@ export default function SuggestedAstrologers() {
     .map((subscription) => subscription.astrologerId)
   const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
   const visibleAstrologers = suggestedAstrologers.slice(0, visibleCount)
-  const hasMore = visibleCount < suggestedAstrologers.length
+  const hasMore = visibleCount < suggestedAstrologers.length && visibleCount < MAX_VISIBLE
 
   return (
     <div className="space-y-8">
@@ -37,17 +39,17 @@ export default function SuggestedAstrologers() {
           <AstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
-            onViewProfile={(astrologerId) => navigate(`${routes.astrologerProfile}?id=${astrologerId}`)}
             onCall={(astrologerId) => navigate(`${routes.callPackages}?id=${astrologerId}`)}
-            onChat={(astrologerId) => navigate(`${routes.chatBooking}?id=${astrologerId}`)}
+            onChat={(astrologerId) => navigate(`/chat-birth-details/${astrologerId}`)}
+            onViewProfile={(astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=explore`)}
           />
         ))}
       </div>
 
       {hasMore && (
         <div className="flex justify-center">
-          <button type="button" className="btn btn-outline" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
-            See More
+          <button type="button" className="btn btn-primary" onClick={() => setVisibleCount((count) => Math.min(count + PAGE_SIZE, MAX_VISIBLE))}>
+            See More <ChevronDown size={16} aria-hidden="true" />
           </button>
         </div>
       )}

@@ -158,6 +158,11 @@ export function AuthProvider({ children }) {
         phone: String(payload.phone || '').trim(),
         specialization: String(payload.specialization || '').trim(),
         experience: String(payload.experience || '').trim(),
+        bio: String(payload.bio || '').trim(),
+        languages: Array.isArray(payload.languages)
+          ? payload.languages
+          : String(payload.languages || '').split(',').map((language) => language.trim()).filter(Boolean),
+        profileImage: String(payload.profileImage || '').trim(),
         astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
         astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
       }
