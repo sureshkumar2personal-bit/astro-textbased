@@ -21,6 +21,8 @@ import {
   ChevronDown,
   UserRound,
   CalendarDays,
+  CalendarPlus,
+  Radio,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -83,6 +85,8 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
+      { to: 'appointment-details', label: 'Book Appointment', icon: CalendarPlus },
+      { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Rewards', icon: Gift },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],

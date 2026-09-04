@@ -4391,6 +4391,40 @@ tbody tr:hover {
 .astrologer-profile-compact .astrologer-compact-stats { margin-top:8px; }
 .astrologer-profile-compact .astrologer-compact-actions { gap:6px; }
 .astrologer-profile-compact .astrologer-compact-actions .btn { min-height:34px; padding:7px 10px; }
+.astrologer-review-link { display:inline-flex; align-items:center; gap:4px; color:inherit; text-decoration:none; cursor:pointer; }
+.astrologer-review-link:hover { color:var(--primary); text-decoration:underline; text-underline-offset:3px; }
+.reviews-ratings-page { display:grid; gap:12px; }
+.reviews-ratings-page .page-title { font-size:24px; }
+.reviews-ratings-page .page-header-row .muted { font-size:12px; }
+.reviews-ratings-page__back { display:inline-flex; align-items:center; gap:5px; width:max-content; padding:0; border:0; background:transparent; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer; }
+.reviews-rating-summary { display:grid; grid-template-columns:minmax(180px,.7fr) 1.3fr; gap:22px; padding:17px 19px; }
+.reviews-rating-summary__score { display:flex; align-items:center; gap:18px; }
+.reviews-rating-summary__score > strong { color:var(--primary); font-size:45px; line-height:1; }
+.reviews-rating-summary__score span { color:var(--text-secondary); font-size:11px; }
+.reviews-stars { display:flex; gap:2px; color:var(--amber-600); margin-bottom:5px; }
+.reviews-stars--small { margin:4px 0 0; }
+.reviews-rating-breakdown { display:grid; gap:8px; align-content:center; }
+.reviews-rating-breakdown > div { display:grid; grid-template-columns:55px 1fr 58px; gap:8px; align-items:center; color:var(--text-secondary); font-size:10px; }
+.reviews-rating-breakdown b { color:var(--text-primary); font-size:10px; text-align:right; }
+.reviews-rating-bar { height:7px; overflow:hidden; border-radius:99px; background:var(--surface-soft); }
+.reviews-rating-bar i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--primary),var(--violet-400)); }
+.reviews-rating-filters { display:flex; flex-wrap:wrap; gap:8px; }
+.reviews-rating-filters button { padding:8px 13px; border:1px solid var(--surface-border); border-radius:999px; background:var(--surface-strong); color:var(--text-secondary); font-size:12px; font-weight:700; cursor:pointer; }
+.reviews-rating-filters button.is-active { border-color:var(--primary); background:var(--primary-bg); color:var(--primary); }
+.reviews-rating-list { display:grid; gap:9px; }
+.consultation-review-card { display:grid; gap:7px; padding:13px 15px; }
+.consultation-review-card__top { display:flex; align-items:center; gap:10px; }
+.consultation-review-card__top > small { margin-left:auto; color:var(--text-secondary); font-size:10px; }
+.consultation-review-card__avatar { display:grid; width:30px; height:30px; place-items:center; border-radius:50%; background:var(--primary-bg); color:var(--primary); font-size:10px; font-weight:800; }
+.consultation-review-card__top strong { color:var(--text-primary); font-size:12px; }
+.consultation-review-card__badges { display:flex; flex-wrap:wrap; gap:7px; }
+.consultation-review-card__badges span,.consultation-review-card__badges em { display:inline-flex; align-items:center; gap:4px; padding:5px 8px; border-radius:999px; background:var(--surface-soft); color:var(--text-secondary); font-size:10px; font-style:normal; font-weight:700; }
+.consultation-review-card__badges em { background:var(--success-bg); color:var(--green-600); }
+.consultation-review-card p { margin:0; color:var(--text-secondary); font-size:12px; line-height:1.45; }
+.consultation-review-card__helpful { display:inline-flex; align-items:center; gap:5px; width:max-content; padding:0; border:0; background:transparent; color:var(--text-secondary); font-size:10px; cursor:pointer; }
+.consultation-review-card__helpful:hover { color:var(--primary); }
+.reviews-rating-empty { padding:30px; color:var(--text-secondary); text-align:center; }
+@media (max-width:700px) { .reviews-rating-summary { grid-template-columns:1fr; gap:20px; padding:16px; } .reviews-rating-summary__score { justify-content:center; } }
 .astrologer-profile-compact .subscription-status { display:flex; align-items:center; gap:7px; min-height:34px; padding:6px 10px; border:1px solid rgba(112,73,180,.14); border-radius:10px; background:#f3effb; color:var(--primary); }
 .astrologer-profile-compact .subscription-status > span { display:flex; flex-direction:column; gap:1px; line-height:1.15; }
 .astrologer-profile-compact .subscription-status strong { font-size:11px; font-weight:800; }
