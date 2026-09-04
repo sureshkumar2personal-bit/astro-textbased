@@ -547,6 +547,7 @@ export const mockAstrologerPosts = [
 
 export const mockAstrologerAvailability = {
   'astrologer-demo': {
+    '2026-09-10': ['10:00 AM', '02:00 PM', '06:00 PM'],
     '2026-08-25': ['10:00 AM', '11:00 AM', '04:00 PM'],
     '2026-08-27': ['09:00 AM', '02:00 PM', '06:00 PM'],
     '2026-08-29': ['11:00 AM', '03:00 PM'],

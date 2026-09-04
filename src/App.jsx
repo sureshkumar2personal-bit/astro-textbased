@@ -49,6 +49,7 @@ import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
+import ReviewsRatings from './pages/ReviewsRatings.jsx'
 import AstrologerLiveSessionShell, {
   AstrologerLiveSessionConfigure,
   AstrologerLiveSessionSetup,
@@ -134,6 +135,7 @@ function UserRoutes() {
         <Route path="/user/raise-dispute" element={<RaiseDispute />} />
         <Route path="/user/chat-astrologers" element={<ChatAstrologers />} />
         <Route path="/user/astrologer/:astrologerId" element={<AstrologerProfile />} />
+        <Route path="/user/astrologer/:astrologerId/reviews" element={<ReviewsRatings />} />
         <Route path="/user/call-astrologers" element={<CallAstrologers />} />
         <Route path="/user/astrologers" element={<Astrologers />} />
         <Route path="/user/astrologers-full" element={<AstrologersFull />} />
