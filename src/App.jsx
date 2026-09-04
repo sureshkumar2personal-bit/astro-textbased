@@ -4,6 +4,7 @@ import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
 import { ThemeProvider } from './state/ThemeContext.jsx'
 import { getRoleRoutes, ROLES } from './utils/roleRoutes.js'
+
 import Login from './pages/Login.jsx'
 import RoleSelection from './pages/RoleSelection.jsx'
 import Dashboard from './pages/Dashboard.jsx'
@@ -62,29 +63,46 @@ import AstrologerAppointmentCalendar from './pages/astrologer/appointments/Appoi
 
 function RequireAuth() {
   const { currentUser } = useAuth()
+
   if (!currentUser) {
     return <Navigate to="/login" replace />
   }
+
   return <Outlet />
 }
 
 function RequireRole({ role }) {
   const { currentUser } = useAuth()
+
   if (!currentUser) {
     return <Navigate to="/login" replace />
   }
+
   if (currentUser.role !== role) {
-    return <Navigate to={getRoleRoutes(currentUser.role).dashboard} replace />
+    return (
+      <Navigate
+        to={getRoleRoutes(currentUser.role).dashboard}
+        replace
+      />
+    )
   }
+
   return <Outlet />
 }
 
 function NotFoundRedirect() {
   const { currentUser } = useAuth()
+
   if (!currentUser) {
     return <Navigate to="/login" replace />
   }
-  return <Navigate to={getRoleRoutes(currentUser.role).dashboard} replace />
+
+  return (
+    <Navigate
+      to={getRoleRoutes(currentUser.role).dashboard}
+      replace
+    />
+  )
 }
 
 function AstrologerRoutes() {
@@ -95,8 +113,11 @@ function AstrologerRoutes() {
         <Route path="/astrologer/text-based-questions" element={<TextBasedQuestions />} />
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
+        <Route path="/astrologer/profile" element={<Profile />} />
         <Route path="/astrologer/wallet" element={<AstrologerWallet />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
+        <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
+        <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
@@ -169,16 +190,30 @@ function UserRoutes() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<RoleSelection />} />
-      <Route path="/login" element={<RoleSelection />} />
-      <Route path="/login/:role" element={<Login />} />
+      <Route
+        path="/"
+        element={<RoleSelection />}
+      />
+
+      <Route
+        path="/login"
+        element={<RoleSelection />}
+      />
+
+      <Route
+        path="/login/:role"
+        element={<Login />}
+      />
 
       <Route element={<RequireAuth />}>
         {AstrologerRoutes()}
         {UserRoutes()}
       </Route>
 
-      <Route path="*" element={<NotFoundRedirect />} />
+      <Route
+        path="*"
+        element={<NotFoundRedirect />}
+      />
     </Routes>
   )
 }

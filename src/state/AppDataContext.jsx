@@ -1,8 +1,9 @@
 /* oxlint-disable react/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
+import { isCancelledStatus } from '../utils/appointments.js'
 import { ROLES } from '../utils/roleRoutes.js'
-import { mockAppointments, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
+import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
 import { useAuth } from './AuthContext.jsx'
 
@@ -732,6 +733,8 @@ const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
 const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
 const APPOINTMENT_AVAILABILITY_STORAGE_KEY = 'astroconnect-appointment-availability'
+const APPOINTMENTS_STORAGE_KEY = 'astroconnect-appointments'
+const CONSULTATIONS_STORAGE_KEY = 'astroconnect-appointment-consultations'
 const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 
@@ -786,8 +789,9 @@ function monthLabelFromKey(monthKey) {
 }
 
 function normalizeAppointmentSlot(slot) {
-  const start = typeof slot?.start === 'string' && slot.start.trim() ? slot.start.trim() : '09:00'
-  const end = typeof slot?.end === 'string' && slot.end.trim() ? slot.end.trim() : '10:00'
+  const validTime = (value) => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
+  const start = validTime(slot?.start) ? slot.start : '09:00'
+  const end = validTime(slot?.end) ? slot.end : '10:00'
   return { start, end }
 }
 
@@ -800,16 +804,25 @@ function normalizeAppointmentScheduleDay(day, dayIndex) {
     dayIndex,
     enabled: day?.enabled !== false && slots.length > 0,
     slots,
+    breaks: Array.isArray(day?.breaks)
+      ? day.breaks.map(normalizeAppointmentSlot).filter((slot) => slot.start < slot.end)
+      : [],
   }
 }
 
 function normalizeAppointmentDateOverride(override) {
   if (!override || typeof override !== 'object') return null
-  const status = ['Available', 'Leave', 'Dyaan'].includes(override.status) ? override.status : 'Available'
+  const status = ['Available', 'Unavailable', 'Leave', 'Dyaan'].includes(override.status) ? override.status : 'Available'
   const windows = Array.isArray(override.windows)
     ? override.windows.map(normalizeAppointmentSlot).filter((slot) => slot.start < slot.end)
     : []
-  return { status, windows }
+  const breaks = Array.isArray(override.breaks)
+    ? override.breaks.map(normalizeAppointmentSlot).filter((slot) => slot.start < slot.end)
+    : []
+  const bookedSlots = Array.isArray(override.bookedSlots)
+    ? override.bookedSlots.filter((n) => Number.isFinite(Number(n))).map((n) => Number(n))
+    : []
+  return { status, windows, breaks, bookedSlots }
 }
 
 function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, status = 'Draft') {
@@ -820,6 +833,8 @@ function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, st
     monthKey: normalizedMonthKey,
     monthLabel: monthLabelFromKey(normalizedMonthKey),
     timezone: 'Asia/Kolkata',
+    appointmentDuration: 30,
+    appointmentPrice: 799,
     status,
     publishedAt: null,
     updatedAt: new Date().toISOString(),
@@ -851,6 +866,14 @@ function normalizeAppointmentAvailabilityTemplate(template) {
     publishedAt: template.publishedAt || null,
     updatedAt: template.updatedAt || normalized.updatedAt,
     reminderDismissedForMonthKey: template.reminderDismissedForMonthKey || null,
+    appointmentDuration: [15, 30].includes(
+      Number(template.appointmentDuration),
+    )
+      ? Number(template.appointmentDuration)
+      : 30,
+    appointmentPrice: Number.isFinite(Number(template.appointmentPrice)) && Number(template.appointmentPrice) >= 0
+      ? Number(template.appointmentPrice)
+      : 799,
     dateOverrides,
     weeklySchedule,
   }
@@ -1006,7 +1029,18 @@ export function AppDataProvider({ children }) {
   const [selectedCampaignId, setSelectedCampaignId] = useState(initialCampaigns[0].id)
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
   const [questionPreviewId, setQuestionPreviewId] = useState(null)
-  const [appointments, setAppointments] = useState(mockAppointments)
+  const [appointments, setAppointments] = useState(() => {
+    const stored = loadFromStorage(APPOINTMENTS_STORAGE_KEY, null)
+    const seed = [...mockAppointmentHistory, ...mockAppointments]
+    if (!Array.isArray(stored) || !stored.length) return seed
+    const storedIds = new Set(stored.map((appointment) => appointment.id))
+    return [...stored, ...seed.filter((appointment) => !storedIds.has(appointment.id))]
+  })
+  const [consultations, setConsultations] = useState(() => {
+    const stored = loadFromStorage(CONSULTATIONS_STORAGE_KEY, null)
+    if (Array.isArray(stored) && stored.length) return stored
+    return mockConsultations
+  })
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
   const [subscriptions, setSubscriptions] = useState(() => {
     if (currentUser?.role !== ROLES.USER || !currentUser?.id) return []
@@ -1127,6 +1161,14 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(APPOINTMENT_AVAILABILITY_STORAGE_KEY, appointmentAvailabilityTemplates)
   }, [appointmentAvailabilityTemplates])
+
+  useEffect(() => {
+    saveToStorage(APPOINTMENTS_STORAGE_KEY, appointments)
+  }, [appointments])
+
+  useEffect(() => {
+    saveToStorage(CONSULTATIONS_STORAGE_KEY, consultations)
+  }, [consultations])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -1843,6 +1885,7 @@ export function AppDataProvider({ children }) {
         bookingGroup: payload.bookingGroup || null,
         bookingSequence: payload.bookingSequence || 1,
         questionDetails: payload.questionDetails || null,
+        horoscope: payload.horoscope || null,
         status: 'Pending',
       }
       setAppointments((prev) => [appointment, ...prev])
@@ -1906,13 +1949,171 @@ export function AppDataProvider({ children }) {
         ),
       )
     },
+    cancelAppointmentByAstrologer(appointmentId, meta = {}) {
+      const target = appointments.find((item) => item.id === appointmentId)
+      if (!target) return null
+      if (target.status !== 'Booked') return null
+      setAppointments((prev) =>
+        prev.map((item) =>
+          item.id === appointmentId
+            ? {
+                ...item,
+                status: 'Cancelled by Astrologer',
+                cancelledBy: 'Astrologer',
+                cancelledAt: new Date().toISOString(),
+                cancellationReason: meta.reason || null,
+              }
+            : item,
+        ),
+      )
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Appointment cancelled by astrologer',
+          detail: `Your ${(target.type || 'appointment').toLowerCase()} with ${target.astrologer} on ${target.date}, ${target.time} was cancelled by the astrologer. A refund or reschedule can be arranged.`,
+          time: 'just now',
+          route: `/user/appointment-details?id=${appointmentId}`,
+          audience: ROLES.USER,
+          category: 'appointments',
+          read: false,
+        },
+        ...prev,
+      ])
+      return target
+    },
+    saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, send }) {
+      if (!appointmentId) return null
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      const existing = consultations.find((consultation) => consultation.appointmentId === appointmentId)
+      const record = {
+        id: existing?.id || `cons-${appointmentId}-${Date.now()}`,
+        appointmentId,
+        astrologerId: appointment?.astrologerId || 'astrologer-demo',
+        userId: appointment?.userId || null,
+        customerName: appointment?.customerName || null,
+        notes: notes ?? '',
+        fileName: fileName ?? '',
+        fileType: fileType ?? '',
+        fileSize: fileSize ?? '',
+        sent: Boolean(send),
+        sentAt: send ? new Date().toISOString() : existing?.sentAt || null,
+        sentToUser: Boolean(send),
+      }
+      setConsultations((prev) => {
+        const idx = prev.findIndex((consultation) => consultation.appointmentId === appointmentId)
+        if (idx === -1) return [record, ...prev]
+        const next = prev.slice()
+        next[idx] = record
+        return next
+      })
+      if (send) {
+        this.updateAppointment(appointmentId, {
+          consultationFollowUpRequired: false,
+          consultationSentAt: record.sentAt,
+        })
+      }
+      return record
+    },
+    sendConsultation(appointmentId) {
+      setConsultations((prev) =>
+        prev.map((consultation) =>
+          consultation.appointmentId === appointmentId
+            ? { ...consultation, sent: true, sentToUser: true, sentAt: new Date().toISOString() }
+            : consultation,
+        ),
+      )
+      this.updateAppointment(appointmentId, {
+        consultationFollowUpRequired: false,
+        consultationSentAt: new Date().toISOString(),
+      })
+    },
+    updateAppointment(appointmentId, patch = {}) {
+      setAppointments((prev) =>
+        prev.map((item) => (item.id === appointmentId ? { ...item, ...patch } : item)),
+      )
+      return patch
+    },
+    savePrivateNotes(appointmentId, privateNotes) {
+      this.updateAppointment(appointmentId, { privateNotes: privateNotes ?? '' })
+    },
+    savePreCallAnalysis(appointmentId, preCallAnalysis) {
+      this.updateAppointment(appointmentId, { preCallAnalysis: preCallAnalysis ?? '' })
+    },
+    completeAppointmentCall(appointmentId, { callDurationSeconds, endedAt, privateNotes } = {}) {
+      const patch = {
+        status: 'Completed',
+        completedAt: endedAt || new Date().toISOString(),
+        callDurationSeconds: callDurationSeconds || 0,
+        consultationFollowUpRequired: true,
+      }
+      if (privateNotes != null) patch.privateNotes = privateNotes
+      this.updateAppointment(appointmentId, patch)
+    },
+    rescheduleAppointment({ originalId, date, dateIso, time, start, end }) {
+      const original = appointments.find((item) => item.id === originalId)
+      if (!original) return null
+      // Only eligible Booked appointments can be rescheduled. Completed,
+      // Cancelled, No-show, Auto-cancelled and already-rescheduled originals
+      // are never candidates.
+      if ((original.status || 'Booked') !== 'Booked') return null
+      if (isCancelledStatus(original.status)) return null
+      if (original.rescheduledTo || original.rescheduledFrom) return null
+      const newId = `apt-rs-${Date.now().toString(36)}`
+      const booked = new Date()
+      const newAppointment = {
+        id: newId,
+        userId: original.userId || null,
+        astrologerId: original.astrologerId,
+        astrologer: original.astrologer,
+        type: 'Audio Call',
+        callType: 'Audio',
+        customerName: original.customerName,
+        customerPhone: original.customerPhone,
+        orderId: original.orderId ? `${original.orderId}-RS` : original.orderId,
+        amount: original.amount ?? original.price ?? 0,
+        price: original.price,
+        package: original.package,
+        duration: original.duration || '30 min',
+        language: original.language,
+        topic: original.topic,
+        date,
+        dateIso,
+        time,
+        start,
+        end,
+        status: 'Booked',
+        paymentStatus: original.paymentStatus || 'Paid',
+        paymentMethod: original.paymentMethod || 'Wallet',
+        transactionId: original.transactionId,
+        bookingDate: date,
+        bookedAt: booked.toISOString(),
+        rescheduledFrom: originalId,
+        horoscope: original.horoscope || null,
+        questionDetails: original.questionDetails || null,
+        note: 'No second payment — rescheduled from the original appointment.',
+      }
+      setAppointments((prev) => {
+        const rest = prev.map((item) =>
+          item.id === originalId
+            ? { ...item, rescheduledTo: newId }
+            : item,
+        )
+        return [newAppointment, ...rest]
+      })
+      return newId
+    },
     saveAppointmentAvailabilityTemplate(template) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)
       if (!normalized) return null
       setAppointmentAvailabilityTemplates((prev) => {
-        const index = prev.findIndex((item) => item.id === normalized.id || (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey))
-        if (index === -1) return [normalized, ...prev]
-        const next = prev.slice()
+        const policy = {
+          appointmentDuration: normalized.appointmentDuration,
+          appointmentPrice: normalized.appointmentPrice,
+        }
+        const withPolicy = prev.map((item) => item.astrologerId === normalized.astrologerId ? { ...item, ...policy } : item)
+        const index = withPolicy.findIndex((item) => item.id === normalized.id || (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey))
+        if (index === -1) return [normalized, ...withPolicy]
+        const next = withPolicy.slice()
         next[index] = normalized
         return next
       })
@@ -1928,9 +2129,11 @@ export function AppDataProvider({ children }) {
         updatedAt: new Date().toISOString(),
       }
       setAppointmentAvailabilityTemplates((prev) => {
-        const index = prev.findIndex((item) => item.id === published.id || (item.astrologerId === published.astrologerId && item.monthKey === published.monthKey))
-        if (index === -1) return [published, ...prev]
-        const next = prev.slice()
+        const policy = { appointmentDuration: published.appointmentDuration, appointmentPrice: published.appointmentPrice }
+        const withPolicy = prev.map((item) => item.astrologerId === published.astrologerId ? { ...item, ...policy } : item)
+        const index = withPolicy.findIndex((item) => item.id === published.id || (item.astrologerId === published.astrologerId && item.monthKey === published.monthKey))
+        if (index === -1) return [published, ...withPolicy]
+        const next = withPolicy.slice()
         next[index] = published
         return next
       })
@@ -2200,7 +2403,7 @@ export function AppDataProvider({ children }) {
       }, 3000)
       return withdrawal
     },
-  }), [astrologerPosts, campaigns, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, withdrawalHistory])
+  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, withdrawalHistory])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -2223,6 +2426,7 @@ export function AppDataProvider({ children }) {
     liveStreamOpen,
     questionPreviewId,
     appointments,
+    consultations,
     followedAstrologerIds,
     subscriptions,
     blockedUserIds,
@@ -2263,6 +2467,7 @@ export function AppDataProvider({ children }) {
     liveStreamOpen,
     questionPreviewId,
     appointments,
+    consultations,
     followedAstrologerIds,
     subscriptions,
     blockedUserIds,
