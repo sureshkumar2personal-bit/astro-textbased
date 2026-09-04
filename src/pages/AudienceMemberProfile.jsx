@@ -86,11 +86,11 @@ export default function AudienceMemberProfile() {
   }, [])
 
   if (!member) {
-    return <div className="audience-member-page"><Card className="audience-member-not-found"><CircleAlert size={28} /><h1>Member profile not found</h1><p>This audience member is unavailable or the profile link is invalid.</p><button type="button" className="btn btn-primary" onClick={() => navigate('/astrologer/profile')}>Return to profile</button></Card></div>
+    return <div className="audience-member-page"><Card className="audience-member-not-found"><CircleAlert size={28} /><h1>Member profile not found</h1><p>This audience member is unavailable or the profile link is invalid.</p><button type="button" className="btn btn-primary" onClick={() => navigate('/astrologer')}>Return to dashboard</button></Card></div>
   }
 
   const blocked = blockedUserIds.includes(member.id)
-  const backTo = `/astrologer/profile?audience=${audienceLabel}`
+  const backTo = '/astrologer'
   const handleAction = (action) => {
     setMenuOpen(false)
     if (action === 'block') {

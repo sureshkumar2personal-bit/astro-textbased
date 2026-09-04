@@ -1,4 +1,4 @@
-import { ArrowLeft, Users, UserCheck } from 'lucide-react'
+import { Users, UserCheck } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { mockAstrologers } from '../../../../data/notificationData.js'
 import Card from '../../../components/ui/Card.jsx'
@@ -14,7 +14,7 @@ function formatCount(count) {
   return String(count)
 }
 
-function AstrologerCard({ astrologer, onViewProfile }) {
+function AstrologerCard({ astrologer }) {
   return (
     <Card hover className="flex flex-col h-48">
       <div className="flex flex-col items-center text-center p-3">
@@ -70,15 +70,6 @@ function AstrologerCard({ astrologer, onViewProfile }) {
         </div>
       </div>
 
-      <div className="px-4 pb-4">
-        <button
-          type="button"
-          className="btn btn-primary w-full"
-          onClick={() => onViewProfile(astrologer.id)}
-        >
-          View Profile
-        </button>
-      </div>
     </Card>
   )
 }
@@ -87,10 +78,6 @@ export default function Astrologers() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-
-  const handleViewProfile = (astrologerId) => {
-    navigate(`${routes.astrologerProfile}?id=${astrologerId}`)
-  }
 
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -102,7 +89,6 @@ export default function Astrologers() {
           <AstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
-            onViewProfile={handleViewProfile}
           />
         ))}
         <Link
@@ -118,7 +104,6 @@ export default function Astrologers() {
             <AstrologerCard
               key={astrologer.id}
               astrologer={astrologer}
-              onViewProfile={handleViewProfile}
             />
           ))}
         </div>

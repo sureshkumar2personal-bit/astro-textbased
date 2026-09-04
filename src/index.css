@@ -618,6 +618,94 @@ textarea:focus-visible {
   box-shadow: 0 3px 12px rgba(58, 42, 106, .035);
   gap: 0;
 }
+
+/* User consultation flow */
+.consultation-directory-page,
+.consultation-profile-page {
+  display: grid;
+  gap: 18px;
+}
+
+.consultation-directory__dashboard-link {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -8px;
+  padding: 0;
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.consultation-directory__dashboard-link:hover { color: var(--primary-dark); }
+.explore-back-link { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; color: var(--primary); background: transparent; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.explore-back-link:hover { color: var(--primary-dark); text-decoration: underline; text-underline-offset: 3px; }
+.chat-booking-page__package-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.voice-call-controls { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+.voice-call-controls button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 13px; border: 1px solid var(--surface-border); border-radius: var(--radius-s); color: var(--ink); background: var(--surface-strong); cursor: pointer; }
+.voice-call-controls button.is-active { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.voice-call-controls .voice-call-end { color: #fff; border-color: var(--danger); background: var(--danger); }
+@media (max-width: 640px) { .voice-call-controls { flex-wrap: wrap; } .chat-booking-page__package-grid--two { grid-template-columns: 1fr; } }
+
+.chat-birth-details-page__card { display: grid; gap: 16px; }
+.chat-birth-details-page__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.chat-birth-details-page__continue { width: 100%; min-height: 44px; margin-top: 4px; }
+
+.consultation-stats-card {
+  min-height: 140px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(109, 40, 217, 0.06), rgba(255, 138, 76, 0.05));
+}
+
+.consultation-astrologer-card {
+  min-height: 100%;
+}
+
+.consultation-astrologer-card__avatar,
+.consultation-profile-avatar {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.14);
+}
+
+.consultation-astrologer-card__avatar {
+  width: 88px;
+  height: 88px;
+}
+
+.consultation-profile-avatar {
+  width: min(100%, 220px);
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  border: 6px solid rgba(255, 255, 255, 0.78);
+}
+
+.consultation-astrologer-card__avatar img,
+.consultation-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.consultation-profile-avatar img {
+  border-radius: inherit;
+}
+
+.consultation-profile-page .section {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .consultation-profile-avatar {
+    max-width: 180px;
+  }
+}
 .my-account-history-list { gap: 18px; border-top: 0; }
 .my-account-history-top { min-height: 38px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 16px; }
 .my-account-history-top > div:first-child { min-width: 0; }
@@ -961,6 +1049,7 @@ textarea:focus-visible {
   gap: 10px;
   position: relative;
 }
+
 
 .topbar-popover {
   position: absolute;
@@ -1447,6 +1536,11 @@ textarea:focus-visible {
   color: var(--primary);
 }
 
+.astrologer-card__action--primary {
+  color: var(--primary);
+  font-weight: 700;
+}
+
 .astrologer-card__action-divider {
   width: 1px;
   height: 24px;
@@ -1458,6 +1552,71 @@ textarea:focus-visible {
   min-width: 0;
   margin: 0 14px 10px;
   align-self: stretch;
+}
+
+/* Compact directory variant: preserves the Explore card structure while
+   allowing three consultation cards to sit comfortably across desktop. */
+.consultation-directory-astrologer-card {
+  width: 100%;
+  min-height: 236px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__content {
+  padding: 10px 10px 7px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__avatar-wrap {
+  margin-bottom: 5px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__name {
+  margin-bottom: 2px;
+  font-size: 15px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__specialization {
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__meta {
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__languages {
+  gap: 3px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__languages span {
+  padding: 2px 7px;
+  font-size: 11px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__rate {
+  top: 8px;
+  right: 8px;
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__stats {
+  min-height: 40px;
+  padding: 4px 10px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__action {
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__actions--chat .astrologer-card__action {
+  width: 100%;
+}
+
+.consultation-directory-astrologer-card .astrologer-card__profile-button {
+  margin: 0 10px 8px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1926,6 +2085,15 @@ textarea:focus-visible {
 .consultation-chat__composer input:focus { outline: 2px solid rgba(143, 77, 255, 0.22); border-color: var(--primary); }
 .consultation-chat__composer .btn { display: inline-flex; align-items: center; gap: 6px; }
 .consultation-chat__composer .btn:disabled { cursor: not-allowed; opacity: 0.55; }
+.consultation-chat__charge-note { padding: 8px 18px 0; color: var(--muted); font-size: 12px; text-align: right; }
+.consultation-chat__timer button { border: 0; background: transparent; color: inherit; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.consultation-chat__empty { margin: auto; color: var(--muted); font-size: 14px; }
+.consultation-chat__summary { margin: 20px 0 0; padding: 14px; border-radius: var(--radius-s); background: var(--surface-soft); text-align: left; }
+.consultation-chat__summary div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; color: var(--text-secondary); font-size: 13px; }
+.consultation-chat__summary dt, .consultation-chat__summary dd { margin: 0; }
+.consultation-chat__summary dd { color: var(--ink); font-weight: 700; }
+.consultation-chat__ended-actions { display: flex; gap: 10px; margin-top: 18px; }
+.consultation-chat__ended-actions .btn { flex: 1; min-height: 44px; }
 .consultation-chat__overlay { position: fixed; z-index: 20; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(27, 13, 46, 0.48); }
 .consultation-chat__ended-modal { width: min(100%, 440px); padding: 26px; border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-float); text-align: center; }
 .consultation-chat__ended-icon { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary-bg); color: var(--primary); }
@@ -2636,6 +2804,7 @@ textarea:focus-visible {
   position: relative;
   z-index: 1;
 }
+.social-profile__avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
 .social-profile__identity-copy {
   min-width: 0;
@@ -2986,6 +3155,84 @@ button.social-profile__audience-item { cursor: pointer; }
 .profile-services-help { margin: 8px 0 16px; color: var(--text-secondary); font-size: 13px; }
 .service-status-dot { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--danger); }
 .service-status-dot.is-available { background: var(--success); box-shadow: 0 0 0 3px var(--success-bg); }
+
+.profile-status-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 112px;
+  padding: 8px 11px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.profile-status-control > span:last-child { display: grid; gap: 1px; font-size: 12px; font-weight: 800; }
+.profile-status-control small { color: var(--text-secondary); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.profile-summary-details { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; color: var(--text-primary); font-size: 12px; font-weight: 700; }
+.profile-summary-details span + span { padding-left: 18px; border-left: 1px solid var(--surface-border); }
+.social-profile__bio > strong { display: block; margin-bottom: 4px; color: var(--text-primary); font-size: 13px; }
+.social-profile__bio > p { margin: 0; }
+.profile-stats-card { display: grid; gap: 16px; margin-top: 20px; padding: 18px 22px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-strong); box-shadow: var(--shadow-xs); }
+.profile-stats-card__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.profile-stats-card__heading h2 { margin: 3px 0 0; color: var(--text-primary); font-size: 18px; }
+.profile-stats-card__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.profile-stats-card__grid > div, .profile-stats-card__grid > button { display: grid; grid-template-columns: 34px 1fr; align-items: center; column-gap: 9px; padding: 7px 10px; border: 0; border-right: 1px solid var(--surface-border); background: transparent; color: var(--text-primary); text-align: left; }
+.profile-stats-card__grid > div:last-child { border-right: 0; }
+.profile-stats-card__grid > button { cursor: pointer; }
+.profile-stats-card__grid > button:hover strong { color: var(--primary); }
+.profile-stat-icon { display: grid; grid-row: span 2; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--primary); background: var(--primary-bg); }
+.profile-stat-icon--coral { color: var(--accent-dark); background: var(--accent-bg); }
+.profile-stat-icon--gold { color: var(--amber-600); background: var(--warning-bg); }
+.profile-stats-card__grid strong { font-size: 18px; line-height: 1.1; }
+.profile-stats-card__grid small { color: var(--text-secondary); font-size: 11px; font-weight: 700; }
+.social-profile__post-author { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+.social-profile__post-avatar { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 800; }
+.social-profile__post-author > span:last-child { display: grid; gap: 2px; }
+.social-profile__post-author strong { color: var(--text-primary); font-size: 12px; }
+.social-profile__post-author small { color: var(--text-secondary); font-size: 10px; }
+.profile-post-meta button { display: inline-flex; align-items: center; gap: 4px; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.profile-post-meta button:hover { color: var(--primary); }
+.profile-management-section { display: grid; gap: 14px; margin-top: 20px; padding: 18px 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-xs); }
+.profile-management-section h2 { margin: 3px 0 0; color: var(--text-primary); font-size: 17px; }
+.profile-consultation-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.profile-consultation-option { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); color: var(--text-primary); text-align: left; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.profile-consultation-option:hover { border-color: var(--primary); background: var(--primary-bg); }
+.profile-consultation-option__icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 10px; background: var(--primary-bg); color: var(--primary); }
+.profile-consultation-option > span:nth-child(2) { display: grid; gap: 4px; min-width: 0; }
+.profile-consultation-option strong { color: var(--text-primary); font-size: 12px; }
+.profile-consultation-option small { display: inline-flex; align-items: center; gap: 7px; color: var(--text-secondary); font-size: 10px; white-space: nowrap; }
+.profile-consultation-option small .service-status-dot { width: 7px; height: 7px; flex-basis: 7px; }
+.profile-option-toggle { position: relative; width: 32px; height: 18px; flex: 0 0 32px; margin-left: auto; border-radius: 99px; background: var(--border); }
+.profile-option-toggle::after { position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-xs); content: ''; transition: transform .18s ease; }
+.profile-option-toggle.is-on { background: var(--primary); }
+.profile-option-toggle.is-on::after { transform: translateX(14px); }
+.profile-management-links { background: linear-gradient(145deg, var(--surface), var(--surface-soft)); }
+.profile-management-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.profile-management-grid button, .profile-management-grid a { display: inline-flex; align-items: center; justify-content: flex-start; gap: 7px; min-height: 38px; padding: 8px 10px; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--surface-strong); color: var(--text-secondary); font-size: 11px; font-weight: 700; text-align: left; text-decoration: none; cursor: pointer; }
+.profile-management-grid button:hover, .profile-management-grid a:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.profile-management-grid svg { flex: 0 0 auto; color: var(--primary); }
+.profile-live-header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.availability-management-modal { width: min(500px, calc(100vw - 32px)); }
+.availability-management-modal .modal-card__header p { margin: 4px 0 0; font-size: 11px; }
+.availability-management-list { display: grid; gap: 8px; }
+.availability-management-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-soft); }
+.availability-management-row > span { display: inline-flex; align-items: center; gap: 8px; color: var(--text-primary); font-size: 12px; }
+.availability-management-row > span svg { color: var(--primary); }
+.availability-management-row .profile-option-toggle { border: 0; cursor: pointer; }
+
+@media (max-width: 760px) {
+  .profile-summary-details span + span { padding-left: 0; border-left: 0; }
+  .profile-consultation-options, .profile-management-grid { grid-template-columns: 1fr; }
+  .profile-stats-card__grid { grid-template-columns: 1fr; }
+  .profile-stats-card__grid > div, .profile-stats-card__grid > button { border-right: 0; border-bottom: 1px solid var(--surface-border); padding: 10px 0; }
+  .profile-stats-card__grid > div:last-child { border-bottom: 0; }
+  .profile-consultation-option { min-height: 58px; }
+  .profile-live-header-actions { width: 100%; }
+  .profile-live-header-actions .btn { flex: 1; justify-content: center; }
+}
 
 @media (max-width: 720px) {
   .hero-services-summary { top: 18px; right: 18px; max-width: calc(100% - 36px); }
@@ -4988,6 +5235,232 @@ tbody tr:hover {
   margin: 0 auto;
 }
 
+.apt-appointment-tabs {
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.apt-page .page-header-row {
+  align-items: flex-start;
+}
+
+.apt-history {
+  display: grid;
+  gap: 16px;
+}
+
+.apt-history-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.apt-history-filters {
+  flex: 1 1 640px;
+  min-width: 0;
+}
+
+.apt-history-search {
+  flex: 0 1 320px;
+  min-width: 240px;
+}
+
+.apt-history-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.apt-history-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.apt-history-list-card,
+.apt-history-detail-card {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px;
+}
+
+.apt-history-list-head,
+.apt-history-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apt-history-list-head .section-title,
+.apt-history-detail-head .section-title {
+  margin-bottom: 4px;
+}
+
+.apt-history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.apt-history-item {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, background .15s ease;
+}
+
+.apt-history-item:hover {
+  border-color: var(--primary-border, #ddd6fe);
+  box-shadow: var(--shadow-xs);
+  transform: translateY(-1px);
+}
+
+.apt-history-item.is-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 1px var(--primary-border, #ddd6fe);
+}
+
+.apt-history-item__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.apt-history-item__top strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.apt-history-item__top span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.apt-history-item__meta,
+.apt-history-item__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.apt-history-item__meta span,
+.apt-history-item__footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.apt-history-item__footer {
+  padding-top: 10px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.apt-history-detail-card {
+  position: sticky;
+  top: 16px;
+}
+
+.apt-history-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apt-history-detail-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+}
+
+.apt-history-detail-grid > div span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.apt-history-detail-grid > div strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.apt-history-detail-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.apt-history-detail-copy p,
+.apt-history-detail-copy .muted {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.apt-history-notes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.apt-history-empty {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 180px;
+  padding: 18px;
+  border: 1px dashed var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.apt-history-empty svg {
+  color: var(--primary);
+}
+
+.apt-history-empty strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.apt-history-empty span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.apt-history-empty--detail {
+  min-height: 320px;
+}
+
 .apt-dyaan-banner {
   display: flex;
   align-items: center;
@@ -6466,6 +6939,10 @@ button.apt-week-day:focus-visible {
   background: var(--primary-bg);
 }
 
+.apt-month-cell.is-unavailable .apt-month-day {
+  color: var(--danger);
+}
+
 .apt-month-cell.is-muted {
   opacity: 0.5;
 }
@@ -6955,6 +7432,186 @@ button.apt-week-day:focus-visible {
   font-weight: 600;
 }
 
+.apt-detail-card--notes {
+  grid-template-columns: 1fr;
+}
+
+.apt-detail-notes-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apt-detail-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apt-detail-note {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+}
+
+.apt-detail-note span,
+.apt-remedy-card span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.apt-detail-note strong,
+.apt-remedy-card strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.apt-detail-note--full {
+  grid-column: 1 / -1;
+}
+
+.apt-remedy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apt-remedy-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface-soft);
+}
+
+.apt-remedy-card--full {
+  grid-column: 1 / -1;
+}
+
+.apt-notes-modal {
+  width: min(860px, calc(100vw - 32px));
+}
+
+.apt-notes-overlay {
+  z-index: 260;
+}
+
+.apt-notes-header {
+  padding-bottom: 16px;
+}
+
+.apt-notes-header h2 {
+  margin: 4px 0 6px;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.apt-notes-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.apt-notes-eyebrow {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.apt-notes-form {
+  display: grid;
+  gap: 14px;
+  background: var(--surface-soft);
+}
+
+.apt-notes-summary {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--primary-border, #ddd6fe);
+  border-radius: var(--radius-m);
+  background: linear-gradient(135deg, var(--primary-bg), var(--surface-strong));
+}
+
+.apt-notes-summary strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.apt-notes-summary span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.apt-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.apt-notes-field {
+  display: grid;
+  gap: 6px;
+}
+
+.apt-notes-field--full {
+  grid-column: 1 / -1;
+}
+
+.apt-notes-field span {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.apt-notes-field input,
+.apt-notes-field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 13px;
+  outline: none;
+}
+
+.apt-notes-field textarea {
+  resize: vertical;
+  min-height: 92px;
+}
+
+.apt-notes-field input:focus,
+.apt-notes-field textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.apt-notes-footer {
+  padding: 6px 0 0;
+  border-top: 0;
+}
+
 .apt-drawer-call {
   margin-top: 8px;
   padding-top: 12px;
@@ -7347,6 +8004,14 @@ button.apt-week-day:focus-visible {
     height: auto;
     min-height: 500px;
   }
+
+  .apt-history-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apt-history-detail-card {
+    position: static;
+  }
 }
 
 @media (max-width: 768px) {
@@ -7399,6 +8064,47 @@ button.apt-week-day:focus-visible {
   .apt-calendar-title {
     width: 100%;
     text-align: center;
+  }
+
+  .apt-history-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .apt-history-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .apt-history-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .apt-history-list-card,
+  .apt-history-detail-card {
+    padding: 16px;
+  }
+
+  .apt-history-item__top,
+  .apt-history-item__meta,
+  .apt-history-item__footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .apt-history-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apt-remedy-grid,
+  .apt-detail-notes-grid,
+  .apt-notes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apt-notes-modal {
+    width: calc(100vw - 20px);
   }
 
   .apt-main,
@@ -7464,6 +8170,11 @@ button.apt-week-day:focus-visible {
   .apt-detail-row {
     display: grid;
     gap: 4px;
+  }
+
+  .apt-detail-notes-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .apt-day-grid {
@@ -7536,6 +8247,18 @@ button.apt-week-day:focus-visible {
     width: 100%;
     max-width: none;
     border-left: 0;
+  }
+
+  .apt-notes-header h2 {
+    font-size: 18px;
+  }
+
+  .apt-notes-form {
+    gap: 12px;
+  }
+
+  .apt-appointment-tabs {
+    width: 100%;
   }
 
   .apt-drawer-head {

@@ -416,7 +416,7 @@ export function TemplatePreview({ onClose }) {
   )
 }
 
-export default function AppointmentAvailabilityPanel({ astrologerId }) {
+export default function AppointmentAvailabilityPanel({ astrologerId, onPublished }) {
   const { appointmentAvailabilityTemplates, actions } = useAppData()
   const today = new Date()
   const currentMonthKey = getMonthKey(today)
@@ -553,6 +553,7 @@ export default function AppointmentAvailabilityPanel({ astrologerId }) {
     const published = actions.publishAppointmentAvailabilityTemplate(draft)
     if (published) {
       setDrafts((prev) => ({ ...prev, [selectedMonthKey]: published }))
+      onPublished?.(published)
     }
   }
 

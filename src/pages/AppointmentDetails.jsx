@@ -100,9 +100,6 @@ export default function AppointmentDetails() {
       </Section>
 
       <div className="appointment-details-actions">
-        <Link to={`${routes.astrologerProfile}?id=${appointment.astrologerId}`} className="btn btn-primary">
-          View Astrologer
-        </Link>
         <Link to={routes.dashboard} className="btn btn-outline">Back to Dashboard</Link>
         {CANCELLABLE_STATUSES.includes(appointment.status) && (
           <button type="button" className="btn btn-danger" onClick={handleCancel}>

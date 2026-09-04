@@ -369,7 +369,7 @@ const initialNotifications = [
     title: `${mockAstrologers[0].name} posted a new update`,
     detail: "New article: 'Navigating Saturn Transit in 2026'.",
     time: '25m ago',
-    route: `/user/astrologer-profile?id=${mockAstrologers[0].id}`,
+    route: '/user/astrologers',
     audience: ROLES.USER,
     category: 'follow',
     read: false,
@@ -379,7 +379,7 @@ const initialNotifications = [
     title: `${mockAstrologers[1].name} is now available for live chat`,
     detail: 'Availability window opened for the next 2 hours.',
     time: '2h ago',
-    route: `/user/astrologer-profile?id=${mockAstrologers[1].id}`,
+    route: '/user/astrologers',
     audience: ROLES.USER,
     category: 'follow',
     read: true,
@@ -567,6 +567,7 @@ const initialUserWallet = {
     { id: 'uw8', label: 'Wallet top-up', amount: '+₹5,000', time: '15 Jul 2026', date: '2026-07-15', type: 'topup' },
   ],
 }
+const USER_WALLET_STORAGE_KEY = 'astroconnect-app-data-user-wallet'
 
 const initialProfile = {
   name: 'Dr. Rani',
@@ -1000,7 +1001,7 @@ export function AppDataProvider({ children }) {
   })
   const [notifications, setNotifications] = useState(initialNotifications)
   const [astrologerWallet, setAstrologerWallet] = useState(initialAstrologerWallet)
-  const [userWallet, setUserWallet] = useState(initialUserWallet)
+  const [userWallet, setUserWallet] = useState(() => loadFromStorage(USER_WALLET_STORAGE_KEY, initialUserWallet))
   const [profile] = useState(initialProfile)
   const [selectedCampaignId, setSelectedCampaignId] = useState(initialCampaigns[0].id)
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
@@ -1092,6 +1093,10 @@ export function AppDataProvider({ children }) {
   }, [questions])
 
   useEffect(() => {
+    saveToStorage(USER_WALLET_STORAGE_KEY, userWallet)
+  }, [userWallet])
+
+  useEffect(() => {
     saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
   }, [astrologerServices])
 
@@ -1169,6 +1174,16 @@ export function AppDataProvider({ children }) {
           ],
         }
       })
+    },
+    topUpUserWallet(amount) {
+      const value = Number(amount) || 0
+      if (value <= 0) return
+      setUserWallet((prev) => ({
+        ...prev,
+        balance: prev.balance + value,
+        toppedUp: (prev.toppedUp || 0) + value,
+        transactions: [{ id: crypto.randomUUID(), label: 'Wallet top-up', amount: `+₹${value.toLocaleString('en-IN')}`, time: 'just now', date: new Date().toISOString(), type: 'topup' }, ...prev.transactions],
+      }))
     },
     updateAstrologerServices(patch) {
       setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, ...patch }))

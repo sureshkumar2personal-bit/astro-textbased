@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
+  Activity,
   Sparkles,
   Gift,
   LayoutDashboard,
@@ -44,7 +45,15 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'appointments', label: 'Appointments', icon: CalendarDays },
+      {
+        label: 'Appointments',
+        icon: CalendarDays,
+        children: [
+          { to: 'appointments/schedule', label: 'Schedule', icon: TempleScrollIcon },
+          { to: 'appointments/calendar', label: 'Calendar', icon: CalendarDays },
+          { to: 'appointments/history', label: 'History', icon: ListChecks },
+        ],
+      },
       {
         label: 'Text Based',
         icon: TempleScrollIcon,
@@ -55,6 +64,7 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
+      { to: 'activity', label: 'My Activity', icon: Activity },
     ],
   },
   [ROLES.USER]: {
@@ -86,16 +96,17 @@ const PAGE_META = {
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
-    '/astrologer/astrologer-profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
-    '/astrologer/profile': { title: 'Astrologer Profile', sub: 'Public profile and profile activity' },
     '/astrologer/audience/follower': { title: 'Follower Profile', sub: 'Audience member details' },
     '/astrologer/audience/subscriber': { title: 'Subscriber Profile', sub: 'Audience member details' },
-    '/astrologer/account-profile': { title: 'Profile Settings', sub: 'Astrologer account details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
+    '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
+    '/astrologer/appointments/calendar': { title: 'Calendar', sub: 'Review and manage published appointments' },
+    '/astrologer/appointments/history': { title: 'History', sub: 'Appointment records and status history' },
     '/astrologer/live-session': { title: 'Live Session', sub: 'Broadcast workspace and session controls' },
     '/astrologer/live-session/setup': { title: 'Create Live', sub: 'Check camera and microphone before continuing' },
     '/astrologer/live-session/configure': { title: 'Live Configuration', sub: 'Set title, category, and pricing' },
@@ -111,7 +122,6 @@ const PAGE_META = {
     '/user/track-questions': { title: 'Track My Questions', sub: 'Review status and follow up' },
     '/user/raise-dispute': { title: 'Raise a Dispute', sub: 'Flag an issue with an answer' },
     '/user/dispute-management': { title: 'Dispute Management', sub: 'View dispute updates' },
-    '/user/astrologer-profile': { title: 'Astrologer Profile', sub: 'Follow updates and ask a question' },
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
     '/user/rewards': { title: 'Rewards', sub: 'Subscriber benefits and discount questions' },
@@ -163,7 +173,20 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
 }
 
 function AstrologerNav({ links, basePath }) {
-  const [textBasedOpen, setTextBasedOpen] = useState(false)
+  const location = useLocation()
+  const [openSections, setOpenSections] = useState({})
+
+  useEffect(() => {
+    setOpenSections((current) => {
+      const next = { ...current }
+      links.forEach((link) => {
+        if (!link.children) return
+        const isActive = link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+        if (isActive) next[link.label] = true
+      })
+      return next
+    })
+  }, [basePath, links, location.pathname])
 
   return (
     <nav className="sidebar-nav">
@@ -173,19 +196,21 @@ function AstrologerNav({ links, basePath }) {
           return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} />
         }
 
+        const isOpen = Boolean(openSections[link.label])
+
         return (
           <div className="sidebar-nav-section" key={link.label}>
             <button
               type="button"
-              className={`sidebar-nav-section-title${textBasedOpen ? ' is-open' : ''}`}
-              aria-expanded={textBasedOpen}
-              onClick={() => setTextBasedOpen((isOpen) => !isOpen)}
+              className={`sidebar-nav-section-title${isOpen ? ' is-open' : ''}`}
+              aria-expanded={isOpen}
+              onClick={() => setOpenSections((current) => ({ ...current, [link.label]: !current[link.label] }))}
             >
               <link.icon size={18} />
               <span>{link.label}</span>
               <ChevronRight size={17} className="sidebar-nav-section-arrow" aria-hidden="true" />
             </button>
-            {textBasedOpen && (
+            {isOpen && (
               <div className="sidebar-nav-subgroup">
                 {link.children.map(({ to, label, icon }) => {
                   const route = `${basePath}/${to}`
@@ -250,9 +275,17 @@ export default function Layout() {
   const audienceMeta = role === ROLES.ASTROLOGER && location.pathname.startsWith('/astrologer/audience/')
     ? (location.pathname.includes('/subscriber/') ? PAGE_META[role]['/astrologer/audience/subscriber'] : PAGE_META[role]['/astrologer/audience/follower'])
     : null
-  const meta = audienceMeta || PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
+  const dynamicAstrologerMeta = role === ROLES.USER && location.pathname.startsWith('/user/astrologer/')
+    ? { title: 'Astrologer Profile', sub: 'Follow updates and ask a question' }
+    : null
+  const meta = audienceMeta || dynamicAstrologerMeta || PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
-  const isOwnerProfile = location.pathname === '/user/profile' || (location.pathname === '/astrologer/profile' && isAstrologer)
+  const shellRole = role
+  const shellConfig = ROLE_CONFIG[shellRole]
+  const shellBasePath = getRoleBasePath(shellRole)
+  const shellIsAstrologer = shellRole === ROLES.ASTROLOGER
+  const headerName = currentUser?.name || 'Dashboard'
+  const isOwnerProfile = location.pathname === '/user/profile'
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
   const showRewardBadge = rewardStatus?.state === 'available'
   const rewardCount = role === ROLES.USER ? actions.getAvailableDiscountQuestions(currentUser?.id).length : 0
@@ -315,19 +348,19 @@ export default function Layout() {
       <aside className="sidebar">
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
-            {isAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <Sparkles size={24} color="#fff" />}
+            {shellIsAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <Sparkles size={24} color="#fff" />}
           </div>
           <div>
             <div className="sidebar-brand-text">Astro Connect</div>
-            <div className="sidebar-brand-sub">{config.subtitle}</div>
+            <div className="sidebar-brand-sub">{shellConfig.subtitle}</div>
           </div>
         </div>
 
-        <div className="sidebar-group-label">{config.navLabel}</div>
+        <div className="sidebar-group-label">{shellConfig.navLabel}</div>
         {isAstrologer ? (
           <AstrologerNav links={config.nav} basePath={basePath} />
         ) : (
-          <NavGroup links={config.nav} basePath={basePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+          <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
         )}
       </aside>
 
@@ -346,15 +379,15 @@ export default function Layout() {
               aria-label="Notifications"
               onClick={() => setPanel(panel === 'notifications' ? null : 'notifications')}
             >
-              {isAstrologer ? <TempleBellIcon size={18} /> : <Bell size={18} />}
+              {shellIsAstrologer ? <TempleBellIcon size={18} /> : <Bell size={18} />}
               {unreadNotificationCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border-[1.5px] border-white bg-[color:var(--red-500)] px-1 text-[10px] font-bold leading-none text-white">
                   {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
                 </span>
               )}
             </button>
-            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(isAstrologer ? routes.wallet : routes.walletHistory)}>
-              {isAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
+            <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(shellIsAstrologer ? routes.wallet : routes.walletHistory)}>
+              {shellIsAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
             </button>
             <ThemeToggle />
             <button
@@ -366,10 +399,10 @@ export default function Layout() {
               }}
             >
               <span className="avatar-circle">
-                {currentUser?.name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'DR'}
+                {headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
               </span>
-              <span>{currentUser?.name || 'Dashboard'}</span>
-              {isAstrologer && (
+              <span>{headerName}</span>
+              {shellIsAstrologer && (
                 <span className={`topbar-service-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} title="Astrologer service status">
                   <span className="service-status-dot" />
                   {astrologerServices.dndEnabled ? 'DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
@@ -386,7 +419,7 @@ export default function Layout() {
                 navigate('/login')
               }}
             >
-              {isAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
+              {shellIsAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
             </button>
 
             {panel === 'notifications' && (

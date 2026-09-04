@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState } from 'react'
 import { Mic, MicOff, Send, MoreHorizontal, PhoneOff } from 'lucide-react'
 import { callTypeMeta } from './meta.jsx'
+import AppointmentCompletionNotesModal from './AppointmentCompletionNotesModal.jsx'
 import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../../utils/appointments.js'
 
 function Avatar({ name, size = 96 }) {
@@ -30,6 +31,7 @@ export default function AppointmentCallScreen({ appointment, onEnd }) {
   const [connected, setConnected] = useState(false)
   const [muted, setMuted] = useState(false)
   const [cameraOn, setCameraOn] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
   const [messages, setMessages] = useState([
     { id: 1, from: 'them', text: `Hi, I'm ${appointment.customerName}. Ready when you are.` },
   ])
@@ -51,6 +53,13 @@ export default function AppointmentCallScreen({ appointment, onEnd }) {
     if (!draft.trim()) return
     setMessages((prev) => [...prev, { id: Date.now(), from: 'me', text: draft.trim() }])
     setDraft('')
+  }
+
+  const openEndNotes = () => setNotesOpen(true)
+  const closeEndNotes = () => setNotesOpen(false)
+  const saveEndNotes = (remedyNotes) => {
+    setNotesOpen(false)
+    onEnd(appointment, remedyNotes)
   }
 
   return createPortal(
@@ -147,11 +156,17 @@ export default function AppointmentCallScreen({ appointment, onEnd }) {
             </button>
           </>
         )}
-        <button type="button" className="apt-call-end" onClick={() => onEnd(appointment)}>
+        <button type="button" className="apt-call-end" onClick={openEndNotes}>
           <PhoneOff size={18} />
-          <span>End Call</span>
+          <span>{callType === 'Text' ? 'End Chat' : 'End Call'}</span>
         </button>
       </footer>
+      <AppointmentCompletionNotesModal
+        appointment={appointment}
+        open={notesOpen}
+        onCancel={closeEndNotes}
+        onSubmit={saveEndNotes}
+      />
     </div>,
     document.body,
   )

@@ -1,0 +1,18 @@
+import { ArrowLeft, CreditCard, Radio, Smartphone } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { mockAstrologers } from '../data/notificationData.js'
+import { useAppData } from '../state/AppDataContext.jsx'
+import { useAuth } from '../state/AuthContext.jsx'
+import { CALL_PURCHASE_KEY } from './CallBooking.jsx'
+
+const money = (value) => `₹${Number(value).toLocaleString('en-IN')}`
+const read = (key) => { try { return JSON.parse(localStorage.getItem(key) || 'null') } catch { return null } }
+
+export default function CallPaymentInformation() {
+  const { currentUser } = useAuth(); const { userWallet, actions } = useAppData(); const navigate = useNavigate(); const key = `${CALL_PURCHASE_KEY}-${currentUser?.id || 'guest'}`; const purchase = read(key); const astrologer = mockAstrologers.find(({ id }) => id === purchase?.astrologerId) || mockAstrologers[0]; const amount = Number(purchase?.selectedAmount || 0); const [method, setMethod] = useState('wallet'); const [processing, setProcessing] = useState(false); const [error, setError] = useState('')
+  const pay = () => { if (processing) return; if (Number(userWallet?.balance || 0) < amount) { setError('Insufficient wallet balance. Please add money before paying.'); return } setProcessing(true); window.setTimeout(() => { const transactionId = `call-purchase-${purchase.astrologerId}-${purchase.selectedDuration}-${currentUser?.id || 'guest'}`; actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: purchase.selectedDuration, service: 'Call', transactionId }); localStorage.setItem(key, JSON.stringify({ ...purchase, paymentStatus: 'successful', paymentMethod: method, transactionId })); navigate('/call-payment-success') }, 350) }
+  if (!purchase) return <main className="call-payment-page"><section className="call-payment-page__card"><h1>Payment Information</h1><p>No call package is waiting for payment.</p><button type="button" className="btn btn-primary" onClick={() => navigate('/user/call-astrologers')}>Back to Astrologers</button></section></main>
+  const methods = [['wallet', Radio, 'Wallet'], ['upi', Smartphone, 'UPI'], ['card', CreditCard, 'Card']]
+  return <main className="call-payment-page"><button type="button" className="call-payment-page__back" onClick={() => navigate(`/call-booking/${purchase.astrologerId}`)}><ArrowLeft size={16} /> Back to Call Booking</button><header className="call-payment-page__heading"><span>CALL BOOKING</span><h1>Payment Information</h1><p>Complete your payment to confirm your call.</p></header><section className="call-payment-page__card"><h2>Payment Information</h2><dl className="call-payment-page__amounts"><div><dt>Astrologer</dt><dd>{astrologer.name}</dd></div><div><dt>Call Duration</dt><dd>{purchase.selectedDuration} Minutes</dd></div><div className="is-total"><dt>Amount</dt><dd>{money(amount)}</dd></div></dl></section><section className="call-payment-page__card"><h2>Payment Method</h2><div className="call-payment-page__methods">{methods.map(([id, Icon, title]) => <button type="button" key={id} className={`call-payment-method ${method === id ? 'is-selected' : ''}`} onClick={() => setMethod(id)}><span className="call-payment-method__icon"><Icon size={18} /></span><span><b>{title}</b><small>Pay securely</small></span><span className="call-payment-method__radio">{method === id ? '✓' : ''}</span></button>)}</div></section>{error && <p className="call-payment-page__insufficient">{error}</p>}<button type="button" className="btn btn-primary call-payment-page__pay" disabled={processing} onClick={pay}>{processing ? 'Processing Payment...' : `Pay ${money(amount)}`}</button></main>
+}

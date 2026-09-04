@@ -523,10 +523,12 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
               const daySchedule = getDateSchedule(availabilityTemplate, cell)
               const isToday = iso === todayIso
               const isCurrentMonth = cell.getMonth() === monthStart.getMonth() && cell.getFullYear() === monthStart.getFullYear()
+              const hasPublishedAvailability = Boolean(availabilityTemplate)
+              const isUnavailable = hasPublishedAvailability && daySchedule.status !== 'Available'
               return (
                 <div
                   key={iso}
-                  className={`apt-month-cell${isToday ? ' is-today' : ''}${!isCurrentMonth ? ' is-muted' : ''}`}
+                  className={`apt-month-cell${isToday ? ' is-today' : ''}${!isCurrentMonth ? ' is-muted' : ''}${isUnavailable ? ' is-unavailable' : ''}`}
                   role="button"
                   tabIndex={0}
                   aria-label={`Show appointments for ${formatDisplayDate(iso, true)}`}
