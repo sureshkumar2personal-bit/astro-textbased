@@ -28,9 +28,9 @@ export default function AstrologersFull() {
           <AstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
-            onViewProfile={(astrologerId) => navigate(`${routes.astrologerProfile}?id=${astrologerId}`)}
             onCall={(astrologerId) => navigate(`${routes.callPackages}?id=${astrologerId}`)}
-            onChat={(astrologerId) => navigate(`${routes.chatBooking}?id=${astrologerId}`)}
+            onChat={(astrologerId) => navigate(`/chat-birth-details/${astrologerId}`)}
+            onViewProfile={(astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=explore`)}
           />
         ))}
       </div>

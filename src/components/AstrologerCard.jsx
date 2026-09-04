@@ -71,9 +71,10 @@ export default function AstrologerCard({ astrologer, onViewProfile, onCall, onCh
         </div>
       </div>
 
-      <button type="button" className="btn btn-primary btn-sm astrologer-card__profile-button" onClick={() => onViewProfile(astrologer.id)}>
+      {onViewProfile && <button type="button" className="btn btn-primary btn-sm astrologer-card__profile-button" onClick={() => onViewProfile(astrologer.id)}>
         View Profile
-      </button>
+      </button>}
+
     </Card>
   )
 }

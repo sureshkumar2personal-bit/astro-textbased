@@ -1,7 +1,8 @@
-import { ArrowLeft, BadgeCheck, CalendarDays, CalendarPlus, Camera, Clock3, Grid3X3, Headphones, Info, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Square, Trash2, UserCircle2, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
+import PageHeader from '../components/ui/PageHeader.jsx'
 import { PROFILE_FOLLOWERS, PROFILE_SUBSCRIBERS, accountHandle } from '../data/audienceMembers.js'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -58,13 +59,14 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
-  const [activeTab, setActiveTab] = useState(isAstrologer ? 'Services' : 'Posts')
+  const [activeTab, setActiveTab] = useState('Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
-  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
+  const [availabilityOpen, setAvailabilityOpen] = useState(false)
+  const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '', bio: currentUser?.bio || '', languages: currentUser?.languages?.join(', ') || '', profileImage: currentUser?.profileImage || '' })
   const [servicesForm, setServicesForm] = useState(astrologerServices)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
@@ -121,11 +123,11 @@ export default function Profile() {
   const cancellableAppointmentStatuses = ['Pending', 'Confirmed', 'Rescheduled']
   const closeAudience = () => {
     setAudiencePanel(null)
-    navigate('/astrologer/profile', { replace: true })
+    navigate(routes.dashboard, { replace: true })
   }
   const openAudience = (panel) => {
     setAudiencePanel(panel)
-    navigate(`/astrologer/profile?audience=${panel}`, { replace: true })
+    navigate(routes.dashboard, { replace: true })
   }
 
   useEffect(() => {
@@ -134,7 +136,7 @@ export default function Profile() {
   }, [isAstrologer, location.search])
 
   const startEditing = () => {
-    setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '' })
+    setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '', bio: currentUser?.bio || '', languages: currentUser?.languages?.join(', ') || '', profileImage: currentUser?.profileImage || '' })
     setError('')
     setSaved(false)
     setServicesForm(astrologerServices)
@@ -315,6 +317,7 @@ export default function Profile() {
 
   return (
     <div>
+      {isAstrologer && <PageHeader eyebrow="ASTROLOGER PORTAL" title="Astrologer Profile" showBack backTo={routes.dashboard} />}
       {editing ? (
         <Card className="profile-edit-card">
           <div className="profile-edit-card__heading"><UserCircle2 size={20} /><div><h2>Edit Profile</h2><p>Update the details shown on your profile.</p></div></div>
@@ -324,6 +327,9 @@ export default function Profile() {
             <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Phone Number</span><input type="tel" className="text-input" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
             {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Specialization</span><input className="text-input" value={form.specialization} onChange={(event) => setForm({ ...form, specialization: event.target.value })} /></label>}
             {isAstrologer && <label className="field-group" style={{ margin: 0 }}><span className="field-label-top">Experience</span><input className="text-input" value={form.experience} onChange={(event) => setForm({ ...form, experience: event.target.value })} placeholder="8 years" /></label>}
+            {isAstrologer && <label className="field-group md:col-span-2" style={{ margin: 0 }}><span className="field-label-top">Profile photo URL</span><input className="text-input" value={form.profileImage} onChange={(event) => setForm({ ...form, profileImage: event.target.value })} placeholder="https://..." /></label>}
+            {isAstrologer && <label className="field-group md:col-span-2" style={{ margin: 0 }}><span className="field-label-top">About / Bio</span><textarea className="textarea-box" value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} rows="3" /></label>}
+            {isAstrologer && <label className="field-group md:col-span-2" style={{ margin: 0 }}><span className="field-label-top">Languages</span><input className="text-input" value={form.languages} onChange={(event) => setForm({ ...form, languages: event.target.value })} placeholder="English, Hindi, Tamil" /></label>}
           </div>
           {isAstrologer && (
             <div className="profile-services-editor">
@@ -342,29 +348,29 @@ export default function Profile() {
           <Card className="social-profile__header">
             <div className="social-profile__cover" />
             <div className="social-profile__identity">
-              <div className="social-profile__avatar">{initials(name)}</div>
+              <div className="social-profile__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name} profile`} /> : initials(name)}</div>
               <div className="social-profile__identity-copy">
                 <div className="flex flex-wrap items-center gap-2"><h1 className="social-profile__name">{name}</h1>{isAstrologer && <BadgeCheck size={18} className="text-[color:var(--primary)]" aria-label="Verified astrologer" />}</div>
                 <div className="muted">@{username}</div>
-                {isAstrologer && <div className="muted">{currentUser?.specialization || 'Astrologer'}</div>}
+                {isAstrologer && <div className="muted">{astrologerProfile.specialization || currentUser?.specialization || 'Astrologer'}</div>}
                 <div className="social-profile__meta"><MapPin size={14} /> India</div>
               </div>
-              <div className="social-profile__actions"><button type="button" className="btn btn-primary" onClick={startEditing}>Edit Profile</button></div>
+              <div className="social-profile__actions">
+                <button type="button" className="btn btn-primary" onClick={startEditing}><Pencil size={15} /> Edit Profile</button>
+                {isAstrologer && <>
+                  <button type="button" className="btn btn-outline" onClick={() => setAvailabilityOpen(true)}><CalendarDays size={15} /> Availability</button>
+                  <button type="button" className="profile-status-control" onClick={() => actions.setAstrologerPresence(!astrologerServices.isOnline)}>
+                    <span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />
+                    <span><small>Profile Status</small>{astrologerServices.available ? 'Available' : 'Offline'}</span>
+                  </button>
+                </>}
+              </div>
             </div>
-            <div className="social-profile__stats">
-              {!isAstrologer && <div><strong>0</strong><span>Posts</span></div>}
-              {isAstrologer ? (
-                <>
-                  <div><strong>{currentUser?.experience || '—'}</strong><span>Experience</span></div>
-                  <button type="button" className="social-profile__stat-button" onClick={() => openAudience('Followers')}><strong>{astrologerProfile.followers.toLocaleString('en-IN')}</strong><span>Followers</span></button>
-                  <button type="button" className="social-profile__stat-button" onClick={() => openAudience('Subscribers')}><strong>{subscriberNames.length}</strong><span>Subscribers</span></button>
-                </>
-              ) : (
-                <><div><strong>0</strong><span>Followers</span></div><div><strong>0</strong><span>Following</span></div></>
-              )}
-            </div>
-            <div className="social-profile__bio">{bio}</div>
+            {!isAstrologer && <div className="social-profile__stats"><div><strong>0</strong><span>Posts</span></div><div><strong>0</strong><span>Followers</span></div><div><strong>0</strong><span>Following</span></div></div>}
+            <div className="social-profile__bio"><strong>About</strong><p>{isAstrologer ? currentUser?.bio || astrologerProfile.bio : bio}</p>{isAstrologer && <div className="profile-summary-details"><span>{currentUser?.experience || astrologerProfile.experience} Experience</span><span>4.9 / 5</span><span>2,345 Reviews</span></div>}</div>
           </Card>
+
+          {isAstrologer && <Card className="profile-stats-card"><div className="profile-stats-card__heading"><div><span className="profile-kicker">YOUR PERFORMANCE</span><h2>Stats</h2></div><BadgeCheck size={20} className="text-[color:var(--primary)]" /></div><div className="profile-stats-card__grid"><button type="button" onClick={() => openAudience('Followers')}><span className="profile-stat-icon profile-stat-icon--violet"><Users size={17} /></span><strong>{astrologerProfile.followers.toLocaleString('en-IN')}</strong><small>Followers</small></button><button type="button" onClick={() => openAudience('Subscribers')}><span className="profile-stat-icon profile-stat-icon--coral"><BadgeCheck size={17} /></span><strong>{subscriberNames.length}</strong><small>Subscribers</small></button><div><span className="profile-stat-icon profile-stat-icon--gold"><CalendarDays size={17} /></span><strong>3,850</strong><small>Consultations</small></div></div></Card>}
 
           {false && !isAstrologer && <section className="profile-consultation-history" aria-live="polite">
             {consultationTab === 'appointments' ? <>
@@ -390,25 +396,66 @@ export default function Profile() {
             </>}
           </section>}
 
+          {isAstrologer && <>
+            <section className="profile-management-section">
+              <div className="profile-content-heading"><div><span className="profile-kicker">MANAGE YOUR SERVICES</span><h2>Consultation Options</h2></div><Settings size={20} className="text-[color:var(--primary)]" /></div>
+              <div className="profile-consultation-options">
+                {[
+                  [MessageCircle, 'Chat', 'chatEnabled', 'chatAvailable', `₹${astrologerServices.chatPricePerMinute}/min`],
+                  [PhoneCall, 'Call', 'callEnabled', 'callAvailable', `₹${astrologerServices.callPricePerMinute}/min`],
+                  [CalendarDays, 'Book Appointment', null, 'appointment', 'Manage slots'],
+                ].map(([Icon, label, setting, available, detail]) => (
+                  <button type="button" className="profile-consultation-option" key={label} onClick={() => setting ? actions.updateAstrologerServices({ [setting]: !astrologerServices[setting] }) : navigate(routes.appointmentSchedule)}>
+                    <span className="profile-consultation-option__icon"><Icon size={18} /></span>
+                    <span><strong>{label}</strong><small><i className={`service-status-dot ${available === 'appointment' || astrologerServices[available] ? 'is-available' : 'is-unavailable'}`} />{available === 'appointment' ? 'Available' : astrologerServices[available] ? 'Available' : 'Unavailable'} · {detail}</small></span>
+                    {setting && <span className={`profile-option-toggle${astrologerServices[setting] ? ' is-on' : ''}`} aria-hidden="true" />}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section className="profile-management-section profile-management-links">
+              <div className="profile-content-heading"><div><span className="profile-kicker">PROFILE MANAGEMENT</span><h2>Manage your profile</h2></div><Pencil size={20} className="text-[color:var(--primary)]" /></div>
+              <div className="profile-management-grid">
+                <button type="button" onClick={startEditing}><Pencil size={15} /> Edit Profile</button>
+                <button type="button" onClick={startEditing}><BadgeCheck size={15} /> Manage Expertise</button>
+                <button type="button" onClick={startEditing}><Languages size={15} /> Manage Languages</button>
+                <button type="button" onClick={startEditing}><span>₹</span> Manage Consultation Prices</button>
+                <button type="button" onClick={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })}><MessageCircle size={15} /> Manage Chat Availability</button>
+                <button type="button" onClick={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })}><PhoneCall size={15} /> Manage Call Availability</button>
+                <Link to={routes.appointmentSchedule}><CalendarDays size={15} /> Manage Appointment Slots</Link>
+              </div>
+            </section>
+          </>}
+
           <div className="social-profile__tabs" role="tablist" aria-label="Profile sections">
-            {(isAstrologer ? [['Posts', Grid3X3], ['Services', Info], ['Live', Radio]] : [['Posts', Grid3X3], ['Live', Radio], ['Other', Info]]).map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
+            {(isAstrologer ? [['Posts', Grid3X3], ['Live', Radio], ['Saved Posts', Bookmark]] : [['Posts', Grid3X3], ['Live', Radio], ['Other', Info]]).map(([label, Icon]) => <button key={label} type="button" role="tab" aria-selected={activeTab === label} className={activeTab === label ? 'is-active' : ''} onClick={() => setActiveTab(label)}><Icon size={16} /> {label}</button>)}
           </div>
 
           {activeTab === 'Posts' && !isAstrologer && <div className="social-profile__posts"><Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card></div>}
           {activeTab === 'Posts' && isAstrologer && <section className="profile-content-section">
             <div className="profile-content-heading"><div><div className="section-title">Posts</div><p className="muted">Share insights with your audience.</p></div><button type="button" className="btn btn-primary" onClick={() => openPostComposer()}><Plus size={16} /> Create Post</button></div>
-            <div className="social-profile__posts">{ownerPosts.length ? ownerPosts.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone || 'violet'}`}><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><div className="profile-content-card-actions"><span className="profile-visibility-badge">{visibilityLabel(post.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${post.title}`} onClick={() => openPostComposer(post)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${post.title}`} onClick={() => deleteContent('post', post.id)}><Trash2 size={14} /></button></span></div><h2>{post.title}</h2><p>{post.body}</p>{post.media?.length > 0 && <div className="profile-post-media">{post.media.map((item) => item.type.startsWith('video/') ? <video key={item.id} src={item.dataUrl} controls preload="metadata" aria-label={item.name} /> : <img key={item.id} src={item.dataUrl} alt={item.name} />)}</div>}<div className="profile-post-meta"><span><MessageCircle size={13} /> {postComments[post.id]?.length || 0} comments</span><span>Published {displayDate(post.createdAt)}</span></div></Card>) : <Card className="social-profile__panel"><div className="section-title">No posts yet</div><p className="muted">Create your first post to share an astrology insight.</p></Card>}</div>
+            <div className="social-profile__posts">{ownerPosts.length ? ownerPosts.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone || 'violet'}`}><div className="social-profile__post-author"><span className="social-profile__post-avatar">{initials(name)}</span><span><strong>{name}</strong><small>{displayDate(post.createdAt)}</small></span></div><div className="profile-content-card-actions"><span className="profile-visibility-badge">{visibilityLabel(post.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${post.title}`} onClick={() => openPostComposer(post)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${post.title}`} onClick={() => deleteContent('post', post.id)}><Trash2 size={14} /></button></span></div><h2>{post.title}</h2><p>{post.body}</p>{post.media?.length > 0 && <div className="profile-post-media">{post.media.map((item) => item.type.startsWith('video/') ? <video key={item.id} src={item.dataUrl} controls preload="metadata" aria-label={item.name} /> : <img key={item.id} src={item.dataUrl} alt={item.name} />)}</div>}<div className="profile-post-meta"><button type="button" onClick={() => actions.togglePostLike(post.id)}><Heart size={13} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => navigator.share?.({ title: post.title, text: post.body })}><Share2 size={13} /> Share</button><span><MessageCircle size={13} /> {postComments[post.id]?.length || 0} comments</span><button type="button" onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={13} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div></Card>) : <Card className="social-profile__panel"><div className="section-title">No posts yet</div><p className="muted">Create your first post to share an astrology insight.</p></Card>}</div>
           </section>}
           {activeTab === 'Live' && !isAstrologer && <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>}
           {activeTab === 'Live' && isAstrologer && <section className="profile-content-section">
-            <div className="profile-content-heading"><div><div className="section-title">Live sessions</div><p className="muted">Schedule and host YouTube-style live sessions.</p></div><button type="button" className="btn btn-primary" onClick={() => openLiveWorkspace()}><Plus size={16} /> Create Live</button></div>
+            <div className="profile-content-heading"><div><div className="section-title">Live sessions</div><p className="muted">Schedule and host YouTube-style live sessions.</p></div><div className="profile-live-header-actions"><button type="button" className="btn btn-outline" onClick={() => openLiveWorkspace()}><Radio size={15} /> Go Live</button><button type="button" className="btn btn-primary" onClick={() => openLiveComposer()}><CalendarPlus size={15} /> Schedule Live</button></div></div>
             <div className="profile-live-groups">{liveGroups.map(([status, label]) => { const sessions = liveSessions.filter((session) => session.status === status); return <div key={status} className="profile-live-group"><div className="profile-live-group__heading"><h3>{label}</h3><span>{sessions.length}</span></div>{sessions.length ? sessions.map((session) => <Card key={session.id} className={`social-profile__post social-profile__post--${status === 'live' ? 'coral' : 'violet'}`}><div className="profile-content-card-actions"><span className={`profile-visibility-badge profile-visibility-badge--${status}`}>{status === 'live' ? 'LIVE' : visibilityLabel(session.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${session.title}`} onClick={() => openLiveComposer(session)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${session.title}`} onClick={() => deleteContent('live', session.id)}><Trash2 size={14} /></button></span></div><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.description}</p><span className="muted">{displayDate(session.scheduledStartAt)} – {displayDate(session.scheduledEndAt)}</span><div className="profile-live-actions">{status === 'upcoming' && <button type="button" className="btn btn-primary" onClick={() => openLiveWorkspace(session)}><Play size={14} /> Start Live</button>}{status === 'live' && <button type="button" className="btn btn-outline" onClick={() => openLiveWorkspace(session)}><Radio size={14} /> Open Live</button>}</div></Card>) : <div className="profile-live-empty muted">No {label.toLowerCase()}.</div>}</div>})}</div>
           </section>}
+          {activeTab === 'Saved Posts' && isAstrologer && <div className="social-profile__posts">{astrologerPosts.filter((post) => savedPostIds.includes(post.id)).length ? astrologerPosts.filter((post) => savedPostIds.includes(post.id)).map((post) => <Card key={post.id} className="social-profile__post"><h2>{post.title}</h2><p>{post.body}</p></Card>) : <Card className="social-profile__panel"><div className="section-title">No saved posts yet</div><p className="muted">Posts you save for later will appear here.</p></Card>}</div>}
           {activeTab === 'Other' && !isAstrologer && <Card className="social-profile__panel"><div className="section-title">Profile details</div><div className="social-profile__details"><div><strong>Email</strong><span><Mail size={14} /> {currentUser?.email || 'Not added'}</span></div><div><strong>Phone</strong><span><Phone size={14} /> {currentUser?.phone || 'Not added'}</span></div></div></Card>}
-          {activeTab === 'Services' && isAstrologer && <Card className="social-profile__panel"><div className="section-title">Services</div><div className="profile-service-status"><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} />{astrologerServices.dndEnabled ? 'Dyan / DND mode — unavailable' : astrologerServices.isOnline ? 'Online' : 'Offline'}</div><p className="profile-services-help">Manage Chat, Call, and DND from the status dropdown in the greeting panel.</p><div className="social-profile__details"><div><strong><PhoneCall size={14} /> Call</strong><span>{astrologerServices.callAvailable ? `Enabled · ₹${astrologerServices.callPricePerMinute}/min` : 'Disabled'}</span></div><div><strong><MessageCircle size={14} /> Chat</strong><span>{astrologerServices.chatAvailable ? `Enabled · ₹${astrologerServices.chatPricePerMinute}/min` : 'Disabled'}</span></div><div><strong>Dyan / DND</strong><span>{astrologerServices.dndEnabled ? 'Enabled · all services paused' : 'Disabled'}</span></div></div></Card>}
           {saved && <div className="profile-message profile-message--success">Profile updated successfully.</div>}
         </div>
       )}
+
+      {isAstrologer && availabilityOpen && <div className="modal-overlay user-modal-overlay" onClick={() => setAvailabilityOpen(false)}>
+        <div className="modal-card user-modal-card availability-management-modal" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4"><div><div className="section-title" style={{ marginBottom: 0 }}>Manage Availability</div><p className="muted">Choose which consultation services are open to clients.</p></div><button type="button" className="icon-btn" aria-label="Close availability settings" onClick={() => setAvailabilityOpen(false)}><X size={16} /></button></div>
+          <div className="modal-card__content user-modal-card__content availability-management-list">
+            {[[MessageCircle, 'Chat availability', 'chatEnabled'], [PhoneCall, 'Call availability', 'callEnabled'], [CalendarDays, 'Appointment availability', null]].map(([Icon, label, setting]) => <div className="availability-management-row" key={label}><span><Icon size={17} /><strong>{label}</strong></span>{setting ? <button type="button" className={`profile-option-toggle${astrologerServices[setting] ? ' is-on' : ''}`} aria-label={`Toggle ${label}`} onClick={() => actions.updateAstrologerServices({ [setting]: !astrologerServices[setting] })}><span /></button> : <Link to={routes.appointmentSchedule} className="btn btn-outline btn-sm" onClick={() => setAvailabilityOpen(false)}>Manage slots</Link>}</div>)}
+            <div className="availability-management-row"><span><span className={`service-status-dot ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} /><strong>Profile status</strong></span><button type="button" className="btn btn-outline btn-sm" onClick={() => actions.setAstrologerPresence(!astrologerServices.isOnline)}>{astrologerServices.available ? 'Set Offline' : 'Set Available'}</button></div>
+          </div>
+        </div>
+      </div>}
 
       {isAstrologer && audiencePanel && <div className="modal-overlay user-modal-overlay" onClick={closeAudience}>
         <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>

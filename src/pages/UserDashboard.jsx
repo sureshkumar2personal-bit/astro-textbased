@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ShoppingBag,
@@ -9,10 +9,13 @@ import {
   BadgeCheck,
   ShieldAlert,
   Sparkles,
+  MessageCircle,
+  PhoneCall,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { getConsultationAstrologers } from '../data/consultationAstrologers.js'
 import StatCard from '../components/ui/StatCard.jsx'
 import ActionCard from '../components/ui/ActionCard.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -25,6 +28,10 @@ export default function UserDashboard() {
   const navigate = useNavigate()
 
   const initialized = useRef(false)
+
+  const chatCount = useMemo(() => getConsultationAstrologers('chat').length, [])
+  const callCount = useMemo(() => getConsultationAstrologers('call').length, [])
+
   useEffect(() => {
     if (initialized.current || !currentUser?.id) return
     initialized.current = true
@@ -57,6 +64,23 @@ export default function UserDashboard() {
           </button>
         </div>
       </div>
+
+      <Section title="Connect with an Astrologer" icon={Sparkles}>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <ActionCard
+            icon={MessageCircle}
+            title="Chat with Astrologer"
+            description={`Get instant answers through live chat · ${chatCount} astrologers available`}
+            onClick={() => navigate(routes.chatAstrologers)}
+          />
+          <ActionCard
+            icon={PhoneCall}
+            title="Call with Astrologer"
+            description={`Talk directly with an available astrologer · ${callCount} astrologers available`}
+            onClick={() => navigate(routes.callAstrologers)}
+          />
+        </div>
+      </Section>
 
       <div className="stat-grid section">
         <button
@@ -137,6 +161,7 @@ export default function UserDashboard() {
           </div>
         </div>
       </Section>
+
     </div>
   )
 }
