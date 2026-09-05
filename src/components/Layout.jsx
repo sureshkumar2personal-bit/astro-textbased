@@ -52,9 +52,8 @@ const ROLE_CONFIG = {
         label: 'Appointments',
         icon: CalendarDays,
         children: [
-          { to: 'appointments/schedule', label: 'Schedule', icon: TempleScrollIcon },
-          { to: 'appointments/calendar', label: 'Calendar', icon: CalendarDays },
-          { to: 'appointments/history', label: 'History', icon: ListChecks },
+          { to: 'appointments/schedule', label: 'Schedule Appointments', icon: CalendarDays },
+          { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
         ],
       },
       {
@@ -197,19 +196,27 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
 
 function AstrologerNav({ links, basePath }) {
   const location = useLocation()
-  const [openSections, setOpenSections] = useState({})
+  const [openSections, setOpenSections] = useState(() => {
+    const initial = {}
+    links.forEach((link) => {
+      if (link.children && link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) {
+        initial[link.label] = true
+      }
+    })
+    return initial
+  })
 
   useEffect(() => {
-    setOpenSections((current) => {
-      const next = { ...current }
-      links.forEach((link) => {
-        if (!link.children) return
-        const isActive = link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
-        if (isActive) next[link.label] = true
-      })
-      return next
+    links.forEach((link) => {
+      if (link.children && link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) {
+        setOpenSections((current) => (current[link.label] ? current : { ...current, [link.label]: true }))
+      }
     })
-  }, [basePath, links, location.pathname])
+  }, [location.pathname, links, basePath])
+
+  const toggleSection = (label) => {
+    setOpenSections((current) => ({ ...current, [label]: !current[label] }))
+  }
 
   return (
     <nav className="sidebar-nav">
@@ -222,12 +229,12 @@ function AstrologerNav({ links, basePath }) {
         const isOpen = Boolean(openSections[link.label])
 
         return (
-          <div className="sidebar-nav-section" key={link.label}>
+          <div className={`sidebar-nav-section${link.label === 'Appointments' ? ' sidebar-nav-section--appointments' : ''}`} key={link.label}>
             <button
               type="button"
               className={`sidebar-nav-section-title${isOpen ? ' is-open' : ''}`}
               aria-expanded={isOpen}
-              onClick={() => setOpenSections((current) => ({ ...current, [link.label]: !current[link.label] }))}
+              onClick={() => toggleSection(link.label)}
             >
               <link.icon size={18} />
               <span>{link.label}</span>
