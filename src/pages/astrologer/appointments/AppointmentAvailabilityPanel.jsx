@@ -12,17 +12,23 @@ import {
   X,
 } from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useToast } from '../../../components/Toast.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import {
+  addMonths,
   format12h,
   fromIsoDate,
   generateAppointmentSlots,
   getAppointmentSlotSummary,
   getDateAvailability,
+  hasUnpublishedChanges,
   isWithinSchedulingHorizon,
+  isValidRange,
   parseTimeToMinutes,
+  publishedAvailabilitySnapshot,
   toIsoDate,
+  validateDayBreaks,
 } from '../../../utils/appointments.js'
 
 const DAYS = [
@@ -101,22 +107,19 @@ function createDraft(astrologerId, key, source) {
               ? []
               : DEFAULT_WINDOWS.map(cloneWindow),
         breaks: (existing?.breaks || []).map(cloneWindow),
+        continueWithoutBreak: Boolean(
+          existing?.continueWithoutBreak,
+        ),
       }
     }),
   }
-}
-
-function isValidRange(item) {
-  return (
-    parseTimeToMinutes(item.start) <
-    parseTimeToMinutes(item.end)
-  )
 }
 
 function TimeRange({
   item,
   onChange,
   onRemove,
+  onBlur,
   label,
 }) {
   return (
@@ -131,6 +134,7 @@ function TimeRange({
             start: event.target.value,
           })
         }
+        onBlur={() => onBlur && onBlur()}
         aria-label={`${label} start`}
       />
 
@@ -144,6 +148,7 @@ function TimeRange({
             end: event.target.value,
           })
         }
+        onBlur={() => onBlur && onBlur()}
         aria-label={`${label} end`}
       />
 
@@ -161,59 +166,106 @@ function TimeRange({
   )
 }
 
-// Simplified single working-hours editor used by both the Weekly and Daily
-// schedules. It intentionally exposes one simple concept per day: is the day
-// working, and is it all-day or a single time range. Existing break data is
-// preserved (so the slot engine keeps honouring stored breaks) but is not
-// edited here to keep the section simple.
 const ALL_DAY_WINDOW = { start: '00:00', end: '23:59' }
 
 function isAllDayWindow(item) {
   return Boolean(item) && item.start === '00:00' && item.end === '23:59'
 }
 
-function DayHoursEditor({ schedule, onChange, daily = false }) {
+function isAllDaySchedule(windows) {
+  return (
+    Array.isArray(windows) &&
+    windows.length === 1 &&
+    isAllDayWindow(windows[0])
+  )
+}
+
+function t24(minutes) {
+  return `${String(Math.floor(minutes / 60)).padStart(
+    2,
+    '0',
+  )}:${String(minutes % 60).padStart(2, '0')}`
+}
+
+// Pick a sensible default break inside the first working window so the added
+// break is immediately valid against the day's working hours.
+function suggestBreak(windows) {
+  const win = (windows && windows.length ? windows : DEFAULT_WINDOWS)[0]
+  const startMin = parseTimeToMinutes(win.start)
+  const endMin = parseTimeToMinutes(win.end)
+  const length = endMin - startMin
+  if (length < 45) return { start: win.start, end: win.end }
+  const mid = startMin + Math.floor(length / 2)
+  return {
+    start: t24(Math.max(startMin, mid - 30)),
+    end: t24(Math.min(endMin, mid + 30)),
+  }
+}
+
+// Shared working-hours editor. Handles both the weekly schedule (per weekday,
+// `slots` key) and the one-off daily schedule (date override, `windows` key).
+// Working hours can contain several windows and each window is editable.
+function WorkingHoursEditor({ schedule, onChange, daily = false }) {
   const windowsKey = daily ? 'windows' : 'slots'
   const enabled = daily
     ? (schedule.status || 'Available') === 'Available'
     : schedule.enabled !== false
-  const firstWindow = (schedule?.[windowsKey] || [])[0] || DEFAULT_WINDOWS[0]
-  const allDay = isAllDayWindow(firstWindow)
+  const windows = schedule?.[windowsKey] || []
+  const allDay = isAllDaySchedule(windows)
 
   const setEnabled = (checked) => {
-    const windows = checked
-      ? (schedule?.[windowsKey] || []).length
-        ? schedule[windowsKey]
-        : DEFAULT_WINDOWS.map(cloneWindow)
-      : []
     onChange({
       ...schedule,
       ...(daily
         ? { status: checked ? 'Available' : 'Unavailable' }
         : { enabled: checked }),
-      [windowsKey]: windows,
+      [windowsKey]: checked
+        ? windows.length
+          ? windows
+          : DEFAULT_WINDOWS.map(cloneWindow)
+        : [],
     })
   }
 
-  const setSingleWindow = (patch = {}) => {
+  const updateWindow = (index, patch) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: windows.map((window, windowIndex) =>
+        windowIndex === index
+          ? { ...window, ...patch }
+          : window,
+      ),
+    })
+  }
+
+  const addWindow = () => {
+    const last = windows[windows.length - 1] || DEFAULT_WINDOWS[0]
+    const start = parseTimeToMinutes(last.end)
+    if (start >= 23 * 60 + 59) return
+    const end = Math.min(start + 60, 23 * 60 + 59)
     onChange({
       ...schedule,
       [windowsKey]: [
-        {
-          ...firstWindow,
-          ...(allDay ? DEFAULT_WINDOWS[0] : {}),
-          ...patch,
-        },
+        ...windows,
+        { start: t24(start), end: t24(end) },
       ],
     })
   }
 
-  const toggleAllDay = (checked) => {
-    setSingleWindow(
-      checked
-        ? ALL_DAY_WINDOW
-        : { start: DEFAULT_WINDOWS[0].start, end: DEFAULT_WINDOWS[0].end },
-    )
+  const removeWindow = (index) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: windows.filter((_, windowIndex) => windowIndex !== index),
+    })
+  }
+
+  const setAllDay = (checked) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: checked
+        ? [ALL_DAY_WINDOW]
+        : DEFAULT_WINDOWS.map(cloneWindow),
+    })
   }
 
   return (
@@ -236,25 +288,43 @@ function DayHoursEditor({ schedule, onChange, daily = false }) {
 
       {enabled && (
         <div className="apt-schedule-group">
-          <label className="apt-all-day">
-            <input
-              type="checkbox"
-              checked={allDay}
-              onChange={(event) =>
-                toggleAllDay(event.target.checked)
-              }
-            />
-            <span>All Day</span>
-          </label>
+          <div className="apt-schedule-group__head">
+            <strong>Working hours</strong>
 
-          {!allDay && (
-            <TimeRange
-              item={firstWindow}
-              label="Working hours"
-              onChange={(patch) =>
-                setSingleWindow(patch)
-              }
-            />
+            <button
+              type="button"
+              onClick={() => setAllDay(!allDay)}
+            >
+              {allDay ? 'Set specific hours' : 'All Day'}
+            </button>
+          </div>
+
+          {allDay ? (
+            <p className="apt-schedule-empty">
+              Available all day (12:00 AM – 11:59 PM).
+            </p>
+          ) : (
+            <div className="apt-schedule-windows">
+              {windows.map((window, index) => (
+                <TimeRange
+                  key={`${window.start}-${window.end}-${index}`}
+                  item={window}
+                  label={windows.length > 1 ? `Hours ${index + 1}` : 'Working hours'}
+                  onChange={(patch) =>
+                    updateWindow(index, patch)
+                  }
+                  onRemove={() => removeWindow(index)}
+                />
+              ))}
+
+              <button
+                type="button"
+                className="btn btn-outline apt-schedule-add"
+                onClick={addWindow}
+              >
+                + Add Hours
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -262,16 +332,176 @@ function DayHoursEditor({ schedule, onChange, daily = false }) {
   )
 }
 
+// Per-day break editor shared by the weekly and daily schedules. Supports
+// multiple breaks (add / edit / remove), blocks invalid breaks (must sit
+// inside the working hours, must not overlap), and exposes a recoverable
+// "continue without break" option that never removes the break feature.
+function BreaksEditor({
+  breaks = [],
+  windows = [],
+  continueWithoutBreak = false,
+  error = null,
+  onChange,
+  onAdd,
+  onRemove,
+  onEditCommit,
+  onToggleContinue,
+}) {
+  return (
+    <div className="apt-schedule-breaks">
+      <div className="apt-schedule-breaks__head">
+        <Coffee size={14} />
+        <span>Break Hours</span>
+        <small>{breaks.length} configured</small>
+      </div>
+
+      {continueWithoutBreak ? (
+        <div className="apt-continue-without-break">
+          <span>
+            Continue without break is ON — no active
+            breaks for this day.
+          </span>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => onToggleContinue(false)}
+          >
+            Turn off and add Breaks
+          </button>
+        </div>
+      ) : (
+        <>
+          {breaks.length > 0 && (
+            <div className="apt-schedule-breaks__list">
+              {breaks.map((item, index) => (
+                <TimeRange
+                  key={`${item.start}-${item.end}-${index}`}
+                  item={item}
+                  label={`Break ${index + 1}`}
+                  onChange={(patch) =>
+                    onChange(
+                      breaks.map((breakItem, breakIndex) =>
+                        breakIndex === index
+                          ? { ...breakItem, ...patch }
+                          : breakItem,
+                      ),
+                    )
+                  }
+                  onBlur={() =>
+                    onEditCommit && onEditCommit(index)
+                  }
+                  onRemove={() =>
+                    onRemove(index)
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={onAdd}
+          >
+            + Add Break
+          </button>
+
+          {breaks.length === 0 && (
+            <button
+              type="button"
+              className="btn btn-ghost apt-schedule-continue-toggle"
+              onClick={() => onToggleContinue(true)}
+            >
+              Continue without break
+            </button>
+          )}
+        </>
+      )}
+
+      {error && (
+        <p className="apt-schedule-error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
+
+// Copy the source weekday's full schedule to chosen target day(s). Requires an
+// explicit target selection + Apply so the command is never a hidden side
+// effect of picking a day.
+function CopyDayControl({ sourceIndex, onCopy }) {
+  const [target, setTarget] = useState('')
+  const targets = DAYS.filter(
+    (item) => item.dayIndex !== sourceIndex,
+  )
+
+  return (
+    <div className="apt-weekly-day__copy">
+      <label>Copy this day to</label>
+
+      <select
+        value={target}
+        onChange={(event) => setTarget(event.target.value)}
+        aria-label={`Copy ${DAYS.find((d) => d.dayIndex === sourceIndex)?.label} to…`}
+      >
+        <option value="" disabled>
+          Choose a day…
+        </option>
+
+        {targets.map((item) => (
+          <option key={item.dayIndex} value={item.dayIndex}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        disabled={!target}
+        onClick={() => {
+          onCopy(sourceIndex, [Number(target)])
+          setTarget('')
+        }}
+      >
+        Apply
+      </button>
+
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={() =>
+          onCopy(
+            sourceIndex,
+            targets.map((item) => item.dayIndex),
+          )
+        }
+      >
+        all weekdays
+      </button>
+    </div>
+  )
+}
+
 function SlotStatus({ slot }) {
+  const completed = slot.status === 'completed' || slot.completed
   const label =
     slot.status === 'booked'
       ? slot.appointment?.status || 'Booked'
-      : 'Available'
+      : completed
+        ? slot.appointment?.status === 'No-show'
+          ? 'No-show'
+          : 'Completed'
+        : 'Available'
 
   const className =
     slot.status === 'booked'
       ? 'apt-slot-status is-booked'
-      : 'apt-slot-status is-available'
+      : completed
+        ? 'apt-slot-status is-completed'
+        : 'apt-slot-status is-available'
 
   return (
     <span className={className}>
@@ -286,9 +516,9 @@ function DateSummaryModal({
   template,
   appointments,
   now,
+  published = false,
   onClose,
   onEdit,
-  onToggleBook,
 }) {
   if (!date || !template) return null
 
@@ -325,7 +555,11 @@ function DateSummaryModal({
       >
         <div className="apt-summary-modal__head">
           <div>
-            <span>Appointment Summary</span>
+            <span>
+              {published
+                ? 'Published Availability Preview'
+                : 'Appointment Summary'}
+            </span>
             <h3>
               {date.toLocaleDateString('en-IN', {
                 weekday: 'long',
@@ -335,6 +569,10 @@ function DateSummaryModal({
               })}
             </h3>
           </div>
+
+          {published && (
+            <StatusBadge label="Published" />
+          )}
 
           <button
             type="button"
@@ -404,8 +642,13 @@ function DateSummaryModal({
           </div>
 
           <div>
+            <span>Completed</span>
+            <strong>{summary.completed}</strong>
+          </div>
+
+          <div>
             <span>Remaining</span>
-            <strong>{summary.available}</strong>
+            <strong>{summary.remaining}</strong>
           </div>
         </div>
 
@@ -422,7 +665,7 @@ function DateSummaryModal({
             <StatusBadge
               label={
                 availability.status === 'Available'
-                  ? summary.available > 0
+                  ? summary.remaining > 0
                     ? 'Available'
                     : 'Fully Booked'
                   : 'Unavailable'
@@ -446,27 +689,7 @@ function DateSummaryModal({
                     </strong>
                   </div>
 
-                  <div className="apt-summary-slot__actions">
-                    <SlotStatus slot={slot} />
-                    {slot.status === 'available' && onToggleBook && (
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline"
-                        onClick={() => onToggleBook(slot.startMin)}
-                      >
-                        Mark Booked
-                      </button>
-                    )}
-                    {slot.manual && onToggleBook && (
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline"
-                        onClick={() => onToggleBook(slot.startMin)}
-                      >
-                        Mark Available
-                      </button>
-                    )}
-                  </div>
+                  <SlotStatus slot={slot} />
                 </div>
               ))}
             </div>
@@ -515,6 +738,7 @@ export default function AppointmentAvailabilityPanel({
     appointmentAvailabilityTemplates,
     actions,
   } = useAppData()
+  const { success } = useToast()
 
   const today = useMemo(
     () => new Date(),
@@ -538,8 +762,11 @@ export default function AppointmentAvailabilityPanel({
   const [selectedSummaryDate, setSelectedSummaryDate] =
     useState(null)
 
-  const [breakReminderDismissed, setBreakReminderDismissed] =
+  const [publishedPreview, setPublishedPreview] =
     useState(false)
+
+  const [weekErrors, setWeekErrors] = useState({})
+  const [dailyError, setDailyError] = useState(null)
 
   const [drafts, setDrafts] = useState({})
 
@@ -676,6 +903,7 @@ export default function AppointmentAvailabilityPanel({
         ...current,
         [key]: result,
       }))
+      success(publish ? 'Successfully published' : 'Saved successfully')
     }
   }
 
@@ -712,6 +940,12 @@ export default function AppointmentAvailabilityPanel({
   const override =
     draft.dateOverrides?.[selectedDate]
 
+  const weekdaySchedule =
+    draft.weeklySchedule.find(
+      (day) =>
+        day.dayIndex === selectedDay.getDay(),
+    )
+
   const daily = {
     status:
       override?.status ||
@@ -726,6 +960,11 @@ export default function AppointmentAvailabilityPanel({
       availability.breaks ||
       []
     ).map(cloneWindow),
+    continueWithoutBreak: Boolean(
+      override
+        ? override.continueWithoutBreak
+        : weekdaySchedule?.continueWithoutBreak,
+    ),
     bookedSlots: override?.bookedSlots || [],
   }
 
@@ -736,22 +975,6 @@ export default function AppointmentAvailabilityPanel({
       appointments,
       now: today,
     })
-
-  const longDays = draft.weeklySchedule.filter(
-    (day) =>
-      day.enabled &&
-      !(day.breaks || []).length &&
-      (day.slots || []).some(
-        (slot) =>
-          parseTimeToMinutes(
-            slot.end,
-          ) -
-            parseTimeToMinutes(
-              slot.start,
-            ) >=
-          360,
-      ),
-  )
 
   const saveDaily = () => {
     const next = {
@@ -780,6 +1003,7 @@ export default function AppointmentAvailabilityPanel({
         ...current,
         [key]: saved,
       }))
+      success('Saved successfully')
     }
   }
 
@@ -803,6 +1027,7 @@ export default function AppointmentAvailabilityPanel({
         ...current,
         [key]: saved,
       }))
+      success('Removed successfully')
     }
   }
 
@@ -829,45 +1054,14 @@ export default function AppointmentAvailabilityPanel({
       ),
     )
 
+    setPublishedPreview(false)
     setSelectedSummaryDate(date)
   }
 
   const editSelectedDate = () => {
     setSelectedSummaryDate(null)
+    setPublishedPreview(false)
     setMode('daily')
-  }
-
-  const toggleBookedSlot = (startMin) => {
-    if (!selectedSummaryDate) return
-
-    const iso = toIsoDate(selectedSummaryDate)
-    const current = draft.dateOverrides?.[iso]?.bookedSlots || []
-    const next = current.includes(startMin)
-      ? current.filter((n) => n !== startMin)
-      : [...current, startMin]
-
-    const override = draft.dateOverrides?.[iso] || {
-      status: 'Available',
-      windows: (availability.windows || []).map(cloneWindow),
-      breaks: (availability.breaks || []).map(cloneWindow),
-    }
-
-    const saved =
-      actions.saveAppointmentAvailabilityTemplate({
-        ...draft,
-        dateOverrides: {
-          ...(draft.dateOverrides || {}),
-          [iso]: { ...override, bookedSlots: next },
-        },
-      })
-
-    if (saved) {
-      setDrafts((current) => ({
-        ...current,
-        [key]: saved,
-      }))
-      setSelectedSummaryDate(selectedSummaryDate)
-    }
   }
 
   const gridStart = new Date(
@@ -895,6 +1089,18 @@ export default function AppointmentAvailabilityPanel({
     dayIndex,
     next,
   ) => {
+    const windows = next.slots?.length
+      ? next.slots
+      : DEFAULT_WINDOWS
+    const message = validateDayBreaks(
+      next.breaks || [],
+      windows,
+    )
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: message || undefined,
+    }))
+
     update((current) => ({
       ...current,
       weeklySchedule:
@@ -907,14 +1113,12 @@ export default function AppointmentAvailabilityPanel({
     }))
   }
 
-  // Apply a source day's schedule (enabled flag, working windows, breaks) to the
-  // chosen target day(s), reusing the same cloned window/break shape.
   const copyDaySchedule = (
     sourceIndex,
     targetIndexes,
   ) => {
     if (!targetIndexes.length) return
-    const source =
+    const sourceDay =
       draft.weeklySchedule.find(
         (day) => day.dayIndex === sourceIndex,
       ) || {}
@@ -928,19 +1132,176 @@ export default function AppointmentAvailabilityPanel({
             )
               ? {
                   ...day,
-                  enabled: source.enabled,
+                  enabled: sourceDay.enabled,
                   slots: (
-                    source.slots ||
+                    sourceDay.slots ||
                     []
                   ).map(cloneWindow),
                   breaks: (
-                    source.breaks ||
+                    sourceDay.breaks ||
                     []
                   ).map(cloneWindow),
+                  continueWithoutBreak:
+                    Boolean(
+                      sourceDay.continueWithoutBreak,
+                    ),
                 }
               : day,
         ),
     }))
+  }
+
+  const setAllDay = (
+    dayIndex,
+    checked,
+  ) => {
+    const day =
+      draft.weeklySchedule.find(
+        (item) => item.dayIndex === dayIndex,
+      ) || {}
+    setWeekly(
+      dayIndex,
+      checked
+        ? {
+            ...day,
+            enabled: true,
+            slots: [ALL_DAY_WINDOW],
+          }
+        : {
+            ...day,
+            slots: (
+              day.slots || []
+            ).length &&
+              !isAllDaySchedule(day.slots)
+              ? day.slots
+              : DEFAULT_WINDOWS.map(cloneWindow),
+          },
+    )
+  }
+
+  const applyExceptSunday = () => {
+    update((current) => ({
+      ...current,
+      weeklySchedule:
+        current.weeklySchedule.map(
+          (day) =>
+            day.dayIndex === 0
+              ? day
+              : {
+                  ...day,
+                  enabled: true,
+                  slots: [ALL_DAY_WINDOW],
+                },
+        ),
+    }))
+  }
+
+  const dayFor = (dayIndex) =>
+    draft.weeklySchedule.find(
+      (item) => item.dayIndex === dayIndex,
+    ) || {}
+
+  const addWeekBreak = (dayIndex) => {
+    const day = dayFor(dayIndex)
+    const windows = day.slots?.length
+      ? day.slots
+      : DEFAULT_WINDOWS
+    const nextBreaks = [
+      ...(day.breaks || []),
+      suggestBreak(windows),
+    ]
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+
+    if (message) {
+      setWeekErrors((current) => ({
+        ...current,
+        [dayIndex]: message,
+      }))
+      return
+    }
+
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: undefined,
+    }))
+    setWeekly(dayIndex, {
+      ...day,
+      continueWithoutBreak: false,
+      breaks: nextBreaks,
+    })
+    success('Successfully added')
+  }
+
+  const updateWeekBreaks = (
+    dayIndex,
+    nextBreaks,
+  ) => {
+    const day = dayFor(dayIndex)
+    const windows = day.slots?.length
+      ? day.slots
+      : DEFAULT_WINDOWS
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: message || undefined,
+    }))
+    setWeekly(dayIndex, {
+      ...day,
+      breaks: nextBreaks,
+    })
+  }
+
+  const removeWeekBreak = (dayIndex, breakIndex) => {
+    const day = dayFor(dayIndex)
+    setWeekly(dayIndex, {
+      ...day,
+      breaks: (day.breaks || []).filter(
+        (_, index) => index !== breakIndex,
+      ),
+    })
+    success('Removed successfully')
+  }
+
+  const toggleWeekContinue = (
+    dayIndex,
+    enabled,
+  ) => {
+    const day = dayFor(dayIndex)
+    setWeekly(dayIndex, {
+      ...day,
+      continueWithoutBreak: enabled,
+      breaks: enabled
+        ? []
+        : (day.breaks || []),
+    })
+  }
+
+  const updateDailyEditor = (next) => {
+    if (next.breaks !== undefined || next.windows !== undefined) {
+      const breaks =
+        next.breaks !== undefined
+          ? next.breaks
+          : (daily.breaks || [])
+      const windows =
+        (next.windows !== undefined
+          ? next.windows
+          : (daily.windows || [])
+        ).length
+          ? next.windows !== undefined
+            ? next.windows
+            : daily.windows
+          : DEFAULT_WINDOWS
+      setDailyError(
+        validateDayBreaks(breaks, windows),
+      )
+    }
+    saveDailyEditor(next)
   }
 
   const saveDailyEditor = (next) => {
@@ -952,6 +1313,158 @@ export default function AppointmentAvailabilityPanel({
       },
     }))
   }
+
+  const addDailyBreak = () => {
+    const windows = daily.windows?.length
+      ? daily.windows
+      : DEFAULT_WINDOWS
+    const nextBreaks = [
+      ...(daily.breaks || []),
+      suggestBreak(windows),
+    ]
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+
+    if (message) {
+      setDailyError(message)
+      return
+    }
+
+    setDailyError(null)
+    saveDailyEditor({
+      ...daily,
+      continueWithoutBreak: false,
+      breaks: nextBreaks,
+    })
+    success('Successfully added')
+  }
+
+  const removeDailyBreak = (index) => {
+    saveDailyEditor({
+      ...daily,
+      breaks: (daily.breaks || []).filter(
+        (_, breakIndex) => breakIndex !== index,
+      ),
+    })
+    setDailyError(null)
+    success('Removed successfully')
+  }
+
+  const commitDailyBreak = () => {
+    success('Saved successfully')
+  }
+
+  const toggleDailyContinue = (enabled) => {
+    saveDailyEditor({
+      ...daily,
+      continueWithoutBreak: enabled,
+      breaks: enabled ? [] : (daily.breaks || []),
+    })
+    setDailyError(null)
+  }
+
+  // Published-availability status driven by the persisted template for this
+  // month. Saving new edits never changes this until the astrologer publishes.
+  const publishedSource = source?.publishedWeeklySchedule
+    ? source
+    : null
+  const snapshot = publishedSource
+    ? publishedAvailabilitySnapshot(source)
+    : null
+  const hasUnpublished = publishedSource
+    ? hasUnpublishedChanges(source)
+    : false
+
+  const horizonEnd = new Date(
+    today.getFullYear(),
+    today.getMonth() + 3,
+    0,
+  )
+  const availabilityPeriod =
+    `${today.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })} – ${horizonEnd.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })}`
+
+  const publishedWorkingDays = snapshot
+    ? (snapshot.weeklySchedule || []).filter(
+        (day) => day.enabled,
+      )
+    : []
+  const publishedSunday = snapshot
+    ? snapshot.weeklySchedule.find(
+        (day) => day.dayIndex === 0,
+      )
+    : null
+  const publishedBreakCount = snapshot
+    ? (snapshot.weeklySchedule || []).reduce(
+        (total, day) => total + (day.breaks || []).length,
+        0,
+      )
+    : 0
+
+  const openPublishedPreview = () => {
+    const horizonEndDate = addMonths(
+      new Date(today.getFullYear(), today.getMonth(), 1),
+      3,
+    )
+    let previewDate = null
+
+    for (
+      let cursor = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1,
+      );
+      cursor < horizonEndDate && !previewDate;
+      cursor.setDate(cursor.getDate() + 1)
+    ) {
+      const monthTemplate =
+        appointmentAvailabilityTemplates.find(
+          (item) =>
+            item.astrologerId === astrologerId &&
+            item.monthKey === monthKey(cursor),
+        )
+      const monthSnapshot =
+        publishedAvailabilitySnapshot(monthTemplate)
+      if (
+        monthSnapshot &&
+        generateAppointmentSlots({
+          template: monthSnapshot,
+          date: cursor,
+          appointments,
+          now: today,
+        }).length
+      ) {
+        previewDate = new Date(cursor)
+      }
+    }
+
+    if (!previewDate) return
+
+    setSelectedMonth(
+      new Date(
+        previewDate.getFullYear(),
+        previewDate.getMonth(),
+        1,
+      ),
+    )
+    setSelectedDate(toIsoDate(previewDate))
+    setPublishedPreview(true)
+    setSelectedSummaryDate(previewDate)
+  }
+
+  const modalTemplate =
+    publishedPreview && snapshot
+      ? snapshot
+      : draft
 
   return (
     <>
@@ -1066,6 +1579,134 @@ export default function AppointmentAvailabilityPanel({
           </p>
         </section>
 
+        <section className="apt-published-card">
+          <div className="apt-published-card__main">
+            <div>
+              <span
+                className={
+                  publishedSource
+                    ? 'is-published'
+                    : ''
+                }
+              />
+              <strong>
+                {publishedSource
+                  ? 'Published Availability'
+                  : 'Not published yet'}
+              </strong>
+              <p>
+                Users can only book the published
+                availability — saved changes become
+                live after you publish.
+              </p>
+            </div>
+
+            {hasUnpublished && (
+              <span className="apt-unpublished-pill">
+                Unpublished changes
+              </span>
+            )}
+          </div>
+
+          <div className="apt-published-card__grid">
+            <div>
+              <span>Status</span>
+              <strong>
+                {publishedSource
+                  ? '✓ Published'
+                  : 'Not published'}
+                {hasUnpublished &&
+                  ' · Edited'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Last published</span>
+              <strong>
+                {source?.publishedAt
+                  ? new Date(
+                      source.publishedAt,
+                    ).toLocaleString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Availability period</span>
+              <strong>
+                {availabilityPeriod}
+              </strong>
+            </div>
+
+            <div>
+              <span>Working days</span>
+              <strong>
+                {publishedWorkingDays.length
+                  ? publishedWorkingDays
+                      .map(
+                        (day) =>
+                          DAYS.find(
+                            (meta) =>
+                              meta.dayIndex ===
+                              day.dayIndex,
+                          )?.label.slice(0, 3),
+                      )
+                      .join(' · ')
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Sunday</span>
+              <strong>
+                {publishedSunday?.enabled
+                  ? 'Working'
+                  : 'Off'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Duration</span>
+              <strong>
+                {snapshot?.appointmentDuration || '—'} Minutes
+              </strong>
+            </div>
+
+            <div>
+              <span>Breaks</span>
+              <strong>
+                {publishedBreakCount > 0
+                  ? `Configured (${publishedBreakCount})`
+                  : 'None'}
+              </strong>
+            </div>
+          </div>
+
+          <div className="apt-published-card__actions">
+            <button
+              type="button"
+              className="btn btn-outline"
+              disabled={!publishedSource}
+              onClick={openPublishedPreview}
+            >
+              <CalendarDays size={15} />
+              View Published Availability
+            </button>
+
+            <p>
+              Publish Availability to make your
+              saved configuration visible to users
+              booking this astrologer.
+            </p>
+          </div>
+        </section>
+
         <nav
           className="apt-schedule-tabs"
           aria-label="Scheduling modes"
@@ -1113,7 +1754,8 @@ export default function AppointmentAvailabilityPanel({
 
                 <p>
                   Your recurring base
-                  availability.
+                  availability. Each day is
+                  independently configurable.
                 </p>
               </div>
 
@@ -1161,6 +1803,51 @@ export default function AppointmentAvailabilityPanel({
               </div>
             </div>
 
+            <div className="apt-weekly-bulk">
+              <div className="apt-weekly-bulk__label">
+                All Day
+              </div>
+
+              <div className="apt-weekly-bulk__days">
+                {DAYS.map((meta) => {
+                  const day = dayFor(meta.dayIndex)
+                  const isOn =
+                    day.enabled &&
+                    isAllDaySchedule(day.slots)
+
+                  return (
+                    <label
+                      key={meta.dayIndex}
+                      className={
+                        isOn ? 'is-on' : ''
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(isOn)}
+                        onChange={(event) =>
+                          setAllDay(
+                            meta.dayIndex,
+                            event.target.checked,
+                          )
+                        }
+                        aria-label={`All Day ${meta.label}`}
+                      />
+                      {meta.label.slice(0, 3)}
+                    </label>
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={applyExceptSunday}
+              >
+                Monday–Saturday (Except Sunday)
+              </button>
+            </div>
+
             <div className="apt-weekly-days">
               {DAYS.map((meta) => {
                 const day =
@@ -1187,7 +1874,7 @@ export default function AppointmentAvailabilityPanel({
                       </span>
                     </div>
 
-                    <DayHoursEditor
+                    <WorkingHoursEditor
                       schedule={day}
                       onChange={(next) =>
                         setWeekly(
@@ -1197,138 +1884,48 @@ export default function AppointmentAvailabilityPanel({
                       }
                     />
 
-                    <div className="apt-weekly-day__copy">
-                      <label>
-                        Copy this day to
-                      </label>
+                    <BreaksEditor
+                      breaks={day.breaks || []}
+                      windows={
+                        day.slots?.length
+                          ? day.slots
+                          : DEFAULT_WINDOWS
+                      }
+                      continueWithoutBreak={
+                        Boolean(day.continueWithoutBreak)
+                      }
+                      error={weekErrors[meta.dayIndex]}
+                      onChange={(nextBreaks) =>
+                        updateWeekBreaks(
+                          meta.dayIndex,
+                          nextBreaks,
+                        )
+                      }
+                      onAdd={() =>
+                        addWeekBreak(meta.dayIndex)
+                      }
+                      onRemove={(breakIndex) =>
+                        removeWeekBreak(meta.dayIndex, breakIndex)
+                      }
+                      onEditCommit={() =>
+                        success('Saved successfully')
+                      }
+                      onToggleContinue={(enabled) =>
+                        toggleWeekContinue(
+                          meta.dayIndex,
+                          enabled,
+                        )
+                      }
+                    />
 
-                      <select
-                        value=""
-                        onChange={(event) => {
-                          const target = Number(
-                            event.target.value,
-                          )
-                          if (
-                            Number.isFinite(
-                              target,
-                            ) &&
-                            target !==
-                              meta.dayIndex
-                          ) {
-                            copyDaySchedule(
-                              meta.dayIndex,
-                              [target],
-                            )
-                          }
-                        }}
-                      >
-                        <option
-                          value=""
-                          disabled
-                        >
-                          Choose a day…
-                        </option>
-
-                        {DAYS.filter(
-                          (item) =>
-                            item.dayIndex !==
-                            meta.dayIndex,
-                        ).map((item) => (
-                          <option
-                            key={item.dayIndex}
-                            value={
-                              item.dayIndex
-                            }
-                          >
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => {
-                          const targets = DAYS.map(
-                            (
-                              item,
-                            ) =>
-                              item.dayIndex,
-                          ).filter(
-                            (idx) =>
-                              idx !==
-                              meta.dayIndex,
-                          )
-                          copyDaySchedule(
-                            meta.dayIndex,
-                            targets,
-                          )
-                        }}
-                      >
-                        all weekdays
-                      </button>
-                    </div>
+                    <CopyDayControl
+                      sourceIndex={meta.dayIndex}
+                      onCopy={copyDaySchedule}
+                    />
                   </article>
                 )
               })}
             </div>
-
-            {longDays.length > 0 &&
-              !breakReminderDismissed && (
-                <div className="apt-break-reminder">
-                  <Coffee size={18} />
-
-                  <div>
-                    <strong>
-                      ⚠ No break time added
-                    </strong>
-
-                    <span>
-                      Your working hours include
-                      a continuous six-hour or
-                      longer period. Consider
-                      adding a break to avoid
-                      continuous appointments.
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-outline"
-                    onClick={() => {
-                      const day =
-                        longDays[0]
-
-                      setWeekly(
-                        day.dayIndex,
-                        {
-                          ...day,
-                          breaks: [
-                            {
-                              start: '13:00',
-                              end: '14:00',
-                            },
-                          ],
-                        },
-                      )
-                    }}
-                  >
-                    Add Break
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() =>
-                      setBreakReminderDismissed(
-                        true,
-                      )
-                    }
-                  >
-                    Continue Without Break
-                  </button>
-                </div>
-              )}
 
             <div className="apt-save-weekly">
               <div>
@@ -1336,6 +1933,8 @@ export default function AppointmentAvailabilityPanel({
                 <span>
                   Your working hours, breaks and
                   available days for each weekday.
+                  Saving does not change what users
+                  see until you publish.
                 </span>
               </div>
 
@@ -1438,10 +2037,33 @@ export default function AppointmentAvailabilityPanel({
                 </div>
               )}
 
-            <DayHoursEditor
+            <WorkingHoursEditor
               daily
               schedule={daily}
-              onChange={saveDailyEditor}
+              onChange={updateDailyEditor}
+            />
+
+            <BreaksEditor
+              breaks={daily.breaks || []}
+              windows={
+                daily.windows?.length
+                  ? daily.windows
+                  : DEFAULT_WINDOWS
+              }
+              continueWithoutBreak={
+                daily.continueWithoutBreak
+              }
+              error={dailyError}
+              onChange={(nextBreaks) =>
+                updateDailyEditor({
+                  ...daily,
+                  breaks: nextBreaks,
+                })
+              }
+              onAdd={addDailyBreak}
+              onRemove={removeDailyBreak}
+              onEditCommit={commitDailyBreak}
+              onToggleContinue={toggleDailyContinue}
             />
 
             <div className="apt-slot-preview">
@@ -1503,9 +2125,10 @@ export default function AppointmentAvailabilityPanel({
                 </h3>
 
                 <p>
-                  Select a date to view its
-                  availability and appointment
-                  slots.
+                  Total, Booked, Completed and
+                  Remaining slots come from real
+                  data — your published working
+                  hours, breaks and appointments.
                 </p>
               </div>
 
@@ -1630,12 +2253,13 @@ export default function AppointmentAvailabilityPanel({
                   if (!inHorizon) {
                     state = 'outside'
                   } else if (
-                    dateSummary.available >
+                    dateSummary.remaining >
                     0
                   ) {
                     state = 'available'
                   } else if (
-                    dateSummary.booked > 0
+                    dateSummary.booked > 0 ||
+                    dateSummary.completed > 0
                   ) {
                     state = 'booked'
                   } else if (
@@ -1682,24 +2306,41 @@ export default function AppointmentAvailabilityPanel({
                         {date.getDate()}
                       </strong>
 
-                      <span>
-                        {state ===
-                        'available'
-                          ? `${dateSummary.available} available`
-                          : state ===
-                              'booked'
-                            ? dateSummary.booked >
-                              0
-                              ? `${dateSummary.booked} booked`
-                              : 'Fully booked'
+                      {dateSummary.total > 0 ? (
+                        <>
+                          <span className="apt-cell-line">
+                            {dateSummary.total}{' '}
+                            Slots
+                          </span>
+
+                          <em
+                            aria-label={`${dateSummary.booked} booked, ${dateSummary.completed} completed, ${dateSummary.remaining} remaining of ${dateSummary.total} total`}
+                          >
+                            {dateSummary.booked}B ·{' '}
+                            {dateSummary.completed}C ·{' '}
+                            {dateSummary.remaining}R
+                          </em>
+                        </>
+                      ) : (
+                        <span>
+                          {state ===
+                          'available'
+                            ? `${dateSummary.available} available`
                             : state ===
-                                'holiday'
-                              ? 'Holiday'
+                                'booked'
+                              ? dateSummary.booked >
+                                0
+                                ? `${dateSummary.booked} booked`
+                                : 'Fully booked'
                               : state ===
-                                  'outside'
-                                ? ''
-                                : 'Unavailable'}
-                      </span>
+                                  'holiday'
+                                ? 'Holiday'
+                                : state ===
+                                    'outside'
+                                  ? ''
+                                  : 'Unavailable'}
+                        </span>
+                      )}
 
                       {draft.dateOverrides?.[
                         iso
@@ -1734,6 +2375,11 @@ export default function AppointmentAvailabilityPanel({
               <span className="holiday">
                 Government Holiday
               </span>
+
+              <span>
+                Day counts show B·C·R =
+                Booked · Completed · Remaining
+              </span>
             </div>
           </section>
         )}
@@ -1742,14 +2388,15 @@ export default function AppointmentAvailabilityPanel({
       {selectedSummaryDate && (
         <DateSummaryModal
           date={selectedSummaryDate}
-          template={draft}
+          template={modalTemplate}
           appointments={appointments}
           now={today}
-          onClose={() =>
+          published={publishedPreview}
+          onClose={() => {
             setSelectedSummaryDate(null)
-          }
+            setPublishedPreview(false)
+          }}
           onEdit={editSelectedDate}
-          onToggleBook={toggleBookedSlot}
         />
       )}
     </>

@@ -807,6 +807,7 @@ function normalizeAppointmentScheduleDay(day, dayIndex) {
     breaks: Array.isArray(day?.breaks)
       ? day.breaks.map(normalizeAppointmentSlot).filter((slot) => slot.start < slot.end)
       : [],
+    continueWithoutBreak: Boolean(day?.continueWithoutBreak),
   }
 }
 
@@ -822,7 +823,7 @@ function normalizeAppointmentDateOverride(override) {
   const bookedSlots = Array.isArray(override.bookedSlots)
     ? override.bookedSlots.filter((n) => Number.isFinite(Number(n))).map((n) => Number(n))
     : []
-  return { status, windows, breaks, bookedSlots }
+  return { status, windows, breaks, bookedSlots, continueWithoutBreak: Boolean(override.continueWithoutBreak) }
 }
 
 function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, status = 'Draft') {
@@ -840,6 +841,12 @@ function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, st
     updatedAt: new Date().toISOString(),
     dateOverrides: {},
     weeklySchedule: APPOINTMENT_WEEKDAYS.map((day) => normalizeAppointmentScheduleDay(null, day.dayIndex)),
+    // Snapshot of the config that was last published. Kept immutable so saved
+    // edits never change what users see until Publish Availability runs again.
+    publishedWeeklySchedule: null,
+    publishedDateOverrides: null,
+    publishedAppointmentDuration: null,
+    publishedAppointmentPrice: null,
   }
 }
 
@@ -855,6 +862,14 @@ function normalizeAppointmentAvailabilityTemplate(template) {
       .map(([dateIso, override]) => [dateIso, normalizeAppointmentDateOverride(override)])
       .filter(([, override]) => override))
     : {}
+  const publishedWeeklySchedule = Array.isArray(template.publishedWeeklySchedule)
+    ? APPOINTMENT_WEEKDAYS.map((day) => normalizeAppointmentScheduleDay(template.publishedWeeklySchedule.find((item) => Number(item?.dayIndex) === day.dayIndex), day.dayIndex))
+    : null
+  const publishedDateOverrides = template.publishedDateOverrides && typeof template.publishedDateOverrides === 'object'
+    ? Object.fromEntries(Object.entries(template.publishedDateOverrides)
+      .map(([dateIso, override]) => [dateIso, normalizeAppointmentDateOverride(override)])
+      .filter(([, override]) => override))
+    : null
   return {
     ...normalized,
     ...template,
@@ -874,8 +889,18 @@ function normalizeAppointmentAvailabilityTemplate(template) {
     appointmentPrice: Number.isFinite(Number(template.appointmentPrice)) && Number(template.appointmentPrice) >= 0
       ? Number(template.appointmentPrice)
       : 799,
+    publishedAppointmentDuration: [15, 30].includes(
+      Number(template.publishedAppointmentDuration),
+    )
+      ? Number(template.publishedAppointmentDuration)
+      : null,
+    publishedAppointmentPrice: Number.isFinite(Number(template.publishedAppointmentPrice))
+      ? Number(template.publishedAppointmentPrice)
+      : null,
     dateOverrides,
     weeklySchedule,
+    publishedWeeklySchedule,
+    publishedDateOverrides,
   }
 }
 
@@ -1886,7 +1911,12 @@ export function AppDataProvider({ children }) {
         bookingSequence: payload.bookingSequence || 1,
         questionDetails: payload.questionDetails || null,
         horoscope: payload.horoscope || null,
-        status: 'Pending',
+        dateIso: payload.dateIso || payload.date || null,
+        start: payload.start || null,
+        end: payload.end || null,
+        userId: payload.userId || null,
+        customerName: payload.customerName || null,
+        status: 'Booked',
       }
       setAppointments((prev) => [appointment, ...prev])
       setNotifications((prev) => [
@@ -2106,15 +2136,40 @@ export function AppDataProvider({ children }) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)
       if (!normalized) return null
       setAppointmentAvailabilityTemplates((prev) => {
+        const existing = prev.find((item) =>
+          item.id === normalized.id ||
+          (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey),
+        )
+        // Saving edits must never discard the published snapshot. While a
+        // snapshot exists the template stays "Published" (with possible
+        // unpublished changes); Publish is what replaces the snapshot.
+        const retained = existing?.publishedWeeklySchedule || existing?.publishedAt
+          ? {
+              status: 'Published',
+              publishedAt: existing.publishedAt || null,
+              publishedWeeklySchedule: existing.publishedWeeklySchedule || null,
+              publishedDateOverrides: existing.publishedDateOverrides || null,
+              publishedAppointmentDuration: existing.publishedAppointmentDuration != null
+                ? existing.publishedAppointmentDuration
+                : null,
+              publishedAppointmentPrice: existing.publishedAppointmentPrice != null
+                ? existing.publishedAppointmentPrice
+                : null,
+            }
+          : {}
+        const merged = { ...normalized, ...retained }
         const policy = {
-          appointmentDuration: normalized.appointmentDuration,
-          appointmentPrice: normalized.appointmentPrice,
+          appointmentDuration: merged.appointmentDuration,
+          appointmentPrice: merged.appointmentPrice,
         }
-        const withPolicy = prev.map((item) => item.astrologerId === normalized.astrologerId ? { ...item, ...policy } : item)
-        const index = withPolicy.findIndex((item) => item.id === normalized.id || (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey))
-        if (index === -1) return [normalized, ...withPolicy]
+        const withPolicy = prev.map((item) => item.astrologerId === merged.astrologerId ? { ...item, ...policy } : item)
+        const index = withPolicy.findIndex((item) =>
+          item.id === merged.id ||
+          (item.astrologerId === merged.astrologerId && item.monthKey === merged.monthKey),
+        )
+        if (index === -1) return [merged, ...withPolicy]
         const next = withPolicy.slice()
-        next[index] = normalized
+        next[index] = merged
         return next
       })
       return normalized
@@ -2122,16 +2177,38 @@ export function AppDataProvider({ children }) {
     publishAppointmentAvailabilityTemplate(template) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)
       if (!normalized) return null
+      const cloneWindow = (item) => (item ? { start: item.start, end: item.end } : { start: '09:00', end: '16:00' })
       const published = {
         ...normalized,
         status: 'Published',
         publishedAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        publishedWeeklySchedule: (normalized.weeklySchedule || []).map((day) => ({
+          ...day,
+          slots: (day.slots || []).map(cloneWindow),
+          breaks: (day.breaks || []).map(cloneWindow),
+        })),
+        publishedDateOverrides: Object.fromEntries(
+          Object.entries(normalized.dateOverrides || {}).map(([dateIso, override]) => [
+            dateIso,
+            {
+              ...override,
+              windows: (override.windows || []).map(cloneWindow),
+              breaks: (override.breaks || []).map(cloneWindow),
+              bookedSlots: Array.isArray(override.bookedSlots) ? override.bookedSlots.slice() : [],
+            },
+          ]),
+        ),
+        publishedAppointmentDuration: normalized.appointmentDuration,
+        publishedAppointmentPrice: normalized.appointmentPrice,
       }
       setAppointmentAvailabilityTemplates((prev) => {
         const policy = { appointmentDuration: published.appointmentDuration, appointmentPrice: published.appointmentPrice }
         const withPolicy = prev.map((item) => item.astrologerId === published.astrologerId ? { ...item, ...policy } : item)
-        const index = withPolicy.findIndex((item) => item.id === published.id || (item.astrologerId === published.astrologerId && item.monthKey === published.monthKey))
+        const index = withPolicy.findIndex((item) =>
+          item.id === published.id ||
+          (item.astrologerId === published.astrologerId && item.monthKey === published.monthKey),
+        )
         if (index === -1) return [published, ...withPolicy]
         const next = withPolicy.slice()
         next[index] = published

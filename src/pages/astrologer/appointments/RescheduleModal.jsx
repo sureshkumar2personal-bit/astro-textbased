@@ -7,6 +7,7 @@ import {
   X,
 } from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useToast } from '../../../components/Toast.jsx'
 import {
   addMonths,
   format12h,
@@ -89,6 +90,7 @@ export default function RescheduleModal({
 }) {
   const { appointmentAvailabilityTemplates, actions } =
     useAppData()
+  const { success } = useToast()
 
   const [month, setMonth] = useState(
     () => new Date(),
@@ -176,6 +178,7 @@ export default function RescheduleModal({
     })
     if (newId) {
       setNotice(`Rescheduled to ${dateLabel(selectedCalendarDay)} at ${format12h(slot.startMin)}.`)
+      success('Appointment rescheduled successfully')
       window.setTimeout(onClose, 1200)
     } else {
       setSaving(false)

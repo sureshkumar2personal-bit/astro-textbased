@@ -3,6 +3,7 @@ import Layout from './components/Layout.jsx'
 import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
 import { ThemeProvider } from './state/ThemeContext.jsx'
+import { ToastProvider } from './components/Toast.jsx'
 import { getRoleRoutes, ROLES } from './utils/roleRoutes.js'
 
 import Login from './pages/Login.jsx'
@@ -223,9 +224,11 @@ function App() {
     <AuthProvider>
       <AppDataProvider>
         <ThemeProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
+          <ToastProvider>
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </ToastProvider>
         </ThemeProvider>
       </AppDataProvider>
     </AuthProvider>

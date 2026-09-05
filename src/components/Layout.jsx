@@ -49,9 +49,8 @@ const ROLE_CONFIG = {
         label: 'Appointments',
         icon: CalendarDays,
         children: [
-          { to: 'appointments/schedule', label: 'Schedule', icon: TempleScrollIcon },
-          { to: 'appointments/calendar', label: 'Calendar', icon: CalendarDays },
-          { to: 'appointments/history', label: 'History', icon: ListChecks },
+          { to: 'appointments/schedule', label: 'Schedule Appointments', icon: CalendarDays },
+          { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
         ],
       },
       {

@@ -479,7 +479,7 @@ export function generateAppointmentSlots({ template, date, appointments = [], no
   const duration = Math.max(1, Math.round(Number(template.appointmentDuration) || 30))
   const interval = Math.min(duration, 15)
   const occupied = appointments
-    .filter((appointment) => appointment.dateIso === iso && appointment.status !== 'Cancelled')
+    .filter((appointment) => appointment.dateIso === iso && !isCancelledStatus(appointment.status))
     .map(resolveAppointmentWindow)
   const manualBooked = new Set(getManualBookedSlots(template, iso))
   const breaks = (schedule.breaks || []).map((item) => ({ start: parseTimeToMinutes(item.start), end: parseTimeToMinutes(item.end) }))
@@ -498,18 +498,141 @@ export function generateAppointmentSlots({ template, date, appointments = [], no
   return slots
 }
 
+// ---- Break / working-hour validation ------------------------------------
+
+// A range is valid only when it has a start strictly before its end.
+export function isValidRange(item) {
+  if (!item || item.start == null || item.end == null) return false
+  return parseTimeToMinutes(item.start) < parseTimeToMinutes(item.end)
+}
+
+// A break must sit entirely inside at least one of the day's working windows.
+export function isBreakWithinWindows(item, windows = []) {
+  if (!isValidRange(item)) return false
+  const start = parseTimeToMinutes(item.start)
+  const end = parseTimeToMinutes(item.end)
+  return windows.some((window) => {
+    if (!window || window.start == null || window.end == null) return false
+    const windowStart = parseTimeToMinutes(window.start)
+    const windowEnd = parseTimeToMinutes(window.end)
+    return windowStart < windowEnd && start >= windowStart && end <= windowEnd
+  })
+}
+
+// Two breaks may not overlap each other.
+export function breaksOverlap(a, b) {
+  const start = parseTimeToMinutes(a.start)
+  const end = parseTimeToMinutes(a.end)
+  const otherStart = parseTimeToMinutes(b.start)
+  const otherEnd = parseTimeToMinutes(b.end)
+  return start < otherEnd && end > otherStart
+}
+
+// Returns the first validation message for a day's break list, or null when
+// every break is well-formed, inside the working windows and non-overlapping.
+export function validateDayBreaks(breaks = [], windows = []) {
+  const list = Array.isArray(breaks) ? breaks : []
+  for (const item of list) {
+    if (!isValidRange(item)) {
+      return 'Break end time must be later than its start time.'
+    }
+    if (!isBreakWithinWindows(item, windows)) {
+      return 'Each break must fall inside that day\u2019s working hours.'
+    }
+  }
+  for (let i = 0; i < list.length; i += 1) {
+    for (let j = i + 1; j < list.length; j += 1) {
+      if (breaksOverlap(list[i], list[j])) {
+        return 'Breaks must not overlap each other.'
+      }
+    }
+  }
+  return null
+}
+
+// ---- Published availability snapshots ------------------------------------
+//
+// Availability templates carry a published snapshot
+// (publishedWeeklySchedule / publishedDateOverrides) that records exactly what
+// was last published. Saving edited changes (weeklySchedule / dateOverrides)
+// never changes what users see until the astrologer publishes again.
+
+export function publishedAvailabilitySnapshot(template) {
+  if (!template) return null
+  const publishedWeeklySchedule = template.publishedWeeklySchedule
+  const publishedDateOverrides = template.publishedDateOverrides
+  if (!publishedWeeklySchedule && !publishedDateOverrides) return null
+  return {
+    ...template,
+    weeklySchedule: publishedWeeklySchedule || template.weeklySchedule || [],
+    dateOverrides: publishedDateOverrides || template.dateOverrides || {},
+    appointmentDuration: template.publishedAppointmentDuration != null
+      ? Number(template.publishedAppointmentDuration)
+      : Number(template.appointmentDuration) || 30,
+    appointmentPrice: template.publishedAppointmentPrice != null
+      ? Number(template.publishedAppointmentPrice)
+      : Number(template.appointmentPrice) || 799,
+  }
+}
+
+export function hasUnpublishedChanges(template) {
+  if (!template) return false
+  const snapshot = publishedAvailabilitySnapshot(template)
+  if (!snapshot) return false
+  const comparable = (value) => (value == null ? 'null' : JSON.stringify(value))
+  const policyChanged =
+    (template.publishedAppointmentDuration != null &&
+      Number(template.appointmentDuration) !== Number(template.publishedAppointmentDuration)) ||
+    (template.publishedAppointmentPrice != null &&
+      Number(template.appointmentPrice) !== Number(template.publishedAppointmentPrice))
+  return (
+    comparable(template.weeklySchedule) !== comparable(snapshot.weeklySchedule) ||
+    comparable(template.dateOverrides) !== comparable(snapshot.dateOverrides) ||
+    policyChanged
+  )
+}
+
+// Date -> '10:00 AM' slot-time map shown on the user booking page. Uses ONLY
+// published snapshots (saved-but-not-published edits are invisible to users),
+// derives slots through the same generateAppointmentSlots engine, and lets
+// booked appointments occupy/remove their slots automatically.
+export function publishedAvailabilityMap({ templates = [], astrologerId, appointments = [], now = new Date() }) {
+  const map = {}
+  if (!Array.isArray(templates) || !astrologerId) return map
+  const first = startOfMonth(now)
+  const end = addMonths(first, 3)
+  const astrologerAppointments = appointments.filter((appointment) => appointment.astrologerId === astrologerId)
+  const cursor = new Date(first)
+  while (cursor < end) {
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`
+    const template = templates.find((item) => item.astrologerId === astrologerId && item.monthKey === key)
+    const published = template ? publishedAvailabilitySnapshot(template) : null
+    if (published) {
+      const slots = generateAppointmentSlots({ template: published, date: cursor, appointments: astrologerAppointments, now })
+      if (slots.length) map[toIsoDate(cursor)] = slots.map((slot) => format12h(slot.startMin))
+    }
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return map
+}
+
 // The scheduling editor needs both bookable and occupied slots.  This keeps
 // the rules in one place: breaks are excluded, while cancelled appointments
-// deliberately leave their slot available again.
+// deliberately leave their slot available again. Occupied slots are split into
+// "booked" (active bookings) and "completed" (Completed / No-show records) so
+// the monthly schedule can show Total / Booked / Completed / Remaining, with
+// Remaining = Total - Booked - Completed and completed capacity never counted
+// as available.
 export function getAppointmentSlotSummary({ template, date, appointments = [], now = new Date() }) {
   const day = typeof date === 'string' ? fromIsoDate(date) : date
   const iso = toIsoDate(day)
-  if (!template || !isWithinSchedulingHorizon(day, now, 3)) return { total: 0, booked: 0, available: 0, slots: [] }
+  const empty = { total: 0, booked: 0, completed: 0, remaining: 0, available: 0, slots: [] }
+  if (!template || !isWithinSchedulingHorizon(day, now, 3)) return empty
   const schedule = getDateAvailability(template, day)
-  if (schedule.status !== 'Available') return { total: 0, booked: 0, available: 0, slots: [] }
+  if (schedule.status !== 'Available') return empty
   const duration = Math.max(1, Math.round(Number(template.appointmentDuration) || 30))
   const interval = Math.min(duration, 15)
-  const appointmentsForDay = appointments.filter((appointment) => appointment.dateIso === iso && appointment.status !== 'Cancelled')
+  const appointmentsForDay = appointments.filter((appointment) => appointment.dateIso === iso && !isCancelledStatus(appointment.status))
   const manualBooked = new Set(getManualBookedSlots(template, iso))
   const breaks = (schedule.breaks || []).map((item) => ({ start: parseTimeToMinutes(item.start), end: parseTimeToMinutes(item.end) }))
   const slots = []
@@ -524,9 +647,19 @@ export function getAppointmentSlotSummary({ template, date, appointments = [], n
         return overlaps(start, end, range.startMin, range.endMin)
       })
       const manual = manualBooked.has(start)
-      slots.push({ startMin: start, endMin: end, status: appointment || manual ? 'booked' : 'available', appointment, manual: manual && !appointment })
+      const completed = Boolean(appointment && appointmentStatusBucket(appointment.status) === 'completed')
+      slots.push({
+        startMin: start,
+        endMin: end,
+        status: appointment || manual ? (completed ? 'completed' : 'booked') : 'available',
+        appointment: appointment || null,
+        manual: manual && !appointment,
+        completed,
+      })
     }
   })
   const booked = slots.filter((slot) => slot.status === 'booked').length
-  return { total: slots.length, booked, available: slots.length - booked, slots }
+  const completedCount = slots.filter((slot) => slot.status === 'completed').length
+  const remaining = slots.length - booked - completedCount
+  return { total: slots.length, booked, completed: completedCount, remaining, available: remaining, slots }
 }

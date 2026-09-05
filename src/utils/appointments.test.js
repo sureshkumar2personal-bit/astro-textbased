@@ -11,6 +11,13 @@ import {
   canStartCall,
   generateAppointmentSlots,
   getAppointmentSlotSummary,
+  isValidRange,
+  isBreakWithinWindows,
+  breaksOverlap,
+  validateDayBreaks,
+  publishedAvailabilitySnapshot,
+  hasUnpublishedChanges,
+  publishedAvailabilityMap,
 } from './appointments.js'
 
 describe('appointment status semantics', () => {
@@ -320,5 +327,196 @@ describe('appointment availability engine (weekly schedule)', () => {
     expect(summary.slots.some((s) => s.status === 'booked')).toBe(true)
     expect(summary.slots.some((s) => s.status === 'available')).toBe(true)
     expect(summary.total).toBe(summary.booked + summary.available)
+  })
+
+  it('counts Completed/No-show records as completed, not remaining capacity', () => {
+    const apt = {
+      dateIso: DATE,
+      start: '11:00',
+      end: '11:30',
+      duration: '30 min',
+      status: 'Completed',
+    }
+    const summary = getAppointmentSlotSummary({
+      template: template(),
+      date: DATE,
+      appointments: [apt],
+    })
+    const completedSlots = summary.slots.filter((s) => s.status === 'completed')
+    expect(completedSlots.length).toBeGreaterThan(0)
+    expect(summary.completed).toBe(completedSlots.length)
+    expect(summary.remaining).toBe(summary.total - summary.booked - summary.completed)
+    expect(summary.total).toBe(summary.booked + summary.completed + summary.remaining)
+    expect(summary.available).toBe(summary.remaining)
+  })
+
+  it('frees a slot again when its appointment is cancelled', () => {
+    const apt = {
+      dateIso: DATE,
+      start: '11:00',
+      end: '11:30',
+      duration: '30 min',
+      status: 'Cancelled by User',
+    }
+    const summary = getAppointmentSlotSummary({
+      template: template(),
+      date: DATE,
+      appointments: [apt],
+    })
+    expect(summary.slots.find((s) => s.startMin === 660).status).toBe('available')
+    expect(summary.booked).toBe(0)
+    expect(summary.completed).toBe(0)
+  })
+
+  it('counts a no-show appointment as completed', () => {
+    const apt = {
+      dateIso: DATE,
+      start: '11:00',
+      end: '11:30',
+      duration: '30 min',
+      status: 'No-show',
+    }
+    const summary = getAppointmentSlotSummary({
+      template: template(),
+      date: DATE,
+      appointments: [apt],
+    })
+    const slot = summary.slots.find((s) => s.startMin === 660)
+    expect(slot.status).toBe('completed')
+    expect(summary.completed).toBeGreaterThan(0)
+    expect(summary.remaining).toBe(summary.total - summary.completed)
+  })
+})
+
+describe('break and working-hour validation', () => {
+  const WINDOWS = [{ start: '09:00', end: '16:00' }]
+
+  it('considers a range valid only when start is strictly before end', () => {
+    expect(isValidRange({ start: '10:00', end: '12:00' })).toBe(true)
+    expect(isValidRange({ start: '10:00', end: '10:00' })).toBe(false)
+    expect(isValidRange({ start: '13:00', end: '12:00' })).toBe(false)
+    expect(isValidRange(null)).toBe(false)
+    expect(isValidRange({ start: '10:00' })).toBe(false)
+  })
+
+  it('rejects a break that falls outside the working hours', () => {
+    expect(isBreakWithinWindows({ start: '10:00', end: '12:00' }, WINDOWS)).toBe(true)
+    expect(isBreakWithinWindows({ start: '08:00', end: '10:00' }, WINDOWS)).toBe(false)
+    expect(isBreakWithinWindows({ start: '15:00', end: '17:00' }, WINDOWS)).toBe(false)
+  })
+
+  it('detects overlapping breaks', () => {
+    expect(breaksOverlap({ start: '10:00', end: '11:00' }, { start: '10:30', end: '11:30' })).toBe(true)
+    expect(breaksOverlap({ start: '10:00', end: '10:30' }, { start: '10:30', end: '11:00' })).toBe(false)
+  })
+
+  it('validates a whole break list and returns the first problem', () => {
+    expect(validateDayBreaks([], WINDOWS)).toBeNull()
+    expect(validateDayBreaks([{ start: '10:00', end: '12:00' }], WINDOWS)).toBeNull()
+    expect(validateDayBreaks([{ start: '13:00', end: '12:00' }], WINDOWS)).toMatch(/later than/)
+    expect(validateDayBreaks([{ start: '07:00', end: '08:00' }], WINDOWS)).toMatch(/working hours/)
+    expect(
+      validateDayBreaks(
+        [
+          { start: '10:00', end: '12:00' },
+          { start: '11:00', end: '12:30' },
+        ],
+        WINDOWS,
+      ),
+    ).toMatch(/overlap/)
+  })
+})
+
+describe('published availability snapshots', () => {
+  const WEEKLY = [
+    { dayIndex: 1, enabled: true, slots: [{ start: '10:00', end: '12:00' }], breaks: [] },
+  ]
+  const baseTemplate = (over = {}) => ({
+    astrologerId: 'a1',
+    monthKey: '2026-09',
+    appointmentDuration: 30,
+    appointmentPrice: 799,
+    status: 'Published',
+    publishedAt: '2026-09-01T10:00:00.000Z',
+    weeklySchedule: WEEKLY,
+    dateOverrides: {},
+    publishedWeeklySchedule: WEEKLY,
+    publishedDateOverrides: {},
+    publishedAppointmentDuration: 30,
+    publishedAppointmentPrice: 799,
+    ...over,
+  })
+
+  it('returns null when nothing has been published', () => {
+    expect(publishedAvailabilitySnapshot({ weeklySchedule: WEEKLY })).toBeNull()
+  })
+
+  it('exposes published config when a snapshot exists', () => {
+    const snapshot = publishedAvailabilitySnapshot(baseTemplate())
+    expect(snapshot.weeklySchedule).toEqual(WEEKLY)
+  })
+
+  it('flags edits as unpublished changes against the snapshot', () => {
+    expect(hasUnpublishedChanges(baseTemplate())).toBe(false)
+    const edited = baseTemplate({
+      weeklySchedule: [
+        { dayIndex: 1, enabled: true, slots: [{ start: '10:00', end: '13:00' }], breaks: [] },
+      ],
+    })
+    expect(hasUnpublishedChanges(edited)).toBe(true)
+  })
+
+  it('flags a price/duration change as unpublished without a schedule change', () => {
+    expect(hasUnpublishedChanges(baseTemplate({ appointmentPrice: 999 }))).toBe(true)
+    expect(hasUnpublishedChanges(baseTemplate({ appointmentDuration: 15 }))).toBe(true)
+  })
+
+  it('builds a date -> slot-time availability map only from published templates', () => {
+    const now = new Date('2026-09-04T12:00:00+05:30')
+    const published = baseTemplate()
+    const notPublished = {
+      ...baseTemplate(),
+      monthKey: '2026-10',
+      id: 'draft-2',
+      status: 'Draft',
+      publishedWeeklySchedule: null,
+      publishedDateOverrides: null,
+      weeklySchedule: [
+        { dayIndex: 2, enabled: true, slots: [{ start: '10:00', end: '12:00' }], breaks: [] },
+      ],
+    }
+    const map = publishedAvailabilityMap({
+      templates: [published, notPublished],
+      astrologerId: 'a1',
+      now,
+    })
+    // The published Monday schedule produces slots; the draft-only month is absent.
+    const monday = [...Object.keys(map)].find((iso) => {
+      const day = new Date(`${iso}T00:00:00`)
+      return day.getDay() === 1
+    })
+    expect(monday).toBeDefined()
+    expect(map[monday].length).toBeGreaterThan(0)
+    // October is never a key because its template was never published.
+    expect(Object.keys(map).every((iso) => iso.startsWith('2026-09'))).toBe(true)
+  })
+
+  it('excludes slots already occupied by a booked appointment', () => {
+    const now = new Date('2026-09-04T12:00:00+05:30')
+    const mondayIso = [...Array(30)]
+      .map((_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`)
+      .find((iso) => new Date(`${iso}T00:00:00`).getDay() === 1)
+    const appointments = [
+      { astrologerId: 'a1', dateIso: mondayIso, start: '10:00', end: '10:30', status: 'Booked' },
+    ]
+    const map = publishedAvailabilityMap({
+      templates: [baseTemplate()],
+      astrologerId: 'a1',
+      appointments,
+      now,
+    })
+    expect(map[mondayIso]).toBeDefined()
+    expect(map[mondayIso]).not.toContain('10:00 AM')
+    expect(map[mondayIso]).toContain('10:30 AM')
   })
 })

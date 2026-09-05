@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText } from 'lucide-react'
 import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
+import { publishedAvailabilityMap } from '../utils/appointments.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -125,7 +126,7 @@ function BookingReview({ selectedSlots }) {
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, appointments, userWallet, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, appointments, userWallet, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments, appointmentAvailabilityTemplates } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = searchParams.get('id') || mockAstrologers[0].id
@@ -183,7 +184,18 @@ export default function AstrologerProfile() {
   const hasSharedPosts = sharedPosts.some((post) => post.astrologerId === astrologer.id)
   const astrologerPosts = hasSharedPosts ? accessiblePosts : mockAstrologerPosts.filter((post) => post.astrologerId === astrologer.id)
   const savedPosts = accessiblePosts.filter((post) => savedPostIds.includes(post.id))
-  const availability = mockAstrologerAvailability[astrologer.id] || {}
+  const hasPublishedTemplates = appointmentAvailabilityTemplates.some(
+    (template) =>
+      template.astrologerId === astrologer.id &&
+      (template.publishedWeeklySchedule || template.publishedDateOverrides),
+  )
+  const availability = useMemo(
+    () =>
+      hasPublishedTemplates
+        ? publishedAvailabilityMap({ templates: appointmentAvailabilityTemplates, astrologerId: astrologer.id, appointments })
+        : mockAstrologerAvailability[astrologer.id] || {},
+    [hasPublishedTemplates, appointmentAvailabilityTemplates, astrologer.id, appointments],
+  )
   const monthDays = calendarDays(calendarMonth)
   const todayKey = dateKey(new Date())
   const selectedDateSlots = bookingForm.date ? [...(availability[bookingForm.date] || [])].sort((a, b) => timeToMinutes(a) - timeToMinutes(b)) : []
@@ -285,7 +297,7 @@ export default function AstrologerProfile() {
     const bookingGroup = `#BOOK-${selectedSlots[0].date.replaceAll('-', '')}-001`
     let firstId = null
     selectedSlots.forEach((slot, index) => {
-      const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: slot.type, date: displayDateKey(slot.date), time: slot.time, price: slot.price, duration: slot.duration, package: slot.package, bookingGroup, bookingSequence: index + 1, questionDetails: consultationDetails.question ? consultationDetails : null, horoscope: consultationDetails?.horoscope || null })
+      const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: slot.type, date: displayDateKey(slot.date), dateIso: slot.date, start: timeToMinutes(slot.time), end: timeToMinutes(slot.time) + 30, time: slot.time, price: slot.price, duration: slot.duration, package: slot.package, bookingGroup, bookingSequence: index + 1, questionDetails: consultationDetails.question ? consultationDetails : null, horoscope: consultationDetails?.horoscope || null })
       if (!firstId) firstId = id
     })
     actions.debitUserWallet({ amount: total, astrologer: astrologer.name, duration: `${selectedSlots.length} appointment${selectedSlots.length > 1 ? 's' : ''}`, service: 'Appointment', transactionId: `appointment-${bookingGroup}` })
