@@ -1,12 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { CalendarDays, ListChecks, ScrollText } from 'lucide-react'
+import { ListChecks, ScrollText } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const TABS = [
   { key: 'schedule', icon: ScrollText, label: 'Schedule' },
-  { key: 'calendar', icon: CalendarDays, label: 'Calendar' },
   { key: 'history', icon: ListChecks, label: 'History' },
 ]
 

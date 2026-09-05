@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight, Search, CalendarDays } from 'lucide-react'
 import {
   addDays,
@@ -10,9 +10,15 @@ import {
   formatDisplayDate,
   weekdayShort,
   toIsoDate,
+  fromIsoDate,
   resolveAppointmentWindow,
   getAppointmentPhase,
   formatTimeRange,
+  parseTimeToMinutes,
+  generateAppointmentSlots,
+  getAppointmentSlotSummary,
+  getDateAvailability,
+  isWithinSchedulingHorizon,
 } from '../../../utils/appointments.js'
 import { callTypeMeta } from './meta.jsx'
 
@@ -122,7 +128,7 @@ function EventBlock({ appointment, now, onClick, hourHeight = 56, layout }) {
 
   return (
     <div
-      className={`apt-event${isLive ? ' apt-event--live' : ''}`}
+      className={`apt-event${isLive ? ' apt-event--live' : ' apt-event--booked'}`}
       style={style}
       onClick={(event) => { event.stopPropagation(); onClick(appointment) }}
     >
@@ -138,7 +144,17 @@ function EventBlock({ appointment, now, onClick, hourHeight = 56, layout }) {
 
 // ---- Day View -----------------------------------------------------------
 
-function DayView({ appointments, now, rangeStart, onSelect }) {
+function AvailabilityLayer({ date, template, appointments, now, hourHeight }) {
+  const availability = getDateAvailability(template, date)
+  const slots = generateAppointmentSlots({ template, date, appointments, now })
+  const toStyle = (startMin, endMin) => ({ top: `${((startMin - WORKDAY_START_HOUR * 60) / 60) * hourHeight}px`, height: `${((endMin - startMin) / 60) * hourHeight}px` })
+  return <div className="apt-availability-layer">
+    {slots.map((slot) => <div key={`${slot.startMin}-${slot.endMin}`} className="apt-availability-block" style={toStyle(slot.startMin, slot.endMin)} />)}
+    {(availability.breaks || []).map((item, index) => <div key={`break-${index}`} className="apt-break-block" style={toStyle(parseTimeToMinutes(item.start), parseTimeToMinutes(item.end))}>Break</div>)}
+  </div>
+}
+
+function DayView({ appointments, allAppointments, availabilityTemplate, now, rangeStart, onSelect }) {
   const day = startOfDay(rangeStart)
   const dayIso = toIsoDate(day)
   const hours = Array.from({ length: WORKDAY_END_HOUR - WORKDAY_START_HOUR + 1 }, (_, i) => WORKDAY_START_HOUR + i)
@@ -166,6 +182,7 @@ function DayView({ appointments, now, rangeStart, onSelect }) {
             ))}
           </div>
           <div className="apt-events-layer" style={{ height: `${hours.length * hourHeight}px` }}>
+            <AvailabilityLayer date={day} template={availabilityTemplate} appointments={allAppointments} now={now} hourHeight={hourHeight} />
             {laidOutAppointments.map((appt) => (
               <EventBlock
                 key={appt.id}
@@ -185,7 +202,7 @@ function DayView({ appointments, now, rangeStart, onSelect }) {
 
 // ---- Week View ----------------------------------------------------------
 
-function WeekView({ appointments, now, rangeStart, onSelect }) {
+function WeekView({ appointments, allAppointments, availabilityTemplate, now, rangeStart, onSelect }) {
   const weekStart = startOfWeek(rangeStart)
   const weekStartIso = toIsoDate(weekStart)
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -245,6 +262,7 @@ function WeekView({ appointments, now, rangeStart, onSelect }) {
                 }}
               >
                 <div className="apt-week-day-events" style={{ height: `${hours.length * hourHeight}px` }}>
+                  <AvailabilityLayer date={d} template={availabilityTemplate} appointments={allAppointments} now={now} hourHeight={hourHeight} />
                   {laidOutAppointments.map((appt) => (
                     <EventBlock
                       key={appt.appointment.id}
@@ -272,11 +290,12 @@ const DAY_EDIT_STATUSES = ['Available', 'Leave', 'Dyaan']
 function getDateSchedule(availabilityTemplate, cell) {
   const iso = toIsoDate(cell)
   const override = availabilityTemplate?.dateOverrides?.[iso]
-  if (override) return { ...override, isOverride: true }
+  if (override) return { ...override, breaks: override.breaks || [], isOverride: true }
   const weeklyDay = availabilityTemplate?.weeklySchedule?.find((day) => Number(day.dayIndex) === cell.getDay())
   return {
     status: weeklyDay?.enabled ? 'Available' : 'Leave',
     windows: weeklyDay?.enabled ? (weeklyDay.slots || []) : [],
+    breaks: weeklyDay?.enabled ? (weeklyDay.breaks || []) : [],
     isOverride: false,
   }
 }
@@ -306,6 +325,22 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
   const weeks = Array.from({ length: 6 }, (_, weekIndex) => cells.slice(weekIndex * 7, weekIndex * 7 + 7))
 
   const todayIso = toIsoDate(new Date())
+  const monthNow = useMemo(() => (_now && new Date(_now)) || new Date(), [_now])
+  const monthSummary = useMemo(() => {
+    let totalAvailable = 0
+    let totalBooked = 0
+    cells.forEach((cellDay) => {
+      const s = getAppointmentSlotSummary({ template: availabilityTemplate, date: cellDay, appointments: allAppointments, now: monthNow })
+      totalAvailable += s.available
+      totalBooked += s.booked
+    })
+    const upcomingCount = allAppointments.filter((appt) => {
+      if (!appt.dateIso || appt.status === 'Cancelled' || appt.status === 'No-show' || appt.status === 'Auto-cancelled') return false
+      const day = fromIsoDate(appt.dateIso)
+      return day.getMonth() === monthStart.getMonth() && day.getFullYear() === monthStart.getFullYear()
+    }).length
+    return { totalAvailable, totalBooked, upcomingCount }
+  }, [cells, availabilityTemplate, allAppointments, monthNow, monthStart])
   const [selectedDayPopup, setSelectedDayPopup] = useState(null)
   const [dayContextMenu, setDayContextMenu] = useState(null)
   const [selectedDayEdit, setSelectedDayEdit] = useState(null)
@@ -339,6 +374,9 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
         .slice()
         .sort((a, b) => resolveAppointmentWindow(a).startMin - resolveAppointmentWindow(b).startMin)
     : []
+  const selectedDaySummary = selectedDayIso
+    ? getAppointmentSlotSummary({ template: availabilityTemplate, date: fromIsoDate(selectedDayIso), appointments: allAppointments, now: monthNow })
+    : null
 
   const openDayPopup = (iso, event) => {
     setDayContextMenu(null)
@@ -377,7 +415,7 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
     const dayApps = allAppointments.filter((appointment) => appointment.dateIso === iso)
     const schedule = getDateSchedule(availabilityTemplate, cell)
     const isCurrentMonth = cell.getMonth() === monthStart.getMonth() && cell.getFullYear() === monthStart.getFullYear()
-    if (!isCurrentMonth || dayApps.length || (!schedule.windows.length && !schedule.isOverride)) return
+    if (!isCurrentMonth || dayApps.length || !isWithinSchedulingHorizon(cell, new Date(), 3)) return
 
     const position = positionOverride || (monthGridRef.current ? getDayEditPosition(event, monthGridRef.current) : { left: 12, top: 12 })
     setDayContextMenu(null)
@@ -386,6 +424,7 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
     setDayEditDraft({
       status: DAY_EDIT_STATUSES.includes(schedule.status) ? schedule.status : 'Available',
       windows: schedule.windows.map((slot) => ({ start: slot.start, end: slot.end })),
+      breaks: (schedule.breaks || []).map((item) => ({ start: item.start, end: item.end })),
     })
   }
 
@@ -407,6 +446,18 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
 
   return (
     <div className="apt-month-view">
+      <div className="apt-cale-summary">
+        <span className="apt-cale-summary__item"><i className="sw is-available" />{monthSummary.totalAvailable} available slots</span>
+        <span className="apt-cale-summary__item"><i className="sw is-booked" />{monthSummary.totalBooked} booked slots</span>
+        <span className="apt-cale-summary__item"><i className="sw is-upcoming" />{monthSummary.upcomingCount} upcoming appointments</span>
+      </div>
+      <div className="apt-cale-legend">
+        <span><i className="sw is-available" />Available</span>
+        <span><i className="sw is-booked" />Booked / Full</span>
+        <span><i className="sw is-unavailable" />Unavailable</span>
+        <span><i className="sw is-override" />Daily override</span>
+        <span><i className="sw is-holiday" />Holiday</span>
+      </div>
       <div className="apt-month-header">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((w) => (
           <div key={w} className="apt-month-weekday">{w}</div>
@@ -424,6 +475,11 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
               <div className="apt-month-popover__title">{formatDisplayDate(selectedDayIso, true)}</div>
               <div className="apt-month-popover__sub">
                 {selectedDayAppointments.length ? `${selectedDayAppointments.length} appointment${selectedDayAppointments.length === 1 ? '' : 's'}` : 'No appointments'}
+                {selectedDaySummary && selectedDaySummary.total > 0 && (
+                  <span className="apt-month-popover__counts">
+                    · {selectedDaySummary.available} available · {selectedDaySummary.booked} booked
+                  </span>
+                )}
               </div>
             </div>
             <button type="button" className="icon-btn" aria-label="Close day popup" onClick={() => setSelectedDayPopup(null)}>
@@ -507,6 +563,11 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
             ))}
             <button type="button" className="apt-month-day-editor__add" disabled={dayEditDraft.windows.length >= 3} onClick={() => setDayEditDraft((current) => ({ ...current, windows: [...current.windows, { start: '09:00', end: '10:00' }] }))}>+ Add window</button>
           </div>
+          <div className="apt-month-day-editor__windows">
+            <div className="apt-month-day-editor__label">Break times</div>
+            {dayEditDraft.breaks.map((slot, index) => <div className="apt-month-day-editor__window" key={`break-${index}`}><input type="time" value={slot.start} aria-label={`Break ${index + 1} start`} onChange={(event) => setDayEditDraft((current) => ({ ...current, breaks: current.breaks.map((item, itemIndex) => itemIndex === index ? { ...item, start: event.target.value } : item) }))} /><span>to</span><input type="time" value={slot.end} aria-label={`Break ${index + 1} end`} onChange={(event) => setDayEditDraft((current) => ({ ...current, breaks: current.breaks.map((item, itemIndex) => itemIndex === index ? { ...item, end: event.target.value } : item) }))} /><button type="button" className="icon-btn" aria-label={`Remove break ${index + 1}`} onClick={() => setDayEditDraft((current) => ({ ...current, breaks: current.breaks.filter((_, itemIndex) => itemIndex !== index) }))}><span aria-hidden="true">×</span></button></div>)}
+            <button type="button" className="apt-month-day-editor__add" onClick={() => setDayEditDraft((current) => ({ ...current, breaks: [...current.breaks, { start: '13:00', end: '14:00' }] }))}>+ Add break</button>
+          </div>
           <div className="apt-month-day-editor__actions">
             <button type="button" className="btn btn-ghost" onClick={() => { onClearDayOverride?.(selectedDayEdit.iso); closeDayEditor() }}>Clear override</button>
             <button type="button" className="btn btn-primary" onClick={() => { onSaveDayOverride?.(selectedDayEdit.iso, dayEditDraft); closeDayEditor() }}>Save day</button>
@@ -520,11 +581,34 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
               const iso = toIsoDate(cell)
               const dayApps = appointments.filter((a) => a.dateIso === iso)
               const allDayApps = allAppointments.filter((a) => a.dateIso === iso)
-              const daySchedule = getDateSchedule(availabilityTemplate, cell)
+              const scheduleInfo = getDateAvailability(availabilityTemplate, cell)
+              const summary = getAppointmentSlotSummary({
+                template: availabilityTemplate,
+                date: cell,
+                appointments: allAppointments,
+                now: _now && new Date(_now) || new Date(),
+              })
               const isToday = iso === todayIso
               const isCurrentMonth = cell.getMonth() === monthStart.getMonth() && cell.getFullYear() === monthStart.getFullYear()
-              const hasPublishedAvailability = Boolean(availabilityTemplate)
-              const isUnavailable = hasPublishedAvailability && daySchedule.status !== 'Available'
+              let cellState = 'unavailable'
+              let cellStateLabel = 'Unavailable'
+              if (scheduleInfo.holiday) {
+                cellState = 'holiday'
+                cellStateLabel = 'Holiday'
+              } else if (scheduleInfo.isOverride) {
+                cellState = 'override'
+                cellStateLabel = 'Daily override'
+              } else if (scheduleInfo.status !== 'Available') {
+                cellState = 'unavailable'
+                cellStateLabel = 'Unavailable'
+              } else if (summary.total > 0) {
+                cellState = summary.available > 0 ? 'available' : 'full'
+                cellStateLabel = summary.available > 0 ? `${summary.available} available` : 'Full / Booked'
+              } else {
+                cellState = 'unavailable'
+                cellStateLabel = 'No slots'
+              }
+              const isUnavailable = cellState === 'unavailable' || cellState === 'holiday'
               return (
                 <div
                   key={iso}
@@ -535,7 +619,7 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
                   onClick={(event) => openDayPopup(iso, event)}
                   onContextMenu={(event) => {
                     event.preventDefault()
-                    if (!allDayApps.length && (daySchedule.windows.length || daySchedule.isOverride)) {
+                    if (!allDayApps.length && isWithinSchedulingHorizon(cell, new Date(), 3)) {
                       const position = monthGridRef.current ? getDayEditPosition(event, monthGridRef.current) : { left: 12, top: 12 }
                       setSelectedDayPopup(null)
                       setSelectedDayEdit(null)
@@ -551,6 +635,15 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
                   }}
                 >
                   <div className="apt-month-day">{cell.getDate()}</div>
+                  <div className={`apt-month-availability apt-month-availability--${cellState}`}>
+                    {cellStateLabel}
+                  </div>
+                  {(cellState === 'available' || cellState === 'full' || cellState === 'override') && summary.total > 0 && (
+                    <div className="apt-month-counts">
+                      <span className="is-avail">{summary.available} available</span>
+                      <span className="is-booked">{summary.booked} booked</span>
+                    </div>
+                  )}
                   <div className="apt-month-events">
                     {dayApps.slice(0, 3).map((appt) => {
                       const meta = callTypeMeta(appt.callType)
@@ -585,7 +678,10 @@ function MonthView({ appointments, allAppointments, availabilityTemplate, _now, 
 export default function AppointmentCalendar({ appointments, allAppointments = appointments, availabilityTemplate, now, view, rangeStart, statusFilter, statusOptions, search, onStatusFilterChange, onSearchChange, onViewChange, onRangeChange, onSelect, onSaveDayOverride, onClearDayOverride, isPreview = false }) {
   const visibleStart = getCalendarRangeStart(view, rangeStart)
   const handlePrevious = () => onRangeChange(shiftCalendarRange(view, visibleStart, -1))
-  const handleNext = () => onRangeChange(shiftCalendarRange(view, visibleStart, 1))
+  const handleNext = () => {
+    const next = shiftCalendarRange(view, visibleStart, 1)
+    if (isPreview || isWithinSchedulingHorizon(next, new Date(), 3)) onRangeChange(next)
+  }
   const handleToday = () => onRangeChange(getCalendarRangeStart(view, new Date()))
 
   return (
@@ -629,8 +725,8 @@ export default function AppointmentCalendar({ appointments, allAppointments = ap
         </div>
       </div>
 
-      {view === 'day' && <DayView appointments={appointments} now={now} rangeStart={visibleStart} onSelect={onSelect} />}
-      {view === 'week' && <WeekView appointments={appointments} now={now} rangeStart={visibleStart} onSelect={onSelect} />}
+      {view === 'day' && <DayView appointments={appointments} allAppointments={allAppointments} availabilityTemplate={availabilityTemplate} now={now} rangeStart={visibleStart} onSelect={onSelect} />}
+      {view === 'week' && <WeekView appointments={appointments} allAppointments={allAppointments} availabilityTemplate={availabilityTemplate} now={now} rangeStart={visibleStart} onSelect={onSelect} />}
       {view === 'month' && <MonthView appointments={appointments} allAppointments={allAppointments} availabilityTemplate={availabilityTemplate} now={now} rangeStart={visibleStart} onSelect={onSelect} onSaveDayOverride={onSaveDayOverride} onClearDayOverride={onClearDayOverride} />}
     </div>
   )

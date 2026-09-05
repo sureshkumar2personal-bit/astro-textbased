@@ -1,663 +1,2404 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Save, Send, Trash2, Clock3, Sparkles, Eye, X } from 'lucide-react'
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Coffee,
+  Edit3,
+  Save,
+  Send,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
+import { useToast } from '../../../components/Toast.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
-import AppointmentCalendar from './AppointmentCalendar.jsx'
-import { toIsoDate } from '../../../utils/appointments.js'
+import {
+  addMonths,
+  format12h,
+  fromIsoDate,
+  generateAppointmentSlots,
+  getAppointmentSlotSummary,
+  getDateAvailability,
+  hasUnpublishedChanges,
+  isWithinSchedulingHorizon,
+  isValidRange,
+  parseTimeToMinutes,
+  publishedAvailabilitySnapshot,
+  toIsoDate,
+  validateDayBreaks,
+} from '../../../utils/appointments.js'
 
-const WEEKDAYS = [
-  { dayIndex: 0, label: 'Sun' },
-  { dayIndex: 1, label: 'Mon' },
-  { dayIndex: 2, label: 'Tue' },
-  { dayIndex: 3, label: 'Wed' },
-  { dayIndex: 4, label: 'Thu' },
-  { dayIndex: 5, label: 'Fri' },
-  { dayIndex: 6, label: 'Sat' },
+const DAYS = [
+  { dayIndex: 1, label: 'Monday' },
+  { dayIndex: 2, label: 'Tuesday' },
+  { dayIndex: 3, label: 'Wednesday' },
+  { dayIndex: 4, label: 'Thursday' },
+  { dayIndex: 5, label: 'Friday' },
+  { dayIndex: 6, label: 'Saturday' },
+  { dayIndex: 0, label: 'Sunday' },
 ]
 
-const DEFAULT_WINDOWS = {
-  0: [],
-  1: [
-    { start: '09:00', end: '13:00' },
-    { start: '16:00', end: '20:00' },
-  ],
-  2: [
-    { start: '09:00', end: '13:00' },
-    { start: '16:00', end: '20:00' },
-  ],
-  3: [
-    { start: '09:00', end: '13:00' },
-    { start: '16:00', end: '20:00' },
-  ],
-  4: [
-    { start: '09:00', end: '13:00' },
-    { start: '16:00', end: '20:00' },
-  ],
-  5: [
-    { start: '09:00', end: '13:00' },
-    { start: '16:00', end: '20:00' },
-  ],
-  6: [
-    { start: '10:00', end: '14:00' },
-  ],
-}
+const DEFAULT_WINDOWS = [{ start: '09:00', end: '16:00' }]
 
-function getMonthKey(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-}
+const DURATIONS = [15, 30]
 
-function fromMonthKey(monthKey) {
-  const [year, month] = String(monthKey || '').split('-').map(Number)
-  if (!year || !month) return new Date()
+const monthKey = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+const monthDate = (key) => {
+  const [year, month] = key.split('-').map(Number)
   return new Date(year, month - 1, 1)
 }
 
-function formatMonthLabel(date) {
-  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-}
+const monthLabel = (date) =>
+  date.toLocaleDateString('en-IN', {
+    month: 'long',
+    year: 'numeric',
+  })
 
-function parseWindowMinutes(value) {
-  const [hoursText, minutesText] = String(value || '00:00').split(':')
-  const hours = Number(hoursText)
-  const minutes = Number(minutesText)
-  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return 0
-  return hours * 60 + minutes
-}
+const cloneWindow = (item = {}) => ({
+  start: item.start || '09:00',
+  end: item.end || '16:00',
+})
 
-function cloneWindow(slot = {}) {
-  return {
-    start: typeof slot.start === 'string' && slot.start.trim() ? slot.start : '09:00',
-    end: typeof slot.end === 'string' && slot.end.trim() ? slot.end : '10:00',
-  }
-}
-
-function createDefaultSchedule() {
-  return WEEKDAYS.map((day) => ({
-    dayIndex: day.dayIndex,
-    enabled: day.dayIndex !== 0 && day.dayIndex !== 6,
-    slots: (DEFAULT_WINDOWS[day.dayIndex] || []).map(cloneWindow),
-  }))
-}
-
-function createDraftTemplate(astrologerId, monthKey, source = null) {
-  const month = fromMonthKey(monthKey)
-  const template = source && typeof source === 'object' ? source : {}
-  const weeklySchedule = Array.isArray(template.weeklySchedule)
-    ? WEEKDAYS.map((day) => {
-        const existingDay = template.weeklySchedule.find((item) => Number(item?.dayIndex) === day.dayIndex)
-        const slots = Array.isArray(existingDay?.slots) && existingDay.slots.length
-          ? existingDay.slots.map(cloneWindow)
-          : (DEFAULT_WINDOWS[day.dayIndex] || []).map(cloneWindow)
-        return {
-          dayIndex: day.dayIndex,
-          enabled: existingDay?.enabled !== false && slots.length > 0,
-          slots,
-        }
-      })
-    : createDefaultSchedule()
+function createDraft(astrologerId, key, source) {
+  const template = source || {}
 
   return {
-    id: template.id || `appointment-availability-${astrologerId || 'astrologer'}-${monthKey}`,
-    astrologerId: astrologerId || template.astrologerId || 'astrologer-demo',
-    monthKey,
-    monthLabel: formatMonthLabel(month),
+    id:
+      template.id ||
+      `appointment-availability-${astrologerId}-${key}`,
+    astrologerId,
+    monthKey: key,
+    monthLabel: monthLabel(monthDate(key)),
     timezone: 'Asia/Kolkata',
+    appointmentDuration: DURATIONS.includes(
+      Number(template.appointmentDuration),
+    )
+      ? Number(template.appointmentDuration)
+      : 30,
+    appointmentPrice:
+      Number.isFinite(Number(template.appointmentPrice))
+        ? Number(template.appointmentPrice)
+        : 799,
     status: template.status === 'Published' ? 'Published' : 'Draft',
     publishedAt: template.publishedAt || null,
-    updatedAt: template.updatedAt || new Date().toISOString(),
-    reminderDismissedForMonthKey: template.reminderDismissedForMonthKey || null,
-    dateOverrides: template.dateOverrides && typeof template.dateOverrides === 'object' ? template.dateOverrides : {},
-    weeklySchedule,
-  }
-}
-
-function countOpenWindows(schedule) {
-  return schedule.reduce((total, day) => total + (day.enabled ? day.slots.length : 0), 0)
-}
-
-function countOpenHours(schedule) {
-  return schedule.reduce((total, day) => {
-    if (!day.enabled) return total
-    return total + day.slots.reduce((sum, slot) => {
-      const minutes = Math.max(0, parseWindowMinutes(slot.end) - parseWindowMinutes(slot.start))
-      return sum + minutes
-    }, 0)
-  }, 0)
-}
-
-function formatHoursLabel(totalMinutes) {
-  const hours = totalMinutes / 60
-  if (!hours) return '0h'
-  if (hours >= 10 && Number.isInteger(hours)) return `${hours}h`
-  return `${hours.toFixed(hours >= 1 ? 1 : 2)}h`
-}
-
-const PREVIEW_WEEKLY_SCHEDULE = [
-  { dayIndex: 0, enabled: false, slots: [] },
-  { dayIndex: 1, enabled: true, slots: [{ start: '09:00', end: '13:00' }, { start: '16:00', end: '19:00' }] },
-  { dayIndex: 2, enabled: true, slots: [{ start: '10:00', end: '14:00' }] },
-  { dayIndex: 3, enabled: true, slots: [{ start: '09:00', end: '12:00' }, { start: '17:00', end: '20:00' }] },
-  { dayIndex: 4, enabled: false, slots: [] },
-  { dayIndex: 5, enabled: true, slots: [{ start: '11:00', end: '15:00' }] },
-  { dayIndex: 6, enabled: true, slots: [{ start: '10:00', end: '13:00' }] },
-]
-
-function createPreviewTemplate(anchorDate) {
-  const monthKey = getMonthKey(anchorDate)
-  const monthLabel = formatMonthLabel(anchorDate)
-  const leaveDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 4)
-  const dyaanDate = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 11)
-  return {
-    monthKey,
-    monthLabel,
-    timezone: 'Asia/Kolkata',
-    weeklySchedule: PREVIEW_WEEKLY_SCHEDULE,
+    updatedAt: template.updatedAt || null,
     dateOverrides: {
-      [toIsoDate(leaveDate)]: { status: 'Leave', windows: [] },
-      [toIsoDate(dyaanDate)]: { status: 'Dyaan', windows: [] },
+      ...(template.dateOverrides || {}),
     },
+    weeklySchedule: DAYS.map(({ dayIndex }) => {
+      const existing = template.weeklySchedule?.find(
+        (day) => Number(day.dayIndex) === dayIndex,
+      )
+
+      return {
+        dayIndex,
+        enabled: existing
+          ? existing.enabled !== false
+          : dayIndex !== 0,
+        slots:
+          existing?.slots?.length
+            ? existing.slots.map(cloneWindow)
+            : dayIndex === 0
+              ? []
+              : DEFAULT_WINDOWS.map(cloneWindow),
+        breaks: (existing?.breaks || []).map(cloneWindow),
+        continueWithoutBreak: Boolean(
+          existing?.continueWithoutBreak,
+        ),
+      }
+    }),
   }
 }
 
-function createPreviewAppointments(anchorDate) {
-  const dates = [
-    new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 3),
-    new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 7),
-    new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 12),
-    new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 14),
-  ]
-  const windows = [
-    ['09:00', '10:00'],
-    ['10:30', '11:30'],
-    ['16:00', '17:00'],
-    ['11:00', '12:00'],
-  ]
-  return dates.map((date, index) => ({
-    id: `template-preview-${index + 1}`,
-    dateIso: toIsoDate(date),
-    start: windows[index][0],
-    end: windows[index][1],
-    customerName: 'Example available slot',
-    callType: 'Audio',
-    status: 'Confirmed',
-    topic: 'Template preview',
-  }))
-}
-
-function DaySchedule({ day, onToggleDay, onUpdateSlot, onAddSlot, onRemoveSlot, readOnly = false }) {
-  const hasMultipleSlots = day.slots.length > 1
-
+function TimeRange({
+  item,
+  onChange,
+  onRemove,
+  onBlur,
+  label,
+}) {
   return (
-    <section className={`apt-slot-day${day.enabled ? '' : ' is-disabled'}`}>
-      <div className="apt-slot-day-head">
+    <div className="apt-schedule-range">
+      <span>{label}</span>
+
+      <input
+        type="time"
+        value={item.start}
+        onChange={(event) =>
+          onChange({
+            start: event.target.value,
+          })
+        }
+        onBlur={() => onBlur && onBlur()}
+        aria-label={`${label} start`}
+      />
+
+      <b>→</b>
+
+      <input
+        type="time"
+        value={item.end}
+        onChange={(event) =>
+          onChange({
+            end: event.target.value,
+          })
+        }
+        onBlur={() => onBlur && onBlur()}
+        aria-label={`${label} end`}
+      />
+
+      {onRemove && (
         <button
           type="button"
-          className={`apt-slot-day-toggle${day.enabled ? ' is-active' : ''}`}
-          onClick={() => onToggleDay?.(day.dayIndex)}
-          aria-pressed={day.enabled}
-          disabled={readOnly}
+          className="icon-btn"
+          onClick={onRemove}
+          aria-label={`Remove ${label}`}
         >
-          <CalendarDays size={14} />
-          <span>{WEEKDAYS.find((item) => item.dayIndex === day.dayIndex)?.label || 'Day'}</span>
+          <Trash2 size={14} />
         </button>
-        <span className="apt-slot-day-meta">
-          {day.enabled ? `${day.slots.length} window${day.slots.length === 1 ? '' : 's'}` : 'Closed'}
-        </span>
-      </div>
-
-      <div className="apt-slot-day-slots">
-        {day.slots.map((slot, slotIndex) => (
-          <div key={`${day.dayIndex}-${slotIndex}`} className="apt-slot-window">
-            <label>
-              <span>Start</span>
-              <input
-                type="time"
-                value={slot.start}
-                onChange={(event) => onUpdateSlot?.(day.dayIndex, slotIndex, { start: event.target.value })}
-                disabled={readOnly || !day.enabled}
-              />
-            </label>
-            <label>
-              <span>End</span>
-              <input
-                type="time"
-                value={slot.end}
-                onChange={(event) => onUpdateSlot?.(day.dayIndex, slotIndex, { end: event.target.value })}
-                disabled={readOnly || !day.enabled}
-              />
-            </label>
-            {!readOnly && <button
-              type="button"
-              className="apt-slot-window-remove"
-              onClick={() => onRemoveSlot(day.dayIndex, slotIndex)}
-              aria-label={`Remove ${WEEKDAYS.find((item) => item.dayIndex === day.dayIndex)?.label || 'day'} slot ${slotIndex + 1}`}
-              disabled={!day.enabled || !hasMultipleSlots}
-            >
-              <Trash2 size={14} />
-            </button>}
-          </div>
-        ))}
-      </div>
-
-      {!readOnly && <button
-        type="button"
-        className="apt-slot-add"
-        onClick={() => onAddSlot?.(day.dayIndex)}
-        disabled={readOnly || !day.enabled || day.slots.length >= 3}
-      >
-        <Plus size={14} />
-        Add window
-      </button>}
-    </section>
+      )}
+    </div>
   )
 }
 
-export function TemplatePreview({ onClose }) {
-  const [view, setView] = useState('day')
-  const [rangeStart, setRangeStart] = useState(() => {
-    const today = new Date()
-    return new Date(today.getFullYear(), today.getMonth(), 3)
-  })
-  const [previewDraft, setPreviewDraft] = useState(() => createPreviewTemplate(new Date()))
-  const previewTemplate = useMemo(() => ({
-    ...previewDraft,
-    monthKey: getMonthKey(rangeStart),
-    monthLabel: formatMonthLabel(rangeStart),
-  }), [previewDraft, rangeStart])
-  const previewAppointments = useMemo(() => createPreviewAppointments(rangeStart), [rangeStart])
+const ALL_DAY_WINDOW = { start: '00:00', end: '23:59' }
 
-  const updatePreviewDraft = (mutator) => {
-    setPreviewDraft((current) => mutator({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => ({ ...day, slots: day.slots.map((slot) => ({ ...slot })) })),
-      dateOverrides: { ...current.dateOverrides },
-    }))
+function isAllDayWindow(item) {
+  return Boolean(item) && item.start === '00:00' && item.end === '23:59'
+}
+
+function isAllDaySchedule(windows) {
+  return (
+    Array.isArray(windows) &&
+    windows.length === 1 &&
+    isAllDayWindow(windows[0])
+  )
+}
+
+function t24(minutes) {
+  return `${String(Math.floor(minutes / 60)).padStart(
+    2,
+    '0',
+  )}:${String(minutes % 60).padStart(2, '0')}`
+}
+
+// Pick a sensible default break inside the first working window so the added
+// break is immediately valid against the day's working hours.
+function suggestBreak(windows) {
+  const win = (windows && windows.length ? windows : DEFAULT_WINDOWS)[0]
+  const startMin = parseTimeToMinutes(win.start)
+  const endMin = parseTimeToMinutes(win.end)
+  const length = endMin - startMin
+  if (length < 45) return { start: win.start, end: win.end }
+  const mid = startMin + Math.floor(length / 2)
+  return {
+    start: t24(Math.max(startMin, mid - 30)),
+    end: t24(Math.min(endMin, mid + 30)),
   }
+}
 
-  const handlePreviewToggleDay = (dayIndex) => {
-    updatePreviewDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => day.dayIndex === dayIndex
-        ? { ...day, enabled: !day.enabled, slots: day.enabled ? [] : [{ start: '09:00', end: '10:00' }] }
-        : day),
-    }))
-  }
+// Shared working-hours editor. Handles both the weekly schedule (per weekday,
+// `slots` key) and the one-off daily schedule (date override, `windows` key).
+// Working hours can contain several windows and each window is editable.
+function WorkingHoursEditor({ schedule, onChange, daily = false }) {
+  const windowsKey = daily ? 'windows' : 'slots'
+  const enabled = daily
+    ? (schedule.status || 'Available') === 'Available'
+    : schedule.enabled !== false
+  const windows = schedule?.[windowsKey] || []
+  const allDay = isAllDaySchedule(windows)
 
-  const handlePreviewUpdateSlot = (dayIndex, slotIndex, patch) => {
-    updatePreviewDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => day.dayIndex === dayIndex
-        ? { ...day, slots: day.slots.map((slot, index) => index === slotIndex ? { ...slot, ...patch } : slot) }
-        : day),
-    }))
-  }
-
-  const handlePreviewAddSlot = (dayIndex) => {
-    updatePreviewDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => day.dayIndex === dayIndex && day.slots.length < 3
-        ? { ...day, enabled: true, slots: [...day.slots, { start: '18:00', end: '20:00' }] }
-        : day),
-    }))
-  }
-
-  const handlePreviewRemoveSlot = (dayIndex, slotIndex) => {
-    updatePreviewDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => {
-        if (day.dayIndex !== dayIndex) return day
-        const slots = day.slots.filter((_, index) => index !== slotIndex)
-        return { ...day, enabled: slots.length > 0, slots }
-      }),
-    }))
-  }
-
-  const handlePreviewSaveDay = (dateIso, override) => {
-    updatePreviewDraft((current) => ({
-      ...current,
-      dateOverrides: { ...current.dateOverrides, [dateIso]: override },
-    }))
-  }
-
-  const handlePreviewClearDay = (dateIso) => {
-    updatePreviewDraft((current) => {
-      const dateOverrides = { ...current.dateOverrides }
-      delete dateOverrides[dateIso]
-      return { ...current, dateOverrides }
+  const setEnabled = (checked) => {
+    onChange({
+      ...schedule,
+      ...(daily
+        ? { status: checked ? 'Available' : 'Unavailable' }
+        : { enabled: checked }),
+      [windowsKey]: checked
+        ? windows.length
+          ? windows
+          : DEFAULT_WINDOWS.map(cloneWindow)
+        : [],
     })
   }
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  const updateWindow = (index, patch) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: windows.map((window, windowIndex) =>
+        windowIndex === index
+          ? { ...window, ...patch }
+          : window,
+      ),
+    })
+  }
 
-  return createPortal(
-    (
-    <div className="modal-overlay apt-preview-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-      <section className="modal-card modal-card--scroll apt-preview-card" role="dialog" aria-modal="true" aria-labelledby="appointment-template-preview-title">
-        <header className="modal-card__header apt-preview-header">
-          <div>
-            <div className="apt-slot-panel__eyebrow">Demo only</div>
-            <h2 id="appointment-template-preview-title">Before Publish: Template Setup</h2>
-            <p>This is a read-only example of the availability setup page and how the same settings appear in the calendar.</p>
+  const addWindow = () => {
+    const last = windows[windows.length - 1] || DEFAULT_WINDOWS[0]
+    const start = parseTimeToMinutes(last.end)
+    if (start >= 23 * 60 + 59) return
+    const end = Math.min(start + 60, 23 * 60 + 59)
+    onChange({
+      ...schedule,
+      [windowsKey]: [
+        ...windows,
+        { start: t24(start), end: t24(end) },
+      ],
+    })
+  }
+
+  const removeWindow = (index) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: windows.filter((_, windowIndex) => windowIndex !== index),
+    })
+  }
+
+  const setAllDay = (checked) => {
+    onChange({
+      ...schedule,
+      [windowsKey]: checked
+        ? [ALL_DAY_WINDOW]
+        : DEFAULT_WINDOWS.map(cloneWindow),
+    })
+  }
+
+  return (
+    <div className="apt-schedule-editor">
+      <label className="apt-availability-switch">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(event) =>
+            setEnabled(event.target.checked)
+          }
+        />
+
+        <span>Available for appointments</span>
+
+        <em>
+          {enabled ? 'Working day' : 'Unavailable'}
+        </em>
+      </label>
+
+      {enabled && (
+        <div className="apt-schedule-group">
+          <div className="apt-schedule-group__head">
+            <strong>Working hours</strong>
+
+            <button
+              type="button"
+              onClick={() => setAllDay(!allDay)}
+            >
+              {allDay ? 'Set specific hours' : 'All Day'}
+            </button>
           </div>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close template preview">
-            <X size={18} />
-          </button>
-        </header>
-        <div className="modal-card__content apt-preview-content">
-          <div className="apt-preview-note">
-            <Eye size={15} />
-            <span>Demo only. The sample settings cannot be saved or published. Close this preview to configure the real template.</span>
-          </div>
-          <div className="apt-preview-summary">
-            <div><strong>Draft</strong><span>Status</span></div>
-            <div><strong>7</strong><span>Open windows</span></div>
-            <div><strong>24h</strong><span>Total hours</span></div>
-            <div><strong>Asia/Kolkata</strong><span>Timezone</span></div>
-          </div>
-          <div className="apt-preview-setup">
-            <div className="apt-preview-section-head">
-              <div>
-                <strong>Weekly availability</strong>
-                <span>{previewTemplate.monthLabel} example hours</span>
-              </div>
-              <div className="apt-preview-actions">
-                <button type="button" className="btn btn-outline" disabled>Save draft</button>
-                <button type="button" className="btn btn-primary" disabled>Publish month</button>
-                <button type="button" className="btn btn-ghost" onClick={() => setPreviewDraft(createPreviewTemplate(rangeStart))}>Reset</button>
-              </div>
+
+          {allDay ? (
+            <p className="apt-schedule-empty">
+              Available all day (12:00 AM – 11:59 PM).
+            </p>
+          ) : (
+            <div className="apt-schedule-windows">
+              {windows.map((window, index) => (
+                <TimeRange
+                  key={`${window.start}-${window.end}-${index}`}
+                  item={window}
+                  label={windows.length > 1 ? `Hours ${index + 1}` : 'Working hours'}
+                  onChange={(patch) =>
+                    updateWindow(index, patch)
+                  }
+                  onRemove={() => removeWindow(index)}
+                />
+              ))}
+
+              <button
+                type="button"
+                className="btn btn-outline apt-schedule-add"
+                onClick={addWindow}
+              >
+                + Add Hours
+              </button>
             </div>
-            <div className="apt-slot-editor apt-preview-form">
-              {previewTemplate.weeklySchedule.map((day) => (
-                <DaySchedule
-                  key={day.dayIndex}
-                  day={day}
-                  onToggleDay={handlePreviewToggleDay}
-                  onUpdateSlot={handlePreviewUpdateSlot}
-                  onAddSlot={handlePreviewAddSlot}
-                  onRemoveSlot={handlePreviewRemoveSlot}
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Per-day break editor shared by the weekly and daily schedules. Supports
+// multiple breaks (add / edit / remove), blocks invalid breaks (must sit
+// inside the working hours, must not overlap), and exposes a recoverable
+// "continue without break" option that never removes the break feature.
+function BreaksEditor({
+  breaks = [],
+  windows = [],
+  continueWithoutBreak = false,
+  error = null,
+  onChange,
+  onAdd,
+  onRemove,
+  onEditCommit,
+  onToggleContinue,
+}) {
+  return (
+    <div className="apt-schedule-breaks">
+      <div className="apt-schedule-breaks__head">
+        <Coffee size={14} />
+        <span>Break Hours</span>
+        <small>{breaks.length} configured</small>
+      </div>
+
+      {continueWithoutBreak ? (
+        <div className="apt-continue-without-break">
+          <span>
+            Continue without break is ON — no active
+            breaks for this day.
+          </span>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={() => onToggleContinue(false)}
+          >
+            Turn off and add Breaks
+          </button>
+        </div>
+      ) : (
+        <>
+          {breaks.length > 0 && (
+            <div className="apt-schedule-breaks__list">
+              {breaks.map((item, index) => (
+                <TimeRange
+                  key={`${item.start}-${item.end}-${index}`}
+                  item={item}
+                  label={`Break ${index + 1}`}
+                  onChange={(patch) =>
+                    onChange(
+                      breaks.map((breakItem, breakIndex) =>
+                        breakIndex === index
+                          ? { ...breakItem, ...patch }
+                          : breakItem,
+                      ),
+                    )
+                  }
+                  onBlur={() =>
+                    onEditCommit && onEditCommit(index)
+                  }
+                  onRemove={() =>
+                    onRemove(index)
+                  }
                 />
               ))}
             </div>
-          </div>
-          <div className="apt-preview-calendar">
-            <AppointmentCalendar
-              appointments={previewAppointments}
-              allAppointments={previewAppointments}
-              availabilityTemplate={previewTemplate}
-              now={new Date()}
-              view={view}
-              rangeStart={rangeStart}
-              statusFilter="upcoming"
-              statusOptions={[{ key: 'upcoming', label: 'Demo availability' }]}
-              search=""
-              onStatusFilterChange={() => {}}
-              onSearchChange={() => {}}
-              onViewChange={setView}
-              onRangeChange={setRangeStart}
-              onSelect={() => {}}
-              onSaveDayOverride={handlePreviewSaveDay}
-              onClearDayOverride={handlePreviewClearDay}
-              isPreview
-            />
-          </div>
-        </div>
-      </section>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={onAdd}
+          >
+            + Add Break
+          </button>
+
+          {breaks.length === 0 && (
+            <button
+              type="button"
+              className="btn btn-ghost apt-schedule-continue-toggle"
+              onClick={() => onToggleContinue(true)}
+            >
+              Continue without break
+            </button>
+          )}
+        </>
+      )}
+
+      {error && (
+        <p className="apt-schedule-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
-    ),
-    document.body,
   )
 }
 
-export default function AppointmentAvailabilityPanel({ astrologerId, onPublished }) {
-  const { appointmentAvailabilityTemplates, actions } = useAppData()
-  const today = new Date()
-  const currentMonthKey = getMonthKey(today)
-  const nextMonthKey = getMonthKey(new Date(today.getFullYear(), today.getMonth() + 1, 1))
-  const [selectedMonthDate, setSelectedMonthDate] = useState(() => fromMonthKey(currentMonthKey))
-  const selectedMonthKey = getMonthKey(selectedMonthDate)
-
-  const selectedMonthTemplate = useMemo(
-    () => appointmentAvailabilityTemplates.find((template) => template.astrologerId === astrologerId && template.monthKey === selectedMonthKey) || null,
-    [appointmentAvailabilityTemplates, astrologerId, selectedMonthKey],
+// Copy the source weekday's full schedule to chosen target day(s). Requires an
+// explicit target selection + Apply so the command is never a hidden side
+// effect of picking a day.
+function CopyDayControl({ sourceIndex, onCopy }) {
+  const [target, setTarget] = useState('')
+  const targets = DAYS.filter(
+    (item) => item.dayIndex !== sourceIndex,
   )
 
-  const nextMonthTemplate = useMemo(
-    () => appointmentAvailabilityTemplates.find((template) => template.astrologerId === astrologerId && template.monthKey === nextMonthKey) || null,
-    [appointmentAvailabilityTemplates, astrologerId, nextMonthKey],
+  return (
+    <div className="apt-weekly-day__copy">
+      <label>Copy this day to</label>
+
+      <select
+        value={target}
+        onChange={(event) => setTarget(event.target.value)}
+        aria-label={`Copy ${DAYS.find((d) => d.dayIndex === sourceIndex)?.label} to…`}
+      >
+        <option value="" disabled>
+          Choose a day…
+        </option>
+
+        {targets.map((item) => (
+          <option key={item.dayIndex} value={item.dayIndex}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        disabled={!target}
+        onClick={() => {
+          onCopy(sourceIndex, [Number(target)])
+          setTarget('')
+        }}
+      >
+        Apply
+      </button>
+
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={() =>
+          onCopy(
+            sourceIndex,
+            targets.map((item) => item.dayIndex),
+          )
+        }
+      >
+        all weekdays
+      </button>
+    </div>
+  )
+}
+
+function SlotStatus({ slot }) {
+  const completed = slot.status === 'completed' || slot.completed
+  const label =
+    slot.status === 'booked'
+      ? slot.appointment?.status || 'Booked'
+      : completed
+        ? slot.appointment?.status === 'No-show'
+          ? 'No-show'
+          : 'Completed'
+        : 'Available'
+
+  const className =
+    slot.status === 'booked'
+      ? 'apt-slot-status is-booked'
+      : completed
+        ? 'apt-slot-status is-completed'
+        : 'apt-slot-status is-available'
+
+  return (
+    <span className={className}>
+      <i />
+      {label}
+    </span>
+  )
+}
+
+function DateSummaryModal({
+  date,
+  template,
+  appointments,
+  now,
+  published = false,
+  onClose,
+  onEdit,
+}) {
+  if (!date || !template) return null
+
+  const iso = toIsoDate(date)
+  const availability = getDateAvailability(
+    template,
+    date,
   )
 
-  const initialDraft = useMemo(
-    () => createDraftTemplate(astrologerId, selectedMonthKey, appointmentAvailabilityTemplates.find((template) => template.astrologerId === astrologerId && template.monthKey === selectedMonthKey) || null),
-    [astrologerId, appointmentAvailabilityTemplates, selectedMonthKey],
+  const summary = getAppointmentSlotSummary({
+    template,
+    date,
+    appointments,
+    now,
+  })
+
+  const holiday = availability.holiday
+
+  return (
+    <div
+      className="apt-summary-overlay"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div
+        className="apt-summary-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Appointment availability summary"
+      >
+        <div className="apt-summary-modal__head">
+          <div>
+            <span>
+              {published
+                ? 'Published Availability Preview'
+                : 'Appointment Summary'}
+            </span>
+            <h3>
+              {date.toLocaleDateString('en-IN', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </h3>
+          </div>
+
+          {published && (
+            <StatusBadge label="Published" />
+          )}
+
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onClose}
+            aria-label="Close summary"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {holiday && (
+          <div className="apt-holiday-banner">
+            <CalendarDays size={17} />
+
+            <div>
+              <strong>
+                Government Holiday
+              </strong>
+              <span>
+                {holiday.name} · This date is
+                unavailable by default. You can
+                override it and make it available.
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="apt-summary-stats">
+          <div>
+            <span>Working Hours</span>
+            <strong>
+              {availability.windows?.length
+                ? availability.windows
+                    .map(
+                      (window) =>
+                        `${format12h(
+                          parseTimeToMinutes(
+                            window.start,
+                          ),
+                        )} – ${format12h(
+                          parseTimeToMinutes(
+                            window.end,
+                          ),
+                        )}`,
+                    )
+                    .join(' · ')
+                : 'Not available'}
+            </strong>
+          </div>
+
+          <div>
+            <span>Duration</span>
+            <strong>
+              {template.appointmentDuration} Minutes
+            </strong>
+          </div>
+
+          <div>
+            <span>Total Slots</span>
+            <strong>{summary.total}</strong>
+          </div>
+
+          <div>
+            <span>Booked</span>
+            <strong>{summary.booked}</strong>
+          </div>
+
+          <div>
+            <span>Completed</span>
+            <strong>{summary.completed}</strong>
+          </div>
+
+          <div>
+            <span>Remaining</span>
+            <strong>{summary.remaining}</strong>
+          </div>
+        </div>
+
+        <div className="apt-summary-slot-section">
+          <div className="apt-summary-slot-head">
+            <div>
+              <h4>Appointment Slots</h4>
+              <p>
+                Cancelled appointments automatically
+                free their slots.
+              </p>
+            </div>
+
+            <StatusBadge
+              label={
+                availability.status === 'Available'
+                  ? summary.remaining > 0
+                    ? 'Available'
+                    : 'Fully Booked'
+                  : 'Unavailable'
+              }
+            />
+          </div>
+
+          {summary.slots.length ? (
+            <div className="apt-summary-slots">
+              {summary.slots.map((slot) => (
+                <div
+                  className="apt-summary-slot"
+                  key={`${iso}-${slot.startMin}`}
+                >
+                  <div>
+                    <Clock3 size={14} />
+                    <strong>
+                      {format12h(slot.startMin)}
+                      {' – '}
+                      {format12h(slot.endMin)}
+                    </strong>
+                  </div>
+
+                  <SlotStatus slot={slot} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="apt-summary-empty">
+              <Clock3 size={20} />
+              <strong>
+                No appointment slots
+              </strong>
+              <span>
+                This date currently has no
+                bookable slots.
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="apt-summary-actions">
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={onClose}
+          >
+            Close
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={onEdit}
+          >
+            <Edit3 size={15} />
+            Edit Daily Schedule
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function AppointmentAvailabilityPanel({
+  astrologerId,
+  appointments = [],
+}) {
+  const {
+    appointmentAvailabilityTemplates,
+    actions,
+  } = useAppData()
+  const { success } = useToast()
+
+  const today = useMemo(
+    () => new Date(),
+    [],
   )
 
-  const [drafts, setDrafts] = useState(() => ({ [selectedMonthKey]: initialDraft }))
-  const draft = drafts[selectedMonthKey] || initialDraft
+  const [mode, setMode] = useState('weekly')
+  const [selectedMonth, setSelectedMonth] =
+    useState(
+      () =>
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1,
+        ),
+    )
 
-  const startOfSelectedMonth = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1)
-  const startOfNextMonth = new Date(startOfSelectedMonth.getFullYear(), startOfSelectedMonth.getMonth() + 1, 1)
-  const daysUntilMonthEnd = Math.max(Math.ceil((startOfNextMonth - today) / (24 * 60 * 60 * 1000)), 0)
+  const [selectedDate, setSelectedDate] =
+    useState(() => toIsoDate(today))
 
-  const monthReminderNeeded =
-    selectedMonthKey === currentMonthKey &&
-    daysUntilMonthEnd <= 10 &&
-    nextMonthTemplate?.status !== 'Published'
+  const [selectedSummaryDate, setSelectedSummaryDate] =
+    useState(null)
+
+  const [publishedPreview, setPublishedPreview] =
+    useState(false)
+
+  const [weekErrors, setWeekErrors] = useState({})
+  const [dailyError, setDailyError] = useState(null)
+
+  const [drafts, setDrafts] = useState({})
+
+  const key = monthKey(selectedMonth)
+
+  const source = appointmentAvailabilityTemplates.find(
+    (template) =>
+      template.astrologerId === astrologerId &&
+      template.monthKey === key,
+  )
+
+  const draft =
+    drafts[key] ||
+    createDraft(
+      astrologerId,
+      key,
+      source,
+    )
 
   useEffect(() => {
-    setDrafts((prev) => {
-      if (prev[selectedMonthKey]) return prev
-      return { ...prev, [selectedMonthKey]: initialDraft }
-    })
-  }, [initialDraft, selectedMonthKey])
+    setDrafts((current) => {
+      const nextDraft = createDraft(
+        astrologerId,
+        key,
+        source,
+      )
 
-  const updateDraft = (mutator) => {
-    setDrafts((prev) => {
-      const current = prev[selectedMonthKey] || initialDraft
-      const next = mutator(createDraftTemplate(astrologerId, selectedMonthKey, current))
+      const existing = current[key]
+
+      if (
+        existing &&
+        existing.updatedAt === source?.updatedAt
+      ) {
+        return current
+      }
+
+      if (existing && !source) {
+        return current
+      }
+
       return {
-        ...prev,
-        [selectedMonthKey]: {
-          ...next,
+        ...current,
+        [key]: existing || nextDraft,
+      }
+    })
+  }, [
+    astrologerId,
+    key,
+    source,
+  ])
+
+  const update = (mutator) => {
+    setDrafts((current) => {
+      const currentDraft =
+        current[key] ||
+        createDraft(
+          astrologerId,
+          key,
+          source,
+        )
+
+      return {
+        ...current,
+        [key]: {
+          ...mutator(currentDraft),
           status: 'Draft',
-          updatedAt: new Date().toISOString(),
+          updatedAt:
+            new Date().toISOString(),
         },
       }
     })
   }
 
-  const handleToggleMonth = (direction) => {
-    setSelectedMonthDate((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1))
-  }
+  const save = (publish) => {
+    const currentDraft =
+      drafts[key] ||
+      createDraft(
+        astrologerId,
+        key,
+        source,
+      )
 
-  const handleToggleDay = (dayIndex) => {
-    updateDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) =>
-        day.dayIndex === dayIndex
-          ? {
-              ...day,
-              enabled: !day.enabled,
-              slots: day.enabled ? [] : (DEFAULT_WINDOWS[dayIndex] || [{ start: '09:00', end: '10:00' }]).map(cloneWindow),
-            }
-          : day,
-      ),
-    }))
-  }
-
-  const handleUpdateSlot = (dayIndex, slotIndex, patch) => {
-    updateDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => {
-        if (day.dayIndex !== dayIndex) return day
-        return {
+    const cleanedWeeklySchedule =
+      currentDraft.weeklySchedule.map(
+        (day) => ({
           ...day,
-          slots: day.slots.map((slot, index) => (index === slotIndex ? { ...slot, ...patch } : slot)),
-        }
-      }),
-    }))
+          slots: (day.slots || []).filter(
+            isValidRange,
+          ),
+          breaks: (day.breaks || []).filter(
+            isValidRange,
+          ),
+        }),
+      )
+
+    const cleanedOverrides =
+      Object.fromEntries(
+        Object.entries(
+          currentDraft.dateOverrides || {},
+        ).map(
+          ([dateIso, override]) => [
+            dateIso,
+            {
+              ...override,
+              windows: (
+                override.windows || []
+              ).filter(isValidRange),
+              breaks: (
+                override.breaks || []
+              ).filter(isValidRange),
+            },
+          ],
+        ),
+      )
+
+    const nextDraft = {
+      ...currentDraft,
+      weeklySchedule:
+        cleanedWeeklySchedule,
+      dateOverrides:
+        cleanedOverrides,
+    }
+
+    const result = publish
+      ? actions.publishAppointmentAvailabilityTemplate(
+          nextDraft,
+        )
+      : actions.saveAppointmentAvailabilityTemplate(
+          nextDraft,
+        )
+
+    if (result) {
+      setDrafts((current) => ({
+        ...current,
+        [key]: result,
+      }))
+      success(publish ? 'Successfully published' : 'Saved successfully')
+    }
   }
 
-  const handleAddSlot = (dayIndex) => {
-    updateDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => {
-        if (day.dayIndex !== dayIndex) return day
-        if (day.slots.length >= 3) return day
-        return {
-          ...day,
-          enabled: true,
-          slots: [...day.slots, { start: '18:00', end: '20:00' }],
-        }
-      }),
-    }))
+  const moveMonth = (direction) => {
+    const next = new Date(
+      selectedMonth.getFullYear(),
+      selectedMonth.getMonth() + direction,
+      1,
+    )
+
+    if (
+      isWithinSchedulingHorizon(
+        next,
+        today,
+        3,
+      )
+    ) {
+      setSelectedMonth(next)
+      setSelectedDate(
+        toIsoDate(next),
+      )
+    }
   }
 
-  const handleRemoveSlot = (dayIndex, slotIndex) => {
-    updateDraft((current) => ({
-      ...current,
-      weeklySchedule: current.weeklySchedule.map((day) => {
-        if (day.dayIndex !== dayIndex) return day
-        const nextSlots = day.slots.filter((_, index) => index !== slotIndex)
-        return {
-          ...day,
-          enabled: nextSlots.length > 0,
-          slots: nextSlots,
-        }
-      }),
-    }))
+  const selectedDay =
+    fromIsoDate(selectedDate)
+
+  const availability =
+    getDateAvailability(
+      draft,
+      selectedDay,
+    )
+
+  const override =
+    draft.dateOverrides?.[selectedDate]
+
+  const weekdaySchedule =
+    draft.weeklySchedule.find(
+      (day) =>
+        day.dayIndex === selectedDay.getDay(),
+    )
+
+  const daily = {
+    status:
+      override?.status ||
+      availability.status,
+    windows: (
+      override?.windows ||
+      availability.windows ||
+      []
+    ).map(cloneWindow),
+    breaks: (
+      override?.breaks ||
+      availability.breaks ||
+      []
+    ).map(cloneWindow),
+    continueWithoutBreak: Boolean(
+      override
+        ? override.continueWithoutBreak
+        : weekdaySchedule?.continueWithoutBreak,
+    ),
+    bookedSlots: override?.bookedSlots || [],
   }
 
-  const handleReset = () => {
-    setDrafts((prev) => ({
-      ...prev,
-      [selectedMonthKey]: createDraftTemplate(astrologerId, selectedMonthKey, appointmentAvailabilityTemplates.find((template) => template.astrologerId === astrologerId && template.monthKey === selectedMonthKey) || null),
-    }))
-  }
+  const selectedDateSlots =
+    generateAppointmentSlots({
+      template: draft,
+      date: selectedDay,
+      appointments,
+      now: today,
+    })
 
-  const handleSaveDraft = () => {
-    const saved = actions.saveAppointmentAvailabilityTemplate(draft)
+  const saveDaily = () => {
+    const next = {
+      ...draft,
+      dateOverrides: {
+        ...(draft.dateOverrides || {}),
+        [selectedDate]: {
+          ...daily,
+          windows: (
+            daily.windows || []
+          ).filter(isValidRange),
+          breaks: (
+            daily.breaks || []
+          ).filter(isValidRange),
+        },
+      },
+    }
+
+    const saved =
+      actions.saveAppointmentAvailabilityTemplate(
+        next,
+      )
+
     if (saved) {
-      setDrafts((prev) => ({ ...prev, [selectedMonthKey]: saved }))
+      setDrafts((current) => ({
+        ...current,
+        [key]: saved,
+      }))
+      success('Saved successfully')
     }
   }
 
-  const handlePublish = () => {
-    const published = actions.publishAppointmentAvailabilityTemplate(draft)
-    if (published) {
-      setDrafts((prev) => ({ ...prev, [selectedMonthKey]: published }))
-      onPublished?.(published)
+  const clearDaily = () => {
+    const overrides = {
+      ...(draft.dateOverrides || {}),
+    }
+
+    delete overrides[selectedDate]
+
+    const saved =
+      actions.saveAppointmentAvailabilityTemplate(
+        {
+          ...draft,
+          dateOverrides: overrides,
+        },
+      )
+
+    if (saved) {
+      setDrafts((current) => ({
+        ...current,
+        [key]: saved,
+      }))
+      success('Removed successfully')
     }
   }
 
-  const openWindows = countOpenWindows(draft.weeklySchedule)
-  const openHours = formatHoursLabel(countOpenHours(draft.weeklySchedule))
+  const openDateSummary = (date) => {
+    if (
+      !isWithinSchedulingHorizon(
+        date,
+        today,
+        3,
+      )
+    ) {
+      return
+    }
+
+    setSelectedDate(
+      toIsoDate(date),
+    )
+
+    setSelectedMonth(
+      new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        1,
+      ),
+    )
+
+    setPublishedPreview(false)
+    setSelectedSummaryDate(date)
+  }
+
+  const editSelectedDate = () => {
+    setSelectedSummaryDate(null)
+    setPublishedPreview(false)
+    setMode('daily')
+  }
+
+  const gridStart = new Date(
+    selectedMonth.getFullYear(),
+    selectedMonth.getMonth(),
+    1,
+  )
+
+  gridStart.setDate(
+    gridStart.getDate() -
+      ((gridStart.getDay() + 6) % 7),
+  )
+
+  const gridDates = Array.from(
+    { length: 42 },
+    (_, index) =>
+      new Date(
+        gridStart.getFullYear(),
+        gridStart.getMonth(),
+        gridStart.getDate() + index,
+      ),
+  )
+
+  const setWeekly = (
+    dayIndex,
+    next,
+  ) => {
+    const windows = next.slots?.length
+      ? next.slots
+      : DEFAULT_WINDOWS
+    const message = validateDayBreaks(
+      next.breaks || [],
+      windows,
+    )
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: message || undefined,
+    }))
+
+    update((current) => ({
+      ...current,
+      weeklySchedule:
+        current.weeklySchedule.map(
+          (day) =>
+            day.dayIndex === dayIndex
+              ? next
+              : day,
+        ),
+    }))
+  }
+
+  const copyDaySchedule = (
+    sourceIndex,
+    targetIndexes,
+  ) => {
+    if (!targetIndexes.length) return
+    const sourceDay =
+      draft.weeklySchedule.find(
+        (day) => day.dayIndex === sourceIndex,
+      ) || {}
+    update((current) => ({
+      ...current,
+      weeklySchedule:
+        current.weeklySchedule.map(
+          (day) =>
+            targetIndexes.includes(
+              day.dayIndex,
+            )
+              ? {
+                  ...day,
+                  enabled: sourceDay.enabled,
+                  slots: (
+                    sourceDay.slots ||
+                    []
+                  ).map(cloneWindow),
+                  breaks: (
+                    sourceDay.breaks ||
+                    []
+                  ).map(cloneWindow),
+                  continueWithoutBreak:
+                    Boolean(
+                      sourceDay.continueWithoutBreak,
+                    ),
+                }
+              : day,
+        ),
+    }))
+  }
+
+  const setAllDay = (
+    dayIndex,
+    checked,
+  ) => {
+    const day =
+      draft.weeklySchedule.find(
+        (item) => item.dayIndex === dayIndex,
+      ) || {}
+    setWeekly(
+      dayIndex,
+      checked
+        ? {
+            ...day,
+            enabled: true,
+            slots: [ALL_DAY_WINDOW],
+          }
+        : {
+            ...day,
+            slots: (
+              day.slots || []
+            ).length &&
+              !isAllDaySchedule(day.slots)
+              ? day.slots
+              : DEFAULT_WINDOWS.map(cloneWindow),
+          },
+    )
+  }
+
+  const applyExceptSunday = () => {
+    update((current) => ({
+      ...current,
+      weeklySchedule:
+        current.weeklySchedule.map(
+          (day) =>
+            day.dayIndex === 0
+              ? day
+              : {
+                  ...day,
+                  enabled: true,
+                  slots: [ALL_DAY_WINDOW],
+                },
+        ),
+    }))
+  }
+
+  const dayFor = (dayIndex) =>
+    draft.weeklySchedule.find(
+      (item) => item.dayIndex === dayIndex,
+    ) || {}
+
+  const addWeekBreak = (dayIndex) => {
+    const day = dayFor(dayIndex)
+    const windows = day.slots?.length
+      ? day.slots
+      : DEFAULT_WINDOWS
+    const nextBreaks = [
+      ...(day.breaks || []),
+      suggestBreak(windows),
+    ]
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+
+    if (message) {
+      setWeekErrors((current) => ({
+        ...current,
+        [dayIndex]: message,
+      }))
+      return
+    }
+
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: undefined,
+    }))
+    setWeekly(dayIndex, {
+      ...day,
+      continueWithoutBreak: false,
+      breaks: nextBreaks,
+    })
+    success('Successfully added')
+  }
+
+  const updateWeekBreaks = (
+    dayIndex,
+    nextBreaks,
+  ) => {
+    const day = dayFor(dayIndex)
+    const windows = day.slots?.length
+      ? day.slots
+      : DEFAULT_WINDOWS
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+    setWeekErrors((current) => ({
+      ...current,
+      [dayIndex]: message || undefined,
+    }))
+    setWeekly(dayIndex, {
+      ...day,
+      breaks: nextBreaks,
+    })
+  }
+
+  const removeWeekBreak = (dayIndex, breakIndex) => {
+    const day = dayFor(dayIndex)
+    setWeekly(dayIndex, {
+      ...day,
+      breaks: (day.breaks || []).filter(
+        (_, index) => index !== breakIndex,
+      ),
+    })
+    success('Removed successfully')
+  }
+
+  const toggleWeekContinue = (
+    dayIndex,
+    enabled,
+  ) => {
+    const day = dayFor(dayIndex)
+    setWeekly(dayIndex, {
+      ...day,
+      continueWithoutBreak: enabled,
+      breaks: enabled
+        ? []
+        : (day.breaks || []),
+    })
+  }
+
+  const updateDailyEditor = (next) => {
+    if (next.breaks !== undefined || next.windows !== undefined) {
+      const breaks =
+        next.breaks !== undefined
+          ? next.breaks
+          : (daily.breaks || [])
+      const windows =
+        (next.windows !== undefined
+          ? next.windows
+          : (daily.windows || [])
+        ).length
+          ? next.windows !== undefined
+            ? next.windows
+            : daily.windows
+          : DEFAULT_WINDOWS
+      setDailyError(
+        validateDayBreaks(breaks, windows),
+      )
+    }
+    saveDailyEditor(next)
+  }
+
+  const saveDailyEditor = (next) => {
+    update((current) => ({
+      ...current,
+      dateOverrides: {
+        ...(current.dateOverrides || {}),
+        [selectedDate]: next,
+      },
+    }))
+  }
+
+  const addDailyBreak = () => {
+    const windows = daily.windows?.length
+      ? daily.windows
+      : DEFAULT_WINDOWS
+    const nextBreaks = [
+      ...(daily.breaks || []),
+      suggestBreak(windows),
+    ]
+    const message = validateDayBreaks(
+      nextBreaks,
+      windows,
+    )
+
+    if (message) {
+      setDailyError(message)
+      return
+    }
+
+    setDailyError(null)
+    saveDailyEditor({
+      ...daily,
+      continueWithoutBreak: false,
+      breaks: nextBreaks,
+    })
+    success('Successfully added')
+  }
+
+  const removeDailyBreak = (index) => {
+    saveDailyEditor({
+      ...daily,
+      breaks: (daily.breaks || []).filter(
+        (_, breakIndex) => breakIndex !== index,
+      ),
+    })
+    setDailyError(null)
+    success('Removed successfully')
+  }
+
+  const commitDailyBreak = () => {
+    success('Saved successfully')
+  }
+
+  const toggleDailyContinue = (enabled) => {
+    saveDailyEditor({
+      ...daily,
+      continueWithoutBreak: enabled,
+      breaks: enabled ? [] : (daily.breaks || []),
+    })
+    setDailyError(null)
+  }
+
+  // Published-availability status driven by the persisted template for this
+  // month. Saving new edits never changes this until the astrologer publishes.
+  const publishedSource = source?.publishedWeeklySchedule
+    ? source
+    : null
+  const snapshot = publishedSource
+    ? publishedAvailabilitySnapshot(source)
+    : null
+  const hasUnpublished = publishedSource
+    ? hasUnpublishedChanges(source)
+    : false
+
+  const horizonEnd = new Date(
+    today.getFullYear(),
+    today.getMonth() + 3,
+    0,
+  )
+  const availabilityPeriod =
+    `${today.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })} – ${horizonEnd.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })}`
+
+  const publishedWorkingDays = snapshot
+    ? (snapshot.weeklySchedule || []).filter(
+        (day) => day.enabled,
+      )
+    : []
+  const publishedSunday = snapshot
+    ? snapshot.weeklySchedule.find(
+        (day) => day.dayIndex === 0,
+      )
+    : null
+  const publishedBreakCount = snapshot
+    ? (snapshot.weeklySchedule || []).reduce(
+        (total, day) => total + (day.breaks || []).length,
+        0,
+      )
+    : 0
+
+  const openPublishedPreview = () => {
+    const horizonEndDate = addMonths(
+      new Date(today.getFullYear(), today.getMonth(), 1),
+      3,
+    )
+    let previewDate = null
+
+    for (
+      let cursor = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1,
+      );
+      cursor < horizonEndDate && !previewDate;
+      cursor.setDate(cursor.getDate() + 1)
+    ) {
+      const monthTemplate =
+        appointmentAvailabilityTemplates.find(
+          (item) =>
+            item.astrologerId === astrologerId &&
+            item.monthKey === monthKey(cursor),
+        )
+      const monthSnapshot =
+        publishedAvailabilitySnapshot(monthTemplate)
+      if (
+        monthSnapshot &&
+        generateAppointmentSlots({
+          template: monthSnapshot,
+          date: cursor,
+          appointments,
+          now: today,
+        }).length
+      ) {
+        previewDate = new Date(cursor)
+      }
+    }
+
+    if (!previewDate) return
+
+    setSelectedMonth(
+      new Date(
+        previewDate.getFullYear(),
+        previewDate.getMonth(),
+        1,
+      ),
+    )
+    setSelectedDate(toIsoDate(previewDate))
+    setPublishedPreview(true)
+    setSelectedSummaryDate(previewDate)
+  }
+
+  const modalTemplate =
+    publishedPreview && snapshot
+      ? snapshot
+      : draft
 
   return (
-    <Card className="apt-slot-panel">
-      <div className="apt-slot-panel__head">
-        <div className="apt-slot-panel__title-copy">
-          <div className="apt-slot-panel__eyebrow">Slot Publishing</div>
-          <h2>Publish availability before booking opens</h2>
-          <p>
-            Set weekly consultation hours for the selected month, then save a draft or publish it for user bookings.
-          </p>
-        </div>
-        <div className="apt-slot-panel__actions">
-          <StatusBadge label={draft.status || 'Draft'} className="apt-slot-panel__status" />
-          <button type="button" className="btn btn-ghost" onClick={handleReset}>
-            Reset
-          </button>
-          <button type="button" className="btn btn-outline" onClick={handleSaveDraft}>
-            <Save size={15} />
-            Save draft
-          </button>
-          <button type="button" className="btn btn-primary" onClick={handlePublish}>
-            <Send size={15} />
-            Publish month
-          </button>
-        </div>
-      </div>
+    <>
+      <Card className="apt-schedule-card">
+        <header className="apt-schedule-header">
+          <div>
+            <div className="apt-slot-panel__eyebrow">
+              Appointments
+            </div>
 
-      <div className="apt-slot-panel__meta">
-        <div className="apt-slot-month-nav">
-          <button type="button" className="icon-btn" onClick={() => handleToggleMonth(-1)} aria-label="Previous month">
-            <ChevronLeft size={16} />
-          </button>
-          <button type="button" className="apt-slot-month-btn is-current" onClick={() => setSelectedMonthDate(fromMonthKey(currentMonthKey))}>
-            Current month
-          </button>
-          <button type="button" className="apt-slot-month-btn" onClick={() => setSelectedMonthDate(fromMonthKey(nextMonthKey))}>
-            Next month
-          </button>
-          <button type="button" className="icon-btn" onClick={() => handleToggleMonth(1)} aria-label="Next month">
-            <ChevronRight size={16} />
-          </button>
-          <span className="apt-slot-month-label">{formatMonthLabel(selectedMonthDate)}</span>
-        </div>
+            <h2>
+              Schedule Appointment
+            </h2>
 
-        {monthReminderNeeded && (
-          <div className="apt-slot-reminder">
-            <Sparkles size={15} />
-            <span>
-              Next month availability is due soon. Prepare the schedule for {formatMonthLabel(new Date(today.getFullYear(), today.getMonth() + 1, 1))}.
-            </span>
-            <button type="button" className="apt-slot-reminder-btn" onClick={() => setSelectedMonthDate(fromMonthKey(nextMonthKey))}>
-              Prepare next month
+            <p>
+              Set your appointment availability,
+              working hours, breaks, duration and
+              price.
+            </p>
+          </div>
+
+          <div className="apt-schedule-actions">
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => save(false)}
+            >
+              <Save size={15} />
+              Save Changes
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => save(true)}
+            >
+              <Send size={15} />
+              Publish Availability
             </button>
           </div>
+        </header>
+
+        <section className="apt-policy-card">
+          <div>
+            <span>
+              Appointment Duration
+            </span>
+
+            <div className="apt-segmented">
+              {DURATIONS.map(
+                (duration) => (
+                  <button
+                    key={duration}
+                    type="button"
+                    className={
+                      draft.appointmentDuration ===
+                      duration
+                        ? 'is-active'
+                        : ''
+                    }
+                    onClick={() =>
+                      update(
+                        (current) => ({
+                          ...current,
+                          appointmentDuration:
+                            duration,
+                        }),
+                      )
+                    }
+                  >
+                    {duration} Minutes
+                  </button>
+                ),
+              )}
+            </div>
+          </div>
+
+          <label className="apt-policy-price">
+            <span>
+              Appointment Price
+            </span>
+
+            <div>
+              <b>₹</b>
+
+              <input
+                type="number"
+                min="0"
+                value={draft.appointmentPrice}
+                onChange={(event) =>
+                  update(
+                    (current) => ({
+                      ...current,
+                      appointmentPrice:
+                        Math.max(
+                          0,
+                          Number(
+                            event.target.value,
+                          ) || 0,
+                        ),
+                    }),
+                  )
+                }
+              />
+            </div>
+          </label>
+
+          <p>
+            <CalendarDays size={16} />
+            Current month + next two months
+            are available for scheduling.
+          </p>
+        </section>
+
+        <section className="apt-published-card">
+          <div className="apt-published-card__main">
+            <div>
+              <span
+                className={
+                  publishedSource
+                    ? 'is-published'
+                    : ''
+                }
+              />
+              <strong>
+                {publishedSource
+                  ? 'Published Availability'
+                  : 'Not published yet'}
+              </strong>
+              <p>
+                Users can only book the published
+                availability — saved changes become
+                live after you publish.
+              </p>
+            </div>
+
+            {hasUnpublished && (
+              <span className="apt-unpublished-pill">
+                Unpublished changes
+              </span>
+            )}
+          </div>
+
+          <div className="apt-published-card__grid">
+            <div>
+              <span>Status</span>
+              <strong>
+                {publishedSource
+                  ? '✓ Published'
+                  : 'Not published'}
+                {hasUnpublished &&
+                  ' · Edited'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Last published</span>
+              <strong>
+                {source?.publishedAt
+                  ? new Date(
+                      source.publishedAt,
+                    ).toLocaleString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Availability period</span>
+              <strong>
+                {availabilityPeriod}
+              </strong>
+            </div>
+
+            <div>
+              <span>Working days</span>
+              <strong>
+                {publishedWorkingDays.length
+                  ? publishedWorkingDays
+                      .map(
+                        (day) =>
+                          DAYS.find(
+                            (meta) =>
+                              meta.dayIndex ===
+                              day.dayIndex,
+                          )?.label.slice(0, 3),
+                      )
+                      .join(' · ')
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Sunday</span>
+              <strong>
+                {publishedSunday?.enabled
+                  ? 'Working'
+                  : 'Off'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Duration</span>
+              <strong>
+                {snapshot?.appointmentDuration || '—'} Minutes
+              </strong>
+            </div>
+
+            <div>
+              <span>Breaks</span>
+              <strong>
+                {publishedBreakCount > 0
+                  ? `Configured (${publishedBreakCount})`
+                  : 'None'}
+              </strong>
+            </div>
+          </div>
+
+          <div className="apt-published-card__actions">
+            <button
+              type="button"
+              className="btn btn-outline"
+              disabled={!publishedSource}
+              onClick={openPublishedPreview}
+            >
+              <CalendarDays size={15} />
+              View Published Availability
+            </button>
+
+            <p>
+              Publish Availability to make your
+              saved configuration visible to users
+              booking this astrologer.
+            </p>
+          </div>
+        </section>
+
+        <nav
+          className="apt-schedule-tabs"
+          aria-label="Scheduling modes"
+        >
+          {[
+            [
+              'weekly',
+              'Weekly Schedule',
+            ],
+            [
+              'daily',
+              'Daily Schedule',
+            ],
+            [
+              'monthly',
+              'Monthly Schedule',
+            ],
+          ].map(
+            ([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                className={
+                  mode === value
+                    ? 'is-active'
+                    : ''
+                }
+                onClick={() =>
+                  setMode(value)
+                }
+              >
+                {label}
+              </button>
+            ),
+          )}
+        </nav>
+
+        {mode === 'weekly' && (
+          <section className="apt-schedule-mode">
+            <div className="apt-mode-heading">
+              <div>
+                <h3>
+                  Weekly Schedule
+                </h3>
+
+                <p>
+                  Your recurring base
+                  availability. Each day is
+                  independently configurable.
+                </p>
+              </div>
+
+              <div className="apt-month-controls">
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() =>
+                    moveMonth(-1)
+                  }
+                  disabled
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <strong>
+                  {monthLabel(
+                    selectedMonth,
+                  )}
+                </strong>
+
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() =>
+                    moveMonth(1)
+                  }
+                  disabled={
+                    !isWithinSchedulingHorizon(
+                      new Date(
+                        selectedMonth.getFullYear(),
+                        selectedMonth.getMonth() +
+                          1,
+                        1,
+                      ),
+                      today,
+                      3,
+                    )
+                  }
+                >
+                  <ChevronRight
+                    size={16}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="apt-weekly-bulk">
+              <div className="apt-weekly-bulk__label">
+                All Day
+              </div>
+
+              <div className="apt-weekly-bulk__days">
+                {DAYS.map((meta) => {
+                  const day = dayFor(meta.dayIndex)
+                  const isOn =
+                    day.enabled &&
+                    isAllDaySchedule(day.slots)
+
+                  return (
+                    <label
+                      key={meta.dayIndex}
+                      className={
+                        isOn ? 'is-on' : ''
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(isOn)}
+                        onChange={(event) =>
+                          setAllDay(
+                            meta.dayIndex,
+                            event.target.checked,
+                          )
+                        }
+                        aria-label={`All Day ${meta.label}`}
+                      />
+                      {meta.label.slice(0, 3)}
+                    </label>
+                  )
+                })}
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={applyExceptSunday}
+              >
+                Monday–Saturday (Except Sunday)
+              </button>
+            </div>
+
+            <div className="apt-weekly-days">
+              {DAYS.map((meta) => {
+                const day =
+                  draft.weeklySchedule.find(
+                    (item) =>
+                      item.dayIndex ===
+                      meta.dayIndex,
+                  )
+
+                return (
+                  <article
+                    className="apt-weekly-day"
+                    key={meta.dayIndex}
+                  >
+                    <div className="apt-weekly-day__title">
+                      <h4>
+                        {meta.label}
+                      </h4>
+
+                      <span>
+                        {day.enabled
+                          ? 'Available'
+                          : 'Unavailable'}
+                      </span>
+                    </div>
+
+                    <WorkingHoursEditor
+                      schedule={day}
+                      onChange={(next) =>
+                        setWeekly(
+                          meta.dayIndex,
+                          next,
+                        )
+                      }
+                    />
+
+                    <BreaksEditor
+                      breaks={day.breaks || []}
+                      windows={
+                        day.slots?.length
+                          ? day.slots
+                          : DEFAULT_WINDOWS
+                      }
+                      continueWithoutBreak={
+                        Boolean(day.continueWithoutBreak)
+                      }
+                      error={weekErrors[meta.dayIndex]}
+                      onChange={(nextBreaks) =>
+                        updateWeekBreaks(
+                          meta.dayIndex,
+                          nextBreaks,
+                        )
+                      }
+                      onAdd={() =>
+                        addWeekBreak(meta.dayIndex)
+                      }
+                      onRemove={(breakIndex) =>
+                        removeWeekBreak(meta.dayIndex, breakIndex)
+                      }
+                      onEditCommit={() =>
+                        success('Saved successfully')
+                      }
+                      onToggleContinue={(enabled) =>
+                        toggleWeekContinue(
+                          meta.dayIndex,
+                          enabled,
+                        )
+                      }
+                    />
+
+                    <CopyDayControl
+                      sourceIndex={meta.dayIndex}
+                      onCopy={copyDaySchedule}
+                    />
+                  </article>
+                )
+              })}
+            </div>
+
+            <div className="apt-save-weekly">
+              <div>
+                <strong>Save Weekly Schedule</strong>
+                <span>
+                  Your working hours, breaks and
+                  available days for each weekday.
+                  Saving does not change what users
+                  see until you publish.
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => save(false)}
+              >
+                <Save size={15} />
+                Save Weekly Schedule
+              </button>
+            </div>
+          </section>
         )}
-      </div>
 
-      <div className="apt-slot-summary">
-        <div className="apt-slot-summary__item">
-          <strong>{draft.status || 'Draft'}</strong>
-          <span>Status</span>
-        </div>
-        <div className="apt-slot-summary__item">
-          <strong>{openWindows}</strong>
-          <span>Open windows</span>
-        </div>
-        <div className="apt-slot-summary__item">
-          <strong>{openHours}</strong>
-          <span>Total hours</span>
-        </div>
-        <div className="apt-slot-summary__item">
-          <strong>{draft.timezone}</strong>
-          <span>Timezone</span>
-        </div>
-      </div>
+        {mode === 'daily' && (
+          <section className="apt-schedule-mode">
+            <div className="apt-mode-heading">
+              <div>
+                <h3>
+                  Daily Schedule
+                </h3>
 
-      <div className="apt-slot-editor">
-        {draft.weeklySchedule.map((day) => (
-          <DaySchedule
-            key={day.dayIndex}
-            day={day}
-            onToggleDay={handleToggleDay}
-            onUpdateSlot={handleUpdateSlot}
-            onAddSlot={handleAddSlot}
-            onRemoveSlot={handleRemoveSlot}
-          />
-        ))}
-      </div>
+                <p>
+                  Apply a one-time change to{' '}
+                  <strong>one date only</strong> —{' '}
+                  this never changes the weekly
+                  schedule.
+                </p>
 
-      <div className="apt-slot-footer">
-        <div className="apt-slot-footer__note">
-          <Clock3 size={14} />
-          <span>
-            {selectedMonthTemplate?.status === 'Published'
-              ? `This month is already published. Last published on ${selectedMonthTemplate.publishedAt ? new Date(selectedMonthTemplate.publishedAt).toLocaleDateString('en-IN') : 'Not available'}.`
-              : 'Publish the schedule once the availability is final. Users can book against the published template.'}
-          </span>
-        </div>
-      </div>
-    </Card>
+                <span
+                  className={
+                    override
+                      ? 'apt-daily-override-pill is-set'
+                      : 'apt-daily-override-pill'
+                  }
+                >
+                  {override
+                    ? 'Custom override set for this date'
+                    : 'Uses the weekly schedule (no custom override)'}
+                </span>
+              </div>
+
+              <label className="apt-date-picker">
+                <span>
+                  Selected Date
+                </span>
+
+                <input
+                  type="date"
+                  min={toIsoDate(today)}
+                  max={toIsoDate(
+                    new Date(
+                      today.getFullYear(),
+                      today.getMonth() + 3,
+                      0,
+                    ),
+                  )}
+                  value={selectedDate}
+                  onChange={(event) => {
+                    const value =
+                      event.target.value
+
+                    setSelectedDate(value)
+
+                    const date =
+                      fromIsoDate(value)
+
+                    setSelectedMonth(
+                      new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        1,
+                      ),
+                    )
+                  }}
+                />
+              </label>
+            </div>
+
+            {availability.holiday &&
+              !override && (
+                <div className="apt-holiday-banner">
+                  <CalendarDays size={17} />
+
+                  <div>
+                    <strong>
+                      Government Holiday —{' '}
+                      {availability.holiday.name}
+                    </strong>
+
+                    <span>
+                      This date is unavailable
+                      by default. Enable
+                      availability below if
+                      you want to work on this
+                      holiday.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+            <WorkingHoursEditor
+              daily
+              schedule={daily}
+              onChange={updateDailyEditor}
+            />
+
+            <BreaksEditor
+              breaks={daily.breaks || []}
+              windows={
+                daily.windows?.length
+                  ? daily.windows
+                  : DEFAULT_WINDOWS
+              }
+              continueWithoutBreak={
+                daily.continueWithoutBreak
+              }
+              error={dailyError}
+              onChange={(nextBreaks) =>
+                updateDailyEditor({
+                  ...daily,
+                  breaks: nextBreaks,
+                })
+              }
+              onAdd={addDailyBreak}
+              onRemove={removeDailyBreak}
+              onEditCommit={commitDailyBreak}
+              onToggleContinue={toggleDailyContinue}
+            />
+
+            <div className="apt-slot-preview">
+              <div>
+                <Clock3 size={16} />
+
+                <strong>
+                  {selectedDateSlots.length}{' '}
+                  available appointment
+                  slots
+                </strong>
+
+                <span>
+                  {selectedDateSlots.length
+                    ? selectedDateSlots
+                        .slice(0, 8)
+                        .map(
+                          (slot) =>
+                            `${format12h(
+                              slot.startMin,
+                            )}–${format12h(
+                              slot.endMin,
+                            )}`,
+                        )
+                        .join(' · ')
+                    : 'No remaining slots for this date.'}
+                </span>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={clearDaily}
+                  disabled={!override}
+                >
+                  Remove Override
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={saveDaily}
+                >
+                  <Save size={14} />
+                  Save Day Schedule
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {mode === 'monthly' && (
+          <section className="apt-schedule-mode">
+            <div className="apt-mode-heading">
+              <div>
+                <h3>
+                  Monthly Schedule
+                </h3>
+
+                <p>
+                  Total, Booked, Completed and
+                  Remaining slots come from real
+                  data — your published working
+                  hours, breaks and appointments.
+                </p>
+              </div>
+
+              <div className="apt-month-controls">
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() =>
+                    moveMonth(-1)
+                  }
+                  disabled={
+                    !isWithinSchedulingHorizon(
+                      new Date(
+                        selectedMonth.getFullYear(),
+                        selectedMonth.getMonth() - 1,
+                        1,
+                      ),
+                      today,
+                      3,
+                    )
+                  }
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <strong>
+                  {monthLabel(
+                    selectedMonth,
+                  )}
+                </strong>
+
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() =>
+                    moveMonth(1)
+                  }
+                  disabled={
+                    !isWithinSchedulingHorizon(
+                      new Date(
+                        selectedMonth.getFullYear(),
+                        selectedMonth.getMonth() +
+                          1,
+                        1,
+                      ),
+                      today,
+                      3,
+                    )
+                  }
+                >
+                  <ChevronRight
+                    size={16}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="apt-scheduling-calendar">
+              <div className="apt-scheduling-calendar__weekdays">
+                {[
+                  'Mon',
+                  'Tue',
+                  'Wed',
+                  'Thu',
+                  'Fri',
+                  'Sat',
+                  'Sun',
+                ].map((label) => (
+                  <span key={label}>
+                    {label}
+                  </span>
+                ))}
+              </div>
+
+              <div className="apt-scheduling-calendar__grid">
+                {gridDates.map((date) => {
+                  const iso =
+                    toIsoDate(date)
+
+                  const inMonth =
+                    date.getMonth() ===
+                    selectedMonth.getMonth()
+
+                  const inHorizon =
+                    isWithinSchedulingHorizon(
+                      date,
+                      today,
+                      3,
+                    )
+
+                  const dateAvailability =
+                    getDateAvailability(
+                      draft,
+                      date,
+                    )
+
+                  const dateSummary =
+                    getAppointmentSlotSummary({
+                      template: draft,
+                      date,
+                      appointments,
+                      now: today,
+                    })
+
+                  const hasAppointments =
+                    appointments.some(
+                      (appointment) =>
+                        appointment.dateIso ===
+                          iso &&
+                        appointment.status !==
+                          'Cancelled',
+                    )
+
+                  const isHoliday =
+                    Boolean(
+                      dateAvailability.holiday,
+                    )
+
+                  let state =
+                    'unavailable'
+
+                  if (!inHorizon) {
+                    state = 'outside'
+                  } else if (
+                    dateSummary.remaining >
+                    0
+                  ) {
+                    state = 'available'
+                  } else if (
+                    dateSummary.booked > 0 ||
+                    dateSummary.completed > 0
+                  ) {
+                    state = 'booked'
+                  } else if (
+                    isHoliday &&
+                    !dateAvailability.isOverride
+                  ) {
+                    state = 'holiday'
+                  } else if (
+                    hasAppointments
+                  ) {
+                    state = 'booked'
+                  }
+
+                  return (
+                    <button
+                      type="button"
+                      key={iso}
+                      disabled={
+                        !inMonth ||
+                        !inHorizon
+                      }
+                      onClick={() =>
+                        openDateSummary(
+                          date,
+                        )
+                      }
+                      className={[
+                        'apt-scheduling-date',
+                        `is-${state}`,
+                        iso ===
+                        toIsoDate(today)
+                          ? 'is-today'
+                          : '',
+                        draft.dateOverrides?.[
+                          iso
+                        ]
+                          ? 'is-override'
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      <strong>
+                        {date.getDate()}
+                      </strong>
+
+                      {dateSummary.total > 0 ? (
+                        <>
+                          <span className="apt-cell-line">
+                            {dateSummary.total}{' '}
+                            Slots
+                          </span>
+
+                          <em
+                            aria-label={`${dateSummary.booked} booked, ${dateSummary.completed} completed, ${dateSummary.remaining} remaining of ${dateSummary.total} total`}
+                          >
+                            {dateSummary.booked}B ·{' '}
+                            {dateSummary.completed}C ·{' '}
+                            {dateSummary.remaining}R
+                          </em>
+                        </>
+                      ) : (
+                        <span>
+                          {state ===
+                          'available'
+                            ? `${dateSummary.available} available`
+                            : state ===
+                                'booked'
+                              ? dateSummary.booked >
+                                0
+                                ? `${dateSummary.booked} booked`
+                                : 'Fully booked'
+                              : state ===
+                                  'holiday'
+                                ? 'Holiday'
+                                : state ===
+                                    'outside'
+                                  ? ''
+                                  : 'Unavailable'}
+                        </span>
+                      )}
+
+                      {draft.dateOverrides?.[
+                        iso
+                      ] && (
+                        <i>
+                          Custom
+                        </i>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="apt-calendar-legend">
+              <span className="available">
+                Available
+              </span>
+
+              <span className="booked">
+                Booked / Full
+              </span>
+
+              <span className="unavailable">
+                Unavailable
+              </span>
+
+              <span className="custom">
+                Custom Day
+              </span>
+
+              <span className="holiday">
+                Government Holiday
+              </span>
+
+              <span>
+                Day counts show B·C·R =
+                Booked · Completed · Remaining
+              </span>
+            </div>
+          </section>
+        )}
+      </Card>
+
+      {selectedSummaryDate && (
+        <DateSummaryModal
+          date={selectedSummaryDate}
+          template={modalTemplate}
+          appointments={appointments}
+          now={today}
+          published={publishedPreview}
+          onClose={() => {
+            setSelectedSummaryDate(null)
+            setPublishedPreview(false)
+          }}
+          onEdit={editSelectedDate}
+        />
+      )}
+    </>
   )
 }

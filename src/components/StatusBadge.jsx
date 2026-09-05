@@ -1,6 +1,7 @@
 const STATUS_TONES = {
-  pending: 'badge-amber',
+  booked: 'badge-green',
   confirmed: 'badge-green',
+  pending: 'badge-amber',
   analysed: 'badge-blue',
   'in progress': 'badge-violet',
   answered: 'badge-green',
@@ -10,11 +11,30 @@ const STATUS_TONES = {
   disputed: 'badge-red',
   open: 'badge-red',
   'in review': 'badge-violet',
+  'cancelled by astrologer': 'badge-red',
+  'cancelled by user': 'badge-red',
+  'no-show': 'badge-gray',
+  'auto-cancelled': 'badge-red',
+}
+
+const STATUS_TONES_STARTS_WITH = [
+  { prefix: 'cancelled by', tone: 'badge-red' },
+  { prefix: 'no-show', tone: 'badge-gray' },
+  { prefix: 'auto-cancelled', tone: 'badge-red' },
+]
+
+function toneFor(label) {
+  const clean = String(label).replace(/^[^\w]+/, '').trim().toLowerCase()
+  if (STATUS_TONES[clean]) return STATUS_TONES[clean]
+  for (const entry of STATUS_TONES_STARTS_WITH) {
+    if (clean.startsWith(entry.prefix)) return entry.tone
+  }
+  return STATUS_TONES[clean] || 'badge-violet'
 }
 
 export default function StatusBadge({ label, className = '' }) {
-  const clean = label.replace(/^[^\w]+/, '').trim()
-  const tone = STATUS_TONES[clean.toLowerCase()] || 'badge-violet'
+  const clean = String(label).replace(/^[^\w]+/, '').trim() || 'Not available'
+  const tone = toneFor(clean)
   return (
     <span
       className={[
