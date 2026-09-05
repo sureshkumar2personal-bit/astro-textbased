@@ -492,6 +492,12 @@ export const mockAppointments = [
   }),
 ]
 
+// ---- Historical appointment records --------------------------------------
+// These records are independent of the Schedule calendar. They represent
+// appointments that were actually booked and are preserved regardless of any
+// later schedule/availability changes. Populated with canonical statuses.
+export { mockAppointmentHistory, mockConsultations, appointmentCustomers } from './appointmentHistoryData.js'
+
 export const mockPoojas = [
   {
     id: 'pooja-1',

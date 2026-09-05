@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import { PROFILE_FOLLOWERS, PROFILE_SUBSCRIBERS, TIER_PRICES, accountHandle } from '../data/audienceMembers.js'
+import { appointmentCustomers } from '../data/notificationData.js'
 import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -46,7 +47,7 @@ export default function AudienceMemberProfile() {
   const { audienceType, memberId } = useParams()
   const navigate = useNavigate()
   const { currentUser } = useAuth()
-  const { subscriptions, blockedUserIds, actions, questions, consultationHistory } = useAppData()
+  const { subscriptions, blockedUserIds, actions, questions, consultationHistory, appointments } = useAppData()
   const [activeTab, setActiveTab] = useState('Posts')
   const [menuOpen, setMenuOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -70,12 +71,14 @@ export default function AudienceMemberProfile() {
   }, [astrologer.id, currentUser?.id, subscriptions])
 
   const member = (isSubscriber ? subscribers : isFollower ? PROFILE_FOLLOWERS : []).find((entry) => entry.id === memberId)
+    || appointmentCustomers[memberId]
   const communicationActivity = useMemo(() => getMemberCommunicationActivity({
     questions,
     consultationHistory,
+    appointments,
     userId: member?.userId || member?.id,
     astrologerId: astrologer.id,
-  }), [astrologer.id, consultationHistory, member?.id, member?.userId, questions])
+  }), [appointments, astrologer.id, consultationHistory, member?.id, member?.userId, questions])
 
   useEffect(() => {
     const close = (event) => {

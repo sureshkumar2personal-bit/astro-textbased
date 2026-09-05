@@ -18,7 +18,7 @@ function toTimestamp(value) {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
-export function getMemberCommunicationActivity({ questions = [], consultationHistory = [], userId, astrologerId }) {
+export function getMemberCommunicationActivity({ questions = [], consultationHistory = [], appointments = [], userId, astrologerId }) {
   if (!userId || !astrologerId) return []
 
   const activity = []
@@ -70,6 +70,21 @@ export function getMemberCommunicationActivity({ questions = [], consultationHis
         occurredAt: session.startedAt,
         metadata: `${session.durationMinutes} min`,
         sessionType: session.type,
+      })
+    })
+
+  appointments
+    .filter((appointment) => appointment.userId === userId && appointment.astrologerId === astrologerId)
+    .forEach((appointment) => {
+      activity.push({
+        id: `${appointment.id}-appointment`,
+        type: ACTIVITY_TYPES.CONSULTATION,
+        title: `${appointment.type || 'Appointment'} consultation`,
+        summary: appointment.topic ? `Topic: ${appointment.topic}` : 'Appointment consultation.',
+        status: appointment.status,
+        occurredAt: appointment.bookedAt || appointment.date,
+        metadata: appointment.orderId,
+        sessionType: appointment.type,
       })
     })
 
