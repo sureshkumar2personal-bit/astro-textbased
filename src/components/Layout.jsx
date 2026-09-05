@@ -21,6 +21,7 @@ import {
   ChevronDown,
   UserRound,
   CalendarDays,
+  CalendarCheck,
   CalendarPlus,
   Radio,
 } from 'lucide-react'
@@ -84,8 +85,15 @@ const ROLE_CONFIG = {
           { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
         ],
       },
-      { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
-      { to: 'appointment-details', label: 'Book Appointment', icon: CalendarPlus },
+      {
+        to: 'astrologers',
+        label: 'Explore Astrologers',
+        icon: Sparkles,
+        children: [
+          { to: 'appointment-details', label: 'View Appointments', icon: CalendarCheck },
+          { to: 'astrologers', label: 'Book Appointments', icon: CalendarPlus },
+        ],
+      },
       { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Rewards', icon: Gift },
       { to: 'my-account', label: 'My Account', icon: UserRound },
@@ -137,34 +145,45 @@ const PAGE_META = {
   },
 }
 
+function sectionIsActive(link, pathname, basePath) {
+  const sectionRoute = link.to || 'ask-question'
+  return pathname.startsWith(`${basePath}/${sectionRoute}`) || (link.children || []).some((child) => pathname.startsWith(`${basePath}/${child.to}`))
+}
+
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   const location = useLocation()
-  const isAskQuestionSection = location.pathname.startsWith(`${basePath}/ask-question`) || location.pathname.startsWith(`${basePath}/purchase-package`) || location.pathname.startsWith(`${basePath}/track-questions`) || location.pathname.startsWith(`${basePath}/raise-dispute`)
-  const [askQuestionOpen, setAskQuestionOpen] = useState(isAskQuestionSection)
+  const [openSections, setOpenSections] = useState(() => Object.fromEntries(links.filter((link) => link.children).map((link) => [link.label, sectionIsActive(link, location.pathname, basePath)])))
 
   useEffect(() => {
-    if (isAskQuestionSection) setAskQuestionOpen(true)
-  }, [isAskQuestionSection])
+    setOpenSections((current) => {
+      const next = { ...current }
+      links.forEach((link) => {
+        if (link.children && sectionIsActive(link, location.pathname, basePath)) next[link.label] = true
+      })
+      return next
+    })
+  }, [basePath, location.pathname, links])
 
   return (
     <nav className="sidebar-nav">
       {links.map(({ to, label, icon, end, children }) => {
         if (children) {
           const Icon = icon
-          const submenuActive = children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
-          const parentActive = submenuActive || location.pathname.startsWith(`${basePath}/ask-question`)
+          const parentActive = sectionIsActive({ to, children }, location.pathname, basePath)
+          const sectionOpen = Boolean(openSections[label])
+          const parentRoute = `${basePath}/${to || 'ask-question'}`
           return <div className="sidebar-nav-group" key={label}>
             <div className={`sidebar-link sidebar-link-toggle${parentActive ? ' active' : ''}`}>
               {parentActive && <span className="sidebar-active-pill" />}
-              <NavLink to={`${basePath}/ask-question`} className="sidebar-parent-link">
+              <NavLink to={parentRoute} className="sidebar-parent-link">
                 <Icon size={18} />
                 <span className="sidebar-link-label">{label}</span>
               </NavLink>
-              <button type="button" className="sidebar-chevron-button" aria-label={`${askQuestionOpen ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={askQuestionOpen} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setAskQuestionOpen((open) => !open) }}>
-                <ChevronDown size={16} className={`sidebar-chevron${askQuestionOpen ? ' is-open' : ''}`} />
+              <button type="button" className="sidebar-chevron-button" aria-label={`${sectionOpen ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={sectionOpen} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpenSections((current) => ({ ...current, [label]: !current[label] })) }}>
+                <ChevronDown size={16} className={`sidebar-chevron${sectionOpen ? ' is-open' : ''}`} />
               </button>
             </div>
-            <motion.div className="sidebar-subnav" initial={false} animate={{ height: askQuestionOpen ? 'auto' : 0, opacity: askQuestionOpen ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
+            <motion.div className="sidebar-subnav" initial={false} animate={{ height: sectionOpen ? 'auto' : 0, opacity: sectionOpen ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
               {children.map((child) => <SidebarItem key={child.to} to={`${basePath}/${child.to}`} icon={child.icon} label={child.label} subItem />)}
             </motion.div>
           </div>

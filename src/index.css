@@ -8358,3 +8358,64 @@ button.apt-week-day:focus-visible {
 }
 
 /* Astrologer Appointments section */
+
+/* Book Appointment palette: purple selected, green available, orange booked, neutral unavailable. */
+.appointment-booking-modal .appointment-view-tabs { border:1px solid var(--border); background:var(--neutral-bg); }
+.appointment-booking-modal .appointment-view-tabs button { color:var(--muted); }
+.appointment-booking-modal .appointment-view-tabs button.is-active { background:var(--primary); color:#fff; box-shadow:0 4px 10px rgba(109,40,217,.2); }
+.appointment-booking-modal .availability-calendar { border:1px solid var(--border); background:var(--neutral-bg); }
+.appointment-booking-modal .availability-calendar__header .icon-btn { border:1px solid var(--border); color:var(--primary); background:var(--surface-strong); }
+.appointment-booking-modal .availability-calendar__weekdays span { color:var(--muted); }
+.appointment-booking-modal .appointment-month-days { grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+.appointment-booking-modal .appointment-month-days button { min-height:54px !important; border:1px solid var(--border); border-radius:10px !important; background:var(--surface-strong); color:var(--ink); }
+.appointment-booking-modal .appointment-month-days button.is-unavailable { background:var(--neutral-bg); color:var(--muted); }
+.appointment-booking-modal .appointment-month-days button.is-available { border-color:rgba(16,185,129,.38); background:var(--success-bg); color:var(--green-600); }
+.appointment-booking-modal .appointment-month-days button.is-booked { border-color:var(--primary); background:var(--primary); color:#fff; cursor:not-allowed; }
+.appointment-booking-modal .appointment-month-days button.is-available:hover { border-color:var(--success); background:#D1FAE5; }
+.appointment-booking-modal .appointment-month-days button.is-booked:hover { border-color:var(--primary); background:var(--primary); }
+.appointment-booking-modal .appointment-month-days button.is-selected,
+.appointment-booking-modal .appointment-month-days button.is-selected:hover { border-color:var(--primary); background:var(--primary); color:#fff; box-shadow:0 4px 10px rgba(109,40,217,.2); }
+.appointment-booking-modal .appointment-month-days button.is-available.is-selected,
+.appointment-booking-modal .appointment-month-days button.is-available.is-selected:hover { border:1px solid var(--primary); background:var(--success-bg); color:var(--green-600); box-shadow:inset 0 0 0 1px rgba(109,40,217,.14); }
+.appointment-booking-modal .appointment-month-days button.is-unavailable.is-selected,
+.appointment-booking-modal .appointment-month-days button.is-unavailable.is-selected:hover { border:1px solid var(--primary); background:var(--neutral-bg); color:var(--muted); box-shadow:inset 0 0 0 1px rgba(109,40,217,.14); }
+.appointment-booking-modal .appointment-month-days button.is-outside { opacity:.55; }
+.appointment-booking-modal .appointment-month-days button.is-selected.is-outside { opacity:1; }
+.appointment-booking-modal .appointment-month-days button small { color:var(--green-600); font-size:7px; }
+.appointment-booking-modal .appointment-month-days button strong { color:inherit; font-size:8px; line-height:1.1; white-space:nowrap; }
+.appointment-booking-modal .appointment-month-days button em { color:var(--muted); font-size:7px; font-style:normal; font-weight:700; white-space:nowrap; }
+.appointment-booking-modal .appointment-month-days button.is-booked small,
+.appointment-booking-modal .appointment-month-days button.is-booked em { color:var(--primary); }
+.appointment-booking-modal .appointment-month-days button.is-booked strong,
+.appointment-booking-modal .appointment-month-days button.is-booked small,
+.appointment-booking-modal .appointment-month-days button.is-booked em { color:#fff; }
+.appointment-booking-modal .appointment-month-days button.is-selected small { color:#fff; }
+.appointment-booking-modal .appointment-month-days button.is-selected em { color:rgba(255,255,255,.82); }
+.appointment-calendar-legend { display:flex; flex-wrap:wrap; align-items:center; gap:7px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border); color:var(--muted); font-size:8px; font-weight:700; }
+.appointment-calendar-legend > span { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+.appointment-calendar-legend i { display:inline-block; width:9px; height:9px; border:1px solid var(--border); border-radius:3px; background:var(--neutral-bg); }
+.appointment-calendar-legend i.is-available { border-color:var(--success); background:var(--success-bg); }
+.appointment-calendar-legend i.is-booked { border-color:var(--primary); background:var(--primary-bg); }
+.appointment-booking-modal .availability-slots button,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button { border-color:rgba(16,185,129,.35); background:var(--success-bg); color:var(--green-600); }
+.appointment-booking-modal .availability-slots button > span,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button > span { color:var(--green-600); }
+.appointment-booking-modal .availability-slots button.is-selected,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button.is-selected { border-color:var(--primary); background:var(--primary-bg); color:var(--primary); }
+.appointment-booking-modal .availability-slots button.is-selected > span,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button.is-selected > span { color:var(--primary); }
+.appointment-booking-modal .availability-slots button:disabled,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button:disabled { border-color:rgba(245,158,11,.35); background:var(--warning-bg); color:var(--amber-600); opacity:1; }
+.appointment-booking-modal .availability-slots button:disabled small,
+.appointment-booking-modal .appointment-timeline .appointment-slot-button:disabled small { color:var(--amber-600); }
+.appointment-booking-modal .appointment-selection-count { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0 0; color:var(--muted); font-size:11px; }
+.appointment-booking-modal .appointment-selection-count strong { color:var(--primary); font-size:12px; }
+.appointment-booking-modal .appointment-selection-count span { color:var(--amber-600); font-size:10px; font-weight:700; text-align:right; }
+.appointment-booking-modal .appointment-selection-help { margin:4px 0 0; color:var(--muted); font-size:10px; line-height:1.4; }
+.appointment-booking-modal .appointment-slot-button.is-limit-disabled:disabled { border-color:var(--border); background:var(--neutral-bg); color:var(--muted); opacity:.62; cursor:not-allowed; }
+.appointment-booking-modal .appointment-slot-button.is-limit-disabled:disabled span,
+.appointment-booking-modal .appointment-slot-button.is-limit-disabled:disabled small { color:var(--muted); }
+.appointment-booking-modal .appointment-review-slot-list { display:grid; gap:8px; }
+.appointment-booking-modal .appointment-selected-panel { border-color:rgba(109,40,217,.22); background:var(--primary-bg); }
+.appointment-booking-modal .appointment-selected-row,
+.appointment-booking-modal .appointment-selected-row > span b { color:var(--primary); }
