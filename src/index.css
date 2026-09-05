@@ -9696,6 +9696,31 @@ button.apt-week-day:focus-visible {
 .appointment-booking-modal .appointment-selected-panel { border-color:rgba(109,40,217,.22); background:var(--primary-bg); }
 .appointment-booking-modal .appointment-selected-row,
 .appointment-booking-modal .appointment-selected-row > span b { color:var(--primary); }
+
+.user-appointment-history .apt-history-detail-copy strong { color:var(--ink); font-size:16px; }
+.user-appointment-history .apt-history-detail-copy p { margin:0; }
+.user-appointment-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.user-appointment-actions .btn { flex:1 1 140px; }
+.user-appointment-list { display:grid; gap:10px; }
+.user-appointment-card { gap:9px; cursor:default; }
+.user-appointment-card__top,
+.user-appointment-identity { display:flex; align-items:flex-start; gap:9px; }
+.user-appointment-card__top { justify-content:space-between; }
+.user-appointment-identity > div { display:grid; gap:2px; min-width:0; }
+.user-appointment-identity strong { color:var(--ink); font-size:13px; font-weight:800; }
+.user-appointment-identity div span { color:var(--muted); font-size:10px; }
+.user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
+.user-appointment-avatar--large { width:40px; height:40px; font-size:12px; }
+.user-appointment-card__meta { display:grid; gap:5px; color:var(--muted); font-size:10px; }
+.user-appointment-card__meta span { display:flex; align-items:center; gap:5px; }
+.user-appointment-card__footer { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--surface-border); color:var(--muted); font-size:10px; }
+.user-appointment-card__actions { display:flex; gap:6px; flex-wrap:wrap; }
+.user-appointment-card__actions .btn { flex:1 1 auto; }
+.user-appointment-detail-heading { display:flex; align-items:center; gap:10px; }
+.user-appointment-detail-heading > div { display:grid; gap:2px; }
+.user-appointment-detail-heading strong { color:var(--ink); font-size:15px; }
+.user-appointment-detail-heading p { margin:0; color:var(--muted); font-size:11px; }
+@media (max-width:600px) { .user-appointment-card__top { flex-direction:column; }.user-appointment-card__actions .btn { flex:1 1 130px; } }
 /* Astrologer Appointments section
 
    ============================================================

@@ -54,7 +54,7 @@ function weekFor(value) {
   return Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index))
 }
 
-export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, actions, routes, onClose }) {
+export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, userId, userName, actions, routes, onClose }) {
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
@@ -110,7 +110,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const pay = () => {
     if (!selected.length || paymentMethod !== 'Wallet' || balance < amount) return
     const group = `#BOOK-${selected[0].date.replaceAll('-', '')}-001`
-    const ids = selected.map((slot, index) => actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: TYPE, date: formatDate(slot.date), time: slot.time, price: PRICE, duration: '30 Minutes', package: '30 Min Consultation', bookingGroup: group, bookingSequence: index + 1, questionDetails: details.question ? details : null }))
+    const ids = selected.map((slot, index) => actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: TYPE, date: formatDate(slot.date), dateIso: slot.date, time: slot.time, price: PRICE, duration: '30 Minutes', package: '30 Min Consultation', bookingGroup: group, bookingSequence: index + 1, questionDetails: details.question ? details : null, userId, customerName: userName || null }))
     actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: `${selected.length} appointments`, service: 'Appointment', transactionId: `appointment-${group}` })
     setAppointmentId(ids[0])
     setStep('success')

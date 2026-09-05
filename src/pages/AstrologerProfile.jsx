@@ -297,7 +297,7 @@ export default function AstrologerProfile() {
     const bookingGroup = `#BOOK-${selectedSlots[0].date.replaceAll('-', '')}-001`
     let firstId = null
     selectedSlots.forEach((slot, index) => {
-      const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: slot.type, date: displayDateKey(slot.date), dateIso: slot.date, start: timeToMinutes(slot.time), end: timeToMinutes(slot.time) + 30, time: slot.time, price: slot.price, duration: slot.duration, package: slot.package, bookingGroup, bookingSequence: index + 1, questionDetails: consultationDetails.question ? consultationDetails : null, horoscope: consultationDetails?.horoscope || null })
+      const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: slot.type, date: displayDateKey(slot.date), dateIso: slot.date, start: timeToMinutes(slot.time), end: timeToMinutes(slot.time) + 30, time: slot.time, price: slot.price, duration: slot.duration, package: slot.package, bookingGroup, bookingSequence: index + 1, questionDetails: consultationDetails.question ? consultationDetails : null, horoscope: consultationDetails?.horoscope || null, userId: currentUser?.id, customerName: currentUser?.name || null })
       if (!firstId) firstId = id
     })
     actions.debitUserWallet({ amount: total, astrologer: astrologer.name, duration: `${selectedSlots.length} appointment${selectedSlots.length > 1 ? 's' : ''}`, service: 'Appointment', transactionId: `appointment-${bookingGroup}` })
