@@ -54,7 +54,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const [notice, setNotice] = useState('')
   const [copied, setCopied] = useState(false)
   const selected = date && time ? [{ key: `${date}|${time}`, date, time, duration: '30 Minutes', type: TYPE, package: '30 Min Consultation', price: PRICE }] : []
-  const booked = useMemo(() => new Set(appointments.filter((item) => item.astrologerId === astrologer.id).map((item) => `${item.date}|${item.time}`)), [appointments, astrologer.id])
+  const booked = useMemo(() => new Set(appointments.filter((item) => item.astrologerId === astrologer.id).map((item) => `${item.dateIso || item.date}|${item.time}`)), [appointments, astrologer.id])
   const days = daysFor(month)
   const amount = selected.reduce((sum, item) => sum + item.price, 0)
   const balance = Number(userWallet?.balance || 0)
@@ -75,7 +75,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const pay = () => {
     if (!selected.length || paymentMethod !== 'Wallet' || balance < amount) return
     const group = `#BOOK-${date.replaceAll('-', '')}-001`
-    const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: TYPE, date: formatDate(date), time, price: PRICE, duration: '30 Minutes', package: '30 Min Consultation', bookingGroup: group, bookingSequence: 1, questionDetails: details.question ? details : null })
+    const id = actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: TYPE, date: formatDate(date), dateIso: date, time, price: PRICE, duration: '30 Minutes', package: '30 Min Consultation', bookingGroup: group, bookingSequence: 1, questionDetails: details.question ? details : null })
     actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: '1 appointment', service: 'Appointment', transactionId: `appointment-${group}` })
     setAppointmentId(id)
     setStep('success')

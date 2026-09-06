@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { ListChecks, ScrollText } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -12,6 +12,7 @@ const TABS = [
 export default function AppointmentsShell() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
+  const { pathname } = useLocation()
 
   return (
     <div className="apt-page">
@@ -25,13 +26,15 @@ export default function AppointmentsShell() {
         {TABS.map((tab) => {
           const to = routes[`appointment${tab.key[0].toUpperCase()}${tab.key.slice(1)}`]
           const Icon = tab.icon
+          const isActive = pathname === to
           return (
             <NavLink
               key={tab.key}
               to={to}
               end
-              className={({ isActive }) => `apt-tab-btn${isActive ? ' is-active' : ''}`}
+              className={`apt-tab-btn${isActive ? ' is-active' : ''}`}
               role="tab"
+              aria-selected={isActive ? 'true' : 'false'}
             >
               <Icon size={15} />
               {tab.label}
