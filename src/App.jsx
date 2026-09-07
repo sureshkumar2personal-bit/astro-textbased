@@ -21,7 +21,20 @@ import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
-import AstrologerWallet from './pages/AstrologerWallet.jsx'
+import {
+  UserWalletOverview,
+  UserWalletTransactions,
+  UserWalletTopUps,
+  UserWalletRefunds,
+} from './pages/user/wallet/WalletHistory.jsx'
+import {
+  WalletOverview,
+  WalletEarnings,
+  WalletTransactions,
+  WalletWithdraw,
+  WalletSettlements,
+  WalletPaymentMethods,
+} from './pages/AstrologerWallet.jsx'
 import Astrologers from './pages/Astrologers.jsx'
 import AstrologersFull from './pages/astrologer/astrologers/AstrologersFull.jsx'
 import FollowedAstrologersFull from './pages/FollowedAstrologersFull.jsx'
@@ -116,7 +129,13 @@ function AstrologerRoutes() {
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/profile" element={<Profile />} />
-        <Route path="/astrologer/wallet" element={<AstrologerWallet />} />
+        <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />
+        <Route path="/astrologer/wallet/overview" element={<WalletOverview />} />
+        <Route path="/astrologer/wallet/earnings" element={<WalletEarnings />} />
+        <Route path="/astrologer/wallet/transactions" element={<WalletTransactions />} />
+        <Route path="/astrologer/wallet/withdraw" element={<WalletWithdraw />} />
+        <Route path="/astrologer/wallet/settlements" element={<WalletSettlements />} />
+        <Route path="/astrologer/wallet/payment-methods" element={<WalletPaymentMethods />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
         <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
@@ -149,8 +168,12 @@ function UserRoutes() {
     <Route element={<RequireRole role={ROLES.USER} />}>
       <Route element={<Layout />}>
         <Route path="/user" element={<UserDashboard />} />
-        <Route path="/user/wallet-history" element={<WalletHistory />} />
-        <Route path="/user/wallet" element={<WalletHistory />} />
+        <Route path="/user/wallet-history" element={<UserWalletOverview />} />
+        <Route path="/user/wallet" element={<Navigate to="/user/wallet/overview" replace />} />
+        <Route path="/user/wallet/overview" element={<UserWalletOverview />} />
+        <Route path="/user/wallet/transactions" element={<UserWalletTransactions />} />
+        <Route path="/user/wallet/topups" element={<UserWalletTopUps />} />
+        <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
         <Route path="/user/ask-question" element={<AskQuestion />} />
         <Route path="/user/track-questions" element={<TrackQuestions />} />

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import {
-  addMonths,
   startOfMonth,
   startOfWeek,
   toIsoDate,
@@ -16,10 +15,12 @@ function dayBreakdown(appointments, date) {
   const iso = toIsoDate(date)
   const dayApps = appointments.filter((appointment) => appointment.dateIso === iso)
   const booked = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'booked')
+  const pending = dayApps.filter((appointment) => appointment.status === 'Pending' || (appointmentStatusBucket(appointment.status) === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo && appointment.status !== 'Rescheduled'))
+  const rescheduled = dayApps.filter((appointment) => Boolean(appointment.rescheduledTo || appointment.rescheduledFrom || appointment.status === 'Rescheduled'))
   const completed = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'completed')
   const cancelled = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'cancelled')
   const other = dayApps.filter((appointment) => appointment.status === 'No-show')
-  return { total: dayApps.length, booked, completed, cancelled, other }
+  return { total: dayApps.length, booked, pending, rescheduled, completed, cancelled, other }
 }
 
 export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate }) {
@@ -31,7 +32,9 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
       date.setDate(gridStart.getDate() + index)
       return date
     })
-    return Array.from({ length: 6 }, (_, weekIndex) => cells.slice(weekIndex * 7, weekIndex * 7 + 7))
+    const result = []
+    for (let index = 0; index < cells.length; index += 7) result.push(cells.slice(index, index + 7))
+    return result
   }, [gridStart])
 
   const todayIso = toIsoDate(new Date())
@@ -59,13 +62,12 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     return () => document.removeEventListener('mousedown', close)
   }, [])
 
-  const handlePrevious = () => onRangeChange(addMonths(monthStart, -1))
-  const handleNext = () => onRangeChange(addMonths(monthStart, 1))
   const handleToday = () => {
     const now = new Date()
     onRangeChange(startOfMonth(now))
     onSelectDate(now)
   }
+
   const applyMonthYear = (month, year) => {
     onRangeChange(new Date(year, month, 1))
     onSelectDate(new Date(year, month, 1))
@@ -73,17 +75,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
   }
 
   return (
-    <div className="apt-calendar apt-history-calendar">
-      <div className="apt-calendar-toolbar">
+    <div className="apt-scheduling-calendar apt-scheduling-calendar--history">
+      <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
-          <button type="button" className="icon-btn" onClick={handlePrevious} aria-label="Previous month">
-            <ChevronLeft size={18} />
-          </button>
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
-          </button>
-          <button type="button" className="icon-btn" onClick={handleNext} aria-label="Next month">
-            <ChevronRight size={18} />
           </button>
         </div>
         <div className="apt-calendar-title-wrap">
@@ -128,9 +124,10 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
           )}
         </div>
         <div className="apt-history-calendar-legend" aria-label="Appointment status legend">
-          <span className="is-booked">Booked</span>
+          <span className="is-pending">Pending</span>
           <span className="is-completed">Completed</span>
           <span className="is-cancelled">Cancelled</span>
+          <span className="is-rescheduled">Rescheduled</span>
         </div>
       </div>
 
@@ -158,7 +155,7 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
                       isCurrentMonth ? '' : 'is-muted',
                       isToday ? 'is-today' : '',
                       isSelected ? 'is-selected' : '',
-                      breakdown.total ? `has-${breakdown.completed.length ? 'completed' : breakdown.cancelled.length ? 'cancelled' : 'booked'}` : '',
+                      breakdown.total ? `has-${breakdown.pending.length ? 'pending' : breakdown.completed.length ? 'completed' : breakdown.cancelled.length ? 'cancelled' : 'rescheduled'}` : '',
                     ].filter(Boolean).join(' ')}
                     role="button"
                     tabIndex={0}
@@ -177,9 +174,10 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
                       <div className="apt-history-count" aria-hidden="true">{breakdown.total}</div>
                     )}
                     <div className="apt-history-cell-status" aria-hidden="true">
-                      {breakdown.booked.length > 0 && <span className="is-booked">{breakdown.booked.length}</span>}
+                      {breakdown.pending.length > 0 && <span className="is-pending">{breakdown.pending.length}</span>}
                       {breakdown.completed.length > 0 && <span className="is-completed">{breakdown.completed.length}</span>}
                       {breakdown.cancelled.length > 0 && <span className="is-cancelled">{breakdown.cancelled.length}</span>}
+                      {breakdown.rescheduled.length > 0 && <span className="is-rescheduled">{breakdown.rescheduled.length}</span>}
                     </div>
                   </div>
                 )

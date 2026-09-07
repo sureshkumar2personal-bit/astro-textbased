@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mockAppointmentHistory, mockConsultations } from './appointmentHistoryData.js'
-import { isCancelledStatus } from '../utils/appointments.js'
+import { isCancelledStatus, isAppointmentUpcoming, canStartCall, isPastDate } from '../utils/appointments.js'
 
 const TERMINAL = ['Completed', 'No-show']
 const CANCELLED = (s) => isCancelledStatus(s)
@@ -97,5 +97,112 @@ describe('mockAppointmentHistory demo data', () => {
   it('gives every appointment a stable userId for profile navigation', () => {
     const entries = mockAppointmentHistory.filter((a) => a.userId)
     expect(entries.length).toBe(mockAppointmentHistory.length)
+  })
+})
+
+describe('appointment history feature corrections (view-only history + per-appointment persistence)', () => {
+  // The demo reference "today" used by appointmentHistoryData.js.
+  const refNow = new Date(2026, 8, 4, 12, 0, 0)
+
+  it('1. ships an upcoming Meena appointment that can be demoed end to end', () => {
+    const meena = mockAppointmentHistory.find((a) => a.customerName === 'Meena' && a.dateIso === '2026-09-07')
+    expect(meena).toBeTruthy()
+    expect(meena.status).toBe('Booked')
+    expect(meena.orderId).toBe('#AH927')
+    expect(meena.horoscope).toBeTruthy()
+  })
+
+  it('2. the Meena appointment is actionable at the demo "today"', () => {
+    const meena = mockAppointmentHistory.find((a) => a.customerName === 'Meena' && a.dateIso === '2026-09-07')
+    expect(isAppointmentUpcoming(meena, refNow)).toBe(true)
+    expect(canStartCall(meena, refNow)).toBe(true)
+  })
+
+  it('3. Booked future appointments carry a persistent horoscope attachment envelope', () => {
+    const attached = mockAppointmentHistory.filter((a) => a.status === 'Booked' && a.horoscope)
+    expect(attached.length).toBeGreaterThan(0)
+    attached.forEach((a) => {
+      expect(a.horoscope.name).toBeTruthy()
+      expect(a.horoscope.type).toBeTruthy()
+      expect(a.horoscope.size).toBeTruthy()
+      expect(a.horoscope.dataUrl).toMatch(/^data:/)
+    })
+  })
+
+  it('4. completed records preserve pre-call analysis, private notes, duration and completion time', () => {
+    const completed = mockAppointmentHistory.filter((a) => a.status === 'Completed')
+    expect(completed.length).toBeGreaterThan(0)
+    completed.forEach((a) => {
+      expect(typeof a.preCallAnalysis).toBe('string')
+      expect(a.preCallAnalysis.length).toBeGreaterThan(0)
+      expect(typeof a.privateNotes).toBe('string')
+      expect(a.privateNotes.length).toBeGreaterThan(0)
+      expect(a.callDurationSeconds).toBeGreaterThan(0)
+      expect(a.completedAt).toBeTruthy()
+    })
+  })
+
+  it('5. completed history preserves the full customer/date/time/status envelope', () => {
+    const completed = mockAppointmentHistory.filter((a) => a.status === 'Completed')
+    completed.forEach((a) => {
+      expect(a.customerName).toBeTruthy()
+      expect(a.customerPhone).toBeTruthy()
+      expect(a.dateIso).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(a.start).toBeTruthy()
+      expect(a.end).toBeTruthy()
+      expect(a.amount).toBeGreaterThan(0)
+    })
+  })
+
+  it('6. consultations are strictly per appointment (never shared or duplicated)', () => {
+    const ids = mockConsultations.map((c) => c.appointmentId)
+    expect(ids.length).toBeGreaterThan(0)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('7. every consultation links to a real Completed appointment and is marked sent', () => {
+    expect(mockConsultations.length).toBeGreaterThan(0)
+    mockConsultations.forEach((c) => {
+      const appointment = mockAppointmentHistory.find((a) => a.id === c.appointmentId)
+      expect(appointment).toBeTruthy()
+      expect(appointment.status).toBe('Completed')
+      expect(c.sent).toBe(true)
+    })
+  })
+
+  it('8. consultation attachments persist on their own record', () => {
+    const withFile = mockConsultations.filter((c) => c.fileName && c.fileType && c.fileSize)
+    expect(withFile.length).toBeGreaterThan(0)
+    withFile.forEach((c) => {
+      expect(typeof c.fileName).toBe('string')
+      expect(typeof c.fileType).toBe('string')
+      expect(typeof c.fileSize).toBe('string')
+    })
+  })
+
+  it('9. notes are appointment-specific and never shared between customers', () => {
+    const featured = mockAppointmentHistory.filter((a) => ['#AH903', '#AH802', '#AH902'].includes(a.orderId))
+    expect(featured.length).toBe(3)
+    const notes = featured.map((a) => a.privateNotes)
+    expect(new Set(notes).size).toBe(3)
+  })
+
+  it('10. the Karthik demo consultation persists with a real attachment', () => {
+    const karthik = mockAppointmentHistory.find((a) => a.orderId === '#AH903')
+    expect(karthik).toBeTruthy()
+    expect(karthik.status).toBe('Completed')
+    const consultation = mockConsultations.find((c) => c.appointmentId === karthik.id)
+    expect(consultation).toBeTruthy()
+    expect(consultation.fileName).toBe('Karthik_Consultation_Notes.pdf')
+    expect(consultation.sent).toBe(true)
+  })
+
+  it('11. past records are view-only — never upcoming and never startable', () => {
+    const pastRecords = mockAppointmentHistory.filter((a) => isPastDate(a.dateIso, refNow))
+    expect(pastRecords.length).toBeGreaterThan(0)
+    pastRecords.forEach((a) => {
+      expect(isAppointmentUpcoming(a, refNow)).toBe(false)
+      expect(canStartCall(a, refNow)).toBe(false)
+    })
   })
 })

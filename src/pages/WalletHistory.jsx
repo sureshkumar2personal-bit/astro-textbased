@@ -3,6 +3,7 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getPaymentHoldStatus } from '../utils/date.js'
+import { computeWalletSummary } from '../utils/wallet.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 
 function parseAmount(amountStr) {
@@ -21,11 +22,18 @@ export default function WalletHistory() {
   const isAstrologer = currentUser?.role === 'astrologer'
   const wallet = isAstrologer ? astrologerWallet : userWallet
   const holdDays = wallet.holdDays ?? 7
+  const summary = isAstrologer ? computeWalletSummary(astrologerWallet) : null
 
-  const transactions = wallet.transactions.map((item) => {
-    const amount = parseAmount(item.amount)
+  const transactions = (isAstrologer ? summary.ledger : wallet.transactions).map((item) => {
+    const amount = isAstrologer ? Number(item.amount) : parseAmount(item.amount)
     const hold = amount > 0 ? getPaymentHoldStatus(item.date, holdDays) : { held: false }
-    return { ...item, amount, hold }
+    return {
+      ...item,
+      label: isAstrologer ? item.description || 'Wallet transaction' : item.label,
+      time: isAstrologer ? `${item.date}${item.time ? ` · ${item.time}` : ''}` : item.time,
+      amount,
+      hold,
+    }
   })
 
   return (
@@ -43,28 +51,28 @@ export default function WalletHistory() {
             <div className="stat-card">
               <div className="stat-icon tone-violet"><Wallet size={20} /></div>
               <div className="stat-card-body">
-                <div className="stat-value">₹ {wallet.balance.toLocaleString('en-IN')}</div>
+                <div className="stat-value">₹ {summary.availableBalance.toLocaleString('en-IN')}</div>
                 <div className="stat-label">Available Balance</div>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon tone-sky"><Shield size={20} /></div>
               <div className="stat-card-body">
-                <div className="stat-value">₹ {(wallet.escrow || 0).toLocaleString('en-IN')}</div>
+                <div className="stat-value">₹ {summary.heldBalance.toLocaleString('en-IN')}</div>
                 <div className="stat-label">Held in Escrow</div>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon tone-green"><TrendingUp size={20} /></div>
               <div className="stat-card-body">
-                <div className="stat-value">₹ {(wallet.earnings || 0).toLocaleString('en-IN')}</div>
+                <div className="stat-value">₹ {summary.totalEarnings.toLocaleString('en-IN')}</div>
                 <div className="stat-label">Total Earnings</div>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon tone-red"><ArrowDownToLine size={20} /></div>
               <div className="stat-card-body">
-                <div className="stat-value">₹ {(wallet.withdrawn || 0).toLocaleString('en-IN')}</div>
+                <div className="stat-value">₹ {summary.withdrawalsTotal.toLocaleString('en-IN')}</div>
                 <div className="stat-label">Total Withdrawn</div>
               </div>
             </div>

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
-import { CalendarCheck2, CalendarDays, Clock3, Headphones, Search, WalletCards } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { CalendarDays, Clock3, Download, Eye, FileText, Hash, Languages, Phone, PhoneCall, Timer, UserRound, Wallet, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -9,46 +10,208 @@ import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
-import { getRoleRoutes } from '../utils/roleRoutes.js'
-import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, isAppointmentUpcoming, resolveAppointmentWindow, toIsoDate } from '../utils/appointments.js'
+import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
+import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, resolveAppointmentWindow, toIsoDate } from '../utils/appointments.js'
 
 const FILTERS = [
   { key: 'all', label: 'All' },
-  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'pending', label: 'Pending' },
   { key: 'completed', label: 'Completed' },
   { key: 'cancelled', label: 'Cancelled' },
   { key: 'rescheduled', label: 'Rescheduled' },
 ]
-const CANCELLABLE_STATUSES = ['Booked', 'Confirmed', 'Rescheduled', 'Pending']
+const CANCELLABLE_STATUSES = ['Booked', 'Confirmed', 'Pending', 'Rescheduled']
 
 function initials(name = '') {
   return String(name).split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
 }
 
-function dateLabel(appointment) {
-  return appointment.dateIso ? formatDisplayDate(appointment.dateIso, true) : appointment.date || 'Date not available'
-}
-
-function UserAppointmentCard({ appointment, selected, onSelect, onReschedule, onCancel }) {
+function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onReschedule, onViewDetails }) {
   const window = resolveAppointmentWindow(appointment)
   const bucket = appointmentStatusBucket(appointment.status)
-  const upcoming = isAppointmentUpcoming(appointment)
-  const canCancel = CANCELLABLE_STATUSES.includes(appointment.status)
+  const statusLabel = appointment.status === 'Confirmed' ? 'Booked' : appointment.status || 'Booked'
+  const durationLabel = appointment.duration ? String(appointment.duration).replace(/\s*min\b/i, ' Minutes') : `${window.endMin - window.startMin} Minutes`
+
   return (
-    <article className={`apt-history-item user-appointment-card${selected ? ' is-active' : ''}${bucket === 'cancelled' ? ' is-cancelled' : ''}`}>
+    <article
+      className={`apt-history-item user-appointment-card${selected ? ' is-active' : ''}${bucket === 'cancelled' ? ' is-cancelled' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(appointment.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onSelect(appointment.id)
+        }
+      }}
+    >
       <div className="user-appointment-card__top">
-        <div className="user-appointment-identity"><span className="user-appointment-avatar">{initials(appointment.astrologer)}</span><div><strong>{appointment.astrologer || 'Astrologer'}</strong><span>{appointment.specialization || 'Vedic Astrology'}</span></div></div>
-        <StatusBadge label={appointment.status || 'Booked'} />
+        <div className="user-appointment-identity">
+          <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>
+          <div>
+            <strong>{appointment.astrologer || 'Astrologer'}</strong>
+            <span>{appointment.specialization || 'Vedic Astrology'}</span>
+          </div>
+        </div>
+        <StatusBadge label={statusLabel} />
       </div>
-      <div className="user-appointment-card__meta"><span><Headphones size={13} /> {appointment.type || 'Audio Call'}</span><span><CalendarDays size={13} /> {dateLabel(appointment)}</span><span><Clock3 size={13} /> {formatTimeRange(window.startMin, window.endMin)} · {appointment.duration || `${window.endMin - window.startMin} min`}</span></div>
-      <div className="user-appointment-card__footer"><span>₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span><span>Appointment ID: {appointment.orderId || appointment.id}</span></div>
-      <div className="user-appointment-card__actions"><button type="button" className="btn btn-outline btn-sm" onClick={() => onSelect(appointment.id)}>View Details</button>{upcoming && <button type="button" className="btn btn-outline btn-sm" onClick={() => onReschedule(appointment)}>Reschedule</button>}{canCancel && <button type="button" className="btn btn-danger btn-sm" onClick={() => onCancel(appointment)}>Cancel Appointment</button>}{bucket === 'completed' && <Link to="/user/astrologers" className="btn btn-primary btn-sm">Book Again</Link>}</div>
+      <div className="user-appointment-card__meta">
+        <span><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
+        <span><CalendarDays size={13} /> {formatDisplayDate(appointment.dateIso, true)}</span>
+        <span className="user-appointment-card__time"><Clock3 size={13} /> {formatTimeRange(window.startMin, window.endMin)} · {durationLabel}</span>
+      </div>
+      <div className="user-appointment-card__footer">
+        <span>₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span>
+        <span>Appointment ID: {appointment.orderId || appointment.id}</span>
+      </div>
+      <div className="user-appointment-card__actions">
+        <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onViewDetails(appointment) }}>View Details</button>
+        {appointment.status === 'Pending' && <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onReschedule(appointment) }}>Reschedule</button>}
+        {CANCELLABLE_STATUSES.includes(appointment.status) && <button type="button" className="btn btn-danger btn-sm" onClick={(event) => { event.stopPropagation(); onCancel(appointment) }}>Cancel Appointment</button>}
+      </div>
     </article>
   )
 }
 
-function DetailField({ label, value, icon: Icon }) {
-  return <div><span>{Icon && <Icon size={13} />} {label}</span><strong>{value || 'Not available'}</strong></div>
+function UserDetailRow({ icon: Icon, label, value }) {
+  return (
+    <div className="apt-detail-row">
+      <span className="apt-detail-label"><Icon size={14} /> {label}</span>
+      <span className="apt-detail-value">{value == null || value === '' ? 'Not available' : value}</span>
+    </div>
+  )
+}
+
+function UserHoroscopeSection({ appointment }) {
+  const horoscope = appointment.horoscope
+  if (!horoscope) {
+    return (
+      <section className="apt-detail-card apt-horoscope-section">
+        <div className="apt-detail-row">
+          <span className="apt-detail-label"><FileText size={14} /> Horoscope</span>
+          <span className="apt-detail-value apt-horoscope-empty">Horoscope not uploaded yet</span>
+        </div>
+      </section>
+    )
+  }
+
+  const uploadedDate = horoscope.uploadedAt
+    ? new Date(horoscope.uploadedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    : ''
+
+  return (
+    <section className="apt-detail-card apt-horoscope-section">
+      <div className="apt-detail-row">
+        <span className="apt-detail-label"><FileText size={14} /> Horoscope</span>
+        <span className="apt-detail-value apt-horoscope-file">{horoscope.name || 'Uploaded horoscope'}</span>
+      </div>
+      <div className="apt-detail-row"><span className="apt-detail-label">Type</span><span className="apt-detail-value">{horoscope.type}</span></div>
+      <div className="apt-detail-row"><span className="apt-detail-label">Size</span><span className="apt-detail-value">{horoscope.size || `${horoscope.sizeBytes || 0} KB`}</span></div>
+      <div className="apt-detail-row"><span className="apt-detail-label">Uploaded</span><span className="apt-detail-value">{uploadedDate || 'Not available'}</span></div>
+      <div className="apt-horoscope-actions">
+        {horoscope.dataUrl && <a className="btn btn-outline" href={horoscope.dataUrl} target="_blank" rel="noreferrer"><Eye size={14} /> View</a>}
+        {horoscope.dataUrl && <a className="btn btn-outline" href={horoscope.dataUrl} download={horoscope.name || 'horoscope'} rel="noreferrer"><Download size={14} /> Download</a>}
+      </div>
+    </section>
+  )
+}
+
+function UserAppointmentDetailsDrawer({ appointment, currentUser, onClose }) {
+  if (!appointment) return null
+  const { startMin, endMin } = resolveAppointmentWindow(appointment)
+  const status = appointment.status || 'Booked'
+  const customerName = appointment.customerName || currentUser?.name || 'Not available'
+  const astrologerName = appointment.astrologer || customerName
+  const paymentStatus = appointment.paymentStatus || (appointment.status?.toLowerCase().includes('cancel') ? appointment.refundStatus || 'Refunded' : 'Paid')
+  const amount = appointment.amount ?? appointment.price
+  const bookingDate = appointment.bookingDate || (appointment.bookedAt ? new Date(appointment.bookedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '')
+  const notes = appointment.privateNotes || appointment.notes
+
+  return createPortal(
+    <div className="apt-drawer-overlay" onClick={onClose}>
+      <aside className="apt-drawer" role="dialog" aria-modal="true" aria-labelledby="user-apt-drawer-title" onClick={(event) => event.stopPropagation()}>
+        <header className="apt-drawer-head">
+          <div className="apt-drawer-head-copy">
+            <h2 id="user-apt-drawer-title">Appointment Details</h2>
+            <StatusBadge label={status} className="apt-drawer-status" />
+          </div>
+          <button type="button" className="icon-btn" aria-label="Close appointment details" onClick={onClose}><X size={18} /></button>
+        </header>
+        <div className="apt-drawer-body">
+          <div className="apt-customer">
+            <span className="user-appointment-avatar user-appointment-avatar--large">{initials(customerName)}</span>
+            <div className="apt-customer-copy">
+              <div className="apt-customer-name">
+                {appointment.astrologerId ? <Link className="apt-customer-name--link" to={`/user/astrologer/${appointment.astrologerId}`}>{astrologerName}</Link> : astrologerName}
+              </div>
+              <div className="apt-customer-order">Appointment ID: {appointment.orderId || appointment.id}</div>
+            </div>
+          </div>
+
+          <section className="apt-drawer-summary">
+            <div className="apt-drawer-summary-time">{formatTimeRange(startMin, endMin)}</div>
+            <div className="apt-drawer-summary-calltype"><PhoneCall size={14} /> {appointment.type || 'Audio Call'}</div>
+          </section>
+
+          <section className="apt-detail-card">
+            <UserDetailRow icon={UserRound} label="Customer" value={customerName} />
+            <UserDetailRow icon={Phone} label="Phone" value={appointment.customerPhone || currentUser?.phone} />
+            <UserDetailRow icon={Languages} label="Language" value={appointment.language || appointment.lang} />
+            <UserDetailRow icon={Hash} label="Topic" value={appointment.topic} />
+          </section>
+
+          <section className="apt-detail-card">
+            <UserDetailRow icon={CalendarDays} label="Date" value={formatDisplayDate(appointment.dateIso, true)} />
+            <UserDetailRow icon={Clock3} label="Time" value={formatTimeRange(startMin, endMin)} />
+            <UserDetailRow icon={PhoneCall} label="Appointment Type" value={appointment.type || 'Audio Call'} />
+            <UserDetailRow icon={Timer} label="Duration" value={appointment.duration || `${endMin - startMin} Minutes`} />
+          </section>
+
+          <section className="apt-detail-card">
+            <UserDetailRow icon={Wallet} label="Payment" value={paymentStatus} />
+            <UserDetailRow icon={Wallet} label="Amount" value={amount == null ? '' : `₹${Number(amount).toLocaleString('en-IN')}`} />
+            <UserDetailRow icon={Wallet} label="Payment Method" value={appointment.paymentMethod} />
+            <UserDetailRow icon={Hash} label="Transaction ID" value={appointment.transactionId} />
+          </section>
+
+          <section className="apt-detail-card">
+            <UserDetailRow icon={CalendarDays} label="Booking Date" value={bookingDate} />
+            <UserDetailRow icon={Wallet} label="Current Status" value={status} />
+          </section>
+
+          <UserHoroscopeSection appointment={appointment} />
+
+          <section className="apt-detail-card apt-detail-card--notes apt-user-astrologer-notes">
+            <div className="apt-private-notes-head"><span>Astrologer Notes</span><span className="apt-private-notes-private">Only you can see</span></div>
+            <div className="apt-user-astrologer-notes-content" aria-readonly="true">{notes || 'No astrologer notes are available for this appointment.'}</div>
+          </section>
+        </div>
+      </aside>
+    </div>,
+    document.body,
+  )
+}
+
+function AddedCompactAppointmentCard() {
+  return (
+    <Card className="apt-side-panel added-compact-appointment-card">
+      <div className="added-compact-appointment-card__top">
+        <div className="added-compact-appointment-card__profile">
+          <span className="user-appointment-avatar">DR</span>
+          <div><strong>Dr. Rani</strong><span>Vedic Astrology</span></div>
+        </div>
+        <StatusBadge label="Booked" />
+      </div>
+      <div className="added-compact-appointment-card__meta">
+        <span><PhoneCall size={13} /> Audio Call</span>
+        <strong><Clock3 size={13} /> 10:00 AM – 10:30 AM</strong>
+      </div>
+      <div className="added-compact-appointment-card__footer">
+        <span>Appointment ID: apt-mtobw10l</span>
+        <strong>₹499</strong>
+      </div>
+    </Card>
+  )
 }
 
 export default function AppointmentDetails() {
@@ -56,7 +219,7 @@ export default function AppointmentDetails() {
   const { appointments, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
-  const userAppointments = useMemo(() => appointments.filter((appointment) => appointment.userId === currentUser?.id), [appointments, currentUser?.id])
+  const userAppointments = useMemo(() => appointments.filter((appointment) => appointment.userId === currentUser?.id || (currentUser?.role === ROLES.USER && appointment.userId === 'user-demo')), [appointments, currentUser?.id, currentUser?.role])
   const requested = userAppointments.find((appointment) => appointment.id === searchParams.get('id'))
   const first = requested || userAppointments[0]
   const initialDate = first?.dateIso ? fromIsoDate(first.dateIso) : new Date()
@@ -64,26 +227,35 @@ export default function AppointmentDetails() {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [selectedId, setSelectedId] = useState(() => first?.id || null)
   const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
   const [notice, setNotice] = useState('')
   const [rescheduleTarget, setRescheduleTarget] = useState(null)
+  const [detailsAppointment, setDetailsAppointment] = useState(null)
 
-  const filteredAppointments = useMemo(() => {
-    const query = search.trim().toLowerCase()
-    return userAppointments.filter((appointment) => {
-      if (query && !`${appointment.astrologer || ''} ${appointment.type || ''} ${appointment.orderId || ''} ${appointment.id || ''}`.toLowerCase().includes(query)) return false
-      if (filter === 'upcoming') return isAppointmentUpcoming(appointment)
-      if (filter === 'completed') return appointmentStatusBucket(appointment.status) === 'completed'
-      if (filter === 'cancelled') return appointmentStatusBucket(appointment.status) === 'cancelled'
-      if (filter === 'rescheduled') return Boolean(appointment.rescheduledTo || appointment.rescheduledFrom || appointment.status === 'Rescheduled')
-      return true
-    })
-  }, [filter, search, userAppointments])
+  const filteredAppointments = useMemo(() => userAppointments.filter((appointment) => {
+    if (filter === 'pending') return appointment.status === 'Pending' || (appointmentStatusBucket(appointment.status) === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo)
+    if (filter === 'completed') return appointmentStatusBucket(appointment.status) === 'completed'
+    if (filter === 'cancelled') return appointmentStatusBucket(appointment.status) === 'cancelled'
+    if (filter === 'rescheduled') return Boolean(appointment.rescheduledTo || appointment.rescheduledFrom || appointment.status === 'Rescheduled')
+    return true
+  }), [filter, userAppointments])
 
   const selectedIso = toIsoDate(selectedDate)
   const dayAppointments = filteredAppointments.filter((appointment) => appointment.dateIso === selectedIso)
   const selectedAppointment = dayAppointments.find((appointment) => appointment.id === selectedId) || dayAppointments[0] || null
-  const selectedWindow = selectedAppointment ? resolveAppointmentWindow(selectedAppointment) : null
+
+  useEffect(() => {
+    const firstVisible = filteredAppointments[0]
+    if (!firstVisible) {
+      setSelectedId(null)
+      return
+    }
+    setSelectedId(firstVisible.id)
+    if (firstVisible.dateIso) {
+      const date = fromIsoDate(firstVisible.dateIso)
+      setSelectedDate(date)
+      setRangeStart(new Date(date.getFullYear(), date.getMonth(), 1))
+    }
+  }, [filter, filteredAppointments, userAppointments])
 
   const selectDate = (date) => {
     setSelectedDate(date)
@@ -101,6 +273,11 @@ export default function AppointmentDetails() {
     }
   }
 
+  const viewDetails = (appointment) => {
+    selectAppointment(appointment.id)
+    setDetailsAppointment(appointment)
+  }
+
   const cancelAppointment = (appointment) => {
     actions.cancelAppointment(appointment.id, appointment)
     setNotice('Appointment cancelled successfully.')
@@ -108,14 +285,15 @@ export default function AppointmentDetails() {
 
   return <div className="apt-page user-appointment-history">
     <PageHeader eyebrow="User portal" title="My Appointments" subtitle="View and manage your consultation appointments" showBack backTo={routes.dashboard} />
-    <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div><div className="apt-history-search"><div className="apt-calendar-search"><Search size={15} /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search appointments..." aria-label="Search appointments" /></div></div></div>
+    <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div><div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div></div>
     <div className="apt-main apt-main--history">
       <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} /></div>
       <aside className="apt-side-col apt-history-day-col">
-        <Card className="apt-side-panel"><div className="apt-side-head apt-history-day-head"><span>{formatDisplayDate(selectedIso, true)}</span><span>{dayAppointments.length} appointment{dayAppointments.length === 1 ? '' : 's'}</span></div><div className="user-appointment-list"><>{dayAppointments.length ? dayAppointments.map((appointment) => <UserAppointmentCard key={appointment.id} appointment={appointment} selected={appointment.id === selectedAppointment?.id} onSelect={selectAppointment} onReschedule={setRescheduleTarget} onCancel={cancelAppointment} />) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see your appointments.</span></div>}</></div></Card>
-        {selectedAppointment ? <Card className="apt-side-panel apt-history-detail-card"><div className="apt-side-head"><span>Appointment Details</span><StatusBadge label={selectedAppointment.status || 'Booked'} /></div><div className="user-appointment-detail-heading"><span className="user-appointment-avatar user-appointment-avatar--large">{initials(selectedAppointment.astrologer)}</span><div><strong>{selectedAppointment.astrologer || 'Astrologer'}</strong><p>{selectedAppointment.specialization || 'Vedic Astrology'}</p></div></div><div className="apt-history-detail-grid"><DetailField label="Consultation" value={selectedAppointment.type || 'Audio Call'} icon={Headphones} /><DetailField label="Date" value={dateLabel(selectedAppointment)} icon={CalendarDays} /><DetailField label="Time" value={selectedWindow ? formatTimeRange(selectedWindow.startMin, selectedWindow.endMin) : selectedAppointment.time} icon={Clock3} /><DetailField label="Duration" value={selectedAppointment.duration || `${selectedWindow.endMin - selectedWindow.startMin} min`} icon={Clock3} /><DetailField label="Amount paid" value={`₹${Number(selectedAppointment.price || selectedAppointment.amount || 0).toLocaleString('en-IN')}`} icon={WalletCards} /><DetailField label="Appointment ID" value={selectedAppointment.orderId || selectedAppointment.id} icon={CalendarCheck2} /></div><div className="user-appointment-actions">{CANCELLABLE_STATUSES.includes(selectedAppointment.status) && <button type="button" className="btn btn-danger" onClick={() => cancelAppointment(selectedAppointment)}>Cancel Appointment</button>}{appointmentStatusBucket(selectedAppointment.status) === 'completed' && <Link to={routes.astrologers} className="btn btn-primary">Book Again</Link>}</div></Card> : <Card className="apt-history-empty apt-history-empty--detail"><CalendarDays size={24} /><strong>No appointment selected</strong><span>Select a date with an appointment to view its details.</span></Card>}
+        <Card className="apt-side-panel"><div className="apt-side-head apt-history-day-head"><span>Appointment</span></div><div className="user-appointment-list">{dayAppointments.length ? dayAppointments.map((appointment) => <UserAppointmentCard key={appointment.id} appointment={appointment} selected={appointment.id === selectedAppointment?.id} onSelect={selectAppointment} onCancel={cancelAppointment} onReschedule={setRescheduleTarget} onViewDetails={viewDetails} />) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>}</div></Card>
+        <AddedCompactAppointmentCard />
       </aside>
     </div>
+    <UserAppointmentDetailsDrawer appointment={detailsAppointment} currentUser={currentUser} onClose={() => setDetailsAppointment(null)} />
     {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>

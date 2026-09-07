@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -13,6 +13,11 @@ import {
   Bell,
   ChevronRight,
   Wallet,
+  TrendingUp,
+  FileText,
+  ArrowDownToLine,
+  History,
+  CreditCard,
   LogOut,
   MessageCircle,
   PhoneCall,
@@ -22,8 +27,8 @@ import {
   UserRound,
   CalendarDays,
   CalendarCheck,
-  CalendarPlus,
   Radio,
+  Receipt,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -48,6 +53,18 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
+      {
+        label: 'Wallet',
+        icon: Wallet,
+        children: [
+          { to: 'wallet/overview', label: 'Overview', icon: Wallet },
+          { to: 'wallet/earnings', label: 'Earnings', icon: TrendingUp },
+          { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
+          { to: 'wallet/withdraw', label: 'Withdraw Money', icon: ArrowDownToLine },
+          { to: 'wallet/settlements', label: 'Settlement History', icon: History },
+          { to: 'wallet/payment-methods', label: 'Payment Methods', icon: CreditCard },
+        ],
+      },
       {
         label: 'Appointments',
         icon: CalendarDays,
@@ -77,6 +94,7 @@ const ROLE_CONFIG = {
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
       {
         label: 'Ask Question',
+        to: 'ask-question',
         icon: CircleHelp,
         children: [
           { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
@@ -89,12 +107,22 @@ const ROLE_CONFIG = {
         label: 'Explore Astrologers',
         icon: Sparkles,
         children: [
-          { to: 'appointment-details', label: 'View Appointments', icon: CalendarCheck },
-          { to: 'astrologers', label: 'Book Appointments', icon: CalendarPlus },
+          { to: 'appointment-details', label: 'Appointment Details', icon: CalendarCheck },
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Rewards', icon: Gift },
+      {
+        label: 'Wallet',
+        to: 'wallet/overview',
+        icon: Wallet,
+        children: [
+          { to: 'wallet/overview', label: 'Overview', icon: Wallet },
+          { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
+          { to: 'wallet/topups', label: 'Top-ups', icon: TrendingUp },
+          { to: 'wallet/refunds', label: 'Refunds', icon: Receipt },
+        ],
+      },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
@@ -103,7 +131,13 @@ const ROLE_CONFIG = {
 const PAGE_META = {
   [ROLES.ASTROLOGER]: {
     '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
-    '/astrologer/wallet': { title: 'Wallet Management', sub: 'Manage earnings, payouts and transactions' },
+    '/astrologer/wallet': { title: 'Wallet', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
+    '/astrologer/wallet/overview': { title: 'Wallet Overview', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
+    '/astrologer/wallet/earnings': { title: 'Earnings', sub: 'Your earnings breakdown by service category.' },
+    '/astrologer/wallet/transactions': { title: 'Transactions', sub: 'Your wallet transaction statement.' },
+    '/astrologer/wallet/withdraw': { title: 'Withdraw Money', sub: 'Request a payout to your preferred method.' },
+    '/astrologer/wallet/settlements': { title: 'Settlement History', sub: 'Monthly settlements and payout records.' },
+    '/astrologer/wallet/payment-methods': { title: 'Payment Methods', sub: 'Manage your payout methods and defaults.' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
@@ -127,7 +161,12 @@ const PAGE_META = {
   },
   [ROLES.USER]: {
     '/user': { title: 'Dashboard', sub: 'User portal overview' },
-    '/user/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
+    '/user/wallet': { title: 'Wallet', sub: 'Manage your balance, top-ups, spending and refunds.' },
+    '/user/wallet/overview': { title: 'Wallet Overview', sub: 'Manage your balance, top-ups, spending and refunds.' },
+    '/user/wallet/transactions': { title: 'Transactions', sub: 'Browse and export your wallet transaction statement.' },
+    '/user/wallet/topups': { title: 'Top-ups', sub: 'Add money and review your top-up history.' },
+    '/user/wallet/refunds': { title: 'Refunds', sub: 'Money refunded back to your wallet.' },
+    '/user/wallet-history': { title: 'Wallet', sub: 'Manage your balance, top-ups, spending and refunds.' },
     '/user/purchase-package': { title: 'Purchase Question Package', sub: 'Select and buy question packages' },
     '/user/ask-question': { title: 'Ask a Question', sub: 'Submit your question to an astrologer' },
     '/user/track-questions': { title: 'Track My Questions', sub: 'Review status and follow up' },
@@ -144,45 +183,68 @@ const PAGE_META = {
   },
 }
 
-function sectionIsActive(link, pathname, basePath) {
-  const sectionRoute = link.to || 'ask-question'
-  return pathname.startsWith(`${basePath}/${sectionRoute}`) || (link.children || []).some((child) => pathname.startsWith(`${basePath}/${child.to}`))
-}
-
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   const location = useLocation()
-  const [openSections, setOpenSections] = useState(() => Object.fromEntries(links.filter((link) => link.children).map((link) => [link.label, sectionIsActive(link, location.pathname, basePath)])))
+  const isGroupActive = (to, children) =>
+    Boolean(children && children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) ||
+    Boolean(to && location.pathname.startsWith(`${basePath}/${to}`))
+
+  const activeSectionLabels = useMemo(() => {
+    const active = []
+    links.forEach(({ to, label, children }) => {
+      if (!children) return
+      const childActive = children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+      const parentActive = Boolean(to) && location.pathname.startsWith(`${basePath}/${to}`)
+      if (childActive || parentActive) active.push(label)
+    })
+    return active
+  }, [links, basePath, location.pathname])
+
+  const [openSections, setOpenSections] = useState(() => {
+    const initial = {}
+    activeSectionLabels.forEach((label) => { initial[label] = true })
+    return initial
+  })
 
   useEffect(() => {
+    if (activeSectionLabels.length === 0) return
     setOpenSections((current) => {
+      let changed = false
       const next = { ...current }
-      links.forEach((link) => {
-        if (link.children && sectionIsActive(link, location.pathname, basePath)) next[link.label] = true
+      activeSectionLabels.forEach((label) => {
+        if (!next[label]) {
+          next[label] = true
+          changed = true
+        }
       })
-      return next
+      return changed ? next : current
     })
-  }, [basePath, location.pathname, links])
+  }, [activeSectionLabels])
+
+  const toggleSection = (label) => {
+    setOpenSections((current) => ({ ...current, [label]: !current[label] }))
+  }
 
   return (
     <nav className="sidebar-nav">
       {links.map(({ to, label, icon, end, children }) => {
         if (children) {
           const Icon = icon
-          const parentActive = sectionIsActive({ to, children }, location.pathname, basePath)
-          const sectionOpen = Boolean(openSections[label])
-          const parentRoute = `${basePath}/${to || 'ask-question'}`
+          const groupActive = isGroupActive(to, children)
+          const open = Boolean(openSections[label])
+          const parentTo = to ? `${basePath}/${to}` : `${basePath}/${children[0].to}`
           return <div className="sidebar-nav-group" key={label}>
-            <div className={`sidebar-link sidebar-link-toggle${parentActive ? ' active' : ''}`}>
-              {parentActive && <span className="sidebar-active-pill" />}
-              <NavLink to={parentRoute} className="sidebar-parent-link">
+            <div className={`sidebar-link sidebar-link-toggle${groupActive ? ' active' : ''}`}>
+              {groupActive && <span className="sidebar-active-pill" />}
+              <NavLink to={parentTo} className="sidebar-parent-link">
                 <Icon size={18} />
                 <span className="sidebar-link-label">{label}</span>
               </NavLink>
-              <button type="button" className="sidebar-chevron-button" aria-label={`${sectionOpen ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={sectionOpen} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpenSections((current) => ({ ...current, [label]: !current[label] })) }}>
-                <ChevronDown size={16} className={`sidebar-chevron${sectionOpen ? ' is-open' : ''}`} />
+              <button type="button" className="sidebar-chevron-button" aria-label={`${open ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={open} onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleSection(label) }}>
+                <ChevronDown size={16} className={`sidebar-chevron${open ? ' is-open' : ''}`} />
               </button>
             </div>
-            <motion.div className="sidebar-subnav" initial={false} animate={{ height: sectionOpen ? 'auto' : 0, opacity: sectionOpen ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
+            <motion.div className="sidebar-subnav" initial={false} animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
               {children.map((child) => <SidebarItem key={child.to} to={`${basePath}/${child.to}`} icon={child.icon} label={child.label} subItem />)}
             </motion.div>
           </div>
