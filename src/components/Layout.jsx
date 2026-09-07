@@ -13,6 +13,11 @@ import {
   Bell,
   ChevronRight,
   Wallet,
+  TrendingUp,
+  FileText,
+  ArrowDownToLine,
+  History,
+  CreditCard,
   LogOut,
   MessageCircle,
   PhoneCall,
@@ -47,6 +52,18 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
+      {
+        label: 'Wallet',
+        icon: Wallet,
+        children: [
+          { to: 'wallet/overview', label: 'Overview', icon: Wallet },
+          { to: 'wallet/earnings', label: 'Earnings', icon: TrendingUp },
+          { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
+          { to: 'wallet/withdraw', label: 'Withdraw Money', icon: ArrowDownToLine },
+          { to: 'wallet/settlements', label: 'Settlement History', icon: History },
+          { to: 'wallet/payment-methods', label: 'Payment Methods', icon: CreditCard },
+        ],
+      },
       {
         label: 'Appointments',
         icon: CalendarDays,
@@ -95,7 +112,13 @@ const ROLE_CONFIG = {
 const PAGE_META = {
   [ROLES.ASTROLOGER]: {
     '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
-    '/astrologer/wallet': { title: 'Wallet Management', sub: 'Manage earnings, payouts and transactions' },
+    '/astrologer/wallet': { title: 'Wallet', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
+    '/astrologer/wallet/overview': { title: 'Wallet Overview', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
+    '/astrologer/wallet/earnings': { title: 'Earnings', sub: 'Your earnings breakdown by service category.' },
+    '/astrologer/wallet/transactions': { title: 'Transactions', sub: 'Your wallet transaction statement.' },
+    '/astrologer/wallet/withdraw': { title: 'Withdraw Money', sub: 'Request a payout to your preferred method.' },
+    '/astrologer/wallet/settlements': { title: 'Settlement History', sub: 'Monthly settlements and payout records.' },
+    '/astrologer/wallet/payment-methods': { title: 'Payment Methods', sub: 'Manage your payout methods and defaults.' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },

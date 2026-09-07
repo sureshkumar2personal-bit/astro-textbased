@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import {
-  addMonths,
   startOfMonth,
   startOfWeek,
   toIsoDate,
@@ -25,13 +24,12 @@ function dayBreakdown(appointments, date) {
 export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate }) {
   const monthStart = startOfMonth(rangeStart)
   const gridStart = startOfWeek(monthStart, 0)
-  const weeks = useMemo(() => {
-    const cells = Array.from({ length: 42 }, (_, index) => {
+  const gridDates = useMemo(() => {
+    return Array.from({ length: 42 }, (_, index) => {
       const date = new Date(gridStart)
       date.setDate(gridStart.getDate() + index)
       return date
     })
-    return Array.from({ length: 6 }, (_, weekIndex) => cells.slice(weekIndex * 7, weekIndex * 7 + 7))
   }, [gridStart])
 
   const todayIso = toIsoDate(new Date())
@@ -59,13 +57,12 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     return () => document.removeEventListener('mousedown', close)
   }, [])
 
-  const handlePrevious = () => onRangeChange(addMonths(monthStart, -1))
-  const handleNext = () => onRangeChange(addMonths(monthStart, 1))
   const handleToday = () => {
     const now = new Date()
     onRangeChange(startOfMonth(now))
     onSelectDate(now)
   }
+
   const applyMonthYear = (month, year) => {
     onRangeChange(new Date(year, month, 1))
     onSelectDate(new Date(year, month, 1))
@@ -73,17 +70,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
   }
 
   return (
-    <div className="apt-calendar apt-history-calendar">
-      <div className="apt-calendar-toolbar">
+    <div className="apt-scheduling-calendar apt-scheduling-calendar--history">
+      <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
-          <button type="button" className="icon-btn" onClick={handlePrevious} aria-label="Previous month">
-            <ChevronLeft size={18} />
-          </button>
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
-          </button>
-          <button type="button" className="icon-btn" onClick={handleNext} aria-label="Next month">
-            <ChevronRight size={18} />
           </button>
         </div>
         <div className="apt-calendar-title-wrap">
@@ -134,59 +125,55 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
         </div>
       </div>
 
-      <div className="apt-month-view apt-history-month-view">
-        <div className="apt-month-header">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-            <div key={day} className="apt-month-weekday">{day}</div>
-          ))}
-        </div>
-        <div className="apt-month-grid">
-          {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className="apt-month-week">
-              {week.map((cell) => {
-                const iso = toIsoDate(cell)
-                const isCurrentMonth = cell.getMonth() === monthStart.getMonth() && cell.getFullYear() === monthStart.getFullYear()
-                const isToday = iso === todayIso
-                const isSelected = iso === selectedIso
-                const breakdown = dayBreakdown(appointments, cell)
-                return (
-                  <div
-                    key={iso}
-                    className={[
-                      'apt-month-cell',
-                      'apt-history-cell',
-                      isCurrentMonth ? '' : 'is-muted',
-                      isToday ? 'is-today' : '',
-                      isSelected ? 'is-selected' : '',
-                      breakdown.total ? `has-${breakdown.completed.length ? 'completed' : breakdown.cancelled.length ? 'cancelled' : 'booked'}` : '',
-                    ].filter(Boolean).join(' ')}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`${formatDisplayDate(iso, true)}${breakdown.total ? `, ${breakdown.total} appointment${breakdown.total === 1 ? '' : 's'}` : ', no appointments'}`}
-                    aria-pressed={isSelected}
-                    onClick={(event) => { event.stopPropagation(); onSelectDate(cell) }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        onSelectDate(cell)
-                      }
-                    }}
-                  >
-                    <div className="apt-month-day">{cell.getDate()}</div>
-                    {breakdown.total > 0 && (
-                      <div className="apt-history-count" aria-hidden="true">{breakdown.total}</div>
-                    )}
-                    <div className="apt-history-cell-status" aria-hidden="true">
-                      {breakdown.booked.length > 0 && <span className="is-booked">{breakdown.booked.length}</span>}
-                      {breakdown.completed.length > 0 && <span className="is-completed">{breakdown.completed.length}</span>}
-                      {breakdown.cancelled.length > 0 && <span className="is-cancelled">{breakdown.cancelled.length}</span>}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-        </div>
+      <div className="apt-scheduling-calendar__weekdays">
+        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+
+      <div className="apt-scheduling-calendar__grid">
+        {gridDates.map((date) => {
+          const iso = toIsoDate(date)
+          const isCurrentMonth = date.getMonth() === monthStart.getMonth() && date.getFullYear() === monthStart.getFullYear()
+          const isToday = iso === todayIso
+          const isSelected = iso === selectedIso
+          const breakdown = dayBreakdown(appointments, date)
+
+          // Match the Monthly Schedule's signature green calendar exactly:
+          // every date cell carries the same `is-available` green treatment
+          // (var(--success-bg) background, green border + green text) used by
+          // the Schedule's available days. Historical appointments are still
+          // strictly view-only through the drawer gating.
+          let state = 'available'
+          if (breakdown.total > 0 && breakdown.booked.length === 0 && breakdown.completed.length === 0 && breakdown.cancelled.length > 0) state = 'closed'
+
+          return (
+            <button
+              type="button"
+              key={iso}
+              className={[
+                'apt-scheduling-date',
+                `is-${state}`,
+                isToday ? 'is-today' : '',
+                isSelected ? 'is-history-selected' : '',
+                isCurrentMonth ? '' : 'is-outside-month',
+              ].filter(Boolean).join(' ')}
+              aria-label={`${formatDisplayDate(iso, true)}${breakdown.total ? `, ${breakdown.total} appointment${breakdown.total === 1 ? '' : 's'}` : ', no appointments'}`}
+              aria-pressed={isSelected}
+              onClick={() => onSelectDate(date)}
+            >
+              <strong>{date.getDate()}</strong>
+              {breakdown.total > 0 && (
+                <em
+                  aria-label={`${breakdown.booked.length} Booked, ${breakdown.completed.length} Completed, ${breakdown.cancelled.length} Cancelled`}
+                >
+                  {breakdown.booked.length > 0 && <b className="is-booked">{breakdown.booked.length} booked</b>}
+                  {breakdown.completed.length > 0 && <b className="is-completed"> · {breakdown.completed.length} completed</b>}
+                </em>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
