@@ -6,6 +6,20 @@ import { CalendarPlus, Check, ChevronLeft, ChevronRight, CircleAlert, Clock3, Co
 const PRICE = 499
 const TYPE = 'Audio Call'
 const MAX_BOOKING_SLOTS = 4
+const MOCK_SEPTEMBER_AVAILABILITY = {
+  '2026-09-07': ['10:00 AM', '02:00 PM', '06:00 PM'],
+  '2026-09-08': ['10:00 AM', '02:00 PM'],
+  '2026-09-09': ['06:00 PM'],
+  '2026-09-10': ['10:00 AM', '02:00 PM', '06:00 PM'],
+  '2026-09-11': ['10:00 AM'],
+  '2026-09-12': ['10:00 AM', '02:00 PM', '06:00 PM'],
+  '2026-09-14': ['10:00 AM', '02:00 PM', '06:00 PM'],
+  '2026-09-16': ['06:00 PM'],
+  '2026-09-18': ['10:00 AM', '02:00 PM'],
+  '2026-09-21': ['06:00 PM'],
+  '2026-09-24': ['10:00 AM', '02:00 PM', '06:00 PM'],
+}
+const MOCK_FULL_DATES = new Set(['2026-09-09', '2026-09-11', '2026-09-16', '2026-09-21'])
 
 function keyFor(date) {
   const value = new Date(date)
@@ -58,8 +72,9 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
-  const bookingWindowEnd = keyFor(new Date(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate() + 9))
-  const firstDate = useMemo(() => Object.keys(availability).filter((date) => slotsForDate(availability, date, today, bookingWindowEnd).length).sort()[0] || '', [availability, today, bookingWindowEnd])
+  const bookingWindowEnd = '2026-09-30'
+  const calendarAvailability = useMemo(() => ({ ...MOCK_SEPTEMBER_AVAILABILITY, ...availability }), [availability])
+  const firstDate = useMemo(() => Object.keys(calendarAvailability).filter((date) => slotsForDate(calendarAvailability, date, today, bookingWindowEnd).length && !MOCK_FULL_DATES.has(date)).sort()[0] || '', [calendarAvailability, today, bookingWindowEnd])
   const [step, setStep] = useState('form')
   const [view, setView] = useState('month')
   const [month, setMonth] = useState(() => firstDate ? new Date(parseKey(firstDate).getFullYear(), parseKey(firstDate).getMonth(), 1) : new Date(2026, 7, 1))
@@ -76,6 +91,17 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const days = daysFor(month)
   const amount = selected.reduce((sum, item) => sum + item.price, 0)
   const balance = Number(userWallet?.balance || 0)
+
+  const dateSlots = (dateKey) => slotsForDate(calendarAvailability, dateKey, today, bookingWindowEnd)
+  const openSlots = (dateKey) => dateSlots(dateKey).filter((slot) => !booked.has(`${dateKey}|${slot}`))
+  const dateState = (dateKey) => {
+    const slots = dateSlots(dateKey)
+    const remaining = openSlots(dateKey).length
+    if (!slots.length) return { state: 'unavailable', remaining: 0 }
+    if (MOCK_FULL_DATES.has(dateKey) || !remaining) return { state: 'booked', remaining: 0 }
+    if (remaining < slots.length) return { state: 'partial', remaining }
+    return { state: 'available', remaining }
+  }
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -99,7 +125,24 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
     setTime(nextTime)
   }
 
+  const chooseDate = (nextDate) => {
+    const state = dateState(nextDate)
+    if (state.state === 'booked') return
+    const nextTime = openSlots(nextDate)[0]
+    if (!nextTime) return
+    chooseSlot(nextDate, nextTime)
+    setView('month')
+  }
+
   const handleCancel = () => {
+    if (step === 'payment') {
+      setStep('review')
+      return
+    }
+    if (step === 'review') {
+      setStep('details')
+      return
+    }
     if (step === 'details') {
       setStep('form')
       return
@@ -126,14 +169,12 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
         <div className="modal-card__content user-modal-card__content">
           {step === 'form' && <>
             <div className="appointment-view-tabs">{['day', 'week', 'month', 'year'].map((name) => <button type="button" key={name} className={view === name ? 'is-active' : ''} onClick={() => setView(name)}>{name[0].toUpperCase() + name.slice(1)}</button>)}</div>
-            <div className="appointment-selection-count" aria-live="polite"><strong>{selected.length} of {MAX_BOOKING_SLOTS} slots selected</strong>{selected.length >= MAX_BOOKING_SLOTS && <span>Maximum {MAX_BOOKING_SLOTS} slots reached</span>}</div>
-            <p className="appointment-selection-help">You can book up to {MAX_BOOKING_SLOTS} slots per appointment.</p>
             <div className="availability-calendar appointment-calendar-extended">
               <div className="availability-calendar__header"><button type="button" className="icon-btn" aria-label="Previous month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><ChevronLeft size={16} /></button><strong>{month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</strong><div className="appointment-calendar-nav"><button type="button" className="btn btn-ghost btn-sm" onClick={() => setMonth(new Date(2026, 7, 1))}>Today</button><button type="button" className="icon-btn" aria-label="Next month" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}><ChevronRight size={16} /></button></div></div>
-              {view === 'month' && <><div className="availability-calendar__weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div><div className="availability-calendar__days appointment-month-days">{days.map((day) => { const dayKey = keyFor(day); const slots = availability[dayKey] || []; const bookableSlots = slotsForDate(availability, dayKey, today, bookingWindowEnd); const available = bookableSlots.length > 0; const bookedCount = slots.filter((slot) => booked.has(`${dayKey}|${slot}`)).length; const hasBooked = bookedCount > 0; const outsideMonth = day.getMonth() !== month.getMonth(); return <button type="button" key={dayKey} aria-label={`${day.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}${hasBooked ? `, ${bookedCount} booked appointment${bookedCount === 1 ? '' : 's'}` : available ? ', available for booking' : ', unavailable'}`} className={`${hasBooked ? 'is-booked' : available ? 'is-available' : 'is-unavailable'}${date === dayKey ? ' is-selected' : ''}${outsideMonth ? ' is-outside' : ''}`} disabled={!available} onClick={() => { setDate(dayKey); setTime(''); setView('day') }}><b>{day.getDate()}</b>{hasBooked && <><strong>Booked</strong><em>{bookedCount}B</em></>}</button> })}</div><div className="appointment-calendar-legend" aria-label="Calendar status legend"><span><i className="is-booked" />Booked / Full</span><span><i className="is-available" />Available</span><span><i className="is-unavailable" />Unavailable</span></div></>}
-              {view === 'year' && <div className="appointment-year-grid">{Array.from({ length: 12 }, (_, index) => { const selectedMonth = new Date(month.getFullYear(), index, 1); const count = Object.entries(availability).filter(([key]) => key.startsWith(`${month.getFullYear()}-${String(index + 1).padStart(2, '0')}`)).reduce((sum, [, slots]) => sum + slots.length, 0); return <button type="button" key={index} onClick={() => { setMonth(selectedMonth); setView('month') }}><strong>{selectedMonth.toLocaleDateString('en-US', { month: 'short' })}</strong><span>{count ? `${count} slots` : 'No availability'}</span></button> })}</div>}
-              {view === 'week' && <div className="appointment-week-grid"><div className="appointment-week-header"><span>Time</span>{weekFor(date).map((day) => <strong key={keyFor(day)}>{day.toLocaleDateString('en-US', { weekday: 'short' })}<small>{day.getDate()}</small></strong>)}</div>{[...new Set(weekFor(date).flatMap((day) => availability[keyFor(day)] || []))].map((slot) => <div className="appointment-week-row" key={slot}><span>{slot}</span>{weekFor(date).map((day) => { const dayKey = keyFor(day); const available = (availability[dayKey] || []).includes(slot) && dayKey >= today; const isSelected = selectedSlots.some((item) => item.key === `${dayKey}|${slot}`); const limitDisabled = !isSelected && selectedSlots.length >= MAX_BOOKING_SLOTS; return available ? <button type="button" key={dayKey} className={`appointment-slot-button ${isSelected ? 'is-selected' : ''}${limitDisabled ? ' is-limit-disabled' : ''}`} disabled={limitDisabled} onClick={() => chooseSlot(dayKey, slot)}><span>{isSelected && <Check size={13} />} {slot}</span></button> : <span className="appointment-week-unavailable" key={dayKey}>—</span> })}</div>)}</div>}
-              {view === 'day' && <div className="appointment-timeline"><div className="appointment-booking-section-label">Day timeline {date && <span className="muted">· {formatDate(date)}</span>}</div>{date && availability[date]?.length ? availability[date].map((slot) => { const isBooked = booked.has(`${date}|${slot}`); const isSelected = selectedSlots.some((item) => item.key === `${date}|${slot}`); const limitDisabled = !isSelected && selectedSlots.length >= MAX_BOOKING_SLOTS; return <button type="button" key={slot} className={`appointment-slot-button ${isSelected ? 'is-selected' : ''}${isBooked ? ' is-booked' : ''}${limitDisabled ? ' is-limit-disabled' : ''}`} disabled={isBooked || limitDisabled} onClick={() => chooseSlot(date, slot)}><span>{isSelected && <Check size={13} />} {slot}</span><small>{isBooked ? 'Booked' : `Available · 30 Minutes · ₹${PRICE}`}</small></button> }) : <p className="availability-empty">Select an available date first.</p>}</div>}
+              {view === 'month' && <><div className="availability-calendar__weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div><div className="availability-calendar__days appointment-month-days">{days.map((day) => { const dayKey = keyFor(day); const { state, remaining } = dateState(dayKey); const outsideMonth = day.getMonth() !== month.getMonth(); const disabled = outsideMonth || state === 'booked'; const label = state === 'booked' ? 'Booked' : state === 'partial' ? `${remaining} slot${remaining === 1 ? '' : 's'} available` : state === 'available' ? 'Available' : 'Unavailable'; return <button type="button" key={dayKey} aria-label={`${day.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}, ${label}`} className={`appointment-date-cell appointment-date-cell--${state}${date === dayKey ? ' is-selected' : ''}${outsideMonth ? ' is-outside' : ''}`} disabled={disabled} onClick={() => chooseDate(dayKey)}><b>{day.getDate()}</b><span className="appointment-date-status"><i aria-hidden="true" />{label}</span></button> })}</div><div className="appointment-calendar-legend" aria-label="Calendar status legend"><span><i className="is-booked" />Booked / Full</span><span><i className="is-available" />Available</span><span><i className="is-partial" />Partially booked</span></div></>}
+              {view === 'year' && <div className="appointment-year-grid">{Array.from({ length: 12 }, (_, index) => { const selectedMonth = new Date(month.getFullYear(), index, 1); const count = Object.entries(calendarAvailability).filter(([key]) => key.startsWith(`${month.getFullYear()}-${String(index + 1).padStart(2, '0')}`)).reduce((sum, [, slots]) => sum + slots.length, 0); return <button type="button" key={index} onClick={() => { setMonth(selectedMonth); setView('month') }}><strong>{selectedMonth.toLocaleDateString('en-US', { month: 'short' })}</strong><span>{count ? `${count} slots` : 'No availability'}</span></button> })}</div>}
+              {view === 'week' && <div className="appointment-availability-summary">{weekFor(date).map((day) => { const dayKey = keyFor(day); const { state, remaining } = dateState(dayKey); const label = state === 'booked' ? 'Booked' : state === 'partial' ? `${remaining} slots available` : state === 'available' ? 'Available' : 'Unavailable'; return <button type="button" key={dayKey} className={`appointment-availability-summary__day appointment-date-cell--${state}`} disabled={state === 'booked'} onClick={() => chooseDate(dayKey)}><strong>{day.toLocaleDateString('en-US', { weekday: 'short' })} {day.getDate()}</strong><span><i />{label}</span></button> })}</div>}
+              {view === 'day' && date && <div className={`appointment-day-availability appointment-date-cell--${dateState(date).state}`}><strong>{formatDate(date)}</strong><span><i />{dateState(date).state === 'booked' ? 'Booked' : dateState(date).state === 'partial' ? `${dateState(date).remaining} slots available` : dateState(date).state === 'available' ? 'Available' : 'Unavailable'}</span></div>}
             </div>
             {notice && <div className="appointment-booking-notice" role="status"><CircleAlert size={15} /> {notice}</div>}
           </>}

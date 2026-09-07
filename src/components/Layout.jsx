@@ -22,7 +22,6 @@ import {
   UserRound,
   CalendarDays,
   CalendarCheck,
-  CalendarPlus,
   Radio,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -89,8 +88,7 @@ const ROLE_CONFIG = {
         label: 'Explore Astrologers',
         icon: Sparkles,
         children: [
-          { to: 'appointment-details', label: 'View Appointments', icon: CalendarCheck },
-          { to: 'astrologers', label: 'Book Appointments', icon: CalendarPlus },
+          { to: 'appointment-details', label: 'Appointment Details', icon: CalendarCheck },
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },

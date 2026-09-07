@@ -4659,9 +4659,10 @@ tbody tr:hover {
 .appointment-booking-modal--details .appointment-details-form { min-width:0; }
 .appointment-booking-modal--details .appointment-details-content { display:block; height:0; padding-top:22px; padding-bottom:24px; scroll-padding-block:22px 24px; }
 .appointment-booking-modal--details .appointment-details-content > .appointment-details-form { width:100%; }
+.appointment-booking-modal--details .appointment-details-content { height:auto; flex:1 1 auto; min-height:0; max-height:calc(100vh - 170px); overflow-y:auto; box-sizing:border-box; }
 @media (max-width:600px) {
   .appointment-booking-modal--details { width:calc(100vw - 20px); max-height:90vh; }
-  .appointment-booking-modal--details .appointment-details-content { padding:20px 18px 24px; scroll-padding-block:20px 24px; }
+  .appointment-booking-modal--details .appointment-details-content { padding:20px 18px 24px; max-height:calc(100vh - 150px); scroll-padding-block:20px 24px; }
 }
 
 /* Compact appointment details page layout. */
@@ -5633,8 +5634,10 @@ tbody tr:hover {
 }
 
 .apt-history-calendar-legend span.is-booked::before { background: var(--primary); }
+.apt-history-calendar-legend span.is-pending::before { background: var(--warning); }
 .apt-history-calendar-legend span.is-completed::before { background: var(--success); }
 .apt-history-calendar-legend span.is-cancelled::before { background: var(--danger); }
+.apt-history-calendar-legend span.is-rescheduled::before { background: var(--accent); }
 
 .apt-history-cell.is-selected {
   background: var(--surface-soft);
@@ -5681,11 +5684,21 @@ tbody tr:hover {
 }
 
 .apt-history-cell-status span.is-booked::before { background: var(--primary); }
+.apt-history-cell-status span.is-pending::before { background: var(--warning); }
 .apt-history-cell-status span.is-completed::before { background: var(--success); }
 .apt-history-cell-status span.is-cancelled::before { background: var(--danger); }
+.apt-history-cell-status span.is-rescheduled::before { background: var(--accent); }
 
 .apt-history-cell.has-booked .apt-month-day {
   color: var(--primary);
+}
+
+.apt-history-cell.has-pending .apt-month-day {
+  color: var(--warning);
+}
+
+.apt-history-cell.has-rescheduled .apt-month-day {
+  color: var(--accent);
 }
 
 .apt-history-day-col {
@@ -6408,6 +6421,7 @@ tbody tr:hover {
   min-height: 32px;
   padding: 6px 12px;
 }
+
 
 /* ---- Call ended screen -------------------------------------------------- */
 
@@ -9673,6 +9687,46 @@ button.apt-week-day:focus-visible {
 .appointment-calendar-legend i { display:inline-block; width:9px; height:9px; border:1px solid var(--border); border-radius:3px; background:var(--neutral-bg); }
 .appointment-calendar-legend i.is-available { border-color:var(--success); background:var(--success-bg); }
 .appointment-calendar-legend i.is-booked { border-color:var(--primary); background:var(--primary-bg); }
+.appointment-calendar-legend i.is-partial { border-color:var(--amber-500); background:var(--warning-bg); }
+.appointment-calendar-legend i.is-bookable { border-color:#60a5fa; background:#dbeafe; }
+.appointment-calendar-legend i.is-booked-by-me { border-color:#8b5cf6; background:#ede9fe; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell { min-height:58px !important; padding:6px 3px; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--bookable { border-color:#60a5fa !important; background:#dbeafe !important; color:#1d4ed8; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--partially-booked { border-color:#60a5fa !important; background:#dbeafe !important; color:#1d4ed8; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--available { border-color:rgba(16,185,129,.38) !important; background:var(--success-bg) !important; color:var(--green-600); }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--unavailable { border-color:#facc15 !important; background:#fef9c3 !important; color:#a16207; cursor:not-allowed; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--booked-by-me { border-color:#8b5cf6 !important; background:#ede9fe !important; color:#6d28d9; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell.is-selected { border-color:var(--primary) !important; background:var(--primary-bg) !important; color:var(--primary); box-shadow:inset 0 0 0 1px rgba(109,40,217,.2); }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--partially-booked.is-selected { background:#dbeafe !important; color:#1d4ed8; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--available.is-selected { background:var(--success-bg) !important; color:var(--green-600); }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell--booked-by-me.is-selected { background:#ede9fe !important; color:#6d28d9; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell.is-outside { opacity:.5; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell small { display:block; max-width:100%; overflow:hidden; color:currentColor; font-size:7px; font-weight:800; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; }
+.appointment-day-slot-count { margin:-3px 0 2px; color:var(--primary); font-size:11px; font-weight:800; }
+.appointment-slot-button.is-my-booking { border-color:#8b5cf6; background:#ede9fe; color:#6d28d9; }
+.appointment-calendar-legend--booking { margin-top:10px; }
+.appointment-booking-modal .appointment-month-days .appointment-date-cell { gap:3px; min-height:58px !important; padding:6px 3px; }
+.appointment-date-cell .appointment-date-status { display:flex; align-items:center; gap:3px; max-width:100%; overflow:hidden; color:var(--muted); font-size:7px; font-weight:800; line-height:1.1; text-align:center; white-space:nowrap; }
+.appointment-date-cell .appointment-date-status i,
+.appointment-availability-summary__day i,
+.appointment-day-availability i { width:6px; height:6px; flex:0 0 6px; border-radius:50%; background:currentColor; }
+.appointment-date-cell--available { border-color:rgba(16,185,129,.38) !important; background:var(--success-bg) !important; color:var(--green-600); }
+.appointment-date-cell--partial { border-color:rgba(245,158,11,.42) !important; background:var(--warning-bg) !important; color:var(--amber-600); }
+.appointment-date-cell--booked { border-color:rgba(239,68,68,.35) !important; background:var(--danger-bg) !important; color:var(--danger); cursor:not-allowed; }
+.appointment-date-cell--unavailable { background:var(--neutral-bg) !important; color:var(--muted); }
+.appointment-month-days .appointment-date-cell.is-selected { border-color:var(--primary) !important; box-shadow:inset 0 0 0 1px rgba(109,40,217,.18); }
+.appointment-availability-summary { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; margin-top:14px; }
+.appointment-availability-summary__day { display:grid; gap:5px; min-width:0; padding:8px 4px; border:1px solid var(--surface-border); border-radius:9px; background:var(--surface-strong); color:var(--ink); text-align:center; cursor:pointer; }
+.appointment-availability-summary__day strong { font-size:9px; }
+.appointment-availability-summary__day span { display:flex; align-items:center; justify-content:center; gap:3px; min-width:0; overflow:hidden; color:var(--muted); font-size:7px; white-space:nowrap; }
+.appointment-availability-summary__day.appointment-date-cell--available { color:var(--green-600); }
+.appointment-availability-summary__day.appointment-date-cell--partial { color:var(--amber-600); }
+.appointment-availability-summary__day.appointment-date-cell--booked { color:var(--danger); cursor:not-allowed; }
+.appointment-day-availability { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; padding:12px; border:1px solid var(--surface-border); border-radius:10px; background:var(--surface-soft); color:var(--ink); font-size:11px; }
+.appointment-day-availability span { display:flex; align-items:center; gap:5px; color:var(--muted); font-size:10px; font-weight:800; }
+.appointment-day-availability--available span { color:var(--green-600); }
+.appointment-day-availability--partial span { color:var(--amber-600); }
+.appointment-day-availability--booked span { color:var(--danger); }
 .appointment-booking-modal .availability-slots button,
 .appointment-booking-modal .appointment-timeline .appointment-slot-button { border-color:rgba(16,185,129,.35); background:var(--success-bg); color:var(--green-600); }
 .appointment-booking-modal .availability-slots button > span,
@@ -9702,7 +9756,7 @@ button.apt-week-day:focus-visible {
 .user-appointment-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
 .user-appointment-actions .btn { flex:1 1 140px; }
 .user-appointment-list { display:grid; gap:10px; }
-.user-appointment-card { gap:9px; cursor:default; }
+.user-appointment-card { gap:10px; cursor:pointer; padding:14px; }
 .user-appointment-card__top,
 .user-appointment-identity { display:flex; align-items:flex-start; gap:9px; }
 .user-appointment-card__top { justify-content:space-between; }
@@ -9711,16 +9765,63 @@ button.apt-week-day:focus-visible {
 .user-appointment-identity div span { color:var(--muted); font-size:10px; }
 .user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
 .user-appointment-avatar--large { width:40px; height:40px; font-size:12px; }
-.user-appointment-card__meta { display:grid; gap:5px; color:var(--muted); font-size:10px; }
+.user-appointment-card__meta { display:grid; gap:6px; color:var(--muted); font-size:10px; }
 .user-appointment-card__meta span { display:flex; align-items:center; gap:5px; }
-.user-appointment-card__footer { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--surface-border); color:var(--muted); font-size:10px; }
-.user-appointment-card__actions { display:flex; gap:6px; flex-wrap:wrap; }
-.user-appointment-card__actions .btn { flex:1 1 auto; }
+.user-appointment-card__time { justify-content:flex-end; color:var(--ink); font-weight:700; }
+.user-appointment-card__footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:9px; border-top:1px solid var(--surface-border); color:var(--muted); font-size:10px; }
+.user-appointment-card__footer span:first-child { color:var(--ink); font-weight:800; }
+.user-appointment-card__actions { display:flex; gap:8px; margin-top:1px; }
+.user-appointment-card__actions .btn { flex:1 1 0; min-width:0; }
+.user-appointment-card__actions .btn-danger {
+  flex: 1.3 1 0;
+  box-sizing: border-box;
+  border: 1px solid #dc2626;
+  border-radius: var(--radius-s);
+  background: #dc2626;
+  color: #fff;
+  justify-content: center;
+  padding: 0 10px;
+  font-size: 12px;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+.user-appointment-card__actions .btn-danger:hover {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+.apt-user-astrologer-notes-content {
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.added-compact-appointment-card { gap:12px; background:#fff; }
+.added-compact-appointment-card__top,
+.added-compact-appointment-card__profile,
+.added-compact-appointment-card__meta,
+.added-compact-appointment-card__footer { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.added-compact-appointment-card__profile { justify-content:flex-start; }
+.added-compact-appointment-card__profile > div { display:grid; gap:2px; }
+.added-compact-appointment-card__profile strong { color:var(--ink); font-size:13px; font-weight:800; }
+.added-compact-appointment-card__profile span:not(.user-appointment-avatar),
+.added-compact-appointment-card__meta span,
+.added-compact-appointment-card__footer span { color:var(--muted); font-size:10px; }
+.added-compact-appointment-card__meta { padding-top:2px; color:var(--muted); font-size:10px; }
+.added-compact-appointment-card__meta span,
+.added-compact-appointment-card__meta strong { display:flex; align-items:center; gap:5px; }
+.added-compact-appointment-card__meta strong { color:var(--ink); font-size:10px; }
+.added-compact-appointment-card__footer { padding-top:9px; border-top:1px solid var(--surface-border); }
+.added-compact-appointment-card__footer strong { color:var(--ink); font-size:13px; font-weight:800; }
+@media (max-width:600px) { .added-compact-appointment-card__top { align-items:flex-start; flex-direction:column; } }
 .user-appointment-detail-heading { display:flex; align-items:center; gap:10px; }
 .user-appointment-detail-heading > div { display:grid; gap:2px; }
 .user-appointment-detail-heading strong { color:var(--ink); font-size:15px; }
 .user-appointment-detail-heading p { margin:0; color:var(--muted); font-size:11px; }
-@media (max-width:600px) { .user-appointment-card__top { flex-direction:column; }.user-appointment-card__actions .btn { flex:1 1 130px; } }
+@media (max-width:600px) { .user-appointment-card__top { flex-direction:column; }.user-appointment-card__actions .btn { flex:1 1 130px; }.user-appointment-card__actions .btn-danger { flex:1.3 1 130px; } }
 /* Astrologer Appointments section
 
    ============================================================
