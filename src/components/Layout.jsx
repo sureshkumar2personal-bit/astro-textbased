@@ -26,7 +26,7 @@ import {
   ChevronDown,
   UserRound,
   CalendarDays,
-  CalendarPlus,
+  CalendarCheck,
   Radio,
   Receipt,
 } from 'lucide-react'
@@ -102,8 +102,14 @@ const ROLE_CONFIG = {
           { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
         ],
       },
-      { to: 'astrologers', label: 'Explore Astrologers', icon: Sparkles },
-      { to: 'appointment-details', label: 'Book Appointment', icon: CalendarPlus },
+      {
+        to: 'astrologers',
+        label: 'Explore Astrologers',
+        icon: Sparkles,
+        children: [
+          { to: 'appointment-details', label: 'Appointment Details', icon: CalendarCheck },
+        ],
+      },
       { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Rewards', icon: Gift },
       {

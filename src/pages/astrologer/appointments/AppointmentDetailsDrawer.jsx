@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { X, Clock, Calendar as CalIcon, Timer, Languages, Hash, Phone, Wallet, UserRound, CalendarX2, StickyNote, Paperclip, Send, FileText, Eye, Download, NotebookPen, Shield, Check } from 'lucide-react'
+import { X, Clock, Calendar as CalIcon, Timer, Languages, Hash, Phone, Wallet, UserRound, CalendarX2, StickyNote, Paperclip, Send, FileText, Eye, Download, NotebookPen, Shield, Check, CalendarCheck2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { callTypeMeta } from './meta.jsx'
@@ -275,7 +275,7 @@ function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes, readOnly
   )
 }
 
-export default function AppointmentDetailsDrawer({ appointment, appointments = [], inProgress, consultation, onClose, onStartCall, onCancel, onViewProfile, onSaveConsultation, onOpenConsultation, onSavePrivateNotes, onSavePreCallAnalysis }) {
+export default function AppointmentDetailsDrawer({ appointment, appointments = [], inProgress, consultation, onClose, onStartCall, onCancel, onViewProfile, onSaveConsultation, onOpenConsultation, onSavePrivateNotes, onSavePreCallAnalysis, onReschedule }) {
   const [horoscopeOpen, setHoroscopeOpen] = useState(false)
   if (!appointment) return null
   const meta = callTypeMeta(appointment.callType)
@@ -304,6 +304,7 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
   // reviewed (details, notes, attachments, consultations) but never acted upon.
   const isViewOnlyHistory = isPastDate(appointment.dateIso)
   const showCancelButton = hasCancelHandler && isBooked && !isViewOnlyHistory
+  const showReschedule = typeof onReschedule === 'function' && isBooked && !appointment.rescheduledTo && !appointment.rescheduledFrom
   const showCall = typeof onStartCall === 'function' && canStartCall(appointment, new Date()) && !inProgress && !isViewOnlyHistory
   const customerId = appointment.userId || null
   const showConsultation = typeof onSaveConsultation === 'function' && !isCancelled
@@ -410,10 +411,15 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                 />
               )}
 
-              <div className={`apt-drawer-call${(showCall || showCancelButton) ? ' apt-drawer-call--split' : ''}`}>
+              <div className={`apt-drawer-call${(showCall || showCancelButton || showReschedule) ? ' apt-drawer-call--split' : ''}`}>
                 {showCall && (
                   <button type="button" className="btn btn-primary apt-drawer-startcall" onClick={onStartCall}>
                     <Phone size={15} /> Start {meta.label}
+                  </button>
+                )}
+                {showReschedule && (
+                  <button type="button" className="btn btn-outline apt-drawer-reschedule" onClick={onReschedule}>
+                    <CalendarCheck2 size={15} /> Reschedule
                   </button>
                 )}
                 {showCancelButton && (
