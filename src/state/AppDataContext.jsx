@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
 import { isCancelledStatus } from '../utils/appointments.js'
+import { applyRunningBalances, buildSeedAstrologerWallet, computeWalletSummary, payoutDisplayLabel } from '../utils/wallet.js'
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
@@ -507,27 +508,8 @@ const initialNotifications = [
   },
 ]
 
-const initialAstrologerWallet = {
-  balance: 34650,
-  holdDays: 7,
-  escrow: 8500,
-  earnings: 52150,
-  withdrawn: 18000,
-  transactions: [
-    { id: 'aw1', label: 'Question package sale - Health', amount: '+₹2,000', time: 'Today', date: '2026-07-27', type: 'earning' },
-    { id: 'aw2', label: 'Personal question - Marriage', amount: '+₹250', time: 'Yesterday', date: '2026-07-26', type: 'earning' },
-    
-    { id: 'aw4', label: 'General question - Business', amount: '+₹100', time: '23 Jul 2026', date: '2026-07-23', type: 'earning' },
-    { id: 'aw5', label: 'Withdrawal to bank', amount: '-₹8,000', time: '22 Jul 2026', date: '2026-07-22', type: 'withdrawal' },
-    { id: 'aw6', label: 'Escrow hold - QTN-2026-000123', amount: '+₹250', time: '21 Jul 2026', date: '2026-07-21', type: 'escrow' },
-    { id: 'aw7', label: 'Escrow hold - QTN-2026-001245', amount: '+₹250', time: '21 Jul 2026', date: '2026-07-21', type: 'escrow' },
-    { id: 'aw8', label: 'Escrow release - QTN-2026-000125', amount: '+₹250', time: '20 Jul 2026', date: '2026-07-20', type: 'escrow_release' },
-    { id: 'aw9', label: 'Personal question - Career', amount: '+₹250', time: '19 Jul 2026', date: '2026-07-19', type: 'earning' },
-    { id: 'aw10', label: 'Withdrawal to bank', amount: '-₹10,000', time: '18 Jul 2026', date: '2026-07-18', type: 'withdrawal' },
-    { id: 'aw11', label: 'Consultation payout - Chat', amount: '+₹2,500', time: '14 Jul 2026', date: '2026-07-14', type: 'earning' },
-    { id: 'aw12', label: 'General question - Job', amount: '+₹100', time: '13 Jul 2026', date: '2026-07-13', type: 'earning' },
-  ],
-}
+const ASTROLOGER_WALLET_STORAGE_KEY = 'astroconnect-app-data-astrologer-wallet'
+const ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY = 'astroconnect-app-data-astrologer-payout-methods'
 
 const initialPayoutMethods = [
   { id: 'pm-hdfc', type: 'bank', bankName: 'HDFC Bank', accountNumber: '4589', ifsc: 'HDFC0001234', accountHolder: 'Dr. Rani', isDefault: true },
@@ -535,21 +517,26 @@ const initialPayoutMethods = [
   { id: 'pm-upi', type: 'upi', upiId: 'rani@upi', isDefault: false },
 ]
 
-const initialSettlementHistory = [
-  { id: 'STL-001', date: '2026-07-25', period: '01 Jul – 25 Jul 2026', grossEarnings: 18500, platformCommission: 2775, taxes: 0, netSettlement: 15725, status: 'Completed' },
-  { id: 'STL-002', date: '2026-06-28', period: '01 Jun – 28 Jun 2026', grossEarnings: 14200, platformCommission: 2130, taxes: 0, netSettlement: 12070, status: 'Completed' },
-  { id: 'STL-003', date: '2026-05-30', period: '01 May – 30 May 2026', grossEarnings: 21300, platformCommission: 3195, taxes: 0, netSettlement: 18105, status: 'Completed' },
-]
+function loadAstrologerWallet() {
+  const stored = loadFromStorage(ASTROLOGER_WALLET_STORAGE_KEY, null)
+  if (stored && Array.isArray(stored.ledger) && stored.ledger.length) {
+    return {
+      holdDays: stored.holdDays ?? 7,
+      ledger: stored.ledger,
+      pendingPayments: Array.isArray(stored.pendingPayments) ? stored.pendingPayments : [],
+      heldPayments: Array.isArray(stored.heldPayments) ? stored.heldPayments : [],
+      settlementSchedule: stored.settlementSchedule || null,
+    }
+  }
+  return buildSeedAstrologerWallet()
+}
 
-const initialWithdrawalHistory = [
-  { id: 'WD-001', amount: 8000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-22T14:30:00+05:30', completedAt: '2026-07-23T10:15:00+05:30', fee: 0 },
-  { id: 'WD-002', amount: 10000, payoutMethodId: 'pm-hdfc', status: 'Completed', initiatedAt: '2026-07-18T11:00:00+05:30', completedAt: '2026-07-19T09:30:00+05:30', fee: 0 },
-]
-
-const initialEarningsBySource = {
-  thisMonth: { consultations: 6330, calls: 5475, textQuestions: 5200, liveSessions: 2000, virtualGifts: 300, other: 445, total: 19750 },
-  lastMonth: { consultations: 5800, calls: 4900, textQuestions: 4600, liveSessions: 1800, virtualGifts: 250, other: 350, total: 17700 },
-  thisYear: { consultations: 38200, calls: 31500, textQuestions: 28400, liveSessions: 12000, virtualGifts: 1800, other: 2450, total: 114350 },
+function maskPayoutLabel(method) {
+  try {
+    return payoutDisplayLabel(method)
+  } catch {
+    return 'Saved payment method'
+  }
 }
 
 const initialUserWallet = {
@@ -826,8 +813,31 @@ function normalizeAppointmentDateOverride(override) {
   return { status, windows, breaks, bookedSlots, continueWithoutBreak: Boolean(override.continueWithoutBreak) }
 }
 
+// Normalize an { start, end } ISO date range. Invalid or missing ranges fall
+// back to the provided default (which itself defaults to today → +90 days).
+function normalizeAvailabilityPeriod(period, fallback) {
+  const isoDay = (value) =>
+    typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? value
+      : null
+  const start = isoDay(period?.start)
+  const fallbackStart = isoDay(fallback?.start)
+  if (!start && !fallbackStart) return { start: null, end: null }
+  if (!start) return fallback
+  const end = isoDay(period?.end)
+  return {
+    start,
+    end: end && end >= start ? end : fallbackStart,
+  }
+}
+
 function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, status = 'Draft') {
   const normalizedMonthKey = monthKey || monthKeyFromDate(new Date())
+  const today = new Date()
+  const start = today.toISOString().slice(0, 10)
+  const endDate = new Date(today)
+  endDate.setDate(endDate.getDate() + 90)
   return {
     id: `appointment-availability-${astrologerId || 'astrologer'}-${normalizedMonthKey}`,
     astrologerId: astrologerId || 'astrologer-demo',
@@ -836,9 +846,11 @@ function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, st
     timezone: 'Asia/Kolkata',
     appointmentDuration: 30,
     appointmentPrice: 799,
+    appointmentBuffer: 5,
     status,
     publishedAt: null,
     updatedAt: new Date().toISOString(),
+    availabilityPeriod: { start, end: endDate.toISOString().slice(0, 10) },
     dateOverrides: {},
     weeklySchedule: APPOINTMENT_WEEKDAYS.map((day) => normalizeAppointmentScheduleDay(null, day.dayIndex)),
     // Snapshot of the config that was last published. Kept immutable so saved
@@ -847,6 +859,8 @@ function createDefaultAppointmentAvailabilityTemplate(astrologerId, monthKey, st
     publishedDateOverrides: null,
     publishedAppointmentDuration: null,
     publishedAppointmentPrice: null,
+    publishedAppointmentBuffer: null,
+    publishedAvailabilityPeriod: null,
   }
 }
 
@@ -870,6 +884,8 @@ function normalizeAppointmentAvailabilityTemplate(template) {
       .map(([dateIso, override]) => [dateIso, normalizeAppointmentDateOverride(override)])
       .filter(([, override]) => override))
     : null
+  const availabilityPeriod = normalizeAvailabilityPeriod(template.availabilityPeriod, normalized.availabilityPeriod)
+  const publishedAvailabilityPeriod = normalizeAvailabilityPeriod(template.publishedAvailabilityPeriod)
   return {
     ...normalized,
     ...template,
@@ -880,6 +896,8 @@ function normalizeAppointmentAvailabilityTemplate(template) {
     status: template.status === 'Published' ? 'Published' : 'Draft',
     publishedAt: template.publishedAt || null,
     updatedAt: template.updatedAt || normalized.updatedAt,
+    availabilityPeriod,
+    publishedAvailabilityPeriod,
     reminderDismissedForMonthKey: template.reminderDismissedForMonthKey || null,
     appointmentDuration: [15, 30].includes(
       Number(template.appointmentDuration),
@@ -896,6 +914,12 @@ function normalizeAppointmentAvailabilityTemplate(template) {
       : null,
     publishedAppointmentPrice: Number.isFinite(Number(template.publishedAppointmentPrice))
       ? Number(template.publishedAppointmentPrice)
+      : null,
+    appointmentBuffer: Number.isFinite(Number(template.appointmentBuffer)) && Number(template.appointmentBuffer) >= 0
+      ? Math.round(Number(template.appointmentBuffer))
+      : 5,
+    publishedAppointmentBuffer: Number.isFinite(Number(template.publishedAppointmentBuffer)) && Number(template.publishedAppointmentBuffer) >= 0
+      ? Math.round(Number(template.publishedAppointmentBuffer))
       : null,
     dateOverrides,
     weeklySchedule,
@@ -1048,7 +1072,7 @@ export function AppDataProvider({ children }) {
     return [...stored, ...initialQuestions.filter((question) => !storedIds.has(question.id))]
   })
   const [notifications, setNotifications] = useState(initialNotifications)
-  const [astrologerWallet, setAstrologerWallet] = useState(initialAstrologerWallet)
+  const [astrologerWallet, setAstrologerWallet] = useState(loadAstrologerWallet)
   const [userWallet, setUserWallet] = useState(() => loadFromStorage(USER_WALLET_STORAGE_KEY, initialUserWallet))
   const [profile] = useState(initialProfile)
   const [selectedCampaignId, setSelectedCampaignId] = useState(initialCampaigns[0].id)
@@ -1084,10 +1108,7 @@ export function AppDataProvider({ children }) {
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
-  const [payoutMethods, setPayoutMethods] = useState(initialPayoutMethods)
-  const [withdrawalHistory, setWithdrawalHistory] = useState(initialWithdrawalHistory)
-  const [settlementHistory] = useState(initialSettlementHistory)
-  const [earningsBySource] = useState(initialEarningsBySource)
+  const [payoutMethods, setPayoutMethods] = useState(() => loadFromStorage(ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY, initialPayoutMethods))
   const [consultationHistory] = useState(initialConsultationHistory)
   const [postLikes, setPostLikes] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${currentUser?.id || 'guest'}`, {}))
   const [savedPostIds, setSavedPostIds] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${currentUser?.id || 'guest'}`, []))
@@ -1154,6 +1175,14 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(USER_WALLET_STORAGE_KEY, userWallet)
   }, [userWallet])
+
+  useEffect(() => {
+    saveToStorage(ASTROLOGER_WALLET_STORAGE_KEY, astrologerWallet)
+  }, [astrologerWallet])
+
+  useEffect(() => {
+    saveToStorage(ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY, payoutMethods)
+  }, [payoutMethods])
 
   useEffect(() => {
     saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
@@ -2069,6 +2098,9 @@ export function AppDataProvider({ children }) {
     savePreCallAnalysis(appointmentId, preCallAnalysis) {
       this.updateAppointment(appointmentId, { preCallAnalysis: preCallAnalysis ?? '' })
     },
+    saveHoroscopeAttachment(appointmentId, horoscope) {
+      this.updateAppointment(appointmentId, { horoscope: horoscope || null })
+    },
     completeAppointmentCall(appointmentId, { callDurationSeconds, endedAt, privateNotes } = {}) {
       const patch = {
         status: 'Completed',
@@ -2135,44 +2167,72 @@ export function AppDataProvider({ children }) {
     saveAppointmentAvailabilityTemplate(template) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)
       if (!normalized) return null
+      const existing = appointmentAvailabilityTemplates.find((item) =>
+        item.id === normalized.id ||
+        (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey),
+      )
+      // Saving edits must never discard the published snapshot. While a
+      // snapshot exists the template stays "Published" (with possible
+      // unpublished changes); Publish is what replaces the snapshot.
+      const retained = existing?.publishedWeeklySchedule || existing?.publishedAt
+        ? {
+            status: 'Published',
+            publishedAt: existing.publishedAt || null,
+            publishedWeeklySchedule: existing.publishedWeeklySchedule || null,
+            publishedDateOverrides: existing.publishedDateOverrides || null,
+            publishedAvailabilityPeriod: existing.publishedAvailabilityPeriod || null,
+            publishedAppointmentDuration: existing.publishedAppointmentDuration != null
+              ? existing.publishedAppointmentDuration
+              : null,
+            publishedAppointmentPrice: existing.publishedAppointmentPrice != null
+              ? existing.publishedAppointmentPrice
+              : null,
+            publishedAppointmentBuffer: existing.publishedAppointmentBuffer != null
+              ? existing.publishedAppointmentBuffer
+              : null,
+          }
+        : {}
+      const merged = { ...normalized, ...retained }
       setAppointmentAvailabilityTemplates((prev) => {
-        const existing = prev.find((item) =>
+        const existing2 = prev.find((item) =>
           item.id === normalized.id ||
           (item.astrologerId === normalized.astrologerId && item.monthKey === normalized.monthKey),
         )
-        // Saving edits must never discard the published snapshot. While a
-        // snapshot exists the template stays "Published" (with possible
-        // unpublished changes); Publish is what replaces the snapshot.
-        const retained = existing?.publishedWeeklySchedule || existing?.publishedAt
+        const retained2 = existing2?.publishedWeeklySchedule || existing2?.publishedAt
           ? {
               status: 'Published',
-              publishedAt: existing.publishedAt || null,
-              publishedWeeklySchedule: existing.publishedWeeklySchedule || null,
-              publishedDateOverrides: existing.publishedDateOverrides || null,
-              publishedAppointmentDuration: existing.publishedAppointmentDuration != null
-                ? existing.publishedAppointmentDuration
+              publishedAt: existing2.publishedAt || null,
+              publishedWeeklySchedule: existing2.publishedWeeklySchedule || null,
+              publishedDateOverrides: existing2.publishedDateOverrides || null,
+              publishedAvailabilityPeriod: existing2.publishedAvailabilityPeriod || null,
+              publishedAppointmentDuration: existing2.publishedAppointmentDuration != null
+                ? existing2.publishedAppointmentDuration
                 : null,
-              publishedAppointmentPrice: existing.publishedAppointmentPrice != null
-                ? existing.publishedAppointmentPrice
+              publishedAppointmentPrice: existing2.publishedAppointmentPrice != null
+                ? existing2.publishedAppointmentPrice
+                : null,
+              publishedAppointmentBuffer: existing2.publishedAppointmentBuffer != null
+                ? existing2.publishedAppointmentBuffer
                 : null,
             }
           : {}
-        const merged = { ...normalized, ...retained }
+        const merged2 = { ...normalized, ...retained2 }
         const policy = {
-          appointmentDuration: merged.appointmentDuration,
-          appointmentPrice: merged.appointmentPrice,
+          appointmentDuration: merged2.appointmentDuration,
+          appointmentPrice: merged2.appointmentPrice,
+          appointmentBuffer: merged2.appointmentBuffer,
         }
-        const withPolicy = prev.map((item) => item.astrologerId === merged.astrologerId ? { ...item, ...policy } : item)
+        const withPolicy = prev.map((item) => item.astrologerId === merged2.astrologerId ? { ...item, ...policy } : item)
         const index = withPolicy.findIndex((item) =>
-          item.id === merged.id ||
-          (item.astrologerId === merged.astrologerId && item.monthKey === merged.monthKey),
+          item.id === merged2.id ||
+          (item.astrologerId === merged2.astrologerId && item.monthKey === merged2.monthKey),
         )
-        if (index === -1) return [merged, ...withPolicy]
+        if (index === -1) return [merged2, ...withPolicy]
         const next = withPolicy.slice()
-        next[index] = merged
+        next[index] = merged2
         return next
       })
-      return normalized
+      return merged
     },
     publishAppointmentAvailabilityTemplate(template) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)
@@ -2201,9 +2261,13 @@ export function AppDataProvider({ children }) {
         ),
         publishedAppointmentDuration: normalized.appointmentDuration,
         publishedAppointmentPrice: normalized.appointmentPrice,
+        publishedAppointmentBuffer: normalized.appointmentBuffer,
+        publishedAvailabilityPeriod: normalized.availabilityPeriod
+          ? { start: normalized.availabilityPeriod.start, end: normalized.availabilityPeriod.end }
+          : null,
       }
       setAppointmentAvailabilityTemplates((prev) => {
-        const policy = { appointmentDuration: published.appointmentDuration, appointmentPrice: published.appointmentPrice }
+        const policy = { appointmentDuration: published.appointmentDuration, appointmentPrice: published.appointmentPrice, appointmentBuffer: published.appointmentBuffer }
         const withPolicy = prev.map((item) => item.astrologerId === published.astrologerId ? { ...item, ...policy } : item)
         const index = withPolicy.findIndex((item) =>
           item.id === published.id ||
@@ -2447,40 +2511,27 @@ export function AppDataProvider({ children }) {
       setPayoutMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
     },
     initiateWithdrawal(amount, payoutMethodId) {
-      const withdrawal = {
-        id: `WD-${String(withdrawalHistory.length + 1).padStart(3, '0')}`,
-        amount,
-        payoutMethodId,
+      const summary = computeWalletSummary(astrologerWallet)
+      const value = Number(amount)
+      if (!value || value <= 0 || value > summary.availableBalance) return null
+      const payout = payoutMethods.find((method) => method.id === payoutMethodId) || payoutMethods.find((method) => method.isDefault) || null
+      const txn = {
+        id: `TXN-${String(Date.now()).slice(-4)}`,
+        date: new Date().toISOString().slice(0, 10),
+        time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        type: 'withdrawal',
         status: 'Processing',
-        initiatedAt: new Date().toISOString(),
-        completedAt: null,
-        fee: 0,
+        description: `Withdrawal to ${maskPayoutLabel(payout || {})}`,
+        amount: -value,
+        payoutLabel: maskPayoutLabel(payout || {}),
       }
-      setWithdrawalHistory((prev) => [withdrawal, ...prev])
       setAstrologerWallet((prev) => ({
         ...prev,
-        balance: prev.balance - amount,
-        withdrawn: prev.withdrawn + amount,
-        transactions: [
-          {
-            id: crypto.randomUUID(),
-            label: `Withdrawal initiated`,
-            amount: `-₹${amount.toLocaleString('en-IN')}`,
-            time: 'just now',
-            date: new Date().toISOString(),
-            type: 'withdrawal',
-          },
-          ...prev.transactions,
-        ],
+        ledger: applyRunningBalances([...(prev.ledger || []), txn]),
       }))
-      setTimeout(() => {
-        setWithdrawalHistory((prev) =>
-          prev.map((w) => (w.id === withdrawal.id ? { ...w, status: 'Completed', completedAt: new Date().toISOString() } : w)),
-        )
-      }, 3000)
-      return withdrawal
+      return txn
     },
-  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, withdrawalHistory])
+  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -2511,9 +2562,6 @@ export function AppDataProvider({ children }) {
     purchasedSlots,
     consultationHistory,
     payoutMethods,
-    withdrawalHistory,
-    settlementHistory,
-    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,
@@ -2552,9 +2600,6 @@ export function AppDataProvider({ children }) {
     purchasedSlots,
     consultationHistory,
     payoutMethods,
-    withdrawalHistory,
-    settlementHistory,
-    earningsBySource,
     postLikes,
     savedPostIds,
     postComments,

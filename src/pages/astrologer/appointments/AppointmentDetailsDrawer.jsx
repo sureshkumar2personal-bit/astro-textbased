@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { X, Clock, Calendar as CalIcon, Timer, Languages, Hash, Phone, Wallet, UserRound, CalendarX2, StickyNote, Paperclip, Send, FileText, NotebookPen, Shield, Check, CalendarCheck2 } from 'lucide-react'
+import { X, Clock, Calendar as CalIcon, Timer, Languages, Hash, Phone, Wallet, UserRound, CalendarX2, StickyNote, Paperclip, Send, FileText, Eye, Download, NotebookPen, Shield, Check, CalendarCheck2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { callTypeMeta } from './meta.jsx'
@@ -8,6 +8,7 @@ import {
   formatTimeRange,
   formatDisplayDate,
   canStartCall,
+  isPastDate,
 } from '../../../utils/appointments.js'
 
 
@@ -47,7 +48,7 @@ function formatSentAt(value) {
   return date.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-function ConsultationSection({ appointment, consultation, onSave, onOpen }) {
+function ConsultationSection({ appointment, consultation, onSave, onOpen, readOnly = false }) {
   const [notes, setNotes] = useState(consultation?.notes || '')
   const [attached, setAttached] = useState(consultation?.fileName ? { name: consultation.fileName, type: consultation.fileType, size: consultation.fileSize } : null)
   const [saved, setSaved] = useState(false)
@@ -94,72 +95,126 @@ function ConsultationSection({ appointment, consultation, onSave, onOpen }) {
         rows={3}
         placeholder="Add consultation notes for this user…"
         value={notes}
+        readOnly={readOnly}
+        aria-readonly={readOnly}
         onChange={(event) => setNotes(event.target.value)}
       />
       <div className="apt-consultation-actions">
         {attached ? (
-          <button type="button" className="apt-consultation-file" onClick={() => fileRef.current && fileRef.current.click()}>
+          <span className="apt-consultation-file">
             <FileText size={14} /> {attached.name}
-          </button>
+          </span>
         ) : (
-          <button type="button" className="apt-consultation-attach" onClick={() => fileRef.current && fileRef.current.click()}>
-            <Paperclip size={14} /> Attach PDF
-          </button>
+          !readOnly && (
+            <button type="button" className="apt-consultation-attach" onClick={() => fileRef.current && fileRef.current.click()}>
+              <Paperclip size={14} /> Attach PDF
+            </button>
+          )
         )}
-        <input ref={fileRef} type="file" accept=".pdf,application/pdf" hidden onChange={handleAttach} />
-        <div className="apt-consultation-action-group">
-          <button type="button" className="btn btn-outline" onClick={handleSave} disabled={saved && !hasConsultation}>
-            {saved ? 'Saved' : 'Save Draft'}
-          </button>
-          <button type="button" className="btn btn-primary" onClick={handleSend} disabled={sent}>
-            <Send size={14} /> {sent ? 'Sent' : 'Send to User'}
-          </button>
-        </div>
+        {!readOnly && <input ref={fileRef} type="file" accept=".pdf,application/pdf" hidden onChange={handleAttach} />}
+        {!readOnly && (
+          <div className="apt-consultation-action-group">
+            <button type="button" className="btn btn-outline" onClick={handleSave} disabled={saved && !hasConsultation}>
+              {saved ? 'Saved' : 'Save Draft'}
+            </button>
+            <button type="button" className="btn btn-primary" onClick={handleSend} disabled={sent}>
+              <Send size={14} /> {sent ? 'Sent' : 'Send to User'}
+            </button>
+          </div>
+        )}
       </div>
-      {saved && <div className="apt-consultation-note">Consultation {sent ? 'sent to the user' : 'saved as a draft'}. It will appear in the user&rsquo;s profile activity.</div>}
+      {!readOnly && saved && <div className="apt-consultation-note">Consultation {sent ? 'sent to the user' : 'saved as a draft'}. It will appear in the user&rsquo;s profile activity.</div>}
     </section>
   )
 }
 
-function HoroscopeSection({ appointment }) {
+function HoroscopePreview({ horoscope, onClose, customerName }) {
+  const url = horoscope?.dataUrl || ''
+  const isImage = url && /^data:image\//.test(url)
+  return createPortal(
+    <div className="apt-drawer-overlay apt-horoscope-overlay" onClick={onClose}>
+      <div className="apt-horoscope-preview" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <header className="apt-horoscope-preview-head">
+          <div>
+            <h2>Horoscope</h2>
+            <span>{horoscope?.name} · {horoscope?.type}</span>
+          </div>
+          <button type="button" className="icon-btn" aria-label="Close" onClick={onClose}><X size={18} /></button>
+        </header>
+        <div className="apt-horoscope-preview-body">
+          {isImage ? (
+            <img src={url} alt={`Horoscope for ${customerName || 'the user'}`} className="apt-horoscope-preview-img" />
+          ) : (
+            <div className="apt-horoscope-preview-doc">
+              <FileText size={40} />
+              <strong>Document preview</strong>
+              <span>{horoscope?.name} ({horoscope?.size})</span>
+              <p>A downloadable document attachment. In a production deployment this would render the actual PDF/image from your file storage.</p>
+            </div>
+          )}
+        </div>
+        {url && (
+          <footer className="apt-horoscope-preview-foot">
+            <a className="btn btn-primary" href={url} download={horoscope?.name || 'horoscope'} rel="noreferrer">
+              <Download size={15} /> Download
+            </a>
+          </footer>
+        )}
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+function HoroscopeSection({ appointment, onView }) {
   const horoscope = appointment.horoscope
-  if (!horoscope) {
-    return (
-      <section className="apt-detail-card apt-horoscope-section">
+
+  return (
+    <section className="apt-detail-card apt-horoscope-section">
+      {horoscope ? (
+        <>
+          <div className="apt-detail-row">
+            <span className="apt-detail-label"><FileText size={14} /> Horoscope</span>
+            <span className="apt-detail-value apt-horoscope-file">{horoscope.name}</span>
+          </div>
+          <div className="apt-detail-row">
+            <span className="apt-detail-label">Type</span>
+            <span className="apt-detail-value">{horoscope.type}</span>
+          </div>
+          <div className="apt-detail-row">
+            <span className="apt-detail-label">Size</span>
+            <span className="apt-detail-value">{horoscope.size || `${horoscope.sizeBytes || 0} KB`}</span>
+          </div>
+          {horoscope.uploadedAt && (
+            <div className="apt-detail-row">
+              <span className="apt-detail-label">Uploaded</span>
+              <span className="apt-detail-value">
+                {new Date(horoscope.uploadedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </span>
+            </div>
+          )}
+          <div className="apt-horoscope-actions">
+            <button type="button" className="btn btn-outline" onClick={onView}>
+              <Eye size={14} /> View
+            </button>
+            {horoscope.dataUrl && (
+              <a className="btn btn-outline" href={horoscope.dataUrl} download={horoscope.name} rel="noreferrer">
+                <Download size={14} /> Download
+              </a>
+            )}
+          </div>
+        </>
+      ) : (
         <div className="apt-detail-row">
           <span className="apt-detail-label"><FileText size={14} /> Horoscope</span>
           <span className="apt-detail-value apt-horoscope-empty">No horoscope attached</span>
-        </div>
-      </section>
-    )
-  }
-  return (
-    <section className="apt-detail-card apt-horoscope-section">
-      <div className="apt-detail-row">
-        <span className="apt-detail-label"><FileText size={14} /> Horoscope</span>
-        <span className="apt-detail-value apt-horoscope-file">{horoscope.name}</span>
-      </div>
-      <div className="apt-detail-row">
-        <span className="apt-detail-label">Type</span>
-        <span className="apt-detail-value">{horoscope.type}</span>
-      </div>
-      <div className="apt-detail-row">
-        <span className="apt-detail-label">Size</span>
-        <span className="apt-detail-value">{horoscope.size || `${horoscope.sizeBytes || 0} KB`}</span>
-      </div>
-      {horoscope.uploadedAt && (
-        <div className="apt-detail-row">
-          <span className="apt-detail-label">Uploaded</span>
-          <span className="apt-detail-value">
-            {new Date(horoscope.uploadedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-          </span>
         </div>
       )}
     </section>
   )
 }
 
-function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes }) {
+function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes, readOnly = false }) {
   const [preCall, setPreCall] = useState(appointment.preCallAnalysis || '')
   const [notes, setNotes] = useState(appointment.privateNotes || '')
   const [preSaved, setPreSaved] = useState(false)
@@ -188,11 +243,15 @@ function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes }) {
           rows={3}
           placeholder="Review the horoscope and jot notes before the call…"
           value={preCall}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
           onChange={(event) => { setPreCall(event.target.value); setPreSaved(false) }}
         />
-        <button type="button" className="btn btn-outline apt-private-notes-save" onClick={savePreCall}>
-          {preSaved ? 'Saved' : 'Save Pre-Call Analysis'}
-        </button>
+        {!readOnly && (
+          <button type="button" className="btn btn-outline apt-private-notes-save" onClick={savePreCall}>
+            {preSaved ? 'Saved' : 'Save Pre-Call Analysis'}
+          </button>
+        )}
       </div>
       <div className="apt-private-notes-group">
         <label className="apt-private-notes-label" htmlFor={`privnotes-${appointment.id}`}>Private Call Notes</label>
@@ -202,17 +261,22 @@ function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes }) {
           rows={3}
           placeholder="Observations, points to discuss, things to remember…"
           value={notes}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
           onChange={(event) => { setNotes(event.target.value); setNotesSaved(false) }}
         />
-        <button type="button" className="btn btn-outline apt-private-notes-save" onClick={saveNotes}>
-          {notesSaved ? 'Saved' : 'Save Notes'}
-        </button>
+        {!readOnly && (
+          <button type="button" className="btn btn-outline apt-private-notes-save" onClick={saveNotes}>
+            {notesSaved ? 'Saved' : 'Save Notes'}
+          </button>
+        )}
       </div>
     </section>
   )
 }
 
 export default function AppointmentDetailsDrawer({ appointment, appointments = [], inProgress, consultation, onClose, onStartCall, onCancel, onViewProfile, onSaveConsultation, onOpenConsultation, onSavePrivateNotes, onSavePreCallAnalysis, onReschedule }) {
+  const [horoscopeOpen, setHoroscopeOpen] = useState(false)
   if (!appointment) return null
   const meta = callTypeMeta(appointment.callType)
   const Icon = meta.icon
@@ -236,10 +300,12 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
   const isBooked = /booked/i.test(String(appointment.status || ''))
   const isCompleted = /completed/i.test(String(appointment.status || ''))
   const isNoShow = /no-show|no show/i.test(String(appointment.status || ''))
-  const showCancelButton = hasCancelHandler && isBooked
-  const showCall = typeof onStartCall === 'function' && canStartCall(appointment, new Date()) && !inProgress
-  const hasRescheduleHandler = typeof onReschedule === 'function'
-  const showReschedule = hasRescheduleHandler && isBooked && !appointment.rescheduledTo && !appointment.rescheduledFrom
+  // Historical appointments are view-only: appointments on past dates may be
+  // reviewed (details, notes, attachments, consultations) but never acted upon.
+  const isViewOnlyHistory = isPastDate(appointment.dateIso)
+  const showCancelButton = hasCancelHandler && isBooked && !isViewOnlyHistory
+  const showReschedule = typeof onReschedule === 'function' && isBooked && !appointment.rescheduledTo && !appointment.rescheduledFrom
+  const showCall = typeof onStartCall === 'function' && canStartCall(appointment, new Date()) && !inProgress && !isViewOnlyHistory
   const customerId = appointment.userId || null
   const showConsultation = typeof onSaveConsultation === 'function' && !isCancelled
 
@@ -310,7 +376,10 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                 <DetailRow icon={Timer} label="Duration" value={`${durationMin} Minutes`} />
               </section>
 
-              <HoroscopeSection appointment={appointment} />
+              <HoroscopeSection
+                appointment={appointment}
+                onView={() => setHoroscopeOpen(true)}
+              />
 
               <section className="apt-detail-card">
                 <DetailRow icon={Wallet} label="Payment" value={appointment.paymentStatus || 'Paid'} />
@@ -338,6 +407,7 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                   appointment={appointment}
                   onSavePreCall={onSavePreCallAnalysis}
                   onSaveNotes={onSavePrivateNotes}
+                  readOnly={isViewOnlyHistory}
                 />
               )}
 
@@ -362,6 +432,9 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                 )}
                 {isCancelled && (
                   <div className="apt-drawer-note">This appointment has been cancelled and is preserved in history.</div>
+                )}
+                {isViewOnlyHistory && (
+                  <div className="apt-drawer-note">This past appointment is in history and is view-only. Details, notes, attachments and consultations remain available for reference.</div>
                 )}
                 {isCompleted && (
                   <div className="apt-drawer-status-callout apt-drawer-status-callout--completed">This appointment has been completed. Consultation notes and any attached file are shown below.</div>
@@ -392,12 +465,16 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                   consultation={consultation}
                   onSave={onSaveConsultation}
                   onOpen={onOpenConsultation}
+                  readOnly={isViewOnlyHistory}
                 />
               )}
             </div>
           </aside>
         </div>,
         document.body,
+      )}
+      {horoscopeOpen && appointment.horoscope && (
+        <HoroscopePreview horoscope={appointment.horoscope} onClose={() => setHoroscopeOpen(false)} customerName={customerName} />
       )}
     </>
   )

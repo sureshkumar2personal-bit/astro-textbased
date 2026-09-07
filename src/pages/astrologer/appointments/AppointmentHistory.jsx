@@ -10,7 +10,6 @@ import StatusBadge from '../../../components/StatusBadge.jsx'
 import HistoryCalendar from './HistoryCalendar.jsx'
 import AppointmentDetailsDrawer from './AppointmentDetailsDrawer.jsx'
 import AppointmentCallScreen from './AppointmentCallScreen.jsx'
-import RescheduleModal from './RescheduleModal.jsx'
 import { callTypeMeta } from './meta.jsx'
 import {
   resolveAppointmentWindow,
@@ -192,7 +191,6 @@ export default function AppointmentHistory() {
     ? appointments.find((appointment) => appointment.id === selectedAppointmentId) || null
     : null
   const [cancelTarget, setCancelTarget] = useState(null)
-  const [rescheduleTarget, setRescheduleTarget] = useState(null)
   const [filter, setFilter] = useState(searchParams.get('filter') || 'all')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const [search, setSearch] = useState(searchParams.get('search') || '')
@@ -413,6 +411,7 @@ export default function AppointmentHistory() {
 
       {selectedAppointment && (
         <AppointmentDetailsDrawer
+          key={selectedAppointment.id}
           appointment={selectedAppointment}
           appointments={appointments}
           consultation={selectedConsultation}
@@ -424,10 +423,6 @@ export default function AppointmentHistory() {
           onSavePrivateNotes={savePrivateNotes}
           onSavePreCallAnalysis={savePreCallAnalysis}
           onCancel={() => setCancelTarget(selectedAppointment)}
-          onReschedule={() => {
-            setRescheduleTarget(selectedAppointment)
-            setSelectedAppointmentId(null)
-          }}
         />
       )}
 
@@ -448,15 +443,6 @@ export default function AppointmentHistory() {
         onCancel={() => setCancelTarget(null)}
         onConfirm={handleCancel}
       />
-
-      {rescheduleTarget && (
-        <RescheduleModal
-          appointment={rescheduleTarget}
-          appointments={myAppointments}
-          astrologerId={astrologerId}
-          onClose={() => setRescheduleTarget(null)}
-        />
-      )}
     </div>
   )
 }

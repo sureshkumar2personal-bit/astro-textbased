@@ -32,7 +32,9 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
       date.setDate(gridStart.getDate() + index)
       return date
     })
-    return Array.from({ length: 6 }, (_, weekIndex) => cells.slice(weekIndex * 7, weekIndex * 7 + 7))
+    const result = []
+    for (let index = 0; index < cells.length; index += 7) result.push(cells.slice(index, index + 7))
+    return result
   }, [gridStart])
 
   const todayIso = toIsoDate(new Date())
@@ -65,6 +67,7 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     onRangeChange(startOfMonth(now))
     onSelectDate(now)
   }
+
   const applyMonthYear = (month, year) => {
     onRangeChange(new Date(year, month, 1))
     onSelectDate(new Date(year, month, 1))
@@ -72,8 +75,8 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
   }
 
   return (
-    <div className="apt-calendar apt-history-calendar">
-      <div className="apt-calendar-toolbar">
+    <div className="apt-scheduling-calendar apt-scheduling-calendar--history">
+      <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
