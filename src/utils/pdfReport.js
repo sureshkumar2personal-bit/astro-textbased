@@ -12,7 +12,9 @@ function sanitizeFilename(value) {
     .toLowerCase()
 }
 
-export function downloadPdf({ title, subtitle = '', columns, rows, filename = 'report', footnote = '' }) {
+const DEFAULT_BRAND = 'AstroConnect Astrologer Wallet'
+
+export function downloadPdf({ title, subtitle = '', columns, rows, filename = 'report', footnote = '', brand = DEFAULT_BRAND }) {
   const landscape = columns.length > 5
   const doc = new jsPDF({ orientation: landscape ? 'landscape' : 'portrait', unit: 'pt', format: 'a4' })
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -41,7 +43,7 @@ export function downloadPdf({ title, subtitle = '', columns, rows, filename = 'r
       doc.setFontSize(8)
       doc.setTextColor(130, 120, 150)
       doc.text(
-        `Generated ${new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · AstroConnect Astrologer Wallet`,
+        `Generated ${new Date().toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · ${brand}`,
         margin,
         doc.internal.pageSize.getHeight() - 20,
       )

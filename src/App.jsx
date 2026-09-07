@@ -22,6 +22,12 @@ import DisputeManagement from './pages/DisputeManagement.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import {
+  UserWalletOverview,
+  UserWalletTransactions,
+  UserWalletTopUps,
+  UserWalletRefunds,
+} from './pages/user/wallet/WalletHistory.jsx'
+import {
   WalletOverview,
   WalletEarnings,
   WalletTransactions,
@@ -162,8 +168,12 @@ function UserRoutes() {
     <Route element={<RequireRole role={ROLES.USER} />}>
       <Route element={<Layout />}>
         <Route path="/user" element={<UserDashboard />} />
-        <Route path="/user/wallet-history" element={<WalletHistory />} />
-        <Route path="/user/wallet" element={<WalletHistory />} />
+        <Route path="/user/wallet-history" element={<UserWalletOverview />} />
+        <Route path="/user/wallet" element={<Navigate to="/user/wallet/overview" replace />} />
+        <Route path="/user/wallet/overview" element={<UserWalletOverview />} />
+        <Route path="/user/wallet/transactions" element={<UserWalletTransactions />} />
+        <Route path="/user/wallet/topups" element={<UserWalletTopUps />} />
+        <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
         <Route path="/user/ask-question" element={<AskQuestion />} />
         <Route path="/user/track-questions" element={<TrackQuestions />} />
