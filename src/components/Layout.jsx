@@ -29,6 +29,7 @@ import {
   CalendarCheck,
   Radio,
   Receipt,
+  RefreshCw,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -121,6 +122,10 @@ const ROLE_CONFIG = {
           { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
           { to: 'wallet/topups', label: 'Top-ups', icon: TrendingUp },
           { to: 'wallet/refunds', label: 'Refunds', icon: Receipt },
+          { to: 'payment-methods', label: 'Payment Methods', icon: CreditCard },
+          { to: 'autopay', label: 'Autopay', icon: RefreshCw },
+          { to: 'withdraw', label: 'Withdraw', icon: ArrowDownToLine },
+          { to: 'transaction-history', label: 'Full History', icon: History },
         ],
       },
       { to: 'my-account', label: 'My Account', icon: UserRound },
@@ -180,6 +185,11 @@ const PAGE_META = {
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
+    '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },
+    '/user/payment-methods/add': { title: 'Add Payment Method', sub: 'Add a new bank account, UPI ID, or card.' },
+    '/user/autopay': { title: 'Autopay', sub: 'Manage automatic payments for subscriptions and top-ups.' },
+    '/user/withdraw': { title: 'Withdraw Funds', sub: 'Transfer money from your wallet to your bank or UPI.' },
+    '/user/transaction-history': { title: 'Transaction History', sub: 'Complete record of all wallet movements.' },
   },
 }
 

@@ -19,6 +19,11 @@ import {
   CircleHelp,
   MoreHorizontal,
   ArrowDownLeft,
+  Building2,
+  Smartphone,
+  Check,
+  CreditCard,
+  Info,
 } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import Section from '../../../components/ui/Section.jsx'
@@ -74,6 +79,16 @@ const SPENDING_SOURCE_OPTIONS = [
 
 const QUICK_TOP_UP_AMOUNTS = [100, 250, 500, 1000, 2000]
 
+const TOPUP_METHOD_ICONS = { bank: Building2, upi: Smartphone, card: CreditCard }
+
+function maskMethod(method) {
+  if (!method) return 'Saved method'
+  if (method.type === 'bank') return `${method.bankName || 'Bank'} ****${String(method.accountNumber || '').slice(-4)}`
+  if (method.type === 'upi') return method.upiId
+  if (method.type === 'card') return `${method.cardNetwork || 'Card'} ****${String(method.cardNumber || '').slice(-4)}`
+  return 'Saved method'
+}
+
 function formatINR(amount) {
   const abs = Math.abs(amount)
   const formatted = abs.toLocaleString('en-IN')
@@ -94,7 +109,7 @@ function typeChipClass(txn) {
 
 export default function UserWallet({ section = 'overview' }) {
   const { currentUser } = useAuth()
-  const { userWallet, actions } = useAppData()
+  const { userWallet, userPaymentMethods, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const walletPath = routes.walletManagement
@@ -108,6 +123,8 @@ export default function UserWallet({ section = 'overview' }) {
 
   const [topUpOpen, setTopUpOpen] = useState(false)
   const [topUpAmount, setTopUpAmount] = useState('')
+  const [topUpMethodId, setTopUpMethodId] = useState('')
+  const [topUpConfirmOpen, setTopUpConfirmOpen] = useState(false)
   const [categoryDetailKind, setCategoryDetailKind] = useState(null)
   const [selectedTxn, setSelectedTxn] = useState(null)
   const [successMessage, setSuccessMessage] = useState('')
@@ -119,6 +136,9 @@ export default function UserWallet({ section = 'overview' }) {
   const today = useMemo(() => new Date(), [])
   const stats = useMemo(() => computeUserWalletStats(userWallet), [userWallet])
   const transactions = useMemo(() => (userWallet.transactions || []).map(parseUserTxn), [userWallet])
+
+  const defaultTopUpMethod = userPaymentMethods.find((m) => m.isDefault)
+  const selectedTopUpMethod = userPaymentMethods.find((m) => m.id === topUpMethodId) || (userPaymentMethods.length === 1 ? userPaymentMethods[0] : null) || defaultTopUpMethod
 
   const dateRange = useMemo(() => {
     if (spendPeriod === 'custom') {
@@ -180,15 +200,24 @@ export default function UserWallet({ section = 'overview' }) {
 
   const openTopUpModal = () => {
     setTopUpAmount('')
+    setTopUpMethodId('')
+    setTopUpConfirmOpen(false)
     setTopUpOpen(true)
+  }
+
+  const handleTopUpSubmit = () => {
+    const value = Number(topUpAmount)
+    if (!value || value <= 0) return
+    setTopUpConfirmOpen(true)
   }
 
   const handleTopUp = () => {
     const value = Number(topUpAmount)
     if (!value || value <= 0) return
     actions.topUpUserWallet(value)
+    setTopUpConfirmOpen(false)
     setTopUpOpen(false)
-    setSuccessMessage(`₹${value.toLocaleString('en-IN')} has been added to your wallet.`)
+    setSuccessMessage(`₹${value.toLocaleString('en-IN')} has been added to your wallet via ${selectedTopUpMethod ? maskMethod(selectedTopUpMethod) : 'your selected method'}.`)
   }
 
   const topUpError = topUpAmount && Number(topUpAmount) <= 0 ? 'Enter an amount greater than zero' : null
@@ -239,6 +268,55 @@ export default function UserWallet({ section = 'overview' }) {
         </td>
       </tr>
     ))
+
+  const renderTopUpMethodPicker = () => {
+    if (userPaymentMethods.length === 0) {
+      return (
+        <div style={{ padding: '8px 0 4px' }}>
+          <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+            No payment methods saved yet. Add one to top up your wallet.
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate(routes?.paymentMethods || `${walletPath}/payment-methods`)}
+          >
+            <CreditCard size={16} /> Add Payment Method
+          </button>
+        </div>
+      )
+    }
+    return (
+      <div className="field-group" style={{ marginTop: 18 }}>
+        <label className="field-label-top">Pay Using</label>
+        <div className="withdraw-methods">
+          {userPaymentMethods.map((method) => {
+            const Icon = TOPUP_METHOD_ICONS[method.type] || CreditCard
+            const selected = selectedTopUpMethod?.id === method.id
+            return (
+              <button
+                key={method.id}
+                type="button"
+                className={`withdraw-method-option ${selected ? 'is-selected' : ''}`}
+                onClick={() => setTopUpMethodId(method.id)}
+              >
+                <div className="withdraw-method-left">
+                  <Icon size={18} style={{ color: 'var(--primary)' }} />
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{maskMethod(method)}</div>
+                    {method.isDefault && <div style={{ color: 'var(--muted)', fontSize: 11 }}>Default</div>}
+                  </div>
+                </div>
+                <div className={`withdraw-method-check ${selected ? 'is-visible' : ''}`}>
+                  <Check size={14} />
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -521,6 +599,8 @@ export default function UserWallet({ section = 'overview' }) {
                 ))}
               </div>
 
+              {renderTopUpMethodPicker()}
+
               <div className="wallet-withdraw-summary">
                 <div><span>Amount</span><strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong></div>
                 <div><span>Platform Fee</span><strong>₹0</strong></div>
@@ -531,10 +611,10 @@ export default function UserWallet({ section = 'overview' }) {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={!topUpAmount || Number(topUpAmount) <= 0}
-                  onClick={handleTopUp}
+                  disabled={!topUpAmount || Number(topUpAmount) <= 0 || !selectedTopUpMethod}
+                  onClick={handleTopUpSubmit}
                 >
-                  <Plus size={16} /> Add to Wallet
+                  <Plus size={16} /> Continue to Confirm
                 </button>
               </div>
             </Card>
@@ -639,6 +719,8 @@ export default function UserWallet({ section = 'overview' }) {
                 ))}
               </div>
 
+              {renderTopUpMethodPicker()}
+
               <div className="wallet-withdraw-summary">
                 <div><span>Amount</span><strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong></div>
                 <div><span>Platform Fee</span><strong>₹0</strong></div>
@@ -647,8 +729,61 @@ export default function UserWallet({ section = 'overview' }) {
             </div>
             <div className="modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setTopUpOpen(false)}>Cancel</button>
-              <button type="button" className="btn btn-primary" disabled={!topUpAmount || Number(topUpAmount) <= 0} onClick={handleTopUp}>
-                <Plus size={16} /> Add to Wallet
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!topUpAmount || Number(topUpAmount) <= 0 || !selectedTopUpMethod}
+                onClick={handleTopUpSubmit}
+              >
+                <Plus size={16} /> Continue to Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      ), document.body)}
+
+      {/* Top Up Confirm Modal */}
+      {topUpConfirmOpen && createPortal((
+        <div className="modal-overlay" onClick={() => setTopUpConfirmOpen(false)}>
+          <div className="modal-card" style={{ width: 'min(440px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>
+                <Wallet size={20} /> Confirm Top-Up
+              </div>
+              <button type="button" className="icon-btn" aria-label="Close" onClick={() => setTopUpConfirmOpen(false)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content">
+              <div className="withdraw-review">
+                <div className="withdraw-review-row">
+                  <span>Amount to add</span>
+                  <strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong>
+                </div>
+                <div className="withdraw-review-row">
+                  <span>Pay using</span>
+                  <strong>{selectedTopUpMethod ? maskMethod(selectedTopUpMethod) : '—'}</strong>
+                </div>
+                <div className="withdraw-review-row">
+                  <span>Platform Fee</span>
+                  <strong>₹0</strong>
+                </div>
+                <div className="withdraw-review-row withdraw-review-total">
+                  <span>Total to charge</span>
+                  <strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong>
+                </div>
+                <div className="withdraw-review-note">
+                  <Info size={14} /> Amount is added to your wallet immediately.
+                </div>
+              </div>
+            </div>
+            <div className="modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setTopUpConfirmOpen(false)}>Back</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!topUpAmount || Number(topUpAmount) <= 0 || !selectedTopUpMethod}
+                onClick={handleTopUp}
+              >
+                <Plus size={16} /> Confirm & Add Money
               </button>
             </div>
           </div>

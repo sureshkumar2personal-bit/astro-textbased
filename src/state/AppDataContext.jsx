@@ -593,6 +593,23 @@ function loadUserWallet() {
   return initialUserWallet
 }
 
+const USER_PAYMENT_METHODS_STORAGE_KEY = 'astroconnect-user-payment-methods'
+const USER_AUTOPAYS_STORAGE_KEY = 'astroconnect-user-autopays'
+const USER_WITHDRAWALS_STORAGE_KEY = 'astroconnect-user-withdrawals'
+
+const initialUserPaymentMethods = [
+  { id: 'upm-hdfc', type: 'bank', bankName: 'HDFC Bank', accountNumber: '98765432104589', ifsc: 'HDFC0001234', accountHolder: 'Priya V.', accountType: 'Savings', isDefault: true },
+  { id: 'upm-gpay', type: 'upi', upiId: 'priya@upi', upiProvider: 'Google Pay', isDefault: false },
+  { id: 'upm-visa', type: 'card', cardHolder: 'Priya V.', cardNumber: '4111111111118821', cardNetwork: 'Visa', cardType: 'Credit', expiryMonth: '12', expiryYear: '2027', isDefault: false },
+]
+
+const initialUserAutopays = [
+  { id: 'uap-1', type: 'subscription', paymentMethodId: 'upm-hdfc', amount: 499, frequency: 'monthly', status: 'active', triggerThreshold: null, nextRunAt: '2026-10-08T10:00:00+05:30', createdAt: '2026-08-01T10:00:00+05:30' },
+  { id: 'uap-2', type: 'low-balance', paymentMethodId: 'upm-gpay', amount: 500, frequency: null, status: 'active', triggerThreshold: 200, nextRunAt: null, createdAt: '2026-08-15T10:00:00+05:30' },
+]
+
+const initialUserWithdrawals = []
+
 const initialProfile = {
   name: 'Dr. Rani',
   role: 'Astrologer',
@@ -1153,6 +1170,9 @@ export function AppDataProvider({ children }) {
     Object.fromEntries(mockAstrologerPosts.map((post) => [post.id, post.comments || []])),
   ))
   const [presenceActive, setPresenceActive] = useState(false)
+  const [userPaymentMethods, setUserPaymentMethods] = useState(() => loadFromStorage(USER_PAYMENT_METHODS_STORAGE_KEY, initialUserPaymentMethods))
+  const [userAutopays, setUserAutopays] = useState(() => loadFromStorage(USER_AUTOPAYS_STORAGE_KEY, initialUserAutopays))
+  const [userWithdrawals, setUserWithdrawals] = useState(() => loadFromStorage(USER_WITHDRAWALS_STORAGE_KEY, initialUserWithdrawals))
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
   ))
@@ -1259,6 +1279,18 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(CONSULTATIONS_STORAGE_KEY, consultations)
   }, [consultations])
+
+  useEffect(() => {
+    saveToStorage(USER_PAYMENT_METHODS_STORAGE_KEY, userPaymentMethods)
+  }, [userPaymentMethods])
+
+  useEffect(() => {
+    saveToStorage(USER_AUTOPAYS_STORAGE_KEY, userAutopays)
+  }, [userAutopays])
+
+  useEffect(() => {
+    saveToStorage(USER_WITHDRAWALS_STORAGE_KEY, userWithdrawals)
+  }, [userWithdrawals])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -2567,7 +2599,67 @@ export function AppDataProvider({ children }) {
       }))
       return txn
     },
-  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet])
+
+    // User Payment Methods
+    addUserPaymentMethod(payload) {
+      const method = {
+        id: `upm-${Date.now().toString(36)}`,
+        ...payload,
+        isDefault: payload.isDefault || userPaymentMethods.length === 0,
+      }
+      if (method.isDefault) {
+        setUserPaymentMethods((prev) => [...prev.map((m) => ({ ...m, isDefault: false })), method])
+      } else {
+        setUserPaymentMethods((prev) => [...prev, method])
+      }
+      return method
+    },
+    updateUserPaymentMethod(methodId, patch) {
+      setUserPaymentMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, ...patch } : m)))
+    },
+    removeUserPaymentMethod(methodId) {
+      setUserPaymentMethods((prev) => {
+        const remaining = prev.filter((m) => m.id !== methodId)
+        if (remaining.length && !remaining.some((m) => m.isDefault)) {
+          remaining[0].isDefault = true
+        }
+        return remaining
+      })
+    },
+    setDefaultUserPaymentMethod(methodId) {
+      setUserPaymentMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
+    },
+
+    // User Autopays
+    createUserAutopay(payload) {
+      const autopay = {
+        id: `uap-${Date.now().toString(36)}`,
+        ...payload,
+        createdAt: new Date().toISOString(),
+      }
+      setUserAutopays((prev) => [autopay, ...prev])
+      return autopay
+    },
+    updateUserAutopay(autopayId, patch) {
+      setUserAutopays((prev) => prev.map((a) => (a.id === autopayId ? { ...a, ...patch } : a)))
+    },
+    deleteUserAutopay(autopayId) {
+      setUserAutopays((prev) => prev.filter((a) => a.id !== autopayId))
+    },
+
+    // User Withdrawals
+    createWithdrawal(payload) {
+      const withdrawal = {
+        id: `WD-${Date.now().toString(36)}`,
+        ...payload,
+        date: new Date().toISOString().slice(0, 10),
+        time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        status: 'Processing',
+      }
+      setUserWithdrawals((prev) => [withdrawal, ...prev])
+      return withdrawal
+    },
+  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -2605,6 +2697,9 @@ export function AppDataProvider({ children }) {
     astrologerPosts,
     astrologerLiveSessions,
     appointmentAvailabilityTemplates,
+    userPaymentMethods,
+    userAutopays,
+    withdrawals: userWithdrawals,
     astrologerServices: getEffectiveAstrologerServices(astrologerServices, presenceActive),
     setSelectedCampaignId,
     setLiveStreamOpen,
@@ -2644,6 +2739,9 @@ export function AppDataProvider({ children }) {
     astrologerLiveSessions,
     appointmentAvailabilityTemplates,
     astrologerServices,
+    userPaymentMethods,
+    userAutopays,
+    userWithdrawals,
     actions,
   ])
 
