@@ -55,6 +55,15 @@ const TXN_DATE_OPTIONS = [
   { key: 'custom', label: 'Custom Range' },
 ]
 
+const SPENDING_PERIOD_OPTIONS = [
+  { key: 'today', label: 'Today' },
+  { key: 'last7days', label: 'Last 7 Days' },
+  { key: 'thismonth', label: 'This Month' },
+  { key: 'lastmonth', label: 'Last Month' },
+  { key: 'thisyear', label: 'This Year' },
+  { key: 'custom', label: 'Custom' },
+]
+
 const SPENDING_SOURCE_OPTIONS = [
   { key: 'appointment', icon: CalendarDays, color: 'var(--primary)' },
   { key: 'call', icon: Phone, color: 'var(--accent)' },
@@ -103,12 +112,23 @@ export default function UserWallet({ section = 'overview' }) {
   const [selectedTxn, setSelectedTxn] = useState(null)
   const [successMessage, setSuccessMessage] = useState('')
 
+  const [spendPeriod, setSpendPeriod] = useState('thismonth')
+  const [spendCustomStart, setSpendCustomStart] = useState('')
+  const [spendCustomEnd, setSpendCustomEnd] = useState('')
+
   const today = useMemo(() => new Date(), [])
   const stats = useMemo(() => computeUserWalletStats(userWallet), [userWallet])
   const transactions = useMemo(() => (userWallet.transactions || []).map(parseUserTxn), [userWallet])
 
-  const thisMonthRange = useMemo(() => getDateRangeForPeriod('thismonth', { today }), [today])
-  const spendingBreakdown = useMemo(() => getUserWalletSpendingBreakdown(transactions, thisMonthRange), [transactions, thisMonthRange])
+  const dateRange = useMemo(() => {
+    if (spendPeriod === 'custom') {
+      if (!spendCustomStart || !spendCustomEnd) return null
+      return { start: spendCustomStart, end: spendCustomEnd, label: `${spendCustomStart} → ${spendCustomEnd}` }
+    }
+    return getDateRangeForPeriod(spendPeriod, { today })
+  }, [spendPeriod, spendCustomStart, spendCustomEnd, today])
+
+  const spendingBreakdown = useMemo(() => getUserWalletSpendingBreakdown(transactions, dateRange), [transactions, dateRange])
 
   const recentTxns = useMemo(
     () => transactions.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).slice(0, 5),
@@ -193,7 +213,7 @@ export default function UserWallet({ section = 'overview' }) {
   const downloadCategoryPdf = () => {
     downloadPdf({
       title: `${USER_SPENDING_CATEGORY_LABELS[categoryEarnings.kind]} Spending`,
-      subtitle: `Period: This Month · Records: ${categoryEarnings.rows.length}`,
+      subtitle: `Period: ${dateRange?.label || 'Selected period'} · Records: ${categoryEarnings.rows.length}`,
       columns: ['Transaction ID', 'Date', 'Description', 'Amount'],
       rows: categoryEarnings.rows.map((row) => [
         row.id,
@@ -289,6 +309,32 @@ export default function UserWallet({ section = 'overview' }) {
           {/* Spending This Month */}
           <Section title="Spending This Month" icon={ArrowDownLeft}>
             <Card className="wallet-earnings-card">
+              <div className="wallet-period-field">
+                <label className="field-label-top" htmlFor="wallet-spending-period">Spending Period</label>
+                <select
+                  id="wallet-spending-period"
+                  className="select-input wallet-period-select"
+                  value={spendPeriod}
+                  onChange={(e) => setSpendPeriod(e.target.value)}
+                >
+                  {SPENDING_PERIOD_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                </select>
+              </div>
+
+              {spendPeriod === 'custom' && (
+                <div className="wallet-custom-range">
+                  <div>
+                    <label className="field-label-top">Start Date</label>
+                    <input type="date" className="text-input" value={spendCustomStart} onChange={(e) => setSpendCustomStart(e.target.value)} />
+                  </div>
+                  <span className="wallet-custom-range__arrow">→</span>
+                  <div>
+                    <label className="field-label-top">End Date</label>
+                    <input type="date" className="text-input" value={spendCustomEnd} onChange={(e) => setSpendCustomEnd(e.target.value)} />
+                  </div>
+                </div>
+              )}
+
               <div className="wallet-earnings-list">
                 {SPENDING_SOURCE_OPTIONS.map(({ key, icon: Icon, color }) => {
                   const kind = spendingBreakdown.kinds.find((item) => item.kind === key)
@@ -315,10 +361,10 @@ export default function UserWallet({ section = 'overview' }) {
               </div>
 
               <div className="wallet-earnings-total">
-                <span>This Month</span>
+                <span>{dateRange ? dateRange.label : 'Selected period'}</span>
                 <span>Total Spent ₹{spendingBreakdown.total.toLocaleString('en-IN')}</span>
               </div>
-              <div className="wallet-earnings-hint">Click a category to view the individual transactions this month.</div>
+              <div className="wallet-earnings-hint">Click a category to view the individual transactions in this period.</div>
             </Card>
           </Section>
 
@@ -615,7 +661,7 @@ export default function UserWallet({ section = 'overview' }) {
           <div className="modal-card modal-card--scroll" style={{ width: 'min(760px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
-                {USER_SPENDING_CATEGORY_LABELS[categoryDetailKind]} — This Month
+                {USER_SPENDING_CATEGORY_LABELS[categoryDetailKind]} — {dateRange ? dateRange.label : 'Selected period'}
                 <span className="wallet-modal-count">{categoryEarnings.rows.length} records · ₹{categoryEarnings.total.toLocaleString('en-IN')}</span>
               </div>
               <button type="button" className="icon-btn" aria-label="Close" onClick={() => setCategoryDetailKind(null)}><X size={16} /></button>
