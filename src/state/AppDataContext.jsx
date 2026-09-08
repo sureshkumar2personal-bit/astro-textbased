@@ -540,22 +540,58 @@ function maskPayoutLabel(method) {
 }
 
 const initialUserWallet = {
-  balance: 4500,
-  toppedUp: 10000,
-  spent: 5500,
-  refunded: 0,
+  seedVersion: 2,
+  balance: 18239,
+  toppedUp: 29000,
+  spent: 11210,
+  refunded: 449,
   transactions: [
-    { id: 'uw1', label: 'Wallet top-up', amount: '+₹5,000', time: '25 Jul 2026', date: '2026-07-25', type: 'topup' },
-    { id: 'uw2', label: 'Personal question - Marriage', amount: '-₹250', time: '21 Jul 2026', date: '2026-07-21', type: 'purchase' },
-    { id: 'uw3', label: 'Personal question - Marriage', amount: '-₹250', time: '21 Jul 2026', date: '2026-07-21', type: 'purchase' },
-    { id: 'uw4', label: 'Wallet top-up', amount: '+₹5,000', time: '20 Jul 2026', date: '2026-07-20', type: 'topup' },
-    { id: 'uw5', label: 'Personal question - Job/Health', amount: '-₹250', time: '18 Jul 2026', date: '2026-07-18', type: 'purchase' },
-    { id: 'uw6', label: 'General question - Business', amount: '-₹100', time: '17 Jul 2026', date: '2026-07-17', type: 'purchase' },
-    { id: 'uw7', label: 'Personal question - Job', amount: '-₹250', time: '16 Jul 2026', date: '2026-07-16', type: 'purchase' },
-    { id: 'uw8', label: 'Wallet top-up', amount: '+₹5,000', time: '15 Jul 2026', date: '2026-07-15', type: 'topup' },
+    { id: 'uw1', label: 'Wallet top-up', amount: '+₹1,500', time: '09:30 AM', date: '2026-09-08', type: 'topup' },
+    { id: 'uw2', label: 'Audio call consultation - Relationship', amount: '-₹750', time: '10:15 AM', date: '2026-09-08', type: 'purchase' },
+    { id: 'uw3', label: 'Chat consultation - Career', amount: '-₹349', time: '11:40 AM', date: '2026-09-08', type: 'purchase' },
+    { id: 'uw4', label: 'Wallet top-up', amount: '+₹3,000', time: '10:15 AM', date: '2026-09-07', type: 'topup' },
+    { id: 'uw5', label: 'Audio call consultation - Career', amount: '-₹850', time: '08:45 PM', date: '2026-09-07', type: 'purchase' },
+    { id: 'uw6', label: 'Appointment consultation - Health', amount: '-₹799', time: '11:30 AM', date: '2026-09-06', type: 'purchase' },
+    { id: 'uw7', label: 'Chat consultation - Relationship', amount: '-₹299', time: '09:05 PM', date: '2026-09-05', type: 'purchase' },
+    { id: 'uw8', label: 'Wallet top-up', amount: '+₹2,000', time: '04:20 PM', date: '2026-09-04', type: 'topup' },
+    { id: 'uw9', label: 'General question - Business', amount: '-₹100', time: '01:10 PM', date: '2026-09-03', type: 'purchase' },
+    { id: 'uw10', label: 'Appointment consultation - Finance', amount: '-₹499', time: '06:00 PM', date: '2026-09-02', type: 'purchase' },
+    { id: 'uw11', label: 'Personal question - Health', amount: '-₹250', time: '10:00 AM', date: '2026-09-01', type: 'purchase' },
+    { id: 'uw12', label: 'General question - Relationship', amount: '-₹100', time: '03:15 PM', date: '2026-09-01', type: 'purchase' },
+    { id: 'uw13', label: 'Wallet top-up', amount: '+₹1,000', time: '06:40 PM', date: '2026-08-30', type: 'topup' },
+    { id: 'uw14', label: 'Personal question - Marriage', amount: '-₹250', time: '07:40 PM', date: '2026-08-28', type: 'purchase' },
+    { id: 'uw15', label: 'Wallet top-up', amount: '+₹5,000', time: '12:00 PM', date: '2026-08-25', type: 'topup' },
+    { id: 'uw16', label: 'Audio call consultation - Finance', amount: '-₹699', time: '08:20 PM', date: '2026-08-22', type: 'purchase' },
+    { id: 'uw17', label: 'Refund - Chat consultation (cancelled)', amount: '+₹249', time: '05:30 PM', date: '2026-08-19', type: 'refund' },
+    { id: 'uw18', label: 'Appointment consultation - Vastu', amount: '-₹599', time: '10:00 AM', date: '2026-08-18', type: 'purchase' },
+    { id: 'uw19', label: 'Wallet top-up', amount: '+₹2,500', time: '03:30 PM', date: '2026-08-15', type: 'topup' },
+    { id: 'uw20', label: 'Chat consultation - Career', amount: '-₹249', time: '09:10 PM', date: '2026-08-12', type: 'purchase' },
+    { id: 'uw21', label: 'Appointment consultation - Love', amount: '-₹899', time: '02:25 PM', date: '2026-08-11', type: 'purchase' },
+    { id: 'uw22', label: 'Refund - Audio call (disconnected)', amount: '+₹200', time: '02:50 PM', date: '2026-08-09', type: 'refund' },
+    { id: 'uw23', label: 'Pooja booking - Ganapathi Homam', amount: '-₹1,500', time: '11:45 AM', date: '2026-08-05', type: 'purchase' },
+    { id: 'uw24', label: 'Personal question - Family', amount: '-₹250', time: '06:30 PM', date: '2026-07-28', type: 'purchase' },
+    { id: 'uw25', label: 'Wallet top-up', amount: '+₹5,000', time: '10:50 AM', date: '2026-07-20', type: 'topup' },
+    { id: 'uw26', label: 'General question - Health', amount: '-₹120', time: '05:15 PM', date: '2026-07-18', type: 'purchase' },
+    { id: 'uw27', label: 'Audio call consultation - Love', amount: '-₹650', time: '09:00 PM', date: '2026-07-10', type: 'purchase' },
+    { id: 'uw28', label: 'Wallet top-up', amount: '+₹4,000', time: '07:00 PM', date: '2026-06-25', type: 'topup' },
+    { id: 'uw29', label: 'Audio call consultation - Career', amount: '-₹750', time: '08:05 PM', date: '2026-06-18', type: 'purchase' },
+    { id: 'uw30', label: 'Appointment consultation - Health', amount: '-₹599', time: '12:30 PM', date: '2026-05-20', type: 'purchase' },
+    { id: 'uw31', label: 'Wallet top-up', amount: '+₹3,000', time: '11:00 AM', date: '2026-05-10', type: 'topup' },
+    { id: 'uw32', label: 'Chat consultation - Relationship', amount: '-₹299', time: '09:25 PM', date: '2026-04-15', type: 'purchase' },
+    { id: 'uw33', label: 'Personal question - Marriage', amount: '-₹250', time: '06:10 PM', date: '2026-03-22', type: 'purchase' },
+    { id: 'uw34', label: 'General question - Business', amount: '-₹100', time: '04:45 PM', date: '2026-02-14', type: 'purchase' },
+    { id: 'uw35', label: 'Wallet top-up', amount: '+₹2,000', time: '12:15 PM', date: '2026-01-30', type: 'topup' },
   ],
 }
 const USER_WALLET_STORAGE_KEY = 'astroconnect-app-data-user-wallet'
+
+function loadUserWallet() {
+  const stored = loadFromStorage(USER_WALLET_STORAGE_KEY, null)
+  if (stored && typeof stored === 'object' && stored.seedVersion === initialUserWallet.seedVersion) {
+    return stored
+  }
+  return initialUserWallet
+}
 
 const initialProfile = {
   name: 'Dr. Rani',
@@ -1073,7 +1109,7 @@ export function AppDataProvider({ children }) {
   })
   const [notifications, setNotifications] = useState(initialNotifications)
   const [astrologerWallet, setAstrologerWallet] = useState(loadAstrologerWallet)
-  const [userWallet, setUserWallet] = useState(() => loadFromStorage(USER_WALLET_STORAGE_KEY, initialUserWallet))
+  const [userWallet, setUserWallet] = useState(() => loadUserWallet())
   const [profile] = useState(initialProfile)
   const [selectedCampaignId, setSelectedCampaignId] = useState(initialCampaigns[0].id)
   const [liveStreamOpen, setLiveStreamOpen] = useState(false)
