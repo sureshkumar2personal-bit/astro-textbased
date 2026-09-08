@@ -65,6 +65,11 @@ import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
+import PaymentMethods from './pages/user/payment-methods/PaymentMethods.jsx'
+import AddPaymentMethod from './pages/user/payment-methods/AddPaymentMethod.jsx'
+import Autopay from './pages/user/autopay/Autopay.jsx'
+import Withdraw from './pages/user/withdraw/Withdraw.jsx'
+import TransactionHistory from './pages/user/transaction-history/TransactionHistory.jsx'
 import AstrologerLiveSessionShell, {
   AstrologerLiveSessionConfigure,
   AstrologerLiveSessionSetup,
@@ -208,6 +213,11 @@ function UserRoutes() {
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
+        <Route path="/user/payment-methods" element={<PaymentMethods />} />
+        <Route path="/user/payment-methods/add" element={<AddPaymentMethod />} />
+        <Route path="/user/autopay" element={<Autopay />} />
+        <Route path="/user/withdraw" element={<Withdraw />} />
+        <Route path="/user/transaction-history" element={<TransactionHistory />} />
       </Route>
     </Route>
   )
