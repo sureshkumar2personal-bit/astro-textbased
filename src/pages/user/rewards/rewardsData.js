@@ -1,0 +1,330 @@
+// Frontend mock data for the user-facing Rewards Center.
+// Everything here is static/demo-only; no backend calls.
+
+const DAYS = 24 * 60 * 60 * 1000
+
+function daysFromNow(days) {
+  const d = new Date(Date.now() + days * DAYS)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+export const REWARD_ASTROLOGERS = [
+  {
+    id: 'astrologer-demo',
+    name: 'Dr. Rani',
+    specialty: 'Vedic Astrology',
+    rating: '4.9',
+    availability: 'online',
+    initials: 'DR',
+  },
+  {
+    id: 'acharya-meena',
+    name: 'Acharya Meena',
+    specialty: 'Family & Remedies',
+    rating: '4.8',
+    availability: 'offline',
+    initials: 'AM',
+  },
+  {
+    id: 'astrologer-10',
+    name: 'Nandini Kapoor',
+    specialty: 'KP Astrology',
+    rating: '4.8',
+    availability: 'online',
+    initials: 'NK',
+  },
+  {
+    id: 'astrologer-13',
+    name: 'Priya Sharma',
+    specialty: 'Vedic Astrology',
+    rating: '4.7',
+    availability: 'online',
+    initials: 'PS',
+  },
+  {
+    id: 'astrologer-11',
+    name: 'Dev Malhotra',
+    specialty: 'Western Astrology',
+    rating: '4.6',
+    availability: 'offline',
+    initials: 'DM',
+  },
+  {
+    id: 'astrologer-demo-3',
+    name: 'Arjun Sharma',
+    specialty: 'Numerology',
+    rating: '4.5',
+    availability: 'online',
+    initials: 'AS',
+  },
+]
+
+export const REWARD_STATUS = {
+  AVAILABLE: 'Available',
+  EXPIRING: 'Expiring Soon',
+  USED: 'Used',
+  LOCKED: 'Locked',
+  SUBSCRIBER: 'Subscriber Only',
+}
+
+// Questions / free & discounted question rewards
+export const QUESTION_REWARDS = [
+  {
+    id: 'q-1',
+    astrologerId: 'astrologer-demo',
+    title: 'Free Text Question',
+    type: 'Free Question',
+    value: '1 free question',
+    description: 'Ask one personal question and get a detailed written answer.',
+    expiresOn: daysFromNow(9),
+    expiresInDays: 9,
+    status: REWARD_STATUS.EXPIRING,
+  },
+  {
+    id: 'q-2',
+    astrologerId: 'astrologer-demo',
+    title: 'Discounted Question',
+    type: 'Discount',
+    value: '70% OFF',
+    description: 'Save 70% on a health category question.',
+    expiresOn: daysFromNow(15),
+    expiresInDays: 15,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+  {
+    id: 'q-3',
+    astrologerId: 'acharya-meena',
+    title: 'Free Text Question',
+    type: 'Free Question',
+    value: '1 free question',
+    description: 'Ask a family or remedies question at no cost.',
+    expiresOn: daysFromNow(6),
+    expiresInDays: 6,
+    status: REWARD_STATUS.EXPIRING,
+  },
+  {
+    id: 'q-4',
+    astrologerId: 'astrologer-10',
+    title: 'Discount Question',
+    type: 'Discount',
+    value: '40% OFF',
+    description: 'Discounted KP astrology career question.',
+    expiresOn: daysFromNow(21),
+    expiresInDays: 21,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+  {
+    id: 'q-5',
+    astrologerId: 'astrologer-13',
+    title: 'Free Text Question',
+    type: 'Free Question',
+    value: '1 free question',
+    description: 'One free question for this billing cycle.',
+    expiresOn: daysFromNow(-3),
+    expiresInDays: -3,
+    status: REWARD_STATUS.USED,
+  },
+  {
+    id: 'q-6',
+    astrologerId: 'astrologer-11',
+    title: 'Subscriber Question',
+    type: 'Subscriber',
+    value: '1 question',
+    description: 'Exclusive question slot for active subscribers.',
+    expiresOn: daysFromNow(30),
+    expiresInDays: 30,
+    status: REWARD_STATUS.SUBSCRIBER,
+  },
+]
+
+// Appointment rewards / discounts
+export const APPOINTMENT_REWARDS = [
+  {
+    id: 'apt-1',
+    astrologerId: 'astrologer-demo',
+    title: 'Appointment Discount',
+    type: 'Appointment Discount',
+    value: '20% OFF',
+    description: 'Flat 20% off your next video or audio consultation.',
+    expiresOn: daysFromNow(11),
+    expiresInDays: 11,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+  {
+    id: 'apt-2',
+    astrologerId: 'acharya-meena',
+    title: 'Appointment Discount',
+    type: 'Appointment Discount',
+    value: '25% OFF',
+    description: '25% off for family and remedies consultations.',
+    expiresOn: daysFromNow(4),
+    expiresInDays: 4,
+    status: REWARD_STATUS.EXPIRING,
+  },
+  {
+    id: 'apt-3',
+    astrologerId: 'astrologer-10',
+    title: 'Priority Slot',
+    type: 'Priority Booking',
+    value: 'Priority',
+    description: 'Book a priority slot before general availability opens.',
+    expiresOn: daysFromNow(18),
+    expiresInDays: 18,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+  {
+    id: 'apt-4',
+    astrologerId: 'astrologer-demo-3',
+    title: 'Appointment Discount',
+    type: 'Appointment Discount',
+    value: '15% OFF',
+    description: 'Numerology consultation discount for subscribers.',
+    expiresOn: daysFromNow(6),
+    expiresInDays: 6,
+    status: REWARD_STATUS.LOCKED,
+  },
+  {
+    id: 'apt-5',
+    astrologerId: 'astrologer-13',
+    title: 'Appointment Discount',
+    type: 'Appointment Discount',
+    value: '10% OFF',
+    description: 'Small discount for returning clients.',
+    expiresOn: daysFromNow(2),
+    expiresInDays: 2,
+    status: REWARD_STATUS.USED,
+  },
+]
+
+// Content rewards: posts, videos, articles, subscriber-only
+export const CONTENT_REWARDS = [
+  {
+    id: 'cnt-1',
+    astrologerId: 'astrologer-demo',
+    title: 'Understanding the right time to begin',
+    type: 'Article',
+    contentType: 'article',
+    description: 'An article on timing, preparation, and patience.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.AVAILABLE,
+    isSubscriberOnly: false,
+  },
+  {
+    id: 'cnt-2',
+    astrologerId: 'astrologer-demo',
+    title: 'Saturn Transit 2026 — Video Guide',
+    type: 'Video',
+    contentType: 'video',
+    description: 'A subscriber-only video walkthrough of the 2026 Saturn transit.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.SUBSCRIBER,
+    isSubscriberOnly: true,
+  },
+  {
+    id: 'cnt-3',
+    astrologerId: 'astrologer-13',
+    title: 'Career Path Through Astrology',
+    type: 'Article',
+    contentType: 'article',
+    description: 'Patterns around career growth, opportunities, and decisions.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.AVAILABLE,
+    isSubscriberOnly: false,
+  },
+  {
+    id: 'cnt-4',
+    astrologerId: 'astrologer-10',
+    title: 'Moon Sign Masterclass',
+    type: 'Video',
+    contentType: 'video',
+    description: 'Emotional patterns, instincts, and inner responses explained.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.AVAILABLE,
+    isSubscriberOnly: false,
+  },
+  {
+    id: 'cnt-5',
+    astrologerId: 'astrologer-11',
+    title: 'Weekly Planetary Transits',
+    type: 'Post',
+    contentType: 'post',
+    description: 'Communication, relationships, and personal decisions this week.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.SUBSCRIBER,
+    isSubscriberOnly: true,
+  },
+  {
+    id: 'cnt-6',
+    astrologerId: 'acharya-meena',
+    title: 'Small Rituals for a Calmer Week',
+    type: 'Article',
+    contentType: 'article',
+    description: 'A few quiet minutes of reflection to reset your priorities.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.AVAILABLE,
+    isSubscriberOnly: false,
+  },
+  {
+    id: 'cnt-7',
+    astrologerId: 'astrologer-demo',
+    title: 'Your chart is a guide',
+    type: 'Post',
+    contentType: 'post',
+    description: 'Astrology helps you understand patterns; your choices give direction.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.USED,
+    isSubscriberOnly: false,
+  },
+]
+
+// Benefits (redeemable perks like discount questions)
+export const BENEFIT_REWARDS = [
+  {
+    id: 'ben-1',
+    title: 'Monthly Discount Question',
+    type: 'Benefit',
+    value: '1 question',
+    description: 'One discounted question every subscription cycle.',
+    expiresOn: daysFromNow(12),
+    expiresInDays: 12,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+  {
+    id: 'ben-2',
+    title: 'Subscriber Pricing',
+    type: 'Benefit',
+    value: 'Up to 90% OFF',
+    description: 'Reduced rates across all subscribed astrologers.',
+    expiresOn: daysFromNow(30),
+    expiresInDays: 30,
+    status: REWARD_STATUS.SUBSCRIBER,
+  },
+  {
+    id: 'ben-3',
+    title: 'Priority Support',
+    type: 'Benefit',
+    value: 'Priority',
+    description: 'Faster responses to your questions and disputes.',
+    expiresOn: null,
+    expiresInDays: null,
+    status: REWARD_STATUS.AVAILABLE,
+  },
+]
+
+export const ALL_REWARDS = [
+  ...QUESTION_REWARDS.map((reward) => ({ ...reward, category: 'questions' })),
+  ...APPOINTMENT_REWARDS.map((reward) => ({ ...reward, category: 'appointments' })),
+  ...CONTENT_REWARDS.map((reward) => ({ ...reward, category: 'content' })),
+  ...BENEFIT_REWARDS.map((reward) => ({ ...reward, category: 'benefits' })),
+]
+
+export function getAstrologerById(id) {
+  return REWARD_ASTROLOGERS.find((astrologer) => astrologer.id === id) || null
+}

@@ -12223,3 +12223,295 @@ button.apt-week-day:focus-visible {
     border-radius: 0;
   }
 }
+
+/* =============================================================
+   Rewards Center
+   ============================================================= */
+.rewards-center { display: grid; gap: 28px; }
+.reward-results { display: grid; gap: 28px; }
+
+/* --- Summary cards --- */
+.reward-summary-grid {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
+}
+.reward-summary-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 18px; border: 1px solid var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-strong); box-shadow: var(--shadow-card);
+}
+.reward-summary-icon {
+  display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px;
+  border-radius: var(--radius-s);
+}
+.reward-summary-card--violet .reward-summary-icon { color: var(--primary); background: var(--primary-bg); }
+.reward-summary-card--gold .reward-summary-icon { color: var(--accent-dark); background: var(--gold-100); }
+.reward-summary-card--green .reward-summary-icon { color: var(--green-600); background: var(--green-100); }
+.reward-summary-card--red .reward-summary-icon { color: var(--red-600); background: var(--red-100); }
+.reward-summary-body { min-width: 0; }
+.reward-summary-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; line-height: 1.1; color: var(--ink, var(--text-primary)); }
+.reward-summary-label { margin-top: 2px; font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+.reward-summary-hint { margin-top: 3px; font-size: 12px; color: var(--muted); }
+
+/* --- Filter tabs --- */
+.reward-filter {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 6px; border: 1px solid var(--surface-border); border-radius: var(--radius-s);
+  background: var(--surface-soft); width: fit-content; max-width: 100%;
+}
+.reward-filter-tab {
+  border: 0; background: transparent; cursor: pointer;
+  padding: 9px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 700; color: var(--text-secondary);
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+  white-space: nowrap;
+}
+.reward-filter-tab:hover { background: var(--surface); color: var(--text-primary); }
+.reward-filter-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.reward-filter-tab.is-active { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+
+/* --- Expiring banner --- */
+.reward-expiring {
+  display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+  padding: 14px 18px; border: 1px solid var(--amber-200, #fde68a); border-radius: var(--radius-s);
+  background: var(--warning-bg, #fffbeb);
+}
+.reward-expiring-head { display: flex; align-items: center; gap: 8px; }
+.reward-expiring-icon { color: var(--amber-600, #d97706); }
+.reward-expiring-head strong { font-size: 14px; color: var(--amber-700, #92400e); }
+.reward-expiring-list { display: flex; gap: 10px; flex-wrap: wrap; }
+.reward-expiring-item {
+  display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 12px; border: 1px solid var(--amber-200, #fde68a); border-radius: 999px;
+  background: #fff; color: var(--text-primary); font-size: 12px; cursor: pointer;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.reward-expiring-item:hover { border-color: var(--primary); transform: translateY(-1px); }
+.reward-expiring-item-name { font-weight: 800; }
+.reward-expiring-item-title { color: var(--text-secondary); font-weight: 600; }
+.reward-expiring-item-days { font-weight: 700; color: var(--red-600); }
+
+/* --- Status pills --- */
+.reward-status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800;
+  white-space: nowrap;
+}
+.reward-status-pill--success { color: var(--green-600); background: var(--green-100); }
+.reward-status-pill--amber { color: var(--amber-600, #d97706); background: var(--warning-bg, #fffbeb); }
+.reward-status-pill--muted { color: var(--muted); background: var(--neutral-bg, #f3f4f6); }
+.reward-status-pill--violet { color: var(--primary); background: var(--primary-bg); }
+.reward-status-pill--red { color: var(--red-600); background: var(--red-100); }
+
+/* --- Avatar & astrologer meta --- */
+.reward-avatar {
+  display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 46px;
+  border-radius: 14px; background: linear-gradient(135deg, var(--violet-500), var(--violet-700));
+  color: #fff; font-size: 15px; font-weight: 800;
+}
+.reward-astro-meta { min-width: 0; }
+.reward-astro-name {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 15px; font-weight: 800; color: var(--ink, var(--text-primary));
+}
+.reward-astro-arrow { color: var(--primary); }
+.reward-astro-line { display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+.reward-astro-rating { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--amber-600, #d97706); }
+.reward-astro-specialty { font-size: 12px; color: var(--text-secondary); }
+.reward-astro-status {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; padding: 3px 9px;
+  border-radius: 999px; font-size: 11px; font-weight: 700;
+}
+.reward-astro-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.reward-astro-status--online { color: var(--green-600); background: var(--green-100); }
+.reward-astro-status--offline { color: var(--muted); background: var(--neutral-bg, #f3f4f6); }
+
+/* --- Section head --- */
+.reward-section-head { display: grid; gap: 6px; margin-bottom: 16px; }
+.reward-section-title {
+  display: flex; align-items: center; gap: 9px; color: var(--ink, var(--text-primary));
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 19px; font-weight: 800;
+}
+.reward-section-title svg { color: var(--primary); }
+.reward-section-desc { margin: 0; color: var(--text-secondary); font-size: 13px; }
+
+/* --- Rewards grids (explore-style: 3 cards + View More) --- */
+.reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(136px, 0.58fr);
+  gap: 20px;
+  align-items: stretch;
+}
+.reward-grid--full { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.reward-grid__action {
+  display: flex;
+  min-height: 264px;
+  align-items: center;
+  justify-content: center;
+}
+.reward-grid__view-more {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 42px; padding: 0 16px;
+  border: 1.5px solid var(--secondary); border-radius: var(--radius-s);
+  background: var(--surface-strong); box-shadow: var(--shadow-xs);
+  color: var(--primary); font-size: 14px; font-weight: 700; text-decoration: none;
+  white-space: nowrap; cursor: pointer;
+  transition: transform 200ms var(--ease-premium), background 200ms var(--ease-premium), border-color 200ms var(--ease-premium);
+}
+.reward-grid__view-more:hover { transform: translateY(-2px); border-color: var(--primary); background: var(--primary-bg); }
+.reward-grid__view-more:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.reward-astrologer-grid { display: grid; gap: 20px; }
+.reward-appointment-grid { display: grid; gap: 20px; }
+.reward-content-grid { display: grid; gap: 20px; }
+.reward-benefit-grid { display: grid; gap: 20px; }
+.reward-astrologer-card {
+  display: flex; flex-direction: column; gap: 14px; padding: 18px;
+  border: 1px solid var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-strong); box-shadow: var(--shadow-card);
+}
+.reward-astrologer-top { display: flex; gap: 12px; align-items: flex-start; }
+.reward-astrologer-preview {
+  display: grid; gap: 8px; padding: 12px; border-radius: var(--radius-s);
+  background: var(--surface-soft); flex: 1;
+}
+.reward-astrologer-count { font-size: 12px; font-weight: 800; color: var(--primary); }
+.reward-astrologer-preview-row { display: flex; gap: 9px; align-items: flex-start; }
+.reward-astrologer-preview-icon { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 26px; border-radius: 8px; color: var(--primary); background: var(--primary-bg); }
+.reward-astrologer-preview-title { font-size: 13px; font-weight: 700; color: var(--ink, var(--text-primary)); margin-bottom: 4px; }
+.reward-astrologer-preview-expiry { font-size: 11px; color: var(--text-secondary); margin: 4px 0; }
+.reward-astrologer-action {
+  margin-top: auto; border: 0; cursor: pointer; border-radius: 11px;
+  padding: 10px 14px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 800;
+  transition: background .15s ease, transform .15s ease;
+}
+.reward-astrologer-action:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.reward-astrologer-action:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: 2px; }
+
+/* --- Appointment cards --- */
+.reward-appointment-grid { display: grid; gap: 20px; }
+.reward-appointment-card {
+  display: flex; flex-direction: column; gap: 12px; padding: 18px;
+  border: 1px solid var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-strong); box-shadow: var(--shadow-card);
+}
+.reward-appointment-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.reward-appointment-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-s); color: var(--primary); background: var(--primary-bg); }
+.reward-appointment-astro { display: flex; align-items: center; gap: 8px; }
+.reward-appointment-astro-name { font-size: 13px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-appointment-value { font-size: 26px; font-weight: 800; color: var(--accent-dark); line-height: 1.1; }
+.reward-appointment-title { font-size: 15px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-appointment-desc { font-size: 13px; color: var(--text-secondary); }
+.reward-appointment-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.reward-appointment-expiry { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+.reward-appointment-cta { margin-top: auto; }
+
+/* --- Content cards --- */
+.reward-content-grid { display: grid; gap: 20px; }
+.reward-content-card {
+  display: flex; flex-direction: column; gap: 9px; padding: 16px;
+  border: 1px solid var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-soft); box-shadow: var(--shadow-card);
+}
+.reward-content-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.reward-content-thumb {
+  display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--violet-100), var(--primary-bg)); color: var(--primary);
+}
+.reward-subscriber-badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 999px;
+  background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 800;
+}
+.reward-content-type { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--primary); }
+.reward-content-title { font-size: 14px; font-weight: 800; color: var(--ink, var(--text-primary)); line-height: 1.35; }
+.reward-content-astro { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.reward-content-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.reward-content-action {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: auto;
+  border: 0; background: transparent; color: var(--primary); font-size: 13px; font-weight: 800; cursor: pointer; padding: 0;
+}
+.reward-content-action:hover { text-decoration: underline; }
+
+/* --- Benefit cards --- */
+.reward-benefit-grid { display: grid; gap: 20px; }
+.reward-benefit-card {
+  display: flex; flex-direction: column; gap: 10px; padding: 18px;
+  border: 1px dashed var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-strong); box-shadow: var(--shadow-card);
+}
+.reward-benefit-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.reward-benefit-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-s); color: var(--accent-dark); background: var(--gold-100); }
+.reward-benefit-title { font-size: 15px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-benefit-value { font-size: 18px; font-weight: 800; color: var(--accent-dark); }
+.reward-benefit-desc { font-size: 13px; color: var(--text-secondary); }
+.reward-benefit-expiry { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); margin-top: auto; }
+
+/* --- Empty state --- */
+.reward-empty {
+  display: grid; gap: 10px; justify-items: center; text-align: center;
+  padding: 48px 24px; border: 1px dashed var(--surface-border); border-radius: var(--radius-m);
+  background: var(--surface-soft);
+}
+.reward-empty-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; color: var(--primary); background: var(--primary-bg); }
+.reward-empty-title { font-size: 16px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-empty-detail { max-width: 420px; color: var(--text-secondary); font-size: 13px; }
+
+/* --- Drawer --- */
+.reward-drawer-overlay {
+  position: fixed; inset: 0; z-index: 80; background: rgba(15, 23, 42, 0.45);
+  display: flex; justify-content: flex-end; animation: rewardFade .2s ease;
+}
+.reward-drawer {
+  width: min(440px, 100vw); height: 100%; background: var(--surface-strong);
+  box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+  animation: rewardSlide .28s var(--ease-premium, cubic-bezier(.16,1,.3,1));
+  overflow: hidden;
+}
+.reward-drawer-header {
+  display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+  border-bottom: 1px solid var(--surface-border);
+}
+.reward-drawer-header h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-drawer-header .icon-btn { margin-left: auto; }
+.reward-drawer-astrologer { display: flex; gap: 12px; align-items: flex-start; padding: 18px; }
+.reward-drawer-astro-name { font-size: 17px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-drawer-astro-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 3px; }
+.reward-drawer-astro-specialty {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+  background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 700;
+}
+.reward-drawer .reward-astro-status { margin-top: 7px; }
+.reward-drawer-count { padding: 0 18px 12px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.reward-drawer-list { flex: 1; overflow-y: auto; padding: 0 18px 24px; display: grid; gap: 14px; }
+.reward-drawer-item {
+  display: grid; gap: 9px; padding: 16px; border: 1px solid var(--surface-border); border-radius: var(--radius-s);
+  background: var(--surface-soft);
+}
+.reward-drawer-item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.reward-drawer-item-title { font-size: 14px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-drawer-item-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+.reward-drawer-item-chip { padding: 3px 8px; border-radius: 8px; background: var(--surface-strong); border: 1px solid var(--surface-border); font-size: 11px; font-weight: 700; color: var(--text-secondary); }
+.reward-drawer-item-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.reward-drawer-item-expiry { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); }
+.reward-drawer-cta { margin-top: 4px; }
+.reward-drawer-cta:disabled { opacity: .5; cursor: not-allowed; }
+
+@keyframes rewardFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rewardSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* --- Responsive --- */
+@media (max-width: 1279px) {
+  .reward-grid, .reward-grid--full { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .reward-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .rewards-center { gap: 20px; }
+  .reward-grid, .reward-grid--full { grid-template-columns: minmax(0, 1fr); }
+  .reward-grid__action { min-height: auto; justify-content: flex-start; }
+  .reward-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .reward-summary-value { font-size: 22px; }
+  .reward-filter { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .reward-filter-tab { flex: 1 0 auto; }
+  .reward-expiring { flex-direction: column; }
+  .reward-drawer { width: 100vw; }
+}
