@@ -54,7 +54,10 @@ import CallPaymentSuccess from './pages/CallPaymentSuccess.jsx'
 import VoiceCallScreen from './pages/VoiceCallScreen.jsx'
 import WalletPayment from './pages/WalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
-import Rewards from './pages/Rewards.jsx'
+import RewardsShell, {
+  RewardsPerks,
+  RewardsBenefits,
+} from './pages/user/rewards/Rewards.jsx'
 import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
@@ -66,6 +69,11 @@ import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
+import PaymentMethods from './pages/user/payment-methods/PaymentMethods.jsx'
+import AddPaymentMethod from './pages/user/payment-methods/AddPaymentMethod.jsx'
+import Autopay from './pages/user/autopay/Autopay.jsx'
+import Withdraw from './pages/user/withdraw/Withdraw.jsx'
+import TransactionHistory from './pages/user/transaction-history/TransactionHistory.jsx'
 import AstrologerLiveSessionShell, {
   AstrologerLiveSessionConfigure,
   AstrologerLiveSessionSetup,
@@ -207,12 +215,21 @@ function UserRoutes() {
         <Route path="/user/wallet-payment" element={<WalletPayment />} />
         <Route path="/chat/:astrologerId" element={<ChatScreen />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
-        <Route path="/user/rewards" element={<Rewards />} />
+        <Route path="/user/rewards" element={<RewardsShell />}>
+          <Route index element={<Navigate to="perks" replace />} />
+          <Route path="perks" element={<RewardsPerks />} />
+          <Route path="benefits" element={<RewardsBenefits />} />
+        </Route>
         <Route path="/user/my-account" element={<MyAccount />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
+        <Route path="/user/payment-methods" element={<PaymentMethods />} />
+        <Route path="/user/payment-methods/add" element={<AddPaymentMethod />} />
+        <Route path="/user/autopay" element={<Autopay />} />
+        <Route path="/user/withdraw" element={<Withdraw />} />
+        <Route path="/user/transaction-history" element={<TransactionHistory />} />
       </Route>
     </Route>
   )

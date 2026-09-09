@@ -31,6 +31,7 @@ import {
   Receipt,
   SlidersHorizontal,
   Send,
+  RefreshCw,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -111,7 +112,15 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
-      { to: 'rewards', label: 'Rewards', icon: Gift },
+      {
+        label: 'Total Rewards',
+        to: 'rewards/perks',
+        icon: Gift,
+        children: [
+          { to: 'rewards/perks', label: 'Perks', icon: Gift },
+          { to: 'rewards/benefits', label: 'Benefits', icon: Sparkles },
+        ],
+      },
       {
         label: 'Wallet',
         to: 'wallet/overview',
@@ -121,6 +130,10 @@ const ROLE_CONFIG = {
           { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
           { to: 'wallet/topups', label: 'Top-ups', icon: TrendingUp },
           { to: 'wallet/refunds', label: 'Refunds', icon: Receipt },
+          { to: 'payment-methods', label: 'Payment Methods', icon: CreditCard },
+          { to: 'autopay', label: 'Autopay', icon: RefreshCw },
+          { to: 'withdraw', label: 'Withdraw', icon: ArrowDownToLine },
+          { to: 'transaction-history', label: 'Full History', icon: History },
         ],
       },
       { to: 'my-account', label: 'My Account', icon: UserRound },
@@ -178,12 +191,19 @@ const PAGE_META = {
     '/user/dispute-management': { title: 'Dispute Management', sub: 'View dispute updates' },
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
-    '/user/rewards': { title: 'Rewards', sub: 'Subscriber benefits and discount questions' },
+    '/user/rewards': { title: 'Total Rewards', sub: 'Your perks and benefits from subscribed astrologers.' },
+    '/user/rewards/perks': { title: 'Perks', sub: 'Exclusive content and interactions from your subscribed astrologers.' },
+    '/user/rewards/benefits': { title: 'Benefits', sub: 'Discounts and rewards you can redeem as a subscriber.' },
     '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
+    '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },
+    '/user/payment-methods/add': { title: 'Add Payment Method', sub: 'Add a new bank account, UPI ID, or card.' },
+    '/user/autopay': { title: 'Autopay', sub: 'Manage automatic payments for subscriptions and top-ups.' },
+    '/user/withdraw': { title: 'Withdraw Funds', sub: 'Transfer money from your wallet to your bank or UPI.' },
+    '/user/transaction-history': { title: 'Transaction History', sub: 'Complete record of all wallet movements.' },
   },
 }
 

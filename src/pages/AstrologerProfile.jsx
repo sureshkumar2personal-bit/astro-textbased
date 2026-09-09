@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText } from 'lucide-react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw } from 'lucide-react'
 import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { publishedAvailabilityMap } from '../utils/appointments.js'
@@ -40,6 +40,17 @@ const PROFILE_POSTS = [
 ]
 
 const PROFILE_FOLLOWERS = ['Priya V.', 'Kannan', 'Devi', 'Arun']
+
+const SUBSCRIPTION_PRICE = 499
+const SUBSCRIPTION_PLAN_LABEL = '1-Month Subscription'
+
+function maskMethod(method) {
+  if (!method) return 'Wallet'
+  if (method.type === 'bank') return `${method.bankName || 'Bank'} ****${String(method.accountNumber || '').slice(-4)}`
+  if (method.type === 'upi') return method.upiId
+  if (method.type === 'card') return `${method.cardNetwork || 'Card'} ****${String(method.cardNumber || '').slice(-4)}`
+  return 'Wallet'
+}
 
 function dateKey(date) {
   const year = date.getFullYear()
@@ -148,10 +159,11 @@ function BookingReview({ selectedSlots }) {
 export default function AstrologerProfile() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { followedAstrologerIds, actions, subscriptions, appointments, userWallet, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments, appointmentAvailabilityTemplates } = useAppData()
+  const { followedAstrologerIds, actions, subscriptions, appointments, userWallet, userPaymentMethods, astrologerServices, astrologerPosts: sharedPosts, postLikes, savedPostIds, postComments, appointmentAvailabilityTemplates } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
-  const astrologerId = searchParams.get('id') || mockAstrologers[0].id
+  const { astrologerId: routeAstrologerId } = useParams()
+  const astrologerId = routeAstrologerId || searchParams.get('id') || mockAstrologers[0].id
   const astrologer = useMemo(
     () => {
       const profile = mockAstrologers.find((item) => item.id === astrologerId) || mockAstrologers[0]
@@ -173,6 +185,8 @@ export default function AstrologerProfile() {
   const subscriptionDaysRemaining = getSubscriptionDaysRemaining(getSubscriptionExpiry(subscription))
   const subscribed = Boolean(subscription && subscriptionDaysRemaining > 0)
   const canBookAppointment = subscribed
+  const walletBalance = Number(userWallet?.balance || 0)
+  const defaultSubscribeMethod = userPaymentMethods.find((m) => m.isDefault)
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState('form')
   const [calendarView, setCalendarView] = useState('month')
@@ -192,6 +206,12 @@ export default function AstrologerProfile() {
   const bookingContentRef = useRef(null)
   const [subscribeSuccess, setSubscribeSuccess] = useState(false)
   const [subscriptionPromptOpen, setSubscriptionPromptOpen] = useState(false)
+  const [subscribeOpen, setSubscribeOpen] = useState(false)
+  const [subscribeMethodId, setSubscribeMethodId] = useState('')
+  const [subscribeAutopay, setSubscribeAutopay] = useState(true)
+  const [subscribeConfirmOpen, setSubscribeConfirmOpen] = useState(false)
+  const [subscribeInsufficient, setSubscribeInsufficient] = useState(false)
+  const selectedSubscribeMethod = userPaymentMethods.find((m) => m.id === subscribeMethodId) || (userPaymentMethods.length === 1 ? userPaymentMethods[0] : null) || defaultSubscribeMethod
   const [activeTab, setActiveTab] = useState('Posts')
   const [audiencePanel, setAudiencePanel] = useState(null)
   const [footerTab, setFooterTab] = useState('Posts')
@@ -278,7 +298,50 @@ export default function AstrologerProfile() {
   }
 
   const handleSubscribe = () => {
-    actions.subscribeToAstrologer(astrologer.id, astrologer.name, currentUser?.id, currentUser?.name)
+    setSubscribeMethodId('')
+    setSubscribeAutopay(true)
+    setSubscribeConfirmOpen(false)
+    setSubscribeInsufficient(false)
+    setSubscribeOpen(true)
+  }
+
+  const handleConfirmSubscribe = () => {
+    const value = SUBSCRIPTION_PRICE
+    if (!selectedSubscribeMethod) return
+    if (walletBalance < value) {
+      setSubscribeInsufficient(true)
+      return
+    }
+    actions.debitUserWallet({
+      amount: value,
+      astrologer: astrologer.name,
+      duration: '',
+      service: 'Subscription',
+      transactionId: `SUB-${Date.now().toString(36)}`,
+    })
+    let autopayId = null
+    if (subscribeAutopay) {
+      const autopay = actions.createUserAutopay({
+        type: 'subscription',
+        paymentMethodId: selectedSubscribeMethod.id,
+        amount: value,
+        frequency: 'monthly',
+        status: 'active',
+        triggerThreshold: null,
+        nextRunAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        astrologerId: astrologer.id,
+        astrologerName: astrologer.name,
+      })
+      autopayId = autopay?.id || null
+    }
+    actions.subscribeToAstrologer(astrologer.id, astrologer.name, currentUser?.id, currentUser?.name, 'Silver', {
+      price: value,
+      paymentMethodId: selectedSubscribeMethod.id,
+      autopayEnabled: subscribeAutopay,
+      autopayId,
+    })
+    setSubscribeOpen(false)
+    setSubscribeConfirmOpen(false)
     setSubscribeSuccess(true)
   }
   const openBooking = () => {
@@ -551,6 +614,175 @@ export default function AstrologerProfile() {
         </div>
       )}
 
+      {subscribeOpen && (
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSubscribeOpen(false)}>
+          <div
+            className="modal-card user-modal-card"
+            style={{ width: 'min(460px, calc(100vw - 32px))' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Subscribe to {astrologer.name}</div>
+              <button type="button" className="icon-btn" aria-label="Close" onClick={() => setSubscribeOpen(false)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content user-modal-card__content">
+              <div className="subscription-plan-summary">
+                <div className="subscription-plan-summary__main">
+                  <BadgeCheck size={18} />
+                  <div>
+                    <div className="subscription-plan-summary__name">{SUBSCRIPTION_PLAN_LABEL}</div>
+                    <div className="subscription-plan-summary__meta">Valid for 30 days · 1 Discount Question</div>
+                  </div>
+                </div>
+                <div className="subscription-plan-summary__price">₹{SUBSCRIPTION_PRICE}</div>
+              </div>
+
+              <div className="field-group" style={{ marginTop: 18 }}>
+                <label className="field-label-top">Pay from Wallet</label>
+                <div className="withdraw-methods">
+                  <div className="withdraw-method-option is-selected">
+                    <div className="withdraw-method-left">
+                      <WalletCards size={18} style={{ color: 'var(--primary)' }} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>Wallet Balance</div>
+                        <div style={{ color: 'var(--muted)', fontSize: 11 }}>Available: ₹{walletBalance.toLocaleString('en-IN')}</div>
+                      </div>
+                    </div>
+                    <span style={{ color: walletBalance >= SUBSCRIPTION_PRICE ? 'var(--success)' : 'var(--danger)', fontSize: 12, fontWeight: 700 }}>
+                      {walletBalance >= SUBSCRIPTION_PRICE ? 'Sufficient' : 'Insufficient'}
+                    </span>
+                  </div>
+                </div>
+                {walletBalance < SUBSCRIPTION_PRICE && (
+                  <div className="subscription-fund-note">
+                    <CircleAlert size={14} /> Your wallet balance is low. Add money before subscribing.
+                    <button type="button" className="btn btn-outline btn-sm" style={{ marginLeft: 'auto' }} onClick={() => navigate(routes.walletHistory)}>Add Money</button>
+                  </div>
+                )}
+              </div>
+
+              <div className="field-group" style={{ marginTop: 18 }}>
+                <label className="field-label-top">Billing Method</label>
+                {userPaymentMethods.length === 0 ? (
+                  <div className="muted" style={{ fontSize: 12, lineHeight: 1.5 }}>
+                    No saved payment method. Subscription will renew from your wallet. You can add a card/UPI later.
+                  </div>
+                ) : (
+                  <div className="withdraw-methods">
+                    {userPaymentMethods.map((method) => {
+                      const selected = selectedSubscribeMethod?.id === method.id
+                      return (
+                        <button
+                          key={method.id}
+                          type="button"
+                          className={`withdraw-method-option ${selected ? 'is-selected' : ''}`}
+                          onClick={() => setSubscribeMethodId(method.id)}
+                        >
+                          <div className="withdraw-method-left">
+                            <WalletCards size={18} style={{ color: 'var(--primary)' }} />
+                            <div>
+                              <div style={{ fontWeight: 600, fontSize: 13 }}>{maskMethod(method)}</div>
+                              {method.isDefault && <div style={{ color: 'var(--muted)', fontSize: 11 }}>Default</div>}
+                            </div>
+                          </div>
+                          <div className={`withdraw-method-check ${selected ? 'is-visible' : ''}`}>
+                            <Check size={14} />
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <label className="autopay-toggle-row">
+                <div className="autopay-toggle-row__text">
+                  <div className="autopay-toggle-row__title">Enable Autopay</div>
+                  <div className="autopay-toggle-row__sub">Auto-renew this subscription each month from your wallet.</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={subscribeAutopay}
+                  onChange={(event) => setSubscribeAutopay(event.target.checked)}
+                />
+                <span className="autopay-toggle-row__slider" />
+              </label>
+            </div>
+            <div className="modal-card__footer user-modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setSubscribeOpen(false)}>Cancel</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={walletBalance < SUBSCRIPTION_PRICE}
+                onClick={() => { setSubscribeConfirmOpen(true) }}
+              >
+                <BadgeCheck size={15} /> Continue to Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {subscribeConfirmOpen && (
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSubscribeConfirmOpen(false)}>
+          <div
+            className="modal-card user-modal-card"
+            style={{ width: 'min(440px, calc(100vw - 32px))' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+              <div className="section-title" style={{ marginBottom: 0 }}>Confirm Subscription</div>
+              <button type="button" className="icon-btn" aria-label="Close" onClick={() => setSubscribeConfirmOpen(false)}><X size={16} /></button>
+            </div>
+            <div className="modal-card__content user-modal-card__content">
+              {subscribeInsufficient ? (
+                <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                  <div style={{ fontSize: 34, marginBottom: 10 }}>⚠️</div>
+                  <p className="muted" style={{ lineHeight: 1.6 }}>Insufficient wallet balance to subscribe.</p>
+                  <div className="wallet-modal-actions" style={{ justifyContent: 'center' }}>
+                    <button type="button" className="btn btn-primary" onClick={() => navigate(routes.walletHistory)}>Add Money</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="withdraw-review">
+                  <div className="withdraw-review-row">
+                    <span>Plan</span>
+                    <strong>{SUBSCRIPTION_PLAN_LABEL}</strong>
+                  </div>
+                  <div className="withdraw-review-row">
+                    <span>Astrologer</span>
+                    <strong>{astrologer.name}</strong>
+                  </div>
+                  <div className="withdraw-review-row">
+                    <span>Amount (from Wallet)</span>
+                    <strong>₹{SUBSCRIPTION_PRICE.toLocaleString('en-IN')}</strong>
+                  </div>
+                  <div className="withdraw-review-row">
+                    <span>Billing method for renewal</span>
+                    <strong>{selectedSubscribeMethod ? maskMethod(selectedSubscribeMethod) : 'Wallet'}</strong>
+                  </div>
+                  <div className="withdraw-review-row withdraw-review-total">
+                    <span>Total charged today</span>
+                    <strong>₹{SUBSCRIPTION_PRICE.toLocaleString('en-IN')}</strong>
+                  </div>
+                  <div className="withdraw-review-note">
+                    <Info size={14} /> Autopay {subscribeAutopay ? 'enabled' : 'disabled'}. Your subscription renews every month.
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-card__footer user-modal-card__footer">
+              <button type="button" className="btn btn-ghost" onClick={() => setSubscribeConfirmOpen(false)}>Back</button>
+              {!subscribeInsufficient && (
+                <button type="button" className="btn btn-primary" onClick={handleConfirmSubscribe}>
+                  <Check size={15} /> Confirm & Subscribe
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {subscribeSuccess && (
         <div className="modal-overlay user-modal-overlay" onClick={() => setSubscribeSuccess(false)}>
           <div
@@ -568,9 +800,15 @@ export default function AstrologerProfile() {
               <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
               <p className="muted" style={{ lineHeight: 1.7 }}>
                 You are now a subscriber of <strong style={{ color: 'var(--ink)' }}>{astrologer.name}</strong>.<br />
-                You get <strong style={{ color: 'var(--ink)' }}>1 Discount Question</strong> valid for{' '}
+                ₹{SUBSCRIPTION_PRICE} charged from your wallet. You get{' '}
+                <strong style={{ color: 'var(--ink)' }}>1 Discount Question</strong> valid for{' '}
                 <strong style={{ color: 'var(--ink)' }}>15 days</strong>.
               </p>
+              {subscribeAutopay && (
+                <div className="subscription-autopay-chip">
+                  <RefreshCw size={13} /> Autopay enabled — renews ₹{SUBSCRIPTION_PRICE}/month from {selectedSubscribeMethod ? maskMethod(selectedSubscribeMethod) : 'wallet'}.
+                </div>
+              )}
             </div>
             <div className="modal-card__footer user-modal-card__footer" style={{ justifyContent: 'center' }}>
               <button className="btn btn-ghost" type="button" onClick={() => setSubscribeSuccess(false)}>
