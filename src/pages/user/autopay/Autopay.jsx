@@ -194,6 +194,12 @@ export default function Autopay() {
           </span>
         </div>
         <div className="autopay-card__details">
+          {autopay.astrologerName && (
+            <div className="autopay-card__detail">
+              <span>Astrologer</span>
+              <strong>{autopay.astrologerName}</strong>
+            </div>
+          )}
           <div className="autopay-card__detail">
             <span>Amount</span>
             <strong>₹{Number(autopay.amount).toLocaleString('en-IN')}</strong>

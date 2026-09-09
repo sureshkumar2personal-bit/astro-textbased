@@ -40,7 +40,13 @@ export default function Astrologers() {
     .filter((subscription) => subscription.userId === currentUser?.id && isActiveSubscription(subscription))
   const subscribedAstrologerIds = activeSubscriptions
     .map((subscription) => subscription.astrologerId)
-  const subscribedAstrologers = mockAstrologers.filter((astrologer) => subscribedAstrologerIds.includes(astrologer.id))
+  const subscribedAstrologers = mockAstrologers
+    .filter((astrologer) => subscribedAstrologerIds.includes(astrologer.id))
+    .slice()
+    .sort((a, b) => {
+      const findSub = (id) => activeSubscriptions.find((subscription) => subscription.astrologerId === id)
+      return new Date(findSub(b.id)?.subscribedAt || 0) - new Date(findSub(a.id)?.subscribedAt || 0)
+    })
   const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
   const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
 

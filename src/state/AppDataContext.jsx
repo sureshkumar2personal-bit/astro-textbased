@@ -2385,7 +2385,7 @@ export function AppDataProvider({ children }) {
       if (!userId) return
       setBlockedUserIds((prev) => prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId])
     },
-    subscribeToAstrologer(astrologerId, astrologerName, userId, userName, tier = 'Silver') {
+    subscribeToAstrologer(astrologerId, astrologerName, userId, userName, tier = 'Silver', opts = {}) {
       if (!userId) return null
       const existing = subscriptions.find((sub) => sub.userId === userId && sub.astrologerId === astrologerId)
       if (existing) return existing
@@ -2398,6 +2398,10 @@ export function AppDataProvider({ children }) {
         tier: normalizedTier,
         subscribedAt: new Date().toISOString(),
         expiresAt: addDaysMs(30),
+        price: opts.price ?? 499,
+        paymentMethodId: opts.paymentMethodId || null,
+        autopayEnabled: Boolean(opts.autopayEnabled),
+        autopayId: opts.autopayId || null,
         discountQuestions: [
           {
             id: crypto.randomUUID(),
@@ -2433,6 +2437,19 @@ export function AppDataProvider({ children }) {
         ...prev,
       ])
       return subscription
+    },
+    renewAstrologerSubscription(astrologerId, userId) {
+      if (!userId) return null
+      const existing = subscriptions.find((sub) => sub.userId === userId && sub.astrologerId === astrologerId)
+      if (!existing) return null
+      const updated = {
+        ...existing,
+        subscribedAt: new Date().toISOString(),
+        expiresAt: addDaysMs(30),
+        autopayEnabled: true,
+      }
+      setSubscriptions((prev) => prev.map((sub) => (sub === existing ? updated : sub)))
+      return updated
     },
     getAvailableDiscountQuestions(userId) {
       if (!userId) return []
