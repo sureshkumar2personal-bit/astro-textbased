@@ -29,6 +29,8 @@ import {
   CalendarCheck,
   Radio,
   Receipt,
+  SlidersHorizontal,
+  Send,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -40,10 +42,8 @@ import {
   TempleArchIcon,
   TempleBellIcon,
   TempleDonationBoxIcon,
-  TempleLotusIcon,
   TempleReturnIcon,
   TempleScrollIcon,
-  TempleShieldIcon,
 } from './TempleIcons.jsx'
 
 const ROLE_CONFIG = {
@@ -73,14 +73,14 @@ const ROLE_CONFIG = {
           { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
         ],
       },
+      { to: 'text-based-questions', label: 'Text Based', icon: TempleScrollIcon },
       {
-        label: 'Text Based',
-        icon: TempleScrollIcon,
+        label: 'Perks & Benefits',
+        icon: Gift,
         children: [
-          { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
-          { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
-          { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
-          { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+          { to: 'perks-benefits/settings', label: 'Settings', icon: SlidersHorizontal },
+          { to: 'perks-benefits/delivery', label: 'Benefit Management', icon: Send },
+          { to: 'perks-benefits/history', label: 'History', icon: History },
         ],
       },
       { to: 'activity', label: 'My Activity', icon: Activity },
@@ -138,6 +138,9 @@ const PAGE_META = {
     '/astrologer/wallet/withdraw': { title: 'Withdraw Money', sub: 'Request a payout to your preferred method.' },
     '/astrologer/wallet/settlements': { title: 'Settlement History', sub: 'Monthly settlements and payout records.' },
     '/astrologer/wallet/payment-methods': { title: 'Payment Methods', sub: 'Manage your payout methods and defaults.' },
+    '/astrologer/perks-benefits/settings': { title: 'Settings', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
+    '/astrologer/perks-benefits/delivery': { title: 'Content Delivery', sub: 'Create and publish content for your committed customer benefits.' },
+    '/astrologer/perks-benefits/history': { title: 'History', sub: 'Track your monthly fulfillment rate against customer commitments.' },
     '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
@@ -146,6 +149,7 @@ const PAGE_META = {
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },

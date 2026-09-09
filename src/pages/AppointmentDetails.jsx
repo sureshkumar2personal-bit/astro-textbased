@@ -192,23 +192,33 @@ function UserAppointmentDetailsDrawer({ appointment, currentUser, onClose }) {
   )
 }
 
-function AddedCompactAppointmentCard() {
+function AddedCompactAppointmentCard({ appointment, onSelect }) {
+  if (!appointment) return null
+  const window = resolveAppointmentWindow(appointment)
+  const statusLabel = appointment.status === 'Confirmed' ? 'Booked' : appointment.status || 'Booked'
+
   return (
-    <Card className="apt-side-panel added-compact-appointment-card">
+    <Card
+      className={`apt-side-panel added-compact-appointment-card${onSelect ? ' is-clickable' : ''}`}
+      role={onSelect ? 'button' : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={onSelect ? () => onSelect(appointment) : undefined}
+      onKeyDown={onSelect ? (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect(appointment) } } : undefined}
+    >
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
-          <span className="user-appointment-avatar">DR</span>
-          <div><strong>Dr. Rani</strong><span>Vedic Astrology</span></div>
+          <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>
+          <div><strong>{appointment.astrologer || 'Astrologer'}</strong><span>{appointment.specialization || 'Vedic Astrology'}</span></div>
         </div>
-        <StatusBadge label="Booked" />
+        <StatusBadge label={statusLabel} />
       </div>
       <div className="added-compact-appointment-card__meta">
-        <span><PhoneCall size={13} /> Audio Call</span>
-        <strong><Clock3 size={13} /> 10:00 AM – 10:30 AM</strong>
+        <span><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
+        <strong><Clock3 size={13} /> {formatTimeRange(window.startMin, window.endMin)}</strong>
       </div>
       <div className="added-compact-appointment-card__footer">
-        <span>Appointment ID: apt-mtobw10l</span>
-        <strong>₹499</strong>
+        <span>Appointment ID: {appointment.orderId || appointment.id}</span>
+        <strong>₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')}</strong>
       </div>
     </Card>
   )
@@ -289,8 +299,16 @@ export default function AppointmentDetails() {
     <div className="apt-main apt-main--history">
       <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} /></div>
       <aside className="apt-side-col apt-history-day-col">
-        <Card className="apt-side-panel"><div className="apt-side-head apt-history-day-head"><span>Appointment</span></div><div className="user-appointment-list">{dayAppointments.length ? dayAppointments.map((appointment) => <UserAppointmentCard key={appointment.id} appointment={appointment} selected={appointment.id === selectedAppointment?.id} onSelect={selectAppointment} onCancel={cancelAppointment} onReschedule={setRescheduleTarget} onViewDetails={viewDetails} />) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>}</div></Card>
-        <AddedCompactAppointmentCard />
+        <div className="apt-side-head"><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) : 'Appointments'}</span></div>
+        <div className="user-appointment-list">
+          {dayAppointments.length ? (
+            dayAppointments.map((appointment) => (
+              <AddedCompactAppointmentCard key={appointment.id} appointment={appointment} onSelect={viewDetails} />
+            ))
+          ) : (
+            <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>
+          )}
+        </div>
       </aside>
     </div>
     <UserAppointmentDetailsDrawer appointment={detailsAppointment} currentUser={currentUser} onClose={() => setDetailsAppointment(null)} />
