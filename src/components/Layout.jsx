@@ -43,8 +43,10 @@ import {
   TempleArchIcon,
   TempleBellIcon,
   TempleDonationBoxIcon,
+  TempleLotusIcon,
   TempleReturnIcon,
   TempleScrollIcon,
+  TempleShieldIcon,
 } from './TempleIcons.jsx'
 
 const ROLE_CONFIG = {
@@ -74,7 +76,16 @@ const ROLE_CONFIG = {
           { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
         ],
       },
-      { to: 'text-based-questions', label: 'Text Based', icon: TempleScrollIcon },
+      {
+        label: 'Text Based',
+        icon: TempleScrollIcon,
+        children: [
+          { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
+          { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
+          { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
+          { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
+        ],
+      },
       {
         label: 'Perks & Benefits',
         icon: Gift,
@@ -107,8 +118,14 @@ const ROLE_CONFIG = {
         to: 'astrologers',
         label: 'Explore Astrologers',
         icon: Sparkles,
+      },
+      {
+        label: 'Appointments',
+        icon: CalendarCheck,
         children: [
-          { to: 'appointment-details', label: 'Appointment Details', icon: CalendarCheck },
+          { to: 'appointments/book', label: 'Book Appointment', icon: CalendarCheck },
+          { to: 'appointments/my', label: 'My Appointments', icon: CalendarCheck },
+          { to: 'appointments/history', label: 'Appointment History', icon: History },
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
@@ -197,6 +214,9 @@ const PAGE_META = {
     '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
+    '/user/appointments/book': { title: 'Book Appointment', sub: 'Find an astrologer and schedule your appointment' },
+    '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
+    '/user/appointments/history': { title: 'Appointment History', sub: 'All your appointment records' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
     '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },
