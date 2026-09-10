@@ -1,0 +1,71 @@
+.user-appointment-history .apt-history-detail-copy strong { color:var(--ink); font-size:16px; }
+.user-appointment-history .apt-history-detail-copy p { margin:0; }
+.user-appointment-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.user-appointment-actions .btn { flex:1 1 140px; }
+.user-appointment-list { display:grid; gap:10px; }
+.user-appointment-card { gap:10px; cursor:pointer; padding:14px; }
+.user-appointment-card__top,
+.user-appointment-identity { display:flex; align-items:flex-start; gap:9px; }
+.user-appointment-card__top { justify-content:space-between; }
+.user-appointment-identity > div { display:grid; gap:2px; min-width:0; }
+.user-appointment-identity strong { color:var(--ink); font-size:13px; font-weight:800; }
+.user-appointment-identity div span { color:var(--muted); font-size:10px; }
+.user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
+.user-appointment-avatar--large { width:40px; height:40px; font-size:12px; }
+.user-appointment-card__meta { display:grid; gap:6px; color:var(--muted); font-size:10px; }
+.user-appointment-card__meta span { display:flex; align-items:center; gap:5px; }
+.user-appointment-card__time { justify-content:flex-end; color:var(--ink); font-weight:700; }
+.user-appointment-card__footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:9px; border-top:1px solid var(--surface-border); color:var(--muted); font-size:10px; }
+.user-appointment-card__footer span:first-child { color:var(--ink); font-weight:800; }
+.user-appointment-card__actions { display:flex; gap:8px; margin-top:1px; }
+.user-appointment-card__actions .btn { flex:1 1 0; min-width:0; }
+.user-appointment-card__actions .btn-danger {
+  flex: 1.3 1 0;
+  box-sizing: border-box;
+  border: 1px solid #dc2626;
+  border-radius: var(--radius-s);
+  background: #dc2626;
+  color: #fff;
+  justify-content: center;
+  padding: 0 10px;
+  font-size: 12px;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+.user-appointment-card__actions .btn-danger:hover {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+.apt-user-astrologer-notes-content {
+  padding: 10px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.added-compact-appointment-card { gap:12px; background:#fff; }
+.added-compact-appointment-card__top,
+.added-compact-appointment-card__profile,
+.added-compact-appointment-card__meta,
+.added-compact-appointment-card__footer { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.added-compact-appointment-card__profile { justify-content:flex-start; }
+.added-compact-appointment-card__profile > div { display:grid; gap:2px; }
+.added-compact-appointment-card__profile strong { color:var(--ink); font-size:13px; font-weight:800; }
+.added-compact-appointment-card__profile span:not(.user-appointment-avatar),
+.added-compact-appointment-card__meta span,
+.added-compact-appointment-card__footer span { color:var(--muted); font-size:10px; }
+.added-compact-appointment-card__meta { padding-top:2px; color:var(--muted); font-size:10px; }
+.added-compact-appointment-card__meta span,
+.added-compact-appointment-card__meta strong { display:flex; align-items:center; gap:5px; }
+.added-compact-appointment-card__meta strong { color:var(--ink); font-size:10px; }
+.added-compact-appointment-card__footer { padding-top:9px; border-top:1px solid var(--surface-border); }
+.added-compact-appointment-card__footer strong { color:var(--ink); font-size:13px; font-weight:800; }
+@media (max-width:600px) { .added-compact-appointment-card__top { align-items:flex-start; flex-direction:column; } }
+.user-appointment-detail-heading { display:flex; align-items:center; gap:10px; }
+.user-appointment-detail-heading > div { display:grid; gap:2px; }
+.user-appointment-detail-heading strong { color:var(--ink); font-size:15px; }
+.user-appointment-detail-heading p { margin:0; color:var(--muted); font-size:11px; }
+@media (max-width:600px) { .user-appointment-card__top { flex-direction:column; }.user-appointment-card__actions .btn { flex:1 1 130px; }.user-appointment-card__actions .btn-danger { flex:1.3 1 130px; } }

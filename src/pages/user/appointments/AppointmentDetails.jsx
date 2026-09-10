@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import './userappointments.css'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
