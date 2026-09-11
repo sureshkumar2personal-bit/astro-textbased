@@ -86,6 +86,7 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
+      { to: 'live-session', label: 'Live', icon: Radio },
       {
         label: 'Perks & Benefits',
         icon: Gift,
