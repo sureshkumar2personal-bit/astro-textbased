@@ -276,6 +276,7 @@ export const consultationAstrologers = mockAstrologers.map((astrologer, index) =
     ratingValue,
     reviewCount,
     profileImage: avatarDataUri(astrologer.name, palette[0], palette[1]),
+    horoscopeAttachment: astrologer.horoscopeAttachment || astrologer.horoscope || null,
   }
 })
 
@@ -292,4 +293,3 @@ export function getConsultationRateLabel(astrologer, kind = 'chat') {
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   return `₹${Number(rate || 0).toLocaleString('en-IN')}/min`
 }
-

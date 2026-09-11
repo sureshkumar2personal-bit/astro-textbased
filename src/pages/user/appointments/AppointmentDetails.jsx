@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import './userappointments.css'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import Card from '../../../components/ui/Card.jsx'
@@ -7,16 +7,13 @@ import Section from '../../../components/ui/Section.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
-import { useAuth } from '../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const CANCELLABLE_STATUSES = ['Confirmed', 'Rescheduled']
 
 export default function AppointmentDetails() {
   const [searchParams] = useSearchParams()
   const { appointments, actions } = useAppData()
-  const { currentUser } = useAuth()
-  const routes = getRoleRoutes(currentUser?.role)
+  const navigate = useNavigate()
   const appointmentId = searchParams.get('id') || appointments[0].id
   const appointment = useMemo(
     () => appointments.find((item) => item.id === appointmentId) || appointments[0],
@@ -36,7 +33,7 @@ export default function AppointmentDetails() {
 
   return (
     <div>
-      <PageHeader eyebrow="User portal" title="Appointment Details" showBack backTo={routes.dashboard} />
+      <PageHeader eyebrow="User portal" title="Appointment Details" showBack />
 
       <Card className="section" style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ lineHeight: 1.7 }}>
@@ -71,7 +68,7 @@ export default function AppointmentDetails() {
             Cancel Appointment
           </button>
         )}
-        <Link to={routes.dashboard} className="btn btn-primary">Back to Dashboard</Link>
+        <button type="button" className="btn btn-primary" onClick={() => navigate(-1)}>Back</button>
       </div>
 
       {cancelled && (

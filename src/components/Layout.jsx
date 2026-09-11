@@ -410,7 +410,10 @@ export default function Layout() {
   const dynamicAstrologerMeta = role === ROLES.USER && location.pathname.startsWith('/user/astrologer/')
     ? { title: 'Astrologer Profile', sub: 'Follow updates and ask a question' }
     : null
-  const meta = audienceMeta || dynamicAstrologerMeta || PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
+  const dynamicBookingMeta = role === ROLES.USER && location.pathname.startsWith('/user/appointments/book/')
+    ? { title: 'Book Appointment', sub: 'Pick an available date, review its open slots and pay from your wallet.' }
+    : null
+  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || PAGE_META[role][location.pathname] || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]

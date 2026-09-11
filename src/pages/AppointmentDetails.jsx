@@ -11,7 +11,7 @@ import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
-import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
+import { ROLES } from '../utils/roleRoutes.js'
 import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, resolveAppointmentWindow, toIsoDate } from '../utils/appointments.js'
 
 const FILTERS = [
@@ -229,7 +229,6 @@ export default function AppointmentDetails() {
   const [searchParams] = useSearchParams()
   const { appointments, actions } = useAppData()
   const { currentUser } = useAuth()
-  const routes = getRoleRoutes(currentUser?.role)
   const userAppointments = useMemo(() => appointments.filter((appointment) => appointment.userId === currentUser?.id || (currentUser?.role === ROLES.USER && appointment.userId === 'user-demo')), [appointments, currentUser?.id, currentUser?.role])
   const requested = userAppointments.find((appointment) => appointment.id === searchParams.get('id'))
   const first = requested || userAppointments[0]
@@ -295,7 +294,7 @@ export default function AppointmentDetails() {
   }
 
   return <div className="apt-page user-appointment-history">
-    <PageHeader eyebrow="User portal" title="My Appointments" subtitle="View and manage your consultation appointments" showBack backTo={routes.dashboard} />
+    <PageHeader eyebrow="User portal" title="My Appointments" subtitle="View and manage your consultation appointments" showBack />
     <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div><div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div></div>
     <div className="apt-main apt-main--history">
       <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} /></div>
