@@ -67,21 +67,10 @@ export const REWARD_STATUS = {
   SUBSCRIBER: 'Subscriber Only',
 }
 
-// Questions / free & discounted question rewards
+// Questions / discount question rewards
 export const QUESTION_REWARDS = [
   {
     id: 'q-1',
-    astrologerId: 'astrologer-demo',
-    title: 'Free Text Question',
-    type: 'Free Question',
-    value: '1 free question',
-    description: 'Ask one personal question and get a detailed written answer.',
-    expiresOn: daysFromNow(9),
-    expiresInDays: 9,
-    status: REWARD_STATUS.EXPIRING,
-  },
-  {
-    id: 'q-2',
     astrologerId: 'astrologer-demo',
     title: 'Discounted Question',
     type: 'Discount',
@@ -92,18 +81,7 @@ export const QUESTION_REWARDS = [
     status: REWARD_STATUS.AVAILABLE,
   },
   {
-    id: 'q-3',
-    astrologerId: 'acharya-meena',
-    title: 'Free Text Question',
-    type: 'Free Question',
-    value: '1 free question',
-    description: 'Ask a family or remedies question at no cost.',
-    expiresOn: daysFromNow(6),
-    expiresInDays: 6,
-    status: REWARD_STATUS.EXPIRING,
-  },
-  {
-    id: 'q-4',
+    id: 'q-2',
     astrologerId: 'astrologer-10',
     title: 'Discount Question',
     type: 'Discount',
@@ -112,28 +90,6 @@ export const QUESTION_REWARDS = [
     expiresOn: daysFromNow(21),
     expiresInDays: 21,
     status: REWARD_STATUS.AVAILABLE,
-  },
-  {
-    id: 'q-5',
-    astrologerId: 'astrologer-13',
-    title: 'Free Text Question',
-    type: 'Free Question',
-    value: '1 free question',
-    description: 'One free question for this billing cycle.',
-    expiresOn: daysFromNow(-3),
-    expiresInDays: -3,
-    status: REWARD_STATUS.USED,
-  },
-  {
-    id: 'q-6',
-    astrologerId: 'astrologer-11',
-    title: 'Subscriber Question',
-    type: 'Subscriber',
-    value: '1 question',
-    description: 'Exclusive question slot for active subscribers.',
-    expiresOn: daysFromNow(30),
-    expiresInDays: 30,
-    status: REWARD_STATUS.SUBSCRIBER,
   },
 ]
 
