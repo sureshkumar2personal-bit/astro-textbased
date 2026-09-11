@@ -1,0 +1,34 @@
+.appointment-history-page { padding: 26px 0 42px; }
+.appointment-history-filters { display: flex; gap: 8px; margin: 22px 0 18px; }
+.appointment-history-filters button { padding: 9px 16px; border: 1px solid var(--surface-border); border-radius: 999px; background: #fff; color: var(--muted); font-size: 12px; font-weight: 800; cursor: pointer; }
+.appointment-history-filters button.is-active { border-color: var(--primary); background: var(--primary); color: #fff; box-shadow: 0 6px 16px rgba(109, 40, 217, .18); }
+.appointment-history-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.appointment-history-card { display: grid; gap: 16px; padding: 18px; border: 1px solid var(--surface-border); border-radius: var(--radius-l); background: #fff; box-shadow: var(--shadow-card); }
+.appointment-history-card--cancelled { border-color: rgba(220, 38, 38, .2); }
+.appointment-history-card--rescheduled { border-color: rgba(217, 119, 6, .24); }
+.appointment-history-card__top, .appointment-history-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.appointment-history-card__identity { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.appointment-history-card__identity img, .appointment-history-card__identity > span { width: 48px; height: 48px; flex: none; border: 2px solid var(--violet-50); border-radius: 50%; object-fit: cover; }
+.appointment-history-card__identity > span { display: grid; place-items: center; background: var(--violet-50); color: var(--primary); font-size: 13px; font-weight: 800; }
+.appointment-history-card__identity h2 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; font-size: 14px; font-weight: 800; }
+.appointment-history-card__identity p { margin: 3px 0 0; color: var(--muted); font-size: 11px; font-weight: 600; }
+.appointment-history-status { padding: 5px 9px; border-radius: 999px; background: var(--success-bg); color: var(--green-700, #15803d); font-size: 10px; font-weight: 800; white-space: nowrap; }
+.appointment-history-card--cancelled .appointment-history-status { background: #fef2f2; color: #dc2626; }
+.appointment-history-card--rescheduled .appointment-history-status { background: #fff7ed; color: #c2410c; }
+.appointment-history-card__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; padding: 14px; border-radius: var(--radius-m); background: var(--surface-strong); }
+.appointment-history-card__details > div { display: flex; align-items: flex-start; gap: 7px; min-width: 0; color: var(--primary); }
+.appointment-history-card__details span { display: grid; gap: 3px; min-width: 0; }
+.appointment-history-card__details small { color: var(--muted); font-size: 10px; font-weight: 700; }
+.appointment-history-card__details strong { overflow: hidden; color: var(--ink); font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.appointment-history-reschedule { display: grid; gap: 5px; padding: 11px 12px; border-radius: 10px; background: #fff7ed; color: #9a3412; font-size: 11px; }
+.appointment-history-reschedule span { display: flex; align-items: center; gap: 5px; font-weight: 800; }
+.appointment-history-reschedule p, .appointment-history-cancellation { margin: 0; font-size: 11px; font-weight: 600; }
+.appointment-history-cancellation { padding: 9px 11px; border-radius: 9px; background: #fef2f2; color: #b91c1c; }
+.appointment-history-card__footer { padding-top: 2px; border-top: 1px solid var(--surface-border); }
+.appointment-history-card__footer > span { color: var(--muted); font-size: 10px; font-weight: 600; }
+.appointment-history-empty { display: grid; justify-items: center; gap: 8px; padding: 64px 20px; border: 1px dashed var(--surface-border); border-radius: var(--radius-l); background: #fff; color: var(--muted); text-align: center; }
+.appointment-history-empty svg { color: var(--primary); }
+.appointment-history-empty strong { color: var(--ink); font-size: 14px; }
+.appointment-history-empty p { margin: 0; font-size: 12px; }
+@media (max-width: 760px) { .appointment-history-list { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .appointment-history-page { padding-top: 18px; } .appointment-history-filters { overflow-x: auto; padding-bottom: 3px; } .appointment-history-filters button { flex: none; } .appointment-history-card { padding: 14px; } }

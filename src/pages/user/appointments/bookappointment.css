@@ -1,0 +1,211 @@
+.book-appointment-page {
+  display: grid;
+  gap: 26px;
+}
+
+.book-appointment-page .page-eyebrow {
+  margin-bottom: 14px;
+}
+
+.book-appointment-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.book-appointment-section-head .section-title {
+  margin: 0;
+}
+
+.book-appointment-section-support {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.book-appointment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 1023px) {
+  .book-appointment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .book-appointment-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .book-appointment-section-support {
+    text-align: left;
+  }
+}
+
+.book-appointment-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-l);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+  transition: transform 250ms var(--ease-premium), box-shadow 250ms var(--ease-premium), border-color 250ms var(--ease-premium);
+}
+
+.book-appointment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-float);
+  border-color: rgba(109, 40, 217, 0.28);
+}
+
+.book-appointment-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.book-appointment-avatar-wrap {
+  position: relative;
+  flex: none;
+}
+
+.book-appointment-avatar {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet-500), var(--violet-700));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(109, 40, 217, 0.28);
+}
+
+.book-appointment-availability-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--surface-strong);
+  background: var(--success);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+.book-appointment-price-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.book-appointment-card__body {
+  display: grid;
+  gap: 2px;
+}
+
+.book-appointment-card__name {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.book-appointment-card__spec {
+  margin: 0;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.book-appointment-card__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.book-appointment-card__rating svg {
+  color: #F59E0B;
+  fill: currentColor;
+  flex: none;
+}
+
+.book-appointment-card__rating strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.book-appointment-card__rating span {
+  color: var(--muted);
+}
+
+.book-appointment-card__slots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.book-appointment-card__slots-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.book-appointment-card__slots strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.book-appointment-card__next {
+  margin-left: auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--green-600);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.book-appointment-card__action {
+  width: 100%;
+  justify-content: center;
+  min-height: 40px;
+  height: 40px;
+  margin-top: auto;
+  font-size: 13px;
+}
