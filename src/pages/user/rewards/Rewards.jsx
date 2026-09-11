@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -20,7 +20,6 @@ import {
   X,
 } from 'lucide-react'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
-import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { getAstrologerById, REWARD_STATUS, ALL_REWARDS, QUESTION_REWARDS, APPOINTMENT_REWARDS, BENEFIT_REWARDS } from './rewardsData.js'
 
 const FILTER_TABS = [
@@ -31,7 +30,7 @@ const FILTER_TABS = [
 ]
 
 const CATEGORY_META = {
-  questions: { label: 'Questions', icon: MessageSquareText, description: 'Free and discounted question rewards from your subscribed astrologers.' },
+  questions: { label: 'Questions', icon: MessageSquareText, description: 'Discounted question rewards from your subscribed astrologers.' },
   appointments: { label: 'Appointments', icon: CalendarCheck, description: 'Booking discounts and priority slots from your astrologers.' },
   content: { label: 'Content', icon: Newspaper, description: 'Posts, videos, and subscriber-only articles shared by your astrologers.' },
   benefits: { label: 'Benefits', icon: Ticket, description: 'Redeemable perks from your active subscriptions.' },
@@ -116,7 +115,7 @@ function ExpiringBanner({ items }) {
               key={reward.id}
               className="reward-expiring-item"
               onClick={() => {
-                if (reward.category === 'questions') navigate(`${routes.askQuestion}`)
+                if (reward.category === 'questions') navigate(`${routes.discountQuestions}`)
                 else if (reward.category === 'appointments') navigate(`${routes.appointmentDetails}`)
                 else if (reward.category === 'content') navigate(`${routes.astrologers}`)
                 else if (reward.category === 'benefits') navigate(`${routes.discountQuestions}`)
@@ -165,7 +164,7 @@ function QuestionSection({ rewards, openDrawer, expand, onViewMore }) {
 
   if (!byAstrologer.length) {
     return (
-      <EmptyState icon={MessageSquareText} title="No question rewards yet" detail="Subscribe to an astrologer to unlock free and discounted questions." cta="Explore Astrologers" onCta={() => navigate(routes.astrologers)} />
+      <EmptyState icon={MessageSquareText} title="No question rewards yet" detail="Subscribe to an astrologer to unlock discount questions." cta="Explore Astrologers" onCta={() => navigate(routes.astrologers)} />
     )
   }
 
@@ -371,7 +370,7 @@ function RewardDrawer({ astrologerId, rewards, onClose }) {
   const performAction = (reward) => {
     onClose()
     if (reward.category === 'questions' || reward.type.includes('Question')) {
-      navigate(`${routes.askQuestion}?campaignId=${reward.campaignId || ''}`)
+      navigate(`${routes.discountQuestions}`)
     } else if (reward.category === 'appointments' || reward.type.includes('Appointment')) {
       navigate(`${routes.appointmentDetails}`)
     } else if (reward.category === 'content') {
@@ -452,7 +451,7 @@ function RewardDrawer({ astrologerId, rewards, onClose }) {
   )
 }
 
-export function RewardsPerks() {
+export default function RewardsPerks() {
   const [filter, setFilter] = useState('all')
   const [drawerRewards, setDrawerRewards] = useState(null)
 
@@ -460,8 +459,9 @@ export function RewardsPerks() {
     const available = ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
     const questions = QUESTION_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
     const appointments = APPOINTMENT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
+    const benefits = BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
     const expiring = ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).length
-    return { available, questions, appointments, expiring }
+    return { available, questions, appointments, benefits, expiring }
   }, [])
 
   const expiringItems = useMemo(
@@ -476,6 +476,7 @@ export function RewardsPerks() {
   const questionRewards = filtered.filter((reward) => reward.category === 'questions')
   const appointmentRewards = filtered.filter((reward) => reward.category === 'appointments')
   const contentRewards = filtered.filter((reward) => reward.category === 'content')
+  const benefitRewards = filtered.filter((reward) => reward.category === 'benefits')
 
   const openDrawer = (reward) => {
     const all = ALL_REWARDS.filter((item) => item.astrologerId === reward.astrologerId)
@@ -488,8 +489,9 @@ export function RewardsPerks() {
 
       <div className="reward-summary-grid">
         <SummaryCard icon={Gift} value={summary.available} label="Available Rewards" hint="Ready to use" tone="violet" />
-        <SummaryCard icon={MessageSquareText} value={summary.questions} label="Free Questions" hint="Including discount questions" tone="gold" />
+        <SummaryCard icon={MessageSquareText} value={summary.questions} label="Discount Questions" hint="Purchase & ask" tone="gold" />
         <SummaryCard icon={CalendarCheck} value={summary.appointments} label="Appointment Rewards" hint="Discounts & priority slots" tone="green" />
+        <SummaryCard icon={Ticket} value={summary.benefits} label="Benefits" hint="Subscriber perks" tone="green" />
         <SummaryCard icon={AlertTriangle} value={summary.expiring} label="Expiring Soon" hint="Use before they are lost" tone="red" />
       </div>
 
@@ -514,6 +516,7 @@ export function RewardsPerks() {
             <QuestionSection rewards={questionRewards} openDrawer={openDrawer} onViewMore={() => setFilter('questions')} />
             <AppointmentSection rewards={appointmentRewards} openDrawer={openDrawer} onViewMore={() => setFilter('appointments')} />
             <ContentSection rewards={contentRewards} openDrawer={openDrawer} onViewMore={() => setFilter('content')} />
+            <BenefitSection rewards={benefitRewards} expand />
           </>
         )}
         {filter === 'questions' && <QuestionSection rewards={questionRewards} openDrawer={openDrawer} expand />}
@@ -532,44 +535,5 @@ export function RewardsPerks() {
   )
 }
 
-export function RewardsBenefits() {
-  const summary = useMemo(() => {
-    const available = BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
-    const subscriber = BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.SUBSCRIBER || reward.status === REWARD_STATUS.LOCKED).length
-    const expiring = BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).length
-    return { available, subscriber, expiring }
-  }, [])
 
-  const expiringItems = useMemo(
-    () => BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).slice(0, 4),
-    [],
-  )
 
-  return (
-    <div className="rewards-center">
-      <ExpiringBanner items={expiringItems} />
-      <div className="reward-summary-grid">
-        <SummaryCard icon={Ticket} value={summary.available} label="Active Benefits" hint="Ready to redeem" tone="violet" />
-        <SummaryCard icon={Sparkles} value={summary.subscriber} label="Subscriber Perks" hint="Unlocked with your subscription" tone="gold" />
-        <SummaryCard icon={MessageSquareText} value={1} label="Monthly Question" hint="Every subscription cycle" tone="green" />
-        <SummaryCard icon={AlertTriangle} value={summary.expiring} label="Expiring Soon" hint="Redeem before they are lost" tone="red" />
-      </div>
-      <BenefitSection rewards={BENEFIT_REWARDS} expand />
-    </div>
-  )
-}
-
-export function RewardsShell() {
-  return (
-    <div>
-      <PageHeader
-        eyebrow="User portal"
-        title="Rewards Center"
-        subtitle="Your exclusive rewards from the astrologers you follow and subscribe to."
-      />
-      <Outlet />
-    </div>
-  )
-}
-
-export default RewardsShell

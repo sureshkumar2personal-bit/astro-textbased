@@ -54,10 +54,7 @@ import CallPaymentSuccess from './pages/CallPaymentSuccess.jsx'
 import VoiceCallScreen from './pages/VoiceCallScreen.jsx'
 import WalletPayment from './pages/WalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
-import RewardsShell, {
-  RewardsPerks,
-  RewardsBenefits,
-} from './pages/user/rewards/Rewards.jsx'
+import RewardsPerks from './pages/user/rewards/Rewards.jsx'
 import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
@@ -218,11 +215,7 @@ function UserRoutes() {
         <Route path="/user/wallet-payment" element={<WalletPayment />} />
         <Route path="/chat/:astrologerId" element={<ChatScreen />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
-        <Route path="/user/rewards" element={<RewardsShell />}>
-          <Route index element={<Navigate to="perks" replace />} />
-          <Route path="perks" element={<RewardsPerks />} />
-          <Route path="benefits" element={<RewardsBenefits />} />
-        </Route>
+        <Route path="/user/rewards" element={<RewardsPerks />} />
         <Route path="/user/my-account" element={<MyAccount />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
