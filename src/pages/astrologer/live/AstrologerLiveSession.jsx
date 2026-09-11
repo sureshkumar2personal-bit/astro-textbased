@@ -1,3 +1,4 @@
+import './astrolive.css'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -40,6 +41,14 @@ const INITIAL_EARNINGS = 3450
 
 const CATEGORIES = ['Vedic Astrology', 'Tarot Card Reading', 'Numerology']
 
+const AUDIENCE_OPTIONS = [
+  { value: 'public', label: 'Public', hint: 'Anyone can join' },
+  { value: 'followers', label: 'Followers', hint: 'Only users following you' },
+  { value: 'subscribers', label: 'Subscribers', hint: 'Only paid subscribers' },
+]
+
+const SUBSCRIBER_TIERS = ['Silver', 'Gold', 'Pro']
+
 const INITIAL_CHAT = [
   { id: 'chat-1', time: '10:51', name: 'Amit', text: 'Sir, check job prospects?' },
   { id: 'chat-2', time: '10:52', name: 'Priya12', text: 'Subscribed! 🙌' },
@@ -67,6 +76,8 @@ const DEFAULT_DRAFT = {
   premiumQueue: true,
   rate: DEFAULT_RATE,
   visibility: 'public',
+  audience: 'public',
+  subscriberTier: '',
   scheduledStartAt: localDateTime(),
   scheduledEndAt: localDateTime(new Date(Date.now() + 60 * 60 * 1000)),
 }
@@ -131,6 +142,8 @@ function initialDraft(existingSession) {
     premiumQueue: existingSession.premiumQueue !== false,
     rate: String(existingSession.rate || DEFAULT_RATE),
     visibility: existingSession.visibility || 'public',
+    audience: existingSession.audience || 'public',
+    subscriberTier: existingSession.subscriberTier || '',
     scheduledStartAt: localDateTime(existingSession.startedAt || existingSession.scheduledStartAt),
     scheduledEndAt: localDateTime(existingSession.endedAt || existingSession.scheduledEndAt),
   }
@@ -400,13 +413,16 @@ function LiveSessionShellInner({ children }) {
   const goToRoom = (sessionId) => goTo(routes.liveSessionRoom, sessionId)
   const goToSummary = (sessionId) => goTo(routes.liveSessionSummary, sessionId)
 
-  const startBroadcast = () => {
+  const startBroadcast = (options = {}) => {
     setFormError('')
 
     if (!draft.title.trim()) {
       setFormError('Add a stream title before starting the broadcast.')
       return
     }
+
+    const audience = options.audience || draft.audience || 'public'
+    const subscriberTier = audience === 'subscribers' ? options.subscriberTier || draft.subscriberTier : ''
 
     const payload = {
       title: draft.title.trim(),
@@ -416,6 +432,8 @@ function LiveSessionShellInner({ children }) {
       premiumQueue: draft.premiumQueue,
       rate: draft.rate,
       visibility: draft.visibility,
+      audience,
+      subscriberTier,
       scheduledStartAt: new Date(draft.scheduledStartAt).toISOString(),
       scheduledEndAt: new Date(draft.scheduledEndAt).toISOString(),
       astrologerId: currentUser?.id,
@@ -647,6 +665,38 @@ export function AstrologerLiveSessionConfigure() {
     startBroadcast,
   } = useLiveSessionFlow()
 
+  const [audienceOpen, setAudienceOpen] = useState(false)
+  const [audience, setAudience] = useState(() => draft.audience || 'public')
+  const [subscriberTier, setSubscriberTier] = useState(() => draft.subscriberTier || '')
+  const [tierError, setTierError] = useState('')
+
+  const openAudiencePopup = () => {
+    if (!draft.title.trim()) {
+      setFormError('Add a stream title before starting the broadcast.')
+      return
+    }
+    setFormError('')
+    setAudience(draft.audience || 'public')
+    setSubscriberTier(draft.subscriberTier || '')
+    setTierError('')
+    setAudienceOpen(true)
+  }
+
+  const confirmBroadcast = () => {
+    if (audience === 'subscribers' && !subscriberTier) {
+      setTierError('Select a subscription tier for this live session.')
+      return
+    }
+    const nextDraft = {
+      ...draft,
+      audience,
+      subscriberTier: audience === 'subscribers' ? subscriberTier : '',
+    }
+    setDraft(nextDraft)
+    setAudienceOpen(false)
+    startBroadcast({ audience, subscriberTier: nextDraft.subscriberTier })
+  }
+
   return (
     <div className="live-workspace live-workspace--setup">
       <LivePageHeader
@@ -745,9 +795,66 @@ export function AstrologerLiveSessionConfigure() {
           <button type="button" className="btn btn-ghost" onClick={goToSetup}>
             Back
           </button>
-          <button type="button" className="btn btn-primary" onClick={startBroadcast}>
-            <Radio size={16} /> Start Broadcast
-          </button>
+          <div className="live-audience-anchor">
+            <button type="button" className="btn btn-primary" onClick={openAudiencePopup}>
+              <Radio size={16} /> Start Broadcast
+            </button>
+            {audienceOpen && (
+              <div className="live-audience-popover" role="dialog" aria-modal="true" aria-label="Choose live audience">
+                <span className="live-eyebrow">Broadcast audience</span>
+                <strong>Who can join this live?</strong>
+                {AUDIENCE_OPTIONS.map((option) => (
+                  <label key={option.value} className={`live-audience-option${audience === option.value ? ' is-selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="live-audience"
+                      value={option.value}
+                      checked={audience === option.value}
+                      onChange={() => {
+                        setAudience(option.value)
+                        setTierError('')
+                      }}
+                    />
+                    <span>
+                      <strong>{option.label}</strong>
+                      <small>{option.hint}</small>
+                    </span>
+                  </label>
+                ))}
+                {audience === 'subscribers' && (
+                  <div className="live-audience-tiers">
+                    {SUBSCRIBER_TIERS.map((tier) => (
+                      <button
+                        type="button"
+                        key={tier}
+                        className={`live-audience-tier${subscriberTier === tier.toLowerCase() ? ' is-selected' : ''}`}
+                        onClick={() => {
+                          setSubscriberTier(tier.toLowerCase())
+                          setTierError('')
+                        }}
+                      >
+                        {tier}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {tierError && <div className="live-audience-error">{tierError}</div>}
+                <div className="live-audience-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setAudienceOpen(false)}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={confirmBroadcast}
+                    disabled={audience === 'subscribers' && !subscriberTier}
+                  >
+                    <Play size={15} /> Go Live
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </Card>
     </div>

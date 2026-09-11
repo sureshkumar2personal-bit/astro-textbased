@@ -759,6 +759,10 @@ export function normalizeLiveSession(session) {
     premiumQueue: session.premiumQueue !== false,
     rate: String(session.rate || '45'),
     visibility: normalizeVisibility(session.visibility),
+    audience: ['public', 'followers', 'subscribers'].includes(session.audience) ? session.audience : 'public',
+    subscriberTier: ['silver', 'gold', 'pro'].includes(String(session.subscriberTier || '').toLowerCase())
+      ? String(session.subscriberTier).toLowerCase()
+      : '',
     scheduledStartAt: session.scheduledStartAt || now,
     scheduledEndAt: session.scheduledEndAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     status: ['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming',
@@ -988,8 +992,11 @@ const initialAstrologerPosts = [
 ]
 
 const initialAstrologerLiveSessions = [
-  { id: 'live-1', astrologerId: 'astrologer-demo', title: 'Marriage & Career Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', visibility: 'public', scheduledStartAt: '2026-08-24T10:00:00+05:30', scheduledEndAt: '2026-08-24T11:00:00+05:30', status: 'past', startedAt: '2026-08-24T10:00:00+05:30', endedAt: '2026-08-24T11:00:00+05:30', createdAt: '2026-08-20T10:00:00+05:30' },
-  { id: 'live-2', astrologerId: 'astrologer-demo', title: 'Health & Remedies Live Session', description: 'A practical session on health-focused astrology and remedies.', visibility: 'subscribers', scheduledStartAt: '2026-08-28T18:00:00+05:30', scheduledEndAt: '2026-08-28T19:00:00+05:30', status: 'upcoming', startedAt: null, endedAt: null, createdAt: '2026-08-21T10:00:00+05:30' },
+  { id: 'live-now-1', astrologerId: 'astrologer-demo', title: 'Career & Marriage Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '45', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-09-11T09:30:00+05:30', scheduledEndAt: '2026-09-11T10:45:00+05:30', status: 'live', startedAt: '2026-09-11T10:05:00+05:30', endedAt: null, createdAt: '2026-09-11T09:00:00+05:30' },
+  { id: 'live-now-2', astrologerId: 'acharya-meena', title: 'Marriage Match & Delay Remedies', description: 'Live guidance on marriage delays, kundli matching, and remedies for happy relationships.', category: 'Tarot Card Reading', freeQuestions: true, premiumQueue: true, rate: '60', visibility: 'followers', audience: 'followers', subscriberTier: '', scheduledStartAt: '2026-09-11T10:15:00+05:30', scheduledEndAt: '2026-09-11T11:15:00+05:30', status: 'live', startedAt: '2026-09-11T10:20:00+05:30', endedAt: null, createdAt: '2026-09-11T09:45:00+05:30' },
+  { id: 'live-now-3', astrologerId: 'astrologer-demo-3', title: 'Child Education & Career Choice', description: 'Choose the right stream, manage education stress, and plan your child’s career path.', category: 'Numerology', freeQuestions: false, premiumQueue: true, rate: '55', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-09-11T10:30:00+05:30', scheduledEndAt: '2026-09-11T11:30:00+05:30', status: 'live', startedAt: '2026-09-11T10:32:00+05:30', endedAt: null, createdAt: '2026-09-11T10:00:00+05:30' },
+  { id: 'live-1', astrologerId: 'astrologer-demo', title: 'Marriage & Career Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-08-24T10:00:00+05:30', scheduledEndAt: '2026-08-24T11:00:00+05:30', status: 'past', startedAt: '2026-08-24T10:00:00+05:30', endedAt: '2026-08-24T11:00:00+05:30', createdAt: '2026-08-20T10:00:00+05:30' },
+  { id: 'live-2', astrologerId: 'astrologer-demo', title: 'Health & Remedies Live Session', description: 'A practical session on health-focused astrology and remedies.', visibility: 'subscribers', audience: 'subscribers', subscriberTier: 'gold', scheduledStartAt: '2026-08-28T18:00:00+05:30', scheduledEndAt: '2026-08-28T19:00:00+05:30', status: 'upcoming', startedAt: null, endedAt: null, createdAt: '2026-08-21T10:00:00+05:30' },
 ]
 
 const initialConsultationHistory = [

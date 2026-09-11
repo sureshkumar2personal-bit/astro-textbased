@@ -61,7 +61,7 @@ import RewardsShell, {
 import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
-import LiveSession from './pages/LiveSession.jsx'
+import LiveSession from './pages/user/live-sessions/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
