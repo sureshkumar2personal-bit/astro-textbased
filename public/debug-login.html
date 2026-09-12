@@ -1,0 +1,9 @@
+<script>
+  const users = [
+    { id: 'user-demo', role: 'user', name: 'Priya V.', email: 'user@astroconnect.com', phone: '+91 98765 43210', password: 'User@123', specialization: '', experience: '' },
+  ]
+  localStorage.setItem('astroconnect-auth-users', JSON.stringify(users))
+  localStorage.setItem('astroconnect-auth-session', JSON.stringify(users[0]))
+  localStorage.removeItem('astroconnect-astrologer-live-sessions')
+  setTimeout(() => { location.replace('/user/live-session') }, 60)
+</script>

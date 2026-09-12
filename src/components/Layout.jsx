@@ -86,6 +86,7 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
+      { to: 'live-session', label: 'Live', icon: Radio },
       {
         label: 'Perks & Benefits',
         icon: Gift,
@@ -129,15 +130,7 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
-      {
-        label: 'Total Rewards',
-        to: 'rewards/perks',
-        icon: Gift,
-        children: [
-          { to: 'rewards/perks', label: 'Perks', icon: Gift },
-          { to: 'rewards/benefits', label: 'Benefits', icon: Sparkles },
-        ],
-      },
+      { to: 'rewards', label: 'Total Rewards', icon: Gift },
       {
         label: 'Wallet',
         to: 'wallet/overview',
@@ -208,9 +201,7 @@ const PAGE_META = {
     '/user/dispute-management': { title: 'Dispute Management', sub: 'View dispute updates' },
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
-    '/user/rewards': { title: 'Total Rewards', sub: 'Your perks and benefits from subscribed astrologers.' },
-    '/user/rewards/perks': { title: 'Perks', sub: 'Exclusive content and interactions from your subscribed astrologers.' },
-    '/user/rewards/benefits': { title: 'Benefits', sub: 'Discounts and rewards you can redeem as a subscriber.' },
+    '/user/rewards': { title: 'Total Rewards', sub: 'Discount questions, perks, and benefits from subscribed astrologers.' },
     '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
@@ -251,22 +242,24 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
   })
 
   useEffect(() => {
-    if (activeSectionLabels.length === 0) return
+    if (activeSectionLabels.length === 0) {
+      setOpenSections({})
+      return
+    }
     setOpenSections((current) => {
-      let changed = false
-      const next = { ...current }
-      activeSectionLabels.forEach((label) => {
-        if (!next[label]) {
-          next[label] = true
-          changed = true
-        }
-      })
-      return changed ? next : current
+      const next = {}
+      activeSectionLabels.forEach((label) => { next[label] = true })
+      const same = Object.keys(next).length === Object.keys(current).length &&
+        Object.keys(next).every((key) => current[key])
+      return same ? current : next
     })
   }, [activeSectionLabels])
 
   const toggleSection = (label) => {
-    setOpenSections((current) => ({ ...current, [label]: !current[label] }))
+    setOpenSections((current) => {
+      if (current[label]) return { ...current, [label]: false }
+      return { [label]: true }
+    })
   }
 
   return (
@@ -313,15 +306,18 @@ function AstrologerNav({ links, basePath }) {
   })
 
   useEffect(() => {
-    links.forEach((link) => {
-      if (link.children && link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) {
-        setOpenSections((current) => (current[link.label] ? current : { ...current, [link.label]: true }))
-      }
-    })
+    const match = links.find(
+      (link) => link.children && link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
+    )
+    if (!match) return
+    setOpenSections((current) => (current[match.label] ? current : { [match.label]: true }))
   }, [location.pathname, links, basePath])
 
   const toggleSection = (label) => {
-    setOpenSections((current) => ({ ...current, [label]: !current[label] }))
+    setOpenSections((current) => {
+      if (current[label]) return { ...current, [label]: false }
+      return { [label]: true }
+    })
   }
 
   return (
