@@ -60,7 +60,7 @@ function weekFor(value) {
   return Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index))
 }
 
-export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, userId, userName, actions, routes, onClose, initialDate = '', initialSelectedSlots = [], pricePerSlot = PRICE, slotDuration = '30 Minutes', initialStep = 'form', initialDetails = null }) {
+export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, userId, userName, actions, routes, onClose, onEditAppointment, initialDate = '', initialSelectedSlots = [], pricePerSlot = PRICE, slotDuration = '30 Minutes', initialStep = 'form', initialDetails = null }) {
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
@@ -129,8 +129,31 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const pay = () => {
     if (!selected.length || paymentMethod !== 'Wallet' || balance < amount) return
     const group = `#BOOK-${selected[0].date.replaceAll('-', '')}-001`
-    const ids = selected.map((slot, index) => actions.bookAppointment({ astrologerId: astrologer.id, astrologerName: astrologer.name, type: TYPE, date: formatDate(slot.date), dateIso: slot.date, time: slot.time, price: slot.price, duration: slot.duration, package: slot.package || '30 Min Consultation', bookingGroup: group, bookingSequence: index + 1, questionDetails: details.question ? details : null, userId, customerName: details.userName || userName || null }))
-    actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: `${selected.length} appointments`, service: 'Appointment', transactionId: `appointment-${group}` })
+    const transactionId = `appointment-${group}`
+    const bookingDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    const ids = selected.map((slot, index) => actions.bookAppointment({
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      type: TYPE,
+      date: formatDate(slot.date),
+      dateIso: slot.date,
+      time: slot.time,
+      price: slot.price,
+      amount: slot.price,
+      duration: slot.duration,
+      package: slot.package || '30 Min Consultation',
+      bookingGroup: group,
+      bookingSequence: index + 1,
+      orderId: group,
+      paymentStatus: 'Paid',
+      paymentMethod,
+      transactionId,
+      bookingDate,
+      questionDetails: details.question ? details : null,
+      userId,
+      customerName: details.userName || userName || null,
+    }))
+    actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: `${selected.length} appointments`, service: 'Appointment', transactionId })
     setAppointmentId(ids[0])
     setStep('success')
   }
@@ -160,9 +183,9 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
         </div>
 {step !== 'form' && <div className="modal-card__footer user-modal-card__footer appointment-booking-modal__footer">
           {step === 'details' && <button className="btn btn-primary" type="button" onClick={() => setStep('review')}>Save Details</button>}
-          {step === 'review' && <><button className="btn btn-outline" type="button" onClick={() => setStep('form')}>Edit Appointment</button><button className="btn btn-primary" type="button" onClick={() => setStep('payment')}>Proceed to Payment</button></>}
+          {step === 'review' && <><button className="btn btn-outline" type="button" onClick={() => { if (onEditAppointment) onEditAppointment(); else setStep('form') }}>Edit Appointment</button><button className="btn btn-primary" type="button" onClick={() => setStep('payment')}>Proceed to Payment</button></>}
           {step === 'payment' && <button className="btn btn-primary" type="button" disabled={paymentMethod !== 'Wallet' || balance < amount} onClick={pay}>Confirm & Pay ₹{amount}</button>}
-          {step === 'success' && <><button className="btn btn-primary" type="button" onClick={() => { onClose(); navigate(`${routes.appointmentDetails}?id=${appointmentId}`) }}><CalendarPlus size={15} /> View Appointment</button><button className="btn btn-outline" type="button" onClick={onClose}>Done</button></>}
+          {step === 'success' && <button className="btn btn-outline" type="button" onClick={() => { onClose(); navigate(`${routes.base}/appointments/book/${encodeURIComponent(astrologer.id)}`, { state: { initialDate: selected[0]?.date || '', appointmentId, openAppointmentDetails: true } }) }}>Done</button>}
         </div>}
       </div>
     </div>,

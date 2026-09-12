@@ -138,8 +138,7 @@ const ROLE_CONFIG = {
         icon: CalendarCheck,
         children: [
           { to: 'appointments/book', label: 'Book Appointment', icon: CalendarCheck },
-          { to: 'appointments/my', label: 'My Appointments', icon: CalendarCheck },
-          { to: 'appointments/history', label: 'Appointment History', icon: History },
+          { to: 'appointments/my', label: 'Appointment History', icon: CalendarCheck },
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
@@ -222,7 +221,6 @@ const PAGE_META = {
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/appointments/book': { title: 'Book Appointment', sub: 'Find an astrologer and schedule your appointment' },
     '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
-    '/user/appointments/history': { title: 'Appointment History', sub: 'All your appointment records' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
     '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },

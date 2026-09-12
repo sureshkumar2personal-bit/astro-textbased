@@ -2009,10 +2009,16 @@ export function AppDataProvider({ children }) {
         date: payload.date,
         time: payload.time,
         price: Number(payload.price) || 499,
+        amount: Number(payload.amount ?? payload.price) || 499,
         duration: payload.duration || '30 Minutes',
         package: payload.package || '30 Min Consultation',
         bookingGroup: payload.bookingGroup || null,
         bookingSequence: payload.bookingSequence || 1,
+        orderId: payload.orderId || payload.bookingGroup || null,
+        paymentStatus: payload.paymentStatus || 'Paid',
+        paymentMethod: payload.paymentMethod || 'Wallet',
+        transactionId: payload.transactionId || null,
+        bookingDate: payload.bookingDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         questionDetails: payload.questionDetails || null,
         horoscope: payload.horoscope || null,
         dateIso: payload.dateIso || payload.date || null,
@@ -2082,6 +2088,23 @@ export function AppDataProvider({ children }) {
           appointment.id === appointmentId ? { ...appointment, status, ...meta } : appointment,
         ),
       )
+    },
+    refundAppointment(appointmentId, meta = {}) {
+      setAppointments((prev) => prev.map((appointment) => {
+        if (appointment.id !== appointmentId) return appointment
+        const keepLifecycleStatus = appointment.status === 'Cancelled' ||
+          isCancelledStatus(appointment.status) ||
+          appointment.status === 'Rescheduled'
+        return {
+          ...appointment,
+          status: keepLifecycleStatus ? appointment.status : 'Refunded',
+          refundStatus: 'Completed',
+          paymentStatus: 'Refunded',
+          refundAmount: Number(meta.amount ?? appointment.amount ?? appointment.price) || 0,
+          refundedAt: meta.refundedAt || new Date().toISOString(),
+        }
+      }))
+      return appointmentId
     },
     cancelAppointmentByAstrologer(appointmentId, meta = {}) {
       const target = appointments.find((item) => item.id === appointmentId)
@@ -2195,49 +2218,22 @@ export function AppDataProvider({ children }) {
       if ((original.status || 'Booked') !== 'Booked') return null
       if (isCancelledStatus(original.status)) return null
       if (original.rescheduledTo || original.rescheduledFrom) return null
-      const newId = `apt-rs-${Date.now().toString(36)}`
-      const booked = new Date()
-      const newAppointment = {
-        id: newId,
-        userId: original.userId || null,
-        astrologerId: original.astrologerId,
-        astrologer: original.astrologer,
-        type: 'Audio Call',
-        callType: 'Audio',
-        customerName: original.customerName,
-        customerPhone: original.customerPhone,
-        orderId: original.orderId ? `${original.orderId}-RS` : original.orderId,
-        amount: original.amount ?? original.price ?? 0,
-        price: original.price,
-        package: original.package,
-        duration: original.duration || '30 min',
-        language: original.language,
-        topic: original.topic,
-        date,
-        dateIso,
-        time,
-        start,
-        end,
-        status: 'Booked',
-        paymentStatus: original.paymentStatus || 'Paid',
-        paymentMethod: original.paymentMethod || 'Wallet',
-        transactionId: original.transactionId,
-        bookingDate: date,
-        bookedAt: booked.toISOString(),
-        rescheduledFrom: originalId,
-        horoscope: original.horoscope || null,
-        questionDetails: original.questionDetails || null,
-        note: 'No second payment — rescheduled from the original appointment.',
-      }
       setAppointments((prev) => {
-        const rest = prev.map((item) =>
-          item.id === originalId
-            ? { ...item, rescheduledTo: newId }
-            : item,
-        )
-        return [newAppointment, ...rest]
+        return prev.map((item) => item.id === originalId
+          ? {
+              ...item,
+              date,
+              dateIso,
+              time,
+              start,
+              end,
+              status: 'Rescheduled',
+              rescheduledAt: new Date().toISOString(),
+              note: 'Appointment time changed without creating a second booking.',
+            }
+          : item)
       })
-      return newId
+      return originalId
     },
     saveAppointmentAvailabilityTemplate(template) {
       const normalized = normalizeAppointmentAvailabilityTemplate(template)

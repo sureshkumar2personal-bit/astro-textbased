@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import {
@@ -17,6 +17,7 @@ import {
 import AppointmentBookingModal from '../../../components/user/AppointmentBookingModal.jsx'
 import AppointmentSlotsModal from '../../../components/user/AppointmentSlotsModal.jsx'
 import ConsultationSummaryDrawer from '../../../components/user/ConsultationSummaryDrawer.jsx'
+import UserAppointmentDetailsDrawer from '../../../components/user/UserAppointmentDetailsDrawer.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -41,6 +42,7 @@ export default function BookAppointmentSlots() {
   const { astrologerId } = useParams()
   const { currentUser } = useAuth()
   const { appointments, userWallet, actions } = useAppData()
+  const location = useLocation()
   const navigate = useNavigate()
 
   const astrologer = useMemo(() => mockAstrologers.find((item) => item.id === astrologerId), [astrologerId])
@@ -60,6 +62,23 @@ export default function BookAppointmentSlots() {
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingSlot, setBookingSlot] = useState(null)
   const [bookingDetails, setBookingDetails] = useState(null)
+  const [detailsAppointment, setDetailsAppointment] = useState(null)
+  const editDate = location.state?.initialDate || ''
+  const detailAppointmentId = location.state?.appointmentId || ''
+  const openAppointmentDetails = Boolean(location.state?.openAppointmentDetails)
+
+  useEffect(() => {
+    if (!editDate) return
+    setMonth(new Date(parseKey(editDate).getFullYear(), parseKey(editDate).getMonth(), 1))
+    setSelectedDate(editDate)
+    setSlotsDate('')
+  }, [editDate])
+
+  useEffect(() => {
+    if (!openAppointmentDetails || !detailAppointmentId) return
+    const appointment = appointments.find((item) => item.id === detailAppointmentId)
+    if (appointment) setDetailsAppointment(appointment)
+  }, [appointments, detailAppointmentId, openAppointmentDetails])
 
   if (!astrologer) return <Navigate to="/user/appointments/book" replace />
 
@@ -109,6 +128,7 @@ export default function BookAppointmentSlots() {
 
   return (
     <div className="book-slots-page">
+      <button type="button" className="book-slots-back" onClick={() => navigate(-1)}><span aria-hidden="true">←</span> Back</button>
       <PageHeader
         eyebrow="USER PORTAL"
         title="Book an Appointment"
@@ -231,9 +251,22 @@ export default function BookAppointmentSlots() {
           slotDuration={bookingSlot.duration}
           initialStep="review"
           initialDetails={bookingDetails}
+          onEditAppointment={() => {
+            setBookingOpen(false)
+            navigate(`/user/appointments/book/${astrologer.id}`, { state: { initialDate: bookingSlot.date } })
+          }}
           onClose={() => setBookingOpen(false)}
         />
       )}
+
+      <UserAppointmentDetailsDrawer
+        appointment={detailsAppointment}
+        currentUser={currentUser}
+        onClose={() => {
+          setDetailsAppointment(null)
+          navigate(location.pathname, { replace: true, state: { initialDate: editDate } })
+        }}
+      />
     </div>
   )
 }

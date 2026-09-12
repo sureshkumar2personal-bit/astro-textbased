@@ -314,6 +314,8 @@ export function useNow(intervalMs = 1000) {
 export const APPOINTMENT_STATUS = {
   BOOKED: 'Booked',
   COMPLETED: 'Completed',
+  RESCHEDULED: 'Rescheduled',
+  REFUNDED: 'Refunded',
   CANCELLED_BY_ASTROLOGER: 'Cancelled by Astrologer',
   CANCELLED_BY_USER: 'Cancelled by User',
   NO_SHOW: 'No-show',
@@ -331,11 +333,58 @@ export function isCancelledStatus(status) {
   return CANCELLED_STATUSES.includes(status) || status === 'Cancelled'
 }
 
+// Resolve the status that should be shown to a user. Appointment records may
+// contain legacy cancellation labels or reschedule/refund metadata, so cards
+// and drawers should use this helper instead of reading status ad hoc.
+export function getAppointmentDisplayStatus(appointment, now = new Date()) {
+  if (!appointment) return ''
+  const rawStatus = String(appointment.status || '').trim()
+  const normalized = rawStatus.toLowerCase()
+  const paymentStatus = String(appointment.paymentStatus || '').toLowerCase()
+  const refundStatus = String(appointment.refundStatus || '').toLowerCase()
+
+  const refunded = normalized === 'refunded' ||
+    paymentStatus === 'refunded' ||
+    refundStatus === 'refunded' ||
+    refundStatus === 'completed'
+  if (refunded) return APPOINTMENT_STATUS.REFUNDED
+
+  if (rawStatus === APPOINTMENT_STATUS.RESCHEDULED || appointment.rescheduledTo || appointment.rescheduledFrom) {
+    return APPOINTMENT_STATUS.RESCHEDULED
+  }
+
+  if (isCancelledStatus(rawStatus)) return 'Cancelled'
+  if (rawStatus === APPOINTMENT_STATUS.COMPLETED) return APPOINTMENT_STATUS.COMPLETED
+  if (rawStatus === APPOINTMENT_STATUS.NO_SHOW) return APPOINTMENT_STATUS.NO_SHOW
+
+  // A booked slot whose consultation window has ended is no longer upcoming.
+  // The existing appointment phase engine is the source of truth for that
+  // transition, while explicit terminal actions above always take precedence.
+  if (rawStatus === APPOINTMENT_STATUS.BOOKED || rawStatus === 'Confirmed' || rawStatus === 'Pending' || !rawStatus) {
+    const phaseResult = getAppointmentPhase({ ...appointment, status: APPOINTMENT_STATUS.BOOKED }, now)
+    const phase = typeof phaseResult === 'string' ? phaseResult : phaseResult.phase
+    if (phase === 'completed') return APPOINTMENT_STATUS.COMPLETED
+    return APPOINTMENT_STATUS.BOOKED
+  }
+
+  return rawStatus
+}
+
 // Classify an appointment purely by its status into one of the history buckets.
 // This is the single source of truth for All / Upcoming / Completed / Cancelled
 // filtering, the summary cards and the calendar day counts, so that every part
 // of Appointment History always agrees on the same numbers.
-export function appointmentStatusBucket(status) {
+export function appointmentStatusBucket(statusOrAppointment, now = new Date()) {
+  const appointment = statusOrAppointment && typeof statusOrAppointment === 'object'
+    ? statusOrAppointment
+    : null
+  const status = appointment
+    ? getAppointmentDisplayStatus(appointment, now)
+    : statusOrAppointment
+  if (status === APPOINTMENT_STATUS.RESCHEDULED) return 'rescheduled'
+  if (status === APPOINTMENT_STATUS.REFUNDED) {
+    return appointment?.rescheduledTo || appointment?.rescheduledFrom || appointment?.rescheduledAt ? 'rescheduled' : 'cancelled'
+  }
   if (isCancelledStatus(status)) return 'cancelled'
   if (status === 'Completed' || status === 'No-show') return 'completed'
   return 'booked'

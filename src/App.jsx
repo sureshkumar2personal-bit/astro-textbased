@@ -74,7 +74,6 @@ import TransactionHistory from './pages/user/transaction-history/TransactionHist
 import BookAppointment from './pages/user/appointments/BookAppointment.jsx'
 import BookAppointmentSlots from './pages/user/appointments/BookAppointmentSlots.jsx'
 import MyAppointments from './pages/user/appointments/MyAppointments.jsx'
-import AppointmentHistoryPage from './pages/user/appointments/AppointmentHistoryPage.jsx'
 import AstrologerLiveSessionShell, {
   AstrologerLiveSessionConfigure,
   AstrologerLiveSessionSetup,
@@ -226,7 +225,6 @@ function UserRoutes() {
         <Route path="/user/appointments/book" element={<BookAppointment />} />
         <Route path="/user/appointments/book/:astrologerId" element={<BookAppointmentSlots />} />
         <Route path="/user/appointments/my" element={<MyAppointments />} />
-        <Route path="/user/appointments/history" element={<AppointmentHistoryPage />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
         <Route path="/user/payment-methods" element={<PaymentMethods />} />
