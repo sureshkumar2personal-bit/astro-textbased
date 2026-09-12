@@ -3,6 +3,33 @@
   gap: 24px;
 }
 
+.book-slots-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 5px 9px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.book-slots-back:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.book-slots-back span {
+  color: var(--primary);
+  font-size: 16px;
+  line-height: 1;
+}
+
 .book-slots-page .page-eyebrow {
   margin-bottom: 14px;
 }

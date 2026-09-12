@@ -25,6 +25,7 @@ export function getRoleRoutes(role) {
     disputeManagement: `${base}/dispute-management`,
     activity: `${base}/activity`,
     appointments: `${base}/appointments`,
+    myAppointments: `${base}/appointments/my`,
     appointmentSchedule: `${base}/appointments/schedule`,
     appointmentCalendar: `${base}/appointments/calendar`,
     appointmentHistory: `${base}/appointments/history`,

@@ -7,6 +7,7 @@ import Section from '../../../components/ui/Section.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
+import { getAppointmentDisplayStatus } from '../../../utils/appointments.js'
 
 const CANCELLABLE_STATUSES = ['Confirmed', 'Rescheduled']
 
@@ -40,7 +41,7 @@ export default function AppointmentDetails() {
           <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{appointment.type}</div>
           <div className="muted">with {appointment.astrologer}</div>
         </div>
-        <StatusBadge label={appointment.status} />
+        <StatusBadge label={getAppointmentDisplayStatus(appointment)} />
       </Card>
 
       <Section title="Schedule">

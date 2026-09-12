@@ -70,7 +70,6 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
     if (consultationFor === 'Others' && !otherPurpose.trim()) return setValidationError('Please specify the consultation purpose.')
     if (!userName.trim()) return setValidationError('Enter your full name.')
     if (!birthDate) return setValidationError('Enter your date of birth.')
-    if (!concern.trim()) return setValidationError('Describe your concern before proceeding.')
     setValidationError('')
     onProceed({ userName: userName.trim(), consultationFor, otherPurpose: otherPurpose.trim(), question: concern.trim(), dob: birthDate })
   }
@@ -101,7 +100,7 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
               <label><span>Date of Birth</span><input className="text-input" type="date" value={birthDate} onChange={(event) => { setBirthDate(event.target.value); setValidationError('') }} /></label>
               <label><span>Consultation For</span><select className="select-input" value={consultationFor} onChange={(event) => { setConsultationFor(event.target.value); setValidationError('') }}><option value="">Select purpose</option>{CONSULTATION_PURPOSES.map((purpose) => <option key={purpose} value={purpose}>{purpose}</option>)}</select></label>
               {consultationFor === 'Others' && <label><span>Please specify</span><input className="text-input" value={otherPurpose} onChange={(event) => { setOtherPurpose(event.target.value); setValidationError('') }} placeholder="Please specify" /></label>}
-              <label><span>Describe your concern</span><textarea className="text-input consultation-concern" rows="3" value={concern} onChange={(event) => { setConcern(event.target.value); setValidationError('') }} placeholder="Type your question or describe what you would like to discuss with the astrologer…" /></label>
+              <label><span>Describe your concern (Optional)</span><textarea className="text-input consultation-concern" rows="3" value={concern} onChange={(event) => { setConcern(event.target.value); setValidationError('') }} placeholder="Type your question or describe what you would like to discuss with the astrologer…" /></label>
               {validationError && <p className="consultation-horoscope-error" role="alert">{validationError}</p>}
             </div>
           </div>

@@ -14,11 +14,11 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 function dayBreakdown(appointments, date) {
   const iso = toIsoDate(date)
   const dayApps = appointments.filter((appointment) => appointment.dateIso === iso)
-  const booked = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'booked')
-  const pending = dayApps.filter((appointment) => appointment.status === 'Pending' || (appointmentStatusBucket(appointment.status) === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo && appointment.status !== 'Rescheduled'))
-  const rescheduled = dayApps.filter((appointment) => Boolean(appointment.rescheduledTo || appointment.rescheduledFrom || appointment.status === 'Rescheduled'))
-  const completed = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'completed')
-  const cancelled = dayApps.filter((appointment) => appointmentStatusBucket(appointment.status) === 'cancelled')
+  const booked = dayApps.filter((appointment) => appointmentStatusBucket(appointment) === 'booked')
+  const pending = dayApps.filter((appointment) => appointmentStatusBucket(appointment) === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo && !appointment.rescheduledAt)
+  const rescheduled = dayApps.filter((appointment) => appointmentStatusBucket(appointment) === 'rescheduled')
+  const completed = dayApps.filter((appointment) => appointmentStatusBucket(appointment) === 'completed')
+  const cancelled = dayApps.filter((appointment) => appointmentStatusBucket(appointment) === 'cancelled')
   const other = dayApps.filter((appointment) => appointment.status === 'No-show')
   return { total: dayApps.length, booked, pending, rescheduled, completed, cancelled, other }
 }
@@ -124,7 +124,7 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
           )}
         </div>
         <div className="apt-history-calendar-legend" aria-label="Appointment status legend">
-          <span className="is-pending">Pending</span>
+          <span className="is-pending">Upcoming</span>
           <span className="is-completed">Completed</span>
           <span className="is-cancelled">Cancelled</span>
           <span className="is-rescheduled">Rescheduled</span>
