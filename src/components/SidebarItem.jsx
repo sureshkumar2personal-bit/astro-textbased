@@ -1,16 +1,19 @@
-import { NavLink } from 'react-router-dom'
+import { useLocation, NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-export default function SidebarItem({ to, end, icon: Icon, label, showBadge = false, badgeCount = 0, nested = false, subItem = false }) {
+export default function SidebarItem({ to, end, icon: Icon, label, showBadge = false, badgeCount = 0, nested = false, subItem = false, activeWhen = [] }) {
+  const { pathname } = useLocation()
+  const extraActive = activeWhen.some((prefix) => pathname.startsWith(prefix))
+
   return (
     <NavLink
       to={to}
       end={end}
-      className={({ isActive }) => `sidebar-link${nested || subItem ? ' sidebar-link--nested' : ''}${subItem ? ' sidebar-subnav-link' : ''}${isActive ? ' active' : ''}`}
+      className={({ isActive }) => `sidebar-link${nested || subItem ? ' sidebar-link--nested' : ''}${subItem ? ' sidebar-subnav-link' : ''}${isActive || extraActive ? ' active' : ''}`}
     >
       {({ isActive }) => (
         <>
-          {isActive && (
+          {(isActive || extraActive) && (
             <motion.span
               layoutId="sidebar-active-pill"
               className="sidebar-active-pill"
