@@ -595,14 +595,35 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
 }
 
 export function AstrologerLiveSessionSetup() {
-  const { draft, mediaStatus, requestMedia, closeWorkspace, goToConfigure, videoRef } = useLiveSessionFlow()
+  const {
+    draft,
+    mediaStatus,
+    requestMedia,
+    closeWorkspace,
+    goToConfigure,
+    startBroadcast,
+    existingSession,
+    videoRef,
+  } = useLiveSessionFlow()
+
+  const enteredForLive = Boolean(existingSession) && new Date(existingSession.scheduledStartAt).getTime() <= Date.now()
+
+  const handleNext = () => {
+    if (enteredForLive) {
+      startBroadcast()
+    } else {
+      goToConfigure()
+    }
+  }
 
   return (
     <div className="live-workspace live-workspace--setup">
       <LivePageHeader
-        step="Step 01 of 04"
+        step={enteredForLive ? 'Scheduled live · Studio check' : 'Step 01 of 04'}
         title="Broadcast studio setup"
-        subtitle="Check your camera and microphone before you continue"
+        subtitle={enteredForLive
+          ? 'Check your camera and microphone, then enter the live room'
+          : 'Check your camera and microphone before you continue'}
         onClose={closeWorkspace}
       />
       <div className="live-setup-content">
@@ -644,8 +665,8 @@ export function AstrologerLiveSessionSetup() {
           <button type="button" className="btn btn-outline" onClick={closeWorkspace}>
             Back to Profile
           </button>
-          <button type="button" className="btn btn-primary live-go-button" onClick={goToConfigure}>
-            <Radio size={18} /> Next
+          <button type="button" className="btn btn-primary live-go-button" onClick={handleNext}>
+            {enteredForLive ? <><Radio size={18} /> Go to Live Room</> : <><Radio size={18} /> Next</>}
           </button>
         </div>
       </div>

@@ -80,6 +80,7 @@ import AstrologerLiveSessionShell, {
   AstrologerLiveSessionRoom,
   AstrologerLiveSessionSummary,
 } from './pages/astrologer/live/AstrologerLiveSession.jsx'
+import { ScheduledLive, LiveHistory } from './pages/astrologer/live/LiveSessionLists.jsx'
 import AppointmentsShell from './pages/astrologer/appointments/AppointmentsShell.jsx'
 import AppointmentScheduleTab from './pages/astrologer/appointments/AppointmentSchedule.jsx'
 import AppointmentHistoryTab from './pages/astrologer/appointments/AppointmentHistory.jsx'
@@ -170,6 +171,8 @@ function AstrologerRoutes() {
           <Route path="configure" element={<AstrologerLiveSessionConfigure />} />
           <Route path="room" element={<AstrologerLiveSessionRoom />} />
           <Route path="summary" element={<AstrologerLiveSessionSummary />} />
+          <Route path="scheduled" element={<ScheduledLive />} />
+          <Route path="history" element={<LiveHistory />} />
         </Route>
       </Route>
     </Route>

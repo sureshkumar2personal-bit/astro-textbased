@@ -86,7 +86,20 @@ const ROLE_CONFIG = {
           { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
         ],
       },
-      { to: 'live-session', label: 'Live', icon: Radio },
+      {
+        label: 'Live',
+        icon: Radio,
+        children: [
+          {
+            to: 'live-session/setup',
+            label: 'Go Live',
+            icon: Radio,
+            activeWhen: ['live-session/configure', 'live-session/room', 'live-session/summary'],
+          },
+          { to: 'live-session/scheduled', label: 'Scheduled Live', icon: CalendarDays },
+          { to: 'live-session/history', label: 'Live History', icon: History },
+        ],
+      },
       {
         label: 'Perks & Benefits',
         icon: Gift,
@@ -183,6 +196,8 @@ const PAGE_META = {
     '/astrologer/live-session/configure': { title: 'Live Configuration', sub: 'Set title, category, and pricing' },
     '/astrologer/live-session/room': { title: 'Live Room', sub: 'Manage the broadcast and audience queue' },
     '/astrologer/live-session/summary': { title: 'Live Summary', sub: 'Review the results of this broadcast' },
+    '/astrologer/live-session/scheduled': { title: 'Scheduled Live', sub: 'Upcoming live broadcasts and stream setup' },
+    '/astrologer/live-session/history': { title: 'Live History', sub: 'Past broadcasts and session records' },
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {
@@ -342,9 +357,10 @@ function AstrologerNav({ links, basePath }) {
             </button>
             {isOpen && (
               <div className="sidebar-nav-subgroup">
-                {link.children.map(({ to, label, icon }) => {
+                {link.children.map(({ to, label, icon, activeWhen }) => {
                   const route = `${basePath}/${to}`
-                  return <SidebarItem key={route} to={route} icon={icon} label={label} nested />
+                  const extra = (activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
+                  return <SidebarItem key={route} to={route} icon={icon} label={label} nested activeWhen={extra} />
                 })}
               </div>
             )}
