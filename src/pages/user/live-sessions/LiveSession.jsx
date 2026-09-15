@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowRight,
   BellRing,
+  Check,
   ChevronLeft,
   Clock3,
   Crown,
@@ -24,6 +25,7 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
+import { sessionAudiences } from '../../../state/AppDataContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const ASTROLOGER_NAMES = Object.fromEntries(mockAstrologers.map((astrologer) => [astrologer.id, astrologer.name]))
@@ -75,19 +77,23 @@ function formatDuration(seconds) {
 }
 
 function audienceMeta(session) {
-  const audience = session.audience || 'public'
-  if (audience === 'subscribers') {
-    return {
-      label: session.subscriberTier ? `Subscribers · ${TIER_LABELS[session.subscriberTier] || session.subscriberTier}` : 'Subscribers only',
-      tone: 'subscribers',
-    }
+  const list = sessionAudiences(session)
+  const subscriberTier = session.subscriberTier
+  const tierLabel = subscriberTier ? `Subscribers · ${TIER_LABELS[subscriberTier] || subscriberTier}` : 'Subscribers'
+  const labelFor = (audience) => {
+    if (audience === 'subscribers') return tierLabel
+    if (audience === 'followers') return 'Followers'
+    return 'Public'
   }
-  if (audience === 'followers') return { label: 'Followers only', tone: 'followers' }
-  return { label: 'Public', tone: 'public' }
+  const label = list.length === 1 && list[0] === 'followers'
+    ? 'Followers only'
+    : list.map(labelFor).join(' + ')
+  const tone = list.includes('subscribers') ? 'subscribers' : list.includes('followers') ? 'followers' : 'public'
+  return { label, tone }
 }
 
 function resolveAccess(session, { userId, followedAstrologerIds = [], subscriptions = [] } = {}) {
-  const audience = session.audience || 'public'
+  const audiences = sessionAudiences(session)
   const activeSub = subscriptions.some(
     (subscription) =>
       subscription.userId === userId &&
@@ -95,16 +101,17 @@ function resolveAccess(session, { userId, followedAstrologerIds = [], subscripti
       (!subscription.expiresAt || new Date(subscription.expiresAt).getTime() > Date.now()),
   )
 
-  if (audience === 'public') return { allowed: true }
+  if (audiences.includes('public')) return { allowed: true }
 
-  if (audience === 'followers') {
-    const following = followedAstrologerIds.includes(session.astrologerId)
-    return following
-      ? { allowed: true }
-      : { allowed: false, reason: 'This is a followers-only live. Follow the astrologer to join.', cta: 'follow', ctaLabel: 'Follow to Join' }
+  if (audiences.includes('followers') && followedAstrologerIds.includes(session.astrologerId)) {
+    return { allowed: true }
   }
 
-  if (audience === 'subscribers') {
+  if (audiences.length === 1 && audiences[0] === 'followers') {
+    return { allowed: false, reason: 'This is a followers-only live. Follow the astrologer to join.', cta: 'follow', ctaLabel: 'Follow to Join' }
+  }
+
+  if (audiences.includes('subscribers')) {
     if (!activeSub) {
       return { allowed: false, reason: 'This is a subscriber-only live. Subscribe to join this session.', cta: 'subscribe', ctaLabel: 'Subscribe to Join' }
     }
@@ -133,7 +140,27 @@ function statusMeta(session) {
   return { label: 'Past', tone: 'past' }
 }
 
+function handleLiveReminder(session, reminderSet, toggleLiveReminder) {
+  toggleLiveReminder(session.id)
+  if (reminderSet) return
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    const request = Notification.permission === 'default'
+      ? Notification.requestPermission()
+      : Promise.resolve(Notification.permission)
+    request.then((permission) => {
+      if (permission === 'granted') {
+        new Notification('Live reminder set', {
+          body: `We'll notify you when "${session.title}" goes live on ${formatSchedule(session.scheduledStartAt)}.`,
+          silent: true,
+        })
+      }
+    })
+  }
+}
+
 function UserLiveSessionCard({ session, access }) {
+  const { toggleLiveReminder, liveReminders } = useAppData()
+  const reminderSet = liveReminders.some((reminder) => reminder.sessionId === session.id)
   const status = statusMeta(session)
   const audience = audienceMeta(session)
   const astrologerId = session.astrologerId
@@ -145,8 +172,8 @@ function UserLiveSessionCard({ session, access }) {
     actionLabel = access.allowed ? 'Join Live' : 'View Session'
     actionIcon = access.allowed ? <Play size={15} /> : <Lock size={15} />
   } else if (session.status === 'upcoming') {
-    actionLabel = 'Set Reminder'
-    actionIcon = <BellRing size={15} />
+    actionLabel = reminderSet ? 'Reminder Set' : 'Set Reminder'
+    actionIcon = reminderSet ? <Check size={15} /> : <BellRing size={15} />
   } else {
     actionLabel = 'View Replay'
     actionIcon = <Play size={15} />
@@ -183,9 +210,23 @@ function UserLiveSessionCard({ session, access }) {
 
       <div className="user-live-card__footer">
         <span className="user-live-card__hint">
-          {!access.allowed && session.status === 'live' ? access.ctaLabel : session.status === 'upcoming' ? 'Free to join' : session.description}
+          {!access.allowed && session.status === 'live' ? access.ctaLabel : session.status === 'upcoming' ? (reminderSet ? 'Reminder active' : 'Free to join') : session.description}
         </span>
-        <span className={`user-live-card__action${access.allowed ? '' : ' is-locked'}`}>{actionIcon} {actionLabel} <ArrowRight size={14} /></span>
+        {session.status === 'upcoming' ? (
+          <button
+            type="button"
+            className={`user-live-card__action${access.allowed ? '' : ' is-locked'}${reminderSet ? ' is-reminder-set' : ''}`}
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              handleLiveReminder(session, reminderSet, toggleLiveReminder)
+            }}
+          >
+            {actionIcon} {actionLabel}
+          </button>
+        ) : (
+          <span className={`user-live-card__action${access.allowed ? '' : ' is-locked'}`}>{actionIcon} {actionLabel} <ArrowRight size={14} /></span>
+        )}
       </div>
     </Link>
   )
@@ -193,10 +234,11 @@ function UserLiveSessionCard({ session, access }) {
 
 function UserLiveRoom({ session, onBack }) {
   const { currentUser } = useAuth()
-  const { followedAstrologerIds, subscriptions } = useAppData()
+  const { followedAstrologerIds, subscriptions, toggleLiveReminder, liveReminders } = useAppData()
 
   const isLive = session.status === 'live'
   const isUpcoming = session.status === 'upcoming'
+  const reminderSet = liveReminders.some((reminder) => reminder.sessionId === session.id)
   const access = resolveAccess(session, {
     userId: currentUser?.id,
     followedAstrologerIds,
@@ -300,10 +342,14 @@ function UserLiveRoom({ session, onBack }) {
             {!isLive && (
               <div className="user-live-stage__notice">
                 <Sparkles size={22} />
-                <strong>{isUpcoming ? 'Reminder set' : 'Session finished'}</strong>
-                <p>{isUpcoming ? 'We will notify you when the astrologer goes live.' : `Replay of this session will be available for ${session.audience === 'public' ? 'everyone' : audience.label}.`}</p>
-                <button type="button" className="btn btn-primary">
-                  <BellRing size={15} /> {isUpcoming ? 'Set Reminder' : 'Watch Replay'}
+                <strong>{isUpcoming ? (reminderSet ? 'Reminder set' : 'Session starts soon') : 'Session finished'}</strong>
+                <p>{isUpcoming ? 'We will notify you when the astrologer goes live.' : `Replay of this session will be available for ${sessionAudiences(session).includes('public') ? 'everyone' : audience.label}.`}</p>
+                <button
+                  type="button"
+                  className={`btn btn-primary${reminderSet ? ' is-reminder-set' : ''}`}
+                  onClick={() => handleLiveReminder(session, reminderSet, toggleLiveReminder)}
+                >
+                  {reminderSet ? <Check size={15} /> : <BellRing size={15} />} {isUpcoming ? (reminderSet ? 'Reminder Set' : 'Set Reminder') : 'Watch Replay'}
                 </button>
               </div>
             )}

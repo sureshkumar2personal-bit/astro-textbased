@@ -20,6 +20,8 @@ import {
   X,
 } from 'lucide-react'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { useAuth } from '../../../state/AuthContext.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
 import { getAstrologerById, REWARD_STATUS, ALL_REWARDS, QUESTION_REWARDS, APPOINTMENT_REWARDS, BENEFIT_REWARDS } from './rewardsData.js'
 
 const FILTER_TABS = [
@@ -452,17 +454,37 @@ function RewardDrawer({ astrologerId, rewards, onClose }) {
 }
 
 export default function RewardsPerks() {
+  const { currentUser } = useAuth()
+  const { actions } = useAppData()
   const [filter, setFilter] = useState('all')
   const [drawerRewards, setDrawerRewards] = useState(null)
 
+  const availableDiscountQuestions = useMemo(
+    () => actions.getAvailableDiscountQuestions(currentUser?.id),
+    [actions, currentUser?.id],
+  )
+
   const summary = useMemo(() => {
-    const available = ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
-    const questions = QUESTION_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
-    const appointments = APPOINTMENT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
-    const benefits = BENEFIT_REWARDS.filter((reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING).length
-    const expiring = ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).length
+    const DAY_MS = 24 * 60 * 60 * 1000
+    const questions = availableDiscountQuestions.length
+    const staticQuestions = QUESTION_REWARDS.filter(
+      (reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING,
+    ).length
+    const appointments = APPOINTMENT_REWARDS.filter(
+      (reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING,
+    ).length
+    const benefits = BENEFIT_REWARDS.filter(
+      (reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING,
+    ).length
+    const available = ALL_REWARDS.filter(
+      (reward) => reward.status === REWARD_STATUS.AVAILABLE || reward.status === REWARD_STATUS.EXPIRING,
+    ).length - staticQuestions + questions
+    const expiring = ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).length +
+      availableDiscountQuestions.filter(
+        (dq) => !!dq.validUntil && dq.validUntil - Date.now() > 0 && dq.validUntil - Date.now() <= 7 * DAY_MS,
+      ).length
     return { available, questions, appointments, benefits, expiring }
-  }, [])
+  }, [availableDiscountQuestions])
 
   const expiringItems = useMemo(
     () => ALL_REWARDS.filter((reward) => reward.status === REWARD_STATUS.EXPIRING).slice(0, 4),

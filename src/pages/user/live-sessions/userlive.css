@@ -69,6 +69,7 @@
 .user-live-card__hint { min-width: 0; overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .user-live-card__action { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; color: var(--primary); font-size: 12px; font-weight: 800; white-space: nowrap; }
 .user-live-card__action.is-locked { color: var(--text-secondary); }
+.user-live-card__action.is-reminder-set { color: var(--green-600, #16a34a); }
 
 .user-live-empty { display: grid; justify-items: center; gap: 8px; padding: 48px 20px; color: var(--text-secondary); text-align: center; }
 .user-live-empty svg { color: var(--primary); }
@@ -107,6 +108,7 @@
 .user-live-stage__lock strong, .user-live-stage__notice strong { font-size: 17px; }
 .user-live-stage__lock p, .user-live-stage__notice p { max-width: 360px; margin: 0; color: var(--text-secondary); font-size: 13px; }
 @media (min-width: 421px) { .user-live-stage__lock .btn, .user-live-stage__notice .btn { min-width: min(280px, 100%); justify-content: center; } }
+.user-live-stage__notice .btn.is-reminder-set { background: var(--green-600, #16a34a); border-color: var(--green-600, #16a34a); }
 
 .user-live-chat { padding: 0; overflow: hidden; }
 .user-live-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 15px; border-bottom: 1px solid var(--surface-border); color: var(--text-secondary); font-size: 12px; font-weight: 800; }

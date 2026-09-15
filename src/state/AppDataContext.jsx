@@ -747,8 +747,43 @@ export function selectVisiblePosts(posts, { userId, followedAstrologerIds = [], 
   })
 }
 
+const LIVE_AUDIENCES = ['public', 'followers', 'subscribers']
+
+export function sessionAudiences(session) {
+  const audiences = Array.isArray(session.audiences) && session.audiences.length
+    ? session.audiences.filter((audience) => LIVE_AUDIENCES.includes(audience))
+    : LIVE_AUDIENCES.includes(session.audience)
+      ? [session.audience]
+      : ['public']
+  return audiences.length ? audiences : ['public']
+}
+
+function toNonNegativeNumber(value) {
+  return Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0
+}
+
+export function audienceAccessDefaults(session) {
+  const audiences = sessionAudiences(session)
+  const values = []
+  if (audiences.includes('public')) {
+    values.push('public', 'followers', 'subscribers')
+  } else if (audiences.includes('followers')) {
+    values.push('followers', 'subscribers')
+  } else if (audiences.includes('subscribers')) {
+    values.push('subscribers')
+  }
+  if (audiences.includes('subscribers') && session.subscriberTier) values.push(session.subscriberTier)
+  return Array.from(new Set(values))
+}
+
 export function normalizeLiveSession(session) {
   const now = new Date().toISOString()
+  const audiences = sessionAudiences(session)
+  const defaultAccess = audienceAccessDefaults(session)
+  const validAccess = ['public', 'followers', 'subscribers', 'silver', 'gold', 'pro']
+  const normalizedAccess = (values) => Array.isArray(values)
+    ? Array.from(new Set(values.filter((value) => validAccess.includes(value))))
+    : []
   return {
     id: session.id || crypto.randomUUID(),
     astrologerId: session.astrologerId || 'astrologer-demo',
@@ -759,10 +794,21 @@ export function normalizeLiveSession(session) {
     premiumQueue: session.premiumQueue !== false,
     rate: String(session.rate || '45'),
     visibility: normalizeVisibility(session.visibility),
-    audience: ['public', 'followers', 'subscribers'].includes(session.audience) ? session.audience : 'public',
+    audiences,
+    audience: audiences[0],
     subscriberTier: ['silver', 'gold', 'pro'].includes(String(session.subscriberTier || '').toLowerCase())
       ? String(session.subscriberTier).toLowerCase()
       : '',
+    commentAccess: normalizedAccess(session.commentAccess).length
+      ? normalizedAccess(session.commentAccess)
+      : defaultAccess,
+    recordAccess: normalizedAccess(session.recordAccess).length
+      ? normalizedAccess(session.recordAccess)
+      : defaultAccess,
+    joinedPublic: toNonNegativeNumber(session.joinedPublic),
+    joinedFollowers: toNonNegativeNumber(session.joinedFollowers),
+    joinedSubscribers: toNonNegativeNumber(session.joinedSubscribers),
+    earnings: toNonNegativeNumber(session.earnings),
     scheduledStartAt: session.scheduledStartAt || now,
     scheduledEndAt: session.scheduledEndAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     status: ['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming',
@@ -775,12 +821,13 @@ export function normalizeLiveSession(session) {
 const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
-const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions'
+const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions-v3'
 const APPOINTMENT_AVAILABILITY_STORAGE_KEY = 'astroconnect-appointment-availability'
 const APPOINTMENTS_STORAGE_KEY = 'astroconnect-appointments'
 const CONSULTATIONS_STORAGE_KEY = 'astroconnect-appointment-consultations'
 const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
+const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -991,12 +1038,18 @@ const initialAstrologerPosts = [
   { id: 'post-rani-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', likeCount: 0, comments: [], createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
 ]
 
+const DEMO_NOW = new Date()
+const demoIso = (millisAgo) => new Date(DEMO_NOW.getTime() - millisAgo).toISOString()
+
 const initialAstrologerLiveSessions = [
-  { id: 'live-now-1', astrologerId: 'astrologer-demo', title: 'Career & Marriage Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '45', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-09-11T09:30:00+05:30', scheduledEndAt: '2026-09-11T10:45:00+05:30', status: 'live', startedAt: '2026-09-11T10:05:00+05:30', endedAt: null, createdAt: '2026-09-11T09:00:00+05:30' },
-  { id: 'live-now-2', astrologerId: 'acharya-meena', title: 'Marriage Match & Delay Remedies', description: 'Live guidance on marriage delays, kundli matching, and remedies for happy relationships.', category: 'Tarot Card Reading', freeQuestions: true, premiumQueue: true, rate: '60', visibility: 'followers', audience: 'followers', subscriberTier: '', scheduledStartAt: '2026-09-11T10:15:00+05:30', scheduledEndAt: '2026-09-11T11:15:00+05:30', status: 'live', startedAt: '2026-09-11T10:20:00+05:30', endedAt: null, createdAt: '2026-09-11T09:45:00+05:30' },
-  { id: 'live-now-3', astrologerId: 'astrologer-demo-3', title: 'Child Education & Career Choice', description: 'Choose the right stream, manage education stress, and plan your child’s career path.', category: 'Numerology', freeQuestions: false, premiumQueue: true, rate: '55', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-09-11T10:30:00+05:30', scheduledEndAt: '2026-09-11T11:30:00+05:30', status: 'live', startedAt: '2026-09-11T10:32:00+05:30', endedAt: null, createdAt: '2026-09-11T10:00:00+05:30' },
-  { id: 'live-1', astrologerId: 'astrologer-demo', title: 'Marriage & Career Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-08-24T10:00:00+05:30', scheduledEndAt: '2026-08-24T11:00:00+05:30', status: 'past', startedAt: '2026-08-24T10:00:00+05:30', endedAt: '2026-08-24T11:00:00+05:30', createdAt: '2026-08-20T10:00:00+05:30' },
-  { id: 'live-2', astrologerId: 'astrologer-demo', title: 'Health & Remedies Live Session', description: 'A practical session on health-focused astrology and remedies.', visibility: 'subscribers', audience: 'subscribers', subscriberTier: 'gold', scheduledStartAt: '2026-08-28T18:00:00+05:30', scheduledEndAt: '2026-08-28T19:00:00+05:30', status: 'upcoming', startedAt: null, endedAt: null, createdAt: '2026-08-21T10:00:00+05:30' },
+  { id: 'live-now-1', astrologerId: 'astrologer-demo', title: 'Career & Marriage Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '45', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: demoIso(75 * 60 * 1000), scheduledEndAt: demoIso(-45 * 60 * 1000), status: 'live', startedAt: demoIso(50 * 60 * 1000), endedAt: null, createdAt: demoIso(90 * 60 * 1000) },
+  { id: 'live-now-2', astrologerId: 'acharya-meena', title: 'Marriage Match & Delay Remedies', description: 'Live guidance on marriage delays, kundli matching, and remedies for happy relationships.', category: 'Tarot Card Reading', freeQuestions: true, premiumQueue: true, rate: '60', visibility: 'followers', audience: 'followers', subscriberTier: '', scheduledStartAt: demoIso(60 * 60 * 1000), scheduledEndAt: demoIso(-60 * 60 * 1000), status: 'live', startedAt: demoIso(40 * 60 * 1000), endedAt: null, createdAt: demoIso(80 * 60 * 1000) },
+  { id: 'live-now-3', astrologerId: 'astrologer-demo-3', title: 'Child Education & Career Choice', description: 'Choose the right stream, manage education stress, and plan your child’s career path.', category: 'Numerology', freeQuestions: false, premiumQueue: true, rate: '55', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: demoIso(30 * 60 * 1000), scheduledEndAt: demoIso(-90 * 60 * 1000), status: 'live', startedAt: demoIso(28 * 60 * 1000), endedAt: null, createdAt: demoIso(60 * 60 * 1000) },
+  { id: 'live-1', astrologerId: 'astrologer-demo', title: 'Marriage & Career Live Q&A', description: 'Ask questions about timing, relationships, and career decisions.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '45', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: '2026-08-24T10:00:00+05:30', scheduledEndAt: '2026-08-24T11:00:00+05:30', status: 'past', startedAt: '2026-08-24T10:00:00+05:30', endedAt: '2026-08-24T11:00:00+05:30', createdAt: '2026-08-20T10:00:00+05:30', joinedPublic: 320, joinedFollowers: 0, joinedSubscribers: 0, earnings: 4200 },
+  { id: 'live-2', astrologerId: 'astrologer-demo', title: 'Health & Remedies Live Session', description: 'A practical session on health-focused astrology and remedies.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '45', visibility: 'subscribers', audience: 'subscribers', subscriberTier: 'gold', scheduledStartAt: '2026-08-28T18:00:00+05:30', scheduledEndAt: '2026-08-28T19:00:00+05:30', status: 'past', startedAt: '2026-08-28T18:00:00+05:30', endedAt: '2026-08-28T19:00:00+05:30', createdAt: '2026-08-21T10:00:00+05:30', joinedPublic: 0, joinedFollowers: 0, joinedSubscribers: 24, earnings: 5200 },
+  { id: 'live-3', astrologerId: 'astrologer-demo', title: 'Career & Marriage Live Q&A', description: 'Professional guidance on career moves, business timing, and married life.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '50', visibility: 'public', audiences: ['public', 'followers', 'subscribers'], audience: 'public', subscriberTier: 'gold', scheduledStartAt: '2026-09-05T10:30:00+05:30', scheduledEndAt: '2026-09-05T11:30:00+05:30', status: 'past', startedAt: '2026-09-05T10:30:00+05:30', endedAt: '2026-09-05T11:30:00+05:30', createdAt: '2026-09-01T10:00:00+05:30', joinedPublic: 210, joinedFollowers: 64, joinedSubscribers: 18, earnings: 4800 },
+  { id: 'live-4', astrologerId: 'astrologer-demo', title: 'Tarot Party: Love & Relationship Predictions', description: 'Playful tarot drills on love, timing, and compatibility for early risers.', category: 'Tarot Card Reading', freeQuestions: false, premiumQueue: true, rate: '55', visibility: 'subscribers', audiences: ['followers', 'subscribers'], audience: 'followers', subscriberTier: 'silver', scheduledStartAt: '2026-09-12T06:30:00+05:30', scheduledEndAt: '2026-09-12T07:30:00+05:30', status: 'past', startedAt: '2026-09-12T06:32:00+05:30', endedAt: '2026-09-12T07:28:00+05:30', createdAt: '2026-09-10T18:00:00+05:30', joinedPublic: 0, joinedFollowers: 88, joinedSubscribers: 41, earnings: 3650 },
+  { id: 'live-upcoming-1', astrologerId: 'astrologer-demo', title: 'Love & Career Predictions: Weekend Special', description: 'A relaxed Q&A on love, timing of marriage, and career moves for the coming months.', category: 'Vedic Astrology', freeQuestions: true, premiumQueue: true, rate: '48', visibility: 'public', audience: 'public', subscriberTier: '', scheduledStartAt: demoIso(-26 * 60 * 60 * 1000), scheduledEndAt: demoIso(-25 * 60 * 60 * 1000), status: 'upcoming', startedAt: null, endedAt: null, createdAt: demoIso(-30 * 60 * 60 * 1000), joinedPublic: 0, joinedFollowers: 0, joinedSubscribers: 0, earnings: 0 },
 ]
 
 const initialConsultationHistory = [
@@ -1191,6 +1244,12 @@ export function AppDataProvider({ children }) {
     const stored = loadFromStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, initialAstrologerLiveSessions)
     return Array.isArray(stored) ? stored.map(normalizeLiveSession) : initialAstrologerLiveSessions.map(normalizeLiveSession)
   })
+  const [liveReminders, setLiveReminders] = useState(() => {
+    const stored = loadFromStorage(LIVE_REMINDERS_STORAGE_KEY, [])
+    return Array.isArray(stored)
+      ? stored.filter((reminder) => reminder && reminder.sessionId)
+      : []
+  })
   const [appointmentAvailabilityTemplates, setAppointmentAvailabilityTemplates] = useState(() => {
     const stored = loadFromStorage(APPOINTMENT_AVAILABILITY_STORAGE_KEY, [])
     return Array.isArray(stored) ? stored.map(normalizeAppointmentAvailabilityTemplate).filter(Boolean) : []
@@ -1270,6 +1329,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(POST_COMMENTS_STORAGE_KEY, postComments)
   }, [postComments])
+
+  useEffect(() => {
+    saveToStorage(LIVE_REMINDERS_STORAGE_KEY, liveReminders)
+  }, [liveReminders])
 
   useEffect(() => {
     saveToStorage(ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY, astrologerLiveSessions)
@@ -2573,6 +2636,31 @@ export function AppDataProvider({ children }) {
         prev.map((notification) => (notification.audience === role ? { ...notification, read: true } : notification)),
       )
     },
+    toggleLiveReminder(sessionId) {
+      const hasReminder = liveReminders.some((reminder) => reminder.sessionId === sessionId)
+      const nextReminders = hasReminder
+        ? liveReminders.filter((reminder) => reminder.sessionId !== sessionId)
+        : [...liveReminders, { sessionId, createdAt: new Date().toISOString() }]
+      setLiveReminders(nextReminders)
+
+      if (!hasReminder) {
+        const session = astrologerLiveSessions.find((item) => item.id === sessionId)
+        const astrologer = mockAstrologers.find((item) => item.id === session?.astrologerId)
+        setNotifications((prev) => [
+          {
+            id: crypto.randomUUID(),
+            title: 'Reminder set for live session',
+            detail: `We'll notify you when "${session?.title || 'this live session'}"${astrologer ? ` by ${astrologer.name}` : ''} goes live.`,
+            time: 'just now',
+            route: `/user/live-session?id=${sessionId}`,
+            audience: ROLES.USER,
+            category: 'live',
+            read: false,
+          },
+          ...prev,
+        ])
+      }
+    },
     addPayoutMethod(payload) {
       const method = {
         id: `pm-${Date.now().toString(36)}`,
@@ -2679,7 +2767,7 @@ export function AppDataProvider({ children }) {
       setUserWithdrawals((prev) => [withdrawal, ...prev])
       return withdrawal
     },
-  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods])
+  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
 
   useEffect(() => {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
@@ -2716,6 +2804,7 @@ export function AppDataProvider({ children }) {
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,
+    liveReminders,
     appointmentAvailabilityTemplates,
     userPaymentMethods,
     userAutopays,
@@ -2757,6 +2846,7 @@ export function AppDataProvider({ children }) {
     presenceActive,
     astrologerPosts,
     astrologerLiveSessions,
+    liveReminders,
     appointmentAvailabilityTemplates,
     astrologerServices,
     userPaymentMethods,
