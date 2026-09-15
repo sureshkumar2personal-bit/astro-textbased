@@ -29,7 +29,7 @@ import {
 } from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
-import { useAppData } from '../../../state/AppDataContext.jsx'
+import { audienceAccessDefaults, sessionAudiences, useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../../../utils/roleRoutes.js'
 
@@ -39,7 +39,8 @@ const INITIAL_TIMER = 0
 const INITIAL_VIEWERS = 1240
 const INITIAL_EARNINGS = 3450
 
-const CATEGORIES = ['Vedic Astrology', 'Tarot Card Reading', 'Numerology']
+const CATEGORIES = ['Vedic Astrology', 'Tarot Card Reading', 'Numerology', 'Other']
+const STANDARD_CATEGORIES = CATEGORIES.slice(0, 3)
 
 const AUDIENCE_OPTIONS = [
   { value: 'public', label: 'Public', hint: 'Anyone can join' },
@@ -48,6 +49,21 @@ const AUDIENCE_OPTIONS = [
 ]
 
 const SUBSCRIBER_TIERS = ['Silver', 'Gold', 'Pro']
+
+function joinAccessOptions(selected) {
+  const list = Array.isArray(selected) ? selected : [selected || 'public']
+  const hasPublic = list.includes('public')
+  const hasFollowers = list.includes('followers')
+  const hasSubscribers = list.includes('subscribers')
+  const options = []
+  if (hasPublic) options.push({ value: 'public', label: 'Public' })
+  if (hasPublic || hasFollowers) options.push({ value: 'followers', label: 'Followers' })
+  if (hasPublic || hasFollowers || hasSubscribers) options.push({ value: 'subscribers', label: 'Subscribers' })
+  if (hasSubscribers) {
+    SUBSCRIBER_TIERS.forEach((tier) => options.push({ value: tier.toLowerCase(), label: tier }))
+  }
+  return options
+}
 
 const INITIAL_CHAT = [
   { id: 'chat-1', time: '10:51', name: 'Amit', text: 'Sir, check job prospects?' },
@@ -72,10 +88,12 @@ const DEFAULT_DRAFT = {
   title: '',
   description: '',
   category: CATEGORIES[0],
+  customCategory: '',
   freeQuestions: true,
   premiumQueue: true,
   rate: DEFAULT_RATE,
   visibility: 'public',
+  audiences: ['public'],
   audience: 'public',
   subscriberTier: '',
   scheduledStartAt: localDateTime(),
@@ -133,17 +151,25 @@ function buildSessionUrl(path, sessionId) {
 function initialDraft(existingSession) {
   if (!existingSession) return { ...DEFAULT_DRAFT }
 
+  const audiences = sessionAudiences(existingSession)
+  const storedCategory = existingSession.category || ''
+  const isCustomCategory = storedCategory && !STANDARD_CATEGORIES.includes(storedCategory)
+
   return {
     ...DEFAULT_DRAFT,
     title: existingSession.title || '',
     description: existingSession.description || '',
-    category: existingSession.category || CATEGORIES[0],
+    category: isCustomCategory ? 'Other' : storedCategory || CATEGORIES[0],
+    customCategory: isCustomCategory ? storedCategory : '',
     freeQuestions: existingSession.freeQuestions !== false,
     premiumQueue: existingSession.premiumQueue !== false,
     rate: String(existingSession.rate || DEFAULT_RATE),
     visibility: existingSession.visibility || 'public',
-    audience: existingSession.audience || 'public',
+    audiences,
+    audience: audiences[0],
     subscriberTier: existingSession.subscriberTier || '',
+    commentAccess: existingSession.commentAccess || audienceAccessDefaults(existingSession),
+    recordAccess: existingSession.recordAccess || audienceAccessDefaults(existingSession),
     scheduledStartAt: localDateTime(existingSession.startedAt || existingSession.scheduledStartAt),
     scheduledEndAt: localDateTime(existingSession.endedAt || existingSession.scheduledEndAt),
   }
@@ -421,19 +447,35 @@ function LiveSessionShellInner({ children }) {
       return
     }
 
-    const audience = options.audience || draft.audience || 'public'
-    const subscriberTier = audience === 'subscribers' ? options.subscriberTier || draft.subscriberTier : ''
+    const audiences = sessionAudiences({ audiences: options.audiences || draft.audiences, audience: draft.audience })
+    if (!audiences.length) {
+      setFormError('Choose who can join this live session.')
+      return
+    }
+    const audience = audiences[0]
+    const subscriberTier = audiences.includes('subscribers') ? options.subscriberTier || draft.subscriberTier : ''
+    if (audiences.includes('subscribers') && !subscriberTier) {
+      setFormError('Choose a subscription tier for this live session.')
+      return
+    }
+    if (draft.category === 'Other' && !draft.customCategory.trim()) {
+      setFormError('Name your custom category before going live.')
+      return
+    }
 
     const payload = {
       title: draft.title.trim(),
       description: draft.description.trim() || 'Live astrology guidance session.',
-      category: draft.category,
+      category: draft.category === 'Other' ? draft.customCategory.trim() : draft.category,
       freeQuestions: draft.freeQuestions,
       premiumQueue: draft.premiumQueue,
       rate: draft.rate,
       visibility: draft.visibility,
+      audiences,
       audience,
       subscriberTier,
+      commentAccess: options.commentAccess || draft.commentAccess || [],
+      recordAccess: options.recordAccess || draft.recordAccess || [],
       scheduledStartAt: new Date(draft.scheduledStartAt).toISOString(),
       scheduledEndAt: new Date(draft.scheduledEndAt).toISOString(),
       astrologerId: currentUser?.id,
@@ -687,8 +729,10 @@ export function AstrologerLiveSessionConfigure() {
   } = useLiveSessionFlow()
 
   const [audienceOpen, setAudienceOpen] = useState(false)
-  const [audience, setAudience] = useState(() => draft.audience || 'public')
+  const [audiences, setAudiences] = useState(() => sessionAudiences({ audiences: draft.audiences, audience: draft.audience }))
   const [subscriberTier, setSubscriberTier] = useState(() => draft.subscriberTier || '')
+  const [commentAccess, setCommentAccess] = useState(() => draft.commentAccess || audienceAccessDefaults({ ...draft, audiences: sessionAudiences(draft) }))
+  const [recordAccess, setRecordAccess] = useState(() => draft.recordAccess || audienceAccessDefaults({ ...draft, audiences: sessionAudiences(draft) }))
   const [tierError, setTierError] = useState('')
 
   const openAudiencePopup = () => {
@@ -697,25 +741,78 @@ export function AstrologerLiveSessionConfigure() {
       return
     }
     setFormError('')
-    setAudience(draft.audience || 'public')
+    const audiencesFromDraft = sessionAudiences({ audiences: draft.audiences, audience: draft.audience })
+    setAudiences(audiencesFromDraft)
     setSubscriberTier(draft.subscriberTier || '')
+    setCommentAccess(draft.commentAccess || audienceAccessDefaults({ ...draft, audiences: audiencesFromDraft }))
+    setRecordAccess(draft.recordAccess || audienceAccessDefaults({ ...draft, audiences: audiencesFromDraft }))
     setTierError('')
     setAudienceOpen(true)
   }
 
+  const toggleAudience = (value) => {
+    setTierError('')
+    const next = audiences.includes(value)
+      ? audiences.filter((item) => item !== value)
+      : [...audiences, value]
+    if (!next.length) return
+    if (!next.includes('subscribers')) setSubscriberTier('')
+    const valid = joinAccessOptions(next).map((option) => option.value)
+    setCommentAccess((prev) => prev.filter((item) => valid.includes(item)))
+    setRecordAccess((prev) => prev.filter((item) => valid.includes(item)))
+    setAudiences(next)
+  }
+
+  const toggleAccess = (setter, protectedValue) => (value) => {
+    setter((prev) => {
+      if (prev.includes(value)) {
+        return value === protectedValue ? prev : prev.filter((item) => item !== value)
+      }
+      return [...prev, value]
+    })
+  }
+
+  const accessGroup = (group, setter, protectedValue) => (
+    <div className="live-access-options live-access-options--multi">
+      {joinAccessOptions(audiences).map((option) => (
+        <button
+          type="button"
+          key={option.value}
+          className={`live-access-option${group.includes(option.value) ? ' is-selected' : ''}${protectedValue === option.value ? ' is-locked' : ''}`}
+          onClick={() => toggleAccess(setter, protectedValue)(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  )
+
+  const accessReady = commentAccess.length > 0 && recordAccess.length > 0
+
   const confirmBroadcast = () => {
-    if (audience === 'subscribers' && !subscriberTier) {
+    if (!audiences.length) {
+      setTierError('Choose at least one audience for this live session.')
+      return
+    }
+    if (audiences.includes('subscribers') && !subscriberTier) {
       setTierError('Select a subscription tier for this live session.')
+      return
+    }
+    if (!accessReady) {
+      setFormError('Choose who can comment and who can watch the recording.')
       return
     }
     const nextDraft = {
       ...draft,
-      audience,
-      subscriberTier: audience === 'subscribers' ? subscriberTier : '',
+      audiences,
+      audience: audiences[0],
+      subscriberTier: audiences.includes('subscribers') ? subscriberTier : '',
+      commentAccess,
+      recordAccess,
     }
     setDraft(nextDraft)
     setAudienceOpen(false)
-    startBroadcast({ audience, subscriberTier: nextDraft.subscriberTier })
+    startBroadcast({ audiences, subscriberTier: nextDraft.subscriberTier, commentAccess, recordAccess })
   }
 
   return (
@@ -760,6 +857,18 @@ export function AstrologerLiveSessionConfigure() {
               </label>
             ))}
           </div>
+          {draft.category === 'Other' && (
+            <label className="field-group live-custom-category" style={{ margin: 0 }}>
+              <span className="field-label-top">Custom category name</span>
+              <input
+                className="text-input"
+                value={draft.customCategory}
+                onChange={(event) => setDraft({ ...draft, customCategory: event.target.value })}
+                placeholder="e.g. Palm Reading, Gemstone Advice"
+                maxLength={40}
+              />
+            </label>
+          )}
         </fieldset>
 
         <fieldset className="live-fieldset">
@@ -823,18 +932,14 @@ export function AstrologerLiveSessionConfigure() {
             {audienceOpen && (
               <div className="live-audience-popover" role="dialog" aria-modal="true" aria-label="Choose live audience">
                 <span className="live-eyebrow">Broadcast audience</span>
-                <strong>Who can join this live?</strong>
+                <strong>Who can join this live? <span className="muted">(choose many)</span></strong>
                 {AUDIENCE_OPTIONS.map((option) => (
-                  <label key={option.value} className={`live-audience-option${audience === option.value ? ' is-selected' : ''}`}>
+                  <label key={option.value} className={`live-audience-option${audiences.includes(option.value) ? ' is-selected' : ''}`}>
                     <input
-                      type="radio"
-                      name="live-audience"
+                      type="checkbox"
                       value={option.value}
-                      checked={audience === option.value}
-                      onChange={() => {
-                        setAudience(option.value)
-                        setTierError('')
-                      }}
+                      checked={audiences.includes(option.value)}
+                      onChange={() => toggleAudience(option.value)}
                     />
                     <span>
                       <strong>{option.label}</strong>
@@ -842,7 +947,7 @@ export function AstrologerLiveSessionConfigure() {
                     </span>
                   </label>
                 ))}
-                {audience === 'subscribers' && (
+                {audiences.includes('subscribers') && (
                   <div className="live-audience-tiers">
                     {SUBSCRIBER_TIERS.map((tier) => (
                       <button
@@ -852,6 +957,9 @@ export function AstrologerLiveSessionConfigure() {
                         onClick={() => {
                           setSubscriberTier(tier.toLowerCase())
                           setTierError('')
+                          const value = tier.toLowerCase()
+                          setCommentAccess((prev) => Array.from(new Set([...prev, value])))
+                          setRecordAccess((prev) => Array.from(new Set([...prev, value])))
                         }}
                       >
                         {tier}
@@ -860,6 +968,18 @@ export function AstrologerLiveSessionConfigure() {
                   </div>
                 )}
                 {tierError && <div className="live-audience-error">{tierError}</div>}
+                <div className="live-access-divider" />
+                <div className="live-access-group">
+                  <strong>Comment</strong>
+                  <span className="live-access-hint">Who can comment (choose many)</span>
+                  {accessGroup(commentAccess, setCommentAccess, audiences.includes('subscribers') ? subscriberTier : null)}
+                </div>
+                <div className="live-access-divider" />
+                <div className="live-access-group">
+                  <strong>Record Live</strong>
+                  <span className="live-access-hint">Who can watch the recording (choose many)</span>
+                  {accessGroup(recordAccess, setRecordAccess, audiences.includes('subscribers') ? subscriberTier : null)}
+                </div>
                 <div className="live-audience-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setAudienceOpen(false)}>
                     Cancel
@@ -868,7 +988,7 @@ export function AstrologerLiveSessionConfigure() {
                     type="button"
                     className="btn btn-primary"
                     onClick={confirmBroadcast}
-                    disabled={audience === 'subscribers' && !subscriberTier}
+                    disabled={!accessReady || (audiences.includes('subscribers') && !subscriberTier)}
                   >
                     <Play size={15} /> Go Live
                   </button>
