@@ -182,6 +182,13 @@ export default function Profile() {
     setComposer('live')
   }
 
+  useEffect(() => {
+    if (!isAstrologer) return
+    const requestedComposer = new URLSearchParams(location.search).get('composer')
+    if (requestedComposer === 'post') openPostComposer()
+    if (requestedComposer === 'live') openLiveComposer()
+  }, [isAstrologer, location.search])
+
   const openLiveWorkspace = (session = null) => {
     navigate(session ? `${routes.liveSessionSetup}?sessionId=${encodeURIComponent(session.id)}` : routes.liveSessionSetup)
   }

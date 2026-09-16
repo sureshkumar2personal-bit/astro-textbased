@@ -61,6 +61,7 @@ import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/user/live-sessions/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
+import AstrologerAccountManagement from './pages/AstrologerAccountManagement.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
@@ -142,7 +143,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
-        <Route path="/astrologer/profile" element={<Profile />} />
+        <Route path="/astrologer/my-account" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />
         <Route path="/astrologer/wallet/overview" element={<WalletOverview />} />
         <Route path="/astrologer/wallet/earnings" element={<WalletEarnings />} />
@@ -151,8 +152,6 @@ function AstrologerRoutes() {
         <Route path="/astrologer/wallet/settlements" element={<WalletSettlements />} />
         <Route path="/astrologer/wallet/payment-methods" element={<WalletPaymentMethods />} />
         <Route path="/astrologer/audience/:audienceType/:memberId" element={<AudienceMemberProfile />} />
-        <Route path="/astrologer/astrologer-profile" element={<Navigate to="/astrologer/profile" replace />} />
-        <Route path="/astrologer/account-profile" element={<Navigate to="/astrologer/profile" replace />} />
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
