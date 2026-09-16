@@ -1,29 +1,27 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ShoppingBag,
   MessagesSquare,
-  ListChecks,
-  Gavel,
   Clock3,
-  BadgeCheck,
-  ShieldAlert,
   Sparkles,
   MessageCircle,
   PhoneCall,
+  CalendarDays,
+  Radio,
+  Users,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getConsultationAstrologers } from '../data/consultationAstrologers.js'
-import StatCard from '../components/ui/StatCard.jsx'
-import ActionCard from '../components/ui/ActionCard.jsx'
-import Section from '../components/ui/Section.jsx'
+import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
+import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
 export default function UserDashboard() {
   const { currentUser } = useAuth()
-  const { campaigns, questions, actions } = useAppData()
+  const { questions, appointments, astrologerLiveSessions, followedAstrologerIds, subscriptions, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
 
@@ -39,10 +37,40 @@ export default function UserDashboard() {
     actions.renewMonthlyDiscountQuestions(currentUser.id)
   }, [currentUser?.id, actions])
 
-  const pending = questions.filter((question) => question.status === 'Pending').length
-  const answered = questions.filter((question) => question.status === 'Answered').length
-  const disputed = questions.filter((question) => question.status === 'Disputed').length
-  const recentQuestions = questions.slice(0, 4)
+  const recentQuestions = questions
+
+  const upcomingAppointments = useMemo(
+    () => appointments.filter((apt) => apt.status === 'Confirmed' || apt.status === 'Pending'),
+    [appointments],
+  )
+
+  const liveSessions = useMemo(
+    () => astrologerLiveSessions.filter((s) => s.status === 'Live now' || s.status === 'Upcoming').slice(0, 3),
+    [astrologerLiveSessions],
+  )
+
+  const recommendedAstrologers = useMemo(() => {
+    if (!currentUser?.id) return []
+    const subscribedAstrologerIds = subscriptions
+      .filter((subscription) => subscription.userId === currentUser.id)
+      .filter((subscription) => {
+        const expiry = subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil
+        return Number.isFinite(new Date(expiry).getTime()) && new Date(expiry).getTime() > Date.now()
+      })
+      .map((subscription) => subscription.astrologerId)
+    const suggested = getSuggestedAstrologers({
+      followedAstrologerIds,
+      subscribedAstrologerIds,
+      preferencesEnabled: currentUser.astrologerPreferencesEnabled,
+      preferences: currentUser.astrologerPreferences,
+    })
+    if (suggested.length) return suggested.slice(0, 4)
+    return mockAstrologers
+      .filter((astrologer) => !followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
+      .slice(0, 4)
+  }, [currentUser, followedAstrologerIds, subscriptions])
+
+  const handleViewAstrologer = (astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=dashboard`)
 
   return (
     <div>
@@ -51,80 +79,139 @@ export default function UserDashboard() {
           <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
             User portal
           </div>
-          <h2>Welcome, {currentUser?.name || 'User'} ✨</h2>
-          <p>Browse packages, ask questions, and keep track of every update in one place.</p>
+          <h2>Welcome back, {currentUser?.name || 'User'} 👋</h2>
+          <p>Here's what's happening with your consultations and questions.</p>
         </div>
         <div className="hero-banner-cta">
           <button
             type="button"
             className="btn btn-primary hero-banner-button"
-            onClick={() => navigate(routes.astrologers)}
+            onClick={() => navigate(routes.askQuestion, { state: { from: 'dashboard' } })}
           >
-            Explore Astrologers
+            Ask a Question
           </button>
         </div>
       </div>
 
-      <Section title="Connect with an Astrologer" icon={Sparkles}>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <ActionCard
-            icon={MessageCircle}
-            title="Chat with Astrologer"
-            description={`Get instant answers through live chat · ${chatCount} astrologers available`}
-            onClick={() => navigate(routes.chatAstrologers)}
-          />
-          <ActionCard
-            icon={PhoneCall}
-            title="Call with Astrologer"
-            description={`Talk directly with an available astrologer · ${callCount} astrologers available`}
-            onClick={() => navigate(routes.callAstrologers)}
-          />
+      <Section title="Quick Actions" icon={Sparkles}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {[
+            { icon: MessagesSquare, label: 'Ask Question', route: routes.askQuestion, fromDashboard: true },
+            { icon: CalendarDays, label: 'Book Appointment', route: routes.appointmentBook, fromDashboard: true },
+            { icon: MessageCircle, label: 'Chat with Astrologer', route: routes.chatAstrologers, badge: chatCount ? `${chatCount} online` : undefined },
+            { icon: PhoneCall, label: 'Call with Astrologer', route: routes.callAstrologers, badge: callCount ? `${callCount} online` : undefined },
+            { icon: ShoppingBag, label: 'Purchase Package', route: routes.purchasePackage, fromDashboard: true },
+            { icon: Radio, label: 'Join Live', route: routes.liveSession, fromDashboard: true },
+          ].map(({ icon: Icon, label, route, badge, fromDashboard }) => (
+            <button
+              key={label}
+              type="button"
+              className="action-card action-card--compact"
+              onClick={() => navigate(route, fromDashboard ? { state: { from: 'dashboard' } } : undefined)}
+            >
+              <div className="action-card-icon">
+                <Icon size={20} />
+              </div>
+              <div className="action-card-body">
+                <div className="action-card-title">{label}</div>
+                {badge && <div className="action-card-desc">{badge}</div>}
+              </div>
+            </button>
+          ))}
         </div>
       </Section>
 
-      <div className="stat-grid section">
-        <button
-          className="stat-card-clickable"
-          onClick={() => navigate(routes.purchasePackage)}
+      {recommendedAstrologers.length > 0 && (
+        <Section
+          title="Recommended Astrologers"
+          icon={Users}
+          action={
+            <Link to={routes.astrologers} className="text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
+              View All →
+            </Link>
+          }
         >
-          <StatCard icon={ShoppingBag} label="available packages" value={campaigns.length} tone="gold" />
-        </button>
-        <button
-          className="stat-card-clickable"
-          onClick={() => navigate(`${routes.trackQuestions}?status=Pending`)}
-        >
-          <StatCard icon={MessagesSquare} label="questions pending" value={pending} tone="sky" />
-        </button>
-        <button
-          className="stat-card-clickable"
-          onClick={() => navigate(`${routes.trackQuestions}?status=Answered`)}
-        >
-          <StatCard icon={BadgeCheck} label="answered questions" value={answered} tone="green" />
-        </button>
-        <button
-          className="stat-card-clickable"
-          onClick={() => navigate(routes.raiseDispute)}
-        >
-          <StatCard icon={ShieldAlert} label="open disputes" value={disputed} tone="red" />
-        </button>
-      </div>
-
-      <div className="section grid grid-cols-1 gap-8 lg:grid-cols-[1.25fr_0.95fr]">
-        <div>
-          <div className="section-title"><Sparkles size={20} />Quick Actions</div>
-          <div className="grid gap-1">
-            <ActionCard icon={ShoppingBag} title="Purchase Package" to={routes.purchasePackage} />
-            <ActionCard icon={MessagesSquare} title="Ask a Question" to={routes.askQuestion} />
-            <ActionCard icon={ListChecks} title="Track Questions" to={routes.trackQuestions} />
-            <ActionCard icon={Gavel} title="Raise Dispute" to={routes.raiseDispute} />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {recommendedAstrologers.map((astrologer) => (
+              <div
+                key={astrologer.id}
+                role="button"
+                tabIndex={0}
+                title={`View ${astrologer.name}'s profile`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleViewAstrologer(astrologer.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleViewAstrologer(astrologer.id)
+                  }
+                }}
+              >
+                <AstrologerCard astrologer={astrologer} />
+              </div>
+            ))}
           </div>
+        </Section>
+      )}
+
+      <div className="section grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div>
+          <div className="section-title"><CalendarDays size={20} />Upcoming Appointments</div>
+          {upcomingAppointments.length > 0 ? (
+            <div className="activity-list">
+              {upcomingAppointments.slice(0, 3).map((apt) => (
+                <div
+                  key={apt.id}
+                  className="activity-row"
+                  role="button"
+                  tabIndex={0}
+                  style={{ cursor: 'pointer' }}
+                  title={`View appointment ${apt.astrologer}`}
+                  onClick={() => navigate(`${routes.myAppointments}?id=${encodeURIComponent(apt.id)}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      navigate(`${routes.myAppointments}?id=${encodeURIComponent(apt.id)}`)
+                    }
+                  }}
+                >
+                  <div>
+                    <div className="activity-id">{apt.astrologer}</div>
+                    <div className="activity-meta">{apt.type} · {apt.date} · {apt.time}</div>
+                  </div>
+                  <StatusBadge label={apt.status} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted" style={{ padding: '16px 0' }}>No upcoming appointments.</p>
+          )}
+          {upcomingAppointments.length > 3 && (
+            <Link to={routes.myAppointments} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
+              See More →
+            </Link>
+          )}
         </div>
 
         <div>
           <div className="section-title"><Clock3 size={20} />Recent Activity</div>
           <div className="activity-list">
-            {recentQuestions.map((question) => (
-              <div key={question.id} className="activity-row">
+            {recentQuestions.slice(0, 3).map((question) => (
+              <div
+                key={question.id}
+                className="activity-row"
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer' }}
+                title={`View question ${question.id}`}
+                onClick={() => navigate(`${routes.askQuestion}?viewQuestionId=${encodeURIComponent(question.id)}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(`${routes.askQuestion}?viewQuestionId=${encodeURIComponent(question.id)}`)
+                  }
+                }}
+              >
                 <div>
                   <div className="activity-id">{question.id}</div>
                   <div className="activity-meta">{question.category} · {question.type}</div>
@@ -133,35 +220,47 @@ export default function UserDashboard() {
               </div>
             ))}
           </div>
+          {recentQuestions.length > 3 && (
+            <Link to={routes.trackQuestions} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
+              See More →
+            </Link>
+          )}
         </div>
       </div>
 
-      <Section title="Guided Flow" icon={ListChecks}>
-        <div className="step-list">
-          <div className="step-item">
-            <div className="step-number">1</div>
-            <div>
-              <div className="step-title">Buy package</div>
-              <div className="step-desc">Choose a campaign and purchase the package that fits your needs.</div>
-            </div>
+      {liveSessions.length > 0 && (
+        <Section title="Live Now" icon={Radio}>
+          <div className="activity-list">
+            {liveSessions.map((session) => (
+              <div key={session.id} className="activity-row">
+                <div>
+                  <div className="activity-id">{session.title}</div>
+                  <div className="activity-meta">{session.astrologer} · {session.time}</div>
+                </div>
+                <StatusBadge label={session.status} />
+              </div>
+            ))}
           </div>
-          <div className="step-item">
-            <div className="step-number">2</div>
-            <div>
-              <div className="step-title">Ask question</div>
-              <div className="step-desc">Submit a general or personal question with the right context and attachments.</div>
-            </div>
-          </div>
-          <div className="step-item">
-            <div className="step-number">3</div>
-            <div>
-              <div className="step-title">Track outcomes</div>
-              <div className="step-desc">Follow progress, view answers, and raise disputes when needed.</div>
-            </div>
-          </div>
-        </div>
-      </Section>
+        </Section>
+      )}
 
+      </div>
+  )
+}
+
+function Section({ title, icon: Icon, action, children }) {
+  return (
+    <div className="section">
+      {title && (
+        <div className="section-title">
+          <span className="flex items-center gap-2.5">
+            {Icon && <Icon size={20} />}
+            {title}
+          </span>
+          {action && <span className="ml-auto">{action}</span>}
+        </div>
+      )}
+      {children}
     </div>
   )
 }
