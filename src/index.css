@@ -13056,47 +13056,62 @@ button.apt-week-day:focus-visible {
 /* =============================================================
    Rewards Center
    ============================================================= */
-.rewards-center { display: grid; gap: 28px; }
+.rewards-center { display: grid; gap: 24px; padding-top: 18px; }
 .reward-results { display: grid; gap: 28px; }
 
-/* --- Summary cards --- */
-.reward-summary-grid {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
-}
-.reward-summary-card {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 18px; border: 1px solid var(--surface-border); border-radius: var(--radius-m);
-  background: var(--surface-strong); box-shadow: var(--shadow-card);
-}
-.reward-summary-icon {
-  display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px;
-  border-radius: var(--radius-s);
-}
-.reward-summary-card--violet .reward-summary-icon { color: var(--primary); background: var(--primary-bg); }
-.reward-summary-card--gold .reward-summary-icon { color: var(--accent-dark); background: var(--gold-100); }
-.reward-summary-card--green .reward-summary-icon { color: var(--green-600); background: var(--green-100); }
-.reward-summary-card--red .reward-summary-icon { color: var(--red-600); background: var(--red-100); }
-.reward-summary-body { min-width: 0; }
-.reward-summary-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; line-height: 1.1; color: var(--ink, var(--text-primary)); }
-.reward-summary-label { margin-top: 2px; font-size: 13px; font-weight: 700; color: var(--text-secondary); }
-.reward-summary-hint { margin-top: 3px; font-size: 12px; color: var(--muted); }
+/* --- Summary strip (stat-card based, consistent with astrologer dashboard) --- */
+.reward-summary-strip { gap: 20px !important; }
+.reward-summary-strip .stat-card { background: var(--surface-strong); border: 1px solid var(--surface-border); border-radius: var(--radius-m); padding: 16px 18px; box-shadow: var(--shadow-card); }
+.reward-summary-strip .stat-card:hover { transform: translateY(-2px); }
+.reward-summary-strip .stat-icon { width: 42px; height: 42px; flex: 0 0 42px; }
+.reward-summary-strip .stat-value { font-size: 28px; font-weight: 700; }
 
-/* --- Filter tabs --- */
+/* --- Filter tabs (consistent with perks-tab-navigation) --- */
 .reward-filter {
-  display: flex; gap: 8px; flex-wrap: wrap;
-  padding: 6px; border: 1px solid var(--surface-border); border-radius: var(--radius-s);
-  background: var(--surface-soft); width: fit-content; max-width: 100%;
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 6px; border: 1px solid var(--surface-border, #e2e8f0); border-radius: 14px;
+  background: var(--surface-soft, #f8fafc); width: fit-content; max-width: 100%;
 }
 .reward-filter-tab {
   border: 0; background: transparent; cursor: pointer;
-  padding: 9px 16px; border-radius: 10px;
-  font-size: 13px; font-weight: 700; color: var(--text-secondary);
-  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+  padding: 10px 18px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; color: var(--muted, #64748b);
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
   white-space: nowrap;
 }
-.reward-filter-tab:hover { background: var(--surface); color: var(--text-primary); }
+.reward-filter-tab:hover { background: var(--primary-bg, rgba(124,58,237,.06)); color: var(--primary, #7c3aed); }
 .reward-filter-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.reward-filter-tab.is-active { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+.reward-filter-tab.is-active { background: var(--primary, #7c3aed); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.22); }
+
+/* --- How rewards work strip --- */
+.reward-how-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px; border: 1px solid var(--surface-border); border-radius: var(--radius-m);
+  background: linear-gradient(90deg, var(--surface-strong), var(--surface-soft));
+  box-shadow: var(--shadow-card);
+}
+.reward-how-icon {
+  display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px;
+  border-radius: 12px; color: var(--primary); background: var(--primary-bg);
+}
+.reward-how-copy { flex: 1; min-width: 0; }
+.reward-how-copy strong { display: block; margin-bottom: 10px; font-size: 13px; color: var(--ink, var(--text-primary)); }
+.reward-how-steps { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; }
+.reward-how-step { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.reward-how-step-link {
+  display: inline-flex; align-items: center; gap: 9px; width: 100%; padding: 0;
+  border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer;
+}
+.reward-how-step-icon {
+  display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px;
+  border-radius: 10px; color: var(--accent-dark); background: var(--gold-100);
+}
+.reward-how-step-text { display: grid; gap: 1px; }
+.reward-how-step-title { font-size: 12px; font-weight: 800; color: var(--ink, var(--text-primary)); }
+.reward-how-step-copy { font-size: 11px; color: var(--text-secondary); }
+.reward-how-step-link:hover .reward-how-step-title { color: var(--primary); }
+.reward-how-step-link:hover .reward-how-step-icon { color: var(--primary); background: var(--primary-bg); }
+.reward-how-arrow { color: var(--muted); font-weight: 800; }
 
 /* --- Expiring banner --- */
 .reward-expiring {
@@ -13131,6 +13146,9 @@ button.apt-week-day:focus-visible {
 .reward-status-pill--violet { color: var(--primary); background: var(--primary-bg); }
 .reward-status-pill--red { color: var(--red-600); background: var(--red-100); }
 
+.reward-status-wrap { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.reward-status-hint { font-size: 11px; line-height: 1.35; color: var(--muted); max-width: 180px; }
+
 /* --- Avatar & astrologer meta --- */
 .reward-avatar {
   display: grid; place-items: center; width: 46px; height: 46px; flex: 0 0 46px;
@@ -13156,11 +13174,12 @@ button.apt-week-day:focus-visible {
 /* --- Section head --- */
 .reward-section-head { display: grid; gap: 6px; margin-bottom: 16px; }
 .reward-section-title {
-  display: flex; align-items: center; gap: 9px; color: var(--ink, var(--text-primary));
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 19px; font-weight: 800;
+  display: flex; align-items: center; gap: 10px; color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 600;
+  letter-spacing: -0.01em; margin-bottom: 4px;
 }
 .reward-section-title svg { color: var(--primary); }
-.reward-section-desc { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.reward-section-desc { margin: 0; color: var(--text-secondary); font-size: 14px; }
 
 /* --- Rewards grids (explore-style: 3 cards + View More) --- */
 .reward-grid {
@@ -13206,6 +13225,7 @@ button.apt-week-day:focus-visible {
 .reward-astrologer-preview-row { display: flex; gap: 9px; align-items: flex-start; }
 .reward-astrologer-preview-icon { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 26px; border-radius: 8px; color: var(--primary); background: var(--primary-bg); }
 .reward-astrologer-preview-title { font-size: 13px; font-weight: 700; color: var(--ink, var(--text-primary)); margin-bottom: 4px; }
+.reward-astrologer-preview-value { font-size: 15px; font-weight: 800; color: var(--accent-dark); margin-bottom: 4px; }
 .reward-astrologer-preview-expiry { font-size: 11px; color: var(--text-secondary); margin: 4px 0; }
 .reward-astrologer-action {
   margin-top: auto; border: 0; cursor: pointer; border-radius: 11px;
@@ -13272,6 +13292,17 @@ button.apt-week-day:focus-visible {
 .reward-benefit-value { font-size: 18px; font-weight: 800; color: var(--accent-dark); }
 .reward-benefit-desc { font-size: 13px; color: var(--text-secondary); }
 .reward-benefit-expiry { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); margin-top: auto; }
+.reward-benefit-tiers { display: flex; gap: 6px; flex-wrap: wrap; }
+.reward-tier-chip {
+  display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px;
+  background: var(--gold-100); color: var(--accent-dark); font-size: 11px; font-weight: 800;
+}
+.reward-benefit-cta { margin-top: auto; }
+.reward-benefit-manage { display: flex; justify-content: flex-end; }
+.reward-benefit-manage .btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--surface-border); color: var(--text-secondary);
+}
 
 /* --- Empty state --- */
 .reward-empty {
@@ -13323,6 +13354,34 @@ button.apt-week-day:focus-visible {
 .reward-drawer-cta { margin-top: 4px; }
 .reward-drawer-cta:disabled { opacity: .5; cursor: not-allowed; }
 
+/* --- Content reader --- */
+.reward-content-reader { overflow: hidden; }
+.reward-content-reader-hero {
+  display: flex; align-items: flex-start; gap: 14px; padding: 18px;
+  border-bottom: 1px solid var(--surface-border); background: var(--surface-soft);
+}
+.reward-content-reader-icon {
+  display: grid; place-items: center; flex: 0 0 52px; width: 52px; height: 52px;
+  border-radius: 16px; background: linear-gradient(135deg, var(--violet-100), var(--primary-bg));
+  color: var(--primary);
+}
+.reward-content-reader-meta { min-width: 0; }
+.reward-content-reader-type {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--primary);
+}
+.reward-content-reader-title { margin: 6px 0 0; font-size: 18px; font-weight: 800; color: var(--ink, var(--text-primary)); line-height: 1.35; }
+.reward-content-reader-astro { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+.reward-content-reader-body { flex: 1; overflow-y: auto; padding: 20px 18px; }
+.reward-content-reader-body p {
+  margin: 0; font-size: 14px; line-height: 1.75; color: var(--text-secondary);
+  white-space: pre-line;
+}
+.reward-content-reader-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 18px; border-top: 1px solid var(--surface-border);
+}
+
 @keyframes rewardFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rewardSlide { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
@@ -13331,14 +13390,14 @@ button.apt-week-day:focus-visible {
   .reward-grid, .reward-grid--full { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {
-  .reward-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reward-summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 @media (max-width: 640px) {
   .rewards-center { gap: 20px; }
   .reward-grid, .reward-grid--full { grid-template-columns: minmax(0, 1fr); }
   .reward-grid__action { min-height: auto; justify-content: flex-start; }
-  .reward-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .reward-summary-value { font-size: 22px; }
+  .reward-summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+  .reward-summary-strip .stat-value { font-size: 22px; }
   .reward-filter { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
   .reward-filter-tab { flex: 1 0 auto; }
   .reward-expiring { flex-direction: column; }
