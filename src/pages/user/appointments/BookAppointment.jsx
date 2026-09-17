@@ -1,11 +1,12 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE } from './bookingAstrologerData.js'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
+import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import './bookappointment.css'
 
 function initials(name = '') {
@@ -61,6 +62,9 @@ export default function BookAppointment() {
   const { currentUser } = useAuth()
   const { subscriptions } = useAppData()
   const navigate = useNavigate()
+  const location = useLocation()
+  const routes = getRoleRoutes(currentUser?.role)
+  const fromDashboard = location.state?.from === 'dashboard'
 
   const subscribedAstrologersList = useMemo(() => {
     const subscriptionIds = subscriptions
@@ -78,6 +82,9 @@ export default function BookAppointment() {
         eyebrow="USER PORTAL"
         title="Book an Appointment"
         subtitle="Schedule an appointment with the astrologers you subscribe to. Subscribe to an astrologer to unlock their appointment slots."
+        showBack={fromDashboard}
+        backTo={routes.dashboard}
+        backLabel="Back to Dashboard"
       />
 
       <div className="book-appointment-section-head">

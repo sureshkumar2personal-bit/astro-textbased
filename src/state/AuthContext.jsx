@@ -156,6 +156,14 @@ export function AuthProvider({ children }) {
         name,
         email,
         phone: String(payload.phone || '').trim(),
+        gender: String(payload.gender ?? currentUser.gender ?? '').trim(),
+        dateOfBirth: String(payload.dateOfBirth ?? currentUser.dateOfBirth ?? '').trim(),
+        birthTime: String(payload.birthTime ?? currentUser.birthTime ?? '').trim(),
+        birthPlace: String(payload.birthPlace ?? currentUser.birthPlace ?? '').trim(),
+        horoscopeDetails: String(payload.horoscopeDetails ?? currentUser.horoscopeDetails ?? '').trim(),
+        rasi: String(payload.rasi ?? currentUser.rasi ?? '').trim(),
+        nakshatra: String(payload.nakshatra ?? currentUser.nakshatra ?? '').trim(),
+        lagna: String(payload.lagna ?? currentUser.lagna ?? '').trim(),
         specialization: String(payload.specialization || '').trim(),
         experience: String(payload.experience || '').trim(),
         bio: String(payload.bio || '').trim(),
@@ -165,6 +173,18 @@ export function AuthProvider({ children }) {
         profileImage: String(payload.profileImage || '').trim(),
         astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
         astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
+      }
+      if (payload.dateOfBirth !== undefined || payload.birthTime !== undefined || payload.birthPlace !== undefined || payload.horoscopeDetails !== undefined || payload.rasi !== undefined || payload.nakshatra !== undefined || payload.lagna !== undefined) {
+        writeJSON('astroconnect-user-birth-details', {
+          name: updatedUser.name,
+          dateOfBirth: updatedUser.dateOfBirth,
+          timeOfBirth: updatedUser.birthTime,
+          placeOfBirth: updatedUser.birthPlace,
+          horoscopeDetails: updatedUser.horoscopeDetails,
+          rasi: updatedUser.rasi,
+          nakshatra: updatedUser.nakshatra,
+          lagna: updatedUser.lagna,
+        })
       }
       setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
       setCurrentUser(updatedUser)

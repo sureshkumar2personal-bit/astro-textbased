@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, X } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -18,12 +18,14 @@ const DEFAULT_QTY = { generalQty: 5, personalQty: 2 }
 
 export default function PurchasePackage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { campaigns, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const source = searchParams.get('source')
   const highlightCampaignId = searchParams.get('campaignId')
+  const fromDashboard = location.state?.from === 'dashboard'
   const backIcon = currentUser?.role === 'astrologer' || source === 'astrologer' ? TempleReturnIcon : undefined
   const [quantities, setQuantities] = useState({})
   const [payment, setPayment] = useState('UPI')
@@ -67,6 +69,7 @@ export default function PurchasePackage() {
         showBack
         backTo={source === 'astrologer' ? routes.salesManagement : routes.dashboard}
         backIcon={backIcon}
+        backLabel={fromDashboard ? 'Back to Dashboard' : 'Back'}
       />
 
       {activeCampaigns.length === 0 && (

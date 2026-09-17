@@ -1,41 +1,147 @@
-import { CalendarDays, Check, Headphones, Mail, MessageCircle, Pencil, Phone, PhoneCall, UserRound, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Pencil, SlidersHorizontal, X } from 'lucide-react'
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import BackButton from '../components/BackButton.jsx'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
-import StatusBadge from '../components/StatusBadge.jsx'
-import { mockAstrologers } from '../data/notificationData.js'
-import { useAppData } from '../state/AppDataContext.jsx'
+import { useToast } from '../components/Toast.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { NAKSHATRA_OPTIONS } from '../data/astrologyOptions.js'
 
-const formatDate = (value) => new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-const formatTime = (value) => new Date(value).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })
-const formatAmount = (value) => `₹${Number(value || 0).toLocaleString('en-IN')}`
-const initials = (name = 'User') => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()
+const formatBirthDate = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+const initials = (name = '') => name.split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'
 const PREFERENCE_OPTIONS = {
-  languages: ['English', 'Hindi', 'Tamil', 'Telugu', 'Malayalam', 'Bengali', 'Marathi', 'Gujarati', 'Punjabi'],
+  languages: ['English', 'Hindi', 'Tamil', 'Telugu', 'Malayalam', 'Kannada', 'Bengali', 'Marathi', 'Gujarati', 'Punjabi', 'Urdu', 'Odia', 'Assamese', 'Sanskrit', 'French', 'German', 'Spanish', 'Arabic', 'Chinese', 'Japanese', 'Korean', 'Portuguese', 'Russian'],
   methods: ['Vedic Astrology', 'Tarot Reading', 'Numerology', 'Vastu Shastra', 'Nadi Astrology', 'Western Astrology', 'KP Astrology', 'Palmistry', 'Crystal Healing'],
   topics: ['Marriage', 'Career', 'Business', 'Child', 'Finance', 'Relationships', 'Health', 'Education', 'Timing', 'Family', 'Life Changes', 'Wellbeing'],
 }
+const GENDER_OPTIONS = ['Male', 'Female', 'Other']
+const RASI_OPTIONS = ['Mesham', 'Rishabam', 'Mithunam', 'Kadagam', 'Simmam', 'Kanni', 'Thulam', 'Viruchigam', 'Dhanusu', 'Magaram', 'Kumbam', 'Meenam']
+const toDateInputValue = (value) => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : ''
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+const PERSONAL_INFO_FIELDS = [
+  ['fullName', 'Name'],
+  ['username', 'Username'],
+  ['dob', 'Date of Birth'],
+  ['gender', 'Gender'],
+  ['phone', 'Phone Number'],
+  ['email', 'Email'],
+  ['birthTime', 'Time of Birth'],
+  ['birthPlace', 'Place of Birth'],
+  ['languages', 'Languages'],
+]
+const ASTROLOGY_FIELDS = [
+  ['rasi', 'Rasi'],
+  ['nakshatra', 'Nakshatra'],
+  ['lagna', 'Lagna / Ascendant'],
+]
+const PREFERENCE_ROWS = [
+  ['languages', 'Preferred Language'],
+  ['astrologerTypes', 'Astrologer Type'],
+  ['consultationTitles', 'Consultation Title'],
+]
 
 export default function MyAccount() {
   const { currentUser, updateProfile } = useAuth()
-  const { appointments, consultationHistory, actions } = useAppData()
+  const { success } = useToast()
   const routes = getRoleRoutes(currentUser?.role)
-  const [accountTab, setAccountTab] = useState('personal')
-  const [editing, setEditing] = useState(false)
+  const location = useLocation()
+  const backTo = location.state?.from === 'profile' ? routes.profile : location.state?.from === 'horoscope' ? routes.horoscope : null
+  const name = currentUser?.name || ''
+  const username = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'profile'
   const [editingDetails, setEditingDetails] = useState(false)
-  const [personalDetails, setPersonalDetails] = useState({ fullName: currentUser?.name || 'Priya V.', dob: '12 March 1995', birthTime: '08:30 AM', birthPlace: 'Chennai, India', gender: 'Female', language: 'English, Tamil' })
-  const [name, setName] = useState(currentUser?.name || '')
-  const [email, setEmail] = useState(currentUser?.email || '')
+  const [detailsError, setDetailsError] = useState('')
+  const syncDetails = () => ({
+    fullName: currentUser?.name || '',
+    dob: currentUser?.dateOfBirth || '',
+    birthTime: currentUser?.birthTime || '',
+    birthPlace: currentUser?.birthPlace || '',
+    gender: currentUser?.gender || '',
+    languages: [...(currentUser?.languages || [])],
+    phone: currentUser?.phone || '',
+    email: currentUser?.email || '',
+  })
+  const [personalDetails, setPersonalDetails] = useState(syncDetails)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [preferences, setPreferences] = useState({ languages: currentUser?.astrologerPreferences?.languages || [], astrologerTypes: currentUser?.astrologerPreferences?.astrologerTypes || currentUser?.astrologerPreferences?.methods || [], consultationTitles: currentUser?.astrologerPreferences?.consultationTitles || currentUser?.astrologerPreferences?.topics || [] })
   const [preferencesError, setPreferencesError] = useState('')
-  const userHistory = useMemo(() => consultationHistory.filter((item) => item.customerId === currentUser?.id || (currentUser?.id === 'user-demo' && item.customerId === 'customer-priya')), [consultationHistory, currentUser?.id])
-  const history = userHistory.length ? userHistory : consultationHistory.filter((item) => item.customerId === 'user-demo' || item.customerId === 'customer-priya')
-  const astrologerName = (id) => mockAstrologers.find((item) => item.id === id)?.name || 'Astrologer'
-  const saveProfile = () => { updateProfile({ name, email }); setEditing(false) }
+  const [horoscopeOpen, setHoroscopeOpen] = useState(false)
+  const [horoscopeForm, setHoroscopeForm] = useState({ rasi: '', nakshatra: '', lagna: '' })
+  const [horoscopeError, setHoroscopeError] = useState('')
+  const personalValue = (key) => {
+    switch (key) {
+      case 'fullName': return currentUser?.name || ''
+      case 'username': return username ? `@${username}` : ''
+      case 'dob': return formatBirthDate(currentUser?.dateOfBirth)
+      case 'gender': return currentUser?.gender || ''
+      case 'phone': return currentUser?.phone || ''
+      case 'email': return currentUser?.email || ''
+      case 'birthTime': return currentUser?.birthTime || ''
+      case 'birthPlace': return currentUser?.birthPlace || ''
+      case 'languages': return (currentUser?.languages || []).join(', ')
+      default: return ''
+    }
+  }
+  const preferenceValue = (group) => {
+    const value = preferences[group]
+    return Array.isArray(value) && value.length ? value.join(', ') : ''
+  }
+  const openPersonalDetailsEditor = () => {
+    setPersonalDetails(syncDetails())
+    setDetailsError('')
+    setEditingDetails(true)
+  }
+  const savePersonalDetails = () => {
+    try {
+      updateProfile({
+        name: personalDetails.fullName,
+        email: personalDetails.email,
+        phone: personalDetails.phone,
+        dateOfBirth: toDateInputValue(personalDetails.dob),
+        birthTime: personalDetails.birthTime,
+        birthPlace: personalDetails.birthPlace,
+        gender: personalDetails.gender,
+        languages: personalDetails.languages,
+      })
+      setEditingDetails(false)
+      setDetailsError('')
+      success('Profile updated')
+    } catch (err) {
+      setDetailsError(err instanceof Error ? err.message : 'Unable to update your details.')
+    }
+  }
+  const toggleLanguage = (option) => setPersonalDetails((details) => ({ ...details, languages: details.languages.includes(option) ? details.languages.filter((item) => item !== option) : [...details.languages, option] }))
+  const openHoroscopeEditor = () => {
+    setHoroscopeForm({ rasi: currentUser?.rasi || '', nakshatra: currentUser?.nakshatra || '', lagna: currentUser?.lagna || '' })
+    setHoroscopeError('')
+    setHoroscopeOpen(true)
+  }
+  const saveHoroscopeDetails = () => {
+    const rasi = horoscopeForm.rasi.trim()
+    const nakshatra = horoscopeForm.nakshatra.trim()
+    const lagna = horoscopeForm.lagna.trim()
+    if (rasi && !RASI_OPTIONS.includes(rasi)) { setHoroscopeError('Select a valid Rasi.'); return }
+    if (nakshatra && !NAKSHATRA_OPTIONS.includes(nakshatra)) { setHoroscopeError('Select a valid Nakshatra.'); return }
+    if (lagna && !RASI_OPTIONS.includes(lagna)) { setHoroscopeError('Select a valid Lagna / Ascendant.'); return }
+    try {
+      updateProfile({ name: currentUser?.name, email: currentUser?.email, rasi, nakshatra, lagna })
+      setHoroscopeOpen(false)
+      setHoroscopeError('')
+      success('Horoscope details saved')
+    } catch (err) {
+      setHoroscopeError(err instanceof Error ? err.message : 'Unable to save your horoscope details.')
+    }
+  }
   const togglePreference = (group, value) => setPreferences((current) => ({ ...current, [group]: current[group].includes(value) ? current[group].filter((item) => item !== value) : [...current[group], value] }))
   const savePreferences = () => {
     const missing = Object.entries(preferences).find(([, values]) => !values.length)
@@ -43,44 +149,81 @@ export default function MyAccount() {
     updateProfile({ name: currentUser?.name, email: currentUser?.email, phone: currentUser?.phone, specialization: currentUser?.specialization, experience: currentUser?.experience, astrologerPreferencesEnabled: true, astrologerPreferences: { ...preferences, methods: preferences.astrologerTypes, topics: preferences.consultationTitles } })
     setPreferencesError('')
     setPreferencesOpen(false)
+    success('Preferences saved')
   }
 
-  return <div className="my-account-page">
-    <PageHeader eyebrow="User portal" title="My Account" subtitle="Manage your profile, personal details, and consultation history." />
-    <Card className="my-account-profile-card"><div className="my-account-avatar">{initials(currentUser?.name)}</div><div className="my-account-profile-copy"><h2>{currentUser?.name || 'User'}</h2><p>@{(currentUser?.name || 'user').toLowerCase().replace(/[^a-z0-9]/g, '')}</p><div className="my-account-contact"><span><Phone size={14} /> {currentUser?.phone || 'Mobile not added'}</span><span><Mail size={14} /> {currentUser?.email || 'Email not added'}</span></div></div><div className="my-account-profile-actions"><button type="button" className="btn btn-outline" onClick={() => setPreferencesOpen(true)}>Preferences</button><button type="button" className="btn btn-outline" onClick={() => setEditing(true)}><Pencil size={15} /> Edit Profile</button></div></Card>
-    {preferencesOpen && <div className="preferences-overlay" role="dialog" aria-modal="true" aria-labelledby="preferences-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrologer matching</div><h2 id="preferences-heading">Your Preferences</h2><p className="muted">Tell us what kind of guidance you are looking for.</p></div><button type="button" className="icon-btn" aria-label="Close preferences" onClick={() => setPreferencesOpen(false)}><X size={17} /></button></div>{Object.entries({ languages: PREFERENCE_OPTIONS.languages, astrologerTypes: PREFERENCE_OPTIONS.methods, consultationTitles: PREFERENCE_OPTIONS.topics }).map(([group, options]) => <fieldset className="preferences-group" key={group}><legend>{group === 'languages' ? 'Preferred Language' : group === 'astrologerTypes' ? 'Astrologer Type' : 'Consultation Title'} <span>*</span></legend><div className="preferences-options">{options.map((option) => <button type="button" key={option} className={preferences[group].includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => togglePreference(group, option)}>{option}</button>)}</div></fieldset>)}{preferencesError && <p className="preferences-error">{preferencesError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPreferencesOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePreferences}>Save Preferences</button></div></Card></div>}
-    {editing && <Card className="my-account-edit-card"><div className="form-grid"><label>Name<input className="text-input" value={name} onChange={(event) => setName(event.target.value)} /></label><label>Email<input className="text-input" value={email} onChange={(event) => setEmail(event.target.value)} /></label></div><div className="my-account-actions"><button type="button" className="btn btn-primary" onClick={saveProfile}>Save Changes</button><button type="button" className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button></div></Card>}
-    <div className="my-account-section-tabs" role="tablist"><button type="button" role="tab" aria-selected={accountTab === 'personal'} className={accountTab === 'personal' ? 'is-active' : ''} onClick={() => setAccountTab('personal')}><UserRound size={16} /> Personal Details</button><button type="button" role="tab" aria-selected={accountTab === 'consultation'} className={accountTab === 'consultation' ? 'is-active' : ''} onClick={() => setAccountTab('consultation')}><MessageCircle size={16} /> Consultation</button></div>
-    {accountTab === 'personal' ? <Card className="my-account-details-card"><div className="my-account-section-heading"><div className="section-title">Personal Information</div><button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingDetails((value) => !value)}>{editingDetails ? 'Save Changes' : 'Edit Profile'}</button></div><div className="my-account-detail-grid">{[['fullName', 'Full Name'], ['dob', 'Date of Birth'], ['birthTime', 'Time of Birth'], ['birthPlace', 'Place of Birth'], ['gender', 'Gender'], ['language', 'Language Preference']].map(([key, label]) => <label className="my-account-form-field" key={key}><span>{label}</span>{editingDetails ? <input className="text-input" value={personalDetails[key]} onChange={(event) => setPersonalDetails((details) => ({ ...details, [key]: event.target.value }))} /> : <strong>{personalDetails[key]}</strong>}</label>)}</div><div className="my-account-astrology-heading"><div><div className="section-title">Astrology Details</div><p className="muted">Your saved horoscope information</p></div><button type="button" className="btn btn-outline btn-sm"><Pencil size={14} /> Edit Horoscope</button></div><div className="my-account-detail-grid">{[['Rashi', 'Karka (Cancer)'], ['Nakshatra', 'Pushya'], ['Lagna', 'Mithuna (Gemini)'], ['Saved Horoscope / Kundli', 'Saved']].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}{label.includes('Saved') && <Check size={15} className="my-account-saved-icon" />}</strong></div>)}</div></Card> : <ConsultationHistorySection appointments={appointments} history={history} routes={routes} actions={actions} astrologerName={astrologerName} />}
-  </div>
-}
-
-function ConsultationHistorySection({ appointments, history, routes, actions, astrologerName }) {
-  const [tab, setTab] = useState('calls')
-  const [selectedChatId, setSelectedChatId] = useState(null)
-  const calls = history.filter((item) => item.type === 'Audio Call')
-  const chats = history.filter((item) => item.type === 'Chat')
-  const selectedChat = chats.find((item) => item.id === selectedChatId)
-  const tabs = [['calls', 'Call History'], ['chats', 'Chat History'], ['appointments', 'Appointment History']]
-
-  return <section className="my-account-consultation-history"><div className="my-account-consultation-heading"><div><div className="section-title">Consultation History</div><p className="muted">View your previous calls, chats, and appointments.</p></div></div><div className="my-account-consultation-tabs" role="tablist">{tabs.map(([value, label]) => <button type="button" role="tab" aria-selected={tab === value} className={tab === value ? 'is-active' : ''} key={value} onClick={() => { setTab(value); if (value !== 'chats') setSelectedChatId(null) }}>{label}</button>)}</div>{tab === 'calls' && <div className="my-account-history-list">{calls.map((item) => <Card key={item.id} className="my-account-history-card"><HistoryRecord item={item} title={astrologerName(item.astrologerId)} type="Audio Call" icon={<Headphones size={14} />} /></Card>)}{!calls.length && <HistoryEmpty message="No call history yet." detail="Your completed calls will appear here." />}</div>}{tab === 'chats' && (selectedChat ? <InlineChatHistory item={selectedChat} astrologerName={astrologerName(selectedChat.astrologerId)} specialization={mockAstrologers.find((astrologer) => astrologer.id === selectedChat.astrologerId)?.specialization || 'Vedic Astrology'} onBack={() => setSelectedChatId(null)} /> : <div className="my-account-history-list">{chats.map((item) => <Card key={item.id} className="my-account-history-card my-account-chat-record" role="button" tabIndex="0" onClick={() => setSelectedChatId(item.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedChatId(item.id) } }}><HistoryRecord item={item} title={astrologerName(item.astrologerId)} type="Chat consultation" icon={<MessageCircle size={14} />} /></Card>)}{!chats.length && <HistoryEmpty message="No chat history yet." />}</div>)}{tab === 'appointments' && <div className="my-account-history-list">{appointments.map((appointment) => <AppointmentHistoryRecord key={appointment.id} appointment={appointment} routes={routes} actions={actions} />)}{!appointments.length && <HistoryEmpty message="No appointment history yet." />}</div>}</section>
-}
-
-function AppointmentHistoryRecord({ appointment, routes, actions }) {
-  const canCancel = ['Pending', 'Confirmed', 'Rescheduled', 'Analysed'].includes(appointment.status)
-  const canJoin = appointment.status === 'Confirmed'
-  return <Card className="my-account-history-card"><div className="my-account-history-top"><div><h3>{appointment.astrologer}</h3><span>{appointment.specialization || 'Vedic Astrology'}</span></div><StatusBadge label={appointment.status || 'Pending'} /></div><div className="my-account-history-meta"><span><b>Date</b>{appointment.date}</span><span><b>Time</b>{appointment.time}</span><span><b>Type</b>{appointment.type}</span><span><b>Duration</b>{appointment.duration || '30 min'}</span><span><b>Amount</b>{formatAmount(appointment.price || 499)}</span><span><b>Booking ID</b>{appointment.id}</span></div><div className="my-account-card-actions"><Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-outline">View Appointment</Link>{canJoin && <Link to={`${routes.appointmentDetails}?id=${appointment.id}`} className="btn btn-primary"><PhoneCall size={15} /> Receive Call</Link>}{canCancel && <button type="button" className="btn btn-ghost" onClick={() => actions.cancelAppointment(appointment.id, appointment)}>Cancel Appointment</button>}</div></Card>
-}
-
-function HistoryEmpty({ message, detail }) {
-  return <div className="my-account-history-empty"><strong>{message}</strong>{detail && <span>{detail}</span>}</div>
-}
-
-function HistoryRecord({ item, title, type, icon, action }) {
-  return <><div className="my-account-history-top"><div><h3>{title}</h3><span>{icon} {type}</span></div><StatusBadge label={item.status} /></div><div className="my-account-history-meta"><span><b>Date</b>{formatDate(item.startedAt)}</span><span><b>Time</b>{formatTime(item.startedAt)}</span><span><b>Duration</b>{item.durationMinutes} min</span><span><b>Spend Amount</b><strong>{formatAmount(item.amount)}</strong></span></div>{action && <button type="button" className="btn btn-outline btn-sm my-account-chat-action">{action}</button>}</>
-}
-
-function InlineChatHistory({ item, astrologerName, specialization, onBack }) {
-  const messages = item.messages || []
-  return <div className="my-account-inline-chat"><div className="my-account-inline-chat-header"><div><button type="button" className="my-account-chat-back" onClick={onBack}><span aria-hidden="true">←</span> Back to Chat History</button><h3>{astrologerName}</h3><p>{specialization}</p></div><StatusBadge label={item.status} /></div><div className="my-account-chat-session-summary"><strong>Chat Consultation</strong><span>{astrologerName} · {specialization}</span><span>{formatDate(item.startedAt)} · {formatTime(item.startedAt)}</span><span>Duration: {item.durationMinutes} min · Amount: {formatAmount(item.amount)}</span><small>Chat History · Read Only</small></div><div className="my-account-inline-chat-messages">{messages.length ? messages.map((message) => <div key={message.id} className={`my-account-inline-message my-account-inline-message--${message.sender}`}><p>{message.text}</p><time>{formatTime(message.sentAt)}</time></div>) : <p className="my-account-chat-empty">No conversation messages available.</p>}</div></div>
+  return (
+    <div className="my-account-page">
+      <BackButton to={backTo} label="Back" />
+      <PageHeader title="My Account" subtitle="Manage your personal information, astrology details and preferences." />
+      <Card className="my-account-summary">
+        <div className="my-account-summary__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} /> : initials(name)}</div>
+        <div className="my-account-summary__copy">
+          <strong>{name || 'Astro Connect Member'}</strong>
+          <span className="muted">@{username}</span>
+        </div>
+        <span className="my-account-summary__tag">Account Information</span>
+      </Card>
+      <Card className="my-account-settings-card">
+        <section className="my-account-settings-section">
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Personal Information</h2>
+              <p className="muted my-account-settings-desc">Your basic account and birth details.</p>
+            </div>
+            <button type="button" className="my-account-settings-edit" aria-label="Edit Personal Information" onClick={openPersonalDetailsEditor}><Pencil size={15} /></button>
+          </div>
+          {editingDetails ? (
+            <>
+              <div className="form-grid">
+                <label>Name<input className="text-input" value={personalDetails.fullName} onChange={(event) => setPersonalDetails((details) => ({ ...details, fullName: event.target.value }))} /></label>
+                <label>Date of Birth<input type="date" className="text-input" value={personalDetails.dob} onChange={(event) => setPersonalDetails((details) => ({ ...details, dob: event.target.value }))} /></label>
+                <label>Gender<select className="select-input" value={personalDetails.gender} onChange={(event) => setPersonalDetails((details) => ({ ...details, gender: event.target.value }))}><option value="">Select gender</option>{GENDER_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+                <label>Phone Number<input className="text-input" value={personalDetails.phone} onChange={(event) => setPersonalDetails((details) => ({ ...details, phone: event.target.value }))} /></label>
+                <label>Email<input className="text-input" value={personalDetails.email} onChange={(event) => setPersonalDetails((details) => ({ ...details, email: event.target.value }))} /></label>
+                <label>Time of Birth<input type="time" className="text-input" value={personalDetails.birthTime} onChange={(event) => setPersonalDetails((details) => ({ ...details, birthTime: event.target.value }))} /></label>
+                <label>Place of Birth<input className="text-input" value={personalDetails.birthPlace} onChange={(event) => setPersonalDetails((details) => ({ ...details, birthPlace: event.target.value }))} /></label>
+                <label>Languages<div className="preferences-options">{PREFERENCE_OPTIONS.languages.map((option) => <button type="button" key={option} className={personalDetails.languages.includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => toggleLanguage(option)}>{option}</button>)}</div></label>
+              </div>
+              {detailsError && <p className="preferences-error">{detailsError}</p>}
+              <div className="my-account-actions">
+                <button type="button" className="btn btn-primary" onClick={savePersonalDetails}>Save Changes</button>
+                <button type="button" className="btn btn-ghost" onClick={() => { setEditingDetails(false); setDetailsError('') }}>Cancel</button>
+              </div>
+            </>
+          ) : (
+            <div className="my-account-info-rows">
+              {PERSONAL_INFO_FIELDS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={personalValue(key) ? '' : 'is-empty'}>{personalValue(key) || 'Not added'}</strong></div>)}
+            </div>
+          )}
+        </section>
+        <section className="my-account-settings-section">
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Astrology Details</h2>
+              <p className="muted my-account-settings-desc">Your basic horoscope information.</p>
+            </div>
+            <button type="button" className="my-account-settings-edit" aria-label="Edit Astrology Details" onClick={openHoroscopeEditor}><Pencil size={15} /></button>
+          </div>
+          <div className="my-account-info-rows">
+            {ASTROLOGY_FIELDS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={currentUser?.[key] ? '' : 'is-empty'}>{currentUser?.[key] || 'Not added'}</strong></div>)}
+          </div>
+        </section>
+        <section className="my-account-settings-section">
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Preferences</h2>
+              <p className="muted my-account-settings-desc">Language and consultation preferences for astrologer matching.</p>
+            </div>
+            <button type="button" className="my-account-settings-edit" aria-label="Edit Preferences" onClick={() => { setPreferencesError(''); setPreferencesOpen(true) }}><SlidersHorizontal size={15} /></button>
+          </div>
+          <div className="my-account-info-rows">
+            {PREFERENCE_ROWS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={preferenceValue(key) ? '' : 'is-empty'}>{preferenceValue(key) || 'Not set'}</strong></div>)}
+          </div>
+        </section>
+      </Card>
+      {preferencesOpen && <div className="preferences-overlay" role="dialog" aria-modal="true" aria-labelledby="preferences-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrologer matching</div><h2 id="preferences-heading">Your Preferences</h2><p className="muted">Tell us what kind of guidance you are looking for.</p></div><button type="button" className="icon-btn" aria-label="Close preferences" onClick={() => setPreferencesOpen(false)}><X size={17} /></button></div>{Object.entries({ languages: PREFERENCE_OPTIONS.languages, astrologerTypes: PREFERENCE_OPTIONS.methods, consultationTitles: PREFERENCE_OPTIONS.topics }).map(([group, options]) => <fieldset className="preferences-group" key={group}><legend>{group === 'languages' ? 'Preferred Language' : group === 'astrologerTypes' ? 'Astrologer Type' : 'Consultation Title'} <span>*</span></legend><div className="preferences-options">{options.map((option) => <button type="button" key={option} className={preferences[group].includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => togglePreference(group, option)}>{option}</button>)}</div></fieldset>)}{preferencesError && <p className="preferences-error">{preferencesError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPreferencesOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePreferences}>Save Preferences</button></div></Card></div>}
+      {horoscopeOpen && <div className="preferences-overlay" role="dialog" aria-modal="true" aria-labelledby="horoscope-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrology Details</div><h2 id="horoscope-heading">Edit Horoscope</h2><p className="muted">Select your Rasi, Nakshatra, and Lagna / Ascendant.</p></div><button type="button" className="icon-btn" aria-label="Close edit horoscope" onClick={() => setHoroscopeOpen(false)}><X size={17} /></button></div><div className="form-grid"><label className="field-group"><span className="field-label-top">Rasi</span><select className="select-input" value={horoscopeForm.rasi} onChange={(event) => setHoroscopeForm((form) => ({ ...form, rasi: event.target.value }))}><option value="">Select Rasi</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group"><span className="field-label-top">Nakshatra</span><select className="select-input" value={horoscopeForm.nakshatra} onChange={(event) => setHoroscopeForm((form) => ({ ...form, nakshatra: event.target.value }))}><option value="">Select Nakshatra</option>{NAKSHATRA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group" style={{ marginBottom: 0 }}><span className="field-label-top">Lagna / Ascendant</span><select className="select-input" value={horoscopeForm.lagna} onChange={(event) => setHoroscopeForm((form) => ({ ...form, lagna: event.target.value }))}><option value="">Select Lagna</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></div>{horoscopeError && <p className="preferences-error">{horoscopeError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setHoroscopeOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveHoroscopeDetails}>Save Horoscope</button></div></Card></div>}
+    </div>
+  )
 }

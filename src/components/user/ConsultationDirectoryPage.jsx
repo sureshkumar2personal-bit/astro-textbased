@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import PageHeader from '../ui/PageHeader.jsx'
 import Section from '../ui/Section.jsx'
 import Card from '../ui/Card.jsx'
@@ -112,12 +112,13 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
 
   return (
     <div>
-      <button type="button" className="consultation-directory__dashboard-link" onClick={() => navigate(routes.dashboard)}><ArrowLeft size={16} aria-hidden="true" /> Back to Dashboard</button>
       <PageHeader
         eyebrow={kind === 'call' ? 'User portal' : undefined}
         title={title}
         subtitle={subtitle}
-        showBack={false}
+        showBack
+        backTo={routes.dashboard}
+        backLabel="Back to Dashboard"
       />
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredAstrologers.length === 0 ? (

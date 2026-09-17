@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw } from 'lucide-react'
 import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
+import { NAKSHATRA_OPTIONS, RASHI_OPTIONS } from '../data/astrologyOptions.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { publishedAvailabilityMap } from '../utils/appointments.js'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -80,9 +81,6 @@ function timeToMinutes(value) {
   const [hours, minutes] = clock.split(':').map(Number)
   return ((hours % 12) + (meridiem === 'PM' ? 12 : 0)) * 60 + minutes
 }
-
-const RASHI_OPTIONS = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)']
-const NAKSHATRA_OPTIONS = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashira', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati']
 
 function appointmentStartTime(slot) {
   if (!slot) return 0

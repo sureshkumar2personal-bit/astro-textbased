@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import {
   ArrowRight,
   BellRing,
@@ -439,9 +439,11 @@ function MessageTarget() {
 
 export default function LiveSession() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const { astrologerLiveSessions, followedAstrologerIds, subscriptions } = useAppData()
+  const fromDashboard = location.state?.from === 'dashboard'
 
   const sessionId = searchParams.get('id')
   const liveCount = astrologerLiveSessions.filter((session) => session.status === 'live').length
@@ -501,7 +503,7 @@ export default function LiveSession() {
 
   return (
     <div className="user-live-page">
-      <PageHeader eyebrow="User portal" title="Live Sessions" showBack backTo={routes.dashboard} />
+      <PageHeader eyebrow="User portal" title="Live Sessions" showBack backTo={routes.dashboard} backLabel={fromDashboard ? 'Back to Dashboard' : 'Back'} />
 
       {liveCount > 0 && (
         <div className="user-live-hero">

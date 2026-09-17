@@ -160,6 +160,7 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'my-account', label: 'My Account', icon: UserRound },
+      { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
 }
@@ -219,6 +220,7 @@ const PAGE_META = {
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
     '/user/rewards': { title: 'Total Rewards', sub: 'Discount questions, perks, and benefits from subscribed astrologers.' },
     '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
+    '/user/horoscope': { title: 'Horoscope', sub: 'Birth details and horoscope information for you and your family' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/appointments/book': { title: 'Book Appointment', sub: 'Find an astrologer and schedule your appointment' },

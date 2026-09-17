@@ -62,6 +62,7 @@ import LiveSession from './pages/user/live-sessions/LiveSession.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
 import AstrologerAccountManagement from './pages/AstrologerAccountManagement.jsx'
+import FullHoroscope from './pages/user/horoscope/FullHoroscope.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
@@ -219,6 +220,7 @@ function UserRoutes() {
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/rewards" element={<RewardsPerks />} />
         <Route path="/user/my-account" element={<MyAccount />} />
+        <Route path="/user/horoscope" element={<FullHoroscope />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
         <Route path="/user/appointments/book" element={<BookAppointment />} />
