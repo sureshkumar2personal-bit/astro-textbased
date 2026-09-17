@@ -117,7 +117,13 @@ export default function Dashboard() {
             )}
             <span className="hero-services-trigger" aria-hidden="true"><ChevronDown size={14} /></span>
             {serviceMenuOpen && (
-              <div className="hero-services-menu" role="menu" aria-label="Service availability">
+              <div
+                className="hero-services-menu"
+                role="menu"
+                aria-label="Service availability"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={(event) => event.stopPropagation()}
+              >
                 <div className="hero-services-menu__heading">Service availability</div>
                 <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
                   <span>
