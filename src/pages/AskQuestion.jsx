@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { X, Clock, AlertTriangle } from 'lucide-react'
 import { RadioGroup, ChipGroup } from '../components/OptionGroup.jsx'
 import UploadField from '../components/UploadField.jsx'
@@ -38,6 +38,7 @@ function formatTime(date) {
 
 export default function AskQuestion() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { campaigns, questions, purchasedSlots, actions } = useAppData()
   const { currentUser } = useAuth()
@@ -235,7 +236,13 @@ export default function AskQuestion() {
 
   return (
     <div>
-      <PageHeader eyebrow="User portal" title={isEditing ? 'Edit Question' : 'Ask a Question'} showBack backTo={routes.trackQuestions} />
+      <PageHeader
+        eyebrow="User portal"
+        title={isEditing ? 'Edit Question' : 'Ask a Question'}
+        showBack
+        backTo={location.state?.from === 'dashboard' ? routes.dashboard : routes.trackQuestions}
+        backLabel={location.state?.from === 'dashboard' ? 'Back to Dashboard' : 'Back'}
+      />
 
       {!isEditing && !discountActive && !isViewing && (
         <Section title="Purchased Question Slots">

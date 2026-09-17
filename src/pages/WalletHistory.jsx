@@ -5,6 +5,7 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getPaymentHoldStatus } from '../utils/date.js'
 import { computeWalletSummary } from '../utils/wallet.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
+import { useLocation } from 'react-router-dom'
 
 function parseAmount(amountStr) {
   const sign = amountStr.trim().startsWith('-') ? -1 : 1
@@ -17,8 +18,10 @@ function formatSignedAmount(amount) {
 
 export default function WalletHistory() {
   const { currentUser } = useAuth()
+  const location = useLocation()
   const { userWallet, astrologerWallet } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
+  const fromProfile = location.state?.from === 'profile'
   const isAstrologer = currentUser?.role === 'astrologer'
   const wallet = isAstrologer ? astrologerWallet : userWallet
   const holdDays = wallet.holdDays ?? 7
@@ -42,7 +45,7 @@ export default function WalletHistory() {
         eyebrow={currentUser?.role === 'astrologer' ? 'Astrologer workspace' : 'User portal'}
         title="Wallet History"
         showBack
-        backTo={routes.dashboard}
+        backTo={fromProfile ? routes.profile : routes.dashboard}
       />
 
       {currentUser?.role === 'astrologer' ? (

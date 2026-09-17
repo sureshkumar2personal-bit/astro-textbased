@@ -1,6 +1,6 @@
 import BackButton from '../BackButton.jsx'
 
-export default function PageHeader({ eyebrow, title, subtitle, showBack = false, backTo, backIcon, actions, className = '' }) {
+export default function PageHeader({ eyebrow, title, subtitle, showBack = false, backTo, backIcon, backLabel, actions, className = '' }) {
   return (
     <div className={`page-header-row${className ? ` ${className}` : ''}`}>
       <div>
@@ -10,7 +10,7 @@ export default function PageHeader({ eyebrow, title, subtitle, showBack = false,
       </div>
       <div className="page-header-actions">
         {actions}
-        {showBack && <BackButton to={backTo} icon={backIcon} />}
+        {showBack && <BackButton to={backTo} label={backLabel} icon={backIcon} />}
       </div>
     </div>
   )

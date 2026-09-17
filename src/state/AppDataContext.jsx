@@ -828,6 +828,7 @@ const CONSULTATIONS_STORAGE_KEY = 'astroconnect-appointment-consultations'
 const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
+const FAMILY_HOROSCOPES_STORAGE_KEY = 'astroconnect-family-horoscopes'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -1233,6 +1234,7 @@ export function AppDataProvider({ children }) {
   const [userPaymentMethods, setUserPaymentMethods] = useState(() => loadFromStorage(USER_PAYMENT_METHODS_STORAGE_KEY, initialUserPaymentMethods))
   const [userAutopays, setUserAutopays] = useState(() => loadFromStorage(USER_AUTOPAYS_STORAGE_KEY, initialUserAutopays))
   const [userWithdrawals, setUserWithdrawals] = useState(() => loadFromStorage(USER_WITHDRAWALS_STORAGE_KEY, initialUserWithdrawals))
+  const [familyHoroscopes, setFamilyHoroscopes] = useState(() => loadFromStorage(FAMILY_HOROSCOPES_STORAGE_KEY, []))
   const [astrologerServices, setAstrologerServices] = useState(() => normalizeAstrologerServices(
     loadFromStorage(ASTROLOGER_SERVICES_STORAGE_KEY, DEFAULT_ASTROLOGER_SERVICES),
   ))
@@ -1361,6 +1363,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(USER_WITHDRAWALS_STORAGE_KEY, userWithdrawals)
   }, [userWithdrawals])
+
+  useEffect(() => {
+    saveToStorage(FAMILY_HOROSCOPES_STORAGE_KEY, familyHoroscopes)
+  }, [familyHoroscopes])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -2708,6 +2714,23 @@ export function AppDataProvider({ children }) {
       return txn
     },
 
+    // Family Horoscopes
+    addFamilyHoroscope(payload) {
+      const entry = {
+        id: crypto.randomUUID(),
+        userId: currentUser?.id || 'guest',
+        ...payload,
+      }
+      setFamilyHoroscopes((prev) => [...prev, entry])
+      return entry
+    },
+    updateFamilyHoroscope(id, patch) {
+      setFamilyHoroscopes((prev) => prev.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)))
+    },
+    deleteFamilyHoroscope(id) {
+      setFamilyHoroscopes((prev) => prev.filter((entry) => entry.id !== id))
+    },
+
     // User Payment Methods
     addUserPaymentMethod(payload) {
       const method = {
@@ -2805,6 +2828,7 @@ export function AppDataProvider({ children }) {
     astrologerPosts,
     astrologerLiveSessions,
     liveReminders,
+    familyHoroscopes,
     appointmentAvailabilityTemplates,
     userPaymentMethods,
     userAutopays,
@@ -2847,6 +2871,7 @@ export function AppDataProvider({ children }) {
     astrologerPosts,
     astrologerLiveSessions,
     liveReminders,
+    familyHoroscopes,
     appointmentAvailabilityTemplates,
     astrologerServices,
     userPaymentMethods,
