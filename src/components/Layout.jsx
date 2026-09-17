@@ -159,6 +159,7 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'my-account', label: 'My Account', icon: UserRound },
+      { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
 }

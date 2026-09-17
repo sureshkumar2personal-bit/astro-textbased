@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
-export default function BackButton({ to, icon: Icon = ArrowLeft }) {
+export default function BackButton({ to, label = 'Back', icon: Icon = ArrowLeft }) {
   const navigate = useNavigate()
   return (
     <button
@@ -9,7 +9,7 @@ export default function BackButton({ to, icon: Icon = ArrowLeft }) {
       onClick={() => (to ? navigate(to) : navigate(-1))}
     >
       <Icon size={16} />
-      Back
+      {label}
     </button>
   )
 }

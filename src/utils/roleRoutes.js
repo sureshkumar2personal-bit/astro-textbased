@@ -52,6 +52,7 @@ export function getRoleRoutes(role) {
     transactionHistory: `${base}/transaction-history`,
     myAccount: `${base}/my-account`,
     profile: `${base}/profile`,
+    horoscope: `${base}/horoscope`,
     appointmentDetails: `${base}/appointment-details`,
     poojaDetails: `${base}/pooja-details`,
     liveSession: `${base}/live-session`,
