@@ -110,6 +110,7 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'activity', label: 'My Activity', icon: Activity },
+      { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
   [ROLES.USER]: {
@@ -188,6 +189,7 @@ const PAGE_META = {
     '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/my-account': { title: 'Account Management', sub: 'Profile, access, security, and account preferences' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
     '/astrologer/appointments/calendar': { title: 'Calendar', sub: 'Review and manage published appointments' },
@@ -545,7 +547,7 @@ export default function Layout() {
               className="avatar-chip"
               onClick={() => {
                 setPanel(null)
-                navigate(`${basePath}/profile`)
+                navigate(shellIsAstrologer ? `${basePath}/my-account` : `${basePath}/profile`)
               }}
             >
               <span className="avatar-circle">

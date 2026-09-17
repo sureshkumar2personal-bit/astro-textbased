@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, CheckCircle2, CircleDollarSign, Gift, Languages, UserRound } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -23,6 +23,8 @@ export default function DiscountQuestions() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const astrologerFromUrl = searchParams.get('astrologer')
   const availableQuestions = actions.getAvailableDiscountQuestions(currentUser?.id)
   const subscribedAstrologers = useMemo(() => {
     const seen = new Set()
@@ -37,6 +39,15 @@ export default function DiscountQuestions() {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null)
   const [priceType, setPriceType] = useState('general')
   const [paid, setPaid] = useState(false)
+
+  useEffect(() => {
+    if (!astrologerFromUrl || selectedQuestionId) return
+    const match = availableQuestions.find((question) => question.astrologerId === astrologerFromUrl)
+    if (match) {
+      setSelectedQuestionId(match.id)
+      setSelectedAstrologerId(match.astrologerId)
+    }
+  }, [astrologerFromUrl, availableQuestions, selectedQuestionId])
 
   const selectedQuestion = availableQuestions.find((question) => question.id === selectedQuestionId) || null
   const selectedAstrologerQuestion = subscribedAstrologers.find((question) => question.astrologerId === selectedAstrologerId) || null
