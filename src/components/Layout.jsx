@@ -32,6 +32,7 @@ import {
   SlidersHorizontal,
   Send,
   RefreshCw,
+  Flame,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -109,6 +110,7 @@ const ROLE_CONFIG = {
           { to: 'perks-benefits/history', label: 'History', icon: History },
         ],
       },
+      { to: 'atonement', label: 'Atonement', icon: Flame },
       { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
@@ -187,6 +189,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
+    '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/my-account': { title: 'Account Management', sub: 'Profile, access, security, and account preferences' },
