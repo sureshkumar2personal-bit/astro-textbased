@@ -143,6 +143,7 @@ const ROLE_CONFIG = {
         ],
       },
       { to: 'live-session', label: 'Live', icon: Radio },
+      { to: 'atonements', label: 'Atonement', icon: Sparkles },
       { to: 'rewards', label: 'Total Rewards', icon: Gift },
       {
         label: 'Wallet',
@@ -227,6 +228,7 @@ const PAGE_META = {
     '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
+    '/user/atonements': { title: 'Atonement', sub: 'Track your recommended poojas and remedies' },
     '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },
     '/user/payment-methods/add': { title: 'Add Payment Method', sub: 'Add a new bank account, UPI ID, or card.' },
     '/user/autopay': { title: 'Autopay', sub: 'Manage automatic payments for subscriptions and top-ups.' },

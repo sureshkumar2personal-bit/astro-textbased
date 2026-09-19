@@ -59,6 +59,7 @@ import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/user/live-sessions/LiveSession.jsx'
+import Atonements from './pages/user/Atonements.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
 import AstrologerAccountManagement from './pages/AstrologerAccountManagement.jsx'
@@ -228,6 +229,7 @@ function UserRoutes() {
         <Route path="/user/appointments/my" element={<MyAppointments />} />
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
+        <Route path="/user/atonements" element={<Atonements />} />
         <Route path="/user/payment-methods" element={<PaymentMethods />} />
         <Route path="/user/payment-methods/add" element={<AddPaymentMethod />} />
         <Route path="/user/autopay" element={<Autopay />} />
