@@ -14497,6 +14497,23 @@ button.apt-week-day:focus-visible {
 .atonement-field-error { color: var(--danger); font-size: 11px; font-weight: 700; line-height: 1.35; }
 .atonement-inline-panel { display: grid; gap: 10px; margin-top: 8px; padding: 12px; border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--surface-border)); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-xs); }
 .atonement-inline-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.atonement-category-dropdown { position: relative; }
+.atonement-category-trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 35px; padding: 8px 11px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface-soft); color: var(--ink); font: inherit; font-size: 12.8px; text-align: left; cursor: pointer; transition: border-color 180ms var(--ease-premium), box-shadow 180ms var(--ease-premium), background 180ms var(--ease-premium); }
+.atonement-category-trigger:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
+.atonement-category-trigger svg { flex: 0 0 auto; color: var(--muted); transition: transform 180ms var(--ease-premium); }
+.atonement-category-trigger svg.open { transform: rotate(180deg); }
+.atonement-category-menu { position: absolute; z-index: 35; top: calc(100% + 6px); left: 0; right: 0; overflow: hidden; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-overlay); box-shadow: var(--shadow-lg); animation: atonement-fade-in 160ms var(--ease-premium); }
+.atonement-category-options { max-height: 206px; padding: 4px; overflow-y: auto; }
+.atonement-category-option { display: flex; align-items: center; gap: 3px; min-height: 34px; border-radius: 7px; }
+.atonement-category-option:hover { background: var(--primary-bg); }
+.atonement-category-option-name { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; padding: 7px 8px; border: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: 12.5px; text-align: left; cursor: pointer; }
+.atonement-category-option-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.atonement-category-option-name svg { flex: 0 0 auto; color: var(--primary); }
+.atonement-category-delete { display: grid; place-items: center; flex: 0 0 auto; width: 27px; height: 27px; margin-right: 3px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; opacity: .78; transition: color 150ms var(--ease-premium), background 150ms var(--ease-premium), opacity 150ms var(--ease-premium); }
+.atonement-category-option:hover .atonement-category-delete, .atonement-category-delete:focus-visible { opacity: 1; }
+.atonement-category-delete:hover, .atonement-category-delete:focus-visible { background: var(--danger-bg); color: var(--danger); outline: none; }
+.atonement-category-add { display: flex; align-items: center; gap: 7px; width: 100%; padding: 9px 12px; border: 0; border-top: 1px solid var(--surface-border); background: var(--surface); color: var(--primary); font: inherit; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; }
+.atonement-category-add:hover { background: var(--primary-bg); }
 
 /* =====================
    RITUAL CHIPS
@@ -14600,7 +14617,7 @@ button.apt-week-day:focus-visible {
 .atonement-form-actions .btn { min-height: 42px; padding: 0 24px; font-size: 13.5px; }
 
 /* Component selector modal */
-.atonement-modal-backdrop { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(21, 16, 36, 0.42); }
+.atonement-modal-backdrop { position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(21, 16, 36, 0.42); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .atonement-details-backdrop { z-index: 1000; background: rgba(25, 16, 48, 0.48); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 .atonement-ritual-picker-modal { width: min(620px, 100%); max-height: min(720px, calc(100vh - 48px)); display: flex; flex-direction: column; padding: 18px; border: 1px solid var(--surface-border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-lg); overflow: auto; }
 .atonement-ritual-picker-modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
