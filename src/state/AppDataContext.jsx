@@ -6,6 +6,8 @@ import { applyRunningBalances, buildSeedAstrologerWallet, computeWalletSummary, 
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
+import { initialAtonements } from '../data/atonementData.js'
+import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
 import { useAuth } from './AuthContext.jsx'
 
 const AppDataContext = createContext(null)
@@ -829,6 +831,7 @@ const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
 const FAMILY_HOROSCOPES_STORAGE_KEY = 'astroconnect-family-horoscopes'
+const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -1204,6 +1207,13 @@ export function AppDataProvider({ children }) {
     if (Array.isArray(stored) && stored.length) return stored
     return mockConsultations
   })
+  const [atonements, setAtonements] = useState(() => {
+    const stored = loadFromStorage(ATONEMENTS_STORAGE_KEY, null)
+    const seed = initialAtonements.map(normalizeAtonement)
+    if (!Array.isArray(stored) || !stored.length) return seed
+    const storedIds = new Set(stored.map((atonement) => atonement.id))
+    return [...stored.map(normalizeAtonement), ...seed.filter((atonement) => !storedIds.has(atonement.id))]
+  })
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
   const [subscriptions, setSubscriptions] = useState(() => {
     if (currentUser?.role !== ROLES.USER || !currentUser?.id) return []
@@ -1353,6 +1363,10 @@ export function AppDataProvider({ children }) {
   }, [consultations])
 
   useEffect(() => {
+    saveToStorage(ATONEMENTS_STORAGE_KEY, atonements)
+  }, [atonements])
+
+  useEffect(() => {
     saveToStorage(USER_PAYMENT_METHODS_STORAGE_KEY, userPaymentMethods)
   }, [userPaymentMethods])
 
@@ -1372,6 +1386,20 @@ export function AppDataProvider({ children }) {
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
 
   const actions = useMemo(() => ({
+    createAtonement(payload) {
+      const record = createAtonementRecord(payload)
+      setAtonements((prev) => [record, ...prev.filter((item) => item.id !== record.id)])
+      return record
+    },
+    updateAtonementDay(atonementId, dayIndex, completed) {
+      let updated = null
+      setAtonements((prev) => prev.map((record) => {
+        if (record.id !== atonementId) return record
+        updated = updateAtonementDay(record, dayIndex, completed)
+        return updated
+      }))
+      return updated
+    },
     togglePostLike(postId) {
       const post = astrologerPosts.find((entry) => entry.id === postId)
       if (post?.interactionAccess?.like === false) return
@@ -2820,6 +2848,7 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    atonements,
     payoutMethods,
     postLikes,
     savedPostIds,
@@ -2863,6 +2892,7 @@ export function AppDataProvider({ children }) {
     incomingRequests,
     purchasedSlots,
     consultationHistory,
+    atonements,
     payoutMethods,
     postLikes,
     savedPostIds,
