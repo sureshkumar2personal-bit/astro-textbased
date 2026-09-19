@@ -90,6 +90,11 @@ function ConsultationSection({ appointment, consultation, onSave, onOpen, readOn
       {sent && sentAt && (
         <div className="apt-consultation-sent-meta">Sent {formatSentAt(sentAt)}</div>
       )}
+      {consultation?.atonement && (() => {
+        const atonement = consultation.atonement
+        const overdue = atonement.dueAt && !atonement.completedAt && new Date(atonement.dueAt) < new Date()
+        return <div className={`apt-consultation-atonement-status${atonement.completedAt ? ' completed' : overdue ? ' overdue' : ''}`}><strong>{atonement.title}</strong><span>{atonement.completedAt ? `✓ Completed — ${formatSentAt(atonement.completedAt)}` : overdue ? 'Overdue' : 'In Progress'}</span></div>
+      })()}
       <textarea
         className="apt-consultation-notes"
         rows={3}

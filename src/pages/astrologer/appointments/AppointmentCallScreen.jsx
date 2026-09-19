@@ -1,8 +1,9 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState } from 'react'
-import { Check, Download, Eye, FileText, Mic, MicOff, MoreHorizontal, Paperclip, PhoneCall, PhoneOff, Send, Shield, StickyNote, Timer, X } from 'lucide-react'
+import { Check, Download, Eye, FileText, Image as ImageIcon, Link as LinkIcon, Mic, MicOff, MoreHorizontal, Pencil, PhoneCall, PhoneOff, Send, Shield, StickyNote, Timer, Upload, X } from 'lucide-react'
 import { callTypeMeta } from './meta.jsx'
 import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../../utils/appointments.js'
+import { useAuth } from '../../../state/AuthContext.jsx'
 
 function Avatar({ name, size = 96 }) {
   const initials = String(name || '?')
@@ -29,6 +30,7 @@ function formatSentAt(value) {
 }
 
 export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateNotes, onSavePreCallAnalysis }) {
+  const { currentUser } = useAuth()
   const callType = getCallType(appointment.callType || appointment.type)
   const meta = callTypeMeta(callType)
   const Icon = meta.icon
@@ -46,11 +48,23 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   const [preCallSaved, setPreCallSaved] = useState(false)
 
   const [notes, setNotes] = useState('')
-  const [attachment, setAttachment] = useState(null)
+  const [attachments, setAttachments] = useState([])
+  const [linkDraft, setLinkDraft] = useState('')
+  const [linkOpen, setLinkOpen] = useState(false)
+  const [savedPickerOpen, setSavedPickerOpen] = useState(false)
+  const [selectedSavedIds, setSelectedSavedIds] = useState([])
+  const [savedPreview, setSavedPreview] = useState(null)
+  const [savedPreviewDay, setSavedPreviewDay] = useState(1)
+  const [completionPeriod, setCompletionPeriod] = useState('7')
+  const [customCompletionDays, setCustomCompletionDays] = useState('')
   const [followupSaved, setFollowupSaved] = useState(false)
   const [followupSent, setFollowupSent] = useState(false)
   const [followupSentAt, setFollowupSentAt] = useState(null)
-  const fileRef = useRef(null)
+  const [editingSent, setEditingSent] = useState(false)
+  const [confirmResendOpen, setConfirmResendOpen] = useState(false)
+  const [sentSnapshot, setSentSnapshot] = useState(null)
+  const imageRef = useRef(null)
+  const pdfRef = useRef(null)
 
   const [messages, setMessages] = useState([
     { id: 1, from: 'them', text: `Hi, I'm ${appointment.customerName}. Ready when you are.` },
@@ -100,10 +114,54 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
     setDraft('')
   }
 
-  const handleAttach = (event) => {
+  const addFile = (event, kind) => {
     const file = event.target.files && event.target.files[0]
     if (!file) return
-    setAttachment({ name: file.name, type: file.type || 'application/pdf', size: file.size })
+    const attachment = { id: `${Date.now()}-${file.name}`, name: file.name, type: kind, mimeType: file.type, size: file.size }
+    if (kind === 'Image') {
+      const reader = new FileReader()
+      reader.onload = () => setAttachments((items) => [...items, { ...attachment, preview: reader.result }])
+      reader.readAsDataURL(file)
+    } else {
+      setAttachments((items) => [...items, attachment])
+    }
+    event.target.value = ''
+  }
+
+  const savedContent = (() => {
+    if (typeof window === 'undefined') return []
+    try {
+      const userId = currentUser?.id || 'guest'
+      const records = JSON.parse(window.localStorage.getItem(`astroconnect:atonement:${userId}:records`) || '[]')
+      return records.map((record) => {
+        const form = record.form || {}
+        const item = form.attachment || form.content || {}
+        const type = item.type || (item.url ? 'Link' : item.name ? (item.mimeType?.startsWith('image/') ? 'Image' : 'PDF') : 'Text')
+        return { id: record.id, name: item.name || form.name || 'Untitled Atonement', type, date: record.updatedAt || record.createdAt, preview: item.preview || item.dataUrl || '', url: item.url || '', content: form }
+      })
+    } catch {
+      return []
+    }
+  })()
+  const previewForm = savedPreview?.content || {}
+  const previewDays = Math.max(1, Number.parseInt(String(previewForm.templateDuration || previewForm.duration || '').match(/\d+/)?.[0] || '1', 10))
+  const previewRituals = (previewForm.rituals || []).filter((ritual) => ritual.enabled !== false)
+  const previewDayRituals = previewRituals.filter((ritual, index) => index % previewDays === (savedPreviewDay - 1) % previewDays || ['deepam', 'mantra-japam'].includes(ritual.id))
+
+  const addLink = () => {
+    const url = linkDraft.trim()
+    if (!url) return
+    const name = (() => { try { return new URL(url).hostname.replace(/^www\./, '') } catch { return url } })()
+    setAttachments((items) => [...items, { id: `${Date.now()}-${url}`, name, type: 'Link', url }])
+    setLinkDraft('')
+    setLinkOpen(false)
+  }
+
+  const attachSaved = () => {
+    const selected = savedContent.filter((item) => selectedSavedIds.includes(item.id))
+    setAttachments((items) => [...items, ...selected.filter((item) => !items.some((attached) => attached.savedId === item.id)).map((item) => ({ ...item, id: `saved-${item.id}`, savedId: item.id, originalType: item.type, type: 'Saved Content' }))])
+    setSavedPickerOpen(false)
+    setSelectedSavedIds([])
   }
 
   const saveInCallNotes = () => {
@@ -124,9 +182,16 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   const buildPayload = (send) => ({
     appointmentId: appointment.id,
     notes,
-    fileName: attachment?.name || '',
-    fileType: attachment?.type || '',
-    fileSize: attachment?.size || 0,
+    fileName: attachments[0]?.name || '',
+    fileType: attachments[0]?.type || '',
+    fileSize: attachments[0]?.size || 0,
+    attachments,
+    atonement: attachments.some((item) => item.type === 'Saved Content') ? {
+      title: attachments.find((item) => item.type === 'Saved Content')?.name || 'Atonement',
+      content: attachments.find((item) => item.type === 'Saved Content')?.content || {},
+      completionDays: completionPeriod === 'custom' ? Number(customCompletionDays) || 0 : Number(completionPeriod),
+      startAt: send ? new Date().toISOString() : null,
+    } : null,
     send,
   })
 
@@ -135,11 +200,33 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
     setFollowupSaved(true)
   }
 
-  const handleSendFollowup = () => {
+  const commitSendFollowup = () => {
     if (typeof onSaveConsultation === 'function') onSaveConsultation(buildPayload(true))
+    const sentTimestamp = new Date().toISOString()
     setFollowupSent(true)
-    setFollowupSentAt(new Date().toISOString())
+    setFollowupSentAt(sentTimestamp)
     setFollowupSaved(true)
+    setSentSnapshot({ notes, attachments, completionPeriod, customCompletionDays, sentAt: sentTimestamp })
+    setEditingSent(false)
+    setConfirmResendOpen(false)
+  }
+
+  const handleSendFollowup = () => {
+    if (followupSent) {
+      setConfirmResendOpen(true)
+      return
+    }
+    commitSendFollowup()
+  }
+
+  const cancelEditSent = () => {
+    if (sentSnapshot) {
+      setNotes(sentSnapshot.notes)
+      setAttachments(sentSnapshot.attachments)
+      setCompletionPeriod(sentSnapshot.completionPeriod)
+      setCustomCompletionDays(sentSnapshot.customCompletionDays)
+    }
+    setEditingSent(false)
   }
 
   return (
@@ -170,48 +257,127 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
 
           <div className="apt-call-consult follow-up">
             <div className="apt-call-consult-head">
-              <StickyNote size={16} /> Add Consultation?
+              <StickyNote size={16} /> {followupSent && !editingSent ? 'Consultation' : 'Add Consultation?'}
               {followupSent && <span className="apt-consultation-sent-badge"><Check size={12} /> Sent to User</span>}
             </div>
             {followupSent && followupSentAt && (
-              <div className="apt-consultation-sent-meta">Sent {formatSentAt(followupSentAt)}</div>
+              <div className="apt-consultation-sent-meta">Sent {formatSentAt(editingSent ? followupSentAt : sentSnapshot?.sentAt || followupSentAt)}</div>
             )}
-            <textarea
-              className="apt-consultation-notes"
-              rows={3}
-              placeholder="Enter consultation summary..."
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-            />
-            <div className="apt-consultation-actions">
-              {attachment ? (
-                <button type="button" className="apt-consultation-file" onClick={() => fileRef.current && fileRef.current.click()}>
-                  <FileText size={14} /> {attachment.name}
-                </button>
-              ) : (
-                <button type="button" className="apt-consultation-attach" onClick={() => fileRef.current && fileRef.current.click()}>
-                  <Paperclip size={14} /> Attach PDF
-                </button>
-              )}
-              <input ref={fileRef} type="file" accept=".pdf,application/pdf" hidden onChange={handleAttach} />
-              <div className="apt-consultation-action-group">
-                <button type="button" className="btn btn-outline" onClick={handleSaveDraft} disabled={followupSent}>
-                  {followupSaved && !followupSent ? 'Saved' : 'Save Draft'}
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleSendFollowup} disabled={followupSent}>
-                  {followupSent ? 'Sent' : 'Send to User'}
-                </button>
+            {followupSent && !editingSent ? (
+              <div className="apt-consultation-readonly">
+                <div className="apt-consultation-readonly-block">
+                  <label>Consultation Summary</label>
+                  <p>{sentSnapshot?.notes || 'No summary was added.'}</p>
+                </div>
+                {(sentSnapshot?.attachments || []).length > 0 && (
+                  <div className="apt-consultation-attachment-list">
+                    {sentSnapshot.attachments.map((item) => (
+                      <div className="apt-consultation-attachment-card apt-consultation-attachment-card--readonly" key={item.id}>
+                        {item.type === 'Image' && item.preview ? <img src={item.preview} alt="Attachment preview" /> : <span className="apt-consultation-attachment-icon">{item.type === 'Link' ? <LinkIcon size={14} /> : <FileText size={14} />}</span>}
+                        <span><strong>{item.name}</strong><small>{item.type}{item.url ? ` · ${item.url}` : ''}</small></span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {(sentSnapshot?.attachments || []).some((item) => item.type === 'Saved Content') && (() => {
+                  const days = sentSnapshot.completionPeriod === 'custom' ? Number(sentSnapshot.customCompletionDays) : Number(sentSnapshot.completionPeriod)
+                  const start = new Date(sentSnapshot.sentAt || followupSentAt)
+                  const due = new Date(start)
+                  due.setDate(due.getDate() + (days || 0))
+                  return (
+                    <div className="apt-atonement-duration apt-atonement-duration--readonly">
+                      <label>Completion Period</label>
+                      <strong>{sentSnapshot.completionPeriod === 'custom' ? `${days || 0} Days (Custom)` : `${days} Days`}</strong>
+                      <small>Start Date: {start.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} · Due Date: {days ? due.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</small>
+                    </div>
+                  )
+                })()}
+                <div className="apt-consultation-footer">
+                  <div className="apt-consultation-action-group">
+                    <button type="button" className="btn btn-outline" onClick={() => setEditingSent(true)}><Pencil size={14} /> Edit</button>
+                    <button type="button" className="btn btn-primary" onClick={handleEnd}>Close</button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="apt-consultation-notes"
+                  rows={3}
+                  placeholder="Enter consultation summary..."
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                />
+                <div className="apt-consultation-attachments">
+                  <span className="apt-consultation-attachments-label">Attachments</span>
+                  <div className="apt-consultation-attachment-controls">
+                    <button type="button" className="apt-consultation-attach" onClick={() => imageRef.current?.click()}><ImageIcon size={14} /> Upload Image</button>
+                    <button type="button" className="apt-consultation-attach" onClick={() => pdfRef.current?.click()}><Upload size={14} /> Upload PDF</button>
+                    <button type="button" className="apt-consultation-attach" onClick={() => setLinkOpen((open) => !open)}><LinkIcon size={14} /> Add Link</button>
+                    <button type="button" className="apt-consultation-attach" onClick={() => setSavedPickerOpen(true)}><FileText size={14} /> Saved</button>
+                  </div>
+                  <input ref={imageRef} type="file" accept="image/*" hidden onChange={(event) => addFile(event, 'Image')} />
+                  <input ref={pdfRef} type="file" accept=".pdf,application/pdf" hidden onChange={(event) => addFile(event, 'PDF')} />
+                  {linkOpen && <div className="apt-consultation-link-entry"><input type="url" autoFocus placeholder="Paste a URL" value={linkDraft} onChange={(event) => setLinkDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addLink() } }} /><button type="button" className="btn btn-primary btn-sm" onClick={addLink}>Add</button></div>}
+                  {attachments.length > 0 && <div className="apt-consultation-attachment-list">
+                    {attachments.map((item) => <div className="apt-consultation-attachment-card" key={item.id}>
+                      {item.type === 'Image' && item.preview ? <img src={item.preview} alt="Attachment preview" /> : <span className="apt-consultation-attachment-icon">{item.type === 'Link' ? <LinkIcon size={14} /> : <FileText size={14} />}</span>}
+                      <span><strong>{item.name}</strong><small>{item.type}{item.url ? ` · ${item.url}` : ''}</small></span>
+                      <button type="button" aria-label={`Remove ${item.name}`} onClick={() => setAttachments((items) => items.filter((attachment) => attachment.id !== item.id))}><X size={14} /></button>
+                    </div>)}
+                  </div>}
+                  {attachments.some((item) => item.type === 'Saved Content') && <div className="apt-atonement-duration"><label>Completion Period</label><select value={completionPeriod} onChange={(event) => setCompletionPeriod(event.target.value)}><option value="1">1 Day</option><option value="3">3 Days</option><option value="5">5 Days</option><option value="7">7 Days</option><option value="15">15 Days</option><option value="21">21 Days</option><option value="30">30 Days</option><option value="custom">Custom</option></select>{completionPeriod === 'custom' && <input type="number" min="1" placeholder="Days" value={customCompletionDays} onChange={(event) => setCustomCompletionDays(event.target.value)} />}{(() => { const days = completionPeriod === 'custom' ? Number(customCompletionDays) : Number(completionPeriod); const due = new Date(); due.setDate(due.getDate() + (days || 0)); return <small>Start Date: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} · Due Date: {days ? due.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Select days'}</small> })()}</div>}
+                </div>
+                <div className="apt-consultation-footer">
+                  <div className="apt-consultation-action-group">
+                    {!followupSent && (
+                      <button type="button" className="btn btn-outline" onClick={handleSaveDraft}>
+                        {followupSaved ? 'Saved' : 'Save Draft'}
+                      </button>
+                    )}
+                    {followupSent && (
+                      <button type="button" className="btn btn-outline" onClick={cancelEditSent}>
+                        Cancel
+                      </button>
+                    )}
+                    <button type="button" className="btn btn-primary" onClick={handleSendFollowup} disabled={attachments.some((item) => item.type === 'Saved Content') && completionPeriod === 'custom' && !Number(customCompletionDays)}>
+                      {followupSent ? 'Update & Resend' : 'Send to User'}
+                    </button>
+                  </div>
+                  {(followupSaved && !followupSent) && (
+                    <div className="apt-consultation-note">
+                      Consultation saved as a draft. It will appear in the user&rsquo;s profile activity.
+                    </div>
+                  )}
+                  <button type="button" className="btn btn-ghost apt-call-consult-close" onClick={handleEnd}>
+                    Skip / Close
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          {confirmResendOpen && (
+            <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="resend-confirm-title" onClick={() => setConfirmResendOpen(false)}>
+              <div className="modal-card apt-consultation-confirm" onClick={(event) => event.stopPropagation()}>
+                <h3 id="resend-confirm-title">Update sent consultation?</h3>
+                <p>This consultation was already sent to {appointment.customerName}. Sending again will replace what they see and notify them that it was updated.</p>
+                <div className="apt-consultation-action-group apt-consultation-confirm-actions">
+                  <button type="button" className="btn btn-ghost" onClick={() => setConfirmResendOpen(false)}>Cancel</button>
+                  <button type="button" className="btn btn-primary" onClick={commitSendFollowup}>Confirm & Resend</button>
+                </div>
               </div>
             </div>
-            {(followupSaved || followupSent) && (
-              <div className="apt-consultation-note">
-                Consultation {followupSent ? 'sent to the user' : 'saved as a draft'}. It will appear in the user&rsquo;s profile activity.
+          )}
+          {savedPickerOpen && <div className="apt-saved-content-backdrop" role="dialog" aria-modal="true" aria-labelledby="saved-content-title" onClick={() => setSavedPickerOpen(false)}>
+            <div className="apt-saved-content-modal" onClick={(event) => event.stopPropagation()}>
+              <div className="apt-saved-content-head"><div><h3 id="saved-content-title">Saved Atonement Content</h3><p>Select one or more saved items to attach.</p></div><button type="button" className="icon-btn" aria-label="Close saved content" onClick={() => setSavedPickerOpen(false)}><X size={16} /></button></div>
+              <div className="apt-saved-content-list">
+                {savedContent.length ? savedContent.map((item) => <label className="apt-saved-content-item" key={item.id}><input type="checkbox" checked={selectedSavedIds.includes(item.id)} onChange={() => setSelectedSavedIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} /><span className="apt-saved-content-type">{item.type}</span><span><strong>{item.name}</strong><small>{item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Saved content'}</small></span><button type="button" className="apt-saved-view" onClick={(event) => { event.preventDefault(); setSavedPreviewDay(1); setSavedPreview(item) }}>View</button></label>) : <div className="apt-saved-content-empty">No saved Atonement content yet.</div>}
               </div>
-            )}
-            <button type="button" className="btn btn-ghost apt-call-consult-close" onClick={handleEnd}>
-              Skip / Close
-            </button>
-          </div>
+              <div className="apt-saved-content-actions"><button type="button" className="btn btn-ghost" onClick={() => setSavedPickerOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" disabled={!selectedSavedIds.length} onClick={attachSaved}>Attach Selected</button></div>
+            </div>
+          </div>}
+          {savedPreview && <div className="apt-saved-content-backdrop" role="dialog" aria-modal="true" onClick={() => setSavedPreview(null)}><div className="apt-saved-atonement-details" onClick={(event) => event.stopPropagation()}><div className="apt-saved-content-head"><div><span className="atonement-card-badge">{previewForm.sourceDefaultId ? 'Platform Default' : 'My Saved Method'}</span><h3>{savedPreview.name}</h3><strong>{previewDays} Day Atonement</strong><p>{previewForm.purpose || previewForm.shortDescription || previewForm.detailedDescription || 'Saved Atonement details'}</p></div><button type="button" className="icon-btn" aria-label="Close details" onClick={() => setSavedPreview(null)}><X size={16} /></button></div><div className="apt-saved-atonement-body"><div className="apt-saved-atonement-summary"><span>Total Duration: {previewForm.templateDuration || previewForm.duration || `${previewDays} days`}</span><span>{previewRituals.length} Rituals</span></div><section><h4>Rituals Included</h4><div className="apt-saved-ritual-tags">{previewRituals.map((ritual, index) => <span key={ritual.instanceId || index}>{ritual.name}</span>)}</div></section><section><h4>Complete Day-by-Day Procedure</h4><nav className="apt-saved-day-tabs">{Array.from({ length: previewDays }, (_, index) => <button key={index} type="button" className={savedPreviewDay === index + 1 ? 'active' : ''} onClick={() => setSavedPreviewDay(index + 1)}>Day {index + 1}</button>)}</nav><div className="apt-saved-day-detail"><strong>Day {savedPreviewDay}</strong>{previewDayRituals.length ? previewDayRituals.map((ritual, index) => <article key={ritual.instanceId || index}><h5>{ritual.icon || '✦'} {ritual.name}</h5>{ritual.config?.instructions ? <p>{ritual.config.instructions}</p> : <p>Follow the prescribed procedure for this ritual.</p>}{Object.entries(ritual.config || {}).filter(([key, value]) => value && key !== 'instructions').map(([key, value]) => <small key={key}>{key.replace(/([A-Z])/g, ' $1')}: {String(value)}</small>)}</article>) : <p>Follow the saved Atonement instructions for this day.</p>}</div></section>{previewForm.materials?.length > 0 && <section><h4>Materials & Offerings</h4><ul className="apt-saved-materials">{previewForm.materials.map((material, index) => <li key={index}>{material.name} {[material.quantity, material.unit].filter(Boolean).join(' ')}</li>)}</ul></section>}{previewForm.instructions && <section><h4>Additional Instructions</h4>{['before', 'during', 'after'].map((key) => previewForm.instructions[key] && <p key={key}><strong>{key[0].toUpperCase() + key.slice(1)}:</strong> {previewForm.instructions[key]}</p>)}</section>}{savedPreview.preview && <img className="apt-saved-detail-media" src={savedPreview.preview} alt={savedPreview.name} />}</div><div className="apt-saved-content-actions"><button type="button" className="btn btn-ghost" onClick={() => setSavedPreview(null)}>Close</button><button type="button" className="btn btn-primary" onClick={() => { setSelectedSavedIds((ids) => ids.includes(savedPreview.id) ? ids : [...ids, savedPreview.id]); setSavedPreview(null) }}>Attach / Select This Atonement</button></div></div></div>}
         </div>
       ) : (
       <>
