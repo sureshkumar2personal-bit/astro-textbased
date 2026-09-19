@@ -75,7 +75,6 @@ const PROOF_TYPES = [
 ]
 
 const CATEGORIES = ['All', 'Dosha', 'Marriage', 'Career', 'Finance', 'Family', 'General']
-const ADD_CATEGORY_VALUE = '__add-category__'
 
 function readJSON(key, fallback) {
   if (typeof window === 'undefined') return fallback
@@ -477,6 +476,57 @@ function FormField({ label, children, className = '' }) {
     <div className={`atonement-field${className ? ` ${className}` : ''}`}>
       <label className="atonement-field-label">{label}</label>
       {children}
+    </div>
+  )
+}
+
+function CategoryDropdown({ categories, value, error, onChange, onAddCategory, onDeleteCategory }) {
+  const [open, setOpen] = useState(false)
+  const selectedLabel = value || 'Select Category'
+
+  const selectCategory = (name) => {
+    onChange(name)
+    setOpen(false)
+  }
+
+  return (
+    <div className="atonement-category-dropdown">
+      <button
+        type="button"
+        className={`atonement-category-trigger${error ? ' atonement-input-error' : ''}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{selectedLabel}</span>
+        <ChevronDown size={15} className={open ? 'open' : ''} />
+      </button>
+      {open && (
+        <div className="atonement-category-menu" role="listbox" aria-label="Category">
+          <div className="atonement-category-options">
+            {categories.map((category) => (
+              <div className="atonement-category-option" key={category.name} role="option" aria-selected={value === category.name}>
+                <button type="button" className="atonement-category-option-name" onClick={() => selectCategory(category.name)}>
+                  <span>{category.name}</span>
+                  {value === category.name && <Check size={14} />}
+                </button>
+                <button
+                  type="button"
+                  className="atonement-category-delete"
+                  aria-label={`Delete ${category.name} category`}
+                  title="Delete category"
+                  onClick={() => { setOpen(false); onDeleteCategory(category) }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button type="button" className="atonement-category-add" onClick={() => { setOpen(false); onAddCategory() }}>
+            <Plus size={14} /> Add New Category
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -1089,6 +1139,7 @@ function CreateTab({
   setForm,
   categories,
   onAddCategory,
+  onDeleteCategory,
   onSaveDraft,
   onPublish,
   saving,
@@ -1104,6 +1155,7 @@ function CreateTab({
   const [categoryFormOpen, setCategoryFormOpen] = useState(false)
   const [categoryDraft, setCategoryDraft] = useState({ name: '', description: '' })
   const [categoryError, setCategoryError] = useState('')
+  const [categoryPendingDelete, setCategoryPendingDelete] = useState(null)
 
   const update = useCallback((path, value) => {
     setForm((prev) => {
@@ -1289,15 +1341,6 @@ function CreateTab({
     setCategoryFormOpen(false)
   }, [categoryDraft, onAddCategory, update])
 
-  const handleCategoryChange = (event) => {
-    const value = event.target.value
-    if (value === ADD_CATEGORY_VALUE) {
-      setCategoryFormOpen(true)
-      return
-    }
-    update('category', value)
-  }
-
   return (
     <div className="atonement-create">
       <AtonementSection title="Basic Information" number="1" icon={Info}>
@@ -1307,11 +1350,14 @@ function CreateTab({
             {errors.name && <span className="atonement-field-error">{errors.name}</span>}
           </FormField>
           <FormField label="Category">
-            <select className={errors.category ? 'atonement-input-error' : ''} value={form.category} onChange={handleCategoryChange}>
-              <option value="">Select Category</option>
-              {categories.map((category) => <option key={category.name} value={category.name}>{category.name}</option>)}
-              <option value={ADD_CATEGORY_VALUE}>+ Add New Category</option>
-            </select>
+            <CategoryDropdown
+              categories={categories}
+              value={form.category}
+              error={errors.category}
+              onChange={(value) => update('category', value)}
+              onAddCategory={() => setCategoryFormOpen(true)}
+              onDeleteCategory={setCategoryPendingDelete}
+            />
             {errors.category && <span className="atonement-field-error">{errors.category}</span>}
             {categoryFormOpen && (
               <div className="atonement-inline-panel">
@@ -1341,6 +1387,23 @@ function CreateTab({
           </FormField>
         </div>
       </AtonementSection>
+
+      {categoryPendingDelete && (
+        <div className="atonement-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-category-title" onClick={() => setCategoryPendingDelete(null)}>
+          <div className="atonement-confirm-modal" onClick={(event) => event.stopPropagation()}>
+            <h3 id="delete-category-title">Delete “{categoryPendingDelete.name}”?</h3>
+            <p>This category will be permanently removed and can no longer be selected.</p>
+            <div className="atonement-confirm-actions">
+              <button type="button" className="btn btn-ghost" onClick={() => setCategoryPendingDelete(null)}>Cancel</button>
+              <button type="button" className="btn btn-primary atonement-remove-confirm" onClick={() => {
+                onDeleteCategory(categoryPendingDelete)
+                if (form.category === categoryPendingDelete.name) update('category', '')
+                setCategoryPendingDelete(null)
+              }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AtonementSection title={`Atonement Type (${form.rituals.length} ${form.rituals.length === 1 ? 'Component' : 'Components'})`} number="2" icon={Flame} defaultOpen={false} forceOpen={Boolean(errors.rituals)}>
         <p className="atonement-section-desc">Add ritual components for this atonement.</p>
@@ -1824,6 +1887,7 @@ export default function Atonement() {
   const { success, toast } = useToast()
   const userId = currentUser?.id || 'guest'
   const categoryKey = atonementStorageKey(userId, 'categories')
+  const hiddenCategoryKey = atonementStorageKey(userId, 'hidden-categories')
   const draftKey = atonementStorageKey(userId, 'draft')
   const listKey = atonementStorageKey(userId, 'records')
   const [activeTab, setActiveTab] = useState('create')
@@ -1831,6 +1895,7 @@ export default function Atonement() {
   const [form, setForm] = useState(() => normalizeAtonementForm(readJSON(draftKey, createDefaultAtonement())?.form || readJSON(draftKey, createDefaultAtonement())))
   const [source, setSource] = useState('manual')
   const [customCategories, setCustomCategories] = useState(() => uniqueByName(readJSON(categoryKey, [])))
+  const [hiddenCategoryNames, setHiddenCategoryNames] = useState(() => readJSON(hiddenCategoryKey, []))
   const [atonementRecords, setAtonementRecords] = useState(() => readJSON(listKey, []))
   const savedDefaultIdsRef = useRef(new Set(atonementRecords
     .filter((record) => record.kind === 'saved-method' && record.sourceDefaultId)
@@ -1842,7 +1907,7 @@ export default function Atonement() {
   const categories = useMemo(() => uniqueByName([
     ...CATEGORIES.filter((c) => c !== 'All').map((name) => ({ name, description: '', source: 'platform' })),
     ...customCategories,
-  ]), [customCategories])
+  ]).filter((category) => !hiddenCategoryNames.some((name) => String(name).toLowerCase() === category.name.toLowerCase())), [customCategories, hiddenCategoryNames])
 
   const persistRecords = useCallback((records) => {
     setAtonementRecords(records)
@@ -1880,9 +1945,28 @@ export default function Atonement() {
     const next = uniqueByName([...customCategories, { name: cleanName, description: description.trim(), source: 'astrologer' }])
     setCustomCategories(next)
     writeJSON(categoryKey, next)
+    const nextHidden = hiddenCategoryNames.filter((item) => String(item).toLowerCase() !== cleanName.toLowerCase())
+    if (nextHidden.length !== hiddenCategoryNames.length) {
+      setHiddenCategoryNames(nextHidden)
+      writeJSON(hiddenCategoryKey, nextHidden)
+    }
     success('Category added.')
     return { ok: true }
-  }, [categories, categoryKey, customCategories, success])
+  }, [categories, categoryKey, customCategories, hiddenCategoryKey, hiddenCategoryNames, success])
+
+  const deleteCategory = useCallback((category) => {
+    const name = category.name
+    if (category.source === 'platform') {
+      const next = uniqueByName([...hiddenCategoryNames, name]).map((item) => typeof item === 'string' ? item : item.name)
+      setHiddenCategoryNames(next)
+      writeJSON(hiddenCategoryKey, next)
+    } else {
+      const next = customCategories.filter((item) => item.name.toLowerCase() !== name.toLowerCase())
+      setCustomCategories(next)
+      writeJSON(categoryKey, next)
+    }
+    success('Category deleted.')
+  }, [categoryKey, customCategories, hiddenCategoryKey, hiddenCategoryNames, success])
 
   const validateDraft = useCallback(() => {
     const nextErrors = {}
@@ -2033,6 +2117,7 @@ export default function Atonement() {
               setForm={setForm}
               categories={categories}
               onAddCategory={addCategory}
+              onDeleteCategory={deleteCategory}
               onSaveDraft={handleSaveDraft}
               onPublish={handlePublish}
               saving={saving}
