@@ -21,6 +21,7 @@ import RaiseDispute from './pages/RaiseDispute.jsx'
 import DisputeManagement from './pages/DisputeManagement.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import PerksAndBenefits from './pages/PerksAndBenefits.jsx'
+import Atonement from './pages/Atonement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import {
   UserWalletOverview,
@@ -144,6 +145,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/perks-benefits/settings" element={<PerksAndBenefits defaultTab="settings" />} />
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
+        <Route path="/astrologer/atonement" element={<Atonement />} />
         <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/my-account" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />
