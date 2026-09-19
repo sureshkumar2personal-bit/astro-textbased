@@ -3,6 +3,7 @@ export const NOTIFICATION_TABS = [
   { key: 'unread', label: 'Unread' },
   { key: 'follow', label: 'Follow' },
   { key: 'appointments', label: 'Appointments' },
+  { key: 'consultations', label: 'Consultations' },
   { key: 'questions', label: 'Questions' },
   { key: 'pooja', label: 'Pooja' },
   { key: 'live', label: 'Live' },

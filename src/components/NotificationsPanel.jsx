@@ -112,6 +112,11 @@ export default function NotificationsPanel({ notifications, role, onSelect, onMa
                   {!item.read && <span className="h-2 w-2 shrink-0 rounded-full bg-[color:var(--danger)]" />}
                 </span>
                 <span className="block text-sm text-[color:var(--text-secondary)]">{item.detail}</span>
+                {item.category === 'consultations' && (
+                  <span className="mt-1 block text-xs text-[color:var(--text-secondary)]">
+                    {item.consultationTitle}{item.attachmentCount ? ` · ${item.attachmentCount} attachment${item.attachmentCount === 1 ? '' : 's'}${item.attachmentTypes?.length ? ` (${item.attachmentTypes.join(', ')})` : ''}` : ''}
+                  </span>
+                )}
                 <span className="mt-1 block text-xs text-[color:var(--text-secondary)]">{item.time}</span>
               </span>
               <ChevronRight size={16} className="mt-1 shrink-0 text-[color:var(--text-secondary)]" />

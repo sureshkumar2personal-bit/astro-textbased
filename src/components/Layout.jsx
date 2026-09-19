@@ -413,11 +413,37 @@ function IncomingRequestOverlay({ callRequest, chatPreviewRequest, chatRequest, 
   </div>
 }
 
+function UserConsultationDetails({ consultation, history, onSelect, onComplete, onClose }) {
+  if (!consultation) return null
+  const attachments = consultation.attachments || (consultation.fileName ? [{ id: consultation.id, name: consultation.fileName, type: consultation.fileType || 'PDF' }] : [])
+  const sentAt = consultation.sentAt ? new Date(consultation.sentAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Just now'
+  const atonement = consultation.atonement
+  const isOverdue = atonement?.dueAt && !atonement.completedAt && new Date(atonement.dueAt) < new Date()
+  return (
+    <div className="user-consultation-overlay" role="dialog" aria-modal="true" aria-labelledby="user-consultation-title" onClick={onClose}>
+      <section className="user-consultation-modal" onClick={(event) => event.stopPropagation()}>
+        <header><div><span className="profile-kicker">CONSULTATION</span><h2 id="user-consultation-title">Consultation Details</h2></div><button type="button" className="icon-btn" aria-label="Close consultation" onClick={onClose}><X size={17} /></button></header>
+        <div className="user-consultation-meta"><strong>{consultation.astrologerName || 'Your Astrologer'}</strong><span>{sentAt}</span></div>
+        {atonement && <div className={`user-atonement-status${atonement.completedAt ? ' completed' : isOverdue ? ' overdue' : ''}`}><strong>{atonement.title}</strong><span>{atonement.completedAt ? `✓ Completed — ${new Date(atonement.completedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : isOverdue ? 'Overdue' : `Complete within ${atonement.completionDays} days`}</span><small>Started: {atonement.startAt ? new Date(atonement.startAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'} · Due: {atonement.dueAt ? new Date(atonement.dueAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</small></div>}
+        <div className="user-consultation-summary"><span>Summary</span><p>{consultation.notes || 'Your astrologer shared consultation content with you.'}</p></div>
+        {atonement?.content && <div className="user-consultation-summary"><span>Instructions</span><p>{atonement.content.detailedDescription || atonement.content.shortDescription || atonement.content.rituals?.map((ritual, index) => `${index + 1}. ${ritual.name}${ritual.config?.instructions ? ` — ${ritual.config.instructions}` : ''}`).join('\n') || 'Follow the guidance shared by your astrologer.'}</p></div>}
+        <div className="user-consultation-files"><span>Attachments ({attachments.length})</span>{attachments.length ? attachments.map((item) => <div className="user-consultation-file" key={item.id || item.name}>
+          {item.type === 'Image' && item.preview ? <img src={item.preview} alt={item.name} /> : <FileText size={18} />}
+          <div><strong>{item.name}</strong><small>{item.type || 'File'}{item.type === 'Saved Content' && item.content?.shortDescription ? ` · ${item.content.shortDescription}` : ''}</small></div>
+          {item.type === 'Link' && item.url ? <a href={item.url} target="_blank" rel="noreferrer">Open</a> : item.preview ? <a href={item.preview} target="_blank" rel="noreferrer">View</a> : <button type="button" onClick={() => window.alert(`Open ${item.name}`)}>Open</button>}
+        </div>) : <p className="muted">No attachments were included.</p>}</div>
+        {history.length > 1 && <div className="user-consultation-history"><span>Consultation History</span>{history.map((item) => <button type="button" key={item.id} className={item.id === consultation.id ? 'active' : ''} onClick={() => onSelect(item.id)}>{item.notes || 'Consultation'}<small>{item.sentAt ? new Date(item.sentAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}</small></button>)}</div>}
+        {atonement && !atonement.completedAt && <button type="button" className="btn btn-primary user-atonement-complete" onClick={() => { if (window.confirm('Mark this Atonement as completed?')) onComplete(consultation.id) }}>✓ Mark as Completed</button>}
+      </section>
+    </div>
+  )
+}
+
 export default function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, logout } = useAuth()
-  const { notifications, actions, astrologerServices, incomingRequests } = useAppData()
+  const { notifications, consultations, actions, astrologerServices, incomingRequests } = useAppData()
   const role = currentUser?.role || ROLES.ASTROLOGER
   const basePath = getRoleBasePath(role)
   const routes = {
@@ -445,12 +471,14 @@ export default function Layout() {
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
   const showRewardBadge = rewardStatus?.state === 'available'
   const rewardCount = role === ROLES.USER ? actions.getAvailableDiscountQuestions(currentUser?.id).length : 0
-  const visibleNotifications = notifications.filter(
-    (item) => !item.audience || item.audience === 'all' || item.audience === role,
-  )
+  const visibleNotifications = notifications.filter((item) => (
+    (!item.audience || item.audience === 'all' || item.audience === role)
+    && (!item.userId || item.userId === currentUser?.id)
+  ))
   const unreadNotificationCount = visibleNotifications.filter((item) => !item.read).length
   const [panel, setPanel] = useState(null)
   const [activeChatRequestId, setActiveChatRequestId] = useState(null)
+  const [consultationDetailsId, setConsultationDetailsId] = useState(null)
   const actionRef = useRef(null)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const pendingRequests = incomingRequests.filter((request) => request.astrologerId === astrologerId && request.status === 'pending')
@@ -591,6 +619,11 @@ export default function Layout() {
                       setPanel(null)
                       return
                     }
+                    if (item.consultationId) {
+                      setConsultationDetailsId(item.consultationId)
+                      setPanel(null)
+                      return
+                    }
                     if (item.route) {
                       navigate(item.route)
                     }
@@ -602,6 +635,14 @@ export default function Layout() {
 
           </div>
         </header>
+
+        {consultationDetailsId && <UserConsultationDetails
+          consultation={consultations.find((item) => item.id === consultationDetailsId)}
+          history={consultations.filter((item) => item.userId === currentUser?.id && item.sent)}
+          onSelect={setConsultationDetailsId}
+          onComplete={actions.completeAtonement}
+          onClose={() => setConsultationDetailsId(null)}
+        />}
 
         <div className="page-content">
           <AnimatePresence mode="wait">

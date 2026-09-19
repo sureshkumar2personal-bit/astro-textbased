@@ -786,6 +786,9 @@ export default function AppointmentCalendarTab() {
           onCompleteCall={
             handleCompleteCall
           }
+          onSavePrivateNotes={(id, notes) => actions.savePrivateNotes(id, notes)}
+          onSavePreCallAnalysis={(id, notes) => actions.savePreCallAnalysis(id, notes)}
+          onSaveConsultation={(payload) => actions.saveConsultation(payload)}
         />
       )}
 

@@ -2207,23 +2207,35 @@ export function AppDataProvider({ children }) {
       ])
       return target
     },
-    saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, send }) {
+    saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, attachments, atonement, send }) {
       if (!appointmentId) return null
       const appointment = appointments.find((item) => item.id === appointmentId)
       const existing = consultations.find((consultation) => consultation.appointmentId === appointmentId)
+      const wasAlreadySent = Boolean(existing?.sent)
+      const astrologerId = appointment?.astrologerId || 'astrologer-demo'
+      const astrologerName = mockAstrologers.find((item) => item.id === astrologerId)?.name || 'Your astrologer'
       const record = {
         id: existing?.id || `cons-${appointmentId}-${Date.now()}`,
         appointmentId,
-        astrologerId: appointment?.astrologerId || 'astrologer-demo',
+        astrologerId,
+        astrologerName,
         userId: appointment?.userId || null,
         customerName: appointment?.customerName || null,
         notes: notes ?? '',
         fileName: fileName ?? '',
         fileType: fileType ?? '',
         fileSize: fileSize ?? '',
-        sent: Boolean(send),
+        attachments: attachments ?? existing?.attachments ?? [],
+        atonement: atonement ? {
+          ...atonement,
+          dueAt: atonement.startAt && atonement.completionDays ? new Date(new Date(atonement.startAt).getTime() + atonement.completionDays * 86400000).toISOString() : null,
+          status: existing?.atonement?.completedAt ? 'Completed' : 'Pending',
+          completedAt: existing?.atonement?.completedAt || null,
+        } : existing?.atonement || null,
+        sent: send ? true : Boolean(existing?.sent),
         sentAt: send ? new Date().toISOString() : existing?.sentAt || null,
-        sentToUser: Boolean(send),
+        sentToUser: send ? true : Boolean(existing?.sentToUser),
+        updatedAt: new Date().toISOString(),
       }
       setConsultations((prev) => {
         const idx = prev.findIndex((consultation) => consultation.appointmentId === appointmentId)
@@ -2233,6 +2245,25 @@ export function AppDataProvider({ children }) {
         return next
       })
       if (send) {
+        const astrologer = mockAstrologers.find((item) => item.id === record.astrologerId)
+        const attachmentTypes = [...new Set((record.attachments || []).map((item) => item.type || 'File'))]
+        setNotifications((prev) => [{
+          id: `consultation-${record.id}-${Date.now()}`,
+          title: wasAlreadySent ? 'Consultation Updated' : 'New Consultation Received',
+          detail: wasAlreadySent
+            ? `${astrologer?.name || 'Your astrologer'} updated your consultation.`
+            : `You have received a consultation from ${astrologer?.name || 'your astrologer'}.`,
+          time: 'Just now',
+          audience: ROLES.USER,
+          userId: record.userId,
+          category: 'consultations',
+          consultationId: record.id,
+          consultationTitle: (record.notes || 'Consultation summary').slice(0, 90),
+          consultationSentAt: record.sentAt,
+          attachmentCount: (record.attachments || []).length,
+          attachmentTypes,
+          read: false,
+        }, ...prev])
         this.updateAppointment(appointmentId, {
           consultationFollowUpRequired: false,
           consultationSentAt: record.sentAt,
@@ -2252,6 +2283,12 @@ export function AppDataProvider({ children }) {
         consultationFollowUpRequired: false,
         consultationSentAt: new Date().toISOString(),
       })
+    },
+    completeAtonement(consultationId) {
+      const completedAt = new Date().toISOString()
+      setConsultations((prev) => prev.map((consultation) => consultation.id === consultationId && consultation.atonement
+        ? { ...consultation, atonement: { ...consultation.atonement, status: 'Completed', completedAt } }
+        : consultation))
     },
     updateAppointment(appointmentId, patch = {}) {
       setAppointments((prev) =>
