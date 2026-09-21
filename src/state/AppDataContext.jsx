@@ -8,6 +8,7 @@ import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrol
 import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
 import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
+import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
 import { useAuth } from './AuthContext.jsx'
 
 const AppDataContext = createContext(null)
@@ -786,6 +787,9 @@ export function normalizeLiveSession(session) {
   const normalizedAccess = (values) => Array.isArray(values)
     ? Array.from(new Set(values.filter((value) => validAccess.includes(value))))
     : []
+  const startedAt = session.startedAt || null
+  const endedAt = session.endedAt || null
+  const expired = session.status === 'live' && hasLiveSessionExpired({ startedAt })
   return {
     id: session.id || crypto.randomUUID(),
     astrologerId: session.astrologerId || 'astrologer-demo',
@@ -813,9 +817,9 @@ export function normalizeLiveSession(session) {
     earnings: toNonNegativeNumber(session.earnings),
     scheduledStartAt: session.scheduledStartAt || now,
     scheduledEndAt: session.scheduledEndAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    status: ['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming',
-    startedAt: session.startedAt || null,
-    endedAt: session.endedAt || null,
+    status: expired ? 'past' : (['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming'),
+    startedAt,
+    endedAt: expired ? new Date(getLiveSessionExpiry({ startedAt })).toISOString() : endedAt,
     createdAt: session.createdAt || now,
   }
 }
@@ -1303,6 +1307,30 @@ export function AppDataProvider({ children }) {
   }, [])
 
   useEffect(() => {
+    const closeExpiredLiveSessions = () => {
+      const now = Date.now()
+      setAstrologerLiveSessions((prev) => {
+        let changed = false
+        const next = prev.map((session) => {
+          if (session.status !== 'live' || !hasLiveSessionExpired(session, now)) return session
+          changed = true
+          return {
+            ...session,
+            status: 'past',
+            endedAt: new Date(now).toISOString(),
+            scheduledEndAt: new Date(now).toISOString(),
+          }
+        })
+        return changed ? next : prev
+      })
+    }
+
+    closeExpiredLiveSessions()
+    const timer = window.setInterval(closeExpiredLiveSessions, 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
     saveToStorage(QUESTIONS_STORAGE_KEY, questions)
   }, [questions])
 
@@ -1552,8 +1580,10 @@ export function AppDataProvider({ children }) {
       setAstrologerLiveSessions((prev) => prev.filter((session) => session.id !== sessionId))
     },
     startLiveSession(sessionId) {
+      const startedAt = new Date()
+      const scheduledEndAt = new Date(startedAt.getTime() + LIVE_SESSION_MAX_DURATION_MS).toISOString()
       setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
-        ? { ...session, status: 'live', startedAt: new Date().toISOString(), endedAt: null }
+        ? { ...session, status: 'live', startedAt: startedAt.toISOString(), endedAt: null, scheduledEndAt }
         : session))
     },
     endLiveSession(sessionId) {
