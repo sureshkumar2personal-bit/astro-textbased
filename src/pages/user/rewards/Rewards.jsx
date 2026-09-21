@@ -764,7 +764,7 @@ export default function RewardsPerks() {
     <div className="rewards-center">
       <PageHeader
         eyebrow="Member Rewards"
-        title="Rewards Center"
+        title="Perks & Benefits"
         subtitle="Your subscriber perks, discount questions, and savings — all in one place."
       />
 
@@ -836,6 +836,5 @@ export default function RewardsPerks() {
     </div>
   )
 }
-
 
 

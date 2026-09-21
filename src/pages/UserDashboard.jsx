@@ -14,14 +14,22 @@ import {
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils/memberCommunicationActivity.js'
 import { getConsultationAstrologers } from '../data/consultationAstrologers.js'
 import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
+function formatActivityDate(value) {
+  if (!value) return 'Date unavailable'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Date unavailable'
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export default function UserDashboard() {
   const { currentUser } = useAuth()
-  const { questions, appointments, astrologerLiveSessions, followedAstrologerIds, subscriptions, actions } = useAppData()
+  const { questions, consultationHistory, appointments, userWallet, astrologerLiveSessions, followedAstrologerIds, subscriptions, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
 
@@ -37,7 +45,12 @@ export default function UserDashboard() {
     actions.renewMonthlyDiscountQuestions(currentUser.id)
   }, [currentUser?.id, actions])
 
-  const recentQuestions = questions
+  const recentActivities = useMemo(
+    () => getUserCommunicationActivity({ questions, consultationHistory, appointments, walletTransactions: userWallet?.transactions, userId: currentUser?.id })
+      .filter((activity) => !getHiddenUserActivityIds(currentUser?.id).includes(activity.id))
+      .slice(0, 3),
+    [appointments, consultationHistory, currentUser?.id, questions, userWallet?.transactions],
+  )
 
   const upcomingAppointments = useMemo(
     () => appointments.filter((apt) => apt.status === 'Confirmed' || apt.status === 'Pending'),
@@ -196,32 +209,39 @@ export default function UserDashboard() {
         <div>
           <div className="section-title"><Clock3 size={20} />Recent Activity</div>
           <div className="activity-list">
-            {recentQuestions.slice(0, 3).map((question) => (
+            {recentActivities.map((activity) => {
+              const questionActivity = activity.type === 'question' || activity.type === 'answer' || activity.type === 'dispute'
+              const activityTarget = questionActivity
+                ? `${routes.askQuestion}?viewQuestionId=${encodeURIComponent(activity.metadata)}`
+                : routes.activity
+              return (
               <div
-                key={question.id}
+                key={activity.id}
                 className="activity-row"
                 role="button"
                 tabIndex={0}
                 style={{ cursor: 'pointer' }}
-                title={`View question ${question.id}`}
-                onClick={() => navigate(`${routes.askQuestion}?viewQuestionId=${encodeURIComponent(question.id)}`)}
+                title={questionActivity ? 'View question activity' : 'View all activity'}
+                onClick={() => navigate(activityTarget)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    navigate(`${routes.askQuestion}?viewQuestionId=${encodeURIComponent(question.id)}`)
+                    navigate(activityTarget)
                   }
                 }}
               >
                 <div>
-                  <div className="activity-id">{question.id}</div>
-                  <div className="activity-meta">{question.category} · {question.type}</div>
+                  <div className="activity-id">{activity.title}</div>
+                  <div className="activity-meta">{activity.summary || 'Activity recorded.'}</div>
+                  <div className="activity-meta">{formatActivityDate(activity.occurredAt)}</div>
                 </div>
-                <StatusBadge label={question.status} />
+                <StatusBadge label={activity.status || 'Recorded'} />
               </div>
-            ))}
+              )
+            })}
           </div>
-          {recentQuestions.length > 3 && (
-            <Link to={routes.trackQuestions} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
+          {recentActivities.length > 0 && (
+            <Link to={routes.activity} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
               See More →
             </Link>
           )}
