@@ -1052,6 +1052,11 @@ export function AstrologerLiveSessionRoom() {
     return () => window.clearInterval(timerId)
   }, [startedAt, setEarnings, setTimer, setViewerCount])
 
+  useEffect(() => {
+    if (existingSession?.status !== 'past' || !flowSessionId) return
+    endBroadcast()
+  }, [endBroadcast, existingSession?.status, flowSessionId])
+
   if (!flowSessionId && !existingSession) {
     return <Navigate to={routes.liveSessionSetup} replace />
   }
