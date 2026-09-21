@@ -78,8 +78,6 @@ function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onResc
 function AddedCompactAppointmentCard({ appointment, onSelect }) {
   if (!appointment) return null
   const window = resolveAppointmentWindow(appointment)
-  const statusLabel = getAppointmentDisplayStatus(appointment)
-  const amount = appointment.amount ?? appointment.price ?? 0
   const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
 
   return (
@@ -89,20 +87,14 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
           {avatar ? <img className="added-compact-appointment-card__avatar" src={avatar} alt={`${appointment.astrologer || 'Astrologer'} profile`} /> : <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>}
-          <div><strong>{appointment.astrologer || 'Astrologer'}</strong><span>{appointment.specialization || 'Vedic Astrology'}</span></div>
+          <div><strong>{appointment.astrologer || 'Astrologer'}</strong></div>
         </div>
-        <StatusBadge label={statusLabel} />
+        <strong className="added-compact-appointment-card__primary-id">{appointment.orderId || appointment.id}</strong>
       </div>
       <div className="added-compact-appointment-card__meta">
-        <span><CalendarDays size={13} /><small>Date</small><strong>{formatDisplayDate(appointment.dateIso, true)}</strong></span>
         <span><Clock3 size={13} /><small>Time</small><strong>{formatTimeRange(window.startMin, window.endMin)}</strong></span>
-        <span><PhoneCall size={13} /><small>Mode</small><strong>{appointment.type || 'Audio Call'}</strong></span>
-        <span><Clock3 size={13} /><small>Duration</small><strong>{appointment.duration || `${window.endMin - window.startMin} Minutes`}</strong></span>
-      </div>
-      <div className="added-compact-appointment-card__footer">
-        <div><small>Amount</small><strong>₹{Number(amount).toLocaleString('en-IN')}</strong></div>
-        <div><small>Appointment ID</small><strong>{appointment.orderId || appointment.id}</strong></div>
-        <div><small>Status</small><strong>{statusLabel}</strong></div>
+        <span><PhoneCall size={13} /><small>Type</small><strong>Call</strong></span>
+        <span><CalendarDays size={13} /><small>Astrology</small><strong>{appointment.specialization || 'Vedic Astrology'}</strong></span>
       </div>
       <div className="added-compact-appointment-card__actions">
         <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onSelect?.(appointment) }}>View Details</button>
@@ -218,10 +210,11 @@ export default function AppointmentDetails() {
       </div>
       <Link className="btn btn-primary appointment-history-recommendation__action" to="/user/appointments/book/acharya-meena">Continue Consultation →</Link>
     </section>
-    <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div><div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div></div>
+    <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div></div>
     <div className="apt-main apt-main--history">
-      <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} /></div>
+      <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} variant="user" /></div>
       <aside className="apt-side-col apt-history-day-col">
+        <div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div>
         <div className="apt-side-head"><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) : 'Appointments'}</span></div>
         <div className="user-appointment-list">
           {dayAppointments.length ? (

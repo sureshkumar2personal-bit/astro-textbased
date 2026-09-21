@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   startOfMonth,
   startOfWeek,
@@ -23,7 +23,8 @@ function dayBreakdown(appointments, date) {
   return { total: dayApps.length, booked, pending, rescheduled, completed, cancelled, other }
 }
 
-export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate }) {
+export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate, variant = 'default' }) {
+  const isUserCalendar = variant === 'user'
   const monthStart = startOfMonth(rangeStart)
   const gridStart = startOfWeek(monthStart, 0)
   const weeks = useMemo(() => {
@@ -78,6 +79,7 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     <div className="apt-scheduling-calendar apt-scheduling-calendar--history">
       <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
+          {isUserCalendar && <button type="button" className="apt-history-user-nav" aria-label="Previous month" onClick={() => onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}><ChevronLeft size={17} /></button>}
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
           </button>
@@ -124,6 +126,7 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
           )}
         </div>
         <div className="apt-history-calendar-legend" aria-label="Appointment status legend">
+          {isUserCalendar && <button type="button" className="apt-history-user-nav" aria-label="Next month" onClick={() => onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}><ChevronRight size={17} /></button>}
           <span className="is-pending">Upcoming</span>
           <span className="is-completed">Completed</span>
           <span className="is-cancelled">Cancelled</span>
@@ -170,15 +173,27 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
                     }}
                   >
                     <div className="apt-month-day">{cell.getDate()}</div>
-                    {breakdown.total > 0 && (
-                      <div className="apt-history-count" aria-hidden="true">{breakdown.total}</div>
+                    {isUserCalendar ? (
+                      <div className="apt-history-cell-side">
+                        {breakdown.total > 0 && <div className="apt-history-count" aria-label={`${breakdown.total} appointments`}>{breakdown.total}</div>}
+                        <div className="apt-history-cell-status">
+                          {breakdown.pending.length > 0 && <span className="is-pending" title={`${breakdown.pending.length} upcoming appointment${breakdown.pending.length === 1 ? '' : 's'}`} aria-label={`${breakdown.pending.length} upcoming appointments`} />}
+                          {breakdown.completed.length > 0 && <span className="is-completed" title={`${breakdown.completed.length} completed appointment${breakdown.completed.length === 1 ? '' : 's'}`} aria-label={`${breakdown.completed.length} completed appointments`} />}
+                          {breakdown.cancelled.length > 0 && <span className="is-cancelled" title={`${breakdown.cancelled.length} cancelled appointment${breakdown.cancelled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.cancelled.length} cancelled appointments`} />}
+                          {breakdown.rescheduled.length > 0 && <span className="is-rescheduled" title={`${breakdown.rescheduled.length} rescheduled appointment${breakdown.rescheduled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.rescheduled.length} rescheduled appointments`} />}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {breakdown.total > 0 && <div className="apt-history-count" aria-hidden="true">{breakdown.total}</div>}
+                        <div className="apt-history-cell-status" aria-hidden="true">
+                          {breakdown.pending.length > 0 && <span className="is-pending">{breakdown.pending.length}</span>}
+                          {breakdown.completed.length > 0 && <span className="is-completed">{breakdown.completed.length}</span>}
+                          {breakdown.cancelled.length > 0 && <span className="is-cancelled">{breakdown.cancelled.length}</span>}
+                          {breakdown.rescheduled.length > 0 && <span className="is-rescheduled">{breakdown.rescheduled.length}</span>}
+                        </div>
+                      </>
                     )}
-                    <div className="apt-history-cell-status" aria-hidden="true">
-                      {breakdown.pending.length > 0 && <span className="is-pending">{breakdown.pending.length}</span>}
-                      {breakdown.completed.length > 0 && <span className="is-completed">{breakdown.completed.length}</span>}
-                      {breakdown.cancelled.length > 0 && <span className="is-cancelled">{breakdown.cancelled.length}</span>}
-                      {breakdown.rescheduled.length > 0 && <span className="is-rescheduled">{breakdown.rescheduled.length}</span>}
-                    </div>
                   </div>
                 )
               })}

@@ -2145,6 +2145,7 @@ export function AppDataProvider({ children }) {
         paymentStatus: payload.paymentStatus || 'Paid',
         paymentMethod: payload.paymentMethod || 'Wallet',
         transactionId: payload.transactionId || null,
+        bookedAt: payload.bookedAt || new Date().toISOString(),
         bookingDate: payload.bookingDate || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         questionDetails: payload.questionDetails || null,
         horoscope: payload.horoscope || null,
