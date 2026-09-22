@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext.jsx'
+import { recordUserActivity } from '../utils/userActivityLog.js'
 
 const BIRTH_DETAILS_KEY = 'astroconnect-user-birth-details'
 
@@ -33,6 +34,7 @@ export default function ChatBirthDetails() {
     }
     const saved = { ...details, dob: details.dateOfBirth, time: details.timeOfBirth, place: details.placeOfBirth }
     localStorage.setItem(BIRTH_DETAILS_KEY, JSON.stringify(saved))
+    recordUserActivity({ userId: currentUser?.id, type: 'horoscope', title: 'Horoscope details updated', summary: 'Your birth details were saved for consultation.', metadata: [details.dateOfBirth, details.timeOfBirth, details.placeOfBirth].filter(Boolean).join(' · ') })
     navigate(`/chat-booking/${astrologerId}`, { state: { birthDetails: details } })
   }
 
