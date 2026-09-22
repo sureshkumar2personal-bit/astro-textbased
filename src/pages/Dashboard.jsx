@@ -32,10 +32,13 @@ const showcaseCampaigns = [
   { id: 'planetary-guidance', name: 'Planetary Guidance', category: 'General Astrology', status: 'Paused', sold: 10, target: 50, Icon: Orbit, thumb: 'adash-thumb--planetary' },
 ]
 
-const recentQuestions = [
-  { id: 'QTN-2026-000124', user: 'Kannan', category: 'Health', type: 'General', status: 'Pending', raised: '22-Jul-2026 01:15 PM' },
-  { id: 'QTN-2026-000123', user: 'Priya V.', category: 'Health', type: 'Personal', status: 'In Progress', raised: '21-Jul-2026 10:30 AM' },
-  { id: 'QTN-2026-001245', user: 'Priya V.', category: 'Health', type: 'Personal', status: 'Disputed', raised: '21-Jul-2026 10:30 AM' },
+const recentActivities = [
+  { id: 'QTN-2026-000124', type: 'Question', icon: MessageCircle, user: 'Kannan', detail: 'Health', status: 'Pending', date: '22-Jul-2026 01:15 PM', actionLabel: 'Open' },
+  { id: 'APT-2026-000045', type: 'Appointment', icon: CalendarDays, user: 'Sneha', detail: 'Marriage', status: 'Booked', date: '22-Jul-2026 11:00 AM', actionLabel: 'View' },
+  { id: 'LIV-2026-000012', type: 'Live Session', icon: Radio, user: '—', detail: 'Daily Guidance', status: 'Completed', date: '21-Jul-2026 08:00 PM', actionLabel: 'View' },
+  { id: 'WAL-2026-000089', type: 'Transaction', icon: Wallet, user: 'Priya V.', detail: '₹375 earned', status: 'Credited', date: '21-Jul-2026 05:30 PM', actionLabel: 'View' },
+  { id: 'QTN-2026-000123', type: 'Question', icon: MessageCircle, user: 'Priya V.', detail: 'Health', status: 'In Progress', date: '21-Jul-2026 10:30 AM', actionLabel: 'View' },
+  { id: 'CAM-2026-000001', type: 'Campaign', icon: Megaphone, user: '—', detail: 'Health & Wellness', status: 'Active', date: '20-Jul-2026 09:00 AM', actionLabel: 'Manage' },
 ]
 
 export default function Dashboard() {
@@ -209,49 +212,49 @@ export default function Dashboard() {
       </Section>
 
       <Section
-        title="Recent Questions"
+        title="My Activity"
         icon={MessageCircleQuestion}
-        subtitle="Latest questions raised by users"
+        subtitle="Your recent activity across questions, appointments, live sessions, and transactions"
       >
         <div className="adash-questions">
           <table>
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Type</th>
                 <th>User</th>
-                <th>Category</th>
-                <th className="adash-q-col-type">Type</th>
+                <th>Detail</th>
                 <th>Status</th>
-                <th className="adash-q-col-time">Raised</th>
+                <th className="adash-q-col-time">Date</th>
                 <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
-              {recentQuestions.map((question) => {
-                const action = question.status === 'Disputed'
-                  ? { label: 'Resolve', to: `${routes.disputeManagement}?questionId=${encodeURIComponent(question.id)}` }
-                  : { label: question.status === 'Pending' ? 'Open' : 'View', to: `${routes.answerQuestion}?questionId=${encodeURIComponent(question.id)}` }
-                return (
-                  <tr key={question.id}>
-                    <td className="adash-q-id">{question.id}</td>
-                    <td>{question.user}</td>
-                    <td>{question.category}</td>
-                    <td className="adash-q-col-type">{question.type}</td>
-                    <td><StatusBadge label={question.status} className="!px-2 !py-0.5 !text-[11px]" /></td>
-                    <td className="muted adash-q-col-time" style={{ fontSize: 12.5, whiteSpace: 'nowrap' }}>{question.raised}</td>
-                    <td>
-                      <div className="adash-q-actions">
-                        <button type="button" className="adash-q-btn" onClick={() => navigate(action.to)}>{action.label}</button>
-                        <button type="button" className="adash-q-more" aria-label={`More options for ${question.id}`}><MoreVertical size={15} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
+              {recentActivities.map((activity) => (
+                <tr key={activity.id}>
+                  <td className="adash-q-id">{activity.id}</td>
+                  <td>
+                    <span className="flex items-center gap-1.5">
+                      <activity.icon size={14} className="text-[color:var(--primary)]" />
+                      {activity.type}
+                    </span>
+                  </td>
+                  <td>{activity.user}</td>
+                  <td>{activity.detail}</td>
+                  <td><StatusBadge label={activity.status} className="!px-2 !py-0.5 !text-[11px]" /></td>
+                  <td className="muted adash-q-col-time" style={{ fontSize: 12.5, whiteSpace: 'nowrap' }}>{activity.date}</td>
+                  <td>
+                    <div className="adash-q-actions">
+                      <button type="button" className="adash-q-btn">{activity.actionLabel}</button>
+                      <button type="button" className="adash-q-more" aria-label={`More options for ${activity.id}`}><MoreVertical size={15} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
-          <Link to={routes.answerQuestion} className="adash-q-more-link">
-            View More Questions →
+          <Link to={routes.activity} className="adash-q-more-link">
+            View All Activity →
           </Link>
         </div>
       </Section>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astro Connect — Design Assistant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #F5F2F9; --bg-solid: #F3EFF9; --primary: #5B21B6; --primary-dark: #3B0764;
+    --primary-light: #7C3AED; --secondary: #7C3AED; --accent: #FF8A4C; --accent-dark: #F2662A;
+    --text-primary: #251B35; --text-secondary: #685F73; --border: #DED6E8;
+    --success: #10B981; --success-bg: #ECFDF5; --warning: #F59E0B; --warning-bg: #FFFBEB;
+    --danger: #EF4444; --danger-bg: #FEF2F2; --primary-bg: #EEE8F8; --secondary-bg: #E7DDF5;
+    --sky: #0284C7; --sky-bg: #EFF6FF; --neutral-bg: #EEEAF4;
+    --sidebar-from: #281354; --sidebar-to: #472183;
+    --violet-50: #F5F3FF; --violet-100: #EDE9FE; --violet-200: #DDD6FE; --violet-300: #C4B5FD;
+    --violet-400: #A78BFA; --violet-500: #8B5CF6; --violet-600: #6D28D9; --violet-700: #5B21B6; --violet-900: #281354;
+    --gold-100: #FFE9D9; --gold-400: #FFAB73; --gold-500: #FF8A4C; --gold-600: #F2662A;
+    --green-100: #ECFDF5; --green-500: #10B981; --green-600: #059669;
+    --amber-100: #FFFBEB; --amber-500: #F59E0B; --amber-600: #B45309;
+    --red-100: #FEF2F2; --red-500: #EF4444; --red-600: #DC2626;
+    --coral-100: #FFE9D9; --coral-500: #FF8A4C; --coral-600: #F2662A;
+    --ink: #111827; --body: #374151; --muted: #6B7280; --line: #E5E7EB;
+    --paper: rgba(255,255,255,0.9); --surface: rgba(255,255,255,0.88);
+    --surface-strong: #FFFFFF; --surface-soft: #F9FAFB;
+    --surface-border: rgba(229,231,235,0.72); --surface-overlay: rgba(255,255,255,0.98);
+    --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04),0 6px 16px rgba(15,23,42,0.05);
+    --shadow-md: 0 12px 32px rgba(15,23,42,0.08);
+    --shadow-lg: 0 24px 56px rgba(15,23,42,0.14);
+    --shadow-card: 0 1px 2px rgba(15,23,42,0.03);
+    --shadow-float: 0 16px 40px rgba(15,23,42,0.07);
+    --divider: rgba(15,23,42,0.06);
+    --radius-xs: 8px; --radius-s: 14px; --radius-m: 18px; --radius-l: 24px; --radius-xl: 28px; --radius-pill: 999px;
+    --sidebar-w: 288px; --ease-premium: cubic-bezier(0.16,1,0.3,1);
+    --space-1: 8px; --space-2: 16px; --space-3: 24px; --space-4: 32px; --space-5: 40px; --space-6: 48px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--body);
+    min-height: 100vh; display: grid; grid-template-columns: 300px 1fr; gap: 0;
+  }
+
+  .design-panel {
+    background: var(--surface-strong); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; height: 100vh; overflow-y: auto;
+  }
+  .design-panel-header {
+    padding: 16px 16px 12px; border-bottom: 1px solid var(--divider);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff;
+  }
+  .design-panel-header h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 800;
+    letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px;
+  }
+  .design-panel-header h1 span {
+    display: inline-grid; place-items: center; width: 24px; height: 24px;
+    border-radius: 6px; background: rgba(255,255,255,0.2); font-size: 12px;
+  }
+  .design-panel-header p { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+
+  .token-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--divider);
+    padding: 0 8px; background: var(--surface-soft); overflow-x: auto;
+  }
+  .token-tab {
+    padding: 10px 8px; border: 0; background: transparent; font: inherit;
+    font-size: 10px; font-weight: 600; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.18s ease; white-space: nowrap;
+  }
+  .token-tab:hover { color: var(--body); }
+  .token-tab.is-active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .token-list { padding: 8px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .token-group-label {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); padding: 10px 6px 4px;
+  }
+  .token-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+    border-radius: var(--radius-xs); cursor: pointer; transition: all 0.15s ease;
+    border: 1px solid transparent; position: relative;
+  }
+  .token-row:hover { background: var(--surface-soft); border-color: var(--border); }
+  .token-row.is-selected { background: var(--primary-bg); border-color: var(--primary); box-shadow: 0 0 0 2px rgba(91,33,182,0.1); }
+  .token-row.is-changed::after {
+    content: ''; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  }
+  .token-swatch {
+    width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--border);
+    flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .token-info { flex: 1; min-width: 0; }
+  .token-name { font-size: 10px; font-weight: 600; color: var(--body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .token-value { font-size: 9px; color: var(--muted); font-family: 'SF Mono','Fira Code',monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .token-color-input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; inset: 0; }
+
+  .target-display {
+    padding: 10px 12px; background: var(--surface-soft); border-top: 1px solid var(--divider);
+    display: flex; align-items: center; gap: 8px; min-height: 42px;
+  }
+  .target-display .label { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .target-chip {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px;
+    border-radius: var(--radius-pill); background: var(--primary-bg); color: var(--primary);
+    font-size: 10px; font-weight: 600; border: 1px solid rgba(91,33,182,0.2);
+  }
+  .target-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
+
+  .action-bar { padding: 10px 12px; border-top: 1px solid var(--divider); display: flex; gap: 6px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    padding: 7px 12px; border: 1px solid var(--border); border-radius: 7px;
+    background: var(--surface-strong); color: var(--body); font: inherit;
+    font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.18s ease;
+  }
+  .btn:hover { border-color: var(--primary); color: var(--primary); }
+  .btn svg { width: 12px; height: 12px; }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); flex: 1; }
+  .btn-primary:hover { background: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--muted); padding: 7px; }
+  .btn-ghost:hover { color: var(--danger); border-color: transparent; }
+
+  .preview-panel { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .preview-toolbar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+    border-bottom: 1px solid var(--divider); background: var(--surface-strong);
+  }
+  .preview-toolbar .title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .preview-toolbar .subtitle { font-size: 10px; color: var(--muted); margin-left: auto; }
+  .preview-content { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg); }
+
+  .preview-section { margin-bottom: 24px; }
+  .preview-section-title {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .preview-card {
+    background: var(--surface); border: 1px solid var(--surface-border);
+    border-radius: var(--radius-m); padding: 16px; box-shadow: var(--shadow-card);
+  }
+  .preview-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .preview-stat {
+    padding: 10px; border-radius: var(--radius-s); border: 1px solid var(--surface-border);
+    background: var(--surface-soft); cursor: pointer; transition: all 0.18s ease; border-left: 3px solid transparent;
+  }
+  .preview-stat:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .preview-stat.is-targeting { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,138,76,0.2); }
+  .preview-stat-icon {
+    width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center;
+    margin-bottom: 6px; font-size: 12px;
+  }
+  .preview-stat-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: var(--text-primary); }
+  .preview-stat-label { font-size: 9px; color: var(--muted); font-weight: 600; }
+
+  .preview-hero {
+    background: linear-gradient(135deg, var(--sidebar-from), var(--sidebar-to));
+    border-radius: var(--radius-m); padding: 20px 24px; color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .preview-hero::before {
+    content: ''; position: absolute; right: 8%; top: -15px; width: 60px; height: 60px;
+    border-radius: 50%; background: rgba(255,255,255,0.08);
+    box-shadow: 0 0 0 10px rgba(255,255,255,0.04);
+  }
+  .preview-hero h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: -0.03em; margin-top: 4px; }
+  .preview-hero p { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+  .preview-hero-btn {
+    padding: 8px 14px; border-radius: 8px; background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 700; border: 0; cursor: pointer; font-family: inherit;
+  }
+
+  .preview-campaign-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .preview-campaign {
+    background: var(--surface); border: 1px solid var(--surface-border);
+    border-radius: var(--radius-s); padding: 12px; display: flex; gap: 10px;
+    align-items: center; cursor: pointer; transition: all 0.18s ease;
+  }
+  .preview-campaign:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+  .preview-campaign.is-targeting { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,138,76,0.2); }
+  .preview-campaign-icon {
+    width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center;
+    font-size: 14px; background: var(--primary-bg); color: var(--primary); flex-shrink: 0;
+  }
+  .preview-campaign-info { flex: 1; min-width: 0; }
+  .preview-campaign-info strong { font-size: 11px; color: var(--text-primary); display: block; }
+  .preview-campaign-info small { font-size: 9px; color: var(--muted); }
+
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .preview-table th {
+    padding: 8px 10px; text-align: left; font-size: 9px; font-weight: 800;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--divider);
+  }
+  .preview-table td { padding: 8px 10px; color: var(--body); border-bottom: 1px solid var(--divider); }
+  .preview-status { display: inline-flex; padding: 2px 6px; border-radius: var(--radius-pill); font-size: 9px; font-weight: 600; }
+  .preview-status--active { background: var(--success-bg); color: var(--success); }
+  .preview-status--pending { background: var(--warning-bg); color: var(--warning); }
+  .preview-status--paused { background: var(--neutral-bg); color: var(--muted); }
+
+  .toast {
+    position: fixed; bottom: 16px; right: 16px; padding: 10px 14px; border-radius: 8px;
+    background: var(--ink); color: #fff; font-size: 11px; font-weight: 600;
+    box-shadow: var(--shadow-lg); z-index: 100; transform: translateY(80px); opacity: 0;
+    transition: all 0.3s var(--ease-premium); display: flex; align-items: center; gap: 6px;
+  }
+  .toast.is-visible { transform: translateY(0); opacity: 1; }
+  .toast svg { width: 14px; height: 14px; color: var(--success); }
+
+  .changes-log { padding: 10px 12px; border-top: 1px solid var(--divider); background: var(--surface-soft); max-height: 100px; overflow-y: auto; }
+  .changes-log-title { font-size: 9px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .change-entry { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 10px; }
+  .change-entry .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .change-entry .var-name { color: var(--primary); font-weight: 600; }
+  .change-entry .old-val { color: var(--muted); text-decoration: line-through; }
+  .change-entry .arrow { color: var(--muted); }
+  .change-entry .new-val { color: var(--body); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="design-panel">
+  <div class="design-panel-header">
+    <h1><span>✦</span> Design Assistant</h1>
+    <p>Edit your astrologer dashboard palette in real-time</p>
+  </div>
+  <div class="token-tabs">
+    <button class="token-tab is-active" data-category="brand">Brand</button>
+    <button class="token-tab" data-category="surface">Surface</button>
+    <button class="token-tab" data-category="semantic">Semantic</button>
+    <button class="token-tab" data-category="sidebar">Sidebar</button>
+    <button class="token-tab" data-category="radius">Radius</button>
+  </div>
+  <div class="token-list" id="tokenList"></div>
+  <div class="changes-log">
+    <div class="changes-log-title">Recent Changes</div>
+    <div id="changesList"></div>
+  </div>
+  <div class="target-display">
+    <span class="label">Target:</span>
+    <span class="target-chip" id="targetChip"><span class="dot"></span><span id="targetName">None selected</span></span>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-primary" id="btnExport">⬇ Export CSS</button>
+    <button class="btn" id="btnReset">↺ Reset</button>
+    <button class="btn btn-ghost" id="btnClearChanges">✕</button>
+  </div>
+</div>
+
+<div class="preview-panel">
+  <div class="preview-toolbar">
+    <span class="title">Astrologer Dashboard Preview</span>
+    <span class="subtitle">Click any element to target its color</span>
+  </div>
+  <div class="preview-content">
+    <div class="preview-section">
+      <div class="preview-section-title">Hero Banner</div>
+      <div class="preview-hero" data-target="--sidebar-from">
+        <div>
+          <div style="font-size:9px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Astrologer Portal</div>
+          <h2>Welcome back, Kumar 👋</h2>
+          <p>Here's what's happening with your consultations and campaigns.</p>
+        </div>
+        <button class="preview-hero-btn">Set Availability</button>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-title">Stats Cards</div>
+      <div class="preview-stat-grid">
+        <div class="preview-stat" data-target="--primary">
+          <div class="preview-stat-icon" style="background:var(--primary-bg);color:var(--primary)">📊</div>
+          <div class="preview-stat-value">248</div>
+          <div class="preview-stat-label">Total Activity</div>
+        </div>
+        <div class="preview-stat" data-target="--sky">
+          <div class="preview-stat-icon" style="background:var(--sky-bg);color:var(--sky)">📅</div>
+          <div class="preview-stat-value">42</div>
+          <div class="preview-stat-label">Appointments</div>
+        </div>
+        <div class="preview-stat" data-target="--success">
+          <div class="preview-stat-icon" style="background:var(--success-bg);color:var(--success)">🎧</div>
+          <div class="preview-stat-value">18</div>
+          <div class="preview-stat-label">Consultations</div>
+        </div>
+        <div class="preview-stat" data-target="--warning">
+          <div class="preview-stat-icon" style="background:var(--warning-bg);color:var(--warning)">⏰</div>
+          <div class="preview-stat-value">35</div>
+          <div class="preview-stat-label">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-title">Campaign Cards</div>
+      <div class="preview-campaign-grid">
+        <div class="preview-campaign" data-target="--primary">
+          <div class="preview-campaign-icon">💜</div>
+          <div class="preview-campaign-info"><strong>Health & Wellness</strong><small>Vedic Astrology · 45/100 sold</small></div>
+        </div>
+        <div class="preview-campaign" data-target="--accent">
+          <div class="preview-campaign-icon" style="background:var(--gold-100);color:var(--accent)">❤️</div>
+          <div class="preview-campaign-info"><strong>Love & Relationship</strong><small>Marriage Astrology · 32/50 sold</small></div>
+        </div>
+        <div class="preview-campaign" data-target="--success">
+          <div class="preview-campaign-icon" style="background:var(--success-bg);color:var(--success)">📈</div>
+          <div class="preview-campaign-info"><strong>Career & Finance</strong><small>Numerology · 20/50 sold</small></div>
+        </div>
+        <div class="preview-campaign" data-target="--violet-500">
+          <div class="preview-campaign-icon" style="background:var(--violet-100);color:var(--violet-500)">🪐</div>
+          <div class="preview-campaign-info"><strong>Planetary Guidance</strong><small>General · 10/50 sold</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-title">Questions Table</div>
+      <div class="preview-card">
+        <table class="preview-table">
+          <thead><tr><th>ID</th><th>User</th><th>Category</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:monospace;font-size:10px;color:var(--muted)">QTN-2026-000124</td><td>Kannan</td><td>Health</td><td>General</td><td><span class="preview-status preview-status--pending">Pending</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:10px;color:var(--muted)">QTN-2026-000123</td><td>Priya V.</td><td>Health</td><td>Personal</td><td><span class="preview-status preview-status--active">In Progress</span></td></tr>
+            <tr><td style="font-family:monospace;font-size:10px;color:var(--muted)">QTN-2026-001245</td><td>Priya V.</td><td>Health</td><td>Personal</td><td><span class="preview-status preview-status--paused">Disputed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-title">Buttons & Accents</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" style="background:var(--primary);color:#fff;border-color:var(--primary)">Primary</button>
+        <button class="btn" style="background:var(--accent);color:#fff;border-color:var(--accent)">Accent</button>
+        <button class="btn" style="background:var(--success);color:#fff;border-color:var(--success)">Success</button>
+        <button class="btn" style="border-color:var(--border);background:transparent">Outline</button>
+        <button class="btn" style="background:var(--danger-bg);color:var(--danger);border-color:var(--danger)">Danger</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg">CSS exported</span></div>
+
+<script>
+const TOKEN_GROUPS = {
+  brand: { label: 'Brand Colors', tokens: [
+    { var: '--primary', name: 'Primary', value: '#5B21B6' },
+    { var: '--primary-dark', name: 'Primary Dark', value: '#3B0764' },
+    { var: '--primary-light', name: 'Primary Light', value: '#7C3AED' },
+    { var: '--secondary', name: 'Secondary', value: '#7C3AED' },
+    { var: '--accent', name: 'Accent', value: '#FF8A4C' },
+    { var: '--accent-dark', name: 'Accent Dark', value: '#F2662A' },
+  ]},
+  surface: { label: 'Surface & Background', tokens: [
+    { var: '--bg', name: 'Background', value: '#F5F2F9' },
+    { var: '--surface', name: 'Surface', value: 'rgba(255,255,255,0.88)' },
+    { var: '--surface-strong', name: 'Surface Strong', value: '#FFFFFF' },
+    { var: '--surface-soft', name: 'Surface Soft', value: '#F9FAFB' },
+    { var: '--surface-border', name: 'Surface Border', value: 'rgba(229,231,235,0.72)' },
+    { var: '--border', name: 'Border', value: '#DED6E8' },
+    { var: '--divider', name: 'Divider', value: 'rgba(15,23,42,0.06)' },
+  ]},
+  semantic: { label: 'Text & Semantic', tokens: [
+    { var: '--text-primary', name: 'Text Primary', value: '#251B35' },
+    { var: '--text-secondary', name: 'Text Secondary', value: '#685F73' },
+    { var: '--ink', name: 'Ink', value: '#111827' },
+    { var: '--body', name: 'Body Text', value: '#374151' },
+    { var: '--muted', name: 'Muted Text', value: '#6B7280' },
+    { var: '--success', name: 'Success', value: '#10B981' },
+    { var: '--success-bg', name: 'Success Bg', value: '#ECFDF5' },
+    { var: '--warning', name: 'Warning', value: '#F59E0B' },
+    { var: '--warning-bg', name: 'Warning Bg', value: '#FFFBEB' },
+    { var: '--danger', name: 'Danger', value: '#EF4444' },
+    { var: '--danger-bg', name: 'Danger Bg', value: '#FEF2F2' },
+    { var: '--primary-bg', name: 'Primary Bg', value: '#EEE8F8' },
+    { var: '--sky', name: 'Sky', value: '#0284C7' },
+    { var: '--sky-bg', name: 'Sky Bg', value: '#EFF6FF' },
+  ]},
+  sidebar: { label: 'Sidebar & Extended', tokens: [
+    { var: '--sidebar-from', name: 'Sidebar From', value: '#281354' },
+    { var: '--sidebar-to', name: 'Sidebar To', value: '#472183' },
+    { var: '--violet-100', name: 'Violet 100', value: '#EDE9FE' },
+    { var: '--violet-300', name: 'Violet 300', value: '#C4B5FD' },
+    { var: '--violet-500', name: 'Violet 500', value: '#8B5CF6' },
+    { var: '--violet-600', name: 'Violet 600', value: '#6D28D9' },
+    { var: '--gold-100', name: 'Gold 100', value: '#FFE9D9' },
+    { var: '--gold-500', name: 'Gold 500', value: '#FF8A4C' },
+    { var: '--green-500', name: 'Green 500', value: '#10B981' },
+    { var: '--amber-500', name: 'Amber 500', value: '#F59E0B' },
+    { var: '--red-500', name: 'Red 500', value: '#EF4444' },
+    { var: '--coral-500', name: 'Coral 500', value: '#FF8A4C' },
+  ]},
+  radius: { label: 'Radius & Spacing', tokens: [
+    { var: '--radius-xs', name: 'Radius XS', value: '8px' },
+    { var: '--radius-s', name: 'Radius S', value: '14px' },
+    { var: '--radius-m', name: 'Radius M', value: '18px' },
+    { var: '--radius-l', name: 'Radius L', value: '24px' },
+    { var: '--radius-xl', name: 'Radius XL', value: '28px' },
+    { var: '--sidebar-w', name: 'Sidebar Width', value: '288px' },
+  ]}
+};
+
+const ORIGINAL_VALUES = {};
+Object.values(TOKEN_GROUPS).forEach(g => g.tokens.forEach(t => ORIGINAL_VALUES[t.var] = t.value));
+
+let selectedToken = null;
+const changes = [];
+
+function renderTokens(category) {
+  const group = TOKEN_GROUPS[category];
+  const c = document.getElementById('tokenList');
+  c.innerHTML = '';
+  const label = document.createElement('div');
+  label.className = 'token-group-label';
+  label.textContent = group.label;
+  c.appendChild(label);
+
+  group.tokens.forEach(token => {
+    const row = document.createElement('div');
+    row.className = 'token-row';
+    row.dataset.var = token.var;
+    row.dataset.category = category;
+    if (ORIGINAL_VALUES[token.var] !== token.value) row.classList.add('is-changed');
+    if (selectedToken === token.var) row.classList.add('is-selected');
+
+    const isColor = token.value.startsWith('#') || token.value.startsWith('rgba');
+    const swatchBg = token.value.startsWith('--') ? `var(${token.var})` : token.value;
+
+    row.innerHTML = `
+      <div class="token-swatch" style="background:${swatchBg}"></div>
+      ${isColor ? `<input type="color" class="token-color-input" value="${token.value}" data-var="${token.var}">` : ''}
+      <div class="token-info">
+        <div class="token-name">${token.name}</div>
+        <div class="token-value">${token.var}</div>
+      </div>
+    `;
+
+    row.addEventListener('click', (e) => {
+      if (e.target.classList.contains('token-color-input')) return;
+      selectToken(token.var);
+    });
+
+    const ci = row.querySelector('.token-color-input');
+    if (ci) ci.addEventListener('input', e => applyTokenValue(token.var, e.target.value));
+
+    c.appendChild(row);
+  });
+}
+
+function selectToken(varName) {
+  selectedToken = varName;
+  document.querySelectorAll('.token-row').forEach(r => r.classList.remove('is-selected'));
+  const row = document.querySelector(`.token-row[data-var="${varName}"]`);
+  if (row) row.classList.add('is-selected');
+  const token = findToken(varName);
+  document.getElementById('targetName').textContent = token ? token.name : varName;
+  document.querySelectorAll('.is-targeting').forEach(el => el.classList.remove('is-targeting'));
+  const previewEl = document.querySelector(`[data-target="${varName}"]`);
+  if (previewEl) {
+    previewEl.classList.add('is-targeting');
+    previewEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function findToken(varName) {
+  for (const g of Object.values(TOKEN_GROUPS)) { const f = g.tokens.find(t => t.var === varName); if (f) return f; }
+  return null;
+}
+
+function applyTokenValue(varName, value) {
+  document.documentElement.style.setProperty(varName, value);
+  const token = findToken(varName);
+  if (token) {
+    const oldValue = token.value;
+    token.value = value;
+    changes.unshift({ var: varName, name: token.name, old: oldValue, new: value, time: Date.now() });
+    if (changes.length > 20) changes.pop();
+    renderChanges();
+    const row = document.querySelector(`.token-row[data-var="${varName}"]`);
+    if (row && oldValue !== ORIGINAL_VALUES[varName]) row.classList.add('is-changed');
+    const swatch = row?.querySelector('.token-swatch');
+    if (swatch) swatch.style.background = value;
+    const val = row?.querySelector('.token-value');
+    if (val) val.textContent = varName + ' = ' + value;
+  }
+}
+
+function renderChanges() {
+  const c = document.getElementById('changesList');
+  if (!changes.length) { c.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:3px 0">No changes yet</div>'; return; }
+  c.innerHTML = changes.slice(0, 6).map(ch => `
+    <div class="change-entry">
+      <span class="dot"></span>
+      <span class="var-name">${ch.name}</span>
+      <span class="old-val">${ch.old}</span>
+      <span class="arrow">→</span>
+      <span class="new-val">${ch.new}</span>
+    </div>
+  `).join('');
+}
+
+document.querySelectorAll('.token-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.token-tab').forEach(t => t.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    renderTokens(tab.dataset.category);
+    if (selectedToken) selectToken(selectedToken);
+  });
+});
+
+document.querySelectorAll('[data-target]').forEach(el => {
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const varName = el.dataset.target;
+    selectToken(varName);
+    for (const [cat, group] of Object.entries(TOKEN_GROUPS)) {
+      if (group.tokens.some(t => t.var === varName)) {
+        document.querySelectorAll('.token-tab').forEach(t => t.classList.toggle('is-active', t.dataset.category === cat));
+        renderTokens(cat);
+        selectToken(varName);
+        break;
+      }
+    }
+  });
+});
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  let css = ':root {\n';
+  Object.values(TOKEN_GROUPS).forEach(g => g.tokens.forEach(t => { css += `  ${t.var}: ${t.value};\n`; }));
+  css += '}\n';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(css).then(() => showToast('CSS copied to clipboard!'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = css;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('CSS copied to clipboard!');
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  Object.values(TOKEN_GROUPS).forEach(g => g.tokens.forEach(t => {
+    t.value = ORIGINAL_VALUES[t.var];
+    document.documentElement.style.setProperty(t.var, ORIGINAL_VALUES[t.var]);
+  }));
+  changes.length = 0;
+  renderChanges();
+  const cat = document.querySelector('.token-tab.is-active')?.dataset.category || 'brand';
+  renderTokens(cat);
+  showToast('All values reset');
+});
+
+document.getElementById('btnClearChanges').addEventListener('click', () => {
+  changes.length = 0;
+  renderChanges();
+  const cat = document.querySelector('.token-tab.is-active')?.dataset.category || 'brand';
+  renderTokens(cat);
+  showToast('Changes cleared');
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('is-visible');
+  setTimeout(() => t.classList.remove('is-visible'), 2000);
+}
+
+renderTokens('brand');
+renderChanges();
+</script>
+</body>
+</html>

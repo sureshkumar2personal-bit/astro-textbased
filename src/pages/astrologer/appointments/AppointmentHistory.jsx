@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Search, X } from 'lucide-react'
+import { CalendarDays, Clock3, Search, X } from 'lucide-react'
+import './appointmenthistory.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -106,34 +107,67 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
         const isCancelled = isCancelledStatus(appointment.status)
         const isRescheduledOriginal = Boolean(appointment.rescheduledTo)
         const isRescheduleReplacement = Boolean(appointment.rescheduledFrom)
+        // Mirrors the exact same logic the top status filter tabs use (see
+        // `filteredAppointments` above), so a card's status pill always
+        // matches whichever filter surfaced it — e.g. an appointment shown
+        // under "Rescheduled" always reads "Rescheduled" here too, even if
+        // its own `status` field is still "Booked" (a rescheduled slot's
+        // replacement keeps a normal Booked status but carries
+        // `rescheduledFrom`).
+        const bucket = appointmentStatusBucket(appointment.status)
+        const displayStatus = isRescheduledOriginal || isRescheduleReplacement
+          ? 'Rescheduled'
+          : bucket === 'completed'
+            ? 'Completed'
+            : bucket === 'cancelled'
+              ? 'Cancelled'
+              : 'Booked'
         const rescheduleLabel = isRescheduledOriginal
           ? `Rescheduled → ${linkedLabel(appointment.rescheduledTo) || 'new slot'}`
           : isRescheduleReplacement
             ? `Rescheduled from ${linkedLabel(appointment.rescheduledFrom) || 'original'}`
             : null
+        const customerName = appointment.customerName || 'Customer'
+        const avatarInitials = customerName.split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
         return (
-          <button
-            type="button"
+          <article
             key={appointment.id}
             className={`apt-history-item${isCancelled ? ' is-cancelled' : ''}${rescheduleLabel ? ' is-rescheduled' : ''}`}
+            role="button"
+            tabIndex={0}
             onClick={() => onSelect(appointment)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onSelect(appointment)
+              }
+            }}
           >
             <div className="apt-history-item__top">
-              <strong>{appointment.customerName || 'Customer'}</strong>
-              <StatusBadge label={appointment.status || 'Booked'} />
-            </div>
-            <div className="apt-history-item__meta">
-              <span><Icon size={12} /> {meta.label}</span>
-              <span>{formatTimeRange(startMin, endMin)}</span>
+              <div className="apt-history-item__identity">
+                <span className="apt-history-item__avatar">{avatarInitials}</span>
+                <strong>{customerName}</strong>
+              </div>
+              <span className="apt-history-item__id">#{appointment.orderId || appointment.id}</span>
             </div>
             <div className="apt-history-item__footer">
-              <span>#{appointment.orderId || appointment.id}</span>
-              <span>₹{Number(appointment.amount || appointment.price || 0).toLocaleString('en-IN')}</span>
+              <span className="apt-history-item__amount">₹{Number(appointment.amount || appointment.price || 0).toLocaleString('en-IN')}</span>
+              <StatusBadge label={displayStatus} />
+            </div>
+            <div className="apt-history-item__info">
+              <span className="apt-history-item__info-item">
+                <Icon size={14} />
+                {meta.label}
+              </span>
+              <span className="apt-history-item__info-item">
+                <Clock3 size={14} />
+                {formatTimeRange(startMin, endMin)}
+              </span>
             </div>
             {rescheduleLabel && (
               <div className="apt-history-item__reschedule">{rescheduleLabel}</div>
             )}
-          </button>
+          </article>
         )
       })}
     </div>
@@ -268,7 +302,10 @@ export default function AppointmentHistory() {
     return dayAppointments
   }, [dayAppointments, dayFilter])
 
-  const openDetails = (appointment) => setSelectedAppointmentId(appointment.id)
+  const openDetails = (appointment) => {
+    setSelectedAppointmentId(appointment.id)
+    actions.viewAppointment(appointment.id)
+  }
 
   const viewProfile = (userId) => {
     if (!userId) return
@@ -337,7 +374,7 @@ export default function AppointmentHistory() {
   }
 
   return (
-    <div className={`apt-page${selectedAppointment ? ' is-drawer-open' : ''}`}>
+    <div className={`apt-page astro-appointment-history${selectedAppointment ? ' is-drawer-open' : ''}`}>
       <div className="apt-history-toolbar">
         <div className="apt-history-filters">
           <div className="apt-history-tabs">
@@ -383,6 +420,7 @@ export default function AppointmentHistory() {
             onRangeChange={setRangeStart}
             onSelectDate={setSelectedDate}
             selectedDate={selectedDate}
+            showMonthArrows
           />
         </div>
 

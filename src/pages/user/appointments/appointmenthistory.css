@@ -58,3 +58,182 @@
 .appointment-history-empty p { margin: 0; font-size: 12px; }
 @media (max-width: 760px) { .appointment-history-statistics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .appointment-history-recommendation { grid-template-columns: auto 1fr; gap: 12px 14px; } .appointment-history-recommendation__action { grid-column: 2; justify-self: start; } .appointment-history-tools { flex-direction: column; } .appointment-history-date-filter { justify-content: space-between; } .appointment-history-list { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .appointment-history-page { padding-top: 18px; } .appointment-history-statistic { padding: 10px 11px; } .appointment-history-statistic span { font-size: 10px; } .appointment-history-statistic strong { font-size: 16px; } .appointment-history-recommendation { grid-template-columns: 1fr; padding: 14px; } .appointment-history-recommendation__ornament { width: 32px; height: 32px; font-size: 17px; } .appointment-history-recommendation__action { grid-column: auto; width: 100%; } .appointment-history-filters { overflow-x: auto; padding-bottom: 3px; } .appointment-history-filters button { flex: none; } .appointment-history-card { padding: 14px; } .appointment-history-card__footer { align-items: flex-end; } .appointment-history-card__actions { gap: 6px; } .appointment-history-custom-dates { flex-direction: column; } .appointment-history-custom-dates label { justify-content: space-between; } .appointment-history-custom-dates input { flex: 1; } }
+
+/* ============================================================================
+   Premium user-side redesign — Appointment History (visual only).
+   Everything below is scoped under `.user-appointment-history`, the wrapper
+   class already on this page's root <div>, so none of it reaches the
+   astrologer-side Appointment History page, which shares several of the
+   same base "apt-*" class names but never carries this wrapper class.
+   No markup, data, labels, functionality or routes were changed — only
+   color, spacing, borders, radii and shadows.
+   ============================================================================ */
+
+.user-appointment-history {
+  background: linear-gradient(180deg, #FBF9FF 0%, #F6F1FC 55%, #FBF8FE 100%);
+  border-radius: 24px;
+  padding: 6px 6px 18px;
+}
+
+/* Continue-journey recommendation banner — same content, softer premium shell */
+.user-appointment-history .appointment-history-recommendation {
+  border: 1px solid rgba(109, 40, 217, 0.14);
+  border-radius: 20px;
+  background: linear-gradient(105deg, #F8F3FF 0%, #FDFBFF 55%, #FFF9EF 100%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 10px 26px rgba(109, 40, 217, 0.06);
+}
+
+/* Status-tab / filter toolbar — wrapped as its own soft card */
+.user-appointment-history > .apt-history-toolbar {
+  padding: 10px 12px;
+  border: 1px solid rgba(109, 40, 217, 0.12);
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 6px 16px rgba(109, 40, 217, 0.05);
+}
+
+.user-appointment-history .apt-history-tabs {
+  padding: 3px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.user-appointment-history .apt-history-tabs button {
+  border-radius: 11px;
+  font-weight: 700;
+}
+
+.user-appointment-history .apt-history-tabs button.is-active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(91, 33, 182, 0.22);
+}
+
+.user-appointment-history .apt-history-status-filter {
+  border-radius: 12px;
+}
+
+/* Calendar + list layout */
+.user-appointment-history .apt-main--history {
+  align-items: start;
+  gap: 18px;
+}
+
+/* Calendar — clean white rounded card with a subtle purple border */
+.user-appointment-history .apt-scheduling-calendar--history {
+  padding: 16px;
+  border: 1px solid rgba(109, 40, 217, 0.12);
+  border-radius: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 30px rgba(109, 40, 217, 0.06);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-calendar-toolbar {
+  padding: 0 0 12px;
+  margin-bottom: 12px;
+  border: 0;
+  border-bottom: 1px solid var(--divider);
+  border-radius: 0;
+  background: transparent;
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-month-week {
+  border-top: 0;
+  gap: 6px;
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-month-cell {
+  border-right: 0;
+  border-radius: 13px;
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-month-cell:hover {
+  background: var(--primary-bg);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-today {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--primary);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected {
+  background: var(--primary);
+  box-shadow: 0 6px 16px rgba(91, 33, 182, 0.26);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected .apt-month-day {
+  color: #fff;
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected .apt-history-cell-status span {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-today .apt-month-day {
+  background: transparent;
+  color: var(--primary);
+}
+
+.user-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected.is-today .apt-month-day {
+  color: #fff;
+}
+
+/* Right-hand appointment panel */
+.user-appointment-history .apt-side-head {
+  padding-bottom: 10px;
+  font-size: 13px;
+}
+
+.user-appointment-history .user-appointment-list {
+  display: grid;
+  gap: 14px;
+}
+
+.user-appointment-history .added-compact-appointment-card {
+  padding: 16px;
+  border: 1px solid rgba(109, 40, 217, 0.1);
+  border-radius: 18px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 20px rgba(15, 23, 42, 0.05);
+  transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.user-appointment-history .added-compact-appointment-card:hover {
+  border-color: rgba(109, 40, 217, 0.22);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 28px rgba(109, 40, 217, 0.1);
+  transform: translateY(-1px);
+}
+
+.user-appointment-history .added-compact-appointment-card__meta {
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--surface-soft);
+}
+
+.user-appointment-history .apt-history-empty--day {
+  border: 1px dashed rgba(109, 40, 217, 0.22);
+  border-radius: 18px;
+  background: #FFFFFF;
+}
+
+@media (max-width: 1120px) {
+  .user-appointment-history .apt-side-col {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .user-appointment-history {
+    padding: 4px 0 14px;
+    border-radius: 16px;
+  }
+
+  .user-appointment-history .apt-scheduling-calendar--history {
+    padding: 12px;
+  }
+
+  .user-appointment-history > .apt-history-toolbar {
+    padding: 8px;
+  }
+}

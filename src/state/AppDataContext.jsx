@@ -13,6 +13,11 @@ import { useAuth } from './AuthContext.jsx'
 
 const AppDataContext = createContext(null)
 
+const QUESTIONS_DEMO_NOW = Date.now()
+const questionsDemoIso = (millisAgo) => new Date(QUESTIONS_DEMO_NOW - millisAgo).toISOString()
+const DAY_MS = 24 * 60 * 60 * 1000
+
+
 const DEFAULT_CAMPAIGN_CATEGORIES = [
   { name: 'Marriage', normalPrice: 200, discountPercent: 70, compulsoryQuestions: 150 },
   { name: 'Career', normalPrice: 200, discountPercent: 80, compulsoryQuestions: 150 },
@@ -335,6 +340,103 @@ const initialQuestions = [
     },
     history: ['Created by user', 'Answered by astrologer', 'User raised dispute'],
     raisedAt: '2026-07-14T15:20:00+05:30',
+  },
+  // --- Recent answered questions (last 7 days) for the My Activity / Recent Activity feeds ---
+  {
+    id: 'QTN-2026-002001',
+    userId: 'customer-neha',
+    astrologerId: 'astrologer-demo',
+    user: 'Neha S.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'Personal',
+    purchaseType: 'Paid',
+    purchaseAmount: 250,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'Medium',
+    campaignId: 'festival-special',
+    campaignName: 'Career Campaign',
+    raised: '1 day ago',
+    question: 'Is this the right time to switch to a new company?',
+    answer: 'The coming weeks favor a considered move. Negotiate the offer carefully and confirm the start date after mid next month for the smoothest transition.',
+    answeredAt: questionsDemoIso(1 * DAY_MS),
+    answerDeliveredAt: questionsDemoIso(1 * DAY_MS),
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: questionsDemoIso(1 * DAY_MS + 3 * 60 * 60 * 1000),
+  },
+  {
+    id: 'QTN-2026-002002',
+    userId: 'customer-ravi',
+    astrologerId: 'astrologer-demo',
+    user: 'Ravi K.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Marriage',
+    type: 'Personal',
+    purchaseType: 'Paid',
+    purchaseAmount: 250,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'Hindi',
+    status: 'Answered',
+    priority: 'High',
+    campaignId: 'july-premium',
+    campaignName: 'Health Campaign',
+    raised: '2 days ago',
+    question: 'When will my marriage proposal be finalized?',
+    answer: 'Your chart shows a supportive window opening soon. Family discussions held with patience in the next two weeks should lead to a positive outcome.',
+    answeredAt: questionsDemoIso(2 * DAY_MS),
+    answerDeliveredAt: questionsDemoIso(2 * DAY_MS),
+    draftAnswer: '',
+    horoscopeMode: 'Upload Horoscope',
+    attachments: ['Horoscope.pdf'],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: questionsDemoIso(2 * DAY_MS + 5 * 60 * 60 * 1000),
+  },
+  {
+    id: 'QTN-2026-002003',
+    userId: 'customer-fatima',
+    astrologerId: 'astrologer-demo',
+    user: 'Fatima R.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Health',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'Low',
+    campaignId: 'july-premium',
+    campaignName: 'Health Campaign',
+    raised: '4 days ago',
+    question: 'Are there any remedies for recurring headaches based on my chart?',
+    answer: 'A simple daily practice of calm breathing before sunrise, along with staying consistent with your sleep schedule, should ease the pattern over the next few weeks.',
+    answeredAt: questionsDemoIso(4 * DAY_MS),
+    answerDeliveredAt: questionsDemoIso(4 * DAY_MS),
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: questionsDemoIso(4 * DAY_MS + 2 * 60 * 60 * 1000),
   },
 ]
 
@@ -836,6 +938,7 @@ const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
 const FAMILY_HOROSCOPES_STORAGE_KEY = 'astroconnect-family-horoscopes'
 const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
+const ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY = 'astroconnect-astrologer-activity-log'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -1143,6 +1246,61 @@ const initialConsultationHistory = [
   { id: 'consult-chat-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Chat', startedAt: '2026-08-24T19:10:00+05:30', durationMinutes: 26, pricePerMinute: 15, amount: 390, status: 'Completed', messages: [{ id: 'consult-chat-user-006-1', sender: 'user', text: 'I have been seeing repeated changes at work. How should I approach them?', sentAt: '2026-08-24T19:11:00+05:30' }, { id: 'consult-chat-user-006-2', sender: 'astrologer', text: 'Take each change one step at a time and keep your long-term priorities visible while you adapt.', sentAt: '2026-08-24T19:18:00+05:30' }] },
   { id: 'consult-audio-user-004', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-23T10:00:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
   { id: 'consult-audio-user-006', userId: 'user-demo', astrologerId: 'astrologer-demo', customerId: 'user-demo', customerName: 'Priya V.', type: 'Audio Call', startedAt: '2026-08-26T09:30:00+05:30', durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
+  // --- Recent instant calls & chats (last 7 days) for the My Activity / Recent Activity feeds ---
+  { id: 'consult-audio-recent-001', userId: 'customer-vikram', astrologerId: 'astrologer-demo', customerId: 'customer-vikram', customerName: 'Vikram S.', type: 'Audio Call', startedAt: questionsDemoIso(1 * DAY_MS + 2 * 60 * 60 * 1000), durationMinutes: 22, pricePerMinute: 25, amount: 550, status: 'Completed' },
+  { id: 'consult-audio-recent-002', userId: 'customer-anjali', astrologerId: 'astrologer-demo', customerId: 'customer-anjali', customerName: 'Anjali M.', type: 'Audio Call', startedAt: questionsDemoIso(3 * DAY_MS + 6 * 60 * 60 * 1000), durationMinutes: 30, pricePerMinute: 25, amount: 750, status: 'Completed' },
+  { id: 'consult-audio-recent-003', userId: 'customer-suresh2', astrologerId: 'astrologer-demo', customerId: 'customer-suresh2', customerName: 'Suresh P.', type: 'Audio Call', startedAt: questionsDemoIso(5 * DAY_MS + 1 * 60 * 60 * 1000), durationMinutes: 15, pricePerMinute: 25, amount: 375, status: 'Completed' },
+  {
+    id: 'consult-chat-recent-001',
+    userId: 'customer-divya2',
+    astrologerId: 'astrologer-demo',
+    customerId: 'customer-divya2',
+    customerName: 'Divya T.',
+    type: 'Chat',
+    startedAt: questionsDemoIso(2 * DAY_MS + 4 * 60 * 60 * 1000),
+    durationMinutes: 20,
+    pricePerMinute: 15,
+    amount: 300,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-recent-001-1', sender: 'user', text: 'Is this a good time to start a new business venture?', sentAt: questionsDemoIso(2 * DAY_MS + 4 * 60 * 60 * 1000) },
+      { id: 'consult-chat-recent-001-2', sender: 'astrologer', text: 'Yes, the next few weeks are favorable. Start with a small pilot before scaling up.', sentAt: questionsDemoIso(2 * DAY_MS + 4 * 60 * 60 * 1000 - 5 * 60 * 1000) },
+    ],
+  },
+  {
+    id: 'consult-chat-recent-002',
+    userId: 'customer-rohan',
+    astrologerId: 'astrologer-demo',
+    customerId: 'customer-rohan',
+    customerName: 'Rohan B.',
+    type: 'Chat',
+    startedAt: questionsDemoIso(4 * DAY_MS + 8 * 60 * 60 * 1000),
+    durationMinutes: 16,
+    pricePerMinute: 15,
+    amount: 240,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-recent-002-1', sender: 'user', text: 'Will I get good results in my upcoming exams?', sentAt: questionsDemoIso(4 * DAY_MS + 8 * 60 * 60 * 1000) },
+      { id: 'consult-chat-recent-002-2', sender: 'astrologer', text: 'Your chart favors consistent preparation. Focus on revision in the final week for the best outcome.', sentAt: questionsDemoIso(4 * DAY_MS + 8 * 60 * 60 * 1000 - 6 * 60 * 1000) },
+    ],
+  },
+  {
+    id: 'consult-chat-recent-003',
+    userId: 'customer-sanjana',
+    astrologerId: 'astrologer-demo',
+    customerId: 'customer-sanjana',
+    customerName: 'Sanjana K.',
+    type: 'Chat',
+    startedAt: questionsDemoIso(6 * DAY_MS + 3 * 60 * 60 * 1000),
+    durationMinutes: 12,
+    pricePerMinute: 15,
+    amount: 180,
+    status: 'Completed',
+    messages: [
+      { id: 'consult-chat-recent-003-1', sender: 'user', text: 'How can I improve my relationship with my in-laws?', sentAt: questionsDemoIso(6 * DAY_MS + 3 * 60 * 60 * 1000) },
+      { id: 'consult-chat-recent-003-2', sender: 'astrologer', text: 'Approach conversations with patience and small gestures of care. Trust will build gradually over the coming month.', sentAt: questionsDemoIso(6 * DAY_MS + 3 * 60 * 60 * 1000 - 7 * 60 * 1000) },
+    ],
+  },
 ]
 
 export const DEFAULT_ASTROLOGER_SERVICES = {
@@ -1237,6 +1395,7 @@ export function AppDataProvider({ children }) {
   const [incomingRequests, setIncomingRequests] = useState([])
   const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
   const [payoutMethods, setPayoutMethods] = useState(() => loadFromStorage(ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY, initialPayoutMethods))
+  const [activityLog, setActivityLog] = useState(() => loadFromStorage(ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY, []))
   const [consultationHistory] = useState(initialConsultationHistory)
   const [postLikes, setPostLikes] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-likes-${currentUser?.id || 'guest'}`, {}))
   const [savedPostIds, setSavedPostIds] = useState(() => loadFromStorage(`${POST_INTERACTIONS_STORAGE_KEY}-saved-${currentUser?.id || 'guest'}`, []))
@@ -1347,6 +1506,10 @@ export function AppDataProvider({ children }) {
   }, [payoutMethods])
 
   useEffect(() => {
+    saveToStorage(ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY, activityLog)
+  }, [activityLog])
+
+  useEffect(() => {
     saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
   }, [astrologerServices])
 
@@ -1412,6 +1575,32 @@ export function AppDataProvider({ children }) {
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
+
+  // Appends an entry to the astrologer's "My Activity" audit log.
+  // This only ever records that an action happened — it never touches a
+  // record's own business status, which each module continues to own.
+  function logActivity({ astrologerId, kind, type, title, description, relatedId, customerName, amount, moduleStatus }) {
+    // The demo astrologer account's currentUser.id is 'astrologer-demo-alias',
+    // while every seeded record uses 'astrologer-demo' — normalize the same
+    // way the rest of the app does so activity always lands on the right feed.
+    const actingAstrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
+    setActivityLog((prev) => [
+      {
+        id: `act-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        createdAt: new Date().toISOString(),
+        astrologerId: astrologerId || actingAstrologerId || 'astrologer-demo',
+        kind,
+        type,
+        title,
+        description: description || '',
+        relatedId: relatedId || null,
+        customerName: customerName || null,
+        amount: amount != null ? Number(amount) : null,
+        moduleStatus: moduleStatus || null,
+      },
+      ...prev,
+    ])
+  }
 
   const actions = useMemo(() => ({
     createAtonement(payload) {
@@ -1569,6 +1758,15 @@ export function AppDataProvider({ children }) {
         createdAt: new Date().toISOString(),
       })
       setAstrologerLiveSessions((prev) => [session, ...prev])
+      logActivity({
+        astrologerId: session.astrologerId,
+        kind: 'live',
+        type: 'live-session-scheduled',
+        title: 'Live Session Scheduled',
+        description: `Scheduled the live session "${session.title || 'Untitled session'}"`,
+        relatedId: session.id,
+        moduleStatus: 'upcoming',
+      })
       return session
     },
     updateLiveSession(sessionId, patch) {
@@ -1577,7 +1775,19 @@ export function AppDataProvider({ children }) {
         : session))
     },
     deleteLiveSession(sessionId) {
+      const session = astrologerLiveSessions.find((item) => item.id === sessionId)
       setAstrologerLiveSessions((prev) => prev.filter((session) => session.id !== sessionId))
+      if (session) {
+        logActivity({
+          astrologerId: session.astrologerId,
+          kind: 'live',
+          type: 'live-session-deleted',
+          title: 'Live Session Deleted',
+          description: `Deleted the live session "${session.title || 'Untitled session'}"`,
+          relatedId: sessionId,
+          moduleStatus: 'Deleted',
+        })
+      }
     },
     startLiveSession(sessionId) {
       const startedAt = new Date()
@@ -1585,11 +1795,39 @@ export function AppDataProvider({ children }) {
       setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
         ? { ...session, status: 'live', startedAt: startedAt.toISOString(), endedAt: null, scheduledEndAt }
         : session))
+      const session = astrologerLiveSessions.find((item) => item.id === sessionId)
+      logActivity({
+        astrologerId: session?.astrologerId,
+        kind: 'live',
+        type: 'live-session-started',
+        title: 'Live Session Started',
+        description: `Went live${session?.title ? ` with "${session.title}"` : ''}`,
+        relatedId: sessionId,
+        moduleStatus: 'live',
+      })
     },
-    endLiveSession(sessionId) {
+    // `summary` carries the earnings/viewer count accumulated in the live
+    // room UI, which otherwise only lived in local component state and was
+    // never persisted onto the session record.
+    endLiveSession(sessionId, summary = {}) {
+      const endedAt = new Date().toISOString()
+      const patch = { status: 'past', endedAt }
+      if (summary.earnings != null) patch.earnings = summary.earnings
+      if (summary.viewerCount != null) patch.joinedPublic = summary.viewerCount
       setAstrologerLiveSessions((prev) => prev.map((session) => session.id === sessionId
-        ? { ...session, status: 'past', endedAt: new Date().toISOString() }
+        ? { ...session, ...patch }
         : session))
+      const session = astrologerLiveSessions.find((item) => item.id === sessionId)
+      logActivity({
+        astrologerId: session?.astrologerId,
+        kind: 'live',
+        type: 'live-session-ended',
+        title: 'Live Session Ended',
+        description: `Ended the live session${session?.title ? ` "${session.title}"` : ''}`,
+        relatedId: sessionId,
+        amount: summary.earnings ?? session?.earnings ?? null,
+        moduleStatus: 'past',
+      })
     },
     toggleCampaignOffer(campaignId, offerKey) {
       setCampaigns((prev) =>
@@ -1605,6 +1843,26 @@ export function AppDataProvider({ children }) {
       const priceChanged = Object.prototype.hasOwnProperty.call(patch, 'generalPrice') || Object.prototype.hasOwnProperty.call(patch, 'personalPrice')
       if (discountChanged || availabilityChanged || priceChanged) {
         const campaign = campaigns.find((item) => item.id === campaignId)
+        if (campaign && availabilityChanged && patch.status === 'Closed') {
+          logActivity({
+            kind: 'campaigns',
+            type: 'campaign-frozen',
+            title: 'Campaign Frozen',
+            description: `Froze the "${campaign.name}" campaign`,
+            relatedId: campaignId,
+            moduleStatus: 'Closed',
+          })
+        } else if (campaign && discountChanged) {
+          logActivity({
+            kind: 'campaigns',
+            type: 'campaign-discount-updated',
+            title: 'Campaign Discount Updated',
+            description: `Updated the subscriber discount on "${campaign.name}" to ${Number(patch.discountPercent) || 0}%`,
+            relatedId: campaignId,
+            amount: Number(patch.discountPercent) || 0,
+            moduleStatus: campaign.status,
+          })
+        }
         if (campaign && subscriptions.length) {
           const nextDiscount = discountChanged ? Number(patch.discountPercent) || 0 : campaign.discountPercent || 0
           const nextStatus = patch.status || campaign.status
@@ -1628,12 +1886,23 @@ export function AppDataProvider({ children }) {
       setPurchasedSlots((prev) => updatePurchasedSlotBalance(prev, userId, campaignId, slotType, -1))
     },
     deleteCampaign(campaignId) {
+      const campaign = campaigns.find((item) => item.id === campaignId)
       setCampaigns((prev) => prev.filter((campaign) => campaign.id !== campaignId))
       setSelectedCampaignId((currentId) => {
         if (currentId !== campaignId) return currentId
         const remainingCampaign = campaigns.find((campaign) => campaign.id !== campaignId)
         return remainingCampaign?.id || null
       })
+      if (campaign) {
+        logActivity({
+          kind: 'campaigns',
+          type: 'campaign-deleted',
+          title: 'Campaign Deleted',
+          description: `Deleted the "${campaign.name}" campaign`,
+          relatedId: campaignId,
+          moduleStatus: 'Deleted',
+        })
+      }
     },
     createCampaign(payload) {
       const discountPercent = payload.discountEnabled ? Number(payload.discountPercent) || 0 : 0
@@ -1698,6 +1967,19 @@ export function AppDataProvider({ children }) {
           : []),
         ...prev,
       ])
+      logActivity({
+        kind: 'campaigns',
+        type: 'campaign-created',
+        title: campaign.status === 'Active'
+          ? 'Campaign Created & Published'
+          : campaign.status === 'Scheduled'
+            ? 'Campaign Scheduled'
+            : 'Campaign Created (Draft)',
+        description: `Created the "${campaign.name}" campaign`,
+        relatedId: campaign.id,
+        amount: campaign.generalPrice || campaign.personalPrice || campaign.packagePrice || null,
+        moduleStatus: campaign.status,
+      })
       return campaign
     },
     publishCampaign(campaignId) {
@@ -1705,6 +1987,17 @@ export function AppDataProvider({ children }) {
         prev.map((campaign) => (campaign.id === campaignId ? { ...campaign, status: 'Active' } : campaign)),
       )
       const campaign = campaigns.find((item) => item.id === campaignId)
+      if (campaign) {
+        logActivity({
+          kind: 'campaigns',
+          type: 'campaign-published',
+          title: 'Campaign Published',
+          description: `Published the "${campaign.name}" campaign`,
+          relatedId: campaignId,
+          amount: campaign.generalPrice || campaign.personalPrice || campaign.packagePrice || null,
+          moduleStatus: 'Active',
+        })
+      }
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -1817,7 +2110,26 @@ export function AppDataProvider({ children }) {
         ...prev,
       ])
     },
+    // Viewing a question is an astrologer action worth remembering, but it
+    // must never change the question's own business status (stays Pending
+    // until an answer is actually submitted).
+    viewQuestion(questionId) {
+      const question = questions.find((item) => item.id === questionId)
+      if (!question) return
+      logActivity({
+        astrologerId: question.astrologerId,
+        kind: 'questions',
+        type: 'question-viewed',
+        title: 'Question Viewed',
+        description: `Viewed ${question.user || 'a user'}'s ${question.category || ''} question`.trim(),
+        relatedId: questionId,
+        customerName: question.user,
+        amount: question.purchaseAmount,
+        moduleStatus: question.status,
+      })
+    },
     saveQuestionDraft(questionId, draftAnswer) {
+      const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => ({
           ...question,
@@ -1826,8 +2138,22 @@ export function AppDataProvider({ children }) {
           history: [...question.history, 'Draft saved'],
         })),
       )
+      if (question) {
+        logActivity({
+          astrologerId: question.astrologerId,
+          kind: 'questions',
+          type: 'question-draft-saved',
+          title: 'Question Draft Saved',
+          description: `Saved a draft answer for ${question.user || 'a user'}'s question`,
+          relatedId: questionId,
+          customerName: question.user,
+          amount: question.purchaseAmount,
+          moduleStatus: 'In Progress',
+        })
+      }
     },
     submitQuestionAnswer(questionId, answer) {
+      const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => ({
           ...question,
@@ -1841,6 +2167,19 @@ export function AppDataProvider({ children }) {
           history: [...question.history, 'Answer submitted for five-hour review'],
         })),
       )
+      if (question) {
+        logActivity({
+          astrologerId: question.astrologerId,
+          kind: 'questions',
+          type: 'question-answered',
+          title: 'Question Answered',
+          description: `Submitted an answer to ${question.user || 'a user'}'s ${question.category || ''} question`.trim(),
+          relatedId: questionId,
+          customerName: question.user,
+          amount: question.purchaseAmount,
+          moduleStatus: 'Under Review',
+        })
+      }
     },
     editSubmittedQuestionAnswer(questionId, answer) {
       const question = questions.find((item) => item.id === questionId)
@@ -1856,6 +2195,17 @@ export function AppDataProvider({ children }) {
           history: [...currentQuestion.history, 'One-time answer correction saved', 'Corrected answer delivered to user'],
         })),
       )
+      logActivity({
+        astrologerId: question.astrologerId,
+        kind: 'questions',
+        type: 'question-answer-corrected',
+        title: 'Answer Corrected',
+        description: `Made a one-time correction to the answer for ${question.user || 'a user'}`,
+        relatedId: questionId,
+        customerName: question.user,
+        amount: question.purchaseAmount,
+        moduleStatus: 'Answered',
+      })
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -2070,6 +2420,7 @@ export function AppDataProvider({ children }) {
       ])
     },
     respondToDispute(questionId, response, status) {
+      const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => ({
           ...question,
@@ -2086,6 +2437,19 @@ export function AppDataProvider({ children }) {
       setQuestionPreviewId(questionId)
 
       const statusLabel = status.toLowerCase()
+      if (question) {
+        logActivity({
+          astrologerId: question.astrologerId,
+          kind: 'disputes',
+          type: 'dispute-responded',
+          title: status === 'Closed' ? 'Dispute Closed' : 'Dispute Resolved',
+          description: `${status === 'Closed' ? 'Closed' : 'Resolved'} the dispute raised by ${question.user || 'a user'} on question ${questionId}`,
+          relatedId: questionId,
+          customerName: question.user,
+          amount: question.purchaseAmount,
+          moduleStatus: status,
+        })
+      }
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -2233,6 +2597,26 @@ export function AppDataProvider({ children }) {
       }))
       return appointmentId
     },
+    // Viewing an appointment (from Appointment History) is the only thing
+    // that should ever put an appointment into "My Activity" — booking one
+    // must never create an entry by itself, and viewing never changes the
+    // appointment's own status.
+    viewAppointment(appointmentId) {
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      if (!appointment) return
+      const when = [appointment.date || appointment.dateIso, appointment.time].filter(Boolean).join(', ')
+      logActivity({
+        astrologerId: appointment.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-viewed',
+        title: 'Appointment Viewed',
+        description: `Viewed the ${appointment.type || 'appointment'} with ${appointment.customerName || 'a customer'}${when ? ` scheduled for ${when}` : ''}`,
+        relatedId: appointmentId,
+        customerName: appointment.customerName,
+        amount: appointment.amount ?? appointment.price,
+        moduleStatus: appointment.status,
+      })
+    },
     cancelAppointmentByAstrologer(appointmentId, meta = {}) {
       const target = appointments.find((item) => item.id === appointmentId)
       if (!target) return null
@@ -2263,6 +2647,17 @@ export function AppDataProvider({ children }) {
         },
         ...prev,
       ])
+      logActivity({
+        astrologerId: target.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-cancelled',
+        title: 'Appointment Cancelled',
+        description: `Cancelled the appointment with ${target.customerName || 'a customer'}${meta.reason ? ` (${meta.reason})` : ''}`,
+        relatedId: appointmentId,
+        customerName: target.customerName,
+        amount: target.amount ?? target.price,
+        moduleStatus: 'Cancelled by Astrologer',
+      })
       return target
     },
     saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, attachments, atonement, send }) {
@@ -2327,6 +2722,18 @@ export function AppDataProvider({ children }) {
           consultationSentAt: record.sentAt,
         })
       }
+      logActivity({
+        astrologerId,
+        kind: 'appointments',
+        type: send ? 'consultation-sent' : 'consultation-draft-saved',
+        title: send ? 'Consultation Sent' : 'Consultation Draft Saved',
+        description: send
+          ? `Sent consultation notes to ${record.customerName || 'the customer'}`
+          : `Saved a draft of consultation notes for ${record.customerName || 'the customer'}`,
+        relatedId: record.id,
+        customerName: record.customerName,
+        moduleStatus: send ? 'Sent' : 'Draft',
+      })
       return record
     },
     sendConsultation(appointmentId) {
@@ -2356,14 +2763,48 @@ export function AppDataProvider({ children }) {
     },
     savePrivateNotes(appointmentId, privateNotes) {
       this.updateAppointment(appointmentId, { privateNotes: privateNotes ?? '' })
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      logActivity({
+        astrologerId: appointment?.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-notes-saved',
+        title: 'Call Notes Saved',
+        description: `Saved private call notes for ${appointment?.customerName || 'a customer'}`,
+        relatedId: appointmentId,
+        customerName: appointment?.customerName,
+        moduleStatus: appointment?.status,
+      })
     },
     savePreCallAnalysis(appointmentId, preCallAnalysis) {
       this.updateAppointment(appointmentId, { preCallAnalysis: preCallAnalysis ?? '' })
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      logActivity({
+        astrologerId: appointment?.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-precall-saved',
+        title: 'Pre-Call Analysis Saved',
+        description: `Saved pre-call analysis for ${appointment?.customerName || 'a customer'}`,
+        relatedId: appointmentId,
+        customerName: appointment?.customerName,
+        moduleStatus: appointment?.status,
+      })
     },
     saveHoroscopeAttachment(appointmentId, horoscope) {
       this.updateAppointment(appointmentId, { horoscope: horoscope || null })
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      logActivity({
+        astrologerId: appointment?.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-horoscope-attached',
+        title: 'Horoscope Attached',
+        description: `Attached a horoscope for ${appointment?.customerName || 'a customer'}`,
+        relatedId: appointmentId,
+        customerName: appointment?.customerName,
+        moduleStatus: appointment?.status,
+      })
     },
     completeAppointmentCall(appointmentId, { callDurationSeconds, endedAt, privateNotes } = {}) {
+      const appointment = appointments.find((item) => item.id === appointmentId)
       const patch = {
         status: 'Completed',
         completedAt: endedAt || new Date().toISOString(),
@@ -2372,6 +2813,17 @@ export function AppDataProvider({ children }) {
       }
       if (privateNotes != null) patch.privateNotes = privateNotes
       this.updateAppointment(appointmentId, patch)
+      logActivity({
+        astrologerId: appointment?.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-completed',
+        title: 'Appointment Completed',
+        description: `Completed the appointment with ${appointment?.customerName || 'a customer'}`,
+        relatedId: appointmentId,
+        customerName: appointment?.customerName,
+        amount: appointment?.amount ?? appointment?.price,
+        moduleStatus: 'Completed',
+      })
     },
     rescheduleAppointment({ originalId, date, dateIso, time, start, end }) {
       const original = appointments.find((item) => item.id === originalId)
@@ -2382,6 +2834,17 @@ export function AppDataProvider({ children }) {
       if ((original.status || 'Booked') !== 'Booked') return null
       if (isCancelledStatus(original.status)) return null
       if (original.rescheduledTo || original.rescheduledFrom) return null
+      logActivity({
+        astrologerId: original.astrologerId,
+        kind: 'appointments',
+        type: 'appointment-rescheduled',
+        title: 'Appointment Rescheduled',
+        description: `Rescheduled the appointment with ${original.customerName || 'a customer'} to ${date || dateIso}, ${time || ''}`.trim(),
+        relatedId: originalId,
+        customerName: original.customerName,
+        amount: original.amount ?? original.price,
+        moduleStatus: 'Rescheduled',
+      })
       setAppointments((prev) => {
         return prev.map((item) => item.id === originalId
           ? {
@@ -2526,6 +2989,16 @@ export function AppDataProvider({ children }) {
         },
         ...prev,
       ])
+      logActivity({
+        astrologerId: published.astrologerId,
+        kind: 'appointments',
+        type: 'availability-published',
+        title: 'Availability Published',
+        description: `Published appointment availability for ${published.monthLabel}`,
+        relatedId: published.id,
+        amount: published.appointmentPrice,
+        moduleStatus: 'Published',
+      })
       return published
     },
     toggleFollow(astrologerId, astrologerName, isCurrentlyFollowing) {
@@ -2548,9 +3021,19 @@ export function AppDataProvider({ children }) {
         ])
       }
     },
-    toggleUserBlock(userId) {
+    toggleUserBlock(userId, userName) {
       if (!userId) return
+      const wasBlocked = blockedUserIds.includes(userId)
       setBlockedUserIds((prev) => prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId])
+      logActivity({
+        kind: 'audience',
+        type: wasBlocked ? 'follower-unblocked' : 'follower-blocked',
+        title: wasBlocked ? 'Follower Unblocked' : 'Follower Blocked',
+        description: `${wasBlocked ? 'Unblocked' : 'Blocked'} ${userName || 'a follower'}`,
+        relatedId: userId,
+        customerName: userName || userId,
+        moduleStatus: wasBlocked ? 'Unblocked' : 'Blocked',
+      })
     },
     subscribeToAstrologer(astrologerId, astrologerName, userId, userName, tier = 'Silver', opts = {}) {
       if (!userId) return null
@@ -2770,10 +3253,26 @@ export function AppDataProvider({ children }) {
         ...payload,
       }
       setPayoutMethods((prev) => [...prev, method])
+      logActivity({
+        kind: 'wallet',
+        type: 'payout-method-added',
+        title: 'Payout Method Added',
+        description: `Added a ${method.type} payout method`,
+        relatedId: method.id,
+        moduleStatus: 'Active',
+      })
       return method
     },
     updatePayoutMethod(methodId, patch) {
       setPayoutMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, ...patch } : m)))
+      logActivity({
+        kind: 'wallet',
+        type: 'payout-method-updated',
+        title: 'Payout Method Updated',
+        description: 'Updated a payout method',
+        relatedId: methodId,
+        moduleStatus: 'Active',
+      })
     },
     removePayoutMethod(methodId) {
       setPayoutMethods((prev) => {
@@ -2783,9 +3282,25 @@ export function AppDataProvider({ children }) {
         }
         return remaining
       })
+      logActivity({
+        kind: 'wallet',
+        type: 'payout-method-removed',
+        title: 'Payout Method Removed',
+        description: 'Removed a payout method',
+        relatedId: methodId,
+        moduleStatus: 'Removed',
+      })
     },
     setDefaultPayoutMethod(methodId) {
       setPayoutMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
+      logActivity({
+        kind: 'wallet',
+        type: 'payout-method-default-changed',
+        title: 'Default Payout Method Changed',
+        description: 'Set a new default payout method',
+        relatedId: methodId,
+        moduleStatus: 'Default',
+      })
     },
     initiateWithdrawal(amount, payoutMethodId) {
       const summary = computeWalletSummary(astrologerWallet)
@@ -2806,6 +3321,15 @@ export function AppDataProvider({ children }) {
         ...prev,
         ledger: applyRunningBalances([...(prev.ledger || []), txn]),
       }))
+      logActivity({
+        kind: 'wallet',
+        type: 'withdrawal-requested',
+        title: 'Withdrawal Requested',
+        description: `Requested a withdrawal to ${txn.payoutLabel}`,
+        relatedId: txn.id,
+        amount: value,
+        moduleStatus: 'Processing',
+      })
       return txn
     },
 
@@ -2917,6 +3441,7 @@ export function AppDataProvider({ children }) {
     consultationHistory,
     atonements,
     payoutMethods,
+    activityLog,
     postLikes,
     savedPostIds,
     postComments,
@@ -2961,6 +3486,7 @@ export function AppDataProvider({ children }) {
     consultationHistory,
     atonements,
     payoutMethods,
+    activityLog,
     postLikes,
     savedPostIds,
     postComments,

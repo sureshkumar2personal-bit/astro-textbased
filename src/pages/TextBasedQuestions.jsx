@@ -16,8 +16,6 @@ import {
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-
-
 function getWordPreview(content) {
   const text = String(content || '').trim()
   const words = text.split(/\s+/).filter(Boolean)
@@ -101,6 +99,7 @@ export default function TextBasedQuestions() {
       next.set('questionId', id)
       return next
     })
+    actions.viewQuestion(id)
   }
 
   const closePanel = () => {

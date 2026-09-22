@@ -97,7 +97,7 @@ export default function AudienceMemberProfile() {
   const handleAction = (action) => {
     setMenuOpen(false)
     if (action === 'block') {
-      actions.toggleUserBlock(member.id)
+      actions.toggleUserBlock(member.id, member.name)
       setMessage(blocked ? `${member.name} has been unblocked.` : `${member.name} has been blocked.`)
       return
     }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   startOfMonth,
   startOfWeek,
@@ -23,7 +23,7 @@ function dayBreakdown(appointments, date) {
   return { total: dayApps.length, booked, pending, rescheduled, completed, cancelled, other }
 }
 
-export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate }) {
+export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate, showMonthArrows = false }) {
   const monthStart = startOfMonth(rangeStart)
   const gridStart = startOfWeek(monthStart, 0)
   const weeks = useMemo(() => {
@@ -68,6 +68,14 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     onSelectDate(now)
   }
 
+  const handlePrevMonth = () => {
+    onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))
+  }
+
   const applyMonthYear = (month, year) => {
     onRangeChange(new Date(year, month, 1))
     onSelectDate(new Date(year, month, 1))
@@ -78,6 +86,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     <div className="apt-scheduling-calendar apt-scheduling-calendar--history">
       <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
+          {showMonthArrows && (
+            <button type="button" className="icon-btn apt-calendar-arrow" onClick={handlePrevMonth} aria-label="Previous month">
+              <ChevronLeft size={16} />
+            </button>
+          )}
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
           </button>
@@ -123,6 +136,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
             </div>
           )}
         </div>
+        {showMonthArrows && (
+          <button type="button" className="icon-btn apt-calendar-arrow" onClick={handleNextMonth} aria-label="Next month">
+            <ChevronRight size={16} />
+          </button>
+        )}
         <div className="apt-history-calendar-legend" aria-label="Appointment status legend">
           <span className="is-pending">Upcoming</span>
           <span className="is-completed">Completed</span>
