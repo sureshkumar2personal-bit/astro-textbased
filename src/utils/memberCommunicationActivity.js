@@ -9,7 +9,7 @@ const ACTIVITY_TYPES = {
 const HIDDEN_ACTIVITY_STORAGE_KEY = 'astroconnect-hidden-user-activities'
 
 function questionUserId(question) {
-  return question.userId || question.submittedByUserId || null
+  return question.submittedByUserId || question.userId || null
 }
 
 function consultationUserId(session) {
