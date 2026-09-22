@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { getHiddenUserActivityIds, getUserCommunicationActivity, saveHiddenUserActivityIds } from '../../utils/memberCommunicationActivity.js'
+import { getUserActivityLog } from '../../utils/userActivityLog.js'
 import './activity.css'
 
 const ACTIVITY_WINDOW_DAYS = 7
@@ -16,6 +17,14 @@ const TYPE_META = {
   consultation: { label: 'Consultation', icon: MessageCircle },
   dispute: { label: 'Dispute', icon: ActivityIcon },
   wallet: { label: 'Wallet', icon: Wallet },
+  profile: { label: 'Profile', icon: ActivityIcon },
+  horoscope: { label: 'Horoscope', icon: Sparkles },
+  'payment-method': { label: 'Payment method', icon: Wallet },
+  subscription: { label: 'Subscription', icon: Sparkles },
+  autopay: { label: 'Autopay', icon: Wallet },
+  follow: { label: 'Following', icon: ActivityIcon },
+  security: { label: 'Security', icon: ActivityIcon },
+  review: { label: 'Review', icon: CheckCircle2 },
 }
 
 function formatDate(value) {
@@ -36,6 +45,40 @@ function activityType(item) {
   return TYPE_META[item.type] || { label: 'Activity', icon: ActivityIcon }
 }
 
+function collapseCompositeActivities(activities) {
+  const subscriptions = activities.filter((activity) => activity.type === 'subscription')
+  if (!subscriptions.length) return activities
+
+  const isLinked = (activity, subscription) => {
+    const activityTime = new Date(activity.occurredAt).getTime()
+    const subscriptionTime = new Date(subscription.occurredAt).getTime()
+    return Math.abs(subscriptionTime - activityTime) <= 60 * 1000
+  }
+
+  const enriched = subscriptions.map((subscription) => {
+    const walletPayment = activities.find((activity) => activity.type === 'wallet' && isLinked(activity, subscription))
+    const autopay = activities.find((activity) => activity.type === 'autopay' && isLinked(activity, subscription))
+    const details = [subscription.metadata, walletPayment && `Wallet payment: ${walletPayment.summary}`, autopay && 'Autopay enabled'].filter(Boolean)
+    return {
+      ...subscription,
+      summary: walletPayment
+        ? `${subscription.summary || 'Subscription started'} Payment completed from your wallet.`
+        : subscription.summary,
+      metadata: [...new Set(details)].join(' · '),
+    }
+  })
+
+  return activities
+    .filter((activity) => {
+      if (activity.type === 'subscription') return false
+      if (activity.type === 'wallet' || activity.type === 'autopay') {
+        return !subscriptions.some((subscription) => isLinked(activity, subscription))
+      }
+      return true
+    })
+    .concat(enriched)
+}
+
 export default function Activity() {
   const { currentUser } = useAuth()
   const { questions, consultationHistory, appointments, userWallet } = useAppData()
@@ -48,7 +91,10 @@ export default function Activity() {
 
   const activities = useMemo(() => {
     const cutoff = Date.now() - ACTIVITY_WINDOW_MS
-    return getUserCommunicationActivity({ questions, consultationHistory, appointments, walletTransactions: userWallet?.transactions, userId: currentUser?.id })
+    const communicationActivities = getUserCommunicationActivity({ questions, consultationHistory, appointments, walletTransactions: userWallet?.transactions, userId: currentUser?.id })
+    const accountActivities = getUserActivityLog(currentUser?.id)
+    return collapseCompositeActivities([...communicationActivities, ...accountActivities])
+      .sort((first, second) => new Date(second.occurredAt).getTime() - new Date(first.occurredAt).getTime())
       .filter((activity) => {
         const timestamp = new Date(activity.occurredAt).getTime()
         return !Number.isNaN(timestamp) && timestamp >= cutoff

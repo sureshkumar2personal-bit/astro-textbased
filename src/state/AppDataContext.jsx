@@ -10,6 +10,7 @@ import { initialAtonements } from '../data/atonementData.js'
 import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
 import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
 import { useAuth } from './AuthContext.jsx'
+import { recordUserActivity } from '../utils/userActivityLog.js'
 
 const AppDataContext = createContext(null)
 
@@ -2111,6 +2112,10 @@ export function AppDataProvider({ children }) {
           history: [...question.history, `Answer rated ${rating} star${rating === 1 ? '' : 's'}`],
         })),
       )
+      const question = questions.find((entry) => entry.id === questionId)
+      if (currentUser?.role === ROLES.USER && (question?.submittedByUserId || question?.userId) === currentUser.id) {
+        recordUserActivity({ userId: currentUser.id, type: 'review', title: 'Answer rated', summary: review || `You rated the answer ${rating} star${rating === 1 ? '' : 's'}.`, metadata: `${rating}/5` })
+      }
     },
     rateDisputeResolution(questionId, rating) {
       setQuestions((prev) =>
@@ -2126,6 +2131,10 @@ export function AppDataProvider({ children }) {
           history: [...question.history, `Dispute resolution rated ${rating} star${rating === 1 ? '' : 's'}`],
         })),
       )
+      const question = questions.find((entry) => entry.id === questionId)
+      if (currentUser?.role === ROLES.USER && (question?.submittedByUserId || question?.userId) === currentUser.id) {
+        recordUserActivity({ userId: currentUser.id, type: 'review', title: 'Dispute resolution rated', summary: `You rated the dispute resolution ${rating} star${rating === 1 ? '' : 's'}.`, metadata: `${rating}/5` })
+      }
     },
     bookAppointment(payload) {
       const appointment = {
@@ -2533,6 +2542,9 @@ export function AppDataProvider({ children }) {
       setFollowedAstrologerIds((prev) =>
         isCurrentlyFollowing ? prev.filter((id) => id !== astrologerId) : [...prev, astrologerId],
       )
+      if (currentUser?.role === ROLES.USER) {
+        recordUserActivity({ userId: currentUser.id, type: 'follow', title: isCurrentlyFollowing ? 'Astrologer unfollowed' : 'Astrologer followed', summary: `${isCurrentlyFollowing ? 'You stopped following' : 'You started following'} ${astrologerName}.`, metadata: astrologerName })
+      }
       if (!isCurrentlyFollowing) {
         setNotifications((prev) => [
           {
@@ -2581,6 +2593,9 @@ export function AppDataProvider({ children }) {
         ],
       }
       setSubscriptions((prev) => [...prev, subscription])
+      if (currentUser?.role === ROLES.USER && userId === currentUser.id) {
+        recordUserActivity({ userId, type: 'subscription', title: 'Subscription started', summary: `You subscribed to ${astrologerName} using your wallet.`, metadata: `${normalizedTier} plan · ₹${subscription.price}${subscription.autopayEnabled ? ' · Autopay enabled' : ''}` })
+      }
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -2617,6 +2632,9 @@ export function AppDataProvider({ children }) {
         autopayEnabled: true,
       }
       setSubscriptions((prev) => prev.map((sub) => (sub === existing ? updated : sub)))
+      if (currentUser?.role === ROLES.USER && userId === currentUser.id) {
+        recordUserActivity({ userId, type: 'subscription', title: 'Subscription renewed', summary: `Your subscription to ${existing.astrologerName} was renewed.`, metadata: existing.tier || 'Subscription' })
+      }
       return updated
     },
     getAvailableDiscountQuestions(userId) {
@@ -2839,10 +2857,12 @@ export function AppDataProvider({ children }) {
       } else {
         setUserPaymentMethods((prev) => [...prev, method])
       }
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'payment-method', title: 'Payment method added', summary: 'A new payment method was saved to your account.', metadata: method.type })
       return method
     },
     updateUserPaymentMethod(methodId, patch) {
       setUserPaymentMethods((prev) => prev.map((m) => (m.id === methodId ? { ...m, ...patch } : m)))
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'payment-method', title: 'Payment method updated', summary: 'A saved payment method was updated.', metadata: methodId })
     },
     removeUserPaymentMethod(methodId) {
       setUserPaymentMethods((prev) => {
@@ -2852,9 +2872,11 @@ export function AppDataProvider({ children }) {
         }
         return remaining
       })
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'payment-method', title: 'Payment method removed', summary: 'A saved payment method was removed.', metadata: methodId })
     },
     setDefaultUserPaymentMethod(methodId) {
       setUserPaymentMethods((prev) => prev.map((m) => ({ ...m, isDefault: m.id === methodId })))
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'payment-method', title: 'Default payment method changed', summary: 'Your default payment method was changed.', metadata: methodId })
     },
 
     // User Autopays
@@ -2865,13 +2887,16 @@ export function AppDataProvider({ children }) {
         createdAt: new Date().toISOString(),
       }
       setUserAutopays((prev) => [autopay, ...prev])
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'autopay', title: 'Autopay created', summary: 'A new automatic payment rule was created.', metadata: autopay.type })
       return autopay
     },
     updateUserAutopay(autopayId, patch) {
       setUserAutopays((prev) => prev.map((a) => (a.id === autopayId ? { ...a, ...patch } : a)))
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'autopay', title: 'Autopay updated', summary: 'An automatic payment rule was updated.', metadata: patch.status || autopayId })
     },
     deleteUserAutopay(autopayId) {
       setUserAutopays((prev) => prev.filter((a) => a.id !== autopayId))
+      if (currentUser?.role === ROLES.USER) recordUserActivity({ userId: currentUser.id, type: 'autopay', title: 'Autopay removed', summary: 'An automatic payment rule was removed.', metadata: autopayId })
     },
 
     // User Withdrawals

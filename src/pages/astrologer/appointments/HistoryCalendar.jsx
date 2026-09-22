@@ -175,13 +175,10 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
                     <div className="apt-month-day">{cell.getDate()}</div>
                     {isUserCalendar ? (
                       <div className="apt-history-cell-side">
-                        {breakdown.total > 0 && <div className="apt-history-count" aria-label={`${breakdown.total} appointments`}>{breakdown.total}</div>}
-                        <div className="apt-history-cell-status">
-                          {breakdown.pending.length > 0 && <span className="is-pending" title={`${breakdown.pending.length} upcoming appointment${breakdown.pending.length === 1 ? '' : 's'}`} aria-label={`${breakdown.pending.length} upcoming appointments`} />}
-                          {breakdown.completed.length > 0 && <span className="is-completed" title={`${breakdown.completed.length} completed appointment${breakdown.completed.length === 1 ? '' : 's'}`} aria-label={`${breakdown.completed.length} completed appointments`} />}
-                          {breakdown.cancelled.length > 0 && <span className="is-cancelled" title={`${breakdown.cancelled.length} cancelled appointment${breakdown.cancelled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.cancelled.length} cancelled appointments`} />}
-                          {breakdown.rescheduled.length > 0 && <span className="is-rescheduled" title={`${breakdown.rescheduled.length} rescheduled appointment${breakdown.rescheduled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.rescheduled.length} rescheduled appointments`} />}
-                        </div>
+                        {breakdown.pending.length > 0 && <span className="apt-history-status-item is-pending" title={`${breakdown.pending.length} upcoming appointment${breakdown.pending.length === 1 ? '' : 's'}`} aria-label={`${breakdown.pending.length} upcoming appointments`}><i aria-hidden="true" />{breakdown.pending.length}</span>}
+                        {breakdown.completed.length > 0 && <span className="apt-history-status-item is-completed" title={`${breakdown.completed.length} completed appointment${breakdown.completed.length === 1 ? '' : 's'}`} aria-label={`${breakdown.completed.length} completed appointments`}><i aria-hidden="true" />{breakdown.completed.length}</span>}
+                        {breakdown.cancelled.length > 0 && <span className="apt-history-status-item is-cancelled" title={`${breakdown.cancelled.length} cancelled appointment${breakdown.cancelled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.cancelled.length} cancelled appointments`}><i aria-hidden="true" />{breakdown.cancelled.length}</span>}
+                        {breakdown.rescheduled.length > 0 && <span className="apt-history-status-item is-rescheduled" title={`${breakdown.rescheduled.length} rescheduled appointment${breakdown.rescheduled.length === 1 ? '' : 's'}`} aria-label={`${breakdown.rescheduled.length} rescheduled appointments`}><i aria-hidden="true" />{breakdown.rescheduled.length}</span>}
                       </div>
                     ) : (
                       <>

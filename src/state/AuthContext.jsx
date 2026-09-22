@@ -1,6 +1,7 @@
 /* oxlint-disable react/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { inferRoleFromEmail, ROLES } from '../utils/roleRoutes.js'
+import { recordUserActivity } from '../utils/userActivityLog.js'
 
 const AUTH_STORAGE_KEY = 'astroconnect-auth-session'
 const USERS_STORAGE_KEY = 'astroconnect-auth-users'
@@ -107,6 +108,7 @@ export function AuthProvider({ children }) {
         throw new Error(`This account is registered as a ${user.role === ROLES.ASTROLOGER ? 'Astrologer' : 'User'}. Choose the correct login portal.`)
       }
       setCurrentUser(user)
+      recordUserActivity({ userId: user.id, type: 'security', title: 'Account sign-in', summary: 'You signed in to Astro Connect.', metadata: user.email })
       return user
     },
     register(payload) {
@@ -173,6 +175,16 @@ export function AuthProvider({ children }) {
         profileImage: String(payload.profileImage || '').trim(),
         astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
         astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
+      }
+      const profileFields = ['name', 'email', 'phone', 'bio', 'profileImage']
+      const birthFields = ['gender', 'dateOfBirth', 'birthTime', 'birthPlace', 'horoscopeDetails', 'rasi', 'nakshatra', 'lagna']
+      const changedProfileFields = profileFields.filter((field) => updatedUser[field] !== currentUser[field])
+      const changedBirthFields = birthFields.filter((field) => updatedUser[field] !== currentUser[field])
+      if (changedProfileFields.length) {
+        recordUserActivity({ userId: currentUser.id, type: 'profile', title: 'Profile updated', summary: `Updated ${changedProfileFields.join(', ')}.`, metadata: changedProfileFields.join(', ') })
+      }
+      if (changedBirthFields.length) {
+        recordUserActivity({ userId: currentUser.id, type: 'horoscope', title: 'Horoscope details updated', summary: 'Your birth or horoscope details were updated.', metadata: changedBirthFields.join(', ') })
       }
       if (payload.dateOfBirth !== undefined || payload.birthTime !== undefined || payload.birthPlace !== undefined || payload.horoscopeDetails !== undefined || payload.rasi !== undefined || payload.nakshatra !== undefined || payload.lagna !== undefined) {
         writeJSON('astroconnect-user-birth-details', {
