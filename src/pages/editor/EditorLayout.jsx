@@ -14,7 +14,7 @@ const groups = [
   { label: 'Campaigns', icon: 'campaigns', to: '/editor/campaigns' },
   { label: 'Text Based', icon: 'questions', children: [{ label: 'Questions', to: '/editor/questions' }, { label: 'Content', to: '/editor/content' }] },
   { label: 'Appointments', icon: 'appointments', children: [{ label: 'Appointment History', to: '/editor/appointments' }] },
-  { label: 'Live Scheduling', icon: 'live', to: '/editor/live-scheduling' },
+  { label: 'Live', icon: 'live', children: [{ label: 'Schedule Live', to: '/editor/live-scheduling' }, { label: 'Live History', to: '/editor/live-history' }] },
   { label: 'Perks & Benefits', icon: 'perks', to: '/editor/perks' },
   { label: 'Discounts', icon: 'discounts', to: '/editor/discounts' },
   { label: 'Atonement Tracking', icon: 'atonement', to: '/editor/atonement-tracking' },
