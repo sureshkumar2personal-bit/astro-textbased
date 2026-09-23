@@ -111,7 +111,10 @@ export function getEditorNavigation(editor) {
   if (hasEditorPermission(editor, 'Campaigns', 'View')) navigation.push({ label: 'Campaigns', to: '/editor/campaigns', icon: 'campaigns' })
   if (hasEditorPermission(editor, 'Questions', 'View')) navigation.push({ label: 'Questions', to: '/editor/questions', icon: 'questions' })
   if (hasEditorPermission(editor, 'Appointments', 'View')) navigation.push({ label: 'Appointments', to: '/editor/appointments', icon: 'appointments' })
-  if (hasEditorPermission(editor, 'Live Events', 'View')) navigation.push({ label: 'Live Scheduling', to: '/editor/live-scheduling', icon: 'live' })
+  if (hasEditorPermission(editor, 'Live Events', 'View')) {
+    navigation.push({ label: 'Schedule Live', to: '/editor/live-scheduling', icon: 'live' })
+    navigation.push({ label: 'Live History', to: '/editor/live-history', icon: 'live' })
+  }
   if (hasEditorPermission(editor, 'Content', 'View')) navigation.push({ label: 'Content', to: '/editor/content', icon: 'content' })
   if (hasEditorPermission(editor, 'Perks', 'View')) navigation.push({ label: 'Perks & Benefits', to: '/editor/perks', icon: 'perks' })
   if (hasEditorPermission(editor, 'Discounts', 'View')) navigation.push({ label: 'Discounts', to: '/editor/discounts', icon: 'discounts' })

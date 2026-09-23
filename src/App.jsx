@@ -106,6 +106,7 @@ import EditorNotifications from './pages/editor/EditorNotifications.jsx'
 import EditorAvailability from './pages/editor/EditorAvailability.jsx'
 import EditorCampaigns from './pages/editor/EditorCampaigns.jsx'
 import EditorLiveScheduling from './pages/editor/EditorLiveScheduling.jsx'
+import EditorLiveHistory from './pages/editor/EditorLiveHistory.jsx'
 import EditorPerks from './pages/editor/EditorPerks.jsx'
 import EditorDiscounts from './pages/editor/EditorDiscounts.jsx'
 import EditorAtonementTracking from './pages/editor/EditorAtonementTracking.jsx'
@@ -294,6 +295,7 @@ function EditorRoutes() {
         <Route element={<RequireEditorPermission group="Appointments" permission="View" />}><Route path="/editor/appointments" element={<EditorAppointments />} /></Route>
         <Route element={<RequireEditorPermission group="Content" permission="View" />}><Route path="/editor/content" element={<EditorContent />} /></Route>
         <Route element={<RequireEditorPermission group="Live Events" permission="View" />}><Route path="/editor/live-scheduling" element={<EditorLiveScheduling />} /></Route>
+        <Route element={<RequireEditorPermission group="Live Events" permission="View" />}><Route path="/editor/live-history" element={<EditorLiveHistory />} /></Route>
         <Route element={<RequireEditorPermission group="Perks" permission="View" />}><Route path="/editor/perks" element={<EditorPerks />} /></Route>
         <Route element={<RequireEditorPermission group="Discounts" permission="View" />}><Route path="/editor/discounts" element={<EditorDiscounts />} /></Route>
         <Route element={<RequireEditorPermission group="Atonements" permission="TrackProgress" />}><Route path="/editor/atonement-tracking" element={<EditorAtonementTracking />} /></Route>

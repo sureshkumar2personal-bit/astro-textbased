@@ -1,7 +1,32 @@
-import { useState } from 'react'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { useEditor } from '../../state/EditorContext.jsx'
 import { hasEditorPermission } from '../../utils/editorAccess.js'
+import AppointmentAvailabilityPanel from '../astrologer/appointments/AppointmentAvailabilityPanel.jsx'
 import './editor-availability.css'
 
-export default function EditorAvailability() { const { currentUser } = useAuth(); const { currentEditor, saveDraft, submitDraft, recordAudit } = useEditor(); const editor = currentEditor || currentUser; const [draft, setDraft] = useState({ days: 'Monday, Tuesday, Wednesday', start: '10:00', end: '14:00' }); const [saved, setSaved] = useState(null); const canEdit = hasEditorPermission(editor, 'Availability', 'Edit'); const canSubmit = hasEditorPermission(editor, 'Availability', 'Submit'); const save = () => { const item = saveDraft({ id: saved?.id, module: 'Availability', action: 'edit', payload: draft }); setSaved(item); recordAudit('Availability Edited', 'Availability', 'Saved availability draft.') }; const submit = () => { const item = saved || saveDraft({ module: 'Availability', action: 'edit', payload: draft }); submitDraft(item.id); setSaved({ ...item, status: 'pending' }); recordAudit('Availability Submitted', 'Availability', 'Submitted availability for approval.') }; return <section className="editor-page"><div className="editor-page-intro"><span className="editor-eyebrow">CALENDAR AVAILABILITY</span><h2>Availability workspace</h2><p>Prepare availability changes without changing the published astrologer schedule.</p></div><div className="editor-panel editor-form-panel"><label>Available days<input disabled={!canEdit} value={draft.days} onChange={(e) => setDraft({ ...draft, days: e.target.value })} /></label><div className="editor-two-fields"><label>Start time<input disabled={!canEdit} type="time" value={draft.start} onChange={(e) => setDraft({ ...draft, start: e.target.value })} /></label><label>End time<input disabled={!canEdit} type="time" value={draft.end} onChange={(e) => setDraft({ ...draft, end: e.target.value })} /></label></div><div className="editor-form-actions">{canEdit && <button type="button" className="editor-action-button" onClick={save}>Save Draft</button>}{canSubmit && <button type="button" className="editor-action-button" onClick={submit}>Submit for Approval</button>}{saved && <span className="editor-badge">{saved.status === 'pending' ? 'Pending Approval' : 'Draft'}</span>}</div></div></section> }
+export default function EditorAvailability() {
+  const { currentUser } = useAuth()
+  const { currentEditor } = useEditor()
+  const editor = currentEditor || currentUser
+  const astrologerId = editor?.astrologerId || currentUser?.astrologerId
+  const canEdit = hasEditorPermission(editor, 'Availability', 'Edit')
+  const canPublish = hasEditorPermission(editor, 'Availability', 'Publish')
+
+  return (
+    <section className={`editor-page editor-availability-page${canEdit ? '' : ' is-readonly'}`}>
+      <div className="editor-page-intro">
+        <span className="editor-eyebrow">EDITOR WORKSPACE</span>
+        <h2>Appointments</h2>
+        <p>Manage appointment availability using the same calendar workspace as the astrologer.</p>
+      </div>
+      <div className="editor-availability-access-note">
+        <span>{canEdit ? 'Availability editing enabled' : 'Availability view only'}</span>
+        <small>{canPublish ? 'You can publish assigned changes.' : 'Publishing remains with the astrologer.'}</small>
+      </div>
+      <AppointmentAvailabilityPanel
+        astrologerId={astrologerId}
+        onPublished={() => undefined}
+      />
+    </section>
+  )
+}
