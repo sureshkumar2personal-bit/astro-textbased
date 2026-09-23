@@ -1,0 +1,33 @@
+/* ===================================================
+   Main CSS Index - Centralized Import Point
+   Imports organized CSS structure:
+   - Common (shared by both User and Astrologer)
+   - User (user-specific only)
+   - Astrologer (astrologer-specific only)
+   =================================================== */
+
+/* COMMON STYLES - Shared across entire application */
+@import "./common/typography.css";
+@import "./common/common.css";
+@import "./common/buttons.css";
+@import "./common/cards.css";
+@import "./common/forms.css";
+@import "./common/modals.css";
+@import "./common/tables.css";
+@import "./common/badges.css";
+
+/* USER-SPECIFIC STYLES */
+@import "./user/user.css";
+@import "./user/dashboard.css";
+
+/* ASTROLOGER-SPECIFIC STYLES */
+@import "./astrologer/astrologer.css";
+@import "./astrologer/dashboard.css";
+
+/* NOTE: This file replaces the monolithic src/index.css
+   All CSS has been organized into logical sections for:
+   - Better maintainability
+   - Cleaner separation of concerns
+   - Easier debugging and finding styles
+   - Reduced merge conflicts
+*/

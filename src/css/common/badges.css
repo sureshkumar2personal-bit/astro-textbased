@@ -1,0 +1,160 @@
+/* ===== BADGE & STATUS STYLES ===== */
+
+/* Status pills - base styling */
+.account-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--body);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.account-status-pill span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-bg);
+}
+
+/* Status pill - light theme variant */
+.account-status-pill {
+  border-color: #ebe6ef;
+  background: rgba(255, 255, 255, .72);
+  color: #55515d;
+  box-shadow: 0 3px 12px rgba(49, 35, 70, .035);
+}
+
+/* Activity badge styles */
+.my-activity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Appointment status timeline */
+.appointment-status-timeline {
+  align-items: start;
+  gap: 0;
+}
+
+.appointment-status-step {
+  gap: 5px;
+  min-width: 0;
+  font-size: 10px;
+}
+
+.appointment-status-step:not(:last-child)::after {
+  top: 11px;
+  left: 58%;
+  width: 84%;
+  height: 1px;
+  background: var(--surface-border);
+}
+
+.appointment-status-step.is-complete:not(:last-child)::after {
+  background: var(--primary);
+}
+
+.appointment-status-step span {
+  width: 22px;
+  height: 22px;
+  color: var(--muted);
+  background: var(--neutral-bg);
+  font-size: 10px;
+}
+
+.appointment-status-step.is-complete,
+.appointment-status-step.is-current {
+  color: var(--primary);
+}
+
+.appointment-status-step.is-complete span {
+  color: #fff;
+  background: var(--primary);
+}
+
+.appointment-status-step.is-current span {
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.appointment-status-step strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Premium presentation theme - status pills */
+.account-status-pill {
+  gap: 8px;
+  padding: 10px 15px;
+  border-color: rgba(255, 255, 255, .95);
+  background: rgba(255, 255, 255, .78);
+  color: #4c4560;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(66, 45, 88, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+}
+
+.account-status-pill span {
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #34d399, #059669);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, .16);
+}
+
+/* Responsive behavior for badges */
+@media (max-width: 640px) {
+  .account-status-pill {
+    display: inline-flex;
+    margin-top: 15px;
+  }
+
+  .my-activity-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .appointment-status-timeline {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .appointment-status-step {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    justify-items: start;
+    align-items: center;
+    text-align: left;
+  }
+
+  .appointment-status-step:not(:last-child)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .appointment-status-timeline {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .appointment-status-step:not(:last-child)::after {
+    left: 57%;
+    width: 86%;
+  }
+}
