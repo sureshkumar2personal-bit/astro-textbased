@@ -1,0 +1,466 @@
+/* Sales Management Page */
+
+.sales-management-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 4px 48px;
+  color: var(--ink);
+}
+
+.sales-management-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sales-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.sales-management-header h1 {
+  margin: 7px 0 8px;
+  font-size: clamp(27px, 3vw, 38px);
+  letter-spacing: -0.04em;
+}
+
+.sales-management-header p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Sales metrics */
+.sales-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sales-metric-card {
+  padding: 20px;
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.sales-metric-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.sales-metric-value {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.sales-metric-change {
+  color: var(--success);
+  font-size: 11px;
+}
+
+.sales-metric-change.is-negative {
+  color: var(--danger);
+}
+
+/* Filters */
+.sales-management-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.sales-filter-select {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sales-filter-date-range {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sales-filter-date {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+/* Sales chart placeholder */
+.sales-chart-container {
+  padding: 23px;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 24px;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.sales-chart-container h2 {
+  position: absolute;
+  top: 23px;
+  left: 23px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Sales table */
+.sales-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.sales-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--surface-strong);
+  color: var(--muted);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sales-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--divider);
+  color: var(--body);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.sales-table tbody tr:hover {
+  background: var(--surface-soft);
+}
+
+.sales-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Table cell content */
+.sales-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sales-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.sales-user-info {
+  display: grid;
+  gap: 2px;
+}
+
+.sales-user-info strong {
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.sales-user-info small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.sales-service-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sales-service-date {
+  font-size: 12px;
+  color: var(--body);
+}
+
+.sales-amount {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.sales-commission {
+  font-weight: 600;
+  color: var(--success);
+  font-size: 12px;
+}
+
+.sales-status {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sales-status--completed {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.sales-status--pending {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.sales-status--refunded {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Actions */
+.sales-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.sales-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.sales-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.sales-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pagination */
+.sales-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--divider);
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--body);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* Empty state */
+.sales-management-empty {
+  padding: 60px 30px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.sales-management-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.sales-management-empty-title {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sales-management-empty-text {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sales-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .sales-management-header {
+    display: block;
+  }
+
+  .sales-management-filters {
+    flex-direction: column;
+  }
+
+  .sales-filter-select,
+  .sales-filter-date {
+    width: 100%;
+  }
+
+  .sales-filter-date-range {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .sales-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .sales-management-page {
+    padding: 0 0 34px;
+  }
+
+  .sales-management-header {
+    margin-bottom: 22px;
+  }
+
+  .sales-management-filters {
+    flex-direction: column;
+  }
+
+  .sales-filter-select,
+  .sales-filter-date {
+    width: 100%;
+  }
+
+  .sales-filter-date-range {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .sales-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-chart-container {
+    padding: 60px 17px;
+  }
+
+  .sales-table-wrap {
+    border-radius: 0;
+  }
+
+  .sales-table th,
+  .sales-table td {
+    padding: 12px 10px;
+    font-size: 11px;
+  }
+
+  .sales-user {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sales-pagination {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,24 @@
+/* Pooja Store & Package Purchase CSS - Pooja package display and purchase flow
+ * Main classes: .pooja-store*, .package*, .purchase*
+ * Note: Most pooja-store styles are included in pooja.css (atonement-cards-grid, atonement-card*)
+ * This file is reserved for pooja-store specific overrides and package-related styles
+ */
+
+/* Package display variations for store */
+.pooja-store-grid { display: grid; grid-template-columns: repeat(3, minmax(280px, 1fr)); gap: 18px; align-items: stretch; }
+.pooja-package-card { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); overflow: hidden; transition: all 220ms var(--ease-premium); box-shadow: var(--shadow-sm); }
+.pooja-package-card:hover { border-color: color-mix(in srgb, var(--primary) 30%, var(--surface-border)); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+/* Purchase confirmation */
+.pooja-purchase-confirm { width: min(480px, 100%); margin: 20px auto 4px; padding: 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-soft); }
+.pooja-purchase-confirm h2 { margin: 0 0 12px; font-size: 18px; }
+.pooja-purchase-confirm p { margin: 0 0 16px; color: var(--text-secondary); font-size: 13px; }
+.pooja-purchase-confirm .btn { width: 100%; }
+
+@media (max-width: 1100px) {
+  .pooja-store-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .pooja-store-grid { grid-template-columns: 1fr; }
+}

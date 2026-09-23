@@ -1,0 +1,150 @@
+/* Live Session & Call CSS - User live consultation, call booking, and payment flow
+ * Main classes: .call-session*, .call-booking*, .call-payment*, .call-package*, .call-extension*
+ */
+
+/* Session call styles */
+.call-session-card { position: relative; }
+.call-session-timer { display: inline-flex; align-items: center; gap: 7px; margin: 8px 0 18px; color: var(--primary); font-size: 18px; font-weight: 750; }
+.call-completed-state, .call-extension { width: min(480px, 100%); margin: 20px auto 4px; padding: 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-soft); }
+.call-completed-state__icon { display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 50%; color: #fff; background: var(--primary); font-weight: 800; }
+.call-completed-state h2, .call-extension h2 { margin: 0 0 7px; font-size: 18px; }
+.call-completed-state p, .call-extension > p { margin: 4px 0; color: var(--text-secondary); font-size: 13px; }
+.call-completed-state .btn { display: flex; width: 100%; justify-content: center; margin-top: 12px; }
+.call-extension__packages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.call-extension__packages button { display: flex; min-height: 112px; flex-direction: column; align-items: flex-start; gap: 6px; padding: 11px; border: 1px solid var(--surface-border); border-radius: 11px; color: var(--text-primary); background: #fff; text-align: left; cursor: pointer; }
+.call-extension__packages button.is-selected { border-color: var(--primary); background: var(--primary-bg); }
+.call-extension__packages b { font-size: 12px; }
+.call-extension__packages strong { font-size: 16px; }
+.call-extension__packages span, .call-extension__packages em { color: var(--text-secondary); font-size: 11px; font-style: normal; }
+.call-extension__packages em { display: flex; align-items: center; gap: 3px; color: var(--primary); font-weight: 700; }
+.call-extension__balance { display: flex; justify-content: space-between; margin: 12px 0; padding: 11px 0; border-top: 1px solid var(--surface-border); border-bottom: 1px solid var(--surface-border); color: var(--text-secondary); font-size: 13px; }
+.call-extension__balance strong { color: var(--text-primary); }
+.call-extension > .btn { width: 100%; justify-content: center; }
+.call-extension__insufficient { display: grid; gap: 8px; padding: 12px; border-radius: 10px; background: #fff5f5; color: var(--danger); font-size: 12px; }
+.call-extension__insufficient span { color: var(--text-secondary); }
+.call-extension__success { margin-top: 14px; color: var(--green-600); font-size: 12px; font-weight: 700; }
+.call-session-confirm { margin: 16px auto 0; padding: 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
+.call-session-confirm h2 { margin: 0 0 5px; font-size: 16px; }
+.call-session-confirm p { margin: 0 0 12px; color: var(--text-secondary); font-size: 13px; }
+.call-session-confirm .btn { margin: 4px; }
+
+@media (max-width: 540px) {
+  .call-extension__packages { grid-template-columns: 1fr; }
+  .call-extension__packages button { min-height: 0; }
+  .call-session-confirm .btn { width: 100%; margin: 4px 0; justify-content: center; }
+}
+
+/* Chat package selection */
+.chat-booking-page__packages { margin-top: 24px; }
+.chat-booking-page__packages h2 { font-size: 18px; }
+.chat-booking-page__package-grid { gap: 12px; margin-top: 14px; }
+.chat-package { min-height: 162px; padding: 18px 15px 14px; border-radius: var(--radius-m); background: var(--surface-strong); }
+.chat-package--selected { padding: 17px 14px 13px; border: 2px solid var(--primary); background: var(--primary-bg); }
+.chat-package > strong { margin-top: 13px; }
+.chat-package__check { top: 9px; right: 9px; width: 20px; height: 20px; }
+.chat-booking-page__start-button { margin-top: 16px; }
+.chat-booking-page__note { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; text-align: center; }
+
+/* Call booking page */
+.call-booking-page { width: min(100%, 760px); margin: 0 auto; padding: 4px 0 32px; }
+.call-booking-page__back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 20px; padding: 0; border: 0; background: transparent; color: var(--primary); font-size: 14px; font-weight: 600; cursor: pointer; }
+.call-booking-page__back:hover { color: var(--primary-dark); }
+.call-booking-page__panel { padding: 28px; border: 1px solid var(--surface-border); border-radius: var(--radius-l); background: var(--surface-strong); box-shadow: var(--shadow-card); }
+.call-booking-page__astrologer { display: flex; align-items: center; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.call-booking-page__avatar-wrap { position: relative; flex: 0 0 auto; }
+.call-booking-page__avatar { display: flex; width: 62px; height: 62px; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); box-shadow: var(--shadow-card); color: #fff; font-size: 19px; font-weight: 700; }
+.call-booking-page__status { position: absolute; right: 1px; bottom: 2px; width: 14px; height: 14px; border: 2px solid var(--surface-strong); border-radius: 50%; background: var(--muted); }
+.call-booking-page__status--online { background: var(--success); }
+.call-booking-page__astrologer h1, .call-booking-page__packages h2, .call-booking-page__summary h2 { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; }
+.call-booking-page__astrologer h1 { font-size: 23px; line-height: 1.25; }
+.call-booking-page__astrologer p { margin: 5px 0 4px; color: var(--text-secondary); font-size: 14px; }
+.call-booking-page__availability { color: var(--muted); font-size: 12px; font-weight: 600; }
+.call-booking-page__availability::before { content: '●'; margin-right: 5px; }
+.call-booking-page__availability--online { color: var(--success); }
+.call-booking-page__packages, .call-booking-page__summary { margin-top: 26px; }
+.call-booking-page__cta { margin-top: 16px; text-align: center; }
+.call-booking-page__cta .call-booking-page__book-button { width: 100%; }
+.call-booking-page__packages h2, .call-booking-page__summary h2 { font-size: 18px; }
+.call-booking-page__package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.call-package { position: relative; display: flex; min-height: 162px; flex-direction: column; align-items: flex-start; padding: 18px 15px 14px; border: 1px solid var(--border); border-radius: var(--radius-m); background: var(--surface-strong); color: var(--ink); text-align: left; cursor: pointer; transition: border-color 180ms var(--ease-premium), background 180ms var(--ease-premium), transform 180ms var(--ease-premium); }
+.call-package:hover { transform: translateY(-2px); border-color: var(--secondary); }
+.call-package--selected { border: 2px solid var(--primary); background: var(--primary-bg); padding: 17px 14px 13px; }
+.call-package__best-value { position: absolute; top: -10px; left: 12px; padding: 3px 7px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.call-package__selected-icon { position: absolute; top: 9px; right: 9px; display: flex; width: 20px; height: 20px; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: #fff; }
+.call-package__duration { color: var(--text-secondary); font-size: 14px; font-weight: 600; }
+.call-package > strong { margin-top: 13px; color: var(--ink); font-size: 24px; line-height: 1; }
+.call-package__rate { margin-top: 6px; color: var(--text-secondary); font-size: 13px; }
+.call-package__select-label { margin-top: auto; color: var(--primary); font-size: 13px; font-weight: 700; }
+.call-booking-page__summary { padding: 20px; border-radius: var(--radius-m); background: var(--surface-soft); }
+.call-booking-page__summary dl { margin: 14px 0 20px; }
+.call-booking-page__summary dl > div { display: flex; justify-content: space-between; gap: 20px; padding: 7px 0; color: var(--text-secondary); font-size: 14px; }
+.call-booking-page__summary dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
+.call-booking-page__summary .call-booking-page__total { margin-top: 5px; padding-top: 14px; border-top: 1px solid var(--border); color: var(--ink); font-size: 16px; font-weight: 700; }
+.call-booking-page__total dd { color: var(--primary); font-size: 22px; }
+.call-booking-page__book-button { width: 100%; min-height: 46px; }
+.call-booking-page__note { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; text-align: center; }
+
+/* Call payment page */
+.call-payment-page { width: min(760px, 100%); margin: 0 auto; padding: 0 18px 48px; color: var(--text-primary); }
+.call-payment-page__back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 22px; border: 0; color: var(--text-secondary); background: none; font-size: 13px; cursor: pointer; }
+.call-payment-page__heading { margin-bottom: 18px; }
+.call-payment-page__heading span { color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.call-payment-page__heading h1 { margin: 5px 0 4px; font-size: 26px; }
+.call-payment-page__heading p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.call-payment-page__details, .call-payment-page__card { margin-top: 12px; padding: 18px 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); box-shadow: 0 5px 16px rgba(58, 42, 106, .035); }
+.call-payment-page__astrologer { display: flex; align-items: center; gap: 12px; }
+.call-payment-page__avatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); font-weight: 800; }
+.call-payment-page__astrologer h2, .call-payment-page__card h2 { margin: 0; font-size: 16px; }
+.call-payment-page__astrologer p { margin: 3px 0 0; color: var(--text-secondary); font-size: 12px; }
+.call-payment-page__details dl, .call-payment-page__amounts { margin: 16px 0 0; }
+.call-payment-page__details dl div, .call-payment-page__amounts div { display: flex; justify-content: space-between; gap: 20px; padding: 7px 0; font-size: 13px; }
+.call-payment-page dt { color: var(--text-secondary); }
+.call-payment-page dd { margin: 0; font-weight: 650; }
+.call-payment-page .is-total { padding-top: 11px; border-top: 1px solid var(--surface-border); }
+.call-payment-page .is-total dd { color: var(--primary); }
+.call-payment-page__amounts { margin-top: 12px; }
+.call-payment-page__secure { display: flex; align-items: center; gap: 6px; margin: 14px 0 0; color: var(--green-600); font-size: 12px; }
+.call-payment-page__coupon h2 { font-size: 14px; }
+.call-payment-page__coupon > div { display: flex; gap: 8px; margin-top: 10px; }
+.call-payment-page__coupon input { flex: 1; min-width: 0; }
+.call-payment-page__coupon .btn { min-height: 40px; }
+.call-payment-page__methods { display: grid; gap: 8px; margin-top: 12px; }
+.call-payment-method { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px; border: 1px solid var(--surface-border); border-radius: 11px; color: var(--text-primary); background: #fff; text-align: left; cursor: pointer; }
+.call-payment-method.is-selected { border-color: var(--primary); background: var(--primary-bg); }
+.call-payment-method__icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--primary); background: var(--primary-bg); }
+.call-payment-method > span:nth-child(2) { display: flex; flex: 1; flex-direction: column; gap: 3px; }
+.call-payment-method b { font-size: 13px; }
+.call-payment-method small { color: var(--text-secondary); font-size: 11px; }
+.call-payment-method__radio { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--surface-border); border-radius: 50%; color: #fff; background: #fff; }
+.is-selected .call-payment-method__radio { border-color: var(--primary); background: var(--primary); }
+.call-payment-page__pay { display: block; width: min(360px, 100%); min-height: 44px; margin: 18px auto 0; }
+.call-payment-page__insufficient { margin: 12px 0 0; color: var(--danger); font-size: 12px; text-align: center; }
+
+@media (max-width: 640px) {
+  .call-payment-page { padding: 0 12px 32px; }
+  .call-payment-page__heading h1 { font-size: 23px; }
+  .call-payment-page__details, .call-payment-page__card { padding: 16px; }
+  .call-payment-page__coupon > div { flex-direction: column; }
+  .call-payment-page__coupon .btn { width: 100%; justify-content: center; }
+}
+
+/* Compact checkout treatment */
+.call-payment-checkout { width: min(620px, 100%); margin: 0 auto; padding: 0 20px 76px; border: 1px solid var(--surface-border); border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(58, 42, 106, .05); }
+.call-payment-page__compact-details { margin: 0; padding: 15px 0 12px; color: var(--text-secondary); font-size: 11px; }
+.call-payment-checkout .call-payment-page__card { margin: 0; padding: 16px 0; border: 0; border-top: 1px solid var(--surface-border); border-radius: 0; box-shadow: none; }
+.call-payment-checkout .call-payment-page__card h2 { font-size: 14px; }
+.call-payment-checkout .call-payment-page__coupon { padding-top: 14px; }
+.call-payment-checkout .call-payment-page__methods { gap: 0; }
+.call-payment-checkout .call-payment-method { border: 0; border-bottom: 1px solid var(--surface-border); border-radius: 0; padding: 11px 0; }
+.call-payment-checkout .call-payment-method:last-child { border-bottom: 0; }
+.call-payment-checkout .call-payment-method.is-selected { padding-left: 8px; padding-right: 8px; border-radius: 8px; }
+.call-payment-page__sticky-pay { position: sticky; bottom: 0; z-index: 2; margin: 0 -20px; padding: 12px 20px; border-top: 1px solid var(--surface-border); background: rgba(255, 255, 255, .96); }
+.call-payment-page__sticky-pay .call-payment-page__pay { width: min(360px, 100%); margin: 0 auto; }
+.call-payment-page__secure { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .call-booking-page { padding-bottom: 20px; }
+  .call-booking-page__panel { padding: 20px 16px; }
+  .call-booking-page__astrologer h1 { font-size: 20px; }
+  .call-booking-page__package-grid { grid-template-columns: 1fr; }
+}
