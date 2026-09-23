@@ -4,6 +4,7 @@ import { inferRoleFromEmail, ROLES } from '../utils/roleRoutes.js'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
 const AUTH_STORAGE_KEY = 'astroconnect-auth-session'
+const EDITOR_SESSION_KEY = 'astroconnect-editor-session'
 const USERS_STORAGE_KEY = 'astroconnect-auth-users'
 
 const defaultUsers = [
@@ -81,7 +82,7 @@ function seedUsers() {
 
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(seedUsers)
-  const [currentUser, setCurrentUser] = useState(() => readJSON(AUTH_STORAGE_KEY, null))
+  const [currentUser, setCurrentUser] = useState(() => readJSON(AUTH_STORAGE_KEY, null) || readJSON(EDITOR_SESSION_KEY, null))
 
   useEffect(() => {
     writeJSON(USERS_STORAGE_KEY, users)
@@ -89,9 +90,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (currentUser) {
-      writeJSON(AUTH_STORAGE_KEY, currentUser)
+      if (currentUser.role === ROLES.EDITOR) writeJSON(EDITOR_SESSION_KEY, currentUser)
+      else writeJSON(AUTH_STORAGE_KEY, currentUser)
     } else if (typeof window !== 'undefined') {
       window.localStorage.removeItem(AUTH_STORAGE_KEY)
+      window.localStorage.removeItem(EDITOR_SESSION_KEY)
     }
   }, [currentUser])
 
@@ -142,6 +145,16 @@ export function AuthProvider({ children }) {
       setUsers((prev) => [user, ...prev])
       setCurrentUser(user)
       return user
+    },
+    startEditorSession(editor) {
+      const session = { ...editor, role: ROLES.EDITOR }
+      setCurrentUser(session)
+      writeJSON(EDITOR_SESSION_KEY, session)
+      return session
+    },
+    endEditorSession() {
+      setCurrentUser(null)
+      if (typeof window !== 'undefined') window.localStorage.removeItem(EDITOR_SESSION_KEY)
     },
     updateProfile(payload) {
       if (!currentUser) throw new Error('No profile is currently signed in.')
@@ -204,6 +217,7 @@ export function AuthProvider({ children }) {
     },
     logout() {
       setCurrentUser(null)
+      if (typeof window !== 'undefined') window.localStorage.removeItem(EDITOR_SESSION_KEY)
     },
   }), [currentUser, users])
 

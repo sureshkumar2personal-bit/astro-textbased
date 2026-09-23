@@ -1,10 +1,13 @@
 export const ROLES = {
   USER: 'user',
   ASTROLOGER: 'astrologer',
+  EDITOR: 'editor',
 }
 
 export function getRoleBasePath(role) {
-  return role === ROLES.USER ? '/user' : '/astrologer'
+  if (role === ROLES.USER) return '/user'
+  if (role === ROLES.EDITOR) return '/editor'
+  return '/astrologer'
 }
 
 export function getRoleRoutes(role) {

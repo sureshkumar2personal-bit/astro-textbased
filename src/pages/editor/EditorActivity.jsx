@@ -1,0 +1,3 @@
+import { useEditor } from '../../state/EditorContext.jsx'
+import './editor-activity.css'
+export default function EditorActivity() { const { audit } = useEditor(); return <section className="editor-page"><div className="editor-page-intro"><span className="editor-eyebrow">PRIVATE LOG</span><h2>My activity</h2><p>Only your editor actions are shown here.</p></div><div className="editor-panel editor-activity-list">{audit.map((entry) => <div className="editor-activity-row" key={entry.id}><div><strong>{entry.action}</strong><small>{entry.details}</small></div><time>{new Date(entry.occurredAt).toLocaleString()}</time></div>)}{!audit.length && <p className="editor-empty">No activity recorded yet.</p>}</div></section> }
