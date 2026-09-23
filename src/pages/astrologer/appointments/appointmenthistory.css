@@ -1,0 +1,359 @@
+/* ============================================================================
+   Astrologer Appointment History — calendar visual redesign (scoped only).
+   Everything below is scoped under `.astro-appointment-history`, the wrapper
+   class on this page's root <div> (AppointmentHistory.jsx), so it cannot
+   reach the Schedule/upcoming tab (Appointments.jsx) or any other page that
+   also uses the shared "apt-*" base classes. The previous/next month arrow
+   buttons in HistoryCalendar.jsx are gated behind a `showMonthArrows` prop
+   that only this page passes, so the user-side Appointment History page
+   (AppointmentDetails.jsx, which does not pass that prop) is unaffected by
+   either the markup or this stylesheet. Visual only — no data, labels or
+   functionality changed.
+   ============================================================================ */
+
+.astro-appointment-history .apt-main--history {
+  align-items: start;
+  gap: 18px;
+}
+
+/* Give the right-hand appointment-list column more room on desktop by
+   reclaiming space the calendar column never actually needed. The calendar
+   card itself caps at width: min(100%, 700px) (see below), so previously
+   the left `1fr` track could render far wider than 700px on a big desktop
+   and just sit there as wasted space beside a centered, unchanged-size
+   calendar. Capping the left track at the calendar's own 700px ceiling
+   means the calendar renders exactly as before (never shrinks, never
+   grows), while the right track (`1fr`) claims 100% of whatever space that
+   frees up — this grows the appointment column using existing space,
+   without widening the page/container. Each card then insets slightly
+   within that wider column rather than stretching edge-to-edge. Guarded to
+   the same breakpoint the shared responsive rules already use for
+   collapsing `.apt-main` to a single column (see the unscoped
+   `@media (max-width: 1120px)` rule), so tablet/mobile stacking, the base
+   column width (minmax(320px, 380px)) and card width (100%) are completely
+   untouched below this breakpoint. */
+@media (min-width: 1121px) {
+  .astro-appointment-history .apt-main--history {
+    grid-template-columns: minmax(0, 700px) minmax(380px, 1fr);
+  }
+
+  .astro-appointment-history .apt-history-item {
+    width: 88%;
+  }
+}
+
+/* Calendar — clean white rounded card with a subtle purple border. Widened
+   slightly (base cap is 660px, shared with the user-side page) so the 3px
+   per-cell margin below has room without cells growing awkwardly large;
+   still capped at 100% width and still centered by the existing
+   `.apt-main--history .apt-calendar-col { justify-content: center }` rule. */
+.astro-appointment-history .apt-scheduling-calendar--history {
+  width: min(100%, 700px);
+  padding: 18px;
+  border: 1px solid rgba(109, 40, 217, 0.1);
+  border-radius: 22px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 30px rgba(109, 40, 217, 0.06);
+}
+
+/* Header: prev-month / Today / Month + Year (dropdown) / next-month / legend */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-calendar-toolbar {
+  padding: 0 0 16px;
+  margin-bottom: 14px;
+  border: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.astro-appointment-history .apt-calendar-nav {
+  gap: 8px;
+}
+
+.astro-appointment-history .apt-calendar-arrow {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.astro-appointment-history .apt-calendar-arrow:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.astro-appointment-history .apt-today-btn {
+  padding: 0 16px;
+  border: 1px solid var(--surface-border);
+  border-radius: 11px;
+  background: #FFFFFF;
+  font-weight: 700;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-calendar-title.apt-calendar-title {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+/* Weekday row */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-weekday {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/* Date cells: compact, clearly bordered rounded tiles, equally spaced,
+   uniform soft-lavender fill. All 7 columns are already equal-width via the
+   shared grid (.apt-month-week { grid-template-columns: repeat(7,1fr) }).
+   Spacing is a true 3px margin on every side of every cell (not a `gap` and
+   not internal padding) — this also naturally spaces the week rows apart
+   vertically (3px bottom of one row + 3px top of the next = 6px between
+   rows) without needing a separate row-gap. The weekday header cells get
+   the same 3px margin so "SUN…SAT" stays perfectly aligned with the date
+   columns below (both grids then distribute their 7 equal 1fr tracks the
+   same way). */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-header {
+  column-gap: 0;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-weekday {
+  margin: 0 3px;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-week {
+  border-top: 0;
+  column-gap: 0;
+  row-gap: 0;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell {
+  min-height: 52px;
+  margin: 3px;
+  padding: 5px;
+  border: 1px solid rgba(109, 40, 217, 0.12);
+  border-right: 1px solid rgba(109, 40, 217, 0.12);
+  border-radius: 12px;
+  background: #F5F3FB;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-muted {
+  border-color: rgba(109, 40, 217, 0.06);
+  background: #FAFAFC;
+  opacity: 0.55;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell:hover {
+  background: var(--primary-bg);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.has-pending {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: var(--warning-bg);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.has-completed {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: var(--success-bg);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.has-cancelled {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: var(--danger-bg);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.has-rescheduled {
+  border-color: rgba(249, 115, 22, 0.3);
+  background: #FFF7ED;
+}
+
+/* Today (not selected): outline only, so it doesn't compete with a status tint */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-today {
+  background: #F5F3FB;
+  box-shadow: inset 0 0 0 1.5px var(--primary);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-today .apt-month-day {
+  background: transparent;
+  color: var(--primary);
+}
+
+/* Selected date: filled purple, white day number, status dots stay legible */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected {
+  background: var(--primary);
+  box-shadow: 0 6px 16px rgba(91, 33, 182, 0.26);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected .apt-month-day {
+  color: #fff;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected .apt-history-cell-status span {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.is-selected.is-today .apt-month-day {
+  color: #fff;
+}
+
+/* Per-status dot + count badges: top-right corner of the cell, stacked when
+   a day has more than one status. The single purple total-count pill is
+   hidden here since the reference design only shows the per-status dots. */
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-count {
+  display: none;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell-status {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  margin-top: 0;
+  gap: 2px;
+}
+
+.astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell-status span {
+  font-size: 9px;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .astro-appointment-history .apt-scheduling-calendar--history {
+    padding: 12px;
+  }
+}
+
+/* ----------------------------------------------------------------------
+   Day appointment cards (right panel) — white card, purple right accent,
+   avatar + id header row, icon meta rows. The whole card is clickable to
+   open appointment details (no separate "View Details" button).
+   ---------------------------------------------------------------------- */
+
+.astro-appointment-history .apt-history-list {
+  gap: 18px;
+}
+
+.astro-appointment-history .apt-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 28px;
+  border: 1px solid var(--surface-border);
+  border-right: 3px solid var(--primary);
+  border-radius: 24px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 10px 24px rgba(15, 23, 42, 0.05);
+  cursor: pointer;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.astro-appointment-history .apt-history-item:hover,
+.astro-appointment-history .apt-history-item:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 28px rgba(109, 40, 217, 0.12);
+}
+
+.astro-appointment-history .apt-history-item.is-cancelled {
+  border-right-color: var(--danger);
+  opacity: 0.85;
+}
+
+.astro-appointment-history .apt-history-item.is-rescheduled {
+  border-right-color: var(--accent);
+}
+
+.astro-appointment-history .apt-history-item__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.astro-appointment-history .apt-history-item__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.astro-appointment-history .apt-history-item__identity strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.astro-appointment-history .apt-history-item__avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.astro-appointment-history .apt-history-item__id {
+  flex: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.astro-appointment-history .apt-history-item__info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.astro-appointment-history .apt-history-item__info-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.astro-appointment-history .apt-history-item__info-item svg {
+  flex: none;
+  color: var(--primary);
+}
+
+.astro-appointment-history .apt-history-item__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.astro-appointment-history .apt-history-item__amount {
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 600px) {
+  .astro-appointment-history .apt-history-item {
+    padding: 18px 20px;
+    border-radius: 20px;
+  }
+
+  .astro-appointment-history .apt-history-item__info {
+    justify-content: flex-start;
+  }
+}

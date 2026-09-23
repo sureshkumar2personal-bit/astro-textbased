@@ -94,6 +94,7 @@ export default function AnswerQuestion() {
       next.set('questionId', id)
       return next
     })
+    actions.viewQuestion(id)
   }
 
   const closePanel = () => {

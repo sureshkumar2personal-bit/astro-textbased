@@ -23,7 +23,7 @@ function dayBreakdown(appointments, date) {
   return { total: dayApps.length, booked, pending, rescheduled, completed, cancelled, other }
 }
 
-export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate, variant = 'default' }) {
+export default function HistoryCalendar({ appointments, rangeStart, onRangeChange, onSelectDate, selectedDate, variant = 'default', showMonthArrows = false }) {
   const isUserCalendar = variant === 'user'
   const monthStart = startOfMonth(rangeStart)
   const gridStart = startOfWeek(monthStart, 0)
@@ -69,6 +69,14 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
     onSelectDate(now)
   }
 
+  const handlePrevMonth = () => {
+    onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))
+  }
+
+  const handleNextMonth = () => {
+    onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))
+  }
+
   const applyMonthYear = (month, year) => {
     onRangeChange(new Date(year, month, 1))
     onSelectDate(new Date(year, month, 1))
@@ -80,6 +88,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
       <div className="apt-calendar-toolbar apt-history-toolbar">
         <div className="apt-calendar-nav">
           {isUserCalendar && <button type="button" className="apt-history-user-nav" aria-label="Previous month" onClick={() => onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}><ChevronLeft size={17} /></button>}
+          {showMonthArrows && (
+            <button type="button" className="icon-btn apt-calendar-arrow" onClick={handlePrevMonth} aria-label="Previous month">
+              <ChevronLeft size={16} />
+            </button>
+          )}
           <button type="button" className="btn btn-ghost apt-today-btn" onClick={handleToday}>
             Today
           </button>
@@ -125,6 +138,11 @@ export default function HistoryCalendar({ appointments, rangeStart, onRangeChang
             </div>
           )}
         </div>
+        {showMonthArrows && (
+          <button type="button" className="icon-btn apt-calendar-arrow" onClick={handleNextMonth} aria-label="Next month">
+            <ChevronRight size={16} />
+          </button>
+        )}
         <div className="apt-history-calendar-legend" aria-label="Appointment status legend">
           {isUserCalendar && <button type="button" className="apt-history-user-nav" aria-label="Next month" onClick={() => onRangeChange(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}><ChevronRight size={17} /></button>}
           <span className="is-pending">Upcoming</span>

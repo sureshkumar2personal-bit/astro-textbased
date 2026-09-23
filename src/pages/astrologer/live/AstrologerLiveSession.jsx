@@ -512,7 +512,7 @@ function LiveSessionShellInner({ children }) {
       return
     }
 
-    actions.endLiveSession(liveSessionId)
+    actions.endLiveSession(liveSessionId, { earnings, viewerCount })
     setSummarySnapshot({
       duration: timer,
       viewerCount,
