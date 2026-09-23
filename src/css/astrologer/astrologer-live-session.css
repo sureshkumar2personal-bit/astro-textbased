@@ -1,0 +1,449 @@
+/* Astrologer Live Session Page */
+
+.astrologer-live-session-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 4px 48px;
+  color: var(--ink);
+}
+
+.astrologer-live-session-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.astrologer-live-session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.astrologer-live-session-header h1 {
+  margin: 7px 0 8px;
+  font-size: clamp(27px, 3vw, 38px);
+  letter-spacing: -0.04em;
+}
+
+.astrologer-live-session-header p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Session layout */
+.live-session-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Main video area */
+.live-session-video-container {
+  padding: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface-strong);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  aspect-ratio: 16 / 9;
+}
+
+.live-session-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.live-session-video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Session info */
+.live-session-info {
+  padding: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.live-session-info-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.live-session-status-indicator {
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.live-session-info-status-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.live-session-info-time {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.live-session-info-title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.live-session-info-meta {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.live-session-meta-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Session stats */
+.live-session-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.live-session-stat-item {
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.live-session-stat-label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.live-session-stat-value {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Session controls */
+.live-session-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.live-session-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.live-session-btn--primary {
+  background: var(--primary);
+  color: #fff;
+  width: 100%;
+}
+
+.live-session-btn--primary:hover {
+  background: var(--primary-dark);
+}
+
+.live-session-btn--outline {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--body);
+  width: 100%;
+}
+
+.live-session-btn--outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.live-session-btn--danger {
+  background: var(--danger);
+  color: #fff;
+  width: 100%;
+}
+
+.live-session-btn--danger:hover {
+  opacity: 0.9;
+}
+
+/* Viewers list */
+.live-session-viewers {
+  padding: 12px 0;
+  border-top: 1px solid var(--divider);
+}
+
+.live-session-viewers-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.live-session-viewers-list {
+  display: grid;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.live-session-viewer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.live-session-viewer-avatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.live-session-viewer-name {
+  font-size: 11px;
+  color: var(--body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.live-session-viewer-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* Chat area */
+.live-session-chat {
+  padding: 23px;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+}
+
+.live-session-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--divider);
+}
+
+.live-session-chat-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.live-session-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.live-session-message {
+  display: grid;
+  gap: 4px;
+}
+
+.live-session-message-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-session-message-avatar {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.live-session-message-author-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.live-session-message-time {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.live-session-message-text {
+  margin: 0 0 0 32px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--body);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.live-session-chat-input {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--divider);
+}
+
+.live-session-chat-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+.live-session-chat-input input:focus {
+  outline: 0;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.live-session-chat-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.live-session-chat-send:hover {
+  background: var(--primary-dark);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .live-session-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .live-session-video-container {
+    aspect-ratio: 16 / 9;
+  }
+
+  .live-session-chat {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .astrologer-live-session-header {
+    display: block;
+  }
+
+  .live-session-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .astrologer-live-session-page {
+    padding: 0 0 34px;
+  }
+
+  .astrologer-live-session-header {
+    margin-bottom: 22px;
+  }
+
+  .live-session-layout {
+    gap: 16px;
+  }
+
+  .live-session-video-container {
+    aspect-ratio: 9 / 16;
+  }
+
+  .live-session-info {
+    padding: 16px;
+  }
+
+  .live-session-chat {
+    padding: 16px;
+    min-height: 250px;
+  }
+}

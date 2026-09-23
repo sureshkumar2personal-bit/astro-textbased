@@ -1,0 +1,156 @@
+/* ========================================================================
+   Payments CSS - Payment Methods & Add Payment Pages
+   Pages: PaymentMethods, AddPaymentMethod, Autopay
+   Source: src/index.css (lines 2226-2230, 5023-5027, 5128)
+======================================================================== */
+
+/* Call Payment Page - Shared Payment UI */
+.call-payment-page { width: min(760px, 100%); margin: 0 auto; padding: 0 18px 48px; color: var(--text-primary); }
+.call-payment-page__back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 22px; border: 0; color: var(--text-secondary); background: none; font-size: 13px; cursor: pointer; }
+.call-payment-page__heading { margin-bottom: 18px; }
+.call-payment-page__heading span { color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.call-payment-page__heading h1 { margin: 5px 0 4px; font-size: 26px; }
+.call-payment-page__heading p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+
+/* Payment Details & Card Container */
+.call-payment-page__details, .call-payment-page__card { margin-top: 12px; padding: 18px 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); box-shadow: 0 5px 16px rgba(58, 42, 106, .035); }
+
+/* Astrologer Info in Payment */
+.call-payment-page__astrologer { display: flex; align-items: center; gap: 12px; }
+.call-payment-page__avatar { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: #fff; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); font-weight: 800; }
+.call-payment-page__astrologer h2, .call-payment-page__card h2 { margin: 0; font-size: 16px; }
+.call-payment-page__astrologer p { margin: 3px 0 0; color: var(--text-secondary); font-size: 12px; }
+
+/* Payment Details List */
+.call-payment-page__details dl, .call-payment-page__amounts { margin: 16px 0 0; }
+.call-payment-page__details dl div, .call-payment-page__amounts div { display: flex; justify-content: space-between; gap: 20px; padding: 7px 0; font-size: 13px; }
+.call-payment-page dt { color: var(--text-secondary); }
+.call-payment-page dd { margin: 0; font-weight: 650; }
+.call-payment-page .is-total { padding-top: 11px; border-top: 1px solid var(--surface-border); }
+.call-payment-page .is-total dd { color: var(--primary); }
+
+.call-payment-page__amounts { margin-top: 12px; }
+.call-payment-page__secure { display: flex; align-items: center; gap: 6px; margin: 14px 0 0; color: var(--green-600); font-size: 12px; }
+
+/* Coupon Section */
+.call-payment-page__coupon h2 { font-size: 14px; }
+.call-payment-page__coupon > div { display: flex; gap: 8px; margin-top: 10px; }
+.call-payment-page__coupon input { flex: 1; min-width: 0; }
+.call-payment-page__coupon .btn { min-height: 40px; }
+
+/* Payment Method Selection */
+.call-payment-page__methods { display: grid; gap: 8px; margin-top: 12px; }
+
+.call-payment-method { display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px; border: 1px solid var(--surface-border); border-radius: 11px; color: var(--text-primary); background: #fff; text-align: left; cursor: pointer; }
+.call-payment-method.is-selected { border-color: var(--primary); background: var(--primary-bg); }
+.call-payment-method__icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--primary); background: var(--primary-bg); }
+.call-payment-method > span:nth-child(2) { display: flex; flex: 1; flex-direction: column; gap: 3px; }
+.call-payment-method b { font-size: 13px; }
+.call-payment-method small { color: var(--text-secondary); font-size: 11px; }
+
+.call-payment-method__radio { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid var(--surface-border); border-radius: 50%; color: #fff; background: #fff; }
+.is-selected .call-payment-method__radio { border-color: var(--primary); background: var(--primary); }
+
+/* Payment Action Button */
+.call-payment-page__pay { display: block; width: min(360px, 100%); min-height: 44px; margin: 18px auto 0; }
+.call-payment-page__insufficient { margin: 12px 0 0; color: var(--danger); font-size: 12px; text-align: center; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .call-payment-page { padding: 0 12px 32px; }
+  .call-payment-page__heading h1 { font-size: 23px; }
+  .call-payment-page__details, .call-payment-page__card { padding: 16px; }
+  .call-payment-page__coupon > div { flex-direction: column; }
+  .call-payment-page__coupon .btn { width: 100%; justify-content: center; }
+}
+
+/* Compact Checkout Treatment */
+.call-payment-checkout { width: min(620px, 100%); margin: 0 auto; padding: 0 20px 76px; border: 1px solid var(--surface-border); border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(58, 42, 106, .05); }
+.call-payment-page__compact-details { margin: 0; padding: 15px 0 12px; color: var(--text-secondary); font-size: 11px; }
+
+.call-payment-checkout .call-payment-page__card { margin: 0; padding: 16px 0; border: 0; border-top: 1px solid var(--surface-border); border-radius: 0; box-shadow: none; }
+.call-payment-checkout .call-payment-page__card h2 { font-size: 14px; }
+.call-payment-checkout .call-payment-page__coupon { padding-top: 14px; }
+.call-payment-checkout .call-payment-page__methods { gap: 0; }
+
+.call-payment-checkout .call-payment-method { border: 0; border-bottom: 1px solid var(--surface-border); border-radius: 0; padding: 11px 0; }
+.call-payment-checkout .call-payment-method:last-child { border-bottom: 0; }
+.call-payment-checkout .call-payment-method.is-selected { padding-left: 8px; padding-right: 8px; border-radius: 8px; }
+
+/* Sticky Payment Button */
+.call-payment-page__sticky-pay { position: sticky; bottom: 0; z-index: 2; margin: 0 -20px; padding: 12px 20px; border-top: 1px solid var(--surface-border); background: rgba(255, 255, 255, .96); }
+.call-payment-page__sticky-pay .call-payment-page__pay { width: min(360px, 100%); margin: 0 auto; }
+.call-payment-page__sticky-pay .call-payment-page__secure { margin-bottom: 0; }
+
+/* ========================================================================
+   Appointment Payment Styles
+======================================================================== */
+
+/* Payment Step Container */
+.appointment-payment-step { display: grid; gap: 16px; }
+
+/* Payment Summary Card */
+.appointment-payment-summary { display: grid; gap: 5px; padding: 13px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--violet-50); color: var(--text-secondary); font-size: 12px; }
+.appointment-payment-summary strong { color: var(--ink); font-size: 15px; }
+.appointment-payment-summary b { color: var(--primary); font-size: 18px; margin-left: auto; }
+
+/* Payment Method Buttons */
+.appointment-payment-methods { display: flex; gap: 8px; }
+.appointment-payment-methods button { flex: 1; padding: 9px; border: 1px solid var(--surface-border); border-radius: 8px; background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 700; cursor: pointer; }
+.appointment-payment-methods button.is-selected { border-color: var(--primary); background: var(--violet-50); color: var(--primary); }
+
+/* Payment Total */
+.appointment-payment-total { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--surface-border); color: var(--text-secondary); font-size: 12px; }
+.appointment-payment-total strong { color: var(--ink); font-size: 16px; }
+
+/* Appointment Payment Title */
+.appointment-payment-title { color: var(--ink); font-size: 14px; font-weight: 800; }
+
+/* Wallet Card in Payment Modal */
+.appointment-wallet-card { display: grid; gap: 12px; padding: 16px; border: 1px solid rgba(109, 40, 217, .16); border-radius: 15px; background: linear-gradient(180deg, #fff 0%, var(--violet-50) 100%); box-shadow: 0 8px 22px rgba(109, 40, 217, .07); }
+
+.appointment-wallet-balance { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.appointment-wallet-balance div { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 700; }
+.appointment-wallet-balance div svg { color: var(--primary); }
+.appointment-wallet-balance > strong { color: var(--primary); font-size: 23px; letter-spacing: -.03em; }
+
+.appointment-wallet-divider { height: 1px; background: rgba(109, 40, 217, .13); }
+
+.appointment-wallet-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--ink); font-size: 12px; font-weight: 700; }
+.appointment-wallet-line strong { color: var(--primary); font-size: 14px; }
+.appointment-wallet-line--secondary { color: var(--muted); font-weight: 500; }
+.appointment-wallet-line--secondary strong { color: var(--muted); font-size: 12px; }
+
+/* Wallet Status Badge */
+.appointment-wallet-status { display: flex; align-items: center; gap: 6px; width: max-content; margin-top: 2px; padding: 6px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+.appointment-wallet-status.is-sufficient { background: var(--success-bg); color: var(--green-600); }
+.appointment-wallet-status.is-insufficient { background: var(--warning-bg); color: var(--amber-600); }
+
+/* Add Money Action */
+.appointment-add-money { align-self: start; }
+.appointment-charge-note { margin: 0; color: var(--muted); font-size: 11px; }
+
+/* Responsive Appointment Payment */
+@media (max-width: 600px) {
+  .appointment-form-grid { grid-template-columns: 1fr; }
+}
+
+/* ========================================================================
+   Payment Success Styles (Shared with Wallet)
+======================================================================== */
+
+.payment-success-page { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 120px); padding: 24px 16px 40px; }
+.payment-success-card { max-width: 460px; padding: 28px 30px; }
+.payment-success-card > p { margin-bottom: 18px; }
+
+.payment-success-card__astrologer { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 13px 0; border-bottom: 1px solid var(--border); text-align: left; }
+.payment-success-card__astrologer > div:last-child { display: grid; gap: 2px; }
+.payment-success-card__astrologer strong { color: var(--ink); font-size: 15px; }
+.payment-success-card__astrologer span { color: var(--primary); font-size: 12px; font-weight: 600; }
+.payment-success-card__astrologer small { color: var(--muted); font-size: 11px; }
+.payment-success-card__astrologer em { color: var(--text-secondary); font-size: 11px; font-style: normal; font-weight: 600; }
+
+.payment-success-card dl { margin: 0 0 20px; padding: 0 0 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.payment-success-card dl > div { padding: 5px 0; }
+.payment-success-card__actions { flex-direction: column; }
+.payment-success-card__actions .btn { width: 100%; }

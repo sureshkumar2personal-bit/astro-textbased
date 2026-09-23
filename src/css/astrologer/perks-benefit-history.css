@@ -1,0 +1,428 @@
+/* Perks Benefit History Page */
+
+.perks-benefit-history-page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 4px 48px;
+  color: var(--ink);
+}
+
+.perks-benefit-history-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.perks-benefit-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.perks-benefit-history-header h1 {
+  margin: 7px 0 8px;
+  font-size: clamp(27px, 3vw, 38px);
+  letter-spacing: -0.04em;
+}
+
+.perks-benefit-history-header p {
+  max-width: 650px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Summary cards */
+.perks-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.perks-summary-card {
+  padding: 20px;
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.perks-summary-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.perks-summary-value {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.perks-summary-change {
+  color: var(--success);
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+/* Filters */
+.perks-benefit-history-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.perks-filter-select {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.perks-filter-date-range {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.perks-filter-date {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+}
+
+/* History table */
+.perks-benefit-history-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.perks-benefit-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.perks-benefit-history-table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--divider);
+  background: var(--surface-strong);
+  color: var(--muted);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.perks-benefit-history-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--divider);
+  color: var(--body);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.perks-benefit-history-table tbody tr:hover {
+  background: var(--surface-soft);
+}
+
+.perks-benefit-history-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Table cell content */
+.perks-benefit-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.perks-benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.perks-benefit-name {
+  display: grid;
+  gap: 2px;
+}
+
+.perks-benefit-name strong {
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.perks-benefit-name small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.perks-benefit-date {
+  font-size: 12px;
+  color: var(--body);
+}
+
+.perks-benefit-amount {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.perks-benefit-amount.is-positive {
+  color: var(--success);
+}
+
+.perks-benefit-amount.is-negative {
+  color: var(--danger);
+}
+
+.perks-benefit-status {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.perks-benefit-status--claimed {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.perks-benefit-status--pending {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.perks-benefit-status--expired {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Actions */
+.perks-benefit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.perks-benefit-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.perks-benefit-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.perks-benefit-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Pagination */
+.perks-benefit-history-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--divider);
+}
+
+.pagination-info {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--body);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* Empty state */
+.perks-benefit-history-empty {
+  padding: 60px 30px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.perks-benefit-history-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.perks-benefit-history-empty-title {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.perks-benefit-history-empty-text {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .perks-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .perks-benefit-history-header {
+    display: block;
+  }
+
+  .perks-benefit-history-filters {
+    flex-direction: column;
+  }
+
+  .perks-filter-select,
+  .perks-filter-date {
+    width: 100%;
+  }
+
+  .perks-filter-date-range {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .perks-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .perks-benefit-history-page {
+    padding: 0 0 34px;
+  }
+
+  .perks-benefit-history-header {
+    margin-bottom: 22px;
+  }
+
+  .perks-benefit-history-filters {
+    flex-direction: column;
+  }
+
+  .perks-filter-select,
+  .perks-filter-date {
+    width: 100%;
+  }
+
+  .perks-filter-date-range {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .perks-summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .perks-benefit-history-table-wrap {
+    border-radius: 0;
+  }
+
+  .perks-benefit-history-table th,
+  .perks-benefit-history-table td {
+    padding: 12px 10px;
+    font-size: 11px;
+  }
+
+  .perks-benefit-type {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .perks-benefit-history-pagination {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+}
