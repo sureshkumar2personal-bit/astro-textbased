@@ -56,6 +56,7 @@ import VoiceCallScreen from './pages/VoiceCallScreen.jsx'
 import WalletPayment from './pages/WalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
 import RewardsPerks from './pages/user/rewards/Rewards.jsx'
+import Activity from './pages/user/activity.jsx'
 import Profile from './pages/Profile.jsx'
 import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
@@ -222,6 +223,7 @@ function UserRoutes() {
         <Route path="/chat/:astrologerId" element={<ChatScreen />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/rewards" element={<RewardsPerks />} />
+        <Route path="/user/activity" element={<Activity />} />
         <Route path="/user/my-account" element={<MyAccount />} />
         <Route path="/user/horoscope" element={<FullHoroscope />} />
         <Route path="/user/profile" element={<Profile />} />

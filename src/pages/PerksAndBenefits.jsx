@@ -36,6 +36,10 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
+import PerksSettings from './astrologer/PerksSettings.jsx'
+import PerksBenefitManagement from './astrologer/PerksBenefitManagement.jsx'
+import PerksBenefitHistory from './astrologer/PerksBenefitHistory.jsx'
+import './astrologer/perksSettings.css'
 
 // Predefined Content Categories as per prompt requirements
 const INITIAL_CATEGORIES = [
@@ -49,6 +53,8 @@ const INITIAL_CATEGORIES = [
   'Festival / Special Event Prediction',
   'Customized Event',
 ]
+
+const LEGACY_SETTINGS_TAB = '__legacy-settings-disabled__'
 
 const BENEFIT_TEMPLATES = [
   {
@@ -687,12 +693,24 @@ export default function PerksAndBenefits({ defaultTab }) {
       formats: ['Text', 'Audio'],
       categories: ['Weekly Prediction', 'Monthly Prediction'],
       price: 199,
+      discounts: { questions: 10, audio: 10, appointments: 10, emergency: 5 },
+      access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' },
     },
     Gold: {
       freeQuestions: 5,
       formats: ['Text', 'Audio', 'Video'],
       categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
-      price: 499,
+      price: 399,
+      discounts: { questions: 20, audio: 15, appointments: 15, emergency: 10 },
+      access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' },
+    },
+    Platinum: {
+      freeQuestions: 0,
+      formats: ['Text', 'Audio', 'Video'],
+      categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
+      price: 699,
+      discounts: { questions: 30, audio: 20, appointments: 20, emergency: 15 },
+      access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' },
     },
   })
 
@@ -1047,7 +1065,11 @@ export default function PerksAndBenefits({ defaultTab }) {
       <PageHeader
         eyebrow="Astrologer Workspace"
         title="Perks & Benefits"
-        subtitle="Manage customer benefits, free perks, subscription plans, and monthly commitments."
+        subtitle={activeTab === 'settings'
+          ? 'Manage your subscriber program, plans, and benefit visibility.'
+          : activeTab === 'delivery'
+            ? 'Configure the benefits your subscribers receive across your services.'
+            : 'Manage customer benefits, free perks, subscription plans, and monthly commitments.'}
       />
 
       {/* Main Tab Navigation */}
@@ -1085,7 +1107,7 @@ export default function PerksAndBenefits({ defaultTab }) {
       {/* ========================================================================= */}
       {/* 1. PERKS & BENEFITS SETTINGS TAB                                         */}
       {/* ========================================================================= */}
-      {activeTab === 'settings' && (
+      {activeTab === LEGACY_SETTINGS_TAB && (
         <div className="perks-settings-flow">
           {/* A. CUSTOMER OVERVIEW */}
           <Section title="Customer Overview & Subscription Breakdown" icon={Users}>
@@ -1209,6 +1231,14 @@ export default function PerksAndBenefits({ defaultTab }) {
       )}
 
       {activeTab === 'settings' && (
+        <PerksSettings
+          tierConfigs={tierConfigs}
+          onSave={() => setShowSaveSummaryModal(true)}
+          onManageBenefits={() => navigate('/astrologer/perks-benefits/delivery')}
+        />
+      )}
+
+      {activeTab === LEGACY_SETTINGS_TAB && (
         <div className="perks-settings-flow">
           <Section
             title="Benefit Configuration"
@@ -1600,6 +1630,13 @@ export default function PerksAndBenefits({ defaultTab }) {
       {/* 2. CONTENT DELIVERY TAB                                                   */}
       {/* ========================================================================= */}
       {activeTab === 'delivery' && (
+        <PerksBenefitManagement
+          tierConfigs={tierConfigs}
+          onSave={(nextConfig) => setTierConfigs(nextConfig)}
+        />
+      )}
+
+      {activeTab === LEGACY_SETTINGS_TAB && (
         <div className="content-delivery-flow">
           <Section
             title="Active Benefit Commitments for Content Delivery"
@@ -1730,6 +1767,13 @@ export default function PerksAndBenefits({ defaultTab }) {
       {/* 3. PERKS & BENEFITS HISTORY TAB                                          */}
       {/* ========================================================================= */}
       {activeTab === 'history' && (
+        <PerksBenefitHistory
+          tierConfigs={tierConfigs}
+          onManageBenefits={() => navigate('/astrologer/perks-benefits/delivery')}
+        />
+      )}
+
+      {activeTab === LEGACY_SETTINGS_TAB && (
         <div className="perks-history-flow">
           {/* CURRENT / HISTORICAL MONTH SUMMARY HEADER */}
           <Section
@@ -1946,16 +1990,8 @@ export default function PerksAndBenefits({ defaultTab }) {
                     <strong>₹{tierConfigs.Gold.price} / month</strong>
                   </div>
                   <div className="summary-row">
-                    <span className="muted">Followers Free Questions:</span>
-                    <strong>{tierConfigs.Followers.freeQuestions} / 5</strong>
-                  </div>
-                  <div className="summary-row">
-                    <span className="muted">Silver Free Questions:</span>
-                    <strong>{tierConfigs.Silver.freeQuestions} / 5</strong>
-                  </div>
-                  <div className="summary-row">
-                    <span className="muted">Gold Free Questions:</span>
-                    <strong>{tierConfigs.Gold.freeQuestions} / 5</strong>
+                    <span className="muted">Platinum Subscription Price:</span>
+                    <strong>₹{tierConfigs.Platinum.price} / month</strong>
                   </div>
                   <div className="summary-row">
                     <span className="muted">Selected Content Formats:</span>

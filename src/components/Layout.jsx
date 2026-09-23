@@ -146,7 +146,8 @@ const ROLE_CONFIG = {
       },
       { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'atonements', label: 'Atonement', icon: Sparkles },
-      { to: 'rewards', label: 'Total Rewards', icon: Gift },
+      { to: 'rewards', label: 'Perks & Benefits', icon: Gift },
+      { to: 'activity', label: 'My Activity', icon: Activity },
       {
         label: 'Wallet',
         to: 'wallet/overview',
@@ -222,7 +223,8 @@ const PAGE_META = {
     '/user/dispute-management': { title: 'Dispute Management', sub: 'View dispute updates' },
     '/user/astrologers': { title: 'Explore Astrologers', sub: 'Find an astrologer for your next consultation' },
     '/user/discount-questions': { title: 'Discount Questions', sub: 'Choose an available subscriber question' },
-    '/user/rewards': { title: 'Total Rewards', sub: 'Discount questions, perks, and benefits from subscribed astrologers.' },
+    '/user/rewards': { title: 'Perks & Benefits', sub: 'Discount questions, perks, and benefits from subscribed astrologers.' },
+    '/user/activity': { title: 'My Activity', sub: 'Recent questions, consultations, and appointment updates.' },
     '/user/my-account': { title: 'My Account', sub: 'Your profile, personal details, and consultations' },
     '/user/horoscope': { title: 'Horoscope', sub: 'Birth details and horoscope information for you and your family' },
     '/user/profile': { title: 'Profile', sub: 'User account details' },
@@ -309,7 +311,7 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
           </div>
         }
         const route = `${basePath}/${to}`.replace(/\/$/, '')
-        return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Rewards'} badgeCount={label === 'Rewards' ? rewardCount : 0} />
+        return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Perks & Benefits'} badgeCount={label === 'Perks & Benefits' ? rewardCount : 0} />
       })}
     </nav>
   )

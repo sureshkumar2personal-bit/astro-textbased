@@ -2658,6 +2658,10 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   min-width: 180px;
 }
 
+.hero-banner-user .hero-banner-button {
+  border: 2px solid #b7e4c7;
+}
+
 /* stat cards */
 
 .stat-grid {
@@ -14072,8 +14076,8 @@ button.apt-week-day:focus-visible {
   gap: 12px;
 }
 .user-appointment-history .added-compact-appointment-card {
-  width: 85%;
-  margin-right: auto;
+  width: 100%;
+  margin-right: 0;
   margin-left: auto;
   border-right: 3px solid var(--primary);
   padding: 12px 11px;
@@ -14095,7 +14099,7 @@ button.apt-week-day:focus-visible {
 }
 @media (min-width: 1121px) {
   .user-appointment-history .apt-main--history {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 400px);
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 290px);
     gap: 24px;
   }
 }
