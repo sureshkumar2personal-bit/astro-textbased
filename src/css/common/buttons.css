@@ -1,0 +1,263 @@
+/* ==========================================
+   Common Button Styles
+   ========================================== */
+
+/* Base button styles */
+.account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+/* Primary button variant */
+.account-btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.account-btn--primary:hover {
+  background: var(--primary-dark);
+}
+
+/* Outline button variant */
+.account-btn--outline {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--body);
+}
+
+.account-btn--outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Ghost button variant */
+.account-btn--ghost {
+  color: var(--muted);
+  background: transparent;
+}
+
+/* Link button variants */
+.account-btn--link,
+.account-btn--danger-link {
+  min-height: auto;
+  padding: 3px 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.account-btn--danger-link {
+  color: var(--danger);
+}
+
+/* Danger button variant */
+.account-btn--danger,
+.account-btn--danger-outline {
+  background: var(--danger);
+  color: #fff;
+}
+
+.account-btn--danger-outline {
+  border-color: var(--danger);
+  background: transparent;
+  color: var(--danger);
+}
+
+/* Enhanced button styles with gradient and shadows */
+.account-btn {
+  border-radius: 14px;
+  box-shadow: none;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+}
+
+.account-btn--primary {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  box-shadow: 0 10px 24px rgba(109, 40, 217, .28), inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+
+.account-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(109, 40, 217, .36), inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+
+.account-btn--outline {
+  border-color: #cdbce5;
+  color: #5b21b6;
+  background: rgba(255, 255, 255, .65);
+}
+
+.account-btn--outline:hover {
+  border-color: #7c3aed;
+  color: #4c1d95;
+  background: #f6f0fe;
+}
+
+.account-btn--ghost {
+  color: #6f6580;
+  background: #f5f1fa;
+}
+
+.account-btn--ghost:hover {
+  color: #4c1d95;
+  background: #ece3f7;
+}
+
+.account-btn--danger,
+.account-btn--danger-outline {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+  box-shadow: 0 10px 24px rgba(220, 38, 38, .25);
+}
+
+.account-btn--danger-outline {
+  color: #dc2626;
+  background: rgba(255, 255, 255, .7);
+  box-shadow: none;
+}
+
+.account-btn--danger-outline:hover {
+  background: #fff1f1;
+  border-color: #dc2626;
+}
+
+.account-btn--link {
+  color: #5b21b6;
+}
+
+.account-btn--danger-link {
+  color: #dc2626;
+}
+
+/* Button sizing variants */
+.account-btn {
+  min-height: 38px;
+  padding: 10px 15px;
+  font-size: 12px;
+  border-radius: 14px;
+}
+
+.account-btn {
+  font-size: 12px;
+}
+
+/* Button layout variants */
+.account-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.account-btn {
+  border-radius: 11px;
+}
+
+.account-btn {
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.account-btn {
+  min-height:42px;
+  padding:10px 17px;
+}
+
+.account-btn {
+  min-width:96px;
+}
+
+/* Button spacing utilities */
+.account-btn {
+  align-self: end;
+}
+
+.account-btn {
+  justify-self: end;
+}
+
+.account-btn {
+  white-space: nowrap;
+}
+
+/* Profile account actions button overrides */
+.profile-account-actions .account-btn {
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+.profile-account-actions .account-btn--primary {
+  background: #7135bb;
+  box-shadow: 0 5px 12px rgba(113, 53, 187, .18);
+}
+
+.profile-account-actions .account-btn--outline {
+  border-color: #b993e6;
+  color: #7541b7;
+  background: rgba(255, 255, 255, .4);
+}
+
+/* Special button contexts */
+.account-password-inline .account-btn {
+  align-self: end;
+}
+
+.account-preferences > .account-btn {
+  justify-self: end;
+}
+
+.create-post-modal footer .account-btn {
+  min-width:96px;
+}
+
+/* Glassmorphic button variant */
+.account-btn--outline {
+  border-color: rgba(255, 255, 255, .4);
+  color: #fff;
+  background: rgba(255, 255, 255, .14);
+  backdrop-filter: blur(6px);
+}
+
+/* Contrast button variant */
+.account-btn--primary {
+  background: #fff;
+  color: #5b21b6;
+  box-shadow: 0 12px 28px rgba(12, 4, 28, .32);
+}
+
+/* Media queries for button responsive behavior */
+@media (max-width: 640px) {
+  .account-panel-heading > .account-btn,
+  .account-panel-heading > .account-status {
+    margin-top: 14px;
+  }
+
+  .account-profile-banner .account-btn {
+    margin-left: 57px;
+  }
+
+  .account-integration > .account-btn {
+    margin-left: 30px;
+  }
+
+  .account-active-protection .account-btn {
+    margin-left: 33px;
+  }
+
+  .account-mobile-nav .account-btn {
+    white-space: nowrap;
+  }
+}

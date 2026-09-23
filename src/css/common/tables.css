@@ -1,0 +1,157 @@
+/* ===== TABLE STYLES ===== */
+
+/* Basic table structure and styling */
+.account-table-wrap {
+  overflow-x: auto;
+}
+
+.account-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
+}
+
+.account-table th {
+  padding: 0 12px 11px;
+  color: var(--muted);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.account-table td {
+  padding: 13px 12px;
+  border-top: 1px solid var(--divider);
+  color: var(--body);
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+/* Table row components */
+.account-person {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.account-person > span {
+  width: 30px;
+  height: 30px;
+  font-size: 10px;
+}
+
+.account-person div {
+  display: grid;
+  gap: 3px;
+}
+
+.account-person small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* Table row actions */
+.account-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-row-actions .account-btn {
+  font-size: 12px;
+}
+
+/* Status badges in tables (referenced from badges but contextual here) */
+.account-status {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.account-status--success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.account-status--pending {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.account-status--danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.account-status--neutral {
+  background: var(--neutral-bg);
+  color: var(--muted);
+}
+
+/* Premium presentation theme for tables */
+.account-table th {
+  color: #9a90a6;
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+.account-table td {
+  border-top-color: #eee8f2;
+  color: #5a5266;
+  font-size: 13px;
+}
+
+.account-table td strong {
+  color: #3a3245;
+}
+
+.account-person > span {
+  background: linear-gradient(135deg, #ece0fa, #ddd0f3);
+  color: #5b21b6;
+}
+
+.account-status {
+  font-size: 12px;
+}
+
+/* Responsive scrolling for tables */
+@media (max-width: 900px) {
+  .account-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .account-table {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 640px) {
+  .account-table-wrap {
+    overflow-x: auto;
+  }
+
+  .account-table {
+    min-width: 600px;
+    font-size: 11px;
+  }
+
+  .account-table th {
+    font-size: 10px;
+  }
+
+  .account-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .account-person > span {
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+}

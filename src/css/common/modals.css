@@ -1,0 +1,349 @@
+/* ===== MODAL STYLES ===== */
+
+/* Base modal overlay and card styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  overflow-y: auto;
+  animation: fadeIn 200ms ease-out both;
+}
+
+.modal-card {
+  width: min(440px, 100%);
+  background: var(--surface-strong);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+  animation: riseIn 250ms var(--ease-premium) both;
+}
+
+.modal-card.modal-card--scroll {
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.modal-card__header {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-3) 0;
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.modal-card__header .section-title,
+.modal-card__content > .section-title {
+  color: var(--text-primary);
+}
+
+.modal-card__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.modal-card__footer {
+  flex-shrink: 0;
+  padding: var(--space-3);
+  border-top: 1px solid var(--surface-border);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Astrologer modal styles */
+.astrologer-modal-title {
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.astrologer-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.astrologer-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.astrologer-modal-highlight {
+  background: var(--primary-bg);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  padding: 14px;
+}
+
+.astrologer-modal-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  font-size: 14px;
+}
+
+.astrologer-modal-question {
+  font-size: 15px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.astrologer-modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Premium Appointment Details popup */
+.appointment-popup-card {
+  width: min(400px, 100%);
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  background: var(--surface-strong);
+}
+
+.appointment-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  background: linear-gradient(135deg, var(--primary-bg) 0%, var(--surface-strong) 70%);
+  border-bottom: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.appointment-popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 22px 4px;
+  overflow-y: auto;
+}
+
+.appointment-popup-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.appointment-popup-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 6px 14px rgba(109, 40, 217, 0.28);
+}
+
+.appointment-popup-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.appointment-popup-user-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.appointment-popup-amount {
+  padding: 14px 16px;
+  border-radius: var(--radius-s);
+  background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(124, 58, 237, 0.06) 100%);
+  border: 1px solid var(--surface-border);
+}
+
+.appointment-popup-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.appointment-popup-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.appointment-popup-paid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--green-600);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.appointment-popup-amount-value {
+  margin-top: 6px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+}
+
+.appointment-popup-info-card {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-s);
+  background: var(--surface-soft, var(--primary-bg));
+  border: 1px solid var(--surface-border);
+}
+
+.appointment-popup-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.appointment-popup-info-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.appointment-popup-info-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.appointment-popup-info-value {
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.appointment-popup-card .modal-card__footer {
+  padding: 16px 22px 20px;
+  border-top: 1px solid var(--surface-border);
+}
+
+/* Account modal styles (premium presentation) */
+.account-modal-backdrop {
+  background: rgba(28, 17, 46, .55);
+  backdrop-filter: blur(10px);
+}
+
+.account-modal {
+  width: min(500px, 100%);
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, .6);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .97);
+  box-shadow: 0 40px 90px rgba(15, 8, 30, .35);
+}
+
+.account-modal-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ede2fb, #ddd0f3);
+  color: #5b21b6;
+}
+
+.account-modal--danger .account-modal-icon {
+  background: linear-gradient(135deg, #fde4e4, #f9cbcb);
+  color: #dc2626;
+}
+
+.account-modal h2 {
+  font-size: 21px;
+  color: #2b2337;
+}
+
+.account-modal-copy {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #7c748c;
+}
+
+.account-modal-close {
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: #f5f1fa;
+  color: #6f6580;
+  transition: all .2s ease;
+}
+
+.account-modal-close:hover {
+  background: #ece3f7;
+  color: #4c1d95;
+}
+
+.account-modal-form,
+.account-modal-actions {
+  gap: 14px;
+}
+
+/* Responsive behavior */
+@media (max-width: 480px) {
+  .modal-card {
+    width: 100%;
+  }
+
+  .appointment-popup-card {
+    width: 100%;
+  }
+
+  .account-modal {
+    width: min(100%, 95vw);
+  }
+}
