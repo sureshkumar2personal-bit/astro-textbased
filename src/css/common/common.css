@@ -1,0 +1,292 @@
+/* ===== CSS Custom Properties & Theme Variables ===== */
+
+:root {
+  /* ---- Brand palette ---- */
+  --bg: #F5F2F9;
+  --bg-solid: #F3EFF9;
+  --primary: #5B21B6;
+  --primary-dark: #3B0764;
+  --primary-light: #7C3AED;
+  --secondary: #7C3AED;
+  --accent: #FF8A4C;
+  --accent-dark: #F2662A;
+
+  --text-primary: #251B35;
+  --text-secondary: #685F73;
+  --border: #DED6E8;
+
+  --success: #10B981;
+  --success-bg: #ECFDF5;
+  --warning: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --danger: #EF4444;
+  --danger-bg: #FEF2F2;
+
+  --primary-bg: #EEE8F8;
+  --secondary-bg: #E7DDF5;
+  --sky: #0284C7;
+  --sky-bg: #EFF6FF;
+  --neutral-bg: #EEEAF4;
+
+  --sidebar-from: #281354;
+  --sidebar-to: #472183;
+
+  /* legacy aliases kept so any missed reference still resolves sensibly */
+  --violet-50: #F5F3FF;
+  --violet-100: #EDE9FE;
+  --violet-200: #DDD6FE;
+  --violet-300: #C4B5FD;
+  --violet-400: #A78BFA;
+  --violet-500: #8B5CF6;
+  --violet-600: #6D28D9;
+  --violet-700: #5B21B6;
+  --violet-900: #281354;
+
+  --gold-100: #FFE9D9;
+  --gold-400: #FFAB73;
+  --gold-500: #FF8A4C;
+  --gold-600: #F2662A;
+
+  --sky-100: #EFF6FF;
+  --sky-500: #0284C7;
+  --sky-600: #0369A1;
+
+  --green-100: #ECFDF5;
+  --green-500: #10B981;
+  --green-600: #059669;
+
+  --amber-100: #FFFBEB;
+  --amber-500: #F59E0B;
+  --amber-600: #B45309;
+
+  --red-100: #FEF2F2;
+  --red-500: #EF4444;
+  --red-600: #DC2626;
+
+  --coral-100: #FFE9D9;
+  --coral-500: #FF8A4C;
+  --coral-600: #F2662A;
+
+  --teal-100: #ECFDF5;
+  --teal-500: #10B981;
+  --teal-600: #059669;
+
+  --ink: #111827;
+  --body: #374151;
+  --muted: #6B7280;
+  --line: #E5E7EB;
+  --paper: rgba(255, 255, 255, 0.9);
+  --surface: rgba(255, 255, 255, 0.88);
+  --surface-strong: #FFFFFF;
+  --surface-soft: #F9FAFB;
+  --surface-border: rgba(229, 231, 235, 0.72);
+  --surface-overlay: rgba(255, 255, 255, 0.98);
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 12px 32px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 24px 56px rgba(15, 23, 42, 0.14);
+  /* soft, diffused — no more boxed-card shadow; only used on hover/float states */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-float: 0 16px 40px rgba(15, 23, 42, 0.07);
+  --shadow-glow-primary: 0 12px 28px rgba(109, 40, 217, 0.28);
+  --shadow-glow-accent: 0 12px 28px rgba(255, 138, 76, 0.28);
+  --divider: rgba(15, 23, 42, 0.06);
+
+  --radius-xs: 8px;
+  --radius-s: 14px;
+  --radius-m: 18px;
+  --radius-l: 24px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* legacy radius aliases used by a few older rules */
+  --radius-input: var(--radius-s);
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+
+  --sidebar-w: 288px;
+  --apt-drawer-top-offset: calc(var(--space-2) + 80px);
+  --apt-drawer-width: 420px;
+
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+
+/* ===== Dark Theme Overrides ===== */
+
+html[data-theme='dark'] {
+  --bg: linear-gradient(180deg, #0B1020 0%, #111827 100%);
+  --bg-solid: #111827;
+  --primary: #A78BFA;
+  --primary-dark: #8B5CF6;
+  --primary-light: #C4B5FD;
+  --secondary: #8B5CF6;
+  --accent: #FB923C;
+  --accent-dark: #F97316;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --border: #334155;
+
+  --success-bg: rgba(16, 185, 129, 0.14);
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --danger-bg: rgba(239, 68, 68, 0.14);
+
+  --primary-bg: rgba(139, 92, 246, 0.16);
+  --secondary-bg: rgba(168, 85, 247, 0.16);
+  --sky-bg: rgba(14, 165, 233, 0.16);
+  --neutral-bg: rgba(148, 163, 184, 0.14);
+
+  --sidebar-from: #0F172A;
+  --sidebar-to: #1E1B4B;
+
+  --ink: #F8FAFC;
+  --body: #CBD5E1;
+  --muted: #94A3B8;
+  --line: #334155;
+  --paper: rgba(15, 23, 42, 0.84);
+  --surface: rgba(15, 23, 42, 0.84);
+  --surface-strong: #111827;
+  --surface-soft: #1E293B;
+  --surface-border: rgba(148, 163, 184, 0.18);
+  --surface-overlay: rgba(15, 23, 42, 0.96);
+
+  --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.25);
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.28), 0 6px 16px rgba(2, 6, 23, 0.18);
+  --shadow-md: 0 12px 32px rgba(2, 6, 23, 0.32);
+  --shadow-lg: 0 24px 56px rgba(2, 6, 23, 0.38);
+  --shadow-card: 0 1px 2px rgba(2, 6, 23, 0.18);
+  --shadow-float: 0 16px 40px rgba(2, 6, 23, 0.24);
+  --divider: rgba(148, 163, 184, 0.14);
+  color-scheme: dark;
+}
+
+/* ===== Base HTML & Layout Styles ===== */
+
+* {
+  box-sizing: border-box;
+}
+
+@media (min-width: 1280px) {
+  .campaign-groups-grid > .card {
+    position: relative;
+  }
+
+  .campaign-groups-grid > .card:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -11px;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--primary-light) 16%,
+      var(--secondary) 50%,
+      var(--accent) 84%,
+      transparent 100%
+    );
+    opacity: 0.7;
+  }
+
+  .campaigns-details-column {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .campaigns-details-column::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 0;
+    width: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      var(--primary-light) 12%,
+      var(--secondary) 50%,
+      var(--accent) 88%,
+      transparent 100%
+    );
+    opacity: 0.72;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--body);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* ===== Theme-specific Overrides for Components ===== */
+
+html[data-theme='dark'] .bg-white {
+  background-color: var(--surface-strong) !important;
+}
+
+html[data-theme='dark'] .bg-white\/70 {
+  background-color: rgba(15, 23, 42, 0.78) !important;
+}
+
+html[data-theme='dark'] .bg-white\/85 {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+}
+
+html[data-theme='dark'] .bg-white\/90 {
+  background-color: rgba(15, 23, 42, 0.9) !important;
+}
+
+html[data-theme='dark'] .border-white {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html[data-theme='dark'] .border-white\/70 {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html[data-theme='dark'] .border-white\/90 {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html[data-theme='dark'] .btn-outline {
+  background: var(--surface-strong);
+  color: var(--primary-light);
+  border-color: var(--secondary);
+}
+
+html[data-theme='dark'] .btn-outline:hover {
+  background: var(--primary-bg);
+  color: var(--text-primary);
+}
+
+/* ===== Focus Visible States ===== */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}

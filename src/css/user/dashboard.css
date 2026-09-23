@@ -1,0 +1,465 @@
+.my-account-page { display: grid; gap: 20px; }
+.my-account-profile-card { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.my-account-avatar, .my-account-history-avatar { display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 58px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-size: 18px; font-weight: 800; }
+.my-account-profile-copy { flex: 1; min-width: 220px; }.my-account-profile-copy h2 { margin: 0; color: var(--ink); font-size: 20px; }.my-account-profile-copy p { margin: 3px 0 8px; color: var(--primary); font-size: 12px; }.my-account-contact { display: flex; gap: 14px; flex-wrap: wrap; color: var(--text-secondary); font-size: 12px; }.my-account-contact span { display: inline-flex; align-items: center; gap: 5px; }
+.my-account-edit-card { display: grid; gap: 14px; }.my-account-actions, .my-account-card-actions, .my-account-consultation-tabs { display: flex; gap: 8px; flex-wrap: wrap; }.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }.form-grid label { display: grid; gap: 6px; color: var(--text-secondary); font-size: 12px; font-weight: 700; }
+.my-account-section-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--surface-border); }.my-account-section-tabs button { display: inline-flex; align-items: center; gap: 7px; padding: 11px 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-secondary); font-weight: 700; cursor: pointer; }.my-account-section-tabs button.is-active { border-color: var(--primary); color: var(--primary); }
+.my-account-details-card, .my-account-consultation-card { display: grid; gap: 20px; }.my-account-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }.my-account-detail-grid > div { display: grid; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--surface-border); }.my-account-detail-grid span { color: var(--text-secondary); font-size: 11px; }.my-account-detail-grid strong { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-size: 13px; }.my-account-saved-icon { color: var(--green-600); }.my-account-astrology-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+.my-account-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.my-account-form-field { display: grid; gap: 5px; }.my-account-form-field .text-input[readonly] { background: var(--violet-50); color: var(--ink); cursor: default; }
+.my-account-history-list { display: grid; gap: 12px; }.my-account-history-card { display: grid; gap: 14px; }.my-account-history-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.my-account-history-top h3 { margin: 0 0 4px; color: var(--ink); font-size: 15px; }.my-account-history-top span { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 12px; }.my-account-history-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }.my-account-history-meta span { display: grid; gap: 4px; color: var(--text-secondary); font-size: 12px; }.my-account-history-meta b { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }.my-account-card-actions .btn { font-size: 12px; }
+@media (max-width: 640px) { .form-grid, .my-account-detail-grid, .my-account-history-meta { grid-template-columns: 1fr; }.my-account-astrology-heading, .my-account-history-top { align-items: flex-start; flex-direction: column; }.my-account-profile-card > .btn { width: 100%; }.my-account-section-tabs { overflow-x: auto; }.my-account-section-tabs button { white-space: nowrap; } }
+.my-account-page { gap: 14px; }
+.my-account-profile-card { padding: 14px 18px; gap: 12px; }
+.my-account-avatar { width: 50px; height: 50px; flex-basis: 50px; font-size: 16px; }
+.my-account-profile-copy h2 { font-size: 17px; }.my-account-profile-copy p { margin: 1px 0 5px; }.my-account-contact { gap: 10px; }
+.my-account-section-tabs { margin-top: 4px; }.my-account-section-tabs button { padding: 9px 12px; }
+.my-account-details-card, .my-account-consultation-card { gap: 14px; padding: 16px 18px; }
+.my-account-detail-grid { gap: 12px 24px; }.my-account-detail-grid > div, .my-account-form-field { padding-bottom: 8px; }.my-account-form-field strong { color: var(--ink); font-size: 13px; }
+.my-account-astrology-heading { margin-top: 4px; }.my-account-astrology-heading p { margin-top: 2px; }
+.my-account-consultation-tabs { gap: 6px; }.my-account-consultation-tabs .btn { padding: 8px 11px; font-size: 12px; }
+.my-account-history-list { gap: 0; border-top: 1px solid var(--surface-border); }.my-account-history-card { padding: 12px 0; border: 0; border-bottom: 1px solid var(--surface-border); border-radius: 0; box-shadow: none; gap: 8px; }.my-account-history-top h3 { font-size: 14px; }.my-account-history-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }.my-account-card-actions { gap: 6px; }.my-account-card-actions .btn { padding: 7px 10px; }
+@media (max-width: 640px) { .my-account-detail-grid, .my-account-history-meta { grid-template-columns: 1fr; } }
+.my-account-page {
+  width: min(100%, 1060px);
+  margin-inline: auto;
+  gap: 18px;
+}
+.my-account-profile-card { min-height: 76px; padding: 12px 16px; }
+.my-account-profile-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.my-account-profile-card > .btn { min-height: 36px; padding: 8px 13px; font-size: 13px; }
+.my-account-section-tabs { gap: 4px; }
+.my-account-section-tabs button { min-height: 38px; padding: 8px 12px; font-size: 14px; }
+.my-account-consultation-card { gap: 14px; }
+.my-account-consultation-card > .section-title { font-size: 25px; }
+.my-account-consultation-tabs { gap: 6px; }
+.my-account-consultation-tabs .btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 13px;
+  gap: 6px;
+}
+.my-account-consultation-tabs .btn svg { width: 15px; height: 15px; }
+.my-account-history-card { gap: 10px; }
+.my-account-history-top h3 { font-size: 14px; }
+.my-account-history-meta { gap: 16px; }
+.my-account-history-meta span { gap: 3px; font-size: 12px; }
+.my-account-card-actions .btn { min-height: 36px; padding: 8px 15px; font-size: 13px; }
+.my-account-history-card > .btn { width: max-content; }
+.my-account-history-card .my-account-history-top > span { padding: 4px 8px; font-size: 11px; }
+.my-account-history-card {
+  width: 100%;
+  max-width: 980px;
+  margin-inline: auto;
+  padding: 18px 20px 19px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-strong, #fff);
+  box-shadow: 0 3px 12px rgba(58, 42, 106, .035);
+  gap: 0;
+}
+.my-account-history-list { gap: 18px; border-top: 0; }
+.my-account-history-top { min-height: 38px; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; column-gap: 16px; }
+.my-account-history-top > div:first-child { min-width: 0; }
+.my-account-history-top > span { justify-self: end; margin-left: 0; align-self: start; white-space: nowrap; }
+.my-account-history-top h3 { margin-bottom: 7px; }
+.my-account-history-meta {
+  width: 100%;
+  max-width: 720px;
+  margin-top: 15px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.my-account-history-meta span { gap: 7px; }
+.my-account-card-actions { margin-top: 12px; }
+.my-account-card-actions .btn { padding: 7px 14px; }
+  .my-account-history-card { width: 100%; padding: 16px 14px 17px; }
+  .my-account-history-meta { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.my-account-chat-action { width: max-content; min-height: 36px; gap: 6px; }
+.my-account-chat-record .my-account-history-top h3 { font-weight: 800; }
+.my-account-chat-record .my-account-history-meta { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 820px; }
+.my-account-chat-record .my-account-history-meta strong { color: var(--ink); font-weight: 800; }
+.my-account-history-context-menu { position: fixed; z-index: 50; min-width: 145px; padding: 5px; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--surface-strong, #fff); box-shadow: 0 10px 24px rgba(58, 42, 106, .16); }
+.my-account-history-context-menu button { display: inline-flex; align-items: center; width: 100%; gap: 7px; padding: 8px 10px; border: 0; border-radius: 6px; color: var(--primary); background: transparent; font: inherit; font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; }
+.my-account-history-context-menu button:hover { background: var(--primary-bg); }
+.my-account-inline-chat { display: grid; gap: 16px; }
+.my-account-inline-chat-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--surface-border); }
+.my-account-inline-chat-header h3 { margin: 0 0 5px; color: var(--ink); font-size: 17px; font-weight: 800; }
+.my-account-inline-chat-header p { display: flex; align-items: center; gap: 5px; margin: 0; color: var(--text-secondary); font-size: 12px; }
+.my-account-inline-chat-messages { display: grid; gap: 9px; max-width: 720px; }
+.my-account-inline-message { width: fit-content; max-width: 78%; padding: 10px 13px; border-radius: 11px; background: var(--surface-soft); color: var(--ink); }
+.my-account-inline-message--user { justify-self: end; color: #fff; background: var(--primary); }
+.my-account-inline-message p { margin: 0; font-size: 13px; line-height: 1.45; }
+.my-account-inline-message time { display: block; margin-top: 4px; font-size: 10px; opacity: .7; text-align: right; }
+@media (max-width: 640px) { .my-account-chat-record .my-account-history-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }.my-account-inline-chat-header { flex-direction: column; }.my-account-inline-message { max-width: 90%; } }
+@media (max-width: 640px) { .my-account-profile-actions { width: 100%; margin-left: 0; }.my-account-profile-actions .btn { flex: 1; }.preferences-dialog { padding: 17px; } }
+.my-activity-subtitle {
+  margin: -6px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.my-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.my-activity-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: linear-gradient(180deg, var(--surface-strong) 0%, var(--surface-soft) 130%);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  transition: transform 180ms var(--ease-premium), box-shadow 180ms var(--ease-premium), border-color 180ms ease;
+}
+.my-activity-card:hover,
+.my-activity-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-float);
+  border-color: color-mix(in srgb, var(--primary) 22%, var(--surface-border));
+}
+.my-activity-card__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-m);
+}
+.my-activity-card__body {
+  flex: 1;
+  min-width: 0;
+}
+.my-activity-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.my-activity-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.my-activity-card__name {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.my-activity-card__desc {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 2px 0 7px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.my-activity-card__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.my-activity-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.my-activity-card__meta span:not(:first-child)::before {
+  content: '•';
+  color: var(--border);
+}
+.my-activity-card__right {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 14px;
+  padding-top: 3px;
+}
+.my-activity-card__chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: transform 180ms ease, color 180ms ease;
+}
+.my-activity-card:hover .my-activity-card__chevron {
+  transform: translateX(3px);
+  color: var(--primary);
+}
+  .my-activity-card {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .my-activity-card__right {
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 6px;
+    padding-top: 10px;
+    padding-left: 62px;
+    border-top: 1px dashed var(--divider);
+  }
+  .my-activity-card {
+    gap: 12px;
+    padding: 14px;
+  }
+  .my-activity-card__icon {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+  }
+  .my-activity-card__right {
+    padding-left: 0;
+  }
+.my-account-consultation-history { display:grid; gap:14px; padding:16px 18px; border:1px solid var(--surface-border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-sm); }
+.my-account-consultation-heading .section-title { margin-bottom:3px; font-size:18px; }
+.my-account-consultation-heading p { margin:0; font-size:12px; }
+.my-account-consultation-tabs { display:flex; gap:4px; width:max-content; max-width:100%; padding:4px; overflow-x:auto; border-radius:10px; background:var(--surface-soft); }
+.my-account-consultation-tabs button { flex:none; padding:8px 12px; border:0; border-radius:7px; background:transparent; color:var(--muted); font:inherit; font-size:11px; font-weight:800; white-space:nowrap; cursor:pointer; transition:background .18s ease,color .18s ease,box-shadow .18s ease; }
+.my-account-consultation-tabs button:hover { color:var(--primary); }
+.my-account-consultation-tabs button.is-active { color:var(--primary); background:var(--surface); box-shadow:var(--shadow-xs); }
+.my-account-consultation-history .my-account-history-list { display:grid; gap:8px; border-top:0; }
+.my-account-consultation-history .my-account-history-card { display:grid; gap:11px; padding:13px; border:1px solid var(--surface-border); border-radius:11px; background:var(--surface-strong); box-shadow:none; }
+.my-account-consultation-history .my-account-history-top h3 { margin:0 0 3px; font-size:14px; }
+.my-account-consultation-history .my-account-history-top span { font-size:11px; }
+.my-account-consultation-history .my-account-history-meta { grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.my-account-consultation-history .my-account-history-meta span { min-width:0; gap:3px; font-size:11px; overflow-wrap:anywhere; }
+.my-account-consultation-history .my-account-history-meta b { font-size:9px; }
+.my-account-consultation-history .my-account-card-actions { gap:7px; }
+.my-account-consultation-history .my-account-card-actions .btn { min-height:31px; padding:7px 10px; font-size:11px; }
+.my-account-consultation-history .my-account-history-empty { display:grid; gap:3px; padding:14px 4px 3px; color:var(--muted); font-size:12px; }
+.my-account-consultation-history .my-account-history-empty strong { color:var(--ink); font-size:13px; }
+.my-account-consultation-history .my-account-history-empty span { font-size:11px; }
+.my-account-consultation-history .my-account-history-card .my-account-paid-status { color:var(--green-600); }
+  .my-account-consultation-history { padding:14px; }
+  .my-account-consultation-history .my-account-history-meta { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .my-account-consultation-tabs { width:100%; }
+  .my-account-consultation-tabs button { flex:1 0 auto; }
+  .my-account-consultation-history .my-account-history-top { flex-direction:row; align-items:flex-start; }
+  .my-account-consultation-history .my-account-card-actions { flex-direction:column; }
+  .my-account-consultation-history .my-account-card-actions .btn { width:100%; justify-content:center; }
+.my-account-consultation-history .my-account-chat-record { cursor:pointer; transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.my-account-consultation-history .my-account-chat-record:hover,
+.my-account-consultation-history .my-account-chat-record:focus-visible { border-color:rgba(112,73,180,.36); box-shadow:0 8px 18px rgba(58,42,106,.08); transform:translateY(-1px); outline:none; }
+.my-account-chat-back { display:inline-flex; align-items:center; gap:6px; margin:0 0 10px; padding:0; border:0; color:var(--primary); background:transparent; font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+.my-account-chat-back:hover { text-decoration:underline; }
+.my-account-inline-chat-header { align-items:flex-start; }
+.my-account-inline-chat-header h3 { margin-bottom:3px; }
+.my-account-inline-chat-header p { display:block; margin:0; color:var(--muted); font-size:11px; }
+.my-account-chat-session-summary { display:grid; gap:4px; padding:11px 12px; border:1px solid var(--surface-border); border-radius:10px; background:var(--surface-soft); color:var(--muted); font-size:11px; }
+.my-account-chat-session-summary strong { color:var(--ink); font-size:12px; }
+.my-account-chat-session-summary span { line-height:1.35; }
+.my-account-chat-session-summary small { width:max-content; margin-top:3px; padding:4px 7px; border-radius:999px; color:var(--primary); background:var(--primary-bg); font-size:10px; font-weight:800; }
+.my-account-inline-chat-messages { width:100%; gap:10px; padding-top:2px; }
+.my-account-inline-message { max-width:min(78%,520px); overflow-wrap:anywhere; }
+.my-account-chat-empty { margin:0; padding:18px 0 4px; color:var(--muted); font-size:12px; }
+  .my-account-inline-chat-header { flex-direction:row; }
+  .my-account-inline-chat-header > span { flex:none; }
+  .my-account-inline-message { max-width:90%; }
+.my-account-page { gap: 20px; }
+.my-account-page > .page-header-row { margin-bottom: 0; }
+.my-account-summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background:
+    linear-gradient(120deg, var(--surface) 55%, var(--primary-bg));
+  box-shadow: var(--shadow-card);
+}
+.my-account-summary__avatar {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(88, 55, 150, .18);
+}
+.my-account-summary__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.my-account-summary__copy { display: grid; gap: 2px; min-width: 0; }
+.my-account-summary__copy strong { color: var(--ink); font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
+.my-account-summary__copy .muted { margin: 0; font-size: 12px; }
+.my-account-summary__tag {
+  margin-left: auto;
+  padding: 5px 11px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-strong);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.my-account-settings-card {
+  display: grid;
+  gap: 0;
+  padding: 8px 30px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+}
+.my-account-settings-section { display: grid; gap: 6px; padding: 26px 0; }
+.my-account-settings-section + .my-account-settings-section { border-top: 1px solid var(--surface-border); }
+.my-account-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+.my-account-section-heading > div { display: grid; gap: 3px; }
+.my-account-settings-title { margin: 0; color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.my-account-section-heading .muted { margin: 0; font-size: 12px; }
+.my-account-settings-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid var(--surface-border);
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 180ms var(--ease-premium), border-color 180ms var(--ease-premium), color 180ms var(--ease-premium), transform 180ms var(--ease-premium), box-shadow 180ms var(--ease-premium);
+}
+.my-account-settings-edit:hover { background: var(--primary-bg); border-color: var(--secondary); color: var(--primary); box-shadow: var(--shadow-xs); }
+.my-account-info-rows { display: grid; }
+.my-account-info-row {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 20px;
+  row-gap: 3px;
+  padding: 11px 2px;
+}
+.my-account-info-row + .my-account-info-row { border-top: 1px solid var(--surface-border); }
+.my-account-info-row span { color: var(--text-secondary); font-size: 12.5px; }
+.my-account-info-row strong { color: var(--ink); font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
+.my-account-info-row strong.is-empty { color: var(--text-secondary); font-weight: 400; }
+.my-account-settings-card .form-grid { margin-top: 4px; }
+.my-account-settings-card .my-account-actions { margin-top: 16px; }
+  .my-account-settings-card { padding: 8px 20px; }
+  .my-account-settings-section { padding: 22px 0; }
+  .my-account-info-row { grid-template-columns: 1fr; gap: 2px; padding: 10px 2px; }
+  .my-account-summary__tag { display: none; }
+.my-account-page { gap: 18px; }
+.my-account-page .page-header-row { align-items: flex-end; }
+.my-account-page .page-title { font-weight: 800; letter-spacing: -.035em; }
+.my-account-page .page-header-row .muted { color: var(--muted); font-size: 13px; }
+.my-account-profile-card {
+  position: relative;
+  gap: 16px;
+  padding: 18px 22px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-m);
+  background: var(--surface-strong);
+  box-shadow: 0 8px 22px rgba(58, 42, 106, .06);
+}
+.my-account-avatar {
+  box-shadow: 0 0 0 4px var(--primary-bg), 0 10px 22px rgba(109, 40, 217, .22);
+  letter-spacing: -.01em;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, .18);
+}
+.my-account-profile-copy h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.my-account-profile-copy > p { font-weight: 700; letter-spacing: .02em; }
+.my-account-contact { gap: 8px; }
+.my-account-contact span { gap: 6px; padding: 6px 12px; border: 1px solid var(--surface-border); border-radius: var(--radius-pill); background: var(--surface-soft); color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+.my-account-contact span svg { color: var(--primary); }
+.my-account-page .my-account-profile-actions { gap: 8px; }
+.my-account-page .my-account-profile-actions .btn { min-height: 38px; padding: 8px 15px; justify-content: center; font-size: 13px; font-weight: 700; }
+.my-account-edit-card { gap: 16px; padding: 20px 22px; border: 1px solid var(--surface-border); border-radius: var(--radius-m); background: var(--surface-strong); box-shadow: 0 6px 18px rgba(58, 42, 106, .05); }
+.my-account-edit-card .form-grid { gap: 15px; }
+.my-account-edit-card .form-grid label { color: var(--body); font-size: 12.5px; font-weight: 700; }
+.my-account-edit-card .text-input { min-height: 46px; }
+.form-grid .my-account-actions { justify-content: flex-end; gap: 10px; }
+.my-account-section-tabs {
+  align-items: center;
+  gap: 5px;
+  width: max-content;
+  max-width: 100%;
+  padding: 5px;
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+  scrollbar-width: thin;
+}
+.my-account-section-tabs button {
+  min-height: 40px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.my-account-section-tabs button:hover { color: var(--primary); background: color-mix(in srgb, var(--primary-bg) 45%, transparent); }
+.my-account-section-tabs button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.my-account-section-tabs button.is-active { color: var(--primary); background: var(--surface-strong); font-weight: 800; box-shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 4px 10px rgba(58, 42, 106, .08); }
+.my-account-details-card { gap: 20px; padding: 22px 24px; border: 1px solid var(--surface-border); border-radius: var(--radius-m); background: var(--surface-strong); box-shadow: 0 6px 18px rgba(58, 42, 106, .05); }
+.my-account-details-card .section-title { margin-bottom: 0; font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.my-account-section-heading, .my-account-astrology-heading { align-items: center; }
+.my-account-astrology-heading { padding-top: 8px; }
+.my-account-details-card .muted { margin: 0; font-size: 12px; }
+.my-account-detail-grid { gap: 14px 18px; }
+.my-account-detail-grid > div,
+.my-account-form-field {
+  gap: 5px;
+  padding: 13px 15px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-soft) 74%, transparent);
+}
+.my-account-detail-grid span { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.my-account-detail-grid strong, .my-account-form-field strong { font-size: 14.5px; font-weight: 700; }
+.my-account-form-field .text-input { height: auto; min-height: 44px; }
+.my-account-consultation-history { gap: 16px; padding: 20px 22px; border-radius: var(--radius-m); background: var(--surface-strong); box-shadow: 0 6px 18px rgba(58, 42, 106, .05); }
+.my-account-consultation-heading .section-title { margin-bottom: 4px; font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.my-account-consultation-heading p { color: var(--muted); }
+.my-account-consultation-tabs { padding: 4px 5px; border: 1px solid var(--surface-border); background: var(--surface-soft); }
+.my-account-consultation-tabs button.is-active { color: var(--primary); background: var(--surface-strong); box-shadow: 0 1px 3px rgba(15, 23, 42, .08), 0 3px 8px rgba(58, 42, 106, .08); }
+.my-account-consultation-history .my-account-history-card { gap: 13px; padding: 15px 16px; border-radius: 13px; box-shadow: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.my-account-consultation-history .my-account-history-card:hover { border-color: color-mix(in srgb, var(--primary) 26%, var(--border)); box-shadow: 0 10px 22px rgba(58, 42, 106, .08); transform: translateY(-1px); }
+.my-account-consultation-history .my-account-history-top h3 { font-size: 15px; font-weight: 800; }
+.my-account-consultation-history .my-account-history-top span { gap: 6px; color: var(--muted); font-weight: 600; }
+.my-account-consultation-history .my-account-history-top span svg { color: var(--primary); }
+.my-account-consultation-history .my-account-history-meta { gap: 10px; }
+.my-account-consultation-history .my-account-history-meta span { gap: 3px; padding: 8px 11px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-soft); }
+.my-account-consultation-history .my-account-history-meta b { color: var(--muted); letter-spacing: .06em; }
+.my-account-consultation-history .my-account-history-meta strong { color: var(--primary-dark); font-weight: 800; }
+.my-account-consultation-history .my-account-card-actions { gap: 8px; margin-top: 2px; }
+.my-account-consultation-history .my-account-card-actions .btn { min-height: 34px; padding: 7px 12px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.my-account-consultation-history .my-account-history-empty { padding: 20px 6px 6px; }
+.my-account-chat-record { border-color: color-mix(in srgb, var(--primary) 12%, var(--border)); }
+.my-account-inline-chat-header { padding-bottom: 16px; }
+.my-account-chat-session-summary { padding: 12px 14px; border-radius: 12px; }
+.my-account-inline-chat-messages { max-width: 760px; }
+.my-account-inline-message { padding: 11px 14px; border-radius: 14px; box-shadow: 0 2px 6px rgba(15, 23, 42, .05); }
+.my-account-inline-message--user { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+  .my-account-profile-card { padding: 16px 18px; }
+  .my-account-profile-copy h2 { font-size: 17px; }
+  .my-account-details-card, .my-account-consultation-history, .my-account-edit-card { padding: 16px 15px; }
+  .my-account-detail-grid { grid-template-columns: 1fr; }
+  .my-account-section-tabs { width: 100%; }
+  .my-account-consultation-history .my-account-history-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
