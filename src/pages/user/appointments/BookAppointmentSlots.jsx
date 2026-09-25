@@ -279,6 +279,7 @@ export default function BookAppointmentSlots() {
           slotDuration={bookingSlot.duration}
           initialStep="review"
           initialDetails={bookingDetails}
+          publishedAvailability={hasScheduleTemplates}
           onEditAppointment={() => {
             setBookingOpen(false)
             navigate(`/user/appointments/book/${astrologer.id}`, { state: { initialDate: bookingSlot.date } })

@@ -60,7 +60,7 @@ function weekFor(value) {
   return Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index))
 }
 
-export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, userId, userName, actions, routes, onClose, onEditAppointment, initialDate = '', initialSelectedSlots = [], pricePerSlot = PRICE, slotDuration = '30 Minutes', initialStep = 'form', initialDetails = null }) {
+export default function AppointmentBookingModal({ astrologer, availability = {}, appointments = [], userWallet, userId, userName, actions, routes, onClose, onEditAppointment, initialDate = '', initialSelectedSlots = [], pricePerSlot = PRICE, slotDuration = '30 Minutes', initialStep = 'form', initialDetails = null, publishedAvailability = false }) {
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
@@ -75,6 +75,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const [time, setTime] = useState('')
   const [details, setDetails] = useState(() => ({ userName: '', question: '', dob: '', birthTime: '', birthPlace: '', rashi: '', nakshatra: '', consultationFor: '', otherPurpose: '', ...initialDetails }))
   const [paymentMethod, setPaymentMethod] = useState('Wallet')
+  const [processing, setProcessing] = useState(false)
   const [appointmentId, setAppointmentId] = useState(null)
   const [notice, setNotice] = useState('')
   const [copied, setCopied] = useState(false)
@@ -128,40 +129,59 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   }
 
   const pay = () => {
-    if (!selected.length || paymentMethod !== 'Wallet' || balance < amount) return
+    if (processing || !selected.length || paymentMethod !== 'Wallet') return
+    if (balance < amount) {
+      setNotice('Insufficient wallet balance. Please add money before paying.')
+      return
+    }
     const slotPayloads = selected.map((slot) => ({ astrologerId: astrologer.id, dateIso: slot.date, time: slot.time }))
-    if (typeof actions.isAppointmentSlotAvailable === 'function' && slotPayloads.some((slot) => !actions.isAppointmentSlotAvailable(slot))) {
+    const isLocallyAvailable = (slot) => dateSlots(slot.date).includes(slot.time) && !booked.has(`${slot.date}|${slot.time}`)
+    const isAvailable = (slot) => publishedAvailability && typeof actions.isAppointmentSlotAvailable === 'function'
+      ? actions.isAppointmentSlotAvailable(slot)
+      : isLocallyAvailable(slot)
+    if (slotPayloads.some((slot) => !isAvailable(slot))) {
       setNotice('One or more selected slots are no longer available. Please choose another slot.')
       return
     }
+    setProcessing(true)
     const group = `#BOOK-${selected[0].date.replaceAll('-', '')}-001`
     const transactionId = `appointment-${group}`
     const bookingDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-    const ids = selected.map((slot, index) => actions.bookAppointment({
-      astrologerId: astrologer.id,
-      astrologerName: astrologer.name,
-      type: TYPE,
-      date: formatDate(slot.date),
-      dateIso: slot.date,
-      time: slot.time,
-      price: slot.price,
-      amount: slot.price,
-      duration: slot.duration,
-      package: slot.package || '30 Min Consultation',
-      bookingGroup: group,
-      bookingSequence: index + 1,
-      orderId: group,
-      paymentStatus: 'Paid',
-      paymentMethod,
-      transactionId,
-      bookingDate,
-      questionDetails: details.question ? details : null,
-      userId,
-      customerName: details.userName || userName || null,
-    }))
-    actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: `${selected.length} appointments`, service: 'Appointment', transactionId })
-    setAppointmentId(ids[0])
-    setStep('success')
+    try {
+      const ids = selected.map((slot, index) => actions.bookAppointment({
+        astrologerId: astrologer.id,
+        astrologerName: astrologer.name,
+        type: TYPE,
+        date: formatDate(slot.date),
+        dateIso: slot.date,
+        time: slot.time,
+        price: slot.price,
+        amount: slot.price,
+        duration: slot.duration,
+        package: slot.package || '30 Min Consultation',
+        bookingGroup: group,
+        bookingSequence: index + 1,
+        orderId: group,
+        paymentStatus: 'Paid',
+        paymentMethod,
+        transactionId,
+        bookingDate,
+        questionDetails: details.question ? details : null,
+        userId,
+        customerName: details.userName || userName || null,
+      }))
+      if (ids.some((id) => !id)) {
+        setProcessing(false)
+        setNotice('The selected slot is no longer available. Please choose another slot.')
+        return
+      }
+      actions.debitUserWallet({ amount, astrologer: astrologer.name, duration: `${selected.length} appointments`, service: 'Appointment', transactionId })
+      setAppointmentId(ids[0])
+      setStep('success')
+    } catch {
+      setProcessing(false)
+      setNotice('Payment could not be completed. Please try again.')
+    }
   }
 
   return createPortal(
@@ -184,13 +204,13 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
           </>}
           {step === 'details' && <div className="appointment-details-form"><div><div className="appointment-booking-section-label">Consultation Details</div><p className="muted">Would you like to submit your question and horoscope details before the appointment?</p></div><label>Question description<textarea className="text-input" rows="3" value={details.question} onChange={(event) => setDetails({ ...details, question: event.target.value })} placeholder="Share what you would like guidance on (optional)" /></label><div className="appointment-form-divider">Horoscope Details <span>Optional</span></div><div className="appointment-form-grid"><label>Date of Birth<input className="text-input" type="date" value={details.dob} onChange={(event) => setDetails({ ...details, dob: event.target.value })} /></label><label>Time of Birth<input className="text-input" type="time" value={details.birthTime} onChange={(event) => setDetails({ ...details, birthTime: event.target.value })} /></label><label>Place of Birth<input className="text-input" value={details.birthPlace} onChange={(event) => setDetails({ ...details, birthPlace: event.target.value })} /></label></div></div>}
           {step === 'review' && <div className="appointment-review"><div className="appointment-booking-section-label">Selected Appointments</div><div className="appointment-review-slot-list">{selected.map((slot, index) => <div className="appointment-review-slot" key={slot.key}><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{formatDate(slot.date)}</strong><small>{formatTime(slot.time, slotDurationMinutes(slot.duration))}</small><small>{slot.duration} · Audio Consultation</small></div><b>₹{slot.price}</b></div>)}</div><div className="appointment-review-total"><span>Total</span><strong>₹{amount}</strong></div></div>}
-          {step === 'payment' && <div className="appointment-payment-step"><div className="appointment-payment-title">Pay with Wallet</div><div className="appointment-wallet-card"><div className="appointment-wallet-balance"><div><WalletCards size={16} /><span>Wallet Balance</span></div><strong>₹{balance.toLocaleString('en-IN')}</strong></div><div className="appointment-wallet-divider" /><div className="appointment-wallet-line"><span>Appointment Amount</span><strong>₹{amount.toLocaleString('en-IN')}</strong></div><div className={`appointment-wallet-status ${balance >= amount ? 'is-sufficient' : 'is-insufficient'}`}>{balance >= amount ? <><Check size={14} /> Sufficient wallet balance</> : <><CircleAlert size={14} /> Insufficient wallet balance</>}</div></div>{balance < amount && <button type="button" className="btn btn-outline appointment-add-money" onClick={() => navigate(routes.walletHistory)}>Add Money to Wallet</button>}<p className="appointment-charge-note">You will be charged ₹{amount.toLocaleString('en-IN')} from your wallet.</p></div>}
+          {step === 'payment' && <div className="appointment-payment-step"><div className="appointment-payment-title">Pay with Wallet</div><div className="appointment-wallet-card"><div className="appointment-wallet-balance"><div><WalletCards size={16} /><span>Wallet Balance</span></div><strong>₹{balance.toLocaleString('en-IN')}</strong></div><div className="appointment-wallet-divider" /><div className="appointment-wallet-line"><span>Appointment Amount</span><strong>₹{amount.toLocaleString('en-IN')}</strong></div><div className={`appointment-wallet-status ${balance >= amount ? 'is-sufficient' : 'is-insufficient'}`}>{balance >= amount ? <><Check size={14} /> Sufficient wallet balance</> : <><CircleAlert size={14} /> Insufficient wallet balance</>}</div></div>{balance < amount && <button type="button" className="btn btn-outline appointment-add-money" onClick={() => navigate(routes.walletHistory)}>Add Money to Wallet</button>}<p className="appointment-charge-note">You will be charged ₹{amount.toLocaleString('en-IN')} from your wallet.</p>{notice && <div className="appointment-booking-notice" role="status"><CircleAlert size={15} /> {notice}</div>}</div>}
           {step === 'success' && <div className="appointment-booking-success"><div className="appointment-success-heading"><div className="appointment-success-mark"><Check size={21} /></div><div className="appointment-success-title"><Sparkles size={14} /><h3>Appointment Confirmed!</h3><Sparkles size={14} /></div><p>{selected.length} appointment{selected.length === 1 ? '' : 's'} with {astrologer.name} confirmed.</p></div><div className="appointment-success-details"><strong>Appointment Details</strong><div className="appointment-success-detail-list"><div className="appointment-success-detail-entry"><div className="appointment-success-detail-column"><CalendarPlus size={17} className="appointment-detail-icon" /><small>Date &amp; Time</small>{selected.map((slot) => <b key={slot.key}>{formatDate(slot.date)} · {formatTime(slot.time, slotDurationMinutes(slot.duration))}</b>)}</div><div className="appointment-success-detail-column"><PhoneCall size={17} className="appointment-detail-icon" /><small>Consultation Type</small><span className="appointment-consultation-pill">{TYPE}</span></div><div className="appointment-success-detail-column"><Clock3 size={17} className="appointment-detail-icon" /><small>Duration</small><b>{selected[0]?.duration || '30 Minutes'} each</b></div><div className="appointment-success-detail-column appointment-detail-booking-id"><small>Booking ID</small><span>{`#BOOK-${selected[0]?.date.replaceAll('-', '')}-001`}<button type="button" aria-label="Copy booking ID" onClick={() => { navigator.clipboard?.writeText(`#BOOK-${selected[0]?.date.replaceAll('-', '')}-001`); setCopied(true) }}><Copy size={13} /></button>{copied && <em>Copied</em>}</span></div></div></div></div><div className="appointment-paid-card"><div><WalletCards size={17} /><span>Amount Paid</span><strong>₹{amount}</strong></div><span className="appointment-paid-badge"><Check size={13} /> Paid &amp; Confirmed</span></div></div>}
         </div>
 {step !== 'form' && <div className="modal-card__footer user-modal-card__footer appointment-booking-modal__footer">
           {step === 'details' && <button className="btn btn-primary" type="button" onClick={() => setStep('review')}>Save Details</button>}
           {step === 'review' && <><button className="btn btn-outline" type="button" onClick={() => { if (onEditAppointment) onEditAppointment(); else setStep('form') }}>Edit Appointment</button><button className="btn btn-primary" type="button" onClick={() => setStep('payment')}>Proceed to Payment</button></>}
-          {step === 'payment' && <button className="btn btn-primary" type="button" disabled={paymentMethod !== 'Wallet' || balance < amount} onClick={pay}>Confirm & Pay ₹{amount}</button>}
+          {step === 'payment' && <button className="btn btn-primary" type="button" disabled={processing || paymentMethod !== 'Wallet'} onClick={pay}>{`Confirm & Pay ₹${amount}`}</button>}
           {step === 'success' && <button className="btn btn-outline" type="button" onClick={() => { onClose(); navigate(`${routes.base}/appointments/book/${encodeURIComponent(astrologer.id)}`, { state: { initialDate: selected[0]?.date || '', appointmentId, openAppointmentDetails: true } }) }}>Done</button>}
         </div>}
       </div>
