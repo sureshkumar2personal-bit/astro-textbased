@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { Search, X, ChevronRight, ChevronLeft, Calendar } from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
@@ -9,6 +9,7 @@ import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import '../../../css/astrologer/answer-question.css'
 
 
 import {
@@ -30,6 +31,42 @@ function getWordPreview(content) {
   return {
     preview: words.slice(0, 4).join(' '),
     isTruncated: true,
+  }
+}
+
+function getInitials(name) {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase()
+}
+
+function getAccentColor(questionId) {
+  const colors = [
+    '#7c3aed', // purple
+    '#db2777', // pink
+    '#0891b2', // cyan
+    '#d97706', // orange
+    '#059669', // green
+  ]
+  const index = questionId.charCodeAt(questionId.length - 1) % colors.length
+  return colors[index]
+}
+
+function getStatusColor(status) {
+  switch (status) {
+    case 'Answered':
+      return { bg: '#ecfdf5', text: '#059669', dot: '#10b981', label: status }
+    case 'Pending':
+      return { bg: '#fffbeb', text: '#b45309', dot: '#f59e0b', label: status }
+    case 'Disputed':
+      return { bg: '#fef2f2', text: '#dc2626', dot: '#ef4444', label: status }
+    case 'Under Review':
+      return { bg: '#e0e7ff', text: '#3730a3', dot: '#6366f1', label: status }
+    default:
+      return { bg: '#f3f4f6', text: '#6b7280', dot: '#9ca3af', label: status }
   }
 }
 
@@ -124,9 +161,14 @@ export default function AnswerQuestion() {
   }
 
   return (
-    <div>
+    <div className="answer-question-page">
       <PageHeader
-        eyebrow="Astrologer"
+        eyebrow={
+          <>
+            <TempleLotusIcon size={13} />
+            Astrologer
+          </>
+        }
         title="Answer Question"
         showBack
         backTo={routes.textBasedQuestions}
@@ -138,16 +180,17 @@ export default function AnswerQuestion() {
           <div className="search-filter-row">
             <div className="search-filter-row__group">
               <div className="search-bar">
+              <Search size={18} className="search-bar__icon" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by user name, question ID, category, status, or keyword"
+                placeholder="Search by user name, question"
                 className="text-input search-bar__input"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setAppliedSearch(search)
                 }}
               />
-              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
+              <button type="button" className="icon-btn search-bar__submit" aria-label="Search" onClick={() => setAppliedSearch(search)}>
                 <Search size={18} />
               </button>
               </div>
@@ -163,49 +206,81 @@ export default function AnswerQuestion() {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {pagedQuestions.map((question) => (
-            <Card
-              key={question.id}
-              hover
-              style={{ cursor: 'pointer', padding: 16 }}
-              onClick={() => openQuestion(question.id)}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.user}</span>
-                    <span className="muted" style={{ fontSize: 12 }}>{question.id}</span>
+        <div className="question-cards-grid">
+          {pagedQuestions.map((question) => {
+            const statusColor = getStatusColor(question.status)
+            const accentColor = getAccentColor(question.id)
+            const initials = getInitials(question.user)
+
+            return (
+              <div
+                key={question.id}
+                className="question-card-modern"
+                style={{
+                  borderLeft: `4px solid ${accentColor}`,
+                  cursor: 'pointer',
+                }}
+                onClick={() => openQuestion(question.id)}
+              >
+                <div className="question-card-content">
+                  <div className="question-card-avatar" style={{ background: accentColor }}>
+                    {initials}
                   </div>
-                  <div style={{ color: 'var(--ink)', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 320 }}>
-                    "{question.question}"
+                  <div className="question-card-details">
+                    <div className="question-card-name-row">
+                      <span className="question-card-name">{question.user}</span>
+                      <span className="question-card-id">{question.id}</span>
+                    </div>
+                    <p className="question-card-text">"{question.question}"</p>
+                    <div className="question-card-meta">
+                      <span className="question-card-category">{question.type}</span>
+                      <span className="question-card-date">
+                        <Calendar size={12} />
+                        Submitted: {question.raised}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="badge badge-violet">{question.type}</span>
-                    <span className="muted" style={{ fontSize: 12 }}>Submitted: {question.raised}</span>
+
+                  <div className="question-card-divider" />
+
+                  {/* Status and Chevron */}
+                  <div className="question-card-actions">
+                    <span
+                      className="question-card-status"
+                      style={{
+                        background: statusColor.bg,
+                        color: statusColor.text,
+                      }}
+                    >
+                      <span className="question-card-status-dot" style={{ background: statusColor.dot }} />
+                      {statusColor.label}
+                    </span>
+                    <ChevronRight size={18} className="question-card-chevron" />
                   </div>
                 </div>
               </div>
-            </Card>
-          ))}
+            )
+          })}
         </div>
 
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 18 }}>
+          <div className="question-pagination">
             <button
               className="btn btn-outline btn-sm"
               disabled={currentPage <= 1}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             >
+              <ChevronLeft size={16} />
               Previous
             </button>
-            <span className="muted" style={{ fontSize: 13 }}>Page {currentPage} of {totalPages}</span>
+            <span className="muted question-pagination__label">Page {currentPage} of {totalPages}</span>
             <button
               className="btn btn-outline btn-sm"
               disabled={currentPage >= totalPages}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
             >
               Next
+              <ChevronRight size={16} />
             </button>
           </div>
         )}

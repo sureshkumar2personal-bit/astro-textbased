@@ -623,11 +623,6 @@ export default function Layout() {
                       setPanel(null)
                       return
                     }
-                    if (item.consultationId) {
-                      setConsultationDetailsId(item.consultationId)
-                      setPanel(null)
-                      return
-                    }
                     if (item.route) {
                       navigate(item.route)
                     }

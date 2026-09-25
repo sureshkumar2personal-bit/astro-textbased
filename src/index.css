@@ -10455,7 +10455,7 @@ button.apt-week-day:focus-visible {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 150;
+  z-index: 300;
   display: flex;
   flex-direction: column;
   gap: 10px;
