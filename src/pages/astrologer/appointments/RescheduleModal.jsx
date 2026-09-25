@@ -11,6 +11,7 @@ import { useToast } from '../../../components/Toast.jsx'
 import {
   addMonths,
   format12h,
+  fromIsoDate,
   generateAppointmentSlots,
   isWithinSchedulingHorizon,
   parseDurationToMinutes,
@@ -202,7 +203,7 @@ export default function RescheduleModal({
             <h2>Reschedule Appointment</h2>
             <span>
               {appointment.customerName} ·{' '}
-              {appointment.date || dateLabel(new Date(appointment.dateIso))}{' '}
+              {appointment.date || dateLabel(fromIsoDate(appointment.dateIso))}{' '}
               · {durationMin} min
             </span>
           </div>

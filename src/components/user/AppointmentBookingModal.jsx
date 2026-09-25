@@ -65,7 +65,8 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const todayDate = new Date()
   const today = keyFor(todayDate)
   const bookingWindowEnd = '2026-09-30'
-  const calendarAvailability = useMemo(() => ({ ...MOCK_SEPTEMBER_AVAILABILITY, ...availability }), [availability])
+  const usesConfiguredAvailability = Object.keys(availability || {}).length > 0
+  const calendarAvailability = useMemo(() => usesConfiguredAvailability ? availability : MOCK_SEPTEMBER_AVAILABILITY, [availability, usesConfiguredAvailability])
   const firstDate = useMemo(() => Object.keys(calendarAvailability).filter((date) => slotsForDate(calendarAvailability, date, today, bookingWindowEnd).length && !MOCK_FULL_DATES.has(date)).sort()[0] || '', [calendarAvailability, today, bookingWindowEnd])
   const [step, setStep] = useState(initialStep)
   const [view, setView] = useState('month')
@@ -90,7 +91,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
     const slots = dateSlots(dateKey)
     const remaining = openSlots(dateKey).length
     if (!slots.length) return { state: 'unavailable', remaining: 0 }
-    if (MOCK_FULL_DATES.has(dateKey) || !remaining) return { state: 'booked', remaining: 0 }
+    if ((!usesConfiguredAvailability && MOCK_FULL_DATES.has(dateKey)) || !remaining) return { state: 'booked', remaining: 0 }
     if (remaining < slots.length) return { state: 'partial', remaining }
     return { state: 'available', remaining }
   }
@@ -128,6 +129,11 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
 
   const pay = () => {
     if (!selected.length || paymentMethod !== 'Wallet' || balance < amount) return
+    const slotPayloads = selected.map((slot) => ({ astrologerId: astrologer.id, dateIso: slot.date, time: slot.time }))
+    if (typeof actions.isAppointmentSlotAvailable === 'function' && slotPayloads.some((slot) => !actions.isAppointmentSlotAvailable(slot))) {
+      setNotice('One or more selected slots are no longer available. Please choose another slot.')
+      return
+    }
     const group = `#BOOK-${selected[0].date.replaceAll('-', '')}-001`
     const transactionId = `appointment-${group}`
     const bookingDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })

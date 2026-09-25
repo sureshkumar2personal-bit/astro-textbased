@@ -105,7 +105,7 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
 
 export default function AppointmentDetails() {
   const [searchParams] = useSearchParams()
-  const { appointments, actions } = useAppData()
+  const { appointments, consultations, actions } = useAppData()
   const { currentUser } = useAuth()
   const navigate = useNavigate()
   const now = useNow(60000)
@@ -227,7 +227,14 @@ export default function AppointmentDetails() {
         </div>
       </aside>
     </div>
-    <UserAppointmentDetailsDrawer appointment={detailsAppointment} currentUser={currentUser} onClose={() => closeDetailsDrawer(detailsAppointment)} onBookAgain={bookAgain} />
+    <UserAppointmentDetailsDrawer
+      appointment={detailsAppointment}
+      consultation={detailsAppointment ? consultations.find((item) => item.appointmentId === detailsAppointment.id && (item.sent || item.sentToUser || item.completedAt)) : null}
+      currentUser={currentUser}
+      onClose={() => closeDetailsDrawer(detailsAppointment)}
+      onBookAgain={bookAgain}
+      onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
+    />
     {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>

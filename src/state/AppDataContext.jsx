@@ -1,7 +1,7 @@
 /* oxlint-disable react/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
-import { isCancelledStatus } from '../utils/appointments.js'
+import { availabilitySnapshotForDate, format12h, generateAppointmentSlots, isCancelledStatus } from '../utils/appointments.js'
 import { applyRunningBalances, buildSeedAstrologerWallet, computeWalletSummary, payoutDisplayLabel } from '../utils/wallet.js'
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
@@ -1344,6 +1344,7 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
 
 export function AppDataProvider({ children }) {
   const { currentUser } = useAuth()
+  const consultationEditLocks = useRef(new Set())
   const [campaigns, setCampaigns] = useState(initialCampaigns)
   const [questions, setQuestions] = useState(() => {
     const stored = loadFromStorage(QUESTIONS_STORAGE_KEY, null)
@@ -2501,6 +2502,21 @@ export function AppDataProvider({ children }) {
       }
     },
     bookAppointment(payload) {
+      const template = availabilitySnapshotForDate({
+        templates: appointmentAvailabilityTemplates.filter((item) => item.astrologerId === payload.astrologerId),
+        date: payload.dateIso || payload.date,
+      })
+      if (template) {
+        const currentSlots = generateAppointmentSlots({
+          template,
+          date: payload.dateIso || payload.date,
+          appointments,
+          now: new Date(),
+          availabilityPeriod: template.publishedAvailabilityPeriod || template.availabilityPeriod || undefined,
+        })
+        const requestedTime = String(payload.time || '').trim()
+        if (!currentSlots.some((slot) => format12h(slot.startMin) === requestedTime)) return null
+      }
       const appointment = {
         id: `apt-${Date.now().toString(36)}`,
         astrologerId: payload.astrologerId,
@@ -2554,6 +2570,22 @@ export function AppDataProvider({ children }) {
         ...prev,
       ])
       return appointment.id
+    },
+    isAppointmentSlotAvailable(payload = {}) {
+      if (!payload.astrologerId || !payload.dateIso || !payload.time) return false
+      const template = availabilitySnapshotForDate({
+        templates: appointmentAvailabilityTemplates.filter((item) => item.astrologerId === payload.astrologerId),
+        date: payload.dateIso,
+      })
+      if (!template) return false
+      const slots = generateAppointmentSlots({
+        template,
+        date: payload.dateIso,
+        appointments,
+        now: new Date(),
+        availabilityPeriod: template.publishedAvailabilityPeriod || template.availabilityPeriod || undefined,
+      })
+      return slots.some((slot) => format12h(slot.startMin) === String(payload.time).trim())
     },
     cancelAppointment(appointmentId, meta) {
       setAppointments((prev) =>
@@ -2670,11 +2702,12 @@ export function AppDataProvider({ children }) {
       })
       return target
     },
-    saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, attachments, atonement, send }) {
+    saveConsultation({ appointmentId, notes, fileName, fileType, fileSize, attachments, atonement, send, isEdit = false }) {
       if (!appointmentId) return null
       const appointment = appointments.find((item) => item.id === appointmentId)
       const existing = consultations.find((consultation) => consultation.appointmentId === appointmentId)
-      const wasAlreadySent = Boolean(existing?.sent)
+      if (existing?.consultationEdited || (isEdit && consultationEditLocks.current.has(appointmentId))) return existing || null
+      if (isEdit) consultationEditLocks.current.add(appointmentId)
       const astrologerId = appointment?.astrologerId || 'astrologer-demo'
       const astrologerName = mockAstrologers.find((item) => item.id === astrologerId)?.name || 'Your astrologer'
       const record = {
@@ -2684,6 +2717,8 @@ export function AppDataProvider({ children }) {
         astrologerName,
         userId: appointment?.userId || null,
         customerName: appointment?.customerName || null,
+        consultationTitle: existing?.consultationTitle || appointment?.type || 'Consultation',
+        consultationType: existing?.consultationType || appointment?.type || 'Appointment',
         notes: notes ?? '',
         fileName: fileName ?? '',
         fileType: fileType ?? '',
@@ -2698,6 +2733,9 @@ export function AppDataProvider({ children }) {
         sent: send ? true : Boolean(existing?.sent),
         sentAt: send ? new Date().toISOString() : existing?.sentAt || null,
         sentToUser: send ? true : Boolean(existing?.sentToUser),
+        completedAt: send ? new Date().toISOString() : existing?.completedAt || null,
+        consultationEdited: existing?.consultationEdited || Boolean(isEdit),
+        consultationEditedAt: isEdit ? new Date().toISOString() : existing?.consultationEditedAt || null,
         updatedAt: new Date().toISOString(),
       }
       setConsultations((prev) => {
@@ -2708,25 +2746,6 @@ export function AppDataProvider({ children }) {
         return next
       })
       if (send) {
-        const astrologer = mockAstrologers.find((item) => item.id === record.astrologerId)
-        const attachmentTypes = [...new Set((record.attachments || []).map((item) => item.type || 'File'))]
-        setNotifications((prev) => [{
-          id: `consultation-${record.id}-${Date.now()}`,
-          title: wasAlreadySent ? 'Consultation Updated' : 'New Consultation Received',
-          detail: wasAlreadySent
-            ? `${astrologer?.name || 'Your astrologer'} updated your consultation.`
-            : `You have received a consultation from ${astrologer?.name || 'your astrologer'}.`,
-          time: 'Just now',
-          audience: ROLES.USER,
-          userId: record.userId,
-          category: 'consultations',
-          consultationId: record.id,
-          consultationTitle: (record.notes || 'Consultation summary').slice(0, 90),
-          consultationSentAt: record.sentAt,
-          attachmentCount: (record.attachments || []).length,
-          attachmentTypes,
-          read: false,
-        }, ...prev])
         this.updateAppointment(appointmentId, {
           consultationFollowUpRequired: false,
           consultationSentAt: record.sentAt,
@@ -2735,14 +2754,14 @@ export function AppDataProvider({ children }) {
       logActivity({
         astrologerId,
         kind: 'appointments',
-        type: send ? 'consultation-sent' : 'consultation-draft-saved',
-        title: send ? 'Consultation Sent' : 'Consultation Draft Saved',
+        type: send ? 'consultation-completed' : 'consultation-draft-saved',
+        title: send ? 'Consultation Completed' : 'Consultation Draft Saved',
         description: send
           ? `Sent consultation notes to ${record.customerName || 'the customer'}`
           : `Saved a draft of consultation notes for ${record.customerName || 'the customer'}`,
         relatedId: record.id,
         customerName: record.customerName,
-        moduleStatus: send ? 'Sent' : 'Draft',
+        moduleStatus: send ? 'Completed' : 'Draft',
       })
       return record
     },
@@ -2750,7 +2769,7 @@ export function AppDataProvider({ children }) {
       setConsultations((prev) =>
         prev.map((consultation) =>
           consultation.appointmentId === appointmentId
-            ? { ...consultation, sent: true, sentToUser: true, sentAt: new Date().toISOString() }
+            ? { ...consultation, sent: true, sentToUser: true, sentAt: new Date().toISOString(), completedAt: new Date().toISOString() }
             : consultation,
         ),
       )
@@ -2765,20 +2784,38 @@ export function AppDataProvider({ children }) {
         ? { ...consultation, atonement: { ...consultation.atonement, status: 'Completed', completedAt } }
         : consultation))
     },
+    savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed) {
+      if (!appointmentId || !pariharamId || !dayId) return null
+      const completedAt = completed ? new Date().toISOString() : null
+      setConsultations((prev) => prev.map((consultation) => consultation.appointmentId === appointmentId
+        ? {
+            ...consultation,
+            pariharamProgress: {
+              pariharamId,
+              days: {
+                ...(consultation.pariharamProgress?.pariharamId === pariharamId ? consultation.pariharamProgress.days : {}),
+                [dayId]: { date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt },
+              },
+            },
+            updatedAt: new Date().toISOString(),
+          }
+        : consultation))
+      return { appointmentId, pariharamId, dayId, date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt }
+    },
     updateAppointment(appointmentId, patch = {}) {
       setAppointments((prev) =>
         prev.map((item) => (item.id === appointmentId ? { ...item, ...patch } : item)),
       )
       return patch
     },
-    savePrivateNotes(appointmentId, privateNotes) {
-      this.updateAppointment(appointmentId, { privateNotes: privateNotes ?? '' })
+    savePrivateCallNotes(appointmentId, privateCallNotes) {
+      this.updateAppointment(appointmentId, { privateCallNotes: privateCallNotes ?? '' })
       const appointment = appointments.find((item) => item.id === appointmentId)
       logActivity({
         astrologerId: appointment?.astrologerId,
         kind: 'appointments',
         type: 'appointment-notes-saved',
-        title: 'Call Notes Saved',
+        title: 'Private Call Notes Saved',
         description: `Saved private call notes for ${appointment?.customerName || 'a customer'}`,
         relatedId: appointmentId,
         customerName: appointment?.customerName,
@@ -2813,7 +2850,7 @@ export function AppDataProvider({ children }) {
         moduleStatus: appointment?.status,
       })
     },
-    completeAppointmentCall(appointmentId, { callDurationSeconds, endedAt, privateNotes } = {}) {
+    completeAppointmentCall(appointmentId, { callDurationSeconds, endedAt } = {}) {
       const appointment = appointments.find((item) => item.id === appointmentId)
       const patch = {
         status: 'Completed',
@@ -2821,7 +2858,6 @@ export function AppDataProvider({ children }) {
         callDurationSeconds: callDurationSeconds || 0,
         consultationFollowUpRequired: true,
       }
-      if (privateNotes != null) patch.privateNotes = privateNotes
       this.updateAppointment(appointmentId, patch)
       logActivity({
         astrologerId: appointment?.astrologerId,
