@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity as ActivityIcon, CheckCircle2, CircleHelp, MessageCircle, Search, Sparkles, Trash2, Wallet, X } from 'lucide-react'
+import { Activity as ActivityIcon, CheckCircle2, ChevronRight, CircleHelp, MessageCircle, Search, Sparkles, Wallet, X } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
+import { mockAstrologers } from '../../data/notificationData.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
-import { getHiddenUserActivityIds, getUserCommunicationActivity, saveHiddenUserActivityIds } from '../../utils/memberCommunicationActivity.js'
+import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../../utils/memberCommunicationActivity.js'
 import { getUserActivityLog } from '../../utils/userActivityLog.js'
 import './activity.css'
 
@@ -12,19 +13,19 @@ const ACTIVITY_WINDOW_DAYS = 7
 const ACTIVITY_WINDOW_MS = ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000
 
 const TYPE_META = {
-  question: { label: 'Question', icon: CircleHelp },
-  answer: { label: 'Answer', icon: CheckCircle2 },
-  consultation: { label: 'Consultation', icon: MessageCircle },
-  dispute: { label: 'Dispute', icon: ActivityIcon },
-  wallet: { label: 'Wallet', icon: Wallet },
-  profile: { label: 'Profile', icon: ActivityIcon },
-  horoscope: { label: 'Horoscope', icon: Sparkles },
-  'payment-method': { label: 'Payment method', icon: Wallet },
-  subscription: { label: 'Subscription', icon: Sparkles },
-  autopay: { label: 'Autopay', icon: Wallet },
-  follow: { label: 'Following', icon: ActivityIcon },
-  security: { label: 'Security', icon: ActivityIcon },
-  review: { label: 'Review', icon: CheckCircle2 },
+  question: { label: 'Question', icon: CircleHelp, tone: 'indigo' },
+  answer: { label: 'Answer', icon: CheckCircle2, tone: 'indigo' },
+  consultation: { label: 'Consultation', icon: MessageCircle, tone: 'blue' },
+  dispute: { label: 'Dispute', icon: ActivityIcon, tone: 'red' },
+  wallet: { label: 'Wallet', icon: Wallet, tone: 'green' },
+  profile: { label: 'Profile', icon: ActivityIcon, tone: 'neutral' },
+  horoscope: { label: 'Horoscope', icon: Sparkles, tone: 'amber' },
+  'payment-method': { label: 'Payment method', icon: Wallet, tone: 'green' },
+  subscription: { label: 'Subscription', icon: Sparkles, tone: 'teal' },
+  autopay: { label: 'Autopay', icon: Wallet, tone: 'green' },
+  follow: { label: 'Following', icon: ActivityIcon, tone: 'teal' },
+  security: { label: 'Security', icon: ActivityIcon, tone: 'violet' },
+  review: { label: 'Review', icon: CheckCircle2, tone: 'purple' },
 }
 
 function formatDate(value) {
@@ -42,7 +43,31 @@ function formatTime(value) {
 }
 
 function activityType(item) {
-  return TYPE_META[item.type] || { label: 'Activity', icon: ActivityIcon }
+  const base = TYPE_META[item.type] || { label: 'Activity', icon: ActivityIcon, tone: 'neutral' }
+  if (item.type !== 'consultation') return base
+  if (item.sourceType === 'appointment') return { ...base, tone: 'orange' }
+  if (item.sourceType === 'chat' || String(item.sessionType || '').toLowerCase().includes('chat')) return { ...base, tone: 'purple' }
+  return base
+}
+
+function statusTone(status) {
+  const normalized = String(status || '').toLowerCase()
+  if (normalized.includes('cancel') || normalized.includes('fail')) return 'is-red'
+  if (normalized.includes('resched')) return 'is-blue'
+  if (normalized.includes('refund')) return 'is-purple'
+  if (normalized.includes('pending')) return 'is-amber'
+  if (normalized.includes('book') || normalized.includes('upcoming')) return 'is-orange'
+  if (normalized.includes('complete') || normalized.includes('answer') || normalized.includes('success')) return 'is-green'
+  return 'is-neutral'
+}
+
+function activityAstrologer(activity, appointments, consultationHistory) {
+  if (!activity || activity.type !== 'consultation') return ''
+  const source = activity.sourceType === 'appointment'
+    ? appointments.find((appointment) => appointment.id === activity.sourceId)
+    : consultationHistory.find((session) => session.id === activity.sourceId)
+  if (!source) return ''
+  return source.astrologerName || source.astrologer || mockAstrologers.find((astrologer) => astrologer.id === source.astrologerId)?.name || ''
 }
 
 function collapseCompositeActivities(activities) {
@@ -105,14 +130,7 @@ export default function Activity() {
     () => activities.filter((item) => !hiddenActivityIds.includes(item.id)),
     [activities, hiddenActivityIds],
   )
-
-  const handleDeleteActivity = (activityId) => {
-    setHiddenActivityIds((currentIds) => {
-      const nextIds = [...new Set([...currentIds, activityId])]
-      saveHiddenUserActivityIds(currentUser?.id, nextIds)
-      return nextIds
-    })
-  }
+  const summaryAstrologer = activityAstrologer(summaryActivity, appointments, consultationHistory)
 
   const openActivity = (item) => {
     setSummaryActivity(item)
@@ -133,26 +151,21 @@ export default function Activity() {
         subtitle="Review your activity from the last 7 days."
       />
 
-      <section className="user-activity-intro">
-        <div className="user-activity-intro__icon"><Sparkles size={19} /></div>
-        <div><strong>Only the last 7 days of your activity are shown</strong><p>Your recent conversations and services appear here for seven days.</p></div>
-      </section>
-
       <Card className="user-activity-card">
-        <div className="user-activity-card__heading"><div><span className="user-activity-eyebrow">ACTIVITY TIMELINE</span><h2>Recent activity</h2></div><span className="user-activity-count">{visibleActivities.length} {visibleActivities.length === 1 ? 'entry' : 'entries'}</span></div>
+        <div className="user-activity-card__heading"><div><span className="user-activity-eyebrow">ACTIVITY TIMELINE</span><h2>Recent Activity</h2><p className="user-activity-card__subtitle">Review your activity from the last 7 days.</p></div><span className="user-activity-count">{visibleActivities.length} {visibleActivities.length === 1 ? 'entry' : 'entries'}</span></div>
         {visibleActivities.length ? (
           <div className="user-activity-list">
             {visibleActivities.map((item) => {
               const meta = activityType(item)
               const Icon = meta.icon
-              return <article className="user-activity-item" key={item.id} role="button" tabIndex={0} onClick={() => openActivity(item)} onKeyDown={(event) => handleActivityKeyDown(event, item)}><span className="user-activity-item__icon"><Icon size={17} /></span><div className="user-activity-item__body"><div className="user-activity-item__top"><strong>{item.title}</strong><span>{formatDate(item.occurredAt)}{formatTime(item.occurredAt) ? ` · ${formatTime(item.occurredAt)}` : ''}</span></div><p>{item.summary || 'Activity recorded.'}</p><div className="user-activity-item__meta"><span>{meta.label}</span>{item.status && <span>{item.status}</span>}{item.metadata && <span>{item.metadata}</span>}</div></div><button type="button" className="user-activity-delete" aria-label={`Delete ${item.title}`} title="Delete activity" onClick={(event) => { event.stopPropagation(); handleDeleteActivity(item.id) }} onKeyDown={(event) => event.stopPropagation()}><Trash2 size={15} /></button></article>
+              return <article className="my-activity-card user-activity-item" key={item.id} role="button" tabIndex={0} onClick={() => openActivity(item)} onKeyDown={(event) => handleActivityKeyDown(event, item)}><span className={`my-activity-card__icon user-activity-item__icon activity-tone-${meta.tone}`}><Icon size={20} /></span><div className="my-activity-card__body user-activity-item__body"><div className="my-activity-card__top user-activity-item__top"><span className={`my-activity-badge activity-tone-${meta.tone}`}>{meta.label}</span><span className="my-activity-card__name">{item.title}</span></div><p className="my-activity-card__desc">{item.summary || 'Activity recorded.'}</p><div className="my-activity-card__meta user-activity-item__meta"><span>{formatDate(item.occurredAt)}{formatTime(item.occurredAt) ? ` · ${formatTime(item.occurredAt)}` : ''}</span>{item.metadata && <span>{item.metadata}</span>}</div></div><div className="my-activity-card__right user-activity-item__right">{item.status && <span className={`user-activity-status ${statusTone(item.status)}`}>{item.status}</span>}<ChevronRight size={18} className="my-activity-card__chevron" aria-hidden="true" /></div></article>
             })}
           </div>
         ) : (
           <div className="user-activity-empty"><Search size={24} /><strong>No activity yet</strong><p>Your questions, consultations, and appointments will appear here as you use Astro Connect.</p></div>
         )}
       </Card>
-      {summaryActivity && <div className="user-activity-modal-backdrop" role="presentation" onClick={() => setSummaryActivity(null)}><section className="user-activity-summary-modal" role="dialog" aria-modal="true" aria-labelledby="user-activity-summary-title" onClick={(event) => event.stopPropagation()}><header className="user-activity-summary-modal__header"><div><span className="user-activity-eyebrow">ACTIVITY SUMMARY</span><h2 id="user-activity-summary-title">{summaryActivity.title}</h2></div><button type="button" className="icon-btn" aria-label="Close activity summary" onClick={() => setSummaryActivity(null)}><X size={17} /></button></header><div className="user-activity-summary-modal__body"><div className="user-activity-summary-row"><span>Date</span><strong>{formatDate(summaryActivity.occurredAt)}{formatTime(summaryActivity.occurredAt) ? ` · ${formatTime(summaryActivity.occurredAt)}` : ''}</strong></div>{summaryActivity.status && <div className="user-activity-summary-row"><span>Status</span><strong>{summaryActivity.status}</strong></div>}{summaryActivity.metadata && <div className="user-activity-summary-row"><span>Details</span><strong>{summaryActivity.metadata}</strong></div>}<p className="user-activity-summary-copy">{summaryActivity.summary || 'Activity recorded.'}</p></div></section></div>}
+      {summaryActivity && <div className="user-activity-modal-backdrop" role="presentation" onClick={() => setSummaryActivity(null)}><section className="user-activity-summary-modal" role="dialog" aria-modal="true" aria-labelledby="user-activity-summary-title" onClick={(event) => event.stopPropagation()}><header className="user-activity-summary-modal__header"><div><span className="user-activity-eyebrow">ACTIVITY SUMMARY</span><h2 id="user-activity-summary-title">{summaryActivity.title}</h2></div><button type="button" className="icon-btn" aria-label="Close activity summary" onClick={() => setSummaryActivity(null)}><X size={17} /></button></header><div className="user-activity-summary-modal__body"><div className="user-activity-summary-row"><span>Date</span><strong>{formatDate(summaryActivity.occurredAt)}{formatTime(summaryActivity.occurredAt) ? ` · ${formatTime(summaryActivity.occurredAt)}` : ''}</strong></div>{summaryAstrologer && <div className="user-activity-summary-row"><span>Astrologer</span><strong>{summaryAstrologer}</strong></div>}{summaryActivity.status && <div className="user-activity-summary-row"><span>Status</span><strong>{summaryActivity.status}</strong></div>}{summaryActivity.metadata && <div className="user-activity-summary-row"><span>Details</span><strong>{summaryActivity.metadata}</strong></div>}<p className="user-activity-summary-copy">{summaryActivity.summary || 'Activity recorded.'}</p></div></section></div>}
     </div>
   )
 }
