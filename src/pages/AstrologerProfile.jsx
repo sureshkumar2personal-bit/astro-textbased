@@ -347,21 +347,7 @@ export default function AstrologerProfile() {
       setSubscriptionPromptOpen(true)
       return
     }
-    const firstAvailableDate = Object.keys(availability).filter((date) => date >= todayKey).sort()[0] || ''
-    setBookingForm({
-      type: APPOINTMENT_TYPE,
-      date: firstAvailableDate,
-      time: '',
-    })
-    setSelectedSlots([])
-    setCalendarView('month')
-    if (firstAvailableDate) setCalendarMonth(new Date(dateFromKey(firstAvailableDate).getFullYear(), dateFromKey(firstAvailableDate).getMonth(), 1))
-    setBookingStep('form')
-    setPaymentMethod('Wallet')
-    setBookingNotice('')
-    setBookingIdCopied(false)
-    setBookedAppointmentId(null)
-    setBookingOpen(true)
+    navigate(`${routes.appointmentBook}/${encodeURIComponent(astrologer.id)}`)
   }
 
   useEffect(() => {
