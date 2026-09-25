@@ -5814,6 +5814,8 @@ tbody tr:hover {
 .wallet-txn-type--top-up { background: var(--success-bg); color: var(--green-600); }
 .wallet-txn-type--spending { background: var(--danger-bg); color: var(--red-600); }
 .wallet-txn-type--package-purchase { background: var(--primary-bg); color: var(--primary); }
+.wallet-txn-type--general { background: var(--success-bg); color: var(--green-600); }
+.wallet-txn-type--personal { background: var(--primary-bg); color: var(--primary); }
 
 .wallet-txn-status {
   display: inline-flex;
@@ -15349,4 +15351,41 @@ button.apt-week-day:focus-visible {
   .atonement-customer-instructions > div { grid-template-columns: 1fr; }
   .atonement-details-actions { flex-direction: column-reverse; }
   .atonement-details-actions .btn { justify-content: center; }
+}
+
+/* ---------- Text-Based Questions module tabs ---------- */
+.tbq-module-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 24px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(91, 33, 182, 0.08);
+  background: linear-gradient(160deg, #F1EAFA 0%, #F6F2F8 100%);
+}
+.tbq-module-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 150px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+}
+.tbq-module-tab:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
 }

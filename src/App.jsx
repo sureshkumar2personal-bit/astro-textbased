@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, BrowserRouter, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
@@ -18,9 +18,9 @@ import Campaigns from './pages/Campaigns.jsx'
 import PurchasePackage from './pages/PurchasePackage.jsx'
 import AskQuestion from './pages/AskQuestion.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
+import TextBasedQuestionHistory from './pages/TextBasedQuestionHistory.jsx'
 import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
-import DisputeManagement from './pages/DisputeManagement.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import PerksAndBenefits from './pages/PerksAndBenefits.jsx'
 import Atonement from './pages/Atonement.jsx'
@@ -168,6 +168,11 @@ function NotFoundRedirect() {
   )
 }
 
+function DisputeManagementRedirect() {
+  const location = useLocation()
+  return <Navigate to={`/astrologer/text-based-question-history${location.search}`} replace />
+}
+
 function AstrologerRoutes() {
   return (
     <Route element={<RequireRole role={ROLES.ASTROLOGER} />}>
@@ -194,7 +199,8 @@ function AstrologerRoutes() {
         <Route path="/astrologer/wallet-history" element={<WalletHistory />} />
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
-        <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
+        <Route path="/astrologer/text-based-question-history" element={<TextBasedQuestionHistory />} />
+        <Route path="/astrologer/dispute-management" element={<DisputeManagementRedirect />} />
         <Route path="/astrologer/activity" element={<AstrologerActivity />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
         <Route path="/astrologer/appointments" element={<AppointmentsShell />}>

@@ -44,10 +44,8 @@ import {
   TempleArchIcon,
   TempleBellIcon,
   TempleDonationBoxIcon,
-  TempleLotusIcon,
   TempleReturnIcon,
   TempleScrollIcon,
-  TempleShieldIcon,
 } from './TempleIcons.jsx'
 
 const ROLE_CONFIG = {
@@ -77,16 +75,7 @@ const ROLE_CONFIG = {
           { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
         ],
       },
-      {
-        label: 'Text Based',
-        icon: TempleScrollIcon,
-        children: [
-          { to: 'text-based-questions', label: 'Text Based Questions', icon: TempleScrollIcon },
-          { to: 'sales-management', label: 'Sales Management', icon: TempleDonationBoxIcon },
-          { to: 'answer-question', label: 'Answer Question', icon: TempleLotusIcon },
-          { to: 'dispute-management', label: 'Dispute Management', icon: TempleShieldIcon },
-        ],
-      },
+      { to: 'text-based-questions', label: 'Text-Based Questions', icon: TempleScrollIcon },
       {
         label: 'Live',
         icon: Radio,
@@ -182,13 +171,14 @@ const PAGE_META = {
     '/astrologer/perks-benefits/settings': { title: 'Settings', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
     '/astrologer/perks-benefits/delivery': { title: 'Content Delivery', sub: 'Create and publish content for your committed customer benefits.' },
     '/astrologer/perks-benefits/history': { title: 'History', sub: 'Track your monthly fulfillment rate against customer commitments.' },
-    '/astrologer/text-based-questions': { title: 'Text Based Questions', sub: 'Campaign & queue overview' },
+    '/astrologer/text-based-questions': { title: 'Text-Based Questions', sub: 'Questions, campaigns, and queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
     '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
     '/astrologer/audience/follower': { title: 'Follower Profile', sub: 'Audience member details' },
     '/astrologer/audience/subscriber': { title: 'Subscriber Profile', sub: 'Audience member details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
-    '/astrologer/answer-question': { title: 'Answer Question', sub: 'Respond to a user question' },
+    '/astrologer/answer-question': { title: 'Answer Questions', sub: 'Respond to a user question' },
+    '/astrologer/text-based-question-history': { title: 'Text-Based Question History', sub: 'Review completed question records and dispute outcomes' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
