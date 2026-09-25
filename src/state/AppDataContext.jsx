@@ -1,7 +1,7 @@
 /* oxlint-disable react/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { sortByDateDesc } from '../utils/date.js'
-import { availabilitySnapshotForDate, format12h, generateAppointmentSlots, isCancelledStatus } from '../utils/appointments.js'
+import { availabilitySnapshotForDate, generateAppointmentSlots, isCancelledStatus, parseTimeToMinutes } from '../utils/appointments.js'
 import { applyRunningBalances, buildSeedAstrologerWallet, computeWalletSummary, payoutDisplayLabel } from '../utils/wallet.js'
 import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
@@ -2514,8 +2514,8 @@ export function AppDataProvider({ children }) {
           now: new Date(),
           availabilityPeriod: template.publishedAvailabilityPeriod || template.availabilityPeriod || undefined,
         })
-        const requestedTime = String(payload.time || '').trim()
-        if (!currentSlots.some((slot) => format12h(slot.startMin) === requestedTime)) return null
+        const requestedMinutes = parseTimeToMinutes(payload.time)
+        if (!currentSlots.some((slot) => slot.startMin === requestedMinutes)) return null
       }
       const appointment = {
         id: `apt-${Date.now().toString(36)}`,
@@ -2585,7 +2585,8 @@ export function AppDataProvider({ children }) {
         now: new Date(),
         availabilityPeriod: template.publishedAvailabilityPeriod || template.availabilityPeriod || undefined,
       })
-      return slots.some((slot) => format12h(slot.startMin) === String(payload.time).trim())
+      const requestedMinutes = parseTimeToMinutes(payload.time)
+      return slots.some((slot) => slot.startMin === requestedMinutes)
     },
     cancelAppointment(appointmentId, meta) {
       setAppointments((prev) =>
