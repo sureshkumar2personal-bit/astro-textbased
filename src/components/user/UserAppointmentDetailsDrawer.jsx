@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import SavedAtonementDetails from '../atonement/SavedAtonementDetails.jsx'
 import StatusBadge from '../StatusBadge.jsx'
 import { formatDisplayDate, formatTimeRange, getAppointmentDisplayStatus, resolveAppointmentWindow } from '../../utils/appointments.js'
+import { useAppData } from '../../state/AppDataContext.jsx'
 
 function initials(name = '') {
   return String(name).split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
@@ -312,10 +313,12 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
   const paymentStatus = appointment.paymentStatus || (appointment.status?.toLowerCase().includes('cancel') ? appointment.refundStatus || 'Refunded' : 'Paid')
   const amount = appointment.amount ?? appointment.price
   const bookingDate = appointment.bookingDate || (appointment.bookedAt ? new Date(appointment.bookedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '')
-  const hasSharedConsultation = Boolean(consultation && (consultation.sent || consultation.sentToUser || consultation.completedAt))
-  const notes = hasSharedConsultation ? consultation : null
-  const mappedNotes = notes ? mapConsultationForUser(notes) : null
-  const hasCustomerFacingNotes = Boolean(mappedNotes && (mappedNotes.title || mappedNotes.summary || mappedNotes.instructions.length || mappedNotes.days.length || mappedNotes.attachments.length || mappedNotes.history.length || mappedNotes.completionText || mappedNotes.startedDate || mappedNotes.dueDate))
+  const { atonements, consultations } = useAppData()
+  const hasPariharam = (() => {
+    const direct = atonements.some((a) => (a.sourceId === appointment.id || a.appointmentId === appointment.id))
+    if (direct) return true
+    return consultations.some((c) => c.appointmentId === appointment.id && c.atonement && c.sent)
+  })()
 
   return createPortal(
     <div className="apt-drawer-overlay" onClick={onClose}>
@@ -371,14 +374,9 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
 
           <UserHoroscopeSection appointment={appointment} />
 
-          <section className="apt-detail-card apt-detail-card--notes apt-user-astrologer-notes">
-            <div className="apt-private-notes-head"><span>Astrologer Notes</span><span className="apt-private-notes-private">ONLY YOU CAN SEE</span></div>
-            <div className="apt-user-astrologer-notes-content" aria-readonly="true">
-              {hasCustomerFacingNotes
-                ? <ConsultationNotesContent mapped={mappedNotes} onUpdatePariharamProgress={(pariharamId, dayId, completed) => onUpdatePariharamProgress?.(appointment.id, pariharamId, dayId, completed)} />
-                : 'No astrologer notes are available for this appointment.'}
-            </div>
-          </section>
+          {hasPariharam && (
+            <Link to={`/user/atonements?appointmentId=${appointment.id}`} onClick={onClose} className="apt-drawer-pariharam-link">🪔 View Pariharam →</Link>
+          )}
 
           {displayStatus === 'Completed' && appointment.astrologerId && onBookAgain && (
             <div className="apt-drawer-actions">

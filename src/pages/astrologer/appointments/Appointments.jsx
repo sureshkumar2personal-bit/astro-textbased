@@ -361,6 +361,7 @@ export default function AppointmentCalendarTab() {
       appointment,
     )
     setToastAppointment(null)
+    actions.initiateAppointmentCall(appointment.id)
   }
 
   const handleCompleteCall = (

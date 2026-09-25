@@ -15350,3 +15350,19 @@ button.apt-week-day:focus-visible {
   .atonement-details-actions { flex-direction: column-reverse; }
   .atonement-details-actions .btn { justify-content: center; }
 }
+
+/* User sidebar — Ask Questions / Appointment / Wallet main tabs bold, one-by-one — same as astrologer */
+.sidebar--user .sidebar-link,
+.sidebar--user .sidebar-nav-section-title {
+  font-weight: 800;
+}
+.sidebar--user .sidebar-link--nested,
+.sidebar--user .sidebar-subnav-link,
+.sidebar--user .sidebar-link.nested,
+.sidebar--user .sidebar-nav-subgroup .sidebar-link {
+  font-weight: 600;
+}
+.sidebar--user .sidebar-nav,
+.sidebar--user .sidebar-nav-section {
+  gap: 4px;
+}

@@ -4,6 +4,7 @@ import { Check, Download, Eye, FileText, Image as ImageIcon, Link as LinkIcon, M
 import { callTypeMeta } from './meta.jsx'
 import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../../utils/appointments.js'
 import { useAuth } from '../../../state/AuthContext.jsx'
+import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useToast } from '../../../components/Toast.jsx'
 import SavedAtonementDetails from '../../../components/atonement/SavedAtonementDetails.jsx'
 
@@ -33,6 +34,7 @@ function formatSentAt(value) {
 
 export default function AppointmentCallScreen({ appointment, consultation, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateCallNotes }) {
   const { currentUser } = useAuth()
+  const { appointmentCalls } = useAppData()
   const { success } = useToast()
   const callType = getCallType(appointment.callType || appointment.type)
   const meta = callTypeMeta(callType)
@@ -104,6 +106,11 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
     const interval = window.setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => window.clearInterval(interval)
   }, [phase, callType])
+
+  useEffect(() => {
+    const call = appointmentCalls.find((c) => c.appointmentId === appointment.id)
+    if (call && (call.status === 'ended' || call.status === 'declined') && phase !== 'ended') setPhase('ended')
+  }, [appointmentCalls, appointment.id, phase])
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
