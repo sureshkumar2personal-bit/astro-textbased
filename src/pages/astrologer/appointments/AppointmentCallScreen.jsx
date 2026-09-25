@@ -4,12 +4,9 @@ import { Check, Download, Eye, FileText, Image as ImageIcon, Link as LinkIcon, M
 import { callTypeMeta } from './meta.jsx'
 import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../../utils/appointments.js'
 import { useAuth } from '../../../state/AuthContext.jsx'
-<<<<<<< HEAD
 import { useAppData } from '../../../state/AppDataContext.jsx'
-=======
 import { useToast } from '../../../components/Toast.jsx'
 import SavedAtonementDetails from '../../../components/atonement/SavedAtonementDetails.jsx'
->>>>>>> main
 
 function Avatar({ name, size = 96 }) {
   const initials = String(name || '?')
@@ -37,11 +34,8 @@ function formatSentAt(value) {
 
 export default function AppointmentCallScreen({ appointment, consultation, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateCallNotes }) {
   const { currentUser } = useAuth()
-<<<<<<< HEAD
   const { appointmentCalls } = useAppData()
-=======
   const { success } = useToast()
->>>>>>> main
   const callType = getCallType(appointment.callType || appointment.type)
   const meta = callTypeMeta(callType)
   const Icon = meta.icon

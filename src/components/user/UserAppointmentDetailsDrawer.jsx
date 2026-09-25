@@ -313,19 +313,12 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
   const paymentStatus = appointment.paymentStatus || (appointment.status?.toLowerCase().includes('cancel') ? appointment.refundStatus || 'Refunded' : 'Paid')
   const amount = appointment.amount ?? appointment.price
   const bookingDate = appointment.bookingDate || (appointment.bookedAt ? new Date(appointment.bookedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '')
-<<<<<<< HEAD
   const { atonements, consultations } = useAppData()
   const hasPariharam = (() => {
     const direct = atonements.some((a) => (a.sourceId === appointment.id || a.appointmentId === appointment.id))
     if (direct) return true
     return consultations.some((c) => c.appointmentId === appointment.id && c.atonement && c.sent)
   })()
-=======
-  const hasSharedConsultation = Boolean(consultation && (consultation.sent || consultation.sentToUser || consultation.completedAt))
-  const notes = hasSharedConsultation ? consultation : null
-  const mappedNotes = notes ? mapConsultationForUser(notes) : null
-  const hasCustomerFacingNotes = Boolean(mappedNotes && (mappedNotes.title || mappedNotes.summary || mappedNotes.instructions.length || mappedNotes.days.length || mappedNotes.attachments.length || mappedNotes.history.length || mappedNotes.completionText || mappedNotes.startedDate || mappedNotes.dueDate))
->>>>>>> main
 
   return createPortal(
     <div className="apt-drawer-overlay" onClick={onClose}>
@@ -381,20 +374,9 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
 
           <UserHoroscopeSection appointment={appointment} />
 
-<<<<<<< HEAD
           {hasPariharam && (
             <Link to={`/user/atonements?appointmentId=${appointment.id}`} onClick={onClose} className="apt-drawer-pariharam-link">🪔 View Pariharam →</Link>
           )}
-=======
-          <section className="apt-detail-card apt-detail-card--notes apt-user-astrologer-notes">
-            <div className="apt-private-notes-head"><span>Astrologer Notes</span><span className="apt-private-notes-private">ONLY YOU CAN SEE</span></div>
-            <div className="apt-user-astrologer-notes-content" aria-readonly="true">
-              {hasCustomerFacingNotes
-                ? <ConsultationNotesContent mapped={mappedNotes} onUpdatePariharamProgress={(pariharamId, dayId, completed) => onUpdatePariharamProgress?.(appointment.id, pariharamId, dayId, completed)} />
-                : 'No astrologer notes are available for this appointment.'}
-            </div>
-          </section>
->>>>>>> main
 
           {displayStatus === 'Completed' && appointment.astrologerId && onBookAgain && (
             <div className="apt-drawer-actions">
