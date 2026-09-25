@@ -836,5 +836,3 @@ export default function RewardsPerks() {
     </div>
   )
 }
-
-
