@@ -199,11 +199,27 @@
   transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
+.user-appointment-history .added-compact-appointment-card--booked { border-right-color: #F59E0B; }
+.user-appointment-history .added-compact-appointment-card--completed { border-right-color: #10B981; }
+.user-appointment-history .added-compact-appointment-card--cancelled { border-right-color: #EF4444; }
+.user-appointment-history .added-compact-appointment-card--rescheduled { border-right-color: #F97316; }
+
 .user-appointment-history .added-compact-appointment-card:hover {
   border-color: rgba(109, 40, 217, 0.22);
-  border-right-color: var(--primary);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 28px rgba(109, 40, 217, 0.1);
   transform: translateY(-1px);
+}
+
+.user-appointment-history .added-compact-appointment-card__top {
+  align-items: flex-start;
+}
+
+.user-appointment-history .added-compact-appointment-card__profile small.added-compact-appointment-card__id {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .user-appointment-history .added-compact-appointment-card__meta {
