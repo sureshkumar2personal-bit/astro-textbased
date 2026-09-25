@@ -244,40 +244,27 @@ const PAGE_META = {
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   const location = useLocation()
-  const isGroupActive = (to, children) =>
-    Boolean(children && children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) ||
-    Boolean(to && location.pathname.startsWith(`${basePath}/${to}`))
-
-  const activeSectionLabels = useMemo(() => {
-    const active = []
-    links.forEach(({ to, label, children }) => {
-      if (!children) return
-      const childActive = children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))
-      const parentActive = Boolean(to) && location.pathname.startsWith(`${basePath}/${to}`)
-      if (childActive || parentActive) active.push(label)
-    })
-    return active
-  }, [links, basePath, location.pathname])
-
+  const navigate = useNavigate()
   const [openSections, setOpenSections] = useState(() => {
     const initial = {}
-    activeSectionLabels.forEach((label) => { initial[label] = true })
+    links.forEach((link) => {
+      if (link.children && link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`))) {
+        initial[link.label] = true
+      }
+      if (link.children && link.to && location.pathname.startsWith(`${basePath}/${link.to}`)) {
+        initial[link.label] = true
+      }
+    })
     return initial
   })
 
   useEffect(() => {
-    if (activeSectionLabels.length === 0) {
-      setOpenSections({})
-      return
-    }
-    setOpenSections((current) => {
-      const next = {}
-      activeSectionLabels.forEach((label) => { next[label] = true })
-      const same = Object.keys(next).length === Object.keys(current).length &&
-        Object.keys(next).every((key) => current[key])
-      return same ? current : next
-    })
-  }, [activeSectionLabels])
+    const match = links.find(
+      (link) => link.children && (link.children.some((child) => location.pathname.startsWith(`${basePath}/${child.to}`)) || (link.to && location.pathname.startsWith(`${basePath}/${link.to}`)))
+    )
+    if (!match) return
+    setOpenSections((current) => (current[match.label] ? current : { [match.label]: true }))
+  }, [location.pathname, links, basePath])
 
   const toggleSection = (label) => {
     setOpenSections((current) => {
@@ -288,30 +275,40 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
 
   return (
     <nav className="sidebar-nav">
-      {links.map(({ to, label, icon, end, children }) => {
-        if (children) {
-          const Icon = icon
-          const groupActive = isGroupActive(to, children)
-          const open = Boolean(openSections[label])
-          const parentTo = to ? `${basePath}/${to}` : `${basePath}/${children[0].to}`
-          return <div className="sidebar-nav-group" key={label}>
-            <div className={`sidebar-link sidebar-link-toggle${groupActive ? ' active' : ''}`}>
-              {groupActive && <span className="sidebar-active-pill" />}
-              <NavLink to={parentTo} className="sidebar-parent-link">
-                <Icon size={18} />
-                <span className="sidebar-link-label">{label}</span>
-              </NavLink>
-              <button type="button" className="sidebar-chevron-button" aria-label={`${open ? 'Collapse' : 'Expand'} ${label} menu`} aria-expanded={open} onClick={(event) => { event.preventDefault(); event.stopPropagation(); toggleSection(label) }}>
-                <ChevronDown size={16} className={`sidebar-chevron${open ? ' is-open' : ''}`} />
-              </button>
-            </div>
-            <motion.div className="sidebar-subnav" initial={false} animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }} transition={{ duration: 0.24, ease: 'easeInOut' }}>
-              {children.map((child) => <SidebarItem key={child.to} to={`${basePath}/${child.to}`} icon={child.icon} label={child.label} subItem />)}
-            </motion.div>
-          </div>
+      {links.map((link) => {
+        if (!link.children) {
+          const route = `${basePath}/${link.to}`.replace(/\/$/, '')
+          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
         }
-        const route = `${basePath}/${to}`.replace(/\/$/, '')
-        return <SidebarItem key={route} to={route} end={end} icon={icon} label={label} showBadge={showRewardBadge && label === 'Perks & Benefits'} badgeCount={label === 'Perks & Benefits' ? rewardCount : 0} />
+
+        const isOpen = Boolean(openSections[link.label])
+        const parentTo = link.to ? `${basePath}/${link.to}` : null
+
+        return (
+          <div className="sidebar-nav-section" key={link.label}>
+            <button
+              type="button"
+              className={`sidebar-nav-section-title${isOpen ? ' is-open' : ''}`}
+              aria-expanded={isOpen}
+              onClick={() => {
+                toggleSection(link.label)
+                if (parentTo) navigate(parentTo)
+              }}
+            >
+              <link.icon size={18} />
+              <span>{link.label}</span>
+              <ChevronRight size={17} className="sidebar-nav-section-arrow" aria-hidden="true" />
+            </button>
+            {isOpen && (
+              <div className="sidebar-nav-subgroup">
+                {link.children.map(({ to, label, icon }) => {
+                  const route = `${basePath}/${to}`
+                  return <SidebarItem key={route} to={route} icon={icon} label={label} nested />
+                })}
+              </div>
+            )}
+          </div>
+        )
       })}
     </nav>
   )
@@ -533,7 +530,7 @@ export default function Layout() {
 
   return (
     <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
-      <aside className="sidebar">
+      <aside className={`sidebar sidebar--${role}`}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
             {shellIsAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <Sparkles size={24} color="#fff" />}

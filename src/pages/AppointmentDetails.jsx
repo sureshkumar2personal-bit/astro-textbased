@@ -81,10 +81,16 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
   const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
   const statusLabel = getAppointmentDisplayStatus(appointment)
   const bucket = appointmentStatusBucket(appointment)
+  const { atonements, consultations } = useAppData()
+  const hasPariharam = (() => {
+    const direct = atonements.some((a) => a.sourceId === appointment.id || a.appointmentId === appointment.id)
+    if (direct) return true
+    return consultations.some((c) => c.appointmentId === appointment.id && c.atonement && c.sent)
+  })()
 
   return (
     <Card
-      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}`}
+      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}${hasPariharam ? ' has-pariharam' : ''}`}
     >
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
@@ -98,6 +104,9 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
         <span><PhoneCall size={13} /><small>Type</small><strong>Call</strong></span>
         <span><CalendarDays size={13} /><small>Astrology</small><strong>{appointment.specialization || 'Vedic Astrology'}</strong></span>
       </div>
+      {hasPariharam && (
+        <Link to={`/user/atonements?appointmentId=${appointment.id}`} className="added-compact-pariharam-link" onClick={(e) => e.stopPropagation()}>🪔 View Pariharam →</Link>
+      )}
       <div className="added-compact-appointment-card__actions">
         <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onSelect?.(appointment) }}>View Details</button>
       </div>
