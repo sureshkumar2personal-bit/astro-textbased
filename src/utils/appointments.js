@@ -845,6 +845,25 @@ export function publishedSnapshotForDate({ templates = [], date }) {
   return best ? best.snapshot : null
 }
 
+// The astrologer's saved schedule is the fallback source when a template has
+// not created a published snapshot yet. Published data still wins whenever it
+// exists, so users never see a stale draft over an already-published schedule.
+export function availabilitySnapshotForDate({ templates = [], date }) {
+  const published = publishedSnapshotForDate({ templates, date })
+  if (published) return published
+  const iso = typeof date === 'string' ? date : toIsoDate(date)
+  const month = monthKeyOf(iso)
+  const inPeriod = (template) => {
+    const period = template?.availabilityPeriod
+    return !period?.start || !period?.end || (iso >= period.start && iso <= period.end)
+  }
+  const candidates = templates
+    .filter((template) => template?.monthKey === month && inPeriod(template))
+    .concat(templates.filter((template) => template?.monthKey !== month && inPeriod(template)))
+    .sort((a, b) => (a.updatedAt || '') < (b.updatedAt || '') ? 1 : -1)
+  return candidates[0] || null
+}
+
 export function hasUnpublishedChanges(template) {
   if (!template) return false
   const snapshot = publishedAvailabilitySnapshot(template)
@@ -871,7 +890,7 @@ export function hasUnpublishedChanges(template) {
 // published snapshots (saved-but-not-published edits are invisible to users),
 // derives slots through the same generateAppointmentSlots engine, and lets
 // booked appointments occupy/remove their slots automatically.
-export function publishedAvailabilityMap({ templates = [], astrologerId, appointments = [], now = new Date() }) {
+export function publishedAvailabilityMap({ templates = [], astrologerId, appointments = [], now = new Date(), includeSaved = false }) {
   const map = {}
   if (!Array.isArray(templates) || !astrologerId) return map
 
@@ -902,7 +921,9 @@ export function publishedAvailabilityMap({ templates = [], astrologerId, appoint
   const cursor = new Date(rangeStart)
   const limit = addDays(rangeEnd, 1)
   while (cursor < limit) {
-    const published = publishedSnapshotForDate({ templates: astrologerTemplates, date: cursor })
+    const published = includeSaved
+      ? availabilitySnapshotForDate({ templates: astrologerTemplates, date: cursor })
+      : publishedSnapshotForDate({ templates: astrologerTemplates, date: cursor })
     if (published) {
       const period = published.publishedAvailabilityPeriod || published.availabilityPeriod
       const slots = generateAppointmentSlots({

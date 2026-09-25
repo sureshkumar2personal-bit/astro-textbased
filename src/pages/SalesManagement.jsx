@@ -13,6 +13,9 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { sortByDateDesc } from '../utils/date.js'
 import { TempleDonationBoxIcon, TempleReturnIcon } from '../components/TempleIcons.jsx'
+import '../css/astrologer/sales-management.css'
+
+const CAMPAIGN_TINTS = ['lavender', 'cream', 'mint']
 
 export default function SalesManagement() {
   const { campaigns, selectedCampaignId, actions } = useAppData()
@@ -63,8 +66,23 @@ export default function SalesManagement() {
   }
 
   return (
-    <div>
-      <PageHeader eyebrow="Astrologer" title="Sales Management" showBack backTo={routes.dashboard} backIcon={backIcon} />
+    <div className="sales-management-page">
+      <div className="sales-hero">
+        <div className="sales-hero__left">
+          <PageHeader
+            eyebrow="Astrologer"
+            title="Sales Management"
+            subtitle="Campaigns, pricing & allocation"
+            showBack
+            backTo={routes.dashboard}
+            backIcon={backIcon}
+          />
+          <div className="sales-hero__icon" aria-hidden="true">
+            <TempleDonationBoxIcon size={30} />
+          </div>
+        </div>
+        <div className="sales-hero__zodiac" aria-hidden="true" />
+      </div>
 
       <Section title={`All Campaigns (${campaignCards.length})`} icon={TempleDonationBoxIcon}>
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -90,25 +108,66 @@ export default function SalesManagement() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {campaignCards.map((campaign) => (
-            <button type="button" key={campaign.id} className="card flex h-full flex-col text-left transition hover:-translate-y-1 hover:border-[color:var(--secondary)]" onClick={() => openCampaignDetails(campaign)}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="font-bold text-[color:var(--text-primary)]">{campaign.name}</div>
-                <StatusBadge label={campaign.status} />
-              </div>
-              <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm">
-                <span>{campaign.date} – {campaign.endDate}</span>
-                {campaign.status === 'Scheduled' && campaign.scheduledPublishAt && <span>Publishes: {new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')}</span>}
-                <span>Total slots: {campaign.totalLimit} · Sold: {campaign.purchasedGeneral + campaign.purchasedPersonal}</span>
-                <span>General ₹{campaign.generalPrice} · Individual ₹{campaign.personalPrice}</span>
-                <span className={Number(campaign.discountPercent) > 0 ? 'font-semibold text-[color:var(--primary)]' : ''}>
-                  {Number(campaign.discountPercent) > 0 ? `${campaign.discountPercent}% subscriber discount` : 'No subscriber discount'}
-                </span>
-              </div>
-              <div className="mt-4 font-semibold text-[color:var(--primary)]">View Campaign Details →</div>
-            </button>
-          ))}
+        <div className="campaign-cards-grid">
+          {campaignCards.map((campaign, index) => {
+            const tint = CAMPAIGN_TINTS[index % CAMPAIGN_TINTS.length]
+            const sold = campaign.purchasedGeneral + campaign.purchasedPersonal
+            const progress = campaign.totalLimit ? Math.min(100, Math.round((sold / campaign.totalLimit) * 100)) : 0
+            const hasDiscount = Number(campaign.discountPercent) > 0
+
+            return (
+              <button
+                type="button"
+                key={campaign.id}
+                className={`campaign-card-modern campaign-card-modern--${tint}`}
+                onClick={() => openCampaignDetails(campaign)}
+              >
+                <div className="campaign-card-modern__header">
+                  <div className="campaign-card-modern__icon" aria-hidden="true">
+                    <TempleDonationBoxIcon size={18} />
+                  </div>
+                  <div className="campaign-card-modern__name">{campaign.name}</div>
+                  <StatusBadge label={campaign.status} className="campaign-card-modern__status" />
+                </div>
+
+                <div className="campaign-card-modern__body">
+                  <div className="campaign-card-modern__dates">
+                    {campaign.date} – {campaign.endDate}
+                    {campaign.status === 'Scheduled' && campaign.scheduledPublishAt && (
+                      <span className="campaign-card-modern__publish"> · Publishes: {new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')}</span>
+                    )}
+                  </div>
+
+                  <div className="campaign-card-modern__slots">
+                    <div className="campaign-card-modern__slots-row">
+                      <span>Total slots: {campaign.totalLimit}</span>
+                      <span>Sold: {sold}</span>
+                    </div>
+                    <div className="campaign-card-modern__progress">
+                      <div className="campaign-card-modern__progress-fill" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="campaign-card-modern__divider" />
+
+                  <div className="campaign-card-modern__pricing">
+                    <span>General ₹{campaign.generalPrice}</span>
+                    <span>Individual ₹{campaign.personalPrice}</span>
+                  </div>
+
+                  <div className="campaign-card-modern__divider" />
+
+                  <div className={`campaign-card-modern__discount${hasDiscount ? ' has-discount' : ''}`}>
+                    {hasDiscount ? `${campaign.discountPercent}% subscriber discount` : 'No subscriber discount'}
+                  </div>
+                </div>
+
+                <div className="campaign-card-modern__footer">
+                  View Campaign Details <span aria-hidden="true">→</span>
+                </div>
+              </button>
+            )
+          })}
         </div>
         {!campaignCards.length && <div className="muted mt-4">No campaigns match your search.</div>}
       </Section>

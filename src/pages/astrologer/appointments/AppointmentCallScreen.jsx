@@ -4,7 +4,12 @@ import { Check, Download, Eye, FileText, Image as ImageIcon, Link as LinkIcon, M
 import { callTypeMeta } from './meta.jsx'
 import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../../utils/appointments.js'
 import { useAuth } from '../../../state/AuthContext.jsx'
+<<<<<<< HEAD
 import { useAppData } from '../../../state/AppDataContext.jsx'
+=======
+import { useToast } from '../../../components/Toast.jsx'
+import SavedAtonementDetails from '../../../components/atonement/SavedAtonementDetails.jsx'
+>>>>>>> main
 
 function Avatar({ name, size = 96 }) {
   const initials = String(name || '?')
@@ -30,9 +35,13 @@ function formatSentAt(value) {
   return date.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateNotes, onSavePreCallAnalysis }) {
+export default function AppointmentCallScreen({ appointment, consultation, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateCallNotes }) {
   const { currentUser } = useAuth()
+<<<<<<< HEAD
   const { appointmentCalls } = useAppData()
+=======
+  const { success } = useToast()
+>>>>>>> main
   const callType = getCallType(appointment.callType || appointment.type)
   const meta = callTypeMeta(callType)
   const Icon = meta.icon
@@ -44,10 +53,9 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   const [previewOpen, setPreviewOpen] = useState(false)
   const [moreTab, setMoreTab] = useState('call')
 
-  const [notesDraft, setNotesDraft] = useState(appointment.privateNotes || '')
-  const [preCallDraft, setPreCallDraft] = useState(appointment.preCallAnalysis || '')
+  const [notesDraft, setNotesDraft] = useState(appointment.privateCallNotes || '')
+  const [preCallDraft] = useState(appointment.preCallAnalysis || '')
   const [notesSaved, setNotesSaved] = useState(false)
-  const [preCallSaved, setPreCallSaved] = useState(false)
 
   const [notes, setNotes] = useState('')
   const [attachments, setAttachments] = useState([])
@@ -56,15 +64,17 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   const [savedPickerOpen, setSavedPickerOpen] = useState(false)
   const [selectedSavedIds, setSelectedSavedIds] = useState([])
   const [savedPreview, setSavedPreview] = useState(null)
-  const [savedPreviewDay, setSavedPreviewDay] = useState(1)
   const [completionPeriod, setCompletionPeriod] = useState('7')
   const [customCompletionDays, setCustomCompletionDays] = useState('')
   const [followupSaved, setFollowupSaved] = useState(false)
   const [followupSent, setFollowupSent] = useState(false)
   const [followupSentAt, setFollowupSentAt] = useState(null)
   const [editingSent, setEditingSent] = useState(false)
+  const [consultationEdited, setConsultationEdited] = useState(Boolean(consultation?.consultationEdited))
+  const [savingFollowup, setSavingFollowup] = useState(false)
   const [confirmResendOpen, setConfirmResendOpen] = useState(false)
   const [sentSnapshot, setSentSnapshot] = useState(null)
+  const savingFollowupRef = useRef(false)
   const imageRef = useRef(null)
   const pdfRef = useRef(null)
 
@@ -74,6 +84,22 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   const [draft, setDraft] = useState('')
   const chatRef = useRef(null)
   const ended = phase === 'ended'
+
+  useEffect(() => {
+    if (!consultation || consultation.appointmentId !== appointment.id || !consultation.sent) return
+    setFollowupSent(true)
+    setFollowupSentAt(consultation.sentAt || null)
+    setConsultationEdited(Boolean(consultation.consultationEdited))
+    setNotes(consultation.notes || '')
+    setAttachments(consultation.attachments || (consultation.fileName ? [{ id: consultation.id, name: consultation.fileName, type: consultation.fileType, size: consultation.fileSize }] : []))
+    setSentSnapshot({
+      notes: consultation.notes || '',
+      attachments: consultation.attachments || [],
+      completionPeriod: consultation.atonement?.completionDays ? String(consultation.atonement.completionDays) : '7',
+      customCompletionDays: '',
+      sentAt: consultation.sentAt || null,
+    })
+  }, [appointment.id, consultation])
 
   useEffect(() => {
     if (callType === 'Text') return undefined
@@ -109,7 +135,7 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
       return
     }
     if (typeof onCompleteCall === 'function') {
-      onCompleteCall(appointment.id, { callDurationSeconds: seconds, privateNotes: notesDraft })
+      onCompleteCall(appointment.id, { callDurationSeconds: seconds })
     }
     setPhase('ended')
   }
@@ -150,10 +176,6 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
       return []
     }
   })()
-  const previewForm = savedPreview?.content || {}
-  const previewDays = Math.max(1, Number.parseInt(String(previewForm.templateDuration || previewForm.duration || '').match(/\d+/)?.[0] || '1', 10))
-  const previewRituals = (previewForm.rituals || []).filter((ritual) => ritual.enabled !== false)
-  const previewDayRituals = previewRituals.filter((ritual, index) => index % previewDays === (savedPreviewDay - 1) % previewDays || ['deepam', 'mantra-japam'].includes(ritual.id))
 
   const addLink = () => {
     const url = linkDraft.trim()
@@ -172,13 +194,8 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   }
 
   const saveInCallNotes = () => {
-    if (typeof onSavePrivateNotes === 'function') onSavePrivateNotes(appointment.id, notesDraft)
+    if (typeof onSavePrivateCallNotes === 'function') onSavePrivateCallNotes(appointment.id, notesDraft)
     setNotesSaved(true)
-  }
-
-  const saveInCallPreCall = () => {
-    if (typeof onSavePreCallAnalysis === 'function') onSavePreCallAnalysis(appointment.id, preCallDraft)
-    setPreCallSaved(true)
   }
 
   const openHoroscope = () => {
@@ -208,14 +225,29 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
   }
 
   const commitSendFollowup = () => {
-    if (typeof onSaveConsultation === 'function') onSaveConsultation(buildPayload(true))
+    if (savingFollowupRef.current || (editingSent && consultationEdited)) return
+    const isEdit = editingSent
+    savingFollowupRef.current = true
+    setSavingFollowup(true)
+    const saved = typeof onSaveConsultation === 'function'
+      ? onSaveConsultation({ ...buildPayload(true), isEdit })
+      : null
+    if (isEdit && saved?.consultationEdited !== true) {
+      savingFollowupRef.current = false
+      setSavingFollowup(false)
+      return
+    }
     const sentTimestamp = new Date().toISOString()
     setFollowupSent(true)
     setFollowupSentAt(sentTimestamp)
     setFollowupSaved(true)
     setSentSnapshot({ notes, attachments, completionPeriod, customCompletionDays, sentAt: sentTimestamp })
+    setConsultationEdited(Boolean(isEdit || saved?.consultationEdited))
     setEditingSent(false)
     setConfirmResendOpen(false)
+    savingFollowupRef.current = false
+    setSavingFollowup(false)
+    success('Sent Successfully')
   }
 
   const handleSendFollowup = () => {
@@ -301,7 +333,7 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
                 })()}
                 <div className="apt-consultation-footer">
                   <div className="apt-consultation-action-group">
-                    <button type="button" className="btn btn-outline" onClick={() => setEditingSent(true)}><Pencil size={14} /> Edit</button>
+                    {!consultationEdited && <button type="button" className="btn btn-outline" onClick={() => { if (!consultationEdited) setEditingSent(true) }}><Pencil size={14} /> Edit</button>}
                     <button type="button" className="btn btn-primary" onClick={handleEnd}>Close</button>
                   </div>
                 </div>
@@ -347,7 +379,7 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
                         Cancel
                       </button>
                     )}
-                    <button type="button" className="btn btn-primary" onClick={handleSendFollowup} disabled={attachments.some((item) => item.type === 'Saved Content') && completionPeriod === 'custom' && !Number(customCompletionDays)}>
+                    <button type="button" className="btn btn-primary" onClick={handleSendFollowup} disabled={savingFollowup || (attachments.some((item) => item.type === 'Saved Content') && completionPeriod === 'custom' && !Number(customCompletionDays))}>
                       {followupSent ? 'Update & Resend' : 'Send to User'}
                     </button>
                   </div>
@@ -370,7 +402,7 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
                 <p>This consultation was already sent to {appointment.customerName}. Sending again will replace what they see and notify them that it was updated.</p>
                 <div className="apt-consultation-action-group apt-consultation-confirm-actions">
                   <button type="button" className="btn btn-ghost" onClick={() => setConfirmResendOpen(false)}>Cancel</button>
-                  <button type="button" className="btn btn-primary" onClick={commitSendFollowup}>Confirm & Resend</button>
+                  <button type="button" className="btn btn-primary" onClick={commitSendFollowup} disabled={savingFollowup}>Confirm & Resend</button>
                 </div>
               </div>
             </div>
@@ -379,12 +411,12 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
             <div className="apt-saved-content-modal" onClick={(event) => event.stopPropagation()}>
               <div className="apt-saved-content-head"><div><h3 id="saved-content-title">Saved Atonement Content</h3><p>Select one or more saved items to attach.</p></div><button type="button" className="icon-btn" aria-label="Close saved content" onClick={() => setSavedPickerOpen(false)}><X size={16} /></button></div>
               <div className="apt-saved-content-list">
-                {savedContent.length ? savedContent.map((item) => <label className="apt-saved-content-item" key={item.id}><input type="checkbox" checked={selectedSavedIds.includes(item.id)} onChange={() => setSelectedSavedIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} /><span className="apt-saved-content-type">{item.type}</span><span><strong>{item.name}</strong><small>{item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Saved content'}</small></span><button type="button" className="apt-saved-view" onClick={(event) => { event.preventDefault(); setSavedPreviewDay(1); setSavedPreview(item) }}>View</button></label>) : <div className="apt-saved-content-empty">No saved Atonement content yet.</div>}
+                {savedContent.length ? savedContent.map((item) => <label className="apt-saved-content-item" key={item.id}><input type="checkbox" checked={selectedSavedIds.includes(item.id)} onChange={() => setSelectedSavedIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} /><span className="apt-saved-content-type">{item.type}</span><span><strong>{item.name}</strong><small>{item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Saved content'}</small></span><button type="button" className="apt-saved-view" onClick={(event) => { event.preventDefault(); setSavedPreview(item) }}>View</button></label>) : <div className="apt-saved-content-empty">No saved Atonement content yet.</div>}
               </div>
               <div className="apt-saved-content-actions"><button type="button" className="btn btn-ghost" onClick={() => setSavedPickerOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" disabled={!selectedSavedIds.length} onClick={attachSaved}>Attach Selected</button></div>
             </div>
           </div>}
-          {savedPreview && <div className="apt-saved-content-backdrop" role="dialog" aria-modal="true" onClick={() => setSavedPreview(null)}><div className="apt-saved-atonement-details" onClick={(event) => event.stopPropagation()}><div className="apt-saved-content-head"><div><span className="atonement-card-badge">{previewForm.sourceDefaultId ? 'Platform Default' : 'My Saved Method'}</span><h3>{savedPreview.name}</h3><strong>{previewDays} Day Atonement</strong><p>{previewForm.purpose || previewForm.shortDescription || previewForm.detailedDescription || 'Saved Atonement details'}</p></div><button type="button" className="icon-btn" aria-label="Close details" onClick={() => setSavedPreview(null)}><X size={16} /></button></div><div className="apt-saved-atonement-body"><div className="apt-saved-atonement-summary"><span>Total Duration: {previewForm.templateDuration || previewForm.duration || `${previewDays} days`}</span><span>{previewRituals.length} Rituals</span></div><section><h4>Rituals Included</h4><div className="apt-saved-ritual-tags">{previewRituals.map((ritual, index) => <span key={ritual.instanceId || index}>{ritual.name}</span>)}</div></section><section><h4>Complete Day-by-Day Procedure</h4><nav className="apt-saved-day-tabs">{Array.from({ length: previewDays }, (_, index) => <button key={index} type="button" className={savedPreviewDay === index + 1 ? 'active' : ''} onClick={() => setSavedPreviewDay(index + 1)}>Day {index + 1}</button>)}</nav><div className="apt-saved-day-detail"><strong>Day {savedPreviewDay}</strong>{previewDayRituals.length ? previewDayRituals.map((ritual, index) => <article key={ritual.instanceId || index}><h5>{ritual.icon || '✦'} {ritual.name}</h5>{ritual.config?.instructions ? <p>{ritual.config.instructions}</p> : <p>Follow the prescribed procedure for this ritual.</p>}{Object.entries(ritual.config || {}).filter(([key, value]) => value && key !== 'instructions').map(([key, value]) => <small key={key}>{key.replace(/([A-Z])/g, ' $1')}: {String(value)}</small>)}</article>) : <p>Follow the saved Atonement instructions for this day.</p>}</div></section>{previewForm.materials?.length > 0 && <section><h4>Materials & Offerings</h4><ul className="apt-saved-materials">{previewForm.materials.map((material, index) => <li key={index}>{material.name} {[material.quantity, material.unit].filter(Boolean).join(' ')}</li>)}</ul></section>}{previewForm.instructions && <section><h4>Additional Instructions</h4>{['before', 'during', 'after'].map((key) => previewForm.instructions[key] && <p key={key}><strong>{key[0].toUpperCase() + key.slice(1)}:</strong> {previewForm.instructions[key]}</p>)}</section>}{savedPreview.preview && <img className="apt-saved-detail-media" src={savedPreview.preview} alt={savedPreview.name} />}</div><div className="apt-saved-content-actions"><button type="button" className="btn btn-ghost" onClick={() => setSavedPreview(null)}>Close</button><button type="button" className="btn btn-primary" onClick={() => { setSelectedSavedIds((ids) => ids.includes(savedPreview.id) ? ids : [...ids, savedPreview.id]); setSavedPreview(null) }}>Attach / Select This Atonement</button></div></div></div>}
+          {savedPreview && <SavedAtonementDetails name={savedPreview.name} content={savedPreview.content} preview={savedPreview.preview} onClose={() => setSavedPreview(null)} onAttach={() => { setSelectedSavedIds((ids) => ids.includes(savedPreview.id) ? ids : [...ids, savedPreview.id]); setSavedPreview(null) }} />}
         </div>
       ) : (
       <>
@@ -474,13 +506,11 @@ export default function AppointmentCallScreen({ appointment, onEnd, onSaveConsul
                   id={`callprecall-${appointment.id}`}
                   className="apt-consultation-notes"
                   rows={2}
-                  placeholder="Pre-call horoscope analysis…"
+                  placeholder="No pre-call notes saved."
                   value={preCallDraft}
-                  onChange={(event) => { setPreCallDraft(event.target.value); setPreCallSaved(false) }}
+                  readOnly
+                  aria-readonly="true"
                 />
-                <button type="button" className="btn btn-outline apt-private-notes-save" onClick={saveInCallPreCall}>
-                  {preCallSaved ? 'Saved' : 'Save Analysis'}
-                </button>
                 <label className="apt-private-notes-label" htmlFor={`callnotes-${appointment.id}`}>Private Call Notes</label>
                 <textarea
                   id={`callnotes-${appointment.id}`}

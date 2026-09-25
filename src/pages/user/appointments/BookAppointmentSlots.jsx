@@ -10,7 +10,6 @@ import {
   buildCalendarAvailability,
   getBookingOverride,
   gridOpenSlotCount,
-  isFullyBooked,
   keyFor,
   parseKey,
 } from './bookingAstrologerData.js'
@@ -22,6 +21,7 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { availabilitySnapshotForDate, publishedAvailabilityMap } from '../../../utils/appointments.js'
 import './bookappointmentslots.css'
 
 function daysFor(month) {
@@ -41,7 +41,7 @@ function ratingScore(rating) {
 export default function BookAppointmentSlots() {
   const { astrologerId } = useParams()
   const { currentUser } = useAuth()
-  const { appointments, userWallet, actions } = useAppData()
+  const { appointments, consultations, userWallet, actions, appointmentAvailabilityTemplates } = useAppData()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -53,11 +53,35 @@ export default function BookAppointmentSlots() {
   const astrologerPrice = bookingOverride.price
   const routes = getRoleRoutes(currentUser?.role)
 
-  const calendarAvailability = useMemo(() => (astrologer ? buildCalendarAvailability(astrologer) : {}), [astrologer])
+  // Prefer the astrologer's own published availability (weekly schedule,
+  // date overrides, duration/buffer) over the static demo fallback, so
+  // updates the astrologer publishes are reflected here immediately. Mirrors
+  // the same pattern already used on the astrologer's public profile page.
+  const hasScheduleTemplates = appointmentAvailabilityTemplates.some(
+    (template) => template.astrologerId === astrologer?.id && (template.weeklySchedule || template.dateOverrides || template.publishedWeeklySchedule || template.publishedDateOverrides),
+  )
+  const calendarAvailability = useMemo(() => {
+    if (!astrologer) return {}
+    if (hasScheduleTemplates) {
+      return publishedAvailabilityMap({ templates: appointmentAvailabilityTemplates, astrologerId: astrologer.id, appointments, includeSaved: true })
+    }
+    return buildCalendarAvailability(astrologer)
+  }, [astrologer, hasScheduleTemplates, appointmentAvailabilityTemplates, appointments])
 
   const [month, setMonth] = useState(() => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState('')
   const [slotsDate, setSlotsDate] = useState('')
+  // The astrologer's real published duration/buffer/price for the day whose
+  // slots are currently open, so the slot grid and its summary cards match
+  // exactly what was published instead of the generic demo defaults.
+  const slotsSnapshot = useMemo(() => {
+    if (!slotsDate || !astrologer || !hasScheduleTemplates) return null
+    return availabilitySnapshotForDate({
+      templates: appointmentAvailabilityTemplates.filter((template) => template.astrologerId === astrologer.id),
+      date: slotsDate,
+    })
+  }, [slotsDate, astrologer, hasScheduleTemplates, appointmentAvailabilityTemplates])
+  const slotsPrice = slotsSnapshot?.appointmentPrice ?? astrologerPrice
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingSlot, setBookingSlot] = useState(null)
@@ -83,8 +107,10 @@ export default function BookAppointmentSlots() {
   if (!astrologer) return <Navigate to="/user/appointments/book" replace />
 
   const dateInfo = (dayKey) => {
-    if (dayKey < today || dayKey > BOOKING_WINDOW_END || isFullyBooked(dayKey)) return { available: false, count: 0 }
-    const count = gridOpenSlotCount({ availability: calendarAvailability, dateKey: dayKey, astrologerId: astrologer.id, appointments })
+    if (dayKey < today || dayKey > BOOKING_WINDOW_END) return { available: false, count: 0 }
+    const count = hasScheduleTemplates
+      ? (calendarAvailability[dayKey] || []).length
+      : gridOpenSlotCount({ availability: calendarAvailability, dateKey: dayKey, astrologerId: astrologer.id, appointments })
     return { available: count > 0, count }
   }
 
@@ -111,10 +137,10 @@ export default function BookAppointmentSlots() {
       time: slot.time,
       timeLabel: slot.timeLabel,
       endLabel: slot.endLabel,
-      duration: APPOINTMENT_CONFIG.durationLabel,
+      duration: slotsSnapshot?.appointmentDuration ? `${slotsSnapshot.appointmentDuration} Minutes` : APPOINTMENT_CONFIG.durationLabel,
       type: CONSULTATION_TYPE,
       package: CONSULTATION_PACKAGE,
-      price: astrologerPrice,
+      price: slotsPrice,
     })
     setSlotsDate('')
     setSummaryOpen(true)
@@ -217,7 +243,9 @@ export default function BookAppointmentSlots() {
           astrologer={astrologer}
           availability={calendarAvailability}
           appointments={appointments}
-          price={astrologerPrice}
+          price={slotsPrice}
+          durationMinutes={slotsSnapshot?.appointmentDuration}
+          bufferMinutes={slotsSnapshot?.appointmentBuffer}
           dateKey={slotsDate}
           onClose={() => setSlotsDate('')}
           onContinue={continueSlots}
@@ -261,11 +289,13 @@ export default function BookAppointmentSlots() {
 
       <UserAppointmentDetailsDrawer
         appointment={detailsAppointment}
+        consultation={detailsAppointment ? consultations.find((item) => item.appointmentId === detailsAppointment.id && (item.sent || item.sentToUser || item.completedAt)) : null}
         currentUser={currentUser}
         onClose={() => {
           setDetailsAppointment(null)
           navigate(location.pathname, { replace: true, state: { initialDate: editDate } })
         }}
+        onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
       />
     </div>
   )
