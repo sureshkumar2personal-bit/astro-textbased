@@ -17,7 +17,7 @@ import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDat
 
 const FILTERS = [
   { key: 'all', label: 'All' },
-  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'booked', label: 'Booked' },
   { key: 'completed', label: 'Completed' },
   { key: 'cancelled', label: 'Cancelled' },
   { key: 'rescheduled', label: 'Rescheduled' },
@@ -79,17 +79,19 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
   if (!appointment) return null
   const window = resolveAppointmentWindow(appointment)
   const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
+  const statusLabel = getAppointmentDisplayStatus(appointment)
+  const bucket = appointmentStatusBucket(appointment)
 
   return (
     <Card
-      className="apt-side-panel added-compact-appointment-card"
+      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}`}
     >
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
           {avatar ? <img className="added-compact-appointment-card__avatar" src={avatar} alt={`${appointment.astrologer || 'Astrologer'} profile`} /> : <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>}
-          <div><strong>{appointment.astrologer || 'Astrologer'}</strong></div>
+          <div><strong>{appointment.astrologer || 'Astrologer'}</strong><small className="added-compact-appointment-card__id">{appointment.orderId || appointment.id}</small></div>
         </div>
-        <strong className="added-compact-appointment-card__primary-id">{appointment.orderId || appointment.id}</strong>
+        <StatusBadge label={statusLabel} />
       </div>
       <div className="added-compact-appointment-card__meta">
         <span><Clock3 size={13} /><small>Time</small><strong>{formatTimeRange(window.startMin, window.endMin)}</strong></span>
@@ -123,7 +125,7 @@ export default function AppointmentDetails() {
 
   const filteredAppointments = useMemo(() => userAppointments.filter((appointment) => {
     const bucket = appointmentStatusBucket(appointment, now)
-    if (filter === 'upcoming') return bucket === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo
+    if (filter === 'booked' || filter === 'upcoming') return bucket === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo
     if (filter === 'completed') return bucket === 'completed'
     if (filter === 'cancelled') return bucket === 'cancelled'
     if (filter === 'rescheduled') return bucket === 'rescheduled'
