@@ -7924,7 +7924,7 @@ tbody tr:hover {
   border-radius: var(--radius-m);
   background: var(--primary-bg);
   color: var(--primary);
-  font-size: 13px;
+  font-size: 13px ;
 }
 
 .apt-slot-reminder svg {
