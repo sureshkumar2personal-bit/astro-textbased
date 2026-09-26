@@ -4032,6 +4032,7 @@ tbody tr:hover {
 }
 
 .my-activity-card {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 16px;
@@ -4143,6 +4144,40 @@ tbody tr:hover {
 .my-activity-card:hover .my-activity-card__chevron {
   transform: translateX(3px);
   color: var(--primary);
+}
+
+.my-activity-delete {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d92d20;
+  border-radius: 9px;
+  color: #fff;
+  background: #d92d20;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transition: color .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+}
+
+.my-activity-card:hover .my-activity-delete,
+.my-activity-card:focus-within .my-activity-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.my-activity-delete:hover,
+.my-activity-delete:focus-visible {
+  color: #b42318;
+  background: #fff1f0;
+  border-color: #efb5b0;
+  outline: none;
 }
 
 @media (max-width: 720px) {
