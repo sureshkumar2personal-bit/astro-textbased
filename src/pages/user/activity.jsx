@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity as ActivityIcon, CheckCircle2, ChevronRight, CircleHelp, MessageCircle, Search, Sparkles, Wallet, X } from 'lucide-react'
+import { Activity as ActivityIcon, CheckCircle2, ChevronRight, CircleHelp, MessageCircle, Search, Sparkles, Trash2, Wallet, X } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
 import { mockAstrologers } from '../../data/notificationData.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
-import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../../utils/memberCommunicationActivity.js'
+import { getHiddenUserActivityIds, getUserCommunicationActivity, saveHiddenUserActivityIds } from '../../utils/memberCommunicationActivity.js'
 import { getUserActivityLog } from '../../utils/userActivityLog.js'
 import './activity.css'
 
@@ -136,6 +136,12 @@ export default function Activity() {
     setSummaryActivity(item)
   }
 
+  const handleDelete = (item) => {
+    const updated = [...hiddenActivityIds, item.id]
+    setHiddenActivityIds(updated)
+    saveHiddenUserActivityIds(currentUser?.id, updated)
+  }
+
   const handleActivityKeyDown = (event, item) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -158,7 +164,7 @@ export default function Activity() {
             {visibleActivities.map((item) => {
               const meta = activityType(item)
               const Icon = meta.icon
-              return <article className="my-activity-card user-activity-item" key={item.id} role="button" tabIndex={0} onClick={() => openActivity(item)} onKeyDown={(event) => handleActivityKeyDown(event, item)}><span className={`my-activity-card__icon user-activity-item__icon activity-tone-${meta.tone}`}><Icon size={20} /></span><div className="my-activity-card__body user-activity-item__body"><div className="my-activity-card__top user-activity-item__top"><span className={`my-activity-badge activity-tone-${meta.tone}`}>{meta.label}</span><span className="my-activity-card__name">{item.title}</span></div><p className="my-activity-card__desc">{item.summary || 'Activity recorded.'}</p><div className="my-activity-card__meta user-activity-item__meta"><span>{formatDate(item.occurredAt)}{formatTime(item.occurredAt) ? ` · ${formatTime(item.occurredAt)}` : ''}</span>{item.metadata && <span>{item.metadata}</span>}</div></div><div className="my-activity-card__right user-activity-item__right">{item.status && <span className={`user-activity-status ${statusTone(item.status)}`}>{item.status}</span>}<ChevronRight size={18} className="my-activity-card__chevron" aria-hidden="true" /></div></article>
+              return <article className="my-activity-card user-activity-item" key={item.id} role="button" tabIndex={0} onClick={() => openActivity(item)} onKeyDown={(event) => handleActivityKeyDown(event, item)}><span className={`my-activity-card__icon user-activity-item__icon activity-tone-${meta.tone}`}><Icon size={20} /></span><div className="my-activity-card__body user-activity-item__body"><div className="my-activity-card__top user-activity-item__top"><span className={`my-activity-badge activity-tone-${meta.tone}`}>{meta.label}</span><span className="my-activity-card__name">{item.title}</span></div><p className="my-activity-card__desc">{item.summary || 'Activity recorded.'}</p><div className="my-activity-card__meta user-activity-item__meta"><span>{formatDate(item.occurredAt)}{formatTime(item.occurredAt) ? ` · ${formatTime(item.occurredAt)}` : ''}</span>{item.metadata && <span>{item.metadata}</span>}</div></div><div className="my-activity-card__right user-activity-item__right">{item.status && <span className={`user-activity-status ${statusTone(item.status)}`}>{item.status}</span>}<ChevronRight size={18} className="my-activity-card__chevron" aria-hidden="true" /><button type="button" className="user-activity-delete" onClick={(event) => { event.stopPropagation(); handleDelete(item) }} aria-label="Delete activity"><Trash2 size={16} /></button></div></article>
             })}
           </div>
         ) : (
