@@ -651,6 +651,34 @@ textarea:focus-visible {
   gap: 4px;
 }
 
+/* User-side nav — white bold main tabs matching astrologer style */
+.sidebar-nav-group .sidebar-link-toggle {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.sidebar-nav-group .sidebar-parent-link {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.sidebar-nav-group .sidebar-link-toggle:hover,
+.sidebar-nav-group .sidebar-parent-link:hover {
+  color: #fff;
+}
+
+.sidebar-nav-group .sidebar-subnav-link {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.sidebar-nav-group .sidebar-subnav-link:hover {
+  color: #fff;
+}
+
 .sidebar-nav-section-title {
   display: flex;
   align-items: center;
