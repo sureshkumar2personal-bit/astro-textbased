@@ -26,12 +26,12 @@ function summaryValue(summary, key) {
   return String(summary[key] ?? 0)
 }
 
-export default function AppointmentSlotsModal({ astrologer, availability, appointments = [], price, dateKey, onClose, onContinue }) {
+export default function AppointmentSlotsModal({ astrologer, availability, appointments = [], price, durationMinutes, bufferMinutes, dateKey, onClose, onContinue }) {
   const [selectedKey, setSelectedKey] = useState('')
 
   const model = useMemo(
-    () => buildAppointmentDaySlotModel({ availability, dateKey, astrologerId: astrologer.id, appointments, price }),
-    [availability, dateKey, astrologer.id, appointments, price],
+    () => buildAppointmentDaySlotModel({ availability, dateKey, astrologerId: astrologer.id, appointments, price, durationMinutes, bufferMinutes }),
+    [availability, dateKey, astrologer.id, appointments, price, durationMinutes, bufferMinutes],
   )
   const summary = model.summary
   const selectedSlot = model.slots.find((slot) => slot.key === selectedKey) || null

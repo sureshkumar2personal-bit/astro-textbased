@@ -557,3 +557,53 @@
     font-size: 12px;
   }
 }
+
+/* ========================================================================
+    Bordered Question Rows - TrackQuestions Page
+======================================================================= */
+
+.card.track-question-row {
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: var(--surface);
+  position: relative;
+  transition: border-color 200ms var(--ease-premium), box-shadow 200ms var(--ease-premium);
+}
+
+.card.track-question-row:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(58, 42, 106, 0.1);
+}
+
+/* Status dot in top-right corner */
+.card.track-question-row .status-dot {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.card.track-question-row .status-dot--pending {
+  background: var(--amber-600);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+}
+
+.card.track-question-row .status-dot--answered {
+  background: var(--green-600);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.card.track-question-row .status-dot--dispute {
+  background: var(--red-600);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+}
+
+/* Grid: 3 cards per row */
+.track-questions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}

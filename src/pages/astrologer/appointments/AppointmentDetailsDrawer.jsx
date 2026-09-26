@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 import { X, Clock, Calendar as CalIcon, Timer, Languages, Hash, Phone, Wallet, UserRound, CalendarX2, StickyNote, Paperclip, Send, FileText, Eye, Download, NotebookPen, Shield, Check, CalendarCheck2 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { callTypeMeta } from './meta.jsx'
 import {
@@ -219,18 +219,25 @@ function HoroscopeSection({ appointment, onView }) {
   )
 }
 
-function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes, readOnly = false }) {
+function PrivateNotesSection({ appointment, onSavePreCall, onSavePrivateCallNotes, readOnly = false }) {
   const [preCall, setPreCall] = useState(appointment.preCallAnalysis || '')
-  const [notes, setNotes] = useState(appointment.privateNotes || '')
+  const [notes, setNotes] = useState(appointment.privateCallNotes || '')
   const [preSaved, setPreSaved] = useState(false)
   const [notesSaved, setNotesSaved] = useState(false)
+
+  useEffect(() => {
+    setPreCall(appointment.preCallAnalysis || '')
+    setNotes(appointment.privateCallNotes || '')
+    setPreSaved(false)
+    setNotesSaved(false)
+  }, [appointment.id, appointment.preCallAnalysis, appointment.privateCallNotes])
 
   const savePreCall = () => {
     if (typeof onSavePreCall === 'function') onSavePreCall(appointment.id, preCall)
     setPreSaved(true)
   }
   const saveNotes = () => {
-    if (typeof onSaveNotes === 'function') onSaveNotes(appointment.id, notes)
+    if (typeof onSavePrivateCallNotes === 'function') onSavePrivateCallNotes(appointment.id, notes)
     setNotesSaved(true)
   }
 
@@ -272,7 +279,7 @@ function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes, readOnly
         />
         {!readOnly && (
           <button type="button" className="btn btn-outline apt-private-notes-save" onClick={saveNotes}>
-            {notesSaved ? 'Saved' : 'Save Notes'}
+            {notesSaved ? 'Saved' : 'Save Private Call Notes'}
           </button>
         )}
       </div>
@@ -280,7 +287,7 @@ function PrivateNotesSection({ appointment, onSavePreCall, onSaveNotes, readOnly
   )
 }
 
-export default function AppointmentDetailsDrawer({ appointment, appointments = [], inProgress, consultation, onClose, onStartCall, onCancel, onViewProfile, onSaveConsultation, onOpenConsultation, onSavePrivateNotes, onSavePreCallAnalysis, onReschedule }) {
+export default function AppointmentDetailsDrawer({ appointment, appointments = [], inProgress, consultation, onClose, onStartCall, onCancel, onViewProfile, onSaveConsultation, onOpenConsultation, onSavePrivateCallNotes, onSavePreCallAnalysis, onReschedule }) {
   const [horoscopeOpen, setHoroscopeOpen] = useState(false)
   if (!appointment) return null
   const meta = callTypeMeta(appointment.callType)
@@ -407,18 +414,18 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
                 )}
               </section>
 
-              {(typeof onSavePrivateNotes === 'function' || typeof onSavePreCallAnalysis === 'function') && (
+              {(typeof onSavePrivateCallNotes === 'function' || typeof onSavePreCallAnalysis === 'function') && (
                 <PrivateNotesSection
                   appointment={appointment}
                   onSavePreCall={onSavePreCallAnalysis}
-                  onSaveNotes={onSavePrivateNotes}
+                  onSavePrivateCallNotes={onSavePrivateCallNotes}
                   readOnly={isViewOnlyHistory}
                 />
               )}
 
               <div className={`apt-drawer-call${(showCall || showCancelButton || showReschedule) ? ' apt-drawer-call--split' : ''}`}>
                 {showCall && (
-                  <button type="button" className="btn btn-primary apt-drawer-startcall" onClick={onStartCall}>
+                  <button type="button" className="btn btn-primary apt-drawer-startcall" onClick={() => onStartCall(appointment)}>
                     <Phone size={15} /> Start {meta.label}
                   </button>
                 )}

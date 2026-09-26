@@ -20,6 +20,7 @@ import {
   isCancelledStatus,
   appointmentStatusBucket,
   isAppointmentUpcoming,
+  getAppointmentDisplayStatus,
   APPOINTMENT_STATUS,
 } from '../../../utils/appointments.js'
 
@@ -51,9 +52,9 @@ const SUMMARY_BUCKETS = [
 
 function summaryCounts(appointments) {
   const total = appointments.length
-  const booked = appointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'booked').length
-  const completed = appointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'completed').length
-  const cancelled = appointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'cancelled').length
+  const booked = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'booked').length
+  const completed = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'completed').length
+  const cancelled = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'cancelled').length
   return { total, booked, completed, cancelled }
 }
 
@@ -114,20 +115,16 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
         // its own `status` field is still "Booked" (a rescheduled slot's
         // replacement keeps a normal Booked status but carries
         // `rescheduledFrom`).
-        const bucket = appointmentStatusBucket(appointment.status)
-        const displayStatus = isRescheduledOriginal || isRescheduleReplacement
-          ? 'Rescheduled'
-          : bucket === 'completed'
-            ? 'Completed'
-            : bucket === 'cancelled'
-              ? 'Cancelled'
-              : 'Booked'
+        const displayStatus = getAppointmentDisplayStatus(appointment) === APPOINTMENT_STATUS.REFUNDED
+          ? 'Refund'
+          : getAppointmentDisplayStatus(appointment)
         const rescheduleLabel = isRescheduledOriginal
           ? `Rescheduled → ${linkedLabel(appointment.rescheduledTo) || 'new slot'}`
           : isRescheduleReplacement
             ? `Rescheduled from ${linkedLabel(appointment.rescheduledFrom) || 'original'}`
             : null
         const customerName = appointment.customerName || 'Customer'
+        const hasAnalysis = Boolean(String(appointment.preCallAnalysis || '').trim())
         const avatarInitials = customerName.split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
         return (
           <article
@@ -167,6 +164,9 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
             {rescheduleLabel && (
               <div className="apt-history-item__reschedule">{rescheduleLabel}</div>
             )}
+            <button type="button" className={`apt-history-item__analysis${hasAnalysis ? ' is-saved' : ''}`} onClick={(event) => { event.stopPropagation(); onSelect(appointment) }}>
+              {hasAnalysis ? '✓ Analysis Saved' : 'Analysis'}
+            </button>
           </article>
         )
       })}
@@ -270,7 +270,7 @@ export default function AppointmentHistory() {
           : appointment.status === statusFilter)
       if (!matchesStatus) return false
 
-      const bucket = appointmentStatusBucket(appointment.status)
+      const bucket = appointmentStatusBucket(appointment)
       if (filter === 'upcoming') return isAppointmentUpcoming(appointment, new Date())
       if (filter === 'completed') return bucket === 'completed'
       if (filter === 'cancelled') return bucket === 'cancelled'
@@ -291,13 +291,13 @@ export default function AppointmentHistory() {
   const visibleDayAppointments = useMemo(() => {
     if (dayFilter === 'total') return dayAppointments
     if (dayFilter === 'booked') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'booked')
+      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'booked')
     }
     if (dayFilter === 'completed') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'completed')
+      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'completed')
     }
     if (dayFilter === 'cancelled') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment.status) === 'cancelled')
+      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'cancelled')
     }
     return dayAppointments
   }, [dayAppointments, dayFilter])
@@ -322,12 +322,13 @@ export default function AppointmentHistory() {
     : null
 
   const saveConsultation = (payload) => {
-    actions.saveConsultation(payload)
+    const record = actions.saveConsultation(payload)
     success('Consultation saved successfully')
+    return record
   }
 
-  const savePrivateNotes = (appointmentId, notes) => {
-    actions.savePrivateNotes(appointmentId, notes)
+  const savePrivateCallNotes = (appointmentId, notes) => {
+    actions.savePrivateCallNotes(appointmentId, notes)
     success('Notes saved successfully')
   }
 
@@ -458,7 +459,7 @@ export default function AppointmentHistory() {
           onStartCall={startCall}
           onViewProfile={viewProfile}
           onSaveConsultation={saveConsultation}
-          onSavePrivateNotes={savePrivateNotes}
+          onSavePrivateCallNotes={savePrivateCallNotes}
           onSavePreCallAnalysis={savePreCallAnalysis}
           onCancel={() => setCancelTarget(selectedAppointment)}
         />
@@ -467,11 +468,11 @@ export default function AppointmentHistory() {
       {callAppointment && (
         <AppointmentCallScreen
           appointment={callAppointment}
+          consultation={consultations.find((c) => c.appointmentId === callAppointment.id)}
           onEnd={() => setCallAppointment(null)}
           onSaveConsultation={saveConsultation}
           onCompleteCall={completeAppointmentCall}
-          onSavePrivateNotes={savePrivateNotes}
-          onSavePreCallAnalysis={savePreCallAnalysis}
+          onSavePrivateCallNotes={savePrivateCallNotes}
         />
       )}
 

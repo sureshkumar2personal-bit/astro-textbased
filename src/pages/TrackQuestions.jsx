@@ -10,6 +10,7 @@ import Section from '../components/ui/Section.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import '../css/user/question-tracking.css'
 
 const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered']
 const EDIT_TIME_LIMIT_MS = 30 * 60 * 1000
@@ -239,6 +240,14 @@ export default function TrackQuestions() {
     }
   }, [closeQuestion, detailsOpen, fullContent, selectedQuestion])
 
+  function getStatusDotClass(status) {
+    const s = String(status).toLowerCase()
+    if (s === 'pending') return 'status-dot--pending'
+    if (s === 'dispute' || s === 'disputed') return 'status-dot--dispute'
+    if (s === 'answered') return 'status-dot--answered'
+    return ''
+  }
+
   return (
     <div>
       <PageHeader eyebrow="User portal" title="Track My Questions" showBack backTo={routes.askQuestion} />
@@ -280,14 +289,13 @@ export default function TrackQuestions() {
             <div className="mb-4 rounded-[14px] border border-[color:var(--border)] bg-white/90 px-4 py-3 text-sm text-[color:var(--muted)]">
               No matching questions found. Clear filters or submit a question from the Ask Question page.
             </div>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+           )}
+           <div className="track-questions-grid">
             {visibleQuestions.map((question) => {
               return (
                 <Card
                   key={question.id}
-                  hover
-                  className="cursor-pointer"
+                  className="cursor-pointer track-question-row"
                   onClick={() => openQuestion(question.id)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
@@ -299,7 +307,7 @@ export default function TrackQuestions() {
                       </div>
                       <div className="muted">Raised: {question.raised}</div>
                     </div>
-                    <StatusBadge label={question.status} />
+                    <div className={`status-dot ${getStatusDotClass(question.status)}`} />
                   </div>
                   <div className="btn-row" style={{ marginTop: 14 }}>
                     <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>

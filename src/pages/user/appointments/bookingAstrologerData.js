@@ -140,7 +140,30 @@ function workingWindowSlotStarts() {
   })
 }
 
-export function buildAppointmentDaySlotModel({ availability, dateKey, astrologerId, appointments = [], price }) {
+// Reference "closed" checkpoints for a day, spaced using the astrologer's own
+// published duration+buffer cadence and phase-aligned to their actual
+// published start time (falling back to a plain 0-offset grid when no
+// published time is known for the day). Aligning the phase, not just the
+// step size, guarantees every published "Available" time lands exactly on a
+// checkpoint instead of a few minutes off one — which is what produced
+// overlapping/duplicate-looking ranges before.
+function publishedCadenceSlotStarts(duration, buffer, anchorMinute) {
+  const cadence = Math.max(1, duration + buffer)
+  const rangeStart = 6 * 60
+  const rangeEnd = 22 * 60
+  const phase = anchorMinute == null ? rangeStart % cadence : ((anchorMinute % cadence) + cadence) % cadence
+  const starts = []
+  for (let minute = phase; minute + duration <= rangeEnd; minute += cadence) {
+    if (minute >= rangeStart) starts.push(minute)
+  }
+  return starts
+}
+
+export function buildAppointmentDaySlotModel({ availability, dateKey, astrologerId, appointments = [], price, durationMinutes, bufferMinutes }) {
+  const usesRealPolicy = durationMinutes != null || bufferMinutes != null
+  const duration = durationMinutes != null ? durationMinutes : APPOINTMENT_CONFIG.durationMinutes
+  const buffer = bufferMinutes != null ? bufferMinutes : APPOINTMENT_CONFIG.bufferMinutes
+
   const publishedMinutes = (Array.isArray(availability?.[dateKey]) ? availability[dateKey] : [])
     .map(timeToMinutes)
     .filter((minutes) => minutes >= 0)
@@ -151,11 +174,12 @@ export function buildAppointmentDaySlotModel({ availability, dateKey, astrologer
     const minutes = timeToMinutes(item.time)
     if (minutes >= 0 && !bookingByMinute.has(minutes)) bookingByMinute.set(minutes, item)
   })
-  const cadence = workingWindowSlotStarts()
+  const anchorMinute = publishedMinutes.length ? Math.min(...publishedMinutes) : null
+  const cadence = usesRealPolicy ? publishedCadenceSlotStarts(duration, buffer, anchorMinute) : workingWindowSlotStarts()
   const slotStarts = [...new Set([...cadence, ...publishedMinutes])].sort((a, b) => a - b)
   const slots = slotStarts.map((startMinutes) => {
     const start = minutesToClock(startMinutes)
-    const end = minutesToClock(startMinutes + APPOINTMENT_CONFIG.durationMinutes)
+    const end = minutesToClock(startMinutes + duration)
     const booking = bookingByMinute.get(startMinutes)
     let status = 'closed'
     if (booking) status = booking.status === 'Completed' ? 'completed' : 'booked'
@@ -166,7 +190,7 @@ export function buildAppointmentDaySlotModel({ availability, dateKey, astrologer
       time: start,
       timeLabel: minutesToClock(startMinutes, false),
       endTime: end,
-      endLabel: minutesToClock(startMinutes + APPOINTMENT_CONFIG.durationMinutes, false),
+      endLabel: minutesToClock(startMinutes + duration, false),
       status,
       selectable: status === 'available',
     }
@@ -176,8 +200,8 @@ export function buildAppointmentDaySlotModel({ availability, dateKey, astrologer
     slots,
     summary: {
       workingHours: APPOINTMENT_CONFIG.workingHours,
-      duration: APPOINTMENT_CONFIG.durationLabel,
-      buffer: APPOINTMENT_CONFIG.bufferValue,
+      duration: durationMinutes != null ? `${duration} Minutes` : APPOINTMENT_CONFIG.durationLabel,
+      buffer: bufferMinutes != null ? `${buffer} min` : APPOINTMENT_CONFIG.bufferValue,
       price,
       available: countBy('available'),
       total: slots.length,

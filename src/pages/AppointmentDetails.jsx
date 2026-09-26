@@ -17,7 +17,7 @@ import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDat
 
 const FILTERS = [
   { key: 'all', label: 'All' },
-  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'booked', label: 'Booked' },
   { key: 'completed', label: 'Completed' },
   { key: 'cancelled', label: 'Cancelled' },
   { key: 'rescheduled', label: 'Rescheduled' },
@@ -79,17 +79,19 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
   if (!appointment) return null
   const window = resolveAppointmentWindow(appointment)
   const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
+  const statusLabel = getAppointmentDisplayStatus(appointment)
+  const bucket = appointmentStatusBucket(appointment)
 
   return (
     <Card
-      className="apt-side-panel added-compact-appointment-card"
+      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}`}
     >
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
           {avatar ? <img className="added-compact-appointment-card__avatar" src={avatar} alt={`${appointment.astrologer || 'Astrologer'} profile`} /> : <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>}
-          <div><strong>{appointment.astrologer || 'Astrologer'}</strong></div>
+          <div><strong>{appointment.astrologer || 'Astrologer'}</strong><small className="added-compact-appointment-card__id">{appointment.orderId || appointment.id}</small></div>
         </div>
-        <strong className="added-compact-appointment-card__primary-id">{appointment.orderId || appointment.id}</strong>
+        <StatusBadge label={statusLabel} />
       </div>
       <div className="added-compact-appointment-card__meta">
         <span><Clock3 size={13} /><small>Time</small><strong>{formatTimeRange(window.startMin, window.endMin)}</strong></span>
@@ -105,7 +107,7 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
 
 export default function AppointmentDetails() {
   const [searchParams] = useSearchParams()
-  const { appointments, actions } = useAppData()
+  const { appointments, consultations, actions } = useAppData()
   const { currentUser } = useAuth()
   const navigate = useNavigate()
   const now = useNow(60000)
@@ -123,7 +125,7 @@ export default function AppointmentDetails() {
 
   const filteredAppointments = useMemo(() => userAppointments.filter((appointment) => {
     const bucket = appointmentStatusBucket(appointment, now)
-    if (filter === 'upcoming') return bucket === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo
+    if (filter === 'booked' || filter === 'upcoming') return bucket === 'booked' && !appointment.rescheduledFrom && !appointment.rescheduledTo
     if (filter === 'completed') return bucket === 'completed'
     if (filter === 'cancelled') return bucket === 'cancelled'
     if (filter === 'rescheduled') return bucket === 'rescheduled'
@@ -227,7 +229,14 @@ export default function AppointmentDetails() {
         </div>
       </aside>
     </div>
-    <UserAppointmentDetailsDrawer appointment={detailsAppointment} currentUser={currentUser} onClose={() => closeDetailsDrawer(detailsAppointment)} onBookAgain={bookAgain} />
+    <UserAppointmentDetailsDrawer
+      appointment={detailsAppointment}
+      consultation={detailsAppointment ? consultations.find((item) => item.appointmentId === detailsAppointment.id && (item.sent || item.sentToUser || item.completedAt)) : null}
+      currentUser={currentUser}
+      onClose={() => closeDetailsDrawer(detailsAppointment)}
+      onBookAgain={bookAgain}
+      onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
+    />
     {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>

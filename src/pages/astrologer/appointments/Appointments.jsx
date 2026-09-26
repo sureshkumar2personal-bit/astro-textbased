@@ -768,7 +768,7 @@ export default function AppointmentCalendarTab() {
             setRescheduleAppointment(selectedAppointment)
             setSelectedAppointment(null)
           }}
-          onSavePrivateNotes={(id, notes) => actions.savePrivateNotes(id, notes)}
+          onSavePrivateCallNotes={(id, notes) => actions.savePrivateCallNotes(id, notes)}
           onSavePreCallAnalysis={(id, notes) => actions.savePreCallAnalysis(id, notes)}
           onSaveConsultation={(payload) => actions.saveConsultation(payload)}
           onViewDetails={() => {}}
@@ -780,14 +780,14 @@ export default function AppointmentCalendarTab() {
           appointment={
             inProgressAppointment
           }
+          consultation={consultations.find((c) => c.appointmentId === inProgressAppointment.id)}
           onEnd={
             handleEndCall
           }
           onCompleteCall={
             handleCompleteCall
           }
-          onSavePrivateNotes={(id, notes) => actions.savePrivateNotes(id, notes)}
-          onSavePreCallAnalysis={(id, notes) => actions.savePreCallAnalysis(id, notes)}
+          onSavePrivateCallNotes={(id, notes) => actions.savePrivateCallNotes(id, notes)}
           onSaveConsultation={(payload) => actions.saveConsultation(payload)}
         />
       )}

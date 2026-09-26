@@ -347,6 +347,29 @@
   letter-spacing: -0.01em;
 }
 
+.astro-appointment-history .apt-history-item__analysis {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.astro-appointment-history .apt-history-item__analysis:hover,
+.astro-appointment-history .apt-history-item__analysis:focus-visible {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.astro-appointment-history .apt-history-item__analysis.is-saved {
+  color: var(--success, #15803d);
+}
+
 @media (max-width: 600px) {
   .astro-appointment-history .apt-history-item {
     padding: 18px 20px;

@@ -8,6 +8,7 @@ import {
   MessageCircleQuestion,
   Percent,
   Receipt,
+  Search,
   ShoppingBag,
   TrendingUp,
   Users,
@@ -16,12 +17,18 @@ import {
 import StatusBadge from '../components/StatusBadge.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
+import CreateCampaignModal from '../components/CreateCampaignModal.jsx'
+import { CampaignDetails } from './Campaigns.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getMonthKeyFromDate, getMonthLabel, shiftMonthKey } from '../utils/questions.js'
 import { getSalesReport } from '../utils/sales.js'
-import { TempleReturnIcon } from '../components/TempleIcons.jsx'
+import { TempleDonationBoxIcon, TempleReturnIcon } from '../components/TempleIcons.jsx'
+import { sortByDateDesc } from '../utils/date.js'
+import '../css/astrologer/sales-management.css'
+
+const CAMPAIGN_TINTS = ['lavender', 'cream', 'mint']
 
 function formatINR(value) {
   const amount = Number(value) || 0
@@ -155,15 +162,122 @@ export default function SalesManagement() {
   }
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="Astrologer"
-        title="Sales Management"
-        subtitle="Track your Text-Based Questions sales, revenue, purchases, offers and transaction activity."
-        showBack
-        backTo={routes.dashboard}
-        backIcon={backIcon}
-        actions={<MonthSelector monthKey={selectedMonthKey} onChange={setSelectedMonthKey} />}
+    <div className="sales-management-page">
+      <div className="sales-hero">
+        <div className="sales-hero__left">
+          <PageHeader
+            eyebrow="Astrologer"
+            title="Sales Management"
+            subtitle="Campaigns, pricing & allocation"
+            showBack
+            backTo={routes.dashboard}
+            backIcon={backIcon}
+            actions={<MonthSelector monthKey={selectedMonthKey} onChange={setSelectedMonthKey} />}
+          />
+          <div className="sales-hero__icon" aria-hidden="true">
+            <TempleDonationBoxIcon size={30} />
+          </div>
+        </div>
+        <div className="sales-hero__zodiac" aria-hidden="true" />
+      </div>
+
+      <Section title={`All Campaigns (${campaignCards.length})`} icon={TempleDonationBoxIcon}>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="muted">Select a campaign card to view complete details.</div>
+          <div className="campaign-toolbar">
+            <button className="btn btn-primary" type="button" onClick={() => setCreateOpen(true)}>
+              <TempleDonationBoxIcon size={15} />Create Campaign
+            </button>
+            <div className="search-bar">
+              <input
+                className="text-input search-bar__input"
+                placeholder="Search campaigns"
+                value={campaignQuery}
+                onChange={(event) => setCampaignQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') setAppliedCampaignQuery(campaignQuery)
+                }}
+              />
+              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedCampaignQuery(campaignQuery)}>
+                <Search size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="campaign-cards-grid">
+          {campaignCards.map((campaign, index) => {
+            const tint = CAMPAIGN_TINTS[index % CAMPAIGN_TINTS.length]
+            const sold = campaign.purchasedGeneral + campaign.purchasedPersonal
+            const progress = campaign.totalLimit ? Math.min(100, Math.round((sold / campaign.totalLimit) * 100)) : 0
+            const hasDiscount = Number(campaign.discountPercent) > 0
+
+            return (
+              <button
+                type="button"
+                key={campaign.id}
+                className={`campaign-card-modern campaign-card-modern--${tint}`}
+                onClick={() => openCampaignDetails(campaign)}
+              >
+                <div className="campaign-card-modern__header">
+                  <div className="campaign-card-modern__icon" aria-hidden="true">
+                    <TempleDonationBoxIcon size={18} />
+                  </div>
+                  <div className="campaign-card-modern__name">{campaign.name}</div>
+                  <StatusBadge label={campaign.status} className="campaign-card-modern__status" />
+                </div>
+
+                <div className="campaign-card-modern__body">
+                  <div className="campaign-card-modern__dates">
+                    {campaign.date} – {campaign.endDate}
+                    {campaign.status === 'Scheduled' && campaign.scheduledPublishAt && (
+                      <span className="campaign-card-modern__publish"> · Publishes: {new Date(campaign.scheduledPublishAt).toLocaleString('en-IN')}</span>
+                    )}
+                  </div>
+
+                  <div className="campaign-card-modern__slots">
+                    <div className="campaign-card-modern__slots-row">
+                      <span>Total slots: {campaign.totalLimit}</span>
+                      <span>Sold: {sold}</span>
+                    </div>
+                    <div className="campaign-card-modern__progress">
+                      <div className="campaign-card-modern__progress-fill" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="campaign-card-modern__divider" />
+
+                  <div className="campaign-card-modern__pricing">
+                    <span>General ₹{campaign.generalPrice}</span>
+                    <span>Individual ₹{campaign.personalPrice}</span>
+                  </div>
+
+                  <div className="campaign-card-modern__divider" />
+
+                  <div className={`campaign-card-modern__discount${hasDiscount ? ' has-discount' : ''}`}>
+                    {hasDiscount ? `${campaign.discountPercent}% subscriber discount` : 'No subscriber discount'}
+                  </div>
+                </div>
+
+                <div className="campaign-card-modern__footer">
+                  View Campaign Details <span aria-hidden="true">→</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+        {!campaignCards.length && <div className="muted mt-4">No campaigns match your search.</div>}
+      </Section>
+
+      <CreateCampaignModal
+        open={createOpen}
+        onClose={() => {
+          setCreateOpen(false)
+        }}
+        onComplete={(action) => {
+          setSuccessMessage(action === 'Published' ? 'Campaign published successfully.' : action === 'Scheduled' ? 'Campaign scheduled successfully.' : 'Campaign draft saved successfully.')
+        }}
+        defaultTotalLimit={selectedCampaign?.totalLimit || 30}
       />
 
       <Section

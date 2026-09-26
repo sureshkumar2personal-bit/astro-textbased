@@ -1,4 +1,4 @@
-import { Pencil, SlidersHorizontal, X } from 'lucide-react'
+import { AtSign, CalendarDays, Clock3, Languages, Mail, MapPin, Moon, Pencil, Phone, SlidersHorizontal, Sparkles, Star, UserRound, VenusAndMars, X } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import BackButton from '../components/BackButton.jsx'
@@ -8,6 +8,7 @@ import { useToast } from '../components/Toast.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { NAKSHATRA_OPTIONS } from '../data/astrologyOptions.js'
+import './my-account.css'
 
 const formatBirthDate = (value) => {
   if (!value) return ''
@@ -45,6 +46,8 @@ const ASTROLOGY_FIELDS = [
   ['nakshatra', 'Nakshatra'],
   ['lagna', 'Lagna / Ascendant'],
 ]
+const PERSONAL_FIELD_ICONS = { fullName: UserRound, username: AtSign, dob: CalendarDays, birthTime: Clock3, birthPlace: MapPin, gender: VenusAndMars, phone: Phone, email: Mail, languages: Languages }
+const ASTROLOGY_FIELD_ICONS = { rasi: Sparkles, nakshatra: Star, lagna: Moon }
 const PREFERENCE_ROWS = [
   ['languages', 'Preferred Language'],
   ['astrologerTypes', 'Astrologer Type'],
@@ -154,7 +157,7 @@ export default function MyAccount() {
 
   return (
     <div className="my-account-page">
-      <BackButton to={backTo} label="Back" />
+      <BackButton to={backTo} label="Back to Dashboard" />
       <PageHeader title="My Account" subtitle="Manage your personal information, astrology details and preferences." />
       <Card className="my-account-summary">
         <div className="my-account-summary__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} /> : initials(name)}</div>
@@ -162,7 +165,8 @@ export default function MyAccount() {
           <strong>{name || 'Astro Connect Member'}</strong>
           <span className="muted">@{username}</span>
         </div>
-        <span className="my-account-summary__tag">Account Information</span>
+        <span className="my-account-summary__tag">Member</span>
+        <button type="button" className="btn btn-primary my-account-summary__edit" onClick={openPersonalDetailsEditor}><Pencil size={15} /> Edit Profile</button>
       </Card>
       <Card className="my-account-settings-card">
         <section className="my-account-settings-section">
@@ -193,7 +197,7 @@ export default function MyAccount() {
             </>
           ) : (
             <div className="my-account-info-rows">
-              {PERSONAL_INFO_FIELDS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={personalValue(key) ? '' : 'is-empty'}>{personalValue(key) || 'Not added'}</strong></div>)}
+              {PERSONAL_INFO_FIELDS.map(([key, label]) => { const Icon = PERSONAL_FIELD_ICONS[key] || UserRound; return <div className="my-account-info-row" key={key}><span><Icon size={14} />{label}</span><strong className={personalValue(key) ? '' : 'is-empty'}>{personalValue(key) || 'Not added'}</strong></div> })}
             </div>
           )}
         </section>
@@ -206,7 +210,7 @@ export default function MyAccount() {
             <button type="button" className="my-account-settings-edit" aria-label="Edit Astrology Details" onClick={openHoroscopeEditor}><Pencil size={15} /></button>
           </div>
           <div className="my-account-info-rows">
-            {ASTROLOGY_FIELDS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={currentUser?.[key] ? '' : 'is-empty'}>{currentUser?.[key] || 'Not added'}</strong></div>)}
+            {ASTROLOGY_FIELDS.map(([key, label]) => { const Icon = ASTROLOGY_FIELD_ICONS[key] || Sparkles; return <div className="my-account-info-row" key={key}><span><Icon size={14} />{label}</span><strong className={currentUser?.[key] ? '' : 'is-empty'}>{currentUser?.[key] || 'Not added'}</strong></div> })}
           </div>
         </section>
         <section className="my-account-settings-section">
