@@ -236,11 +236,7 @@
   overflow-x: hidden;
   padding-right: 6px;
   scrollbar-width: thin;
-<<<<<<< HEAD
-  scrollbar-color: rgba(109,40,217,0.28) transparent;
-=======
   scrollbar-color: rgba(109, 40, 217, 0.28) transparent;
->>>>>>> ffc00dcabdfed7c17f7fc079f9589f22843e65c3
 }
 
 .user-appointment-history .user-appointment-list::-webkit-scrollbar {
@@ -248,23 +244,12 @@
 }
 
 .user-appointment-history .user-appointment-list::-webkit-scrollbar-thumb {
-<<<<<<< HEAD
-  background: rgba(109,40,217,0.22);
+  background: rgba(109, 40, 217, 0.22);
   border-radius: 999px;
 }
 
 .user-appointment-history .user-appointment-list::-webkit-scrollbar-track {
   background: transparent;
-=======
-  background: rgba(109, 40, 217, 0.22);
-  border-radius: 999px;
-}
-
-/* Right-hand appointment panel — vertically scrollable (user only) */
-.user-appointment-history .apt-history-day-col {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
 }
 
 .user-appointment-history .apt-history-day-col > * {
@@ -277,7 +262,6 @@
 
 .user-appointment-history .apt-history-day-col > *:last-child {
   margin-bottom: 0;
->>>>>>> ffc00dcabdfed7c17f7fc079f9589f22843e65c3
 }
 
 .user-appointment-history .added-compact-appointment-card {
