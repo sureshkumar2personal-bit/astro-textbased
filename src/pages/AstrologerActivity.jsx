@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Activity, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight } from 'lucide-react'
+import { Activity, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, Trash2, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight } from 'lucide-react'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -59,8 +59,17 @@ export default function AstrologerActivity() {
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const [selectedItem, setSelectedItem] = useState(null)
+  const [hiddenActivityIds, setHiddenActivityIds] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem('astroconnect-hidden-astrologer-activities') || '[]') } catch { return [] }
+  })
 
   const now = Date.now()
+
+  const handleDelete = (item) => {
+    const updated = [...hiddenActivityIds, item.id]
+    setHiddenActivityIds(updated)
+    window.localStorage.setItem('astroconnect-hidden-astrologer-activities', JSON.stringify(updated))
+  }
 
   // Note: there is deliberately no snapshot feed here built from the raw
   // `appointments` list — booking an appointment must never create a Recent
@@ -335,8 +344,9 @@ export default function AstrologerActivity() {
   const recentItems = useMemo(() => {
     return allItems
       .filter((item) => item.occurredAtMs <= now)
+      .filter((item) => !hiddenActivityIds.includes(item.id))
       .sort((a, b) => b.occurredAtMs - a.occurredAtMs)
-  }, [allItems, now])
+  }, [allItems, now, hiddenActivityIds])
 
   return (
     <div>
@@ -376,10 +386,11 @@ export default function AstrologerActivity() {
                       {item.extra && <span>{item.extra}</span>}
                     </div>
                   </div>
-                  <div className="my-activity-card__right">
-                    <StatusBadge label={item.status} />
-                    <ChevronRight size={18} className="my-activity-card__chevron" />
-                  </div>
+<div className="my-activity-card__right">
+                     <StatusBadge label={item.status} />
+                     <ChevronRight size={18} className="my-activity-card__chevron" />
+                   </div>
+                   <button type="button" className="my-activity-delete" onClick={(event) => { event.stopPropagation(); handleDelete(item) }} aria-label="Delete activity"><Trash2 size={16} /></button>
                 </div>
               )
             })}
