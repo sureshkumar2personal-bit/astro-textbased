@@ -14,6 +14,7 @@ const STATUS_TONES = {
   closed: 'badge-gray',
   disputed: 'badge-red',
   open: 'badge-red',
+  missed: 'badge-red',
   'in review': 'badge-violet',
   'cancelled by astrologer': 'badge-red',
   'cancelled by user': 'badge-red',

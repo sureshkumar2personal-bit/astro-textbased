@@ -7238,9 +7238,52 @@ tbody tr:hover {
 .apt-saved-content-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--surface-border); }
 .apt-saved-view { margin-left: auto; padding: 5px 7px; border: 1px solid var(--primary); border-radius: 6px; background: var(--surface); color: var(--primary); font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
 .apt-saved-preview-body { display: grid; gap: 10px; padding: 16px 18px; overflow-y: auto; color: var(--ink); font-size: 12px; line-height: 1.55; }.apt-saved-preview-body p { margin: 0; }.apt-saved-preview-body ol { margin: 0; padding-left: 18px; }.apt-saved-preview-body img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 9px; }
-.apt-saved-atonement-details { width: min(680px, 100%); max-height: min(720px, calc(100vh - 36px)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-lg); }.apt-saved-atonement-details .apt-saved-content-head h3 { margin: 7px 0 3px; font-size: 20px; }.apt-saved-atonement-details .apt-saved-content-head strong { color: var(--primary); font-size: 12px; }.apt-saved-atonement-details .apt-saved-content-head p { margin-top: 8px; line-height: 1.5; }.apt-saved-atonement-body { display: grid; align-content: start; gap: 14px; overflow-y: auto; padding: 16px 18px; }.apt-saved-atonement-summary { display: flex; flex-wrap: wrap; gap: 8px; }.apt-saved-atonement-summary span, .apt-saved-ritual-tags span { padding: 5px 8px; border-radius: 7px; background: var(--primary-bg); color: var(--primary); font-size: 11px; font-weight: 800; }.apt-saved-atonement-body section { display: grid; gap: 8px; }.apt-saved-atonement-body h4 { margin: 0; color: var(--ink); font-size: 13px; }.apt-saved-ritual-tags { display: flex; flex-wrap: wrap; gap: 6px; }.apt-saved-day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }.apt-saved-day-tabs button { flex: 0 0 auto; padding: 6px 9px; border: 1px solid var(--surface-border); border-radius: 7px; background: var(--surface); color: var(--muted); font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }.apt-saved-day-tabs button.active { border-color: var(--primary); background: var(--primary); color: #fff; }.apt-saved-day-detail { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-soft); }.apt-saved-day-detail > strong { color: var(--primary); font-size: 12px; }.apt-saved-day-detail article { display: grid; gap: 4px; padding: 9px; border-radius: 8px; background: var(--surface); }.apt-saved-day-detail h5, .apt-saved-day-detail p { margin: 0; color: var(--ink); font-size: 12px; }.apt-saved-day-detail small { color: var(--muted); font-size: 10px; }.apt-saved-materials { display: grid; gap: 5px; margin: 0; padding-left: 18px; color: var(--ink); font-size: 12px; }.apt-saved-atonement-body section > p { margin: 0; color: var(--ink); font-size: 12px; line-height: 1.5; }.apt-saved-detail-media { width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; }
+.apt-saved-atonement-details { width: min(620px, calc(100vw - 32px)); max-height: min(760px, calc(100vh - 32px)); }
+.apt-saved-content-backdrop { z-index: 1400; isolation: isolate; background: rgba(17, 10, 34, .72); }
+.apt-saved-atonement-details { position: relative; z-index: 1; min-height: 0; border-radius: 14px; background: #fff; opacity: 1; }
+.apt-saved-atonement-details > .apt-saved-content-head,
+.apt-saved-atonement-details > .apt-saved-atonement-body,
+.apt-saved-atonement-details > .apt-saved-content-actions { min-width: 0; }
+.apt-saved-atonement-details > .apt-saved-content-head { position: relative; z-index: 1; flex: none; }
+.apt-saved-atonement-details > .apt-saved-atonement-body { min-height: 0; }
+.apt-saved-atonement-details > .apt-saved-content-actions { position: relative; z-index: 1; flex: none; background: #fff; }
+.apt-saved-content-backdrop { padding: 16px; }
+.apt-saved-atonement-details .apt-saved-content-head { padding: 17px 18px 13px; background: linear-gradient(135deg, #fbf9ff, #fff); }
+.apt-saved-atonement-details .apt-saved-content-head h3 { margin: 6px 0 3px; font-size: 18px; }
+.apt-saved-atonement-details .apt-saved-content-head strong { color: var(--primary); font-size: 11px; }
+.apt-saved-atonement-details .apt-saved-content-head p { max-width: 500px; margin-top: 6px; line-height: 1.45; font-size: 11px; }
+.apt-saved-atonement-body { gap: 13px; padding: 14px 18px 16px; }
+.apt-saved-atonement-summary span { padding: 6px 9px; border-radius: 7px; font-size: 10px; }
+.apt-saved-atonement-body section { gap: 7px; padding-top: 1px; }
+.apt-saved-atonement-body h4 { font-size: 12px; letter-spacing: .01em; }
+.apt-saved-ritual-tags span { border: 1px solid rgba(124, 58, 237, .12); border-radius: 999px; }
+.apt-saved-day-tabs { gap: 5px; padding: 1px 0 3px; }
+.apt-saved-day-tabs button { min-width: 52px; padding: 6px 8px; border-radius: 7px; font-size: 10px; }
+.apt-saved-day-tabs button.completed { border-color: rgba(16, 185, 129, .35); color: var(--green-600); background: var(--success-bg); }
+.apt-saved-day-tabs button.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.apt-saved-day-tabs button.active.completed { color: #fff; background: var(--green-600); }
+.apt-saved-day-detail { gap: 8px; padding: 10px; border-radius: 9px; }
+.apt-saved-day-detail > strong { font-size: 12px; }
+.apt-saved-day-detail article { gap: 4px; padding: 8px 9px; border: 1px solid rgba(124, 58, 237, .09); }
+.apt-saved-day-detail h5 { font-size: 11px; }
+.apt-saved-day-detail p { line-height: 1.45; font-size: 11px; }
+.apt-saved-day-complete { display: flex; align-items: center; gap: 7px; padding: 8px 9px; border-radius: 7px; color: var(--primary); background: var(--primary-bg); font-size: 10px; font-weight: 800; cursor: pointer; }
+.apt-saved-day-complete input { width: 16px; height: 16px; accent-color: var(--primary); }
+.apt-saved-day-complete.is-completed { color: var(--green-600); background: var(--success-bg); }
+.apt-saved-day-complete.is-locked { color: var(--muted); background: var(--surface); cursor: not-allowed; }
+.apt-saved-day-complete.is-locked input { cursor: not-allowed; }
+.apt-saved-materials { gap: 5px; padding-left: 17px; line-height: 1.4; font-size: 11px; }
+.apt-saved-atonement-body section > p { line-height: 1.5; }
+.apt-saved-detail-media { max-height: 190px; }
+.apt-saved-atonement-details .apt-saved-content-actions { align-items: center; min-height: 52px; padding: 9px 18px 11px; background: #fff; }
+.apt-saved-atonement-details .apt-saved-content-actions .btn { min-height: 31px; padding: 7px 11px; font-size: 11px; }
+@media (max-width: 560px) { .apt-saved-content-backdrop { padding: 8px; }.apt-saved-atonement-details { max-height: calc(100vh - 16px); border-radius: 13px; }.apt-saved-atonement-details .apt-saved-content-head { padding: 17px 16px 13px; }.apt-saved-atonement-body { padding: 15px 16px 18px; }.apt-saved-day-tabs button { min-width: 52px; padding: 7px 8px; font-size: 10px; } }
 .apt-atonement-duration { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding: 8px; border: 1px solid var(--primary-bg); border-radius: 8px; background: var(--surface); }.apt-atonement-duration label { color: var(--ink); font-size: 11px; font-weight: 800; }.apt-atonement-duration select, .apt-atonement-duration input { padding: 5px 7px; border: 1px solid var(--surface-border); border-radius: 6px; background: var(--surface-soft); color: var(--ink); font: inherit; font-size: 11px; }.apt-atonement-duration small { width: 100%; color: var(--muted); font-size: 10px; }
 .apt-consultation-atonement-status { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--primary-bg); color: var(--primary); font-size: 11px; }.apt-consultation-atonement-status.completed { background: var(--success-bg); color: var(--success); }.apt-consultation-atonement-status.overdue { background: var(--danger-bg); color: var(--danger); }
+.apt-astrologer-pariharam-progress { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--surface-border); border-radius: 9px; background: var(--surface-soft); }
+.apt-astrologer-pariharam-progress-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink); font-size: 11px; }.apt-astrologer-pariharam-progress-head span { color: var(--muted); font-size: 10px; }
+.apt-astrologer-pariharam-progress-bar { height: 6px; overflow: hidden; border-radius: 999px; background: var(--surface-border); }.apt-astrologer-pariharam-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--primary); transition: width .2s ease; }
+.apt-astrologer-pariharam-days { display: grid; gap: 5px; }.apt-astrologer-pariharam-day { display: grid; grid-template-columns: 18px 44px 1fr auto; align-items: center; gap: 6px; padding: 6px 7px; border-radius: 7px; background: var(--surface); color: var(--muted); font-size: 10px; }.apt-astrologer-pariharam-day > span { display: grid; place-items: center; }.apt-astrologer-pariharam-day strong { color: var(--ink); }.apt-astrologer-pariharam-day small { color: var(--muted); }.apt-astrologer-pariharam-day em { color: var(--muted); font-size: 9px; font-style: normal; }.apt-astrologer-pariharam-day.is-completed { background: var(--success-bg); color: var(--green-600); }.apt-astrologer-pariharam-day.is-completed strong, .apt-astrologer-pariharam-day.is-completed em { color: var(--green-600); }
 
 .apt-consultation-readonly { display: flex; flex-direction: column; flex: 1 1 auto; gap: 10px; min-height: 0; }
 .apt-consultation-readonly > .apt-consultation-readonly-block,
@@ -7624,6 +7667,12 @@ tbody tr:hover {
   justify-self: start;
   min-height: 32px;
   padding: 6px 12px;
+}
+
+.apt-private-notes-success {
+  color: var(--success, #15803d);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 
@@ -15362,6 +15411,37 @@ button.apt-week-day:focus-visible {
 .atonement-card-detail-row strong { color: var(--text-primary); white-space: nowrap; }
 .atonement-card-actions-secondary { display: flex; gap: 8px; margin-top: 10px; }
 
+/* User Progress (astrologer-side Pariharam tracking) tab */
+.atonement-user-progress { display: flex; flex-direction: column; gap: 18px; }
+.atonement-progress-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.atonement-progress-filters .atonement-search-bar { flex: 1 1 240px; }
+.atonement-progress-select, .atonement-progress-date { min-height: 44px; padding: 0 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; }
+.atonement-progress-select:focus, .atonement-progress-date:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
+.atonement-progress-list { display: grid; gap: 14px; }
+.atonement-progress-card { display: grid; gap: 12px; padding: 18px; }
+.atonement-progress-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.atonement-progress-user { display: flex; align-items: center; gap: 10px; }
+.atonement-progress-user > div { display: grid; gap: 2px; }
+.atonement-progress-user strong { color: var(--text-primary); font-size: 13.5px; }
+.atonement-progress-user span { color: var(--muted); font-size: 11.5px; }
+.atonement-progress-pariharam { display: grid; gap: 4px; }
+.atonement-progress-pariharam strong { color: var(--text-primary); font-size: 14.5px; }
+.atonement-progress-pariharam span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11.5px; font-weight: 600; }
+.atonement-progress-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.atonement-progress-current-day { color: var(--primary); font-size: 12px; font-weight: 700; }
+.atonement-progress-status { display: inline-flex; align-items: center; padding: 5px 13px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .01em; white-space: nowrap; }
+.atonement-progress-modal { width: min(560px, 100%); max-height: min(760px, calc(100vh - 48px)); overflow-y: auto; padding: 24px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-lg); }
+.atonement-progress-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.atonement-progress-modal-head h3 { margin: 0 0 4px; color: var(--text-primary); font-size: 18px; }
+.atonement-progress-modal-info { display: grid; gap: 8px; margin-bottom: 18px; padding: 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
+.atonement-progress-modal-info div { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; }
+.atonement-progress-modal-info div strong { color: var(--text-primary); font-weight: 700; }
+.atonement-progress-modal .atonement-progress-row { margin-top: 6px; }
+.atonement-progress-modal .atonement-day-list { margin-top: 16px; }
+.atonement-progress-complete-banner { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 14px; border-radius: 12px; color: var(--green-600); background: var(--success-bg); font-size: 13px; }
+.atonement-progress-complete-banner strong { display: block; font-size: 13.5px; }
+.atonement-progress-complete-banner div > div { margin-top: 2px; color: var(--green-600); font-size: 11.5px; font-weight: 500; opacity: .85; }
+
 /* =====================
    BUTTONS (sm)
    ===================== */
@@ -15392,6 +15472,10 @@ button.apt-week-day:focus-visible {
   .atonement-ritual-picker-grid { grid-template-columns: repeat(2, 1fr); }
   .atonement-form-actions { flex-wrap: wrap; }
   .atonement-form-actions .btn { flex: 1; justify-content: center; }
+  .atonement-progress-filters { flex-direction: column; align-items: stretch; }
+  .atonement-progress-select, .atonement-progress-date { width: 100%; }
+  .atonement-progress-card-head, .atonement-progress-card-foot { flex-direction: column; align-items: flex-start; }
+  .atonement-progress-card-foot .btn { width: 100%; justify-content: center; }
 }
 @media (max-width: 480px) {
   .atonement-checkbox-grid { grid-template-columns: 1fr; }

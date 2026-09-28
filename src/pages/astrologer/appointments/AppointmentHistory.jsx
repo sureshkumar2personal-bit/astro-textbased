@@ -473,6 +473,7 @@ export default function AppointmentHistory() {
           onSaveConsultation={saveConsultation}
           onCompleteCall={completeAppointmentCall}
           onSavePrivateCallNotes={savePrivateCallNotes}
+          onSavePreCallAnalysis={savePreCallAnalysis}
         />
       )}
 
