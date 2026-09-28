@@ -32,7 +32,7 @@ function formatSentAt(value) {
   return date.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-export default function AppointmentCallScreen({ appointment, consultation, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateCallNotes }) {
+export default function AppointmentCallScreen({ appointment, consultation, onEnd, onSaveConsultation, onCompleteCall, onSavePrivateCallNotes, onSavePreCallAnalysis }) {
   const { currentUser } = useAuth()
   const { appointmentCalls } = useAppData()
   const { success } = useToast()
@@ -48,8 +48,13 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
   const [moreTab, setMoreTab] = useState('call')
 
   const [notesDraft, setNotesDraft] = useState(appointment.privateCallNotes || '')
-  const [preCallDraft] = useState(appointment.preCallAnalysis || '')
+  const [preCallDraft, setPreCallDraft] = useState(appointment.preCallAnalysis || '')
   const [notesSaved, setNotesSaved] = useState(false)
+  const [notesSaveMessage, setNotesSaveMessage] = useState('')
+  const [lastSavedNotes, setLastSavedNotes] = useState(appointment.privateCallNotes || '')
+  const [preCallSaved, setPreCallSaved] = useState(false)
+  const [preCallSaveMessage, setPreCallSaveMessage] = useState('')
+  const [lastSavedPreCall, setLastSavedPreCall] = useState(appointment.preCallAnalysis || '')
 
   const [notes, setNotes] = useState('')
   const [attachments, setAttachments] = useState([])
@@ -78,6 +83,17 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
   const [draft, setDraft] = useState('')
   const chatRef = useRef(null)
   const ended = phase === 'ended'
+
+  useEffect(() => {
+    setNotesDraft(appointment.privateCallNotes || '')
+    setLastSavedNotes(appointment.privateCallNotes || '')
+    setNotesSaved(false)
+    setNotesSaveMessage('')
+    setPreCallDraft(appointment.preCallAnalysis || '')
+    setLastSavedPreCall(appointment.preCallAnalysis || '')
+    setPreCallSaved(false)
+    setPreCallSaveMessage('')
+  }, [appointment.id])
 
   useEffect(() => {
     if (!consultation || consultation.appointmentId !== appointment.id || !consultation.sent) return
@@ -188,8 +204,31 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
   }
 
   const saveInCallNotes = () => {
-    if (typeof onSavePrivateCallNotes === 'function') onSavePrivateCallNotes(appointment.id, notesDraft)
+    if (typeof onSavePrivateCallNotes !== 'function') return
+
+    if (notesDraft === lastSavedNotes) {
+      setNotesSaved(true)
+      return
+    }
+
+    onSavePrivateCallNotes(appointment.id, notesDraft)
+    setLastSavedNotes(notesDraft)
     setNotesSaved(true)
+    setNotesSaveMessage('Saved successfully')
+  }
+
+  const savePreCallInCall = () => {
+    if (typeof onSavePreCallAnalysis !== 'function') return
+
+    if (preCallDraft === lastSavedPreCall) {
+      setPreCallSaved(true)
+      return
+    }
+
+    onSavePreCallAnalysis(appointment.id, preCallDraft)
+    setLastSavedPreCall(preCallDraft)
+    setPreCallSaved(true)
+    setPreCallSaveMessage('Saved successfully')
   }
 
   const openHoroscope = () => {
@@ -502,9 +541,16 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
                   rows={2}
                   placeholder="No pre-call notes saved."
                   value={preCallDraft}
-                  readOnly
-                  aria-readonly="true"
+                  onChange={(event) => {
+                    setPreCallDraft(event.target.value)
+                    setPreCallSaved(false)
+                    setPreCallSaveMessage('')
+                  }}
                 />
+                <button type="button" className="btn btn-outline apt-private-notes-save" onClick={savePreCallInCall}>
+                  {preCallSaved ? 'Saved' : 'Save Pre-Call Analysis'}
+                </button>
+                {preCallSaveMessage && <span className="apt-private-notes-success" role="status">{preCallSaveMessage}</span>}
                 <label className="apt-private-notes-label" htmlFor={`callnotes-${appointment.id}`}>Private Call Notes</label>
                 <textarea
                   id={`callnotes-${appointment.id}`}
@@ -512,11 +558,16 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
                   rows={2}
                   placeholder="Notes while talking with the user…"
                   value={notesDraft}
-                  onChange={(event) => { setNotesDraft(event.target.value); setNotesSaved(false) }}
+                  onChange={(event) => {
+                    setNotesDraft(event.target.value)
+                    setNotesSaved(false)
+                    setNotesSaveMessage('')
+                  }}
                 />
                 <button type="button" className="btn btn-outline apt-private-notes-save" onClick={saveInCallNotes}>
                   {notesSaved ? 'Saved' : 'Save Notes'}
                 </button>
+                {notesSaveMessage && <span className="apt-private-notes-success" role="status">{notesSaveMessage}</span>}
                 <span className="apt-call-more-private-note"><Shield size={11} /> Private — only the astrologer can see these notes.</span>
               </div>
             )}

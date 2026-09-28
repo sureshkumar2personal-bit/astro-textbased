@@ -163,7 +163,6 @@ export default function Incoming() {
           <p>You rated {call.rating} ★ {call.feedback ? `· "${call.feedback.slice(0,80)}"` : ''}</p>
           <div className="user-incoming-rated-actions">
             <Link className="btn btn-outline" to="/user/appointments/my">Back to Appointment History</Link>
-            {appointment && <Link className="btn btn-primary" to={`/user/atonements?appointmentId=${appointment.id}`}>🪔 View Pariharam</Link>}
           </div>
         </Card>
       )}

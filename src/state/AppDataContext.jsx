@@ -2835,19 +2835,26 @@ export function AppDataProvider({ children }) {
     savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed) {
       if (!appointmentId || !pariharamId || !dayId) return null
       const completedAt = completed ? new Date().toISOString() : null
-      setConsultations((prev) => prev.map((consultation) => consultation.appointmentId === appointmentId
-        ? {
-            ...consultation,
-            pariharamProgress: {
-              pariharamId,
-              days: {
-                ...(consultation.pariharamProgress?.pariharamId === pariharamId ? consultation.pariharamProgress.days : {}),
-                [dayId]: { date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt },
-              },
+      setConsultations((prev) => {
+        const index = prev.findIndex((consultation) => consultation.appointmentId === appointmentId)
+        const current = index >= 0 ? prev[index] : { id: `cons-${appointmentId}`, appointmentId }
+        const next = {
+          ...current,
+          pariharamProgress: {
+            pariharamId,
+            startAt: current.pariharamProgress?.startAt || date || null,
+            days: {
+              ...(current.pariharamProgress?.pariharamId === pariharamId ? current.pariharamProgress.days : {}),
+              [dayId]: { date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt },
             },
-            updatedAt: new Date().toISOString(),
-          }
-        : consultation))
+          },
+          updatedAt: new Date().toISOString(),
+        }
+        if (index < 0) return [next, ...prev]
+        const updated = prev.slice()
+        updated[index] = next
+        return updated
+      })
       return { appointmentId, pariharamId, dayId, date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt }
     },
     updateAppointment(appointmentId, patch = {}) {
@@ -2871,7 +2878,8 @@ export function AppDataProvider({ children }) {
       })
     },
     savePreCallAnalysis(appointmentId, preCallAnalysis) {
-      this.updateAppointment(appointmentId, { preCallAnalysis: preCallAnalysis ?? '' })
+      const value = preCallAnalysis ?? ''
+      this.updateAppointment(appointmentId, { preCallAnalysis: value })
       const appointment = appointments.find((item) => item.id === appointmentId)
       logActivity({
         astrologerId: appointment?.astrologerId,
@@ -2883,6 +2891,7 @@ export function AppDataProvider({ children }) {
         customerName: appointment?.customerName,
         moduleStatus: appointment?.status,
       })
+      return { appointmentId, preCallAnalysis: value }
     },
     saveHoroscopeAttachment(appointmentId, horoscope) {
       this.updateAppointment(appointmentId, { horoscope: horoscope || null })
