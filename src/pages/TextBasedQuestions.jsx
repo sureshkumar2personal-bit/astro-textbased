@@ -1316,9 +1316,6 @@ export default function TextBasedQuestions() {
                             {allowedActions.includes('close') && (
                               <button type="button" className="btn btn-outline btn-sm" onClick={() => { actions.updateCampaign(campaign.id, { status: 'Closed' }); setSuccessMessage(`${campaign.name} was closed.`) }}>Close</button>
                             )}
-                            {allowedActions.includes('questions') && (
-                              <button type="button" className="btn btn-outline btn-sm" onClick={() => setView('received')}>Questions</button>
-                            )}
                             {allowedActions.includes('reuse') && (
                               <button type="button" className="btn btn-outline btn-sm" onClick={() => startReuseCampaign(campaign)}><Copy size={13} /> Reuse for Next Month</button>
                             )}

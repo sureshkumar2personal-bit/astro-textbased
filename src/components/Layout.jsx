@@ -55,51 +55,20 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      {
-        label: 'Wallet',
-        icon: Wallet,
-        children: [
-          { to: 'wallet/overview', label: 'Overview', icon: Wallet },
-          { to: 'wallet/earnings', label: 'Earnings', icon: TrendingUp },
-          { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
-          { to: 'wallet/withdraw', label: 'Withdraw Money', icon: ArrowDownToLine },
-          { to: 'wallet/settlements', label: 'Settlement History', icon: History },
-          { to: 'wallet/payment-methods', label: 'Payment Methods', icon: CreditCard },
-        ],
-      },
-      {
-        label: 'Appointments',
-        icon: CalendarDays,
-        children: [
-          { to: 'appointments/schedule', label: 'Schedule Appointments', icon: CalendarDays },
-          { to: 'appointments/history', label: 'Appointment History', icon: TempleScrollIcon },
-        ],
-      },
       { to: 'text-based-questions', label: 'Text-Based Questions', icon: TempleScrollIcon },
-      {
-        label: 'Live',
-        icon: Radio,
-        children: [
-          {
-            to: 'live-session/setup',
-            label: 'Go Live',
-            icon: Radio,
-            activeWhen: ['live-session/configure', 'live-session/room', 'live-session/summary'],
-          },
-          { to: 'live-session/scheduled', label: 'Scheduled Live', icon: CalendarDays },
-          { to: 'live-session/history', label: 'Live History', icon: History },
-        ],
-      },
-      {
-        label: 'Perks & Benefits',
-        icon: Gift,
-        children: [
-          { to: 'perks-benefits/settings', label: 'Settings', icon: SlidersHorizontal },
-          { to: 'perks-benefits/delivery', label: 'Benefit Management', icon: Send },
-          { to: 'perks-benefits/history', label: 'History', icon: History },
-        ],
-      },
+      // Single Appointments entry: /appointments redirects to Schedule and every
+      // /appointments/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'appointments', label: 'Appointments', icon: CalendarDays },
       { to: 'atonement', label: 'Atonement', icon: Flame },
+      // Single Live entry: /live-session redirects to setup and every
+      // /live-session/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'live-session', label: 'Live', icon: Radio },
+      // Single Perks & Benefits entry: /perks-benefits redirects to Settings and
+      // every /perks-benefits/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'perks-benefits', label: 'Perks & Benefits', icon: Gift },
+      // Single Wallet entry: /wallet redirects to the overview and every
+      // /wallet/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'wallet', label: 'Wallet', icon: Wallet },
       { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],

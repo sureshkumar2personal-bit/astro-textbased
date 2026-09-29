@@ -1612,6 +1612,10 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   margin-top: var(--space-6);
 }
 
+.section.answer-question-tight-section {
+  margin-top: var(--space-3);
+}
+
 .section-title {
   display: flex;
   align-items: center;
