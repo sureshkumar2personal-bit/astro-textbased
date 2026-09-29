@@ -741,11 +741,11 @@ describe('single-month campaign model', () => {
     expect(filterCampaignsByStatus(campaigns, 'All', '2026-09', now).map((c) => c.id)).toEqual(['sep-live', 'sep-draft'])
   })
 
-  it('a published campaign keeps the Edit action (edit, questions, reuse, close)', () => {
+  it('a published campaign keeps the Edit action (edit, reuse, close)', () => {
     const active = { status: 'Active', month: '2026-09', date: '1 Sep 2026', endDate: '30 Sep 2026' }
     const actions = getCampaignAllowedActions(active, '2026-09', now)
     expect(actions).toContain('edit')
-    expect(actions).toContain('questions')
+    expect(actions).not.toContain('questions')
     expect(actions).toContain('reuse')
     expect(actions).toContain('close')
     expect(actions).not.toContain('publish')

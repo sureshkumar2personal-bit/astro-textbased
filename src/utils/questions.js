@@ -214,7 +214,6 @@ export function getCampaignAllowedActions(campaign = {}, monthKey, nowIso) {
   if (status === 'Draft' && display !== 'Closed') actions.push('publish')
   if (status === 'Scheduled' && display !== 'Closed') actions.push('publishNow')
   if (display === 'Active' && status === 'Active') actions.push('close')
-  if (display === 'Active') actions.push('questions')
   actions.push('reuse')
   return actions
 }

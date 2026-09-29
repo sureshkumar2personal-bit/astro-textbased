@@ -3,6 +3,8 @@ import { ListChecks, ScrollText } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import '../../../css/astrologer/wallet-dashboard.css'
+import '../../../css/astrologer/appointments-dashboard.css'
 
 const TABS = [
   { key: 'schedule', icon: ScrollText, label: 'Schedule' },
@@ -22,7 +24,7 @@ export default function AppointmentsShell() {
         subtitle="Publish availability first, review the calendar after publish, and check appointment history here."
       />
 
-      <div className="appointment-view-tabs apt-appointment-tabs" role="tablist" aria-label="Appointment sections">
+      <div className="wd-tabs" role="tablist" aria-label="Appointment sections">
         {TABS.map((tab) => {
           const to = routes[`appointment${tab.key[0].toUpperCase()}${tab.key.slice(1)}`]
           const Icon = tab.icon
@@ -32,11 +34,11 @@ export default function AppointmentsShell() {
               key={tab.key}
               to={to}
               end
-              className={`apt-tab-btn${isActive ? ' is-active' : ''}`}
+              className={`wd-tab${isActive ? ' is-active' : ''}`}
               role="tab"
               aria-selected={isActive ? 'true' : 'false'}
             >
-              <Icon size={15} />
+              <Icon size={16} />
               {tab.label}
             </NavLink>
           )

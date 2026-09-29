@@ -1,0 +1,134 @@
+/* Astrologer Appointments - Wallet-style dashboard skin.
+   Presentation only: layered over the existing apt-* rules with a higher
+   specificity, so no markup behaviour or appointment logic is involved.
+   Tab styling comes from the shared wd-tabs rules (wallet-dashboard.css). */
+
+/* ---------- Schedule tab ---------- */
+
+/* The outer gradient card becomes a plain stack of Wallet-style cards. */
+.apt-page .apt-schedule-card {
+  gap: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.apt-page .apt-schedule-header {
+  align-items: center;
+  margin-top: 4px;
+}
+
+.apt-page .apt-schedule-header h2 {
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.apt-page .apt-schedule-header p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.apt-page .apt-schedule-actions .btn {
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.apt-page .apt-policy-card,
+.apt-page .apt-period-card,
+.apt-page .apt-published-card,
+.apt-page .apt-schedule-mode {
+  padding: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.apt-page .apt-policy-card__head {
+  padding-bottom: 10px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Segmented choices (duration / buffer) use the Wallet tab accent. */
+.apt-page .apt-policy-card .apt-segmented button.is-active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.apt-page .apt-published-card__grid > div {
+  border-radius: 14px;
+}
+
+/* ---------- History tab ---------- */
+
+.apt-page.astro-appointment-history {
+  padding: 0;
+  gap: 20px;
+  max-width: none;
+}
+
+.astro-appointment-history > .apt-history-toolbar {
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.astro-appointment-history .apt-history-summary {
+  gap: 10px;
+}
+
+.astro-appointment-history .apt-history-summary button {
+  border-radius: 14px;
+}
+
+.astro-appointment-history .apt-history-summary button.is-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.astro-appointment-history .apt-side-panel,
+.astro-appointment-history .apt-scheduling-calendar {
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.astro-appointment-history .apt-side-head {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.astro-appointment-history .apt-history-item {
+  border-radius: 14px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.astro-appointment-history .apt-history-item:hover {
+  border-color: var(--primary);
+}
+
+@media (max-width: 640px) {
+  .apt-page .apt-policy-card,
+  .apt-page .apt-period-card,
+  .apt-page .apt-published-card,
+  .apt-page .apt-schedule-mode {
+    padding: 16px;
+  }
+
+  .astro-appointment-history > .apt-history-toolbar {
+    padding: 12px;
+  }
+}

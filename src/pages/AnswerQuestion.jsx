@@ -703,7 +703,7 @@ export default function AnswerQuestion() {
         backIcon={backIcon}
       />
 
-      <Section>
+      <Section className="answer-question-tight-section">
         <Card style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <div className="search-filter-row__group" style={{ gap: 10, width: 'min(100%, 320px)' }}>
             <div className="search-bar" style={{ width: '100%' }}>
@@ -724,7 +724,7 @@ export default function AnswerQuestion() {
         </Card>
       </Section>
 
-      <Section>
+      <Section className="answer-question-tight-section">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5" style={{ gridAutoRows: '1fr' }}>
           <SummaryCard
             label="General Pending"

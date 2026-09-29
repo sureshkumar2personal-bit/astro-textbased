@@ -32,6 +32,7 @@ import StatusBadge from '../../../components/StatusBadge.jsx'
 import { audienceAccessDefaults, sessionAudiences, useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../../../utils/roleRoutes.js'
+import '../../../css/astrologer/live-dashboard.css'
 
 const LIVE_FLOW_STORAGE_KEY = 'astroconnect-live-session-flow'
 const DEFAULT_RATE = '45'
@@ -613,10 +614,24 @@ function LiveSessionShellInner({ children }) {
   return <LiveSessionFlowContext.Provider value={value}>{children}</LiveSessionFlowContext.Provider>
 }
 
+// The first two entries are the setup steps; the last two open the existing
+// Scheduled Live / Live History pages of the Live section.
+const LIVE_SETUP_STEPS = [
+  { label: 'Camera & Microphone' },
+  { label: 'Live Details' },
+  { label: 'Scheduled Live', path: 'scheduled' },
+  { label: 'Live History', path: 'history' },
+]
+
 function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'Back' }) {
+  // Purely presentational: the step number is read from the existing label.
+  const stepNumber = Number(/Step\s*0?(\d)/i.exec(step)?.[1]) || 1
+  const navigate = useNavigate()
+  const { currentUser } = useAuth()
+  const liveBase = getRoleRoutes(currentUser?.role || ROLES.ASTROLOGER).liveSession
   return (
-    <div className="live-workspace-topbar">
-      <div className="flex items-center gap-3">
+    <header className="ld-header">
+      <div className="ld-header__bar">
         {onBack ? (
           <button type="button" className="live-text-button" onClick={onBack}>
             <ChevronLeft size={17} /> {backLabel}
@@ -628,11 +643,30 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
         )}
         <span className="live-eyebrow">{step}</span>
       </div>
-      <div className="text-right">
-        <strong>{title}</strong>
-        <div className="muted" style={{ fontSize: 13 }}>{subtitle}</div>
+      <div className="ld-header__titles">
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
       </div>
-    </div>
+      <ol className="ld-steps" aria-label="Live setup steps">
+        {LIVE_SETUP_STEPS.map(({ label, path }, index) => {
+          const number = index + 1
+          const state = number < stepNumber ? ' is-done' : number === stepNumber ? ' is-current' : ''
+          const content = (
+            <>
+              <span className="ld-step__dot">{number < stepNumber ? <Check size={13} /> : number}</span>
+              <span className="ld-step__label">{label}</span>
+            </>
+          )
+          return (
+            <li key={label} className={`ld-step${state}`} aria-current={number === stepNumber ? 'step' : undefined}>
+              {path ? (
+                <button type="button" className="ld-step__link" onClick={() => navigate(`${liveBase}/${path}`)}>{content}</button>
+              ) : content}
+            </li>
+          )
+        })}
+      </ol>
+    </header>
   )
 }
 
@@ -662,55 +696,60 @@ export function AstrologerLiveSessionSetup() {
     <div className="live-workspace live-workspace--setup">
       <LivePageHeader
         step={enteredForLive ? 'Scheduled live · Studio check' : 'Step 01 of 04'}
-        title="Broadcast studio setup"
+        title={enteredForLive ? 'Broadcast studio setup' : 'Create Live'}
         subtitle={enteredForLive
           ? 'Check your camera and microphone, then enter the live room'
           : 'Check your camera and microphone before you continue'}
         onClose={closeWorkspace}
       />
-      <div className="live-setup-content">
-        <CameraPreview
-          videoRef={videoRef}
-          streamReady={mediaStatus.camera}
-          audioReady={mediaStatus.audio}
-          permissionWarning={mediaStatus.warning}
-        />
-        <button type="button" className="live-test-button" onClick={requestMedia}>
-          <Settings2 size={16} /> Tap to test mic &amp; video
-        </button>
-        <div className="live-ready-banner">
-          <span className="live-eyebrow">Astrologer broadcast studio</span>
-          <h1>Ready to engage users?</h1>
-          <p>
-            Your guidance can reach viewers looking for clarity right now.
-            {draft.title ? ` Draft title: ${draft.title}` : ''}
-          </p>
-        </div>
-        <Card className="live-guidelines-card">
+      <div className="ld-setup-grid">
+        <Card className="ld-card ld-card--media">
           <div className="live-section-heading">
-            <ShieldCheck size={20} />
-            <h2>Guidelines reminders</h2>
+            <Camera size={20} />
+            <h2>Camera &amp; Microphone</h2>
           </div>
-          <div className="live-guidelines">
-            <span>Maintain an ethical code of conduct.</span>
-            <span>Do not share personal contact or bank details.</span>
-            <span>Ensure lighting is bright and your audio is clear.</span>
-          </div>
-          {(mediaStatus.warning || !mediaStatus.camera || !mediaStatus.audio) && (
-            <div className="live-warning">
-              <AlertTriangle size={16} />
-              <span>{mediaStatus.warning || 'You can continue, but checking your camera and microphone is recommended.'}</span>
-            </div>
-          )}
+          <CameraPreview
+            videoRef={videoRef}
+            streamReady={mediaStatus.camera}
+            audioReady={mediaStatus.audio}
+            permissionWarning={mediaStatus.warning}
+          />
+          <button type="button" className="live-test-button" onClick={requestMedia}>
+            <Settings2 size={16} /> Tap to test mic &amp; video
+          </button>
         </Card>
-        <div className="flex items-center justify-between gap-3">
-          <button type="button" className="btn btn-outline" onClick={closeWorkspace}>
-            Back to Profile
-          </button>
-          <button type="button" className="btn btn-primary live-go-button" onClick={handleNext}>
-            {enteredForLive ? <><Radio size={18} /> Go to Live Room</> : <><Radio size={18} /> Next</>}
-          </button>
+        <div className="ld-side">
+          <div className="live-ready-banner">
+            <span className="live-eyebrow">Astrologer broadcast studio</span>
+            <h2>Ready to engage users?</h2>
+            <p>
+              Your guidance can reach viewers looking for clarity right now.
+              {draft.title ? ` Draft title: ${draft.title}` : ''}
+            </p>
+          </div>
+          <Card className="live-guidelines-card ld-card">
+            <div className="live-section-heading">
+              <ShieldCheck size={20} />
+              <h2>Guidelines reminders</h2>
+            </div>
+            <div className="live-guidelines">
+              <span>Maintain an ethical code of conduct.</span>
+              <span>Do not share personal contact or bank details.</span>
+              <span>Ensure lighting is bright and your audio is clear.</span>
+            </div>
+            {(mediaStatus.warning || !mediaStatus.camera || !mediaStatus.audio) && (
+              <div className="live-warning">
+                <AlertTriangle size={16} />
+                <span>{mediaStatus.warning || 'You can continue, but checking your camera and microphone is recommended.'}</span>
+              </div>
+            )}
+          </Card>
         </div>
+      </div>
+      <div className="ld-actions">
+        <button type="button" className="btn btn-primary live-go-button" onClick={handleNext}>
+          {enteredForLive ? <><Radio size={18} /> Go to Live Room</> : <><Radio size={18} /> Next</>}
+        </button>
       </div>
     </div>
   )
@@ -819,12 +858,12 @@ export function AstrologerLiveSessionConfigure() {
     <div className="live-workspace live-workspace--setup">
       <LivePageHeader
         step="Step 02 of 04"
-        title="Live broadcast configuration"
+        title="Create Live"
         subtitle="Set the title, audience mode, and rate before you go live"
         onClose={closeWorkspace}
         onBack={goToSetup}
       />
-      <Card style={{ display: 'grid', gap: 20, padding: 24 }}>
+      <Card className="ld-card ld-form-card" style={{ display: 'grid', gap: 20, padding: 24 }}>
         <label className="field-group" style={{ margin: 0 }}>
           <span className="field-label-top">Stream title</span>
           <input

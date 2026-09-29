@@ -1,0 +1,67 @@
+/* Astrologer Live setup - Wallet-style dashboard skin (ld-*).
+   Presentation only: the camera, microphone, permission and step logic live
+   in AstrologerLiveSession.jsx and are untouched. */
+
+.live-workspace--setup { max-width: 1120px; }
+
+/* ---------- header + step navigation ---------- */
+.ld-header { display: grid; gap: 14px; padding: 4px 0 20px; }
+.ld-header__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ld-header__titles h1 { margin: 0; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -0.03em; color: var(--ink); }
+.ld-header__titles p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+
+.ld-steps { display: flex; gap: 4px; margin: 4px 0 0; padding: 0; list-style: none; border-bottom: 1px solid var(--surface-border); overflow-x: auto; scrollbar-width: none; }
+.ld-steps::-webkit-scrollbar { display: none; }
+.ld-step { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; color: var(--muted); font-size: 14px; font-weight: 700; white-space: nowrap; }
+.ld-step__dot { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--surface-soft); color: var(--muted); font-size: 12px; font-weight: 800; }
+.ld-step__link { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.ld-step__link:hover .ld-step__label { color: var(--primary); }
+.ld-step::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: transparent; }
+.ld-step.is-current { color: var(--primary); }
+.ld-step.is-current::after { background: var(--primary); }
+.ld-step.is-current .ld-step__dot { background: var(--primary); color: #fff; }
+.ld-step.is-done { color: var(--ink); }
+.ld-step.is-done .ld-step__dot { background: var(--success-bg); color: var(--green-600); }
+
+/* ---------- setup layout ---------- */
+.ld-setup-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; padding: 4px 0 0; }
+.ld-side { display: grid; gap: 20px; }
+
+.ld-card { padding: 20px; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-strong); box-shadow: var(--shadow-xs); }
+.ld-card--media { display: grid; gap: 16px; justify-items: stretch; }
+.ld-card--media .live-camera-preview { width: 100%; min-height: 300px; border-radius: 14px; box-shadow: none; }
+.ld-card--media .live-test-button { justify-self: center; padding: 8px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
+.ld-card--media .live-test-button:hover { border-color: var(--primary); }
+
+.ld-side .live-ready-banner { width: auto; padding: 20px; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-strong); box-shadow: var(--shadow-xs); text-align: left; }
+.ld-side .live-ready-banner h2 { margin: 6px 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; text-transform: none; color: var(--ink); }
+.ld-side .live-ready-banner p { font-size: 14px; }
+.ld-side .live-guidelines-card { width: auto; }
+
+.ld-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+.ld-actions .btn { min-height: 42px; border-radius: 12px; font-weight: 700; }
+.ld-actions .live-go-button { min-width: 0; min-height: 42px; font-size: 14px; }
+
+/* ---------- configure (Live Details) ---------- */
+.ld-form-card { border-radius: 18px; }
+.ld-form-card .live-fieldset { padding: 16px; border: 1px solid var(--surface-border); border-radius: 14px; background: var(--surface-soft); }
+.ld-form-card .live-fieldset legend { padding: 0 6px; }
+.ld-form-card .live-config-footer { padding: 4px 0 0; border-top: 0; }
+.ld-form-card .live-config-footer .btn { min-height: 42px; border-radius: 12px; font-weight: 700; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .ld-setup-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .ld-header__bar { flex-wrap: wrap; }
+  .ld-step { padding: 10px 12px; font-size: 13px; }
+  .ld-card { padding: 16px; }
+  .ld-card--media .live-camera-preview { min-height: 240px; }
+  .ld-actions { flex-direction: column-reverse; align-items: stretch; }
+  .ld-actions .btn { width: 100%; justify-content: center; }
+  .ld-form-card { padding: 16px !important; }
+  .ld-form-card .live-config-footer { flex-direction: column-reverse; align-items: stretch; }
+  .ld-form-card .live-audience-anchor .btn, .ld-form-card .live-config-footer > .btn { width: 100%; justify-content: center; }
+}
