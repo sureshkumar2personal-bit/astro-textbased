@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   Wallet,
   TrendingUp,
@@ -11,6 +11,7 @@ import {
   History,
   ChevronRight,
   ArrowUpRight,
+  ArrowDownToLine,
   Receipt,
   Search,
   CalendarDays,
@@ -80,6 +81,35 @@ const SPENDING_SOURCE_OPTIONS = [
 const QUICK_TOP_UP_AMOUNTS = [100, 250, 500, 1000, 2000]
 
 const TOPUP_METHOD_ICONS = { bank: Building2, upi: Smartphone, card: CreditCard }
+
+export function WalletSectionTabs() {
+  const { currentUser } = useAuth()
+  const location = useLocation()
+  const routes = getRoleRoutes(currentUser?.role)
+  const tabs = [
+    { to: `${routes.base}/wallet/overview`, label: 'Overview' },
+    { to: `${routes.base}/wallet/transactions`, label: 'Activity' },
+    { to: routes.paymentMethods, label: 'Payment Settings' },
+  ]
+
+  return (
+    <nav className="wallet-section-tabs" aria-label="Wallet sections">
+      {tabs.map((tab) => (
+        <NavLink
+          key={tab.to}
+          to={tab.to}
+          className={({ isActive }) => {
+            const settingsActive = tab.label === 'Payment Settings'
+              && (location.pathname === routes.paymentMethods || location.pathname === routes.autopay)
+            return `wallet-section-tab${isActive || settingsActive ? ' is-active' : ''}`
+          }}
+        >
+          {tab.label}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
 
 function maskMethod(method) {
   if (!method) return 'Saved method'
@@ -326,12 +356,13 @@ export default function UserWallet({ section = 'overview' }) {
             eyebrow="User portal"
             title="Wallet"
             subtitle="Manage your balance, top-ups, spending and refunds."
-            showBack
-            backTo={routes.dashboard}
             actions={
               <div className="wallet-header-actions">
                 <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
                   <Plus size={16} /> Add Money
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                  <ArrowDownToLine size={16} /> Withdraw
                 </button>
                 <button
                   type="button"
@@ -344,6 +375,7 @@ export default function UserWallet({ section = 'overview' }) {
               </div>
             }
           />
+          <WalletSectionTabs />
 
           {/* Summary Cards */}
           <div className="wallet-summary-grid section">
@@ -484,6 +516,7 @@ export default function UserWallet({ section = 'overview' }) {
             title="Transactions"
             subtitle="Browse and export your wallet transaction statement."
           />
+          <WalletSectionTabs />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="All Transactions" icon={History}>
@@ -564,6 +597,7 @@ export default function UserWallet({ section = 'overview' }) {
             title="Top-ups"
             subtitle="Add money to your wallet and review your top-up history."
           />
+          <WalletSectionTabs />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Add Money" icon={Plus}>
@@ -651,6 +685,7 @@ export default function UserWallet({ section = 'overview' }) {
             title="Refunds"
             subtitle="Money refunded back to your wallet."
           />
+          <WalletSectionTabs />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Refund History" icon={Receipt}>

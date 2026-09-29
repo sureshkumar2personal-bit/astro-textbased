@@ -19,6 +19,7 @@ import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { WalletSectionTabs } from '../wallet/WalletHistory.jsx'
 
 const AUTOPAY_TYPES = [
   { key: 'subscription', label: 'Subscription Renewal', icon: RefreshCw, description: 'Auto-debit before subscription expiry' },
@@ -257,6 +258,7 @@ export default function Autopay() {
           ) : null
         }
       />
+      <WalletSectionTabs />
 
       {userPaymentMethods.length === 0 ? (
         <Card>
@@ -338,5 +340,4 @@ export default function Autopay() {
     </div>
   )
 }
-
 

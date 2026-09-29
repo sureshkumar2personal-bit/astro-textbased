@@ -4,6 +4,52 @@
            and unified Transaction History (user side).
    ========================================================================= */
 
+/* Unified user wallet navigation */
+.wallet-section-tabs {
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  max-width: 100%;
+  margin: 10px 0 28px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.wallet-section-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wallet-section-tab:hover,
+.wallet-section-tab.is-active {
+  background: var(--surface-strong);
+  color: var(--primary);
+  box-shadow: var(--shadow-xs);
+}
+
+@media (max-width: 640px) {
+  .wallet-section-tabs {
+    width: 100%;
+  }
+
+  .wallet-section-tab {
+    flex: 1;
+    padding-inline: 10px;
+  }
+}
+
 /* ===========================
    Payment Methods (pm-*)
    =========================== */
@@ -93,6 +139,8 @@
 .withdraw-balance-label svg { color: var(--primary); }
 .withdraw-balance-amount { margin-top: 8px; color: var(--ink); font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
 .withdraw-balance-meta { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.withdraw-reserve-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 12px; padding: 10px 12px; border-radius: 9px; background: var(--primary-bg); color: var(--primary-dark); font-size: 12px; line-height: 1.45; }
+.withdraw-reserve-note svg { flex: 0 0 auto; margin-top: 1px; }
 .withdraw-amount-input { display: flex; align-items: center; gap: 8px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-soft); padding: 0 14px; }
 .withdraw-rupee { color: var(--primary); font-size: 22px; font-weight: 800; }
 .withdraw-amount-field { flex: 1; border: 0 !important; background: transparent !important; box-shadow: none !important; font-size: 22px !important; font-weight: 800 !important; color: var(--ink) !important; }

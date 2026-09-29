@@ -80,7 +80,12 @@ const ROLE_CONFIG = {
     nav: [
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
       {
-        label: 'Ask Question',
+        to: 'astrologers',
+        label: 'Explore Astrologers',
+        icon: Sparkles,
+      },
+      {
+        label: 'Text-Based Questions',
         to: 'ask-question',
         icon: CircleHelp,
         children: [
@@ -90,37 +95,19 @@ const ROLE_CONFIG = {
         ],
       },
       {
-        to: 'astrologers',
-        label: 'Explore Astrologers',
-        icon: Sparkles,
-      },
-      {
         label: 'Appointments',
+        to: 'appointments/book',
         icon: CalendarCheck,
-        children: [
-          { to: 'appointments/book', label: 'Book Appointment', icon: CalendarCheck },
-          { to: 'appointments/my', label: 'Appointment History', icon: CalendarCheck },
-        ],
       },
-      { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'atonements', label: 'Atonement', icon: Sparkles },
+      { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Perks & Benefits', icon: Gift },
-      { to: 'activity', label: 'My Activity', icon: Activity },
       {
         label: 'Wallet',
         to: 'wallet/overview',
         icon: Wallet,
-        children: [
-          { to: 'wallet/overview', label: 'Overview', icon: Wallet },
-          { to: 'wallet/transactions', label: 'Transactions', icon: FileText },
-          { to: 'wallet/topups', label: 'Top-ups', icon: TrendingUp },
-          { to: 'wallet/refunds', label: 'Refunds', icon: Receipt },
-          { to: 'payment-methods', label: 'Payment Methods', icon: CreditCard },
-          { to: 'autopay', label: 'Autopay', icon: RefreshCw },
-          { to: 'withdraw', label: 'Withdraw', icon: ArrowDownToLine },
-          { to: 'transaction-history', label: 'Full History', icon: History },
-        ],
       },
+      { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
       { to: 'profile', label: 'My Profile', icon: UserRound },
     ],

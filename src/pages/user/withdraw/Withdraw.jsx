@@ -21,6 +21,7 @@ import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000]
 const MIN_WITHDRAW = 100
+const MIN_REMAINING_BALANCE = 1000
 const MAX_WITHDRAW_DAILY = 50000
 const PLATFORM_FEE_RATE = 0.01
 const GST_RATE = 0.18
@@ -52,7 +53,8 @@ export default function Withdraw() {
   const gst = Math.round(platformFee * GST_RATE)
   const totalFee = platformFee + gst
   const youReceive = value - totalFee
-  const validAmount = value >= MIN_WITHDRAW && value <= MAX_WITHDRAW_DAILY && value <= balance
+  const maxWithdrawable = Math.max(0, Math.min(MAX_WITHDRAW_DAILY, balance - MIN_REMAINING_BALANCE))
+  const validAmount = value >= MIN_WITHDRAW && value <= maxWithdrawable
 
   const defaultMethod = userPaymentMethods.find((m) => m.isDefault)
   const selectedMethod = userPaymentMethods.find((m) => m.id === selectedMethodId) || defaultMethod
@@ -92,7 +94,6 @@ export default function Withdraw() {
         title="Withdraw Funds"
         subtitle="Transfer money from your wallet to your bank account or UPI."
         showBack
-        backTo={routes.dashboard}
       />
 
       <div className="withdraw-layout">
@@ -105,7 +106,10 @@ export default function Withdraw() {
                 </div>
                 <div className="withdraw-balance-amount">₹{balance.toLocaleString('en-IN')}</div>
                 <div className="withdraw-balance-meta">
-                  Min ₹{MIN_WITHDRAW.toLocaleString('en-IN')} · Max ₹{MAX_WITHDRAW_DAILY.toLocaleString('en-IN')}/day
+                  Min ₹{MIN_WITHDRAW.toLocaleString('en-IN')} · Max ₹{maxWithdrawable.toLocaleString('en-IN')} available
+                </div>
+                <div className="withdraw-reserve-note">
+                  <Info size={14} /> ₹{MIN_REMAINING_BALANCE.toLocaleString('en-IN')} will remain reserved in your wallet after withdrawal.
                 </div>
               </div>
             </Card>
@@ -125,17 +129,23 @@ export default function Withdraw() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     min={MIN_WITHDRAW}
-                    max={MAX_WITHDRAW_DAILY}
+                    max={maxWithdrawable}
                   />
                 </div>
                 {amount && !validAmount && (
                   <div className="pm-field-error">
-                    {value < MIN_WITHDRAW ? `Minimum withdrawal is ₹${MIN_WITHDRAW}` : value > balance ? 'Insufficient balance' : `Maximum daily withdrawal is ₹${MAX_WITHDRAW_DAILY.toLocaleString('en-IN')}`}
+                    {value < MIN_WITHDRAW
+                      ? `Minimum withdrawal is ₹${MIN_WITHDRAW}`
+                      : maxWithdrawable < MIN_WITHDRAW
+                        ? `You need more than ₹${MIN_REMAINING_BALANCE} in your wallet before you can withdraw.`
+                        : value > maxWithdrawable
+                          ? `You can withdraw up to ₹${maxWithdrawable.toLocaleString('en-IN')} and must keep ₹${MIN_REMAINING_BALANCE.toLocaleString('en-IN')} in your wallet.`
+                          : `Maximum daily withdrawal is ₹${MAX_WITHDRAW_DAILY.toLocaleString('en-IN')}`}
                   </div>
                 )}
               </div>
               <div className="withdraw-quick-amounts">
-                {QUICK_AMOUNTS.filter((a) => a <= balance).map((a) => (
+                {QUICK_AMOUNTS.filter((a) => a <= maxWithdrawable).map((a) => (
                   <button key={a} type="button" className={`withdraw-quick-btn ${value === a ? 'is-active' : ''}`} onClick={() => setAmount(String(a))}>
                     ₹{a.toLocaleString('en-IN')}
                   </button>

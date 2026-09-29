@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE } from './bookingAstrologerData.js'
@@ -85,6 +85,11 @@ export default function BookAppointment() {
         showBack={fromDashboard}
         backTo={routes.dashboard}
         backLabel="Back to Dashboard"
+        actions={
+          <Link className="appointment-history-link" to="/user/appointments/my">
+            Appointment History
+          </Link>
+        }
       />
 
       <div className="book-appointment-section-head">
