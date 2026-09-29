@@ -677,7 +677,7 @@ export function ScheduledLive() {
         title="Scheduled Live"
         subtitle="Plan upcoming live broadcasts and set the details for each session."
         showBack
-        backTo={routes.dashboard}
+        backTo={routes.liveSessionSetup}
         actions={
           <button type="button" className="btn btn-primary" onClick={() => setScheduleOpen(true)}>
             <CalendarPlus size={16} /> Schedule Live
@@ -741,7 +741,7 @@ export function LiveHistory() {
         title="Live History"
         subtitle="Review your past live broadcasts and held session details."
         showBack
-        backTo={routes.dashboard}
+        backTo={routes.liveSessionSetup}
       />
 
       <div className="live-list-section">

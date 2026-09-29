@@ -51,6 +51,15 @@ import {
   WALLET_TXN_TYPE_LABELS,
 } from '../utils/wallet.js'
 import { downloadPdf } from '../utils/pdfReport.js'
+import {
+  WalletTabs,
+  WalletBalanceHero,
+  WalletEarningsOverview,
+  WalletPayoutCard,
+  WalletLedger,
+  WalletTxnFilters,
+  txnDisplayType,
+} from '../components/WalletDashboard.jsx'
 
 const PERIOD_OPTIONS = [
   { key: 'today', label: 'Today' },
@@ -73,13 +82,22 @@ const TXN_DATE_OPTIONS = [
 
 const TXN_TYPE_FILTER_OPTIONS = [
   { key: 'all', label: 'All Types' },
-  { key: 'earning', label: 'Earnings' },
+  { key: 'earning', label: 'All Earnings' },
+  { key: 'earning:question', label: 'Question Earnings' },
+  { key: 'earning:appointment', label: 'Appointment Earnings' },
+  { key: 'earning:session', label: 'Live Session Earnings' },
+  { key: 'earning:call', label: 'Call Earnings' },
+  { key: 'earning:subscription', label: 'Subscription Earnings' },
   { key: 'withdrawal', label: 'Withdrawal' },
-  { key: 'commission', label: 'Platform Commission' },
-  { key: 'refund', label: 'Refund / Adjustment' },
+  { key: 'commission', label: 'Platform Fee' },
+  { key: 'refund', label: 'Refund' },
   { key: 'settlement', label: 'Settlement' },
   { key: 'adjustment', label: 'Other Adjustment' },
 ]
+
+// The withdrawal rules only require a positive amount (see validateWithdrawal),
+// so the smallest withdrawable amount is one rupee.
+const MIN_WITHDRAWAL_AMOUNT = 1
 
 const STATUS_OPTIONS = ['All', 'Completed', 'Processing', 'Failed']
 
@@ -225,7 +243,7 @@ export default function AstrologerWallet({ section = 'overview' }) {
   const [txnDateFilter, setTxnDateFilter] = useState('all')
   const [txnCustomStart, setTxnCustomStart] = useState('')
   const [txnCustomEnd, setTxnCustomEnd] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
+  const [txnSearch, setTxnSearch] = useState('')
 
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const [withdrawAmount, setWithdrawAmount] = useState('')
@@ -277,15 +295,45 @@ export default function AstrologerWallet({ section = 'overview' }) {
   }, [txnDateFilter, txnCustomStart, txnCustomEnd, today])
 
   const filteredTxns = useMemo(() => {
+    const [baseType, sourceKind] = txnTypeFilter.split(':')
+    const term = txnSearch.trim().toLowerCase()
     const rows = filterWalletTransactions(ledger, {
-      type: txnTypeFilter === 'all' ? 'all' : txnTypeFilter,
+      type: baseType,
       status: txnStatusFilter === 'All' ? 'all' : txnStatusFilter,
       range: txnRange,
+    }).filter((txn) => {
+      if (sourceKind && txn.sourceKind !== sourceKind) return false
+      if (!term) return true
+      return [txn.id, txn.description, txn.sourceSummary, txn.sourceRef, txn.customer, txnDisplayType(txn)]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
     })
     return rows.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-  }, [ledger, txnTypeFilter, txnStatusFilter, txnRange])
+  }, [ledger, txnTypeFilter, txnStatusFilter, txnRange, txnSearch])
 
   const recentTxns = filteredTxns.slice(0, 5)
+
+  const lastMonthNet = useMemo(() => getEarningsBreakdown(ledger, getDateRangeForPeriod('lastmonth', { today })).net, [ledger, today])
+  const earningsSeries = useMemo(() => {
+    const toIso = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    return Array.from({ length: 6 }, (_, index) => {
+      const offset = index - 5
+      const start = new Date(today.getFullYear(), today.getMonth() + offset, 1)
+      const end = new Date(today.getFullYear(), today.getMonth() + offset + 1, 0)
+      return {
+        key: toIso(start),
+        label: start.toLocaleDateString('en-IN', { month: 'short' }),
+        net: getEarningsBreakdown(ledger, { start: toIso(start), end: toIso(end) }).net,
+      }
+    })
+  }, [ledger, today])
+  const monthSources = useMemo(() => EARNINGS_SOURCE_OPTIONS.map(({ key, label, color }) => ({
+    key,
+    label,
+    color,
+    net: overviewBreakdown.kinds.find((item) => item.kind === key)?.net || 0,
+  })), [overviewBreakdown])
 
   const settlementRows = useMemo(() => settlementFromLedger(astrologerWallet, todayIso), [astrologerWallet, todayIso])
   const refunds = useMemo(() => ledger.filter((txn) => txn.type === 'refund'), [ledger])
@@ -371,112 +419,43 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Wallet"
-            subtitle="Manage your earnings, pending payments, settlements and withdrawals."
+            subtitle="Manage your earnings, balance, payouts, and transactions."
             showBack
             backTo={routes.dashboard}
-            actions={
-              <div className="wallet-header-actions">
-                <button type="button" className="btn btn-primary" onClick={() => navigate(`${walletPath}/withdraw`)}>
-                  <ArrowDownToLine size={16} /> Withdraw Money
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(`${walletPath}/transactions`)}>
-                  <FileText size={16} /> Transactions
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(`${walletPath}/settlements`)}>
-                  <History size={16} /> Settlements
-                </button>
-              </div>
-            }
+          />
+          <WalletTabs active="overview" walletPath={walletPath} onNavigate={navigate} />
+
+          <WalletBalanceHero
+            summary={summary}
+            pendingCount={pendingList.length}
+            canWithdraw={summary.availableBalance > 0}
+            onWithdraw={openWithdrawModal}
+            onViewTransactions={() => navigate(`${walletPath}/transactions`)}
+            onOpenHeld={() => setHeldModalOpen(true)}
+            onOpenRefunds={() => setRefundsOpen(true)}
           />
 
-          {/* Summary Cards */}
-          <div className="wallet-summary-grid section">
-            <button type="button" className="wallet-stat-card wallet-stat-card--primary" onClick={openWithdrawModal}>
-              <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{summary.availableBalance.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Available Balance</div>
-                <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Withdrawable</span></div>
-              </div>
-            </button>
+          <WalletEarningsOverview
+            thisMonth={overviewBreakdown.net}
+            lastMonth={lastMonthNet}
+            totalEarnings={summary.totalEarnings}
+            totalWithdrawn={summary.withdrawalsTotal}
+            series={earningsSeries}
+            sources={monthSources}
+            onViewAll={() => navigate(`${walletPath}/earnings`)}
+          />
 
-            <div className="wallet-stat-card">
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--amber"><Clock size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{summary.pendingBalance.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Pending Balance</div>
-                <div className="wallet-stat-card__meta">Will be settled within 2-3 days</div>
-              </div>
-            </div>
-
-            <button type="button" className="wallet-stat-card" onClick={() => setHeldModalOpen(true)}>
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--sky"><Lock size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{summary.heldBalance.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Held Amount</div>
-                <div className="wallet-stat-card__meta">Held during the refund review window</div>
-              </div>
-            </button>
-
-            <button type="button" className="wallet-stat-card" onClick={() => setRefundsOpen(true)}>
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--red"><Receipt size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{summary.refundsTotal.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Refunds</div>
-                <div className="wallet-stat-card__meta">Refunded from your earnings</div>
-              </div>
-            </button>
-
-            <div className="wallet-stat-card">
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--green"><TrendingUp size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{summary.totalEarnings.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Total Earnings</div>
-                <div className="wallet-stat-card__meta">All time earnings</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Earnings Preview */}
-          <Section title="Earnings This Month" icon={TrendingUp}>
-            <Card className="wallet-earnings-card">
-              <div className="wallet-earnings-list">
-                {EARNINGS_SOURCE_OPTIONS.map(({ key, label, icon: Icon, color }) => {
-                  const kind = overviewBreakdown.kinds.find((item) => item.kind === key)
-                  const amount = kind ? kind.net : 0
-                  const pct = overviewBreakdown.net > 0 ? ((amount / overviewBreakdown.net) * 100).toFixed(1) : '0.0'
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      className="wallet-earnings-row"
-                      onClick={() => navigate(`${walletPath}/earnings`)}
-                    >
-                      <div className="wallet-earnings-row__icon" style={{ color }}>{<Icon size={18} />}</div>
-                      <div className="wallet-earnings-row__label">{label}</div>
-                      <div className="wallet-earnings-row__bar">
-                        <div className="wallet-earnings-row__bar-fill" style={{ width: `${pct}%`, background: color }} />
-                      </div>
-                      <div className="wallet-earnings-row__amount">₹{amount.toLocaleString('en-IN')}</div>
-                      <div className="wallet-earnings-row__pct">{pct}%</div>
-                      <ChevronRight size={16} className="wallet-earnings-row__arrow" />
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="wallet-earnings-total">
-                <span>This Month</span>
-                <span>Net Earnings ₹{overviewBreakdown.net.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="wallet-earnings-hint">Click a category or view the full earnings page for a complete period breakdown.</div>
-              <div className="wallet-modal-actions">
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(`${walletPath}/earnings`)}>
-                  <TrendingUp size={16} /> View Full Earnings
-                </button>
-              </div>
-            </Card>
-          </Section>
+          <WalletPayoutCard
+            withdrawable={summary.availableBalance}
+            minimum={MIN_WITHDRAWAL_AMOUNT}
+            nextPayoutDate={withdrawalWindow.nextSettlementDate}
+            frequency={astrologerWallet.settlementSchedule?.frequencyLabel}
+            methodLabel={defaultPayoutMethod ? payoutDisplayLabel(defaultPayoutMethod) : ''}
+            canRequest={summary.availableBalance > 0}
+            onRequest={openWithdrawModal}
+            onManageMethods={() => navigate(`${walletPath}/payment-methods`)}
+            onSettlements={() => navigate(`${walletPath}/settlements`)}
+          />
 
           {/* Pending & Held Payments */}
           <Section title="Pending & Held Payments" icon={Clock}>
@@ -535,48 +514,15 @@ export default function AstrologerWallet({ section = 'overview' }) {
             </Card>
           </Section>
 
-          {/* Recent Transactions Preview */}
-          <Section title="Recent Transactions" icon={FileText}>
-            <Card className="wallet-txn-card">
-              <div className="wallet-txn-table-wrap">
-                <table className="wallet-txn-table">
-                  <thead>
-                    <tr>
-                      <th>Transaction ID</th>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTxns.map((txn) => (
-                      <tr key={txn.id} className="wallet-txn-row" onClick={() => setSelectedEarning(txn)}>
-                        <td className="wallet-txn-date">{txn.id}</td>
-                        <td className="wallet-txn-date">{fmtDate(txn.date)}</td>
-                        <td><span className={`wallet-txn-type wallet-txn-type--${txn.type}`}>{WALLET_TXN_TYPE_LABELS[txn.type] || txn.type}</span></td>
-                        <td className={`wallet-txn-amount ${txn.amount >= 0 ? 'wallet-txn-amount--credit' : 'wallet-txn-amount--debit'}`}>
-                          {formatINR(txn.amount)}
-                        </td>
-                        <td><span className={`wallet-txn-status ${statusClass(txn.status)}`}>{txn.status}</span></td>
-                        <td className="wallet-txn-balance">₹{txn.balanceAfter.toLocaleString('en-IN')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {recentTxns.length === 0 && (
-                <div className="muted" style={{ padding: '24px 0', textAlign: 'center' }}>No transactions yet.</div>
-              )}
-
-              <div className="wallet-txn-footer">
-                <span className="muted">{filteredTxns.length} transaction{filteredTxns.length === 1 ? '' : 's'} in total</span>
-                <button type="button" className="btn btn-primary" onClick={() => navigate(`${walletPath}/transactions`)}>View All Transactions</button>
-              </div>
-            </Card>
-          </Section>
+          <section className="wd-section" aria-label="Recent transactions">
+            <header className="wd-section__head">
+              <h2>Transaction history</h2>
+              <button type="button" className="wd-link" onClick={() => navigate(`${walletPath}/transactions`)}>
+                View all <ChevronRight size={15} />
+              </button>
+            </header>
+            <WalletLedger rows={recentTxns} onSelect={setSelectedEarning} emptyText="No transactions yet." />
+          </section>
         </>
       )}
 
@@ -661,81 +607,36 @@ export default function AstrologerWallet({ section = 'overview' }) {
           />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
-          <Section title="All Transactions" icon={FileText}>
-            <Card className="wallet-txn-card">
-              <div className="wallet-txn-toolbar">
-                <button type="button" className="icon-btn" onClick={() => setShowFilters(!showFilters)} title="Filters">
-                  <Filter size={18} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => downloadTransactionsPdf(filteredTxns, { typeLabel: txnTypeLabel, dateLabel: txnDateLabel, statusFilter: txnStatusFilter })}
-                  disabled={filteredTxns.length === 0}
-                >
-                  <Download size={16} /> Download PDF
-                </button>
-              </div>
+          <WalletTabs active="transactions" walletPath={walletPath} onNavigate={navigate} />
 
-              {showFilters && (
-                <div className="wallet-txn-filters">
-                  <select className="select-input" value={txnTypeFilter} onChange={(e) => setTxnTypeFilter(e.target.value)}>
-                    {TXN_TYPE_FILTER_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
-                  </select>
-                  <select className="select-input" value={txnStatusFilter} onChange={(e) => setTxnStatusFilter(e.target.value)}>
-                    {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
-                  </select>
-                  <select className="select-input" value={txnDateFilter} onChange={(e) => setTxnDateFilter(e.target.value)}>
-                    {TXN_DATE_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
-                  </select>
-                  {txnDateFilter === 'custom' && (
-                    <div className="wallet-custom-range">
-                      <input type="date" className="text-input" value={txnCustomStart} onChange={(e) => setTxnCustomStart(e.target.value)} />
-                      <span className="wallet-custom-range__arrow">→</span>
-                      <input type="date" className="text-input" value={txnCustomEnd} onChange={(e) => setTxnCustomEnd(e.target.value)} />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="wallet-txn-table-wrap">
-                <table className="wallet-txn-table">
-                  <thead>
-                    <tr>
-                      <th>Transaction ID</th>
-                      <th>Date</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredTxns.map((txn) => (
-                      <tr key={txn.id} className="wallet-txn-row" onClick={() => setSelectedEarning(txn)}>
-                        <td className="wallet-txn-date">{txn.id}</td>
-                        <td className="wallet-txn-date">{fmtDate(txn.date)}</td>
-                        <td><span className={`wallet-txn-type wallet-txn-type--${txn.type}`}>{WALLET_TXN_TYPE_LABELS[txn.type] || txn.type}</span></td>
-                        <td className={`wallet-txn-amount ${txn.amount >= 0 ? 'wallet-txn-amount--credit' : 'wallet-txn-amount--debit'}`}>
-                          {formatINR(txn.amount)}
-                        </td>
-                        <td><span className={`wallet-txn-status ${statusClass(txn.status)}`}>{txn.status}</span></td>
-                        <td className="wallet-txn-balance">₹{txn.balanceAfter.toLocaleString('en-IN')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {filteredTxns.length === 0 && (
-                <div className="muted" style={{ padding: '24px 0', textAlign: 'center' }}>No transactions match the selected filters.</div>
-              )}
-
-              <div className="wallet-txn-footer">
-                <span className="muted">{filteredTxns.length} transaction{filteredTxns.length === 1 ? '' : 's'} found</span>
-              </div>
-            </Card>
-          </Section>
+          <section className="wd-section" aria-label="All transactions">
+            <header className="wd-section__head">
+              <h2>Transaction history</h2>
+            </header>
+            <WalletTxnFilters
+              search={txnSearch}
+              onSearch={setTxnSearch}
+              dateValue={txnDateFilter}
+              onDate={setTxnDateFilter}
+              dateOptions={TXN_DATE_OPTIONS}
+              typeValue={txnTypeFilter}
+              onType={setTxnTypeFilter}
+              typeOptions={TXN_TYPE_FILTER_OPTIONS}
+              statusValue={txnStatusFilter}
+              onStatus={setTxnStatusFilter}
+              statusOptions={STATUS_OPTIONS}
+              customStart={txnCustomStart}
+              customEnd={txnCustomEnd}
+              onCustomStart={setTxnCustomStart}
+              onCustomEnd={setTxnCustomEnd}
+              onDownload={() => downloadTransactionsPdf(filteredTxns, { typeLabel: txnTypeLabel, dateLabel: txnDateLabel, statusFilter: txnStatusFilter })}
+              canDownload={filteredTxns.length > 0}
+            />
+            <WalletLedger rows={filteredTxns} onSelect={setSelectedEarning} emptyText="No transactions match the selected filters." />
+            <div className="wd-ledger-footer">
+              <span>{filteredTxns.length} transaction{filteredTxns.length === 1 ? '' : 's'} found</span>
+            </div>
+          </section>
         </>
       )}
 
@@ -747,6 +648,7 @@ export default function AstrologerWallet({ section = 'overview' }) {
             subtitle="Request a withdrawal to your preferred payout method."
           />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
+          <WalletTabs active="payouts" walletPath={walletPath} onNavigate={navigate} />
 
           <Section title="Withdraw Money" icon={ArrowDownToLine}>
             <Card>

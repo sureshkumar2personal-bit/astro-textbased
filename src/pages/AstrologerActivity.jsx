@@ -390,7 +390,6 @@ export default function AstrologerActivity() {
                      <StatusBadge label={item.status} />
                      <ChevronRight size={18} className="my-activity-card__chevron" />
                    </div>
-                   <button type="button" className="my-activity-delete" onClick={(event) => { event.stopPropagation(); handleDelete(item) }} aria-label="Delete activity"><Trash2 size={16} /></button>
                 </div>
               )
             })}

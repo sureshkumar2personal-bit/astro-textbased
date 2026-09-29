@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
@@ -266,33 +266,169 @@ function HistoryRecordCard({ question, onOpenDetails, index, isDark }) {
   )
 }
 
-// Month is the PRIMARY selection: History is always scoped to a whole month.
-// The arrows move month to month and the label always reflects the active
-// month + year. The day box is an OPTIONAL numeric narrowing - clearing it
-// goes back to the full month.
-function HistoryPeriodControls({ monthKey, day, onMonthChange, onDayChange }) {
-  const [dayDraft, setDayDraft] = useState(day == null ? '' : String(day))
+// Compact calendar popover for the History date field. It is portalled to
+// <body> and positioned from the field's live bounding box, then clamped to
+// the viewport, so it never overflows the page whatever the screen width.
+const CALENDAR_WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+const CALENDAR_GAP = 6
+const CALENDAR_MARGIN = 8
+
+function HistoryDatePicker({ anchorRef, monthKey, day, onSelect, onClear, onClose }) {
+  const popRef = useRef(null)
+  const [view, setView] = useState(monthKey)
+  const [pos, setPos] = useState(null)
+
+  useEffect(() => setView(monthKey), [monthKey])
+
+  const place = () => {
+    const anchor = anchorRef.current
+    const pop = popRef.current
+    if (!anchor || !pop) return
+    const rect = anchor.getBoundingClientRect()
+    const width = pop.offsetWidth
+    const height = pop.offsetHeight
+    const vw = document.documentElement.clientWidth
+    const vh = window.innerHeight
+    // Align to the field's right edge, then clamp inside the viewport.
+    const left = Math.max(CALENDAR_MARGIN, Math.min(rect.right - width, vw - width - CALENDAR_MARGIN))
+    let top = rect.bottom + CALENDAR_GAP
+    if (top + height > vh - CALENDAR_MARGIN && rect.top - CALENDAR_GAP - height >= CALENDAR_MARGIN) {
+      top = rect.top - CALENDAR_GAP - height
+    }
+    // Keep the same state object when nothing moved, otherwise the every-render
+    // layout effect below re-renders forever.
+    setPos((prev) => (prev && prev.left === left && prev.top === top ? prev : { left, top }))
+  }
+
+  useLayoutEffect(() => {
+    place()
+    window.addEventListener('resize', place)
+    window.addEventListener('scroll', place, true)
+    return () => {
+      window.removeEventListener('resize', place)
+      window.removeEventListener('scroll', place, true)
+    }
+  })
 
   useEffect(() => {
-    setDayDraft(day == null ? '' : String(day))
-  }, [day])
-
-  const daysInMonth = (() => {
-    const bounds = getMonthBounds(monthKey)
-    return bounds ? bounds.end.getDate() : 31
-  })()
-
-  const commitDay = (value) => {
-    setDayDraft(value)
-    const trimmed = value.trim()
-    if (!trimmed) {
-      onDayChange(null)
-      return
+    const onDown = (event) => {
+      if (popRef.current?.contains(event.target) || anchorRef.current?.contains(event.target)) return
+      onClose()
     }
-    const parsed = Number(trimmed)
-    if (!Number.isInteger(parsed) || parsed < 1 || parsed > daysInMonth) return
-    onDayChange(parsed)
+    const onKey = (event) => { if (event.key === 'Escape') onClose() }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [anchorRef, onClose])
+
+  const bounds = getMonthBounds(view)
+  if (!bounds) return null
+  const year = bounds.start.getFullYear()
+  const month = bounds.start.getMonth()
+  const lead = bounds.start.getDay()
+  const daysInView = bounds.end.getDate()
+  const cells = [...Array(lead).fill(null), ...Array.from({ length: daysInView }, (_, i) => i + 1)]
+  const today = new Date()
+  const isToday = (d) => today.getFullYear() === year && today.getMonth() === month && today.getDate() === d
+
+  return createPortal(
+    <div
+      ref={popRef}
+      role="dialog"
+      aria-label="Choose date"
+      style={{
+        position: 'fixed',
+        left: pos ? pos.left : 0,
+        top: pos ? pos.top : 0,
+        visibility: pos ? 'visible' : 'hidden',
+        zIndex: 1000,
+        boxSizing: 'border-box',
+        width: 'min(280px, calc(100vw - 16px))',
+        padding: 12,
+        borderRadius: 16,
+        border: '1px solid var(--surface-border)',
+        background: 'var(--surface-strong)',
+        boxShadow: 'var(--shadow-md, 0 12px 32px rgba(0,0,0,0.16))',
+      }}
+    >
+      <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+        <button type="button" className="icon-btn" aria-label="Previous month" onClick={() => setView(shiftMonthKey(view, -1))} style={{ width: 30, height: 30, borderRadius: '50%' }}>
+          <ChevronLeft size={15} />
+        </button>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--text-primary)' }}>{getMonthLabel(view)}</span>
+        <button type="button" className="icon-btn" aria-label="Next month" onClick={() => setView(shiftMonthKey(view, 1))} style={{ width: 30, height: 30, borderRadius: '50%' }}>
+          <ChevronRight size={15} />
+        </button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 2, textAlign: 'center' }}>
+        {CALENDAR_WEEKDAYS.map((label) => (
+          <span key={label} className="muted" style={{ fontSize: 11, fontWeight: 700, padding: '4px 0' }}>{label}</span>
+        ))}
+        {cells.map((d, index) => {
+          if (d == null) return <span key={`blank-${index}`} />
+          const selected = view === monthKey && day === d
+          return (
+            <button
+              key={d}
+              type="button"
+              onClick={() => onSelect(view, d)}
+              aria-pressed={selected}
+              style={{
+                height: 32,
+                borderRadius: 10,
+                border: isToday(d) && !selected ? '1px solid var(--surface-border)' : '1px solid transparent',
+                background: selected ? 'var(--accent, var(--text-primary))' : 'transparent',
+                color: selected ? 'var(--accent-contrast, #fff)' : 'var(--text-primary)',
+                fontSize: 13,
+                fontWeight: selected ? 800 : 600,
+                cursor: 'pointer',
+              }}
+            >
+              {d}
+            </button>
+          )
+        })}
+      </div>
+      <div className="flex items-center justify-between" style={{ marginTop: 8 }}>
+        <button type="button" className="btn btn-outline btn-sm" onClick={onClear}>Clear</button>
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => onSelect(getMonthKeyFromDate(today), today.getDate())}>Today</button>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+// Month is the PRIMARY selection: History is always scoped to a whole month.
+// The arrows move month to month and the label always reflects the active
+// month + year. The date picker is an OPTIONAL single-day narrowing - clearing it
+// goes back to the full month.
+function HistoryPeriodControls({ monthKey, day, onMonthChange, onDayChange }) {
+  const [open, setOpen] = useState(false)
+  const fieldRef = useRef(null)
+
+  // The date field is derived from the month + day state, so the month pill,
+  // the picker and the listed records can never drift apart.
+  const dateValue = day == null ? '' : `${monthKey}-${String(day).padStart(2, '0')}`
+
+  // Picking a date sets month AND day together; clearing goes back to the whole month.
+  const selectDate = (nextMonthKey, nextDay) => {
+    onMonthChange(nextMonthKey)
+    onDayChange(nextDay)
+    setOpen(false)
   }
+
+  const clearDate = () => {
+    onDayChange(null)
+    setOpen(false)
+  }
+
+  const dateLabel = day == null
+    ? 'All'
+    : new Date(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 1, day)
+        .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
   const step = (delta) => {
     onMonthChange(shiftMonthKey(monthKey, delta))
@@ -358,19 +494,28 @@ function HistoryPeriodControls({ monthKey, day, onMonthChange, onDayChange }) {
         style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8 }}
       >
         <span className="muted" style={{ fontSize: 12.5, fontWeight: 700, flex: 'none' }}>Date</span>
-        <input
+        <button
+          ref={fieldRef}
+          type="button"
           className="text-input"
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={daysInMonth}
-          step={1}
-          value={dayDraft}
-          onChange={(event) => commitDay(event.target.value)}
-          placeholder="All"
-          aria-label={`Day of ${getMonthLabel(monthKey)}`}
-          style={{ width: 104, height: 44, minHeight: 44, padding: '0 12px', textAlign: 'center' }}
-        />
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-label={`Date in ${getMonthLabel(monthKey)}`}
+          onClick={() => setOpen((value) => !value)}
+          style={{ width: 156, height: 44, minHeight: 44, padding: '0 12px', textAlign: 'center', cursor: 'pointer' }}
+        >
+          {dateLabel}
+        </button>
+        {open && (
+          <HistoryDatePicker
+            anchorRef={fieldRef}
+            monthKey={monthKey}
+            day={day}
+            onSelect={selectDate}
+            onClear={clearDate}
+            onClose={() => setOpen(false)}
+          />
+        )}
       </label>
     </div>
   )
