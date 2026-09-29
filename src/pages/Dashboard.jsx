@@ -20,7 +20,6 @@ import {
   Zap,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
-import CreateCampaignModal from '../components/CreateCampaignModal.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -42,11 +41,10 @@ const recentActivities = [
 ]
 
 export default function Dashboard() {
-  const { selectedCampaign, astrologerServices, actions } = useAppData()
+  const { astrologerServices, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-  const [createOpen, setCreateOpen] = useState(false)
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false)
   const serviceMenuRef = useRef(null)
 
@@ -67,7 +65,11 @@ export default function Dashboard() {
   }, [serviceMenuOpen])
 
   const quickActions = [
-    { icon: Megaphone, label: 'Create Campaign', onClick: () => setCreateOpen(true) },
+    // Opens the existing Text-Based Questions Campaigns view directly, so the
+    // user lands on the module's own campaign screen instead of the overview.
+    // Lands on the existing Campaigns view with the existing Create Campaign
+    // form already open, so the user can start creating straight away.
+    { icon: Megaphone, label: 'Create Campaign', route: `${routes.textBasedQuestions}?view=campaigns&create=1` },
     { icon: MessageCircleReply, label: 'Answer Questions', route: routes.answerQuestion },
     { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments },
     { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup },
@@ -258,8 +260,6 @@ export default function Dashboard() {
           </Link>
         </div>
       </Section>
-
-      <CreateCampaignModal open={createOpen} onClose={() => setCreateOpen(false)} defaultTotalLimit={selectedCampaign?.totalLimit || 30} />
     </div>
   )
 }

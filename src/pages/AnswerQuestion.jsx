@@ -1,17 +1,35 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { Search, X, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
+import SummaryCard from '../components/ui/SummaryCard.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
+import DisputeDetailsModal from '../components/DisputeDetailsModal.jsx'
+import AnswerAttachmentPanel from '../components/AnswerAttachmentPanel.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
-
-
+import {
+  filterAnswerQuestions,
+  formatAnswerDate,
+  getAnswerDeadlineLabel,
+  getAnswerEditWindowLabel,
+  getAnswerSummary,
+  getQuestionAnswerDeadline,
+  getQuestionDueState,
+  getQuestionTypeLabel,
+  hasOpenDispute,
+  isQuestionAnswered,
+  isQuestionCancelled,
+  sortAnswerQueue,
+  ANSWER_CHAR_LIMIT,
+  canEditQuestionAnswer,
+} from '../utils/answer.js'
+import { getQuestionSourceLabel } from '../utils/questions.js'
 import {
   TempleArchIcon,
   TempleLampIcon,
@@ -20,18 +38,526 @@ import {
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-const PAGE_SIZE = 6
+const DUE_FILTER_KEY = {
+  'Pending': 'pending',
+  'Due Soon': 'dueSoon',
+  'Overdue': 'overdue',
+  'Answered': 'answered',
+  'Disputed': 'disputed',
+  'Cancelled': 'cancelled',
+}
 
-function getWordPreview(content) {
-  const text = String(content || '').trim()
-  const words = text.split(/\s+/).filter(Boolean)
+const QUESTIONS_PAGE_SIZE = 8
 
-  if (words.length <= 4) return { preview: text, isTruncated: false }
+const TYPE_FILTER_KEY = {
+  'General Pending': 'generalPending',
+  'Personal': 'personalPending',
+}
 
-  return {
-    preview: words.slice(0, 4).join(' '),
-    isTruncated: true,
+const DUE_PILL_STYLE = {
+  pending: { background: 'var(--warning-bg)', color: 'var(--amber-600)', border: 'rgba(217, 119, 6, 0.30)' },
+  dueSoon: { background: 'var(--coral-100)', color: 'var(--coral-600)', border: 'rgba(242, 102, 42, 0.32)' },
+  overdue: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.30)' },
+  answered: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)' },
+  disputed: { background: '#FFF7ED', color: '#EA580C', border: 'rgba(234, 88, 12, 0.32)' },
+  inProgress: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.26)' },
+  closed: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.25)' },
+  cancelled: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.30)' },
+}
+
+const DUE_PILL_LABEL = {
+  pending: 'Pending',
+  dueSoon: 'Due Soon',
+  overdue: 'Overdue',
+  answered: 'Answered',
+  disputed: 'Dispute',
+  inProgress: 'In Progress',
+  closed: 'Closed',
+  cancelled: 'Cancelled',
+}
+
+const CARD_TONE = {
+  pending: '#D97706',
+  dueSoon: '#F2662A',
+  overdue: '#DC2626',
+  answered: '#10B981',
+  disputed: '#EA580C',
+  inProgress: '#5B21B6',
+  closed: '#64748B',
+  cancelled: '#DC2626',
+}
+
+const DEADLINE_TONE_STATES = ['pending', 'dueSoon', 'overdue']
+
+// Page numbers to render, with ellipsis markers when the range is wide.
+function buildPageTokens(currentPage, totalPages) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const tokens = [1]
+  const start = Math.max(2, currentPage - 1)
+  const end = Math.min(totalPages - 1, currentPage + 1)
+
+  if (start > 2) tokens.push('start-ellipsis')
+  for (let value = start; value <= end; value += 1) tokens.push(value)
+  if (end < totalPages - 1) tokens.push('end-ellipsis')
+  tokens.push(totalPages)
+  return tokens
+}
+
+function formatDateTime(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const day = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  const time = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+  return `${day} · ${time}`
+}
+
+function DeadlinePill({ dueState, label }) {
+  const style = DUE_PILL_STYLE[dueState] || DUE_PILL_STYLE.pending
+  const text = label || DUE_PILL_LABEL[dueState] || 'Pending'
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        borderRadius: 999,
+        padding: '3px 10px',
+        fontSize: 11,
+        fontWeight: 800,
+        whiteSpace: 'nowrap',
+        background: style.background,
+        color: style.color,
+        border: `1px solid ${style.border}`,
+      }}
+    >
+      <span style={{ width: 7, height: 7, borderRadius: 999, background: style.color, flex: 'none' }} />
+      {text}
+    </span>
+  )
+}
+
+function TypeBadge({ type }) {
+  const isPersonal = getQuestionTypeLabel({ type }) === 'Personal'
+  return <span className={isPersonal ? 'badge badge-blue' : 'badge badge-violet'}>{getQuestionTypeLabel({ type })}</span>
+}
+
+function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
+  const dueState = getQuestionDueState(question, nowMs)
+  const deadline = getAnswerDeadlineLabel(question, nowMs)
+  const typeLabel = getQuestionTypeLabel(question)
+  const source = getQuestionSourceLabel(question)
+  const openQuestion = source === 'Open Question'
+  const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
+  const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
+  const accent = CARD_TONE[dueState] || CARD_TONE.pending
+  const isPending = DEADLINE_TONE_STATES.includes(dueState)
+  const pillLabel = isPending ? deadline?.label : undefined
+  const canEditAnswered = dueState === 'answered' && canEditQuestionAnswer(question, nowMs)
+  const isDisputed = dueState === 'disputed'
+  const isAnswered = dueState === 'answered'
+  const isCancelled = dueState === 'cancelled'
+
+  const remainingLine = isCancelled
+    ? <span style={{ color: accent, fontWeight: 700 }}>{question.cancellationReason || 'Answer deadline exceeded'}</span>
+    : isPending
+      ? <span style={{ color: accent, fontWeight: 700 }}>{deadline?.label}</span>
+      : isAnswered
+        ? <span style={{ color: 'var(--green-600)', fontWeight: 700 }}>Answered {formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || ''}</span>
+        : isDisputed
+          ? <span style={{ color: '#EA580C', fontWeight: 700 }}>Under dispute</span>
+          : <span className="muted">Closed</span>
+
+  const actionLabel = isDisputed ? 'View Dispute' : isAnswered ? (canEditAnswered ? 'Edit Answer' : 'View Answer') : isCancelled ? 'View Details' : 'Answer Now'
+  const handleOpen = () => (isDisputed ? onViewDispute(question.id) : onAnswer(question.id))
+
+  return (
+    <div
+      className="card card-hover"
+      role="button"
+      tabIndex={0}
+      onClick={handleOpen}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          handleOpen()
+        }
+      }}
+      style={{
+        background: 'var(--surface-strong, #fff)',
+        border: '1px solid var(--surface-border)',
+        borderTop: `3px solid ${accent}`,
+        borderRadius: 16,
+        padding: 18,
+        boxShadow: 'var(--shadow-card)',
+        cursor: 'pointer',
+        minWidth: 0,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+              {question.user}
+            </span>
+            <span className="badge badge-gray">{question.submittedByUserId || 'user-demo'}</span>
+            <TypeBadge type={typeLabel} />
+            {openQuestion && <span className="badge badge-blue">Open Question</span>}
+          </div>
+          <div className="muted" style={{ marginTop: 6, fontSize: 12.5 }}>
+            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</span> · Source: {source} · {question.category || 'Others'}
+          </div>
+        </div>
+        <div style={{ flex: 'none' }}>
+          <DeadlinePill dueState={dueState} label={pillLabel} />
+        </div>
+      </div>
+
+      <div
+        style={{
+          color: 'var(--ink)',
+          fontStyle: 'italic',
+          fontSize: 13,
+          marginTop: 12,
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          lineHeight: 1.5,
+        }}
+      >
+        “{question.question}”
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+          flexWrap: 'wrap',
+          marginTop: 14,
+          paddingTop: 12,
+          borderTop: '1px solid var(--surface-border)',
+        }}
+      >
+        <div className="muted" style={{ fontSize: 12, lineHeight: 1.6 }}>
+          <div>Asked: {received || '—'} · Answer by: {deadlineDate || '—'}</div>
+          <div style={{ marginTop: 2 }}>{remainingLine}</div>
+          {isCancelled && Number(question.refundAmount) > 0 && (
+            <div style={{ marginTop: 2 }}>Refund: {question.refundStatus || 'Refunded'} of {Number(question.refundAmount).toLocaleString('en-IN')}</div>
+          )}
+        </div>
+        <button
+          type="button"
+          className={isDisputed ? 'btn btn-outline btn-sm' : isAnswered && !canEditAnswered ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm'}
+          style={isDisputed ? { color: '#EA580C', borderColor: 'rgba(234, 88, 12, 0.4)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: 'var(--red-600)', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
+          onClick={(event) => {
+            event.stopPropagation()
+            handleOpen()
+          }}
+        >
+          {actionLabel}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCorrection, onViewHoroscope }) {
+  const answered = isQuestionAnswered(question)
+  const disputed = hasOpenDispute(question)
+  const canEdit = answered && canEditQuestionAnswer(question, nowMs)
+  const dueState = getQuestionDueState(question, nowMs)
+  const deadline = getAnswerDeadlineLabel(question, nowMs)
+  const editWindow = getAnswerEditWindowLabel(question, nowMs)
+  const birthDetails = question?.customer || null
+  const source = getQuestionSourceLabel(question)
+  const openQuestion = source === 'Open Question'
+  const cancelled = isQuestionCancelled(question)
+  const refundAmount = Number(question.refundAmount) || 0
+  const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
+  const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
+  const remaining = cancelled
+    ? (question.cancellationReason || 'Answer deadline exceeded')
+    : dueState === 'answered'
+      ? `Answered ${formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || '—'}`
+      : dueState === 'disputed'
+        ? 'Under dispute'
+        : deadline?.label || '—'
+  const pillLabel = DEADLINE_TONE_STATES.includes(dueState) ? deadline?.label : undefined
+
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(question?.draftAnswer || question?.answer || '')
+  const [attachments, setAttachments] = useState(() => (answered ? question?.answerAttachments || [] : question?.draftAttachments || []))
+  const [links, setLinks] = useState(() => (answered ? question?.referenceLinks || [] : question?.draftReferenceLinks || []))
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [onClose])
+
+  const saveDraft = () => {
+    if (!text.trim()) return
+    onSaveDraft(question.id, text, attachments, links)
   }
+
+  const submit = () => {
+    if (!text.trim()) return
+    onSubmit(question.id, text, attachments, links)
+  }
+
+  const saveCorrection = () => {
+    if (!text.trim()) return
+    const saved = onSaveCorrection(question.id, text, attachments, links)
+    if (saved) setEditing(false)
+  }
+
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+        <div className="modal-card__header flex items-center justify-between gap-4">
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <div className="astrologer-modal-title">Question Details</div>
+            <div className="muted" style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {question.campaignName || 'Open Question'} · {question.id}
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 'auto' }}>
+            <StatusBadge label={question.status} />
+            <DeadlinePill dueState={dueState} label={pillLabel} />
+            <button type="button" className="icon-btn" aria-label="Close answer modal" onClick={onClose} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+          </div>
+        </div>
+
+        <div className="modal-card__content astrologer-modal-content">
+          <div className="astrologer-modal-section">
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleArchIcon size={14} />Question Summary</div>
+            <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+              <div><strong>Customer Name</strong><div className="muted">{question.user}</div></div>
+              <div><strong>User ID</strong><div className="muted">{question.submittedByUserId || question.userId || '—'}</div></div>
+              <div><strong>Question ID</strong><div className="muted">{question.id}</div></div>
+              <div><strong>Source</strong><div className="muted">{openQuestion ? 'Open Question' : source}</div></div>
+              <div><strong>Question Type</strong><div className="muted">{question.type}</div></div>
+              <div><strong>Campaign</strong><div className="muted">{openQuestion ? 'Not from a campaign' : source}</div></div>
+              <div><strong>Asked On</strong><div className="muted">{received || '—'}</div></div>
+              <div><strong>Answer Deadline</strong><div className="muted">{deadlineDate || '—'} (asked date + 30 days)</div></div>
+              <div>
+                <strong>Remaining</strong>
+                <div className="muted" style={cancelled ? { color: 'var(--red-600)', fontWeight: 700 } : dueState === 'overdue' ? { color: 'var(--red-600)', fontWeight: 700 } : dueState === 'dueSoon' ? { color: 'var(--coral-600)', fontWeight: 700 } : undefined}>{remaining}</div>
+              </div>
+              <div><strong>Current Status</strong><div className="muted">{question.status}</div></div>
+              {cancelled && (
+                <>
+                  <div><strong>Cancellation Reason</strong><div className="muted">{question.cancellationReason || 'Answer deadline exceeded'}</div></div>
+                  <div>
+                    <strong>Refund</strong>
+                    <div className="muted">
+                      {question.refundStatus || 'Refunded'}
+                      {refundAmount > 0 ? ` · ${refundAmount.toLocaleString('en-IN')}` : ' · No amount paid for this question'}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="astrologer-modal-section">
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleScrollIcon size={14} />Customer Question</div>
+            <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{question.question}</div>
+          </div>
+
+          {question.type === 'Personal' && !birthDetails && (
+            <div className="astrologer-modal-section">
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLotusIcon size={14} />Horoscope Details</div>
+              <div className="option-list" style={{ gap: 10 }}>
+                <div className="option-pill selected">
+                  <span className="option-mark">✓</span>
+                  {question.horoscopeMode || 'Continue Without Horoscope'}
+                </div>
+                {Array.isArray(question.attachments) && question.attachments.map((file) => (
+                  <button key={file} className="option-pill" type="button" onClick={() => window.alert(`Opening ${file}`)}>
+                    <span className="option-mark"><TempleScrollIcon size={14} /></span>
+                    {file}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {question.type === 'Personal' && birthDetails && (
+            <div className="astrologer-modal-section">
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLotusIcon size={14} />Horoscope Details</div>
+              <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+                <div><strong>Name</strong><div className="muted">{birthDetails.name || question.user}</div></div>
+                <div><strong>DOB</strong><div className="muted">{birthDetails.dateOfBirth || '—'}</div></div>
+                <div><strong>Birth Time</strong><div className="muted">{birthDetails.timeOfBirth || '—'}</div></div>
+                <div><strong>Birth Place</strong><div className="muted">{birthDetails.birthPlace || '—'}</div></div>
+                {birthDetails.rasi && <div><strong>Zodiac / Rashi</strong><div className="muted">{birthDetails.rasi}</div></div>}
+                {birthDetails.nakshatra && <div><strong>Nakshatra</strong><div className="muted">{birthDetails.nakshatra}</div></div>}
+                {birthDetails.lagna && <div><strong>Lagna</strong><div className="muted">{birthDetails.lagna}</div></div>}
+              </div>
+              {(birthDetails.horoscopeDetails || birthDetails.horoscope) && (
+                <div style={{ marginTop: 10 }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => onViewHoroscope({
+                      title: `${birthDetails.name || question.user}'s Horoscope`,
+                      content: birthDetails.horoscopeDetails || birthDetails.horoscope,
+                    })}
+                  >
+                    View Horoscope
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="astrologer-modal-section">
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Your Answer</div>
+
+            {cancelled && (
+              <div
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 14,
+                  border: '1px solid rgba(239, 68, 68, 0.30)',
+                  background: 'var(--danger-bg)',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ fontWeight: 700, color: 'var(--red-600)' }}>This question was cancelled - {question.cancellationReason || 'Answer deadline exceeded'}</div>
+                <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>
+                  The 30-day answer deadline passed without an answer, so the question was cancelled automatically{refundAmount > 0 ? ` and ${refundAmount.toLocaleString('en-IN')} was refunded to the user` : ''}. It can no longer be answered.
+                </div>
+              </div>
+            )}
+
+            {disputed && (
+              <div
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 14,
+                  border: '1px solid rgba(234, 88, 12, 0.30)',
+                  background: '#FFF7ED',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ fontWeight: 700, color: '#C2410C' }}>This question is under dispute</div>
+                <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>
+                  The customer raised a dispute for this answer. Review the concern and respond via View Dispute.
+                </div>
+              </div>
+            )}
+
+            {answered && !editing && (
+              <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap', marginBottom: 10 }}>
+                {question.answer || '—'}
+              </div>
+            )}
+
+            {answered && (
+              <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+                Answered {formatDateTime(question.answeredAt || question.answerDeliveredAt)}
+                {canEdit ? ` · ${editWindow?.label || 'Editable for a limited time'}` : ' · Answer locked (24-hour edit window ended)'}
+              </div>
+            )}
+
+            {!answered && !disputed && !cancelled && (
+              <>
+                <textarea
+                  className="textarea-box"
+                  style={{ width: '100%', minHeight: 150 }}
+                  placeholder="Write your answer here..."
+                  maxLength={ANSWER_CHAR_LIMIT}
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                />
+                <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>
+                  Characters: {text.length} / {ANSWER_CHAR_LIMIT}
+                  {question.draftAnswer ? ' · Draft autosaved — continue where you left off.' : ''}
+                </div>
+              </>
+            )}
+
+            {answered && canEdit && editing && (
+              <>
+                <textarea
+                  className="textarea-box"
+                  style={{ width: '100%', minHeight: 150 }}
+                  placeholder="Update your answer..."
+                  maxLength={ANSWER_CHAR_LIMIT}
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                />
+                <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {text.length} / {ANSWER_CHAR_LIMIT}</div>
+              </>
+            )}
+
+            {answered && !canEdit && (
+              <div className="muted" style={{ fontSize: 13 }}>
+                {disputed
+                  ? 'The answer is final while the dispute is being resolved.'
+                  : 'This answer is final and can no longer be edited.'}
+              </div>
+            )}
+          </div>
+
+          {!disputed && !cancelled && (
+            <div className="astrologer-modal-section">
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Paperclip size={14} />Attachments &amp; References</div>
+              {answered && !editing ? (
+                <>
+                  <AnswerAttachmentPanel
+                    attachments={question.answerAttachments || []}
+                    links={question.referenceLinks || []}
+                    readOnly
+                  />
+                  {canEdit && (
+                    <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>
+                      Click Edit Answer to add or remove attachments before saving.
+                    </div>
+                  )}
+                </>
+              ) : (
+                <AnswerAttachmentPanel
+                  attachments={attachments}
+                  links={links}
+                  onChange={({ attachments: nextAttachments, links: nextLinks }) => {
+                    setAttachments(nextAttachments)
+                    setLinks(nextLinks)
+                  }}
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="modal-card__footer astrologer-modal-footer-actions">
+          <button className="btn btn-ghost" onClick={onClose}>Close</button>
+          {!answered && !disputed && !cancelled && (
+            <>
+              <button className="btn btn-outline" disabled={!text.trim()} onClick={saveDraft}>Save Draft</button>
+              <button className="btn btn-primary" disabled={!text.trim()} onClick={submit}>Submit Answer</button>
+            </>
+          )}
+          {answered && canEdit && !editing && <button className="btn btn-primary" onClick={() => setEditing(true)}>Edit Answer</button>}
+          {answered && canEdit && editing && <button className="btn btn-primary" disabled={!text.trim()} onClick={saveCorrection}>Save Updated Answer</button>}
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
 }
 
 export default function AnswerQuestion() {
@@ -39,111 +565,152 @@ export default function AnswerQuestion() {
   const { questions, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
-  const questionIdParam = searchParams.get('questionId')
+  const astrologerId = currentUser?.id || 'astrologer-demo'
   const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
 
+  const [dueFilter, setDueFilter] = useState('All')
+  const [typeOption, setTypeOption] = useState('All')
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [panelQuestionId, setPanelQuestionId] = useState(questionIdParam || null)
-  const [answer, setAnswer] = useState('')
-  const [justSubmitted, setJustSubmitted] = useState(false)
-  const [editingSubmittedAnswer, setEditingSubmittedAnswer] = useState(false)
-  const [now, setNow] = useState(Date.now())
+  const [answerId, setAnswerId] = useState(null)
+  const [disputeId, setDisputeId] = useState(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  const [alert, setAlert] = useState(null)
   const [fullContent, setFullContent] = useState(null)
-
-  const filteredQuestions = useMemo(() => {
-    const term = appliedSearch.trim().toLowerCase()
-    return questions
-      .filter((question) => {
-        const searchable = [question.id, question.user, question.category, question.type, question.question, question.status]
-          .join(' ')
-          .toLowerCase()
-        return !term || searchable.includes(term)
-      })
-      .sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
-  }, [questions, appliedSearch])
-
-  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE))
-  const currentPage = Math.min(page, totalPages)
-  const pagedQuestions = filteredQuestions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+  const bootRef = useRef(false)
 
   useEffect(() => {
-    setPage(1)
-  }, [appliedSearch])
-
-  const panelQuestion = useMemo(
-    () => questions.find((question) => question.id === panelQuestionId) || null,
-    [questions, panelQuestionId],
-  )
-
-  useEffect(() => {
-    setAnswer(panelQuestion?.draftAnswer || panelQuestion?.answer || '')
-    setEditingSubmittedAnswer(false)
-  }, [panelQuestion?.id, panelQuestion?.draftAnswer, panelQuestion?.answer])
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 30 * 1000)
+    const timer = window.setInterval(() => setNowMs(Date.now()), 30 * 1000)
     return () => window.clearInterval(timer)
   }, [])
 
-  const openQuestion = (id) => {
-    setPanelQuestionId(id)
+  const myQuestions = useMemo(
+    () => questions.filter((question) => (question.astrologerId || 'astrologer-demo') === astrologerId),
+    [questions, astrologerId],
+  )
+
+  useEffect(() => {
+    if (bootRef.current) return
+    bootRef.current = true
+    const id = searchParams.get('questionId')
+    if (!id) return
+    const question = myQuestions.find((item) => item.id === id)
+    if (!question) return
+    if (hasOpenDispute(question)) setDisputeId(id)
+    else setAnswerId(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myQuestions])
+
+  const queue = useMemo(() => sortAnswerQueue(myQuestions), [myQuestions])
+
+  const summary = useMemo(() => getAnswerSummary(myQuestions, nowMs), [myQuestions, nowMs])
+
+  const filteredQuestions = useMemo(() => {
+    // The status cards drive these two states directly, so only the card-backed
+    // statuses need mapping here.
+    const statusDue = DUE_FILTER_KEY[dueFilter] || 'All'
+    const typeDue = typeOption === 'All' ? 'All' : TYPE_FILTER_KEY[typeOption] || 'All'
+    const due = typeDue !== 'All' ? typeDue : statusDue
+    return filterAnswerQuestions(queue, { due, search: appliedSearch }, nowMs)
+  }, [queue, dueFilter, typeOption, appliedSearch, nowMs])
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / QUESTIONS_PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedQuestions = filteredQuestions.slice(
+    (currentPage - 1) * QUESTIONS_PAGE_SIZE,
+    currentPage * QUESTIONS_PAGE_SIZE,
+  )
+
+  useEffect(() => {
+    setPage(1)
+  }, [appliedSearch, dueFilter, typeOption])
+
+  const answerQuestion = useMemo(
+    () => (answerId ? myQuestions.find((question) => question.id === answerId) || null : null),
+    [answerId, myQuestions],
+  )
+
+  const disputeQuestion = useMemo(
+    () => (disputeId ? myQuestions.find((question) => question.id === disputeId) || null : null),
+    [disputeId, myQuestions],
+  )
+
+  const setQuestionParam = useCallback((id) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.set('questionId', id)
       return next
     })
     actions.viewQuestion(id)
-  }
+  }, [setSearchParams])
 
-  const closePanel = () => {
-    setPanelQuestionId(null)
-    setFullContent(null)
+  const clearQuestionParam = useCallback(() => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.delete('questionId')
       return next
     })
-  }
+  }, [setSearchParams])
 
-  const isAnswered = panelQuestion?.status === 'Answered'
-  const isUnderReview = panelQuestion?.status === 'Under Review'
-  const reviewActive = isUnderReview && panelQuestion?.answerReviewUntil > now
-  const canEditSubmittedAnswer = reviewActive && !panelQuestion?.answerEditUsed
+  const openAnswer = useCallback((id) => {
+    setAnswerId(id)
+    setDisputeId(null)
+    setQuestionParam(id)
+  }, [setQuestionParam])
 
-  const handleSaveCorrection = () => {
-    if (!panelQuestion || !answer.trim()) return
-    const saved = actions.editSubmittedQuestionAnswer(panelQuestion.id, answer)
-    if (saved) setEditingSubmittedAnswer(false)
-  }
+  const closeAnswer = useCallback(() => {
+    setAnswerId(null)
+    clearQuestionParam()
+  }, [clearQuestionParam])
 
-  const handleSubmitAnswer = () => {
-    if (!panelQuestion) return
-    actions.submitQuestionAnswer(panelQuestion.id, answer)
-    closePanel()
-    setJustSubmitted(true)
-  }
+  const openDispute = useCallback((id) => {
+    setDisputeId(id)
+    setAnswerId(null)
+    setQuestionParam(id)
+  }, [setQuestionParam])
+
+  const closeDispute = useCallback(() => {
+    setDisputeId(null)
+    clearQuestionParam()
+  }, [clearQuestionParam])
+
+  const handleSaveDraft = useCallback((id, draft, attachments = [], referenceLinks = []) => {
+    actions.saveQuestionDraft(id, draft, attachments, referenceLinks)
+    setAlert('Draft saved. You can continue anytime before the answer deadline.')
+  }, [actions])
+
+  const handleSubmit = useCallback((id, answerText, attachments = [], referenceLinks = []) => {
+    actions.submitQuestionAnswer(id, answerText, attachments, referenceLinks)
+    closeAnswer()
+    setAlert('Answer submitted. The customer can now view it and you can edit it for the next 24 hours.')
+  }, [actions, closeAnswer])
+
+  const handleSaveCorrection = useCallback((id, updatedAnswer, attachments = [], referenceLinks = []) => {
+    const saved = actions.editSubmittedQuestionAnswer(id, updatedAnswer, attachments, referenceLinks)
+    if (saved) setAlert('Answer updated. The corrected answer is now visible to the customer.')
+    return saved
+  }, [actions])
 
   return (
     <div>
       <PageHeader
         eyebrow="Astrologer"
-        title="Answer Question"
+        title="Question Details"
+        subtitle="Answer received questions within 30 days, oldest first."
         showBack
         backTo={routes.textBasedQuestions}
         backIcon={backIcon}
       />
 
       <Section>
-        <Card>
-          <div className="search-filter-row">
-            <div className="search-filter-row__group">
-              <div className="search-bar">
+        <Card style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="search-filter-row__group" style={{ gap: 10, width: 'min(100%, 320px)' }}>
+            <div className="search-bar" style={{ width: '100%' }}>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by user name, question ID, category, status, or keyword"
+                placeholder="Search by customer, user ID, question ID, category, or keyword"
                 className="text-input search-bar__input"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setAppliedSearch(search)
@@ -152,206 +719,180 @@ export default function AnswerQuestion() {
               <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
                 <Search size={18} />
               </button>
-              </div>
             </div>
           </div>
         </Card>
       </Section>
 
-      <Section title="Questions" icon={TempleScrollIcon} titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>({filteredQuestions.length})</span>}>
-        {pagedQuestions.length === 0 && (
+      <Section>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5" style={{ gridAutoRows: '1fr' }}>
+          <SummaryCard
+            label="General Pending"
+            value={summary.generalPending}
+            hint={`${summary.inProgress} in progress`}
+            background="var(--primary-bg)"
+            color="var(--primary)"
+            border="rgba(91, 33, 182, 0.20)"
+            onClick={() => {
+              if (dueFilter === 'Pending' && typeOption === 'General Pending') {
+                setTypeOption('All')
+                setDueFilter('All')
+                return
+              }
+              setTypeOption('General Pending')
+              setDueFilter('Pending')
+            }}
+            active={dueFilter === 'Pending' && typeOption === 'General Pending'}
+          />
+          <SummaryCard
+            label="Personal Pending"
+            value={summary.personalPending}
+            hint={`${summary.needsAnswer} awaiting answers`}
+            background="var(--sky-bg)"
+            color="var(--sky-600)"
+            border="rgba(2, 132, 199, 0.20)"
+            onClick={() => {
+              if (dueFilter === 'Pending' && typeOption === 'Personal') {
+                setTypeOption('All')
+                setDueFilter('All')
+                return
+              }
+              setTypeOption('Personal')
+              setDueFilter('Pending')
+            }}
+            active={dueFilter === 'Pending' && typeOption === 'Personal'}
+          />
+          <SummaryCard
+            label="Due Soon"
+            value={summary.dueSoon}
+            hint="Within 7 days of deadline"
+            background="var(--coral-100)"
+            color="var(--coral-600)"
+            border="rgba(242, 102, 42, 0.24)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Due Soon' ? 'All' : 'Due Soon') }}
+            active={dueFilter === 'Due Soon'}
+          />
+          <SummaryCard
+            label="Disputed"
+            value={summary.disputed}
+            hint="Dispute Raised"
+            background="#FFF7ED"
+            color="#EA580C"
+            border="rgba(234, 88, 12, 0.32)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Disputed' ? 'All' : 'Disputed') }}
+            active={dueFilter === 'Disputed'}
+          />
+          <SummaryCard
+            label="Cancelled"
+            value={summary.cancelled}
+            hint="Answer deadline exceeded"
+            background="var(--danger-bg)"
+            color="var(--red-600)"
+            border="rgba(239, 68, 68, 0.24)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Cancelled' ? 'All' : 'Cancelled') }}
+            active={dueFilter === 'Cancelled'}
+          />
+        </div>
+      </Section>
+
+      <Section
+        title="Questions"
+        icon={TempleScrollIcon}
+        titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>({filteredQuestions.length} {dueFilter !== 'All' ? ` · ${dueFilter.toLowerCase()}` : 'total'})</span>}
+      >
+        {filteredQuestions.length === 0 && (
           <Card>
-            <div className="muted">No matching questions found. Try a different search term.</div>
+            <div className="muted">No matching questions found. Try a different search term or filter.</div>
           </Card>
         )}
-
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {pagedQuestions.map((question) => (
-            <Card
+            <QuestionCard
               key={question.id}
-              hover
-              style={{ cursor: 'pointer', padding: 16 }}
-              onClick={() => openQuestion(question.id)}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.user}</span>
-                    <span className="muted" style={{ fontSize: 12 }}>{question.id}</span>
-                  </div>
-                  <div style={{ color: 'var(--ink)', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 320 }}>
-                    "{question.question}"
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="badge badge-violet">{question.type}</span>
-                    <span className="muted" style={{ fontSize: 12 }}>Submitted: {question.raised}</span>
-                  </div>
-                </div>
-                <StatusBadge label={question.status} />
-              </div>
-            </Card>
+              question={question}
+              nowMs={nowMs}
+              onAnswer={openAnswer}
+              onViewDispute={openDispute}
+            />
           ))}
         </div>
-
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 18 }}>
+          <div
+            className="flex flex-wrap items-center justify-center gap-2"
+            style={{ marginTop: 20 }}
+            role="navigation"
+            aria-label="Questions pagination"
+          >
             <button
+              type="button"
               className="btn btn-outline btn-sm"
               disabled={currentPage <= 1}
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             >
+              <ChevronLeft size={16} />
               Previous
             </button>
-            <span className="muted" style={{ fontSize: 13 }}>Page {currentPage} of {totalPages}</span>
+            {buildPageTokens(currentPage, totalPages).map((token) => {
+              if (typeof token === 'string') {
+                return (
+                  <span key={token} className="muted" style={{ padding: '0 4px', fontSize: 13 }}>&hellip;</span>
+                )
+              }
+              const isCurrent = token === currentPage
+              return (
+                <button
+                  key={token}
+                  type="button"
+                  className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  style={{ minWidth: 34, justifyContent: 'center' }}
+                  onClick={() => setPage(token)}
+                >
+                  {token}
+                </button>
+              )
+            })}
             <button
+              type="button"
               className="btn btn-outline btn-sm"
               disabled={currentPage >= totalPages}
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
             >
               Next
+              <ChevronRight size={16} />
             </button>
           </div>
         )}
+        <div className="muted" style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5 }}>
+          Showing {pagedQuestions.length} of {filteredQuestions.length} questions
+          {' · '}
+          Page {currentPage} of {totalPages}
+        </div>
       </Section>
 
-      {panelQuestion && createPortal(
-        <div className="modal-overlay" onClick={closePanel}>
-          <div
-            className="modal-card modal-card--scroll"
-            style={{ width: 'min(640px, calc(100vw - 32px))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-card__header flex items-center justify-between gap-4">
-              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-                <div className="astrologer-modal-title">Answer Question</div>
-                <div
-                  className="muted"
-                  style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {panelQuestion.campaignName} · {panelQuestion.id}
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 'auto' }}>
-                <StatusBadge label={panelQuestion.status} />
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label="Close"
-                  onClick={closePanel}
-                  style={{ width: 32, height: 32, minWidth: 32 }}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="modal-card__content astrologer-modal-content">
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <TempleArchIcon size={14} />User Details
-                </div>
-                <div
-                  className="astrologer-modal-highlight astrologer-modal-details-grid"
-                >
-                  <div><strong>Name</strong><div className="muted">{panelQuestion.user}</div></div>
-                  <div><strong>Question Type</strong><div className="muted">{panelQuestion.type}</div></div>
-                  <div><strong>Category</strong><div className="muted">{panelQuestion.category}</div></div>
-                  <div><strong>Question For</strong><div className="muted">{panelQuestion.questionFor}</div></div>
-                  <div><strong>Language</strong><div className="muted">{panelQuestion.language}</div></div>
-                </div>
-              </div>
-
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <TempleScrollIcon size={14} />User Question
-                </div>
-                <div
-                  className="astrologer-modal-highlight astrologer-modal-question"
-                >
-                  {(() => {
-                    const { preview, isTruncated } = getWordPreview(panelQuestion.question)
-                    return <>
-                      “{preview}”
-                      {isTruncated && <button type="button" className="link-btn ml-1" aria-label="See full user question" onClick={() => setFullContent({ title: 'User Question', content: panelQuestion.question })}>See more…</button>}
-                    </>
-                  })()}
-                </div>
-              </div>
-
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <TempleLotusIcon size={14} />Horoscope Details
-                </div>
-                <div className="option-list" style={{ gap: 10 }}>
-                  <div className="option-pill selected">
-                    <span className="option-mark">✓</span>
-                    {panelQuestion.horoscopeMode}
-                  </div>
-                  {panelQuestion.attachments.map((file) => (
-                    <button key={file} className="option-pill" type="button" onClick={() => window.alert(`Opening ${file}`)}>
-                      <span className="option-mark"><TempleScrollIcon size={14} /></span>
-                      {file}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <TempleLampIcon size={14} />Answer
-                </div>
-                <textarea
-                  className="textarea-box"
-                  style={{ width: '100%' }}
-                  placeholder="Type your answer here..."
-                  maxLength={3000}
-                  value={answer}
-                  readOnly={isAnswered || (isUnderReview && !editingSubmittedAnswer)}
-                  onChange={(e) => setAnswer(e.target.value)}
-                />
-                <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>Characters: {answer.length} / 3000</div>
-                {isUnderReview && (
-                  <div className="muted" style={{ marginTop: 8, fontSize: 13 }}>
-                    {reviewActive
-                      ? canEditSubmittedAnswer
-                        ? 'Answer is held for review. You can enable one correction before it is delivered.'
-                        : 'Correction saved. The answer is locked until automatic delivery.'
-                      : 'Review window ended. The answer will be delivered automatically.'}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-card__footer astrologer-modal-footer-actions">
-              {isAnswered && (
-                <span style={{ color: 'var(--green-600)', fontSize: 13, fontWeight: 600, marginRight: 'auto' }}>
-                  Submitted Successfully
-                </span>
-              )}
-              <button className="btn btn-ghost" onClick={closePanel}>Cancel</button>
-              {isUnderReview && canEditSubmittedAnswer && !editingSubmittedAnswer && (
-                <button className="btn btn-outline" onClick={() => setEditingSubmittedAnswer(true)}>Enable One-Time Edit</button>
-              )}
-              {isUnderReview && editingSubmittedAnswer && (
-                <button className="btn btn-primary" disabled={!answer.trim()} onClick={handleSaveCorrection}>Save Correction</button>
-              )}
-              {!isAnswered && !isUnderReview && (
-                <button
-                  className="btn btn-primary"
-                  disabled={!answer.trim()}
-                  onClick={handleSubmitAnswer}
-                >
-                  Submit Answer
-                </button>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.body,
+      {answerQuestion && (
+        <AnswerModal
+          key={answerQuestion.id}
+          question={answerQuestion}
+          nowMs={nowMs}
+          onClose={closeAnswer}
+          onSaveDraft={handleSaveDraft}
+          onSubmit={handleSubmit}
+          onSaveCorrection={handleSaveCorrection}
+          onViewHoroscope={setFullContent}
+        />
       )}
 
-      {justSubmitted && (
-        <SuccessAlert message="Answer submitted successfully." onDismiss={() => setJustSubmitted(false)} />
+      {disputeQuestion && (
+        <DisputeDetailsModal
+          question={disputeQuestion}
+          onClose={closeDispute}
+          onResponded={() => setAlert('Response submitted successfully.')}
+        />
+      )}
+
+      {alert && (
+        <SuccessAlert message={alert} onDismiss={() => setAlert(null)} />
       )}
 
       {fullContent && createPortal(

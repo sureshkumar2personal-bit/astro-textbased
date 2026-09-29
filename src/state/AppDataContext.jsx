@@ -9,6 +9,19 @@ import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
 import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
 import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
+import {
+  MONTHLY_QUESTION_CAPACITY,
+  countQuestionsInMonth,
+  createCampaignRecord,
+  getCampaignAllocation,
+  getCampaignDiscountPercent,
+  getDiscountPreview,
+  getMonthlyCapacitySummary,
+  getOpenQuestionCapacity,
+  sumCampaignAllocations,
+  validateCapacityAllocation,
+} from '../utils/questions.js'
+import { ANSWER_DEADLINE_EXCEEDED_REASON, applyAnswerDeadlineCancellation, applyAnswerEdit, applyAnswerSubmit, applyQuestionDraft } from '../utils/answer.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -34,15 +47,274 @@ const CAREER_CAMPAIGN_CATEGORIES = [
   { name: 'Career', normalPrice: 200, discountPercent: 80, compulsoryQuestions: 150 },
 ]
 
-const ANSWER_REVIEW_WINDOW_MS = 5 * 60 * 60 * 1000
+const DEFAULT_OPEN_QUESTION_SETTINGS = {
+  generalPrice: 200,
+  personalPrice: 500,
+  capacity: 0,
+  generalEnabled: true,
+  personalEnabled: true,
+  // Subscriber offer, mirroring the campaign offer model (offerEnabled +
+  // discountPercent). It lives on the open question settings only, so it can
+  // never leak into campaigns or any other question type.
+  offerEnabled: false,
+  discountPercent: 0,
+}
+
+// Demo campaigns are anchored to the current calendar month so the Campaigns
+// dashboard always demonstrates Active / Scheduled / Draft states. Hard-coding a
+// month here would let the demo rot into an empty or fully-closed month.
+const DEMO_TODAY = new Date()
+const DEMO_MONTH_KEY = `${DEMO_TODAY.getFullYear()}-${String(DEMO_TODAY.getMonth() + 1).padStart(2, '0')}`
+const DEMO_NEXT_MONTH_KEY = (() => {
+  const next = new Date(DEMO_TODAY.getFullYear(), DEMO_TODAY.getMonth() + 1, 1)
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`
+})()
+const demoMonthStart = (offset = 0) => new Date(DEMO_TODAY.getFullYear(), DEMO_TODAY.getMonth() + offset, 1)
+const demoMonthEnd = (offset = 0) => new Date(DEMO_TODAY.getFullYear(), DEMO_TODAY.getMonth() + offset + 1, 0)
+const demoDate = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+const demoDateTime = (daysFromNow) => new Date(DEMO_TODAY.getTime() + daysFromNow * 86400000).toISOString()
+
+const DEMO_CAMPAIGNS = [
+  {
+    id: 'demo-active-marriage',
+    name: 'Marriage & Relationships',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd()),
+    priority: 'High',
+    status: 'Active',
+    categories: [{ name: 'Marriage', normalPrice: 200, discountPercent: 70, compulsoryQuestions: 150 }],
+    shortDescription: 'Live marriage timing, compatibility and partner questions.',
+    description: 'Ask about marriage timing, partner compatibility and remedies for marital harmony.',
+    whatUsersCanAsk: 'Ask about marriage timing, partner compatibility, relationship challenges and Manglik dosha.',
+    exampleQuestions: ['When will I get married?', 'Is this proposal compatible with my horoscope?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: true,
+    discountPercent: 60,
+    generalOffer: true,
+    personalOffer: true,
+    generalPrice: 100,
+    personalPrice: 250,
+    packagePrice: 2000,
+    purchasedGeneral: 14,
+    purchasedPersonal: 7,
+    totalLimit: 40,
+    generalLimit: 25,
+    personalLimit: 15,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-active-health',
+    name: 'Health & Wellbeing',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd()),
+    priority: 'High',
+    status: 'Active',
+    categories: HEALTH_CAMPAIGN_CATEGORIES,
+    shortDescription: 'Live health, dosha and wellbeing questions for subscribers.',
+    description: 'Ask about health issues, dosha balance, diet and wellbeing remedies.',
+    whatUsersCanAsk: 'Ask about recurring health issues, dosha imbalance, diet guidance and remedies.',
+    exampleQuestions: ['Why do I face acidity frequently?', 'Which diet suits my dosha balance?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: true,
+    discountPercent: 50,
+    generalOffer: true,
+    personalOffer: true,
+    generalPrice: 100,
+    personalPrice: 250,
+    packagePrice: 2200,
+    purchasedGeneral: 9,
+    purchasedPersonal: 5,
+    totalLimit: 30,
+    generalLimit: 18,
+    personalLimit: 12,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-scheduled-career',
+    name: 'Career Breakthrough',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd(1)),
+    priority: 'Medium',
+    status: 'Scheduled',
+    scheduledPublishAt: demoDateTime(2),
+    categories: CAREER_CAMPAIGN_CATEGORIES,
+    shortDescription: 'Auto-publishes shortly for job, promotion and business questions.',
+    description: 'Ask about job changes, promotions, government jobs and business moves.',
+    whatUsersCanAsk: 'Ask about job changes, promotions, government jobs and ideal career fields.',
+    exampleQuestions: ['Will I get a government job based on my horoscope?', 'Should I accept this offer?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: true,
+    discountPercent: 40,
+    generalOffer: true,
+    personalOffer: false,
+    generalPrice: 120,
+    personalPrice: 275,
+    packagePrice: 2400,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 30,
+    generalLimit: 18,
+    personalLimit: 12,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-scheduled-education',
+    name: 'Education & Study',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd(1)),
+    priority: 'Medium',
+    status: 'Scheduled',
+    scheduledPublishAt: demoDateTime(9),
+    categories: [{ name: 'Study', normalPrice: 200, discountPercent: 40, compulsoryQuestions: 150 }],
+    shortDescription: 'Queues to publish next week for exams, admissions and study focus.',
+    description: 'Ask about exam performance, admissions, study focus and foreign education.',
+    whatUsersCanAsk: 'Ask about exam results, admissions, study focus and foreign education.',
+    exampleQuestions: ['Will I clear my exam this year?', 'Is studying abroad suitable for me?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: false,
+    discountPercent: 0,
+    generalOffer: false,
+    personalOffer: false,
+    generalPrice: 100,
+    personalPrice: 200,
+    packagePrice: 1800,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 24,
+    generalLimit: 16,
+    personalLimit: 8,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-draft-finance',
+    name: 'Wealth & Finance',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd()),
+    priority: 'Low',
+    status: 'Draft',
+    categories: [{ name: 'Finance', normalPrice: 200, discountPercent: 60, compulsoryQuestions: 150 }],
+    shortDescription: 'Draft saved for review — pricing and allocation still to be finalised.',
+    description: 'Ask about wealth periods, safe investments, clearing debts and income growth.',
+    whatUsersCanAsk: 'Ask about wealth periods, safe investments, clearing debts and income growth.',
+    exampleQuestions: ['When is the right time to buy a property?', 'How do I clear debt faster?'],
+    questionTypes: ['General'],
+    offerEnabled: true,
+    discountPercent: 30,
+    generalOffer: true,
+    personalOffer: false,
+    generalPrice: 110,
+    personalPrice: 0,
+    packagePrice: 2000,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 20,
+    generalLimit: 20,
+    personalLimit: 0,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-draft-love',
+    name: 'Love & Compatibility',
+    month: DEMO_MONTH_KEY,
+    date: demoDate(demoMonthStart()),
+    endDate: demoDate(demoMonthEnd()),
+    priority: 'Low',
+    status: 'Draft',
+    categories: [{ name: 'Love', normalPrice: 200, discountPercent: 90, compulsoryQuestions: 150 }],
+    shortDescription: 'Draft saved for review — publish once the offer copy is agreed.',
+    description: 'Ask about love compatibility, commitment timing and moving on from past relationships.',
+    whatUsersCanAsk: 'Ask about love compatibility, commitment timing and past relationships.',
+    exampleQuestions: ['Does he love me back?', 'When will we get married?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: false,
+    discountPercent: 0,
+    generalOffer: false,
+    personalOffer: false,
+    generalPrice: 130,
+    personalPrice: 300,
+    packagePrice: 2600,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 20,
+    generalLimit: 12,
+    personalLimit: 8,
+    astrologerId: 'astrologer-demo',
+  },
+  // Next-month records so the month selector can demonstrate future states
+  // (Scheduled / Draft) without the campaign period having to be shortened.
+  {
+    id: 'demo-next-scheduled-property',
+    name: 'Property & Vastu',
+    month: DEMO_NEXT_MONTH_KEY,
+    date: demoDate(demoMonthStart(1)),
+    endDate: demoDate(demoMonthEnd(1)),
+    priority: 'Medium',
+    status: 'Scheduled',
+    scheduledPublishAt: demoDateTime(16),
+    categories: [{ name: 'Property', normalPrice: 200, discountPercent: 60, compulsoryQuestions: 150 }],
+    shortDescription: 'Opens next month for property, construction and Vastu questions.',
+    description: 'Ask about property purchases, selling at the right time and Vastu remedies.',
+    whatUsersCanAsk: 'Ask about property purchases, construction decisions and Vastu remedies.',
+    exampleQuestions: ['Is this the right time to buy a house?', 'Should I sell my current property?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: true,
+    discountPercent: 45,
+    generalOffer: true,
+    personalOffer: true,
+    generalPrice: 110,
+    personalPrice: 260,
+    packagePrice: 2200,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 26,
+    generalLimit: 16,
+    personalLimit: 10,
+    astrologerId: 'astrologer-demo',
+  },
+  {
+    id: 'demo-next-draft-family',
+    name: 'Family & Children',
+    month: DEMO_NEXT_MONTH_KEY,
+    date: demoDate(demoMonthStart(1)),
+    endDate: demoDate(demoMonthEnd(1)),
+    priority: 'Low',
+    status: 'Draft',
+    categories: [{ name: 'Family', normalPrice: 200, discountPercent: 50, compulsoryQuestions: 150 }],
+    shortDescription: 'Draft prepared for next month — not published yet.',
+    description: 'Ask about children, their studies and health, and improving family harmony.',
+    whatUsersCanAsk: 'Ask about the timing of children, their studies and health, and family harmony.',
+    exampleQuestions: ['When is the right time for a child?', 'How do I improve family harmony?'],
+    questionTypes: ['General', 'Personal'],
+    offerEnabled: false,
+    discountPercent: 0,
+    generalOffer: false,
+    personalOffer: false,
+    generalPrice: 105,
+    personalPrice: 240,
+    packagePrice: 2100,
+    purchasedGeneral: 0,
+    purchasedPersonal: 0,
+    totalLimit: 22,
+    generalLimit: 14,
+    personalLimit: 8,
+    astrologerId: 'astrologer-demo',
+  },
+]
 
 const initialCampaigns = [
   {
     id: 'july-premium',
     categories: HEALTH_CAMPAIGN_CATEGORIES,
     name: 'Health Campaign',
-    date: '31 Jul 2026',
-    endDate: '31 Aug 2026',
+    month: '2026-07',
+    date: '01 Jul 2026',
+    endDate: '31 Jul 2026',
     priority: 'High',
     status: 'Active',
     discountPercent: 70,
@@ -62,8 +334,9 @@ const initialCampaigns = [
     id: 'festival-special',
     categories: CAREER_CAMPAIGN_CATEGORIES,
     name: 'Career Campaign',
+    month: '2026-08',
     date: '15 Aug 2026',
-    endDate: '20 Sep 2026',
+    endDate: '31 Aug 2026',
     priority: 'Medium',
     status: 'Draft',
     discountPercent: 80,
@@ -83,8 +356,9 @@ const initialCampaigns = [
     id: 'vip-subscribers',
     categories: DEFAULT_CAMPAIGN_CATEGORIES,
     name: 'VIP Subscribers',
+    month: '2026-09',
     date: '05 Sep 2026',
-    endDate: '05 Oct 2026',
+    endDate: '30 Sep 2026',
     priority: 'Low',
     status: 'Closed',
     discountPercent: 0,
@@ -100,6 +374,7 @@ const initialCampaigns = [
     personalLimit: 5,
     astrologerId: 'astrologer-demo',
   },
+  ...DEMO_CAMPAIGNS,
 ]
 
 const initialPurchasedSlots = initialCampaigns
@@ -114,6 +389,22 @@ const initialPurchasedSlots = initialCampaigns
     personalPurchased: campaign.purchasedPersonal,
     personalUsed: 0,
   }))
+
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function demoQuestionReceivedAt(daysAgo, hour = 10, minute = 30) {
+  const date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000)
+  date.setHours(hour, minute, 0, 0)
+  return date.toISOString()
+}
+
+function demoQuestionRaisedLabel(daysAgo, hour = 10, minute = 30) {
+  const date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000)
+  date.setHours(hour, minute, 0, 0)
+  const suffix = date.getHours() >= 12 ? 'PM' : 'AM'
+  const displayHour = date.getHours() % 12 || 12
+  return `${String(date.getDate()).padStart(2, '0')}-${MONTHS_SHORT[date.getMonth()]}-${date.getFullYear()} ${displayHour}:${String(date.getMinutes()).padStart(2, '0')} ${suffix}`
+}
 
 const initialQuestions = [
   {
@@ -135,7 +426,7 @@ const initialQuestions = [
     priority: 'High',
     campaignId: 'july-premium',
     campaignName: 'Health Campaign',
-    raised: '21-Jul-2026 10:30 AM',
+    raised: demoQuestionRaisedLabel(3, 10, 30),
     question: 'When is the right time for my marriage?',
     answer: '',
     draftAnswer: 'Looking at your chart, the next supportive period is...',
@@ -144,7 +435,7 @@ const initialQuestions = [
     previousQuestions: ['Marriage Question - Answered', 'Career Question - Closed'],
     dispute: null,
     history: ['Created by user', 'Assigned to astrologer'],
-    raisedAt: '2026-07-21T10:30:00+05:30',
+    raisedAt: demoQuestionReceivedAt(3, 10, 30),
   },
   {
     id: 'QTN-2026-000124',
@@ -165,7 +456,7 @@ const initialQuestions = [
     priority: 'Medium',
     campaignId: 'july-premium',
     campaignName: 'Health Campaign',
-    raised: '22-Jul-2026 01:15 PM',
+    raised: demoQuestionRaisedLabel(5, 13, 15),
     question: 'Should I expand my business this quarter?',
     answer: '',
     draftAnswer: '',
@@ -174,7 +465,7 @@ const initialQuestions = [
     previousQuestions: ['Business Question - Pending'],
     dispute: null,
     history: ['Queued for review'],
-    raisedAt: '2026-07-22T13:15:00+05:30',
+    raisedAt: demoQuestionReceivedAt(5, 13, 15),
   },
   {
     id: 'QTN-2026-000125',
@@ -262,7 +553,7 @@ const initialQuestions = [
     priority: 'Low',
     campaignId: 'festival-special',
     campaignName: 'Career Campaign',
-    raised: '20-Jul-2026 04:20 PM',
+    raised: demoQuestionRaisedLabel(4, 16, 20),
     question: 'Can I switch jobs this month?',
     answer: '',
     draftAnswer: 'I need to review the timing of your transits.',
@@ -271,7 +562,7 @@ const initialQuestions = [
     previousQuestions: ['Job Question - Pending'],
     dispute: null,
     history: ['Assigned to astrologer'],
-    raisedAt: '2026-07-20T16:20:00+05:30',
+    raisedAt: demoQuestionReceivedAt(4, 16, 20),
   },
   {
     id: 'QTN-2026-001247',
@@ -341,6 +632,412 @@ const initialQuestions = [
     },
     history: ['Created by user', 'Answered by astrologer', 'User raised dispute'],
     raisedAt: '2026-07-14T15:20:00+05:30',
+  },
+  {
+    id: 'QTN-2026-001249',
+    userId: 'customer-kannan',
+    astrologerId: 'astrologer-demo',
+    user: 'Kannan',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Pending',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(2, 10, 30),
+    question: 'Is there a favorable window to negotiate a salary hike this quarter?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(2, 10, 30),
+  },
+  {
+    id: 'QTN-2026-001250',
+    userId: 'customer-arjun-subscriber',
+    astrologerId: 'astrologer-demo',
+    user: 'Arjun D.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Relationship',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Pending',
+    priority: 'Medium',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(6, 16, 45),
+    question: 'When might my relationship become more settled and harmonious?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(6, 16, 45),
+  },
+  {
+    id: 'QTN-2026-001251',
+    userId: 'customer-devi',
+    astrologerId: 'astrologer-demo',
+    user: 'Devi',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Health',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'Tanglish',
+    status: 'Pending',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(9, 11, 20),
+    question: 'I have been facing persistent low energy and sleep issues. Does my chart show a favorable period for recovery soon?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: ['BirthChart.pdf'],
+    previousQuestions: ['Career Question - Answered'],
+    customer: {
+      id: 'customer-devi',
+      name: 'Devi',
+      dateOfBirth: '1993-11-02',
+      timeOfBirth: '06:45 AM',
+      birthPlace: 'Madurai, Tamil Nadu',
+      rasi: 'Vrishchika (Scorpio)',
+      nakshatra: 'Jyeshtha',
+      lagna: 'Kanya Lagna',
+      horoscopeDetails: 'Mangal dosha present. Rahu placed in the 7th house; Saturn aspects the Moon. Driven by an intense, detail-oriented mind.',
+    },
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(9, 11, 20),
+  },
+  {
+    id: 'QTN-2026-001252',
+    userId: 'customer-arun',
+    astrologerId: 'astrologer-demo',
+    user: 'Arun',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'In Progress',
+    priority: 'Low',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(12, 15, 10),
+    question: 'Can I switch jobs this month without it affecting my long-term growth?',
+    answer: '',
+    draftAnswer: 'Checking your current Saturn transit before I commit to a direction.',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer', 'Draft saved'],
+    raisedAt: demoQuestionReceivedAt(12, 15, 10),
+  },
+  {
+    id: 'QTN-2026-001253',
+    userId: 'customer-meena',
+    astrologerId: 'astrologer-demo',
+    user: 'Meena R.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Family',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'In Progress',
+    priority: 'Medium',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(16, 9, 40),
+    question: 'How can I bring more peace and clarity into a strained family relationship?',
+    answer: '',
+    draftAnswer: 'Looking at your Moon placement for emotional balance before the detailed response.',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: [],
+    previousQuestions: ['Health Question - Answered'],
+    customer: {
+      id: 'customer-meena',
+      name: 'Meena R.',
+      dateOfBirth: '1990-02-14',
+      timeOfBirth: '07:20 AM',
+      birthPlace: 'Coimbatore, Tamil Nadu',
+      rasi: 'Kumbha (Aquarius)',
+      nakshatra: 'Dhanishta',
+      lagna: 'Vrishabha Lagna',
+      horoscopeDetails: 'Moon in Taurus in the 6th house. Ketu in the 4th house brings sensitivity at home; calming home environment helps family harmony.',
+    },
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer', 'Draft saved'],
+    raisedAt: demoQuestionReceivedAt(16, 9, 40),
+  },
+  {
+    id: 'QTN-2026-001254',
+    userId: 'customer-kannan',
+    astrologerId: 'astrologer-demo',
+    user: 'Kannan',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Business',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Business',
+    language: 'English',
+    status: 'Pending',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(26, 13, 5),
+    question: 'Should I sign the new vendor agreement before the end of this month?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(26, 13, 5),
+  },
+  {
+    id: 'QTN-2026-001255',
+    userId: 'customer-priya',
+    astrologerId: 'astrologer-demo',
+    user: 'Priya V.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Marriage',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'Tamil',
+    status: 'Pending',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(27, 12, 0),
+    question: 'Which months are most favorable for finalizing my marriage this year, considering the delays in my plans?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: ['Screenshot.pdf'],
+    previousQuestions: ['Marriage Question - Answered'],
+    customer: {
+      id: 'customer-priya',
+      name: 'Priya V.',
+      dateOfBirth: '1994-07-19',
+      timeOfBirth: '04:10 AM',
+      birthPlace: 'Chennai, Tamil Nadu',
+      rasi: 'Kataka (Cancer)',
+      nakshatra: 'Pushya',
+      lagna: 'Simha Lagna',
+      horoscopeDetails: 'Jupiter in Leo in the 1st house. Saturn in the 7th house delays marriage but promises stability after the saturn return window.',
+    },
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(27, 12, 0),
+  },
+  {
+    id: 'QTN-2026-001256',
+    userId: 'customer-lakshmi',
+    astrologerId: 'astrologer-demo',
+    user: 'Lakshmi',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Health',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Pending',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(28, 18, 30),
+    question: 'My mother is recovering from surgery. Is there an auspicious time to schedule the next follow-up procedure?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    customer: {
+      id: 'customer-lakshmi',
+      name: 'Lakshmi',
+      dateOfBirth: '1987-09-25',
+      timeOfBirth: '09:55 PM',
+      birthPlace: 'Salem, Tamil Nadu',
+      rasi: 'Tula (Libra)',
+      nakshatra: 'Swati',
+      lagna: 'Mithuna Lagna',
+      horoscopeDetails: 'Kindly check the ascendant lord periods before selecting the procedure date.',
+    },
+    dispute: null,
+    history: ['Created by user', 'Assigned to astrologer'],
+    raisedAt: demoQuestionReceivedAt(28, 18, 30),
+  },
+  {
+    id: 'QTN-2026-001257',
+    userId: 'customer-meena',
+    astrologerId: 'astrologer-demo',
+    user: 'Meena R.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Family',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'Medium',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(28, 8, 15),
+    question: 'How should I approach an important family discussion about property matters?',
+    answer: 'Approach the discussion calmly and keep the focus on shared intentions rather than past differences. The current period favors clear, written agreements made on a weekday morning. Avoid pushing decisions immediately after full moon days, which tend to heighten emotions at home.',
+    answeredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000).toISOString(),
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: [],
+    previousQuestions: ['Health Question - Answered'],
+    customer: {
+      id: 'customer-meena',
+      name: 'Meena R.',
+      dateOfBirth: '1990-02-14',
+      timeOfBirth: '07:20 AM',
+      birthPlace: 'Coimbatore, Tamil Nadu',
+      rasi: 'Kumbha (Aquarius)',
+      nakshatra: 'Dhanishta',
+      lagna: 'Vrishabha Lagna',
+      horoscopeDetails: 'Moon in Taurus in the 6th house. Ketu in the 4th house brings sensitivity at home.',
+    },
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: demoQuestionReceivedAt(28, 8, 15),
+  },
+  {
+    id: 'QTN-2026-001258',
+    userId: 'customer-arjun-subscriber',
+    astrologerId: 'astrologer-demo',
+    user: 'Arjun D.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'Low',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(20, 9, 50),
+    question: 'Is this a good time to accept the new role I was offered?',
+    answer: 'Yes — the opportunity fits your growth path this year. Review the responsibilities checklist carefully and confirm before the middle of next week, when the supporting transit begins.',
+    answeredAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Created by user', 'Answered by astrologer'],
+    raisedAt: demoQuestionReceivedAt(20, 9, 50),
+  },
+  {
+    id: 'QTN-2026-001259',
+    userId: 'customer-devi',
+    astrologerId: 'astrologer-demo',
+    user: 'Devi',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Health',
+    type: 'Personal',
+    purchaseType: 'Free',
+    purchaseAmount: 0,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'Tanglish',
+    status: 'Disputed',
+    priority: 'High',
+    campaignId: 'vip-subscribers',
+    campaignName: 'VIP Subscribers',
+    raised: demoQuestionRaisedLabel(10, 17, 25),
+    question: 'Does my chart indicate a long-term recovery path for my health, or should I seek a second opinion?',
+    answer: 'Your chart shows gradual improvement. Follow the suggested remedies and lifestyle changes for at least two months before reassessing.',
+    answeredAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    draftAnswer: '',
+    horoscopeMode: 'Use Saved Horoscope',
+    attachments: ['BirthChart.pdf'],
+    previousQuestions: ['Career Question - Answered'],
+    customer: {
+      id: 'customer-devi',
+      name: 'Devi',
+      dateOfBirth: '1993-11-02',
+      timeOfBirth: '06:45 AM',
+      birthPlace: 'Madurai, Tamil Nadu',
+      rasi: 'Vrishchika (Scorpio)',
+      nakshatra: 'Jyeshtha',
+      lagna: 'Kanya Lagna',
+      horoscopeDetails: 'Mangal dosha present. Rahu placed in the 7th house; Saturn aspects the Moon.',
+    },
+    dispute: {
+      target: 'Astrologer',
+      reason: 'The response feels too generic for a personal health question.',
+      description: 'I expected the answer to relate more directly to my chart and to explain the recovery timeline clearly.',
+      response: '',
+      status: 'Open',
+      attachment: 'BirthChart.pdf',
+    },
+    history: ['Created by user', 'Answered by astrologer', 'User raised dispute'],
+    raisedAt: demoQuestionReceivedAt(10, 17, 25),
   },
   // --- Recent answered questions (last 7 days) for the My Activity / Recent Activity feeds ---
   {
@@ -438,6 +1135,127 @@ const initialQuestions = [
     dispute: null,
     history: ['Created by user', 'Answered by astrologer'],
     raisedAt: questionsDemoIso(4 * DAY_MS + 2 * 60 * 60 * 1000),
+  },
+  // --- Open Questions (no campaign) -------------------------------------------
+  // These two records have no campaignId / campaignName on purpose: the question
+  // model already treats that as "raised from Open Questions", so the source
+  // resolves to "Open Question" through getQuestionSourceLabel without needing
+  // any extra field on the record.
+  {
+    // Open Question asked 6 days ago -> still inside the shared 30-day window.
+    id: 'QTN-2026-002101',
+    userId: 'customer-ritika',
+    astrologerId: 'astrologer-demo',
+    user: 'Ritika S.',
+    submittedByUserId: 'user-ritika',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Paid',
+    purchaseAmount: 200,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Pending',
+    priority: 'High',
+    raised: demoQuestionRaisedLabel(6, 11, 40),
+    question: 'I have just resigned from my current role. Based on my horoscope, when is the best time to start interviewing for new positions?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: ['Asked from Open Questions', 'Queued for review', 'Answer deadline set to 30 days from the asked date'],
+    raisedAt: demoQuestionReceivedAt(6, 11, 40),
+  },
+  {
+    // Open Question asked 36 days ago and never answered -> auto Cancelled,
+    // reason "Answer deadline exceeded", question price refunded in full.
+    id: 'QTN-2026-002102',
+    userId: 'customer-suresh',
+    astrologerId: 'astrologer-demo',
+    user: 'Suresh M.',
+    submittedByUserId: 'user-suresh',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Business',
+    type: 'General',
+    purchaseType: 'Paid',
+    purchaseAmount: 799,
+    refundAmount: 799,
+    refundStatus: 'Refunded',
+    questionFor: 'Business',
+    language: 'Tamil',
+    status: 'Cancelled',
+    cancellationReason: ANSWER_DEADLINE_EXCEEDED_REASON,
+    cancelledAt: demoQuestionReceivedAt(6, 11, 40),
+    priority: 'Medium',
+    raised: demoQuestionRaisedLabel(36, 8, 15),
+    question: 'I am planning to expand into a second city next quarter. Is this the right time to invest the capital, and which month should I begin?',
+    answer: '',
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: null,
+    history: [
+      'Asked from Open Questions',
+      'Queued for review',
+      'Answer deadline set to 30 days from the asked date',
+      `Cancelled automatically - ${ANSWER_DEADLINE_EXCEEDED_REASON}`,
+      'Refund of 799 processed',
+    ],
+    raisedAt: demoQuestionReceivedAt(36, 8, 15),
+  },
+  {
+    // Campaign question that was answered, then disputed and later resolved.
+    // History status is "Resolved", which is deliberately different from the
+    // plain "Completed" outcome of a question answered without any dispute.
+    id: 'QTN-2026-002103',
+    userId: 'customer-arjun-subscriber',
+    astrologerId: 'astrologer-demo',
+    user: 'Arjun D.',
+    submittedByUserId: 'user-demo',
+    submittedByEmail: 'user@astroconnect.com',
+    category: 'Career',
+    type: 'General',
+    purchaseType: 'Paid',
+    purchaseAmount: 250,
+    refundAmount: 0,
+    refundStatus: 'None',
+    questionFor: 'Self',
+    language: 'English',
+    status: 'Answered',
+    priority: 'High',
+    campaignId: 'festival-special',
+    campaignName: 'Career Campaign',
+    raised: demoQuestionRaisedLabel(21, 10, 15),
+    question: 'Is this the right time to accept the new role I was offered, and will the joining period suit my chart?',
+    answer: 'The joining window is favourable. Confirm the offer on a weekday morning and keep the first month free of major travel. If the joining date slips beyond the mid-month mark, hold the offer for one more cycle before committing.',
+    answeredAt: demoQuestionReceivedAt(18, 14, 30),
+    draftAnswer: '',
+    horoscopeMode: 'Continue Without Horoscope',
+    attachments: [],
+    previousQuestions: [],
+    dispute: {
+      target: 'Astrologer',
+      reason: 'The response did not mention what happens if the joining date is delayed.',
+      description: 'I need clarity on the delayed joining scenario because my offer expires at the end of the month. The answer did not cover the fallback window or how it affects the rest of the year.',
+      response: 'Apologies for the gap. If the joining date slips, hold the offer for one more 21-day cycle and avoid signing during a week marked by Rahu in the 7th house.',
+      status: 'Resolved',
+      raisedAt: demoQuestionReceivedAt(16, 10, 5),
+      resolvedAt: demoQuestionReceivedAt(12, 16, 45),
+      resolution: 'The answer was revised with an explicit delayed-joining window and a 21-day fallback cycle. The customer confirmed the revised guidance resolved the concern, so no refund was required.',
+    },
+    history: [
+      'Created by user',
+      'Answered by astrologer',
+      'User raised dispute',
+      'Astrologer responded to the dispute',
+      'Dispute resolved',
+    ],
+    raisedAt: demoQuestionReceivedAt(21, 10, 15),
   },
 ]
 
@@ -739,14 +1557,10 @@ function createCampaignId(name) {
   return `${slug || 'campaign'}-${Date.now().toString(36)}`
 }
 
-function formatCampaignDate(input) {
-  const parsed = new Date(input)
-  if (Number.isNaN(parsed.getTime())) return input
-  return parsed.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+function assertCampaignCapacityAllowed(campaigns, openSettings, proposedAllocation) {
+  const baseAllocation = sumCampaignAllocations(campaigns) + getOpenQuestionCapacity(openSettings)
+  const error = validateCapacityAllocation({ baseAllocation, proposedAllocation })
+  if (error) throw new Error(error)
 }
 
 function startOfMonthKey(date = new Date()) {
@@ -928,6 +1742,7 @@ export function normalizeLiveSession(session) {
 }
 
 const QUESTIONS_STORAGE_KEY = 'astroconnect-questions'
+const OPEN_QUESTION_SETTINGS_STORAGE_KEY = 'astroconnect-open-question-settings'
 const ASTROLOGER_SERVICES_STORAGE_KEY = 'astroconnect-astrologer-services'
 const ASTROLOGER_POSTS_STORAGE_KEY = 'astroconnect-astrologer-posts'
 const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessions-v3'
@@ -1347,6 +2162,10 @@ export function AppDataProvider({ children }) {
   const { currentUser } = useAuth()
   const consultationEditLocks = useRef(new Set())
   const [campaigns, setCampaigns] = useState(initialCampaigns)
+  const [openQuestionSettings, setOpenQuestionSettings] = useState(() => ({
+    ...DEFAULT_OPEN_QUESTION_SETTINGS,
+    ...(loadFromStorage(OPEN_QUESTION_SETTINGS_STORAGE_KEY, null) || {}),
+  }))
   const [questions, setQuestions] = useState(() => {
     const stored = loadFromStorage(QUESTIONS_STORAGE_KEY, null)
     if (!Array.isArray(stored)) return initialQuestions
@@ -1496,6 +2315,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(QUESTIONS_STORAGE_KEY, questions)
   }, [questions])
+
+  useEffect(() => {
+    saveToStorage(OPEN_QUESTION_SETTINGS_STORAGE_KEY, openQuestionSettings)
+  }, [openQuestionSettings])
 
   useEffect(() => {
     saveToStorage(USER_WALLET_STORAGE_KEY, userWallet)
@@ -1886,6 +2709,20 @@ export function AppDataProvider({ children }) {
       )
     },
     updateCampaign(campaignId, patch) {
+      const slotKeys = ['totalLimit', 'generalLimit', 'personalLimit']
+      if (slotKeys.some((key) => Object.prototype.hasOwnProperty.call(patch, key))) {
+        const currentCampaign = campaigns.find((item) => item.id === campaignId) || {}
+        const currentAllocation = getCampaignAllocation(currentCampaign)
+        const proposedAllocation = (() => {
+          if (patch.totalLimit != null && patch.totalLimit !== '') return Math.max(Number(patch.totalLimit) || 0, 0)
+          const generalValue = patch.generalLimit != null && patch.generalLimit !== '' ? Number(patch.generalLimit) || 0 : Number(currentCampaign.generalLimit) || 0
+          const personalValue = patch.personalLimit != null && patch.personalLimit !== '' ? Number(patch.personalLimit) || 0 : Number(currentCampaign.personalLimit) || 0
+          return generalValue + personalValue
+        })()
+        const baseAllocation = sumCampaignAllocations(campaigns) - currentAllocation + getOpenQuestionCapacity(openQuestionSettings)
+        const error = validateCapacityAllocation({ baseAllocation, proposedAllocation })
+        if (error) throw new Error(error)
+      }
       setCampaigns((prev) => prev.map((campaign) => (campaign.id === campaignId ? { ...campaign, ...patch } : campaign)))
       const discountChanged = Object.prototype.hasOwnProperty.call(patch, 'discountPercent')
       const availabilityChanged = Object.prototype.hasOwnProperty.call(patch, 'status')
@@ -1953,32 +2790,73 @@ export function AppDataProvider({ children }) {
         })
       }
     },
+    updateOpenQuestionSettings(patch) {
+      const nextGeneralPrice = patch.generalPrice != null && patch.generalPrice !== '' ? Math.max(Number(patch.generalPrice) || 0, 0) : Number(openQuestionSettings.generalPrice) || 0
+      const nextPersonalPrice = patch.personalPrice != null && patch.personalPrice !== '' ? Math.max(Number(patch.personalPrice) || 0, 0) : Number(openQuestionSettings.personalPrice) || 0
+      const nextCapacity = patch.capacity != null && patch.capacity !== '' ? Math.max(Number(patch.capacity) || 0, 0) : getOpenQuestionCapacity(openQuestionSettings)
+      const nextGeneralEnabled = patch.generalEnabled != null ? Boolean(patch.generalEnabled) : openQuestionSettings.generalEnabled !== false
+      const nextPersonalEnabled = patch.personalEnabled != null ? Boolean(patch.personalEnabled) : openQuestionSettings.personalEnabled !== false
+      // Same normalisation the campaign offer uses: a disabled offer stores 0,
+      // and the percent is clamped to 0-100 so no downstream consumer can read
+      // an out-of-range value.
+      const nextOfferEnabled = patch.offerEnabled != null ? Boolean(patch.offerEnabled) : openQuestionSettings.offerEnabled === true
+      const rawDiscountPercent = nextOfferEnabled
+        ? (patch.discountPercent != null ? Number(patch.discountPercent) : Number(openQuestionSettings.discountPercent))
+        : 0
+      const nextDiscountPercent = Number.isFinite(rawDiscountPercent)
+        ? Math.min(Math.max(rawDiscountPercent, 0), 100)
+        : 0
+      const baseAllocation = sumCampaignAllocations(campaigns)
+      const error = validateCapacityAllocation({ baseAllocation, proposedAllocation: nextCapacity })
+      if (error) throw new Error(error)
+      const enabledTypes = [
+        ...(nextGeneralEnabled ? ['General'] : []),
+        ...(nextPersonalEnabled ? ['Personal'] : []),
+      ]
+      // Reuses the campaign offer calculator so the persisted prices and the
+      // preview shown in the UI can never disagree. offerPrice is floored at 0,
+      // so the payable amount is never negative.
+      const generalOfferPreview = getDiscountPreview(nextGeneralPrice, nextDiscountPercent)
+      const personalOfferPreview = getDiscountPreview(nextPersonalPrice, nextDiscountPercent)
+      const offerSuffix = nextOfferEnabled && nextDiscountPercent > 0
+        ? ` A ${nextDiscountPercent}% offer brings this to ₹${generalOfferPreview.offerPrice} general / ₹${personalOfferPreview.offerPrice} personal.`
+        : ''
+      setOpenQuestionSettings((prev) => ({
+        ...prev,
+        generalPrice: nextGeneralPrice,
+        personalPrice: nextPersonalPrice,
+        capacity: nextCapacity,
+        generalEnabled: nextGeneralEnabled,
+        personalEnabled: nextPersonalEnabled,
+        offerEnabled: nextOfferEnabled,
+        discountPercent: nextDiscountPercent,
+      }))
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Open question settings updated',
+          detail: `Open questions are now priced at ₹${nextGeneralPrice} general / ₹${nextPersonalPrice} personal for ${enabledTypes.length > 0 ? `${enabledTypes.join(' and ')} types` : 'no question types'} with ${nextCapacity} monthly slots.${offerSuffix}`,
+          time: 'just now',
+          route: '/astrologer/text-based-questions',
+          audience: ROLES.ASTROLOGER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+    },
     createCampaign(payload) {
-      const discountPercent = payload.discountEnabled ? Number(payload.discountPercent) || 0 : 0
-      const campaign = {
+      const proposedAllocation = Number(payload.totalLimit)
+        || (Number(payload.generalLimit) + Number(payload.personalLimit))
+        || (Number(payload.capacity) || 0)
+      assertCampaignCapacityAllowed(campaigns, openQuestionSettings, proposedAllocation)
+      const discountPercent = getCampaignDiscountPercent(payload)
+      const campaign = createCampaignRecord(payload, {
         id: createCampaignId(payload.name),
-        name: payload.name.trim(),
-        date: formatCampaignDate(payload.date),
-        endDate: formatCampaignDate(payload.endDate),
-        priority: payload.priority || 'Medium',
-        status: payload.status || 'Draft',
-        scheduledPublishAt: payload.scheduledPublishAt || null,
         categories: Array.isArray(payload.categories)
           ? payload.categories
           : DEFAULT_CAMPAIGN_CATEGORIES.map((category) => ({ ...category, discountPercent })),
-        discountPercent,
-        generalOffer: Boolean(payload.discountEnabled ?? payload.generalOffer),
-        personalOffer: Boolean(payload.discountEnabled ?? payload.personalOffer),
-        generalPrice: Number(payload.generalPrice) || 0,
-        personalPrice: Number(payload.personalPrice) || 0,
-        packagePrice: Number(payload.packagePrice) || 0,
-        purchasedGeneral: 0,
-        purchasedPersonal: 0,
-        totalLimit: Number(payload.totalLimit) || 0,
-        generalLimit: Number(payload.generalLimit) || 0,
-        personalLimit: Number(payload.personalLimit) || 0,
-      }
-
+      })
       setCampaigns((prev) => [campaign, ...prev])
       setSelectedCampaignId(campaign.id)
       setNotifications((prev) => [
@@ -2177,15 +3055,10 @@ export function AppDataProvider({ children }) {
         moduleStatus: question.status,
       })
     },
-    saveQuestionDraft(questionId, draftAnswer) {
+    saveQuestionDraft(questionId, draftAnswer, attachments = [], referenceLinks = []) {
       const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
-        updateQuestion(prev, questionId, (question) => ({
-          ...question,
-          draftAnswer,
-          status: 'In Progress',
-          history: [...question.history, 'Draft saved'],
-        })),
+        updateQuestion(prev, questionId, (question) => applyQuestionDraft(question, draftAnswer, attachments, referenceLinks)),
       )
       if (question) {
         logActivity({
@@ -2201,22 +3074,12 @@ export function AppDataProvider({ children }) {
         })
       }
     },
-    submitQuestionAnswer(questionId, answer) {
+    submitQuestionAnswer(questionId, answer, attachments = [], referenceLinks = []) {
       const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
-        updateQuestion(prev, questionId, (question) => ({
-          ...question,
-          answer,
-          draftAnswer: '',
-          status: 'Under Review',
-          answerReviewStartedAt: Date.now(),
-          answerReviewUntil: Date.now() + ANSWER_REVIEW_WINDOW_MS,
-          answerEditUsed: false,
-          answerDeliveredAt: null,
-          history: [...question.history, 'Answer submitted for five-hour review'],
-        })),
+        updateQuestion(prev, questionId, (question) => applyAnswerSubmit(question, answer, Date.now(), attachments, referenceLinks)),
       )
-      if (question) {
+if (question) {
         logActivity({
           astrologerId: question.astrologerId,
           kind: 'questions',
@@ -2229,20 +3092,27 @@ export function AppDataProvider({ children }) {
           moduleStatus: 'Under Review',
         })
       }
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Answer delivered',
+          detail: `Question ${questionId} has been answered and is now available to the user.`,
+          time: 'just now',
+          route: `/user/track-questions?questionId=${questionId}`,
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
     },
-    editSubmittedQuestionAnswer(questionId, answer) {
+    editSubmittedQuestionAnswer(questionId, answer, attachments = [], referenceLinks = []) {
       const question = questions.find((item) => item.id === questionId)
-      if (!question || question.status !== 'Under Review' || question.answerEditUsed || !question.answerReviewUntil || question.answerReviewUntil <= Date.now()) return false
+      if (!question) return false
+      const updated = applyAnswerEdit(question, answer, Date.now(), attachments, referenceLinks)
+      if (updated === question) return false
       setQuestions((prev) =>
-        updateQuestion(prev, questionId, (currentQuestion) => ({
-          ...currentQuestion,
-          answer,
-          status: 'Answered',
-          answerReviewUntil: null,
-          answerEditUsed: true,
-          answerDeliveredAt: Date.now(),
-          history: [...currentQuestion.history, 'One-time answer correction saved', 'Corrected answer delivered to user'],
-        })),
+        updateQuestion(prev, questionId, () => updated),
       )
       logActivity({
         astrologerId: question.astrologerId,
@@ -2291,6 +3161,27 @@ export function AppDataProvider({ children }) {
         ...prev,
       ])
     },
+    // Generic 30-day rule for every question source: once the shared answer
+    // deadline passes without an answer the question is Cancelled and refunded.
+    cancelExpiredQuestions() {
+      const now = Date.now()
+      const expiring = questions.filter((question) => applyAnswerDeadlineCancellation(question, now) !== question)
+      if (!expiring.length) return
+      setQuestions((prev) => prev.map((question) => applyAnswerDeadlineCancellation(question, now)))
+      setNotifications((prev) => [
+        ...expiring.map((question) => ({
+          id: crypto.randomUUID(),
+          title: 'Question cancelled',
+          detail: `Question ${question.id} was cancelled - ${ANSWER_DEADLINE_EXCEEDED_REASON}.${Number(question.purchaseAmount) > 0 ? ' The amount has been refunded.' : ''}`,
+          time: 'just now',
+          route: `/user/track-questions?questionId=${question.id}`,
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        })),
+        ...prev,
+      ])
+    },
     updateQuestionStatus(questionId, status) {
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => ({
@@ -2303,6 +3194,26 @@ export function AppDataProvider({ children }) {
     createQuestion(payload) {
       const nextId = `QTN-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
       const submittedAt = new Date().toISOString()
+      const targetAstrologerId = payload.astrologerId
+        || campaigns.find((campaign) => campaign.id === payload.campaignId)?.astrologerId
+        || 'astrologer-demo'
+      const monthKey = startOfMonthKey()
+      if (countQuestionsInMonth(questions, targetAstrologerId, monthKey) >= MONTHLY_QUESTION_CAPACITY) {
+        setNotifications((prev) => [
+          {
+            id: crypto.randomUUID(),
+            title: 'Monthly question capacity reached',
+            detail: `${targetAstrologerId} has reached the ${MONTHLY_QUESTION_CAPACITY} text-based question limit for this month. No more questions can be submitted.`,
+            time: 'just now',
+            route: '/user/track-questions',
+            audience: ROLES.USER,
+            category: 'questions',
+            read: false,
+          },
+          ...prev,
+        ])
+        return null
+      }
       setQuestions((prev) => [
         {
           id: nextId,
@@ -2325,6 +3236,12 @@ export function AppDataProvider({ children }) {
           question: payload.question,
           answer: '',
           draftAnswer: '',
+          answeredAt: null,
+          answerDeliveredAt: null,
+          answerEditUntil: null,
+          answerEditUsed: false,
+          answerReviewStartedAt: null,
+          answerReviewUntil: null,
           answerRating: null,
           answerReview: '',
           disputeRating: null,
@@ -2460,7 +3377,7 @@ export function AppDataProvider({ children }) {
           title: 'Dispute raised by user',
           detail: `A user raised a dispute on question ${questionId}. Please review and respond.`,
           time: 'just now',
-          route: `/astrologer/dispute-management?questionId=${questionId}`,
+          route: `/astrologer/text-based-question-history?questionId=${questionId}`,
           audience: ROLES.ASTROLOGER,
           category: 'questions',
           read: false,
@@ -2470,14 +3387,26 @@ export function AppDataProvider({ children }) {
     },
     respondToDispute(questionId, response, status) {
       const question = questions.find((item) => item.id === questionId)
+      // A successful resolution is final. Promoting the question's own status to
+      // "Resolved" is what makes the record leave the active Disputed list, land
+      // in History > Resolved on both sides, and stops it being flagged as
+      // Disputed and Resolved at the same time. Everything else on the record
+      // (user, campaign, question text, the original answer, payment, dates) is
+      // spread through untouched, so this stays the SAME question record.
+      const isResolved = status === 'Resolved'
+      const resolvedAt = new Date().toISOString()
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => ({
           ...question,
+          status: isResolved ? 'Resolved' : question.status,
           dispute: question.dispute
             ? {
                 ...question.dispute,
                 response,
                 status,
+                // Stamped on the dispute itself so the resolved date is the real
+                // resolution time rather than an empty value in History.
+                ...(isResolved ? { resolvedAt } : {}),
               }
             : question.dispute,
           history: [...question.history, `Dispute ${status.toLowerCase()}`],
@@ -3577,17 +4506,28 @@ export function AppDataProvider({ children }) {
       setUserWithdrawals((prev) => [withdrawal, ...prev])
       return withdrawal
     },
-  }), [astrologerPosts, appointments, appointmentCalls, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
+  }), [astrologerPosts, appointments, appointmentCalls, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, openQuestionSettings, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
 
   useEffect(() => {
-    const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
-    deliverDueAnswers()
-    const timer = window.setInterval(deliverDueAnswers, 30 * 1000)
+    const runQuestionAutomation = () => {
+      actions.deliverDueQuestionAnswers()
+      actions.cancelExpiredQuestions()
+    }
+    runQuestionAutomation()
+    const timer = window.setInterval(runQuestionAutomation, 30 * 1000)
     return () => window.clearInterval(timer)
   }, [actions])
 
   const value = useMemo(() => ({
     campaigns,
+    openQuestionSettings,
+    monthlyQuestionCapacity: MONTHLY_QUESTION_CAPACITY,
+    capacitySummary: getMonthlyCapacitySummary({
+      campaigns,
+      openSettings: openQuestionSettings,
+      questions,
+      astrologerId: currentUser?.id,
+    }),
     questions,
     notifications,
     wallet: astrologerWallet,
@@ -3635,6 +4575,8 @@ export function AppDataProvider({ children }) {
       .sort((a, b) => sortByDateDesc(a, b, (item) => item.raisedAt || item.raised)),
   }), [
     campaigns,
+    openQuestionSettings,
+    currentUser?.id,
     questions,
     notifications,
     astrologerWallet,

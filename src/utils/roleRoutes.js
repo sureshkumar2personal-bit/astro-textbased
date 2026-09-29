@@ -25,6 +25,7 @@ export function getRoleRoutes(role) {
     salesManagement: `${base}/sales-management`,
     campaigns: `${base}/campaigns`,
     answerQuestion: `${base}/answer-question`,
+    textBasedQuestionHistory: `${base}/text-based-question-history`,
     disputeManagement: `${base}/dispute-management`,
     activity: `${base}/activity`,
     appointments: `${base}/appointments`,

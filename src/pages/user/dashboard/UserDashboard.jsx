@@ -13,6 +13,7 @@ import {
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { hasOpenDispute } from '../../../utils/answer.js'
 import StatCard from '../../../components/ui/StatCard.jsx'
 import ActionCard from '../../../components/ui/ActionCard.jsx'
 import Section from '../../../components/ui/Section.jsx'
@@ -34,7 +35,11 @@ export default function UserDashboard() {
 
   const pending = questions.filter((question) => question.status === 'Pending').length
   const answered = questions.filter((question) => question.status === 'Answered').length
-  const disputed = questions.filter((question) => question.status === 'Disputed').length
+  // Only genuinely open disputes count, so resolving a dispute stops inflating
+  // this stat. Reuses hasOpenDispute, the same check the question list uses.
+  const disputed = questions.filter(
+    (question) => question.status === 'Disputed' && hasOpenDispute(question),
+  ).length
   const recentQuestions = questions.slice(0, 4)
 
   return (

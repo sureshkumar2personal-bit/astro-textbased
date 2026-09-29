@@ -10,11 +10,18 @@ import Section from '../components/ui/Section.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { hasOpenDispute } from '../utils/answer.js'
 import '../css/user/question-tracking.css'
 
-const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered']
+const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered', 'Resolved']
 const EDIT_TIME_LIMIT_MS = 30 * 60 * 1000
 const DELETE_TIME_LIMIT_MS = 60 * 60 * 1000
+
+// Reuses hasOpenDispute, the same helper the astrologer answer queue and
+// History use, so "is this dispute settled?" has one definition app-wide.
+function isDisputeResolved(question) {
+  return Boolean(question?.dispute) && !hasOpenDispute(question)
+}
 
 function normalizeStatusFilter(value) {
   if (STATUS_FILTERS.includes(value)) return value
@@ -102,8 +109,14 @@ export default function TrackQuestions() {
   const matchesStatusFilter = useCallback((question) => {
     if (statusFilter === 'All') return true
     if (statusFilter === 'Pending') return question.status === 'Pending'
-    if (statusFilter === 'Dispute') return question.status === 'Disputed'
+    // A resolved dispute is no longer an active dispute, so it must drop out of
+    // the Dispute bucket even on records resolved before the status was promoted.
+    if (statusFilter === 'Dispute') return question.status === 'Disputed' && !isDisputeResolved(question)
     if (statusFilter === 'Answered') return question.status === 'Answered'
+    // Matches the astrologer History rule: a settled dispute reads as Resolved
+    // whether the status was promoted (current flow) or the dispute simply
+    // carries a resolved status (legacy records).
+    if (statusFilter === 'Resolved') return question.status === 'Resolved' || isDisputeResolved(question)
     return false
   }, [statusFilter])
   const matchesSearchFilter = useCallback((question) => {
