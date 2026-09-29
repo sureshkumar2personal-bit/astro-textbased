@@ -1836,9 +1836,15 @@ function PariharamStatusBadge({ status }) {
 }
 
 function enrichPariharamRecord(record) {
-  const completedCount = record.days.filter((day) => day.completed).length
+  // completedDays is the source of truth for everything the astrologer sees:
+  // only days the user has actually ticked complete ever appear here, so a
+  // 7-day Pariharam where the user has done Day 1 only reports 1/7 — never
+  // a count derived from the total duration.
+  const completedDays = record.days.filter((day) => day.completed)
+  const completedCount = completedDays.length
   return {
     ...record,
+    completedDays,
     completedCount,
     status: pariharamStatus(record.days, record.dueAt),
     progressPercent: record.totalDays ? Math.round((completedCount / record.totalDays) * 100) : 0,
@@ -1875,10 +1881,10 @@ function buildRealPariharamRecords(consultations, appointments, astrologerId) {
 }
 
 const MOCK_PARIHARAM_PROGRESS = [
-  { id: 'mock-progress-1', userId: 'u-demo-ravi', userName: 'Ravi Kumar', bookingId: '#AH3301', appointmentId: 'apt-demo-progress-1', pariharamName: 'Rahu Dosha Pariharam', totalDays: 7, startAt: '2026-09-25', completedDays: [1, 2, 3] },
-  { id: 'mock-progress-2', userId: 'u-demo-ananya', userName: 'Ananya Iyer', bookingId: '#AH3298', appointmentId: 'apt-demo-progress-2', pariharamName: 'Career Obstacle Pariharam', totalDays: 5, startAt: '2026-09-20', completedDays: [1, 2, 3, 4, 5] },
-  { id: 'mock-progress-3', userId: 'u-demo-karthik', userName: 'Karthik Subramanian', bookingId: '#AH3312', appointmentId: 'apt-demo-progress-3', pariharamName: 'Ketu Dosha Pariharam', totalDays: 9, startAt: '2026-09-28', completedDays: [] },
-  { id: 'mock-progress-4', userId: 'u-demo-divya', userName: 'Divya Sharma', bookingId: '#AH3289', appointmentId: 'apt-demo-progress-4', pariharamName: 'Shani Dosha Pariharam', totalDays: 11, startAt: '2026-09-22', completedDays: [1, 2, 3, 4, 5, 6] },
+  { id: 'mock-progress-kani', userId: 'u-demo-kani', userName: 'Kani', bookingId: '#AH4001', appointmentId: 'apt-demo-kani-1', pariharamName: 'Marriage Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1, 2, 3] },
+  { id: 'mock-progress-priya', userId: 'u-demo-priya', userName: 'Priya', bookingId: '#AH4002', appointmentId: 'apt-demo-priya-1', pariharamName: 'Career Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1] },
+  { id: 'mock-progress-sangeetha', userId: 'u-demo-sangeetha', userName: 'Sangeetha', bookingId: '#AH4003', appointmentId: 'apt-demo-sangeetha-1', pariharamName: 'Career Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [] },
+  { id: 'mock-progress-meena', userId: 'u-demo-meena', userName: 'Meena', bookingId: '#AH4004', appointmentId: 'apt-demo-meena-1', pariharamName: 'Rahu Dosha Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1, 2, 3, 4, 5, 6, 7] },
 ]
 
 function buildMockPariharamRecords() {
@@ -1936,23 +1942,24 @@ function PariharamProgressModal({ record, onClose }) {
         </div>
         <div className="atonement-progress"><span style={{ width: `${record.progressPercent}%` }} /></div>
 
-        <div className="atonement-day-list">
-          {record.days.map((day) => (
-            <div key={day.id} className={`atonement-day-row${day.completed ? ' is-completed' : ''}${day.state === 'upcoming' ? ' is-locked' : ''}`}>
-              <div className="atonement-day-icon">{day.completed ? <Check size={14} /> : <Circle size={14} />}</div>
-              <div className="atonement-day-copy">
-                <div className="atonement-day-title"><strong>Day {day.dayNumber} — {day.dateLabel}</strong></div>
-                <div className="atonement-day-details">
-                  <span>
-                    {day.completed
-                      ? `Completed on ${day.dateLabel}${formatProgressTime(day.completedAt) ? ` · ${formatProgressTime(day.completedAt)}` : ''}`
-                      : day.state === 'available' ? 'Available Today' : day.state === 'pending' ? 'Pending' : 'Upcoming'}
-                  </span>
+        <div className="atonement-progress-modal-section-label">Completed Days</div>
+        {record.completedDays.length ? (
+          <div className="atonement-day-list">
+            {record.completedDays.map((day) => (
+              <div key={day.id} className="atonement-day-row is-completed">
+                <div className="atonement-day-icon"><Check size={14} /></div>
+                <div className="atonement-day-copy">
+                  <div className="atonement-day-title"><strong>Day {day.dayNumber} — {day.dateLabel}</strong></div>
+                  <div className="atonement-day-details">
+                    <span>{`Completed${formatProgressTime(day.completedAt) ? ` · ${formatProgressTime(day.completedAt)}` : ''}`}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="atonement-progress-modal-empty">No days completed yet.</div>
+        )}
 
         {isComplete && (
           <div className="atonement-progress-complete-banner">
@@ -2025,9 +2032,8 @@ function UserProgressTab({ astrologerId, consultations, appointments }) {
           <button
             key={label}
             type="button"
-            className="stat-card stat-card-clickable"
+            className={`stat-card stat-card-clickable${statusFilter === value ? ' is-active' : ''}`}
             onClick={() => setStatusFilter(value)}
-            style={statusFilter === value ? { background: 'var(--primary-bg)', borderRadius: 'var(--radius-m)' } : {}}
           >
             <div className={`stat-icon ${tone}`}><Icon size={20} /></div>
             <div className="stat-card-body"><div className="stat-value">{count}</div><div className="stat-label">{label}</div></div>
@@ -2049,31 +2055,32 @@ function UserProgressTab({ astrologerId, consultations, appointments }) {
       {filtered.length ? (
         <div className="atonement-progress-list">
           {filtered.map((record) => (
-            <div key={record.id} className="atonement-card atonement-progress-card">
-              <div className="atonement-progress-card-head">
-                <div className="atonement-progress-user">
-                  <span className="atonement-avatar">{initialsFor(record.userName)}</span>
-                  <div>
+            <div key={record.id} className="atonement-progress-card">
+              <div className="atonement-progress-card-left">
+                <span className="atonement-avatar">{initialsFor(record.userName)}</span>
+                <div className="atonement-progress-identity">
+                  <div className="atonement-progress-user">
                     <strong>{record.userName}</strong>
                     <span>{record.bookingId}</span>
                   </div>
+                  <div className="atonement-progress-pariharam">
+                    <strong>{record.pariharamName}</strong>
+                    <span><Clock size={12} /> {record.totalDays} Days · Start {formatProgressDate(record.startAt)} · Due {formatProgressDate(record.dueAt)}</span>
+                  </div>
                 </div>
-                <PariharamStatusBadge status={record.status} />
               </div>
 
-              <div className="atonement-progress-pariharam">
-                <strong>{record.pariharamName}</strong>
-                <span><Clock size={12} /> {record.totalDays} Days · Start {formatProgressDate(record.startAt)} · Due {formatProgressDate(record.dueAt)}</span>
-              </div>
-
-              <div className="atonement-progress-row">
-                <span>{record.completedCount} / {record.totalDays} Days Completed</span>
-                <strong>{record.progressPercent}%</strong>
-              </div>
-              <div className="atonement-progress"><span style={{ width: `${record.progressPercent}%` }} /></div>
-
-              <div className="atonement-progress-card-foot">
+              <div className="atonement-progress-card-center">
+                <div className="atonement-progress-row">
+                  <span>{record.completedCount} / {record.totalDays} Days Completed</span>
+                  <strong>{record.progressPercent}%</strong>
+                </div>
+                <div className="atonement-progress"><span style={{ width: `${record.progressPercent}%` }} /></div>
                 <span className="atonement-progress-current-day">{record.currentDay}</span>
+              </div>
+
+              <div className="atonement-progress-card-right">
+                <PariharamStatusBadge status={record.status} />
                 <button type="button" className="btn btn-primary btn-sm" onClick={() => setViewTarget(record)}>
                   <Eye size={14} /> View Progress
                 </button>
