@@ -1,168 +1,499 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { CalendarClock, History, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Card from '../components/ui/Card.jsx'
+import Section from '../components/ui/Section.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
-import TextBasedQuestionsModuleTabs from '../components/TextBasedQuestionsModuleTabs.jsx'
+import BackButton from '../components/BackButton.jsx'
+import SummaryCard from '../components/ui/SummaryCard.jsx'
 import AnswerAttachmentPanel from '../components/AnswerAttachmentPanel.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useTheme } from '../state/ThemeContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
-import { getMonthKeyFromDate, getMonthLabel } from '../utils/questions.js'
+import { getMonthBounds, getMonthKeyFromDate, getMonthLabel, getQuestionSourceLabel, isOpenQuestion, shiftMonthKey } from '../utils/questions.js'
 import {
   formatAnswerDate,
   getAnswerSubmittedAtMs,
+  getQuestionAnswerDeadline,
   getQuestionReceivedAt,
   getQuestionTypeLabel,
+  isQuestionCancelled,
   isQuestionNeedingAnswer,
 } from '../utils/answer.js'
-import { getQuestionRefundAmount } from '../utils/sales.js'
+import { getQuestionPaidAmount, getQuestionRefundAmount, isSaleQuestion } from '../utils/sales.js'
 import { TempleReturnIcon } from '../components/TempleIcons.jsx'
 
-const STATUS_FILTERS = ['All', 'Completed', 'Cancelled', 'Refunded', 'Disputed', 'Resolved']
+// History only ever reports an outcome: answered, auto-cancelled after the
+// shared 30-day deadline, or a dispute that was resolved.
+const STATUS_FILTERS = ['All', 'Completed', 'Cancelled', 'Resolved']
+
+// Same coloured title-card design used by the Questions page.
+const STATUS_CARD_META = {
+  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'All history records' },
+  Completed: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answered within 30 days' },
+  Cancelled: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.24)', hint: 'Answer deadline exceeded' },
+  Resolved: { background: 'var(--amber-100)', color: 'var(--amber-600)', border: 'rgba(245, 158, 11, 0.30)', hint: 'Dispute resolved' },
+}
+
+const HISTORY_PAGE_SIZE = 8
+
+// Same ellipsis page-token algorithm used by the Questions page.
+function buildPageTokens(currentPage, totalPages) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const tokens = [1]
+  const start = Math.max(2, currentPage - 1)
+  const end = Math.min(totalPages - 1, currentPage + 1)
+
+  if (start > 2) tokens.push('start-ellipsis')
+  for (let value = start; value <= end; value += 1) tokens.push(value)
+  if (end < totalPages - 1) tokens.push('end-ellipsis')
+  tokens.push(totalPages)
+  return tokens
+}
 
 function inr(value) {
   return Number(value || 0).toLocaleString('en-IN')
 }
 
 function getHistoryStatus(question = {}) {
-  const refunded = getQuestionRefundAmount(question) > 0 || String(question.refundStatus || '').toLowerCase() === 'completed'
-  const dispute = question.dispute
-  if (dispute && String(dispute.status || '').toLowerCase() !== 'resolved') return { label: 'Disputed', refunded }
-  if (dispute && String(dispute.status || '').toLowerCase() === 'resolved') return { label: 'Resolved', refunded }
-  if (refunded) return { label: 'Refunded', refunded }
-  if (String(question.status || '') === 'Closed') return { label: 'Cancelled', refunded }
-  return { label: 'Completed', refunded }
+  const disputeStatus = String((question.dispute && question.dispute.status) || '').toLowerCase()
+  if (disputeStatus === 'resolved') return 'Resolved'
+  const answered = String(question.status || '') === 'Answered' || Boolean(String(question.answer || '').trim())
+  if (!answered || isQuestionCancelled(question) || String(question.status || '') === 'Closed') return 'Cancelled'
+  return 'Completed'
 }
 
-function getRefundResolutionLine(question = {}) {
-  const refunded = getQuestionRefundAmount(question) > 0 || String(question.refundStatus || '').toLowerCase() === 'completed'
-  const parts = []
-  if (refunded) parts.push(`Refunded ₹${inr(getQuestionRefundAmount(question))}`)
-  if (question.dispute) parts.push(question.dispute.status === 'Resolved' ? 'Dispute resolved' : 'Dispute open')
-  return parts.length ? parts.join(' · ') : '—'
+function getHistorySource(question = {}) {
+  return isOpenQuestion(question) ? 'Open Question' : 'Campaign'
 }
 
-function DetailRow({ label, value }) {
+function getHistorySourceText(question = {}) {
+  if (getHistorySource(question) === 'Open Question') return 'Source: Open Question'
+  return `Source: Campaign · ${getQuestionSourceLabel(question)}`
+}
+
+function getHistorySnippet(question = {}) {
+  const text = String(question.question || '').replace(/\s+/g, ' ').trim()
+  if (text.length <= 140) return text
+  return `${text.slice(0, 140).trimEnd()}…`
+}
+
+function getPaymentStatus(question = {}) {
+  const refundState = String(question.refundStatus || '').toLowerCase()
+  if (getQuestionRefundAmount(question) > 0 || refundState === 'refunded' || refundState === 'completed') return 'Refunded'
+  if (isSaleQuestion(question)) return 'Paid'
+  return 'Free'
+}
+
+function askedOnLabel(question = {}) {
+  const received = getQuestionReceivedAt(question)
+  return received ? formatAnswerDate(received) : String(question.raised || '')
+}
+
+function deadlineLabel(question = {}) {
+  const deadline = getQuestionAnswerDeadline(question)
+  return deadline ? formatAnswerDate(deadline) : '—'
+}
+
+function completedOnLabel(question = {}) {
+  const submittedMs = getAnswerSubmittedAtMs(question)
+  return submittedMs ? formatAnswerDate(new Date(submittedMs)) : ''
+}
+
+// One record = one complete bordered box. Every card renders the exact same
+// three bands (identity → question → metadata), so no card grows or shrinks
+// differently because of its content.
+const RECORD_CARD_STYLE = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 12,
+  width: '100%',
+  padding: '16px 18px',
+  border: '1px solid var(--surface-border)',
+  borderRadius: 'var(--radius-l)',
+  boxShadow: 'var(--shadow-card)',
+}
+
+// Four pastel tints applied by record index (1 green, 2 blue, 3 lavender,
+// 4 peach, then repeating) so each question card reads as its own item while
+// the list still looks like one calm, consistent set.
+//
+// These are direct hex values on purpose. The previous attempt blended the
+// theme's soft tokens into white, which resolved to within ~10/255 of pure
+// white (imperceptible), and it also broke whenever a token was missing from
+// the active theme block. Direct hex always renders, and both sets are chosen
+// so the existing text colours stay highly readable.
+//
+// Only the background varies - border, radius, shadow, spacing and typography
+// stay shared via RECORD_CARD_STYLE.
+const RECORD_CARD_TONES_LIGHT = ['#DFF3E7', '#DDEBFA', '#EAE2F8', '#FBEADA']
+const RECORD_CARD_TONES_DARK = ['#12261E', '#121E2E', '#1E1A2F', '#2A2018']
+
+// Small "Label  value" pair used by the metadata band.
+function RecordMeta({ label, children }) {
   return (
-    <div>
-      <strong>{label}</strong>
-      <div className="muted">{value == null || value === '' ? '—' : value}</div>
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, minWidth: 0 }}>
+      <span
+        className="muted"
+        style={{
+          fontSize: 10.5,
+          fontWeight: 800,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          flex: 'none',
+        }}
+      >
+        {label}
+      </span>
+      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{children}</span>
+    </span>
+  )
+}
+
+function HistoryRecordCard({ question, onOpenDetails, index, isDark }) {
+  const status = getHistoryStatus(question)
+  const paymentStatus = getPaymentStatus(question)
+  const refunded = paymentStatus === 'Refunded'
+  const userName = question.user || question.userName
+  // Real identifier already present on the record (same field order the
+  // detail view and the search box use). Nothing is invented here.
+  const userId = question.userId || question.submittedByUserId || ''
+  const paidAmount = getQuestionPaidAmount(question)
+  const tones = isDark ? RECORD_CARD_TONES_DARK : RECORD_CARD_TONES_LIGHT
+  const cardStyle = { ...RECORD_CARD_STYLE, background: tones[index % tones.length] }
+
+  return (
+    <div style={cardStyle}>
+      {/* Band 1 - who and where the question came from */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 800,
+              letterSpacing: '-0.01em',
+              color: 'var(--text-primary)',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {userName || 'Unknown user'}
+          </span>
+          {userId ? (
+            <span
+              className="muted"
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: '-0.005em',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              User ID: {userId}
+            </span>
+          ) : null}
+        </div>
+        <span
+          className="muted"
+          style={{
+            flex: 'none',
+            padding: '4px 11px',
+            borderRadius: 999,
+            border: '1px solid var(--surface-border)',
+            background: 'var(--surface-soft)',
+            fontSize: 12,
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {getHistorySourceText(question)}
+        </span>
+      </div>
+
+      {/* Band 2 - the question itself is the main content */}
+      <div
+        style={{
+          fontSize: 14.5,
+          fontWeight: 600,
+          lineHeight: 1.5,
+          color: 'var(--text-primary)',
+          overflowWrap: 'anywhere',
+        }}
+      >
+        {getHistorySnippet(question)}
+      </div>
+
+      {/* Band 3 - Asked, then Paid, then Status last on the right */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: 8,
+          paddingTop: 12,
+          borderTop: '1px solid var(--surface-border)',
+        }}
+      >
+        <RecordMeta label="Asked">{askedOnLabel(question)}</RecordMeta>
+        <RecordMeta label="Paid">₹{inr(paidAmount)}</RecordMeta>
+        {refunded ? (
+          <RecordMeta label="Refunded">₹{inr(getQuestionRefundAmount(question))}</RecordMeta>
+        ) : (
+          <RecordMeta label="Payment">{paymentStatus}</RecordMeta>
+        )}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+          <span
+            className="muted"
+            style={{
+              fontSize: 10.5,
+              fontWeight: 800,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Status
+          </span>
+          <StatusBadge label={status} />
+        </span>
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => onOpenDetails(question.id)}>
+          View Details
+        </button>
+      </div>
     </div>
   )
 }
 
-function RecordDetailsModal({ question, onClose }) {
+// Month is the PRIMARY selection: History is always scoped to a whole month.
+// The arrows move month to month and the label always reflects the active
+// month + year. The day box is an OPTIONAL numeric narrowing - clearing it
+// goes back to the full month.
+function HistoryPeriodControls({ monthKey, day, onMonthChange, onDayChange }) {
+  const [dayDraft, setDayDraft] = useState(day == null ? '' : String(day))
+
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', closeOnEscape)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      document.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [onClose])
+    setDayDraft(day == null ? '' : String(day))
+  }, [day])
 
-  if (!question) return null
+  const daysInMonth = (() => {
+    const bounds = getMonthBounds(monthKey)
+    return bounds ? bounds.end.getDate() : 31
+  })()
 
+  const commitDay = (value) => {
+    setDayDraft(value)
+    const trimmed = value.trim()
+    if (!trimmed) {
+      onDayChange(null)
+      return
+    }
+    const parsed = Number(trimmed)
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > daysInMonth) return
+    onDayChange(parsed)
+  }
+
+  const step = (delta) => {
+    onMonthChange(shiftMonthKey(monthKey, delta))
+    onDayChange(null)
+  }
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-3">
+      {/* Compact month pill: arrows and the month label share the same optical
+          row so "September 2026" sits centred with equal padding all round. */}
+      <div
+        className="flex items-center"
+        style={{
+          padding: 4,
+          borderRadius: 999,
+          border: '1px solid var(--surface-border)',
+          background: 'var(--surface-strong)',
+          boxShadow: 'var(--shadow-xs)',
+        }}
+      >
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Previous month"
+          onClick={() => step(-1)}
+          style={{ width: 34, height: 34, borderRadius: '50%' }}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div
+          aria-live="polite"
+          style={{
+            minWidth: 150,
+            height: 34,
+            padding: '0 8px',
+            margin: '0 2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            fontSize: 14,
+            fontWeight: 800,
+            letterSpacing: '-0.01em',
+            lineHeight: 1.2,
+            color: 'var(--text-primary)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {getMonthLabel(monthKey)}
+        </div>
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Next month"
+          onClick={() => step(1)}
+          style={{ width: 34, height: 34, borderRadius: '50%' }}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+      <label
+        className="field-group"
+        style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8 }}
+      >
+        <span className="muted" style={{ fontSize: 12.5, fontWeight: 700, flex: 'none' }}>Date</span>
+        <input
+          className="text-input"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={daysInMonth}
+          step={1}
+          value={dayDraft}
+          onChange={(event) => commitDay(event.target.value)}
+          placeholder="All"
+          aria-label={`Day of ${getMonthLabel(monthKey)}`}
+          style={{ width: 104, height: 44, minHeight: 44, padding: '0 12px', textAlign: 'center' }}
+        />
+      </label>
+    </div>
+  )
+}
+
+// "View Details" opens this overlay on the SAME History page. Nothing is
+// navigated and the URL/route is left untouched, so the list, its filters and
+// the month/date selection all stay exactly as the user left them behind it.
+// It reuses the same record fields the previous detail page showed.
+function HistoryDetailModal({ question, onClose }) {
   const status = getHistoryStatus(question)
-  const receivedAt = getQuestionReceivedAt(question)
-  const answeredMs = getAnswerSubmittedAtMs(question)
-  const answeredLabel = answeredMs ? formatAnswerDate(new Date(answeredMs)) : ''
+  const dispute = question.dispute || null
   const attachments = Array.isArray(question.answerAttachments) ? question.answerAttachments : []
   const links = Array.isArray(question.referenceLinks) ? question.referenceLinks : []
   const userId = question.userId || question.submittedByUserId || ''
+  const completedOn = completedOnLabel(question)
+  const paymentStatus = getPaymentStatus(question)
+  const paidAmount = getQuestionPaidAmount(question)
+  const refundAmount = getQuestionRefundAmount(question)
+  const refundState = String(question.refundStatus || '').toLowerCase()
+  const refunded = refundAmount > 0 || refundState === 'refunded' || refundState === 'completed'
+  const answered = Boolean(String(question.answer || '').trim())
 
   return createPortal(
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+    <div className="modal-overlay" style={{ zIndex: 70 }} onClick={onClose}>
+      <div
+        className="modal-card modal-card--scroll"
+        style={{ width: 'min(720px, calc(100vw - 32px))', maxHeight: 'min(86vh, 900px)' }}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Question Details"
+      >
         <div className="modal-card__header flex items-center justify-between gap-4">
           <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-            <div className="astrologer-modal-title">Record Details</div>
+            <div className="astrologer-modal-title">Question Details</div>
             <div className="muted" style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {question.campaignName || 'Open Question'} · {question.id}
+              {question.campaignName || getHistorySource(question)} · {question.id}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, marginLeft: 'auto' }}>
-            <StatusBadge label={status.label} />
-            <button type="button" className="icon-btn" aria-label="Close record details" onClick={onClose} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
+            <StatusBadge label={status} />
+            <button type="button" className="icon-btn" aria-label="Close question details" onClick={onClose} style={{ width: 32, height: 32, minWidth: 32 }}><X size={16} /></button>
           </div>
         </div>
 
-        <div className="modal-card__content astrologer-modal-content">
+        <div className="modal-card__content astrologer-modal-content" style={{ display: 'grid', gap: 18 }}>
           <div className="astrologer-modal-section">
-            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><CalendarClock size={14} />Question Overview</div>
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question Summary</div>
             <div className="astrologer-modal-highlight astrologer-modal-details-grid">
-              <DetailRow label="Customer Name" value={question.user || question.userName} />
-              <DetailRow label="User ID" value={userId} />
-              <DetailRow label="Question Type" value={getQuestionTypeLabel(question)} />
-              <DetailRow label="Category" value={question.category} />
-              <DetailRow label="Received Date" value={receivedAt ? formatAnswerDate(receivedAt) : question.raised} />
-              <DetailRow label="Answer Submitted" value={answeredLabel} />
-              <DetailRow label="Amount" value={`₹${inr(question.purchaseAmount)}`} />
-              <DetailRow label="Refund / Resolution" value={getRefundResolutionLine(question)} />
+              <div><strong>User Name</strong><div className="muted">{question.user || question.userName || '—'}</div></div>
+              <div><strong>User ID</strong><div className="muted">{userId || '—'}</div></div>
+              <div><strong>Source</strong><div className="muted">{getHistorySourceText(question).replace(/^Source: /, '')}</div></div>
+              <div><strong>Campaign</strong><div className="muted">{question.campaignName || '—'}</div></div>
+              <div><strong>Question Type</strong><div className="muted">{getQuestionTypeLabel(question)}</div></div>
+              <div><strong>Status</strong><div className="muted">{status}</div></div>
+              <div><strong>Asked On</strong><div className="muted">{askedOnLabel(question)}</div></div>
+              {completedOn ? <div><strong>Completed On</strong><div className="muted">{completedOn}</div></div> : null}
             </div>
           </div>
 
           <div className="astrologer-modal-section">
             <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question</div>
-            <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{question.question || '—'}</div>
+            <div className="astrologer-modal-highlight" style={{ whiteSpace: 'pre-wrap', fontSize: 14.5, lineHeight: 1.6 }}>
+              {question.question || '—'}
+            </div>
           </div>
 
-          {question.answer ? (
-            <>
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Astrologer's Answer</div>
-                <div className="astrologer-modal-highlight astrologer-modal-question" style={{ whiteSpace: 'pre-wrap' }}>{question.answer}</div>
+          <div className="astrologer-modal-section">
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Answer</div>
+            <div className="astrologer-modal-highlight" style={{ whiteSpace: 'pre-wrap', fontSize: 14.5, lineHeight: 1.6 }}>
+              {answered ? question.answer : 'No answer was provided.'}
+            </div>
+            {attachments.length || links.length ? (
+              <div style={{ marginTop: 12 }}>
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>Attachments &amp; References</div>
+                <AnswerAttachmentPanel attachments={attachments} links={links} readOnly />
               </div>
-              <div className="astrologer-modal-section">
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Attachments & Reference Links</div>
-                <div className="astrologer-modal-highlight">
-                  <AnswerAttachmentPanel attachments={attachments} links={links} readOnly />
-                </div>
+            ) : null}
+          </div>
+
+          <div className="astrologer-modal-section">
+            <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Payment</div>
+            <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+              <div><strong>Paid Amount</strong><div className="muted">{`₹${inr(paidAmount)}`}</div></div>
+              <div><strong>Payment Status</strong><div className="muted">{paymentStatus}</div></div>
+              {refunded ? (
+                <>
+                  <div><strong>Refund Amount</strong><div className="muted">{`₹${inr(refundAmount)}`}</div></div>
+                  <div><strong>Refund Status</strong><div className="muted">{question.refundStatus || 'Refunded'}</div></div>
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          {status === 'Cancelled' ? (
+            <div className="astrologer-modal-section">
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Cancellation</div>
+              <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+                <div><strong>Reason</strong><div className="muted">{question.cancellationReason || 'Answer deadline exceeded'}</div></div>
+                <div><strong>Deadline</strong><div className="muted">{deadlineLabel(question)}</div></div>
               </div>
-            </>
+            </div>
           ) : null}
 
-          {question.dispute && (
+          {dispute ? (
             <div className="astrologer-modal-section">
-              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Dispute Status</div>
-              <div className="astrologer-modal-highlight" style={{ display: 'grid', gap: 12 }}>
-                <div className="astrologer-modal-details-grid">
-                  <DetailRow label="Target" value={question.dispute.target} />
-                  <DetailRow label="Status" value={question.dispute.status} />
-                  <DetailRow label="Attachment" value={question.dispute.attachment} />
-                </div>
-                <DetailRow label="Reason" value={question.dispute.reason} />
-                {question.dispute.description ? <DetailRow label="Description" value={question.dispute.description} /> : null}
-                <DetailRow label="Astrologer Response" value={question.dispute.response || 'No response provided yet'} />
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Dispute</div>
+              <div className="astrologer-modal-highlight astrologer-modal-details-grid">
+                <div><strong>Status</strong><div className="muted">{dispute.status || '—'}</div></div>
+                <div><strong>Raised On</strong><div className="muted">{dispute.raisedAt ? formatAnswerDate(dispute.raisedAt) : '—'}</div></div>
+                <div><strong>Resolved On</strong><div className="muted">{dispute.resolvedAt ? formatAnswerDate(dispute.resolvedAt) : '—'}</div></div>
+                <div><strong>Target</strong><div className="muted">{dispute.target || '—'}</div></div>
+                {dispute.reason ? <div><strong>Reason</strong><div className="muted">{dispute.reason}</div></div> : null}
+                {dispute.response ? <div><strong>Astrologer Response</strong><div className="muted">{dispute.response}</div></div> : null}
+                {dispute.resolution ? <div><strong>Resolution</strong><div className="muted">{dispute.resolution}</div></div> : null}
               </div>
             </div>
-          )}
-
-          {Array.isArray(question.history) && question.history.length > 0 && (
-            <div className="astrologer-modal-section">
-              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Record Timeline</div>
-              <div className="astrologer-modal-highlight" style={{ display: 'grid', gap: 8 }}>
-                {question.history.map((entry, index) => (
-                  <div key={`${entry}-${index}`} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13 }}>
-                    <span style={{ color: 'var(--primary)', flex: 'none', marginTop: 2 }}>•</span>
-                    <span className="muted">{entry}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
 
-        <div className="modal-card__footer astrologer-modal-footer-actions">
-          <span style={{ color: 'var(--muted)', fontSize: 13, marginRight: 'auto' }}>Final outcome · {status.label}</span>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
+        <div className="modal-card__footer">
+          <button type="button" className="btn btn-primary" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>,
@@ -172,6 +503,7 @@ function RecordDetailsModal({ question, onClose }) {
 
 export default function TextBasedQuestionHistory() {
   const { questions } = useAppData()
+  const { isDark } = useTheme()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const [searchParams] = useSearchParams()
@@ -183,153 +515,232 @@ export default function TextBasedQuestionHistory() {
     [questions, astrologerId],
   )
 
+  // History only holds settled questions: answered, disputed/resolved or
+  // auto-cancelled once the shared 30-day deadline passed unanswered.
   const historyRecords = useMemo(() => myQuestions.filter((question) => !isQuestionNeedingAnswer(question)), [myQuestions])
 
-  const monthKeys = useMemo(() => {
-    const keys = new Set()
-    for (const question of historyRecords) {
-      const received = getQuestionReceivedAt(question)
-      const key = received ? getMonthKeyFromDate(received) : null
-      if (key) keys.add(key)
-    }
-    return [...keys].sort((a, b) => (a < b ? 1 : -1))
-  }, [historyRecords])
-
   const focusId = searchParams.get('questionId') || null
-
-  const initialMonth = useMemo(() => {
-    if (focusId) {
-      const focused = historyRecords.find((question) => question.id === focusId)
-      const received = focused ? getQuestionReceivedAt(focused) : null
-      const key = received ? getMonthKeyFromDate(received) : null
-      if (key && monthKeys.includes(key)) return key
-    }
-    return monthKeys[0] || null
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusId, monthKeys, historyRecords])
-
-  const [selectedMonth, setSelectedMonth] = useState(initialMonth)
+  const [detailsId, setDetailsId] = useState(focusId)
   const [statusFilter, setStatusFilter] = useState('All')
   const [search, setSearch] = useState('')
-  const [detailsId, setDetailsId] = useState(focusId)
-  const [detailsOpen, setDetailsOpen] = useState(Boolean(focusId))
+  // Month is primary; the day is an optional secondary narrowing (null = whole month).
+  const [selectedMonthKey, setSelectedMonthKey] = useState(() => getMonthKeyFromDate(new Date()))
+  const [selectedDay, setSelectedDay] = useState(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     if (!focusId) return
     const focused = historyRecords.find((question) => question.id === focusId)
     if (!focused) return
     const received = getQuestionReceivedAt(focused)
-    const key = received ? getMonthKeyFromDate(received) : null
-    if (key) setSelectedMonth(key)
+    if (received) setSelectedMonthKey(getMonthKeyFromDate(received))
     setDetailsId(focusId)
-    setDetailsOpen(true)
   }, [focusId, historyRecords])
 
   const monthRecords = useMemo(() => {
     const base = historyRecords.filter((question) => {
-      if (!selectedMonth) return false
       const received = getQuestionReceivedAt(question)
-      return received ? getMonthKeyFromDate(received) === selectedMonth : false
+      if (!received) return false
+      if (getMonthKeyFromDate(received) !== selectedMonthKey) return false
+      if (selectedDay != null && received.getDate() !== selectedDay) return false
+      return true
     })
     const term = String(search).trim().toLowerCase()
     return base.filter((question) => {
-      if (statusFilter !== 'All' && getHistoryStatus(question).label !== statusFilter) return false
+      if (statusFilter !== 'All' && getHistoryStatus(question) !== statusFilter) return false
       if (!term) return true
-      const searchable = [question.id, question.user, question.userName, question.userId, question.submittedByUserId, question.category, getQuestionTypeLabel(question), question.campaignName]
+      const searchable = [
+        question.id,
+        question.user,
+        question.userName,
+        question.userId,
+        question.submittedByUserId,
+        question.category,
+        getQuestionTypeLabel(question),
+        getQuestionSourceLabel(question),
+        question.question,
+      ]
         .join(' ')
         .toLowerCase()
       return searchable.includes(term)
     })
-  }, [historyRecords, selectedMonth, statusFilter, search])
+  }, [historyRecords, selectedMonthKey, selectedDay, statusFilter, search])
+
+  // Pagination is applied last, after month / day / status / search filtering.
+  const totalPages = Math.max(1, Math.ceil(monthRecords.length / HISTORY_PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedRecords = monthRecords.slice(
+    (currentPage - 1) * HISTORY_PAGE_SIZE,
+    currentPage * HISTORY_PAGE_SIZE,
+  )
+
+  useEffect(() => {
+    setPage(1)
+  }, [selectedMonthKey, selectedDay, statusFilter, search])
 
   const summary = useMemo(() => {
-    const counts = { 'Completed': 0, 'Cancelled': 0, 'Refunded': 0, 'Disputed': 0, 'Resolved': 0 }
-    const monthRecordsAll = historyRecords.filter((question) => {
-      if (!selectedMonth) return false
+    const counts = { Completed: 0, Cancelled: 0, Resolved: 0 }
+    const monthAll = historyRecords.filter((question) => {
       const received = getQuestionReceivedAt(question)
-      return received ? getMonthKeyFromDate(received) === selectedMonth : false
+      return received ? getMonthKeyFromDate(received) === selectedMonthKey : false
     })
-    for (const question of monthRecordsAll) {
-      const label = getHistoryStatus(question).label
-      counts[label] = (counts[label] || 0) + 1
+    for (const question of monthAll) {
+      const label = getHistoryStatus(question)
+      if (counts[label] != null) counts[label] += 1
     }
-    return { total: monthRecordsAll.length, ...counts }
-  }, [historyRecords, selectedMonth])
+    return { total: monthAll.length, ...counts }
+  }, [historyRecords, selectedMonthKey])
 
-  const selectedRecord = detailsId ? monthRecords.find((question) => question.id === detailsId) || historyRecords.find((question) => question.id === detailsId) || null : null
+  const selectedRecord = detailsId
+    ? historyRecords.find((question) => question.id === detailsId) || null
+    : null
+
+  // "View Details" now opens an overlay on this same page. It deliberately does
+  // NOT write to the query string or navigate, so the route, the list state and
+  // every filter stay exactly as they were.
+  const openDetails = (id) => {
+    setDetailsId(id)
+  }
+
+  const closeDetails = () => {
+    setDetailsId(null)
+  }
+
+  // Escape closes the overlay and the page behind it stops scrolling, matching
+  // the other modals in the app.
+  useEffect(() => {
+    if (!selectedRecord) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setDetailsId(null)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [selectedRecord])
+
+  const monthName = getMonthLabel(selectedMonthKey)
+
+  // The month / date controls now sit on the same row as the "History" heading
+  // (see PageHeader.actions below), so no separate control section is needed.
+  const backIcon = currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined
 
   return (
-    <div>
-      <PageHeader eyebrow="Astrologer workspace" title="Text-Based Question History" showBack backTo={routes.dashboard} backIcon={currentUser?.role === 'astrologer' ? TempleReturnIcon : undefined} />
+    <div className="tbh-history-page">
+      <PageHeader
+        eyebrow="Astrologer workspace"
+        title="History"
+        actions={(
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <BackButton to={routes.textBasedQuestions} label="Back" icon={backIcon} />
+            <HistoryPeriodControls
+              monthKey={selectedMonthKey}
+              day={selectedDay}
+              onMonthChange={setSelectedMonthKey}
+              onDayChange={setSelectedDay}
+            />
+          </div>
+        )}
+      />
 
-      <TextBasedQuestionsModuleTabs />
-
-      <Card className="section">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="section-title" style={{ marginBottom: 0 }}><History size={18} />Question History</div>
-          <label className="field-group" style={{ marginBottom: 0, flex: '1 1 200px', maxWidth: 260 }}>
-            <select className="select-input" value={selectedMonth || ''} onChange={(event) => setSelectedMonth(event.target.value)} aria-label="Select month">
-              {monthKeys.length === 0 ? <option value="">No history</option> : monthKeys.map((key) => <option key={key} value={key}>{getMonthLabel(key)}</option>)}
-            </select>
-          </label>
+      <Section className="!mt-4">
+        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-4" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
+          {STATUS_FILTERS.map((label) => {
+            const meta = STATUS_CARD_META[label]
+            return (
+              <div key={label} className="h-full" style={{ minHeight: 132 }}>
+                <SummaryCard
+                  label={label}
+                  value={label === 'All' ? summary.total : summary[label]}
+                  hint={meta.hint}
+                  background={meta.background}
+                  color={meta.color}
+                  border={meta.border}
+                  onClick={() => setStatusFilter(statusFilter === label && label !== 'All' ? 'All' : label)}
+                  active={statusFilter === label}
+                />
+              </div>
+            )
+          })}
         </div>
-        <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-          Review completed question records for {selectedMonth ? getMonthLabel(selectedMonth) : 'the selected month'}. Disputes are resolved from the Answer Questions queue.
-        </p>
+      </Section>
 
-        <div className="stat-grid" style={{ marginTop: 18 }}>
-          {STATUS_FILTERS.map((label) => (
-            <button key={label} className="stat-card stat-card-clickable" onClick={() => setStatusFilter(label)} style={statusFilter === label ? { background: 'var(--primary-bg)', borderRadius: 'var(--radius-m)' } : {}}>
-              <div className={`stat-icon ${label === 'Disputed' || label === 'Cancelled' ? 'tone-red' : label === 'Resolved' || label === 'Completed' ? 'tone-green' : 'tone-violet'}`}><History size={20} /></div>
-              <div className="stat-card-body"><div className="stat-value">{label === 'All' ? summary.total : summary[label]}</div><div className="stat-label">{label}</div></div>
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      <Card className="section">
-        <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 16 }}>
-          <div className="section-title" style={{ marginBottom: 0 }}>Records in {selectedMonth ? getMonthLabel(selectedMonth) : 'Month'}</div>
-          <label className="field-group" style={{ marginBottom: 0, position: 'relative', flex: '1 1 200px', maxWidth: 280 }}>
+      <Card className="section !mt-5">
+        <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 14 }}>
+          <div className="section-title" style={{ marginBottom: 0 }}>Records in {monthName}</div>
+          <label className="field-group" style={{ marginBottom: 0, position: 'relative', flex: '0 1 220px', maxWidth: 260 }}>
             <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
             <input className="text-input" style={{ paddingLeft: 34 }} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search records" aria-label="Search records" />
           </label>
         </div>
 
-        {monthRecords.length === 0 ? (
-          <div className="muted" style={{ padding: '16px 0' }}>No question records found for this month.</div>
+        {pagedRecords.length === 0 ? (
+          <div className="muted" style={{ padding: '16px 0' }}>No question records found{selectedDay != null ? ` for ${monthName} ${selectedDay}` : ` for ${monthName}`}.</div>
         ) : (
-          <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {monthRecords.map((question) => {
-              const status = getHistoryStatus(question)
-              const receivedAt = getQuestionReceivedAt(question)
-              const answeredMs = getAnswerSubmittedAtMs(question)
-              const answeredLabel = answeredMs ? formatAnswerDate(new Date(answeredMs)) : ''
-              const userId = question.userId || question.submittedByUserId || ''
+          <div style={{ display: 'grid', gap: 14 }}>
+            {pagedRecords.map((question, index) => (
+              <HistoryRecordCard key={question.id} question={question} onOpenDetails={openDetails} index={index} isDark={isDark} />
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div
+            className="flex flex-wrap items-center justify-center gap-2"
+            style={{ marginTop: 20 }}
+            role="navigation"
+            aria-label="History pagination"
+          >
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              disabled={currentPage <= 1}
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </button>
+            {buildPageTokens(currentPage, totalPages).map((token) => {
+              if (typeof token === 'string') {
+                return <span key={token} className="muted" style={{ padding: '0 4px', fontSize: 13 }}>&hellip;</span>
+              }
+              const isCurrent = token === currentPage
               return (
-                <button type="button" key={question.id} className="card flex h-full flex-col text-left transition hover:-translate-y-1 hover:border-[color:var(--secondary)]" onClick={() => { setDetailsId(question.id); setDetailsOpen(true) }}>
-                  <div className="flex items-start justify-between gap-3"><div className="font-bold text-[color:var(--text-primary)]">{question.id}</div><StatusBadge label={status.label} /></div>
-                  <div className="muted mt-3 flex flex-1 flex-col gap-2 text-sm">
-                    <span>{question.user || question.userName} · User ID {userId}</span>
-                    <span>{getQuestionTypeLabel(question)} · {question.campaignName || 'Open Question'} · {question.category}</span>
-                    <span>Received: {receivedAt ? formatAnswerDate(receivedAt) : question.raised}</span>
-                    <span>Answer submitted: {answeredLabel || 'Not answered'}</span>
-                    <span>Amount: ₹{inr(question.purchaseAmount)} · {getRefundResolutionLine(question)}</span>
-                  </div>
-                  <div className="mt-4 font-semibold text-[color:var(--primary)]">View Record →</div>
+                <button
+                  key={token}
+                  type="button"
+                  className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  style={{ minWidth: 34, justifyContent: 'center' }}
+                  onClick={() => setPage(token)}
+                >
+                  {token}
                 </button>
               )
             })}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
           </div>
         )}
+
+        <div className="muted" style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5 }}>
+          Showing {pagedRecords.length} of {monthRecords.length} questions
+          {' · '}
+          Page {currentPage} of {totalPages}
+        </div>
       </Card>
 
-      {detailsOpen && selectedRecord && (
-        <RecordDetailsModal
-          question={selectedRecord}
-          onClose={() => setDetailsOpen(false)}
-        />
-      )}
+      {selectedRecord ? <HistoryDetailModal question={selectedRecord} onClose={closeDetails} /> : null}
     </div>
   )
 }

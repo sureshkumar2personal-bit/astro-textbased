@@ -15452,3 +15452,70 @@ button.apt-week-day:focus-visible {
   color: var(--ink);
   box-shadow: var(--shadow-xs);
 }
+
+/* ---------- Text-Based Questions page scope ----------
+   These rules are intentionally unlayered (and page scoped) so they win over
+   the shared .page-title / .page-eyebrow / .tbq-module-tab rules. The page
+   heading stays deliberately small so the module navigation directly beneath
+   it reads as the primary navigation. */
+.tbq-page .page-header-row { margin-bottom: 10px; }
+.tbq-page .page-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  margin-bottom: 6px;
+}
+.tbq-page .page-title {
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.tbq-page .page-header-row > div > p {
+  margin-top: 4px !important;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* Primary navigation treatment for the three module tabs. */
+.tbq-page .tbq-module-tabs {
+  margin-top: 8px;
+  padding: 7px;
+  gap: 7px;
+  border-radius: 18px;
+  border: 1px solid rgba(91, 33, 182, 0.22);
+  background: linear-gradient(160deg, #F4EDFC 0%, #FFFFFF 100%);
+  box-shadow: 0 12px 30px rgba(91, 33, 182, 0.12);
+}
+.tbq-page .tbq-module-tab {
+  font-size: 15.5px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  padding: 11px 18px;
+  border-radius: 12px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(91, 33, 182, 0.16);
+}
+.tbq-page .tbq-module-tab.is-active {
+  font-weight: 800;
+}
+.tbq-page .tbq-module-tab:hover { background: #FFFFFF; }
+
+/* ---------- Question History page scope ----------
+   Tightens the Astrology -> "History" heading gap and lets the month / date
+   controls sit on the same row as the heading, vertically centred. */
+.tbh-history-page > .page-header-row {
+  align-items: center;
+  margin-bottom: 18px;
+}
+.tbh-history-page > .page-header-row .page-eyebrow {
+  margin-bottom: 6px;
+}
+.tbh-history-page > .page-header-row .page-title {
+  font-size: 30px;
+  line-height: 1.15;
+}
+.tbh-history-page > .page-header-row .page-header-actions {
+  align-self: center;
+  margin-left: auto;
+}

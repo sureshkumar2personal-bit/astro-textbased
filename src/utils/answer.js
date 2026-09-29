@@ -9,6 +9,13 @@ export const ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
 export const PDF_ALLOWED_TYPES = ['application/pdf']
 export const IMAGE_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
+// Every question (campaign or Open Question) shares the same 30-day rule:
+// asked date + 30 days = answer deadline. Answer in time -> Answered.
+// Miss it -> Cancelled, refunded, and never left as "Overdue".
+export const QUESTION_CANCELLED_STATUS = 'Cancelled'
+export const ANSWER_DEADLINE_EXCEEDED_REASON = 'Answer deadline exceeded'
+export const OPEN_QUESTION_SOURCE_LABEL = 'Open Question'
+
 export function getQuestionTypeLabel(question = {}) {
   const raw = String(question.type || question.questionType || '').trim().toLowerCase()
   if (raw.includes('personal') || raw === 'individual') return 'Personal'
@@ -34,17 +41,39 @@ export function hasOpenDispute(question = {}) {
   return String(question.dispute.status || 'Open').toLowerCase() !== 'resolved'
 }
 
+export function isQuestionCancelled(question = {}) {
+  const status = String(question.status || '').trim().toLowerCase()
+  return status === 'cancelled' || status === 'auto-cancelled'
+}
+
 export function isQuestionAnswered(question = {}) {
   return question.status === 'Answered' || Boolean(String(question.answer || '').trim())
 }
 
 export function isQuestionNeedingAnswer(question = {}) {
+  if (isQuestionCancelled(question)) return false
   return !isQuestionAnswered(question) && !hasOpenDispute(question) && String(question.status || '') !== 'Closed'
+}
+
+// True once the shared 30-day deadline has passed without an answer. Applies to
+// every question source (campaign and Open Question alike).
+export function isQuestionDeadlineExceeded(question = {}, nowMs = Date.now()) {
+  if (!isQuestionNeedingAnswer(question)) return false
+  const deadline = getQuestionAnswerDeadline(question)
+  if (!deadline) return false
+  return deadline.getTime() <= nowMs
+}
+
+export function getQuestionRefundableAmount(question = {}) {
+  const purchaseType = String(question.purchaseType || '').trim()
+  if (purchaseType !== 'Paid' && purchaseType !== 'Purchased Slot') return 0
+  return Math.max(Number(question.purchaseAmount) || 0, 0)
 }
 
 export function getQuestionDueState(question = {}, nowMs = Date.now()) {
   const status = String(question.status || '').trim()
   if (status === 'Closed') return 'closed'
+  if (isQuestionCancelled(question)) return 'cancelled'
   if (hasOpenDispute(question)) return 'disputed'
   if (isQuestionAnswered(question)) return 'answered'
   const deadline = getQuestionAnswerDeadline(question)
@@ -155,10 +184,12 @@ export function getAnswerSummary(questions = [], nowMs = Date.now()) {
   let overdue = 0
   let answered = 0
   let disputed = 0
+  let cancelled = 0
   for (const question of questions) {
     const dueState = getQuestionDueState(question, nowMs)
     if (dueState === 'disputed') disputed += 1
     else if (dueState === 'answered') answered += 1
+    else if (dueState === 'cancelled') cancelled += 1
     else if (dueState === 'overdue') overdue += 1
     else if (dueState === 'dueSoon') dueSoon += 1
     if (isQuestionNeedingAnswer(question)) {
@@ -177,6 +208,7 @@ export function getAnswerSummary(questions = [], nowMs = Date.now()) {
     overdue,
     answered,
     disputed,
+    cancelled,
     needsAnswer: generalPending + personalPending,
   }
 }
@@ -254,7 +286,7 @@ export const ANSWER_DUE_STATE_META = {
 }
 
 export function applyQuestionDraft(question = {}, draftAnswer, attachments = [], referenceLinks = []) {
-  if (isQuestionAnswered(question) || hasOpenDispute(question) || String(question.status || '') === 'Closed') return question
+  if (!isQuestionNeedingAnswer(question)) return question
   return {
     ...question,
     draftAnswer: String(draftAnswer || ''),
@@ -296,4 +328,30 @@ export function applyAnswerEdit(question = {}, answer, nowMs = Date.now(), attac
     answerEditUsed: true,
     history: [...(question.history || []), 'Answer corrected'],
   }
+}
+
+// The 30-day rule outcome. Generic for every question source: anything that has
+// passed its shared answer deadline without an answer is Cancelled, refunded and
+// never left sitting on "Overdue".
+export function applyAnswerDeadlineCancellation(question = {}, nowMs = Date.now()) {
+  if (!isQuestionDeadlineExceeded(question, nowMs)) return question
+  const deadline = getQuestionAnswerDeadline(question)
+  const refundAmount = getQuestionRefundableAmount(question)
+  return {
+    ...question,
+    status: QUESTION_CANCELLED_STATUS,
+    cancellationReason: ANSWER_DEADLINE_EXCEEDED_REASON,
+    cancelledAt: new Date(deadline ? deadline.getTime() : nowMs).toISOString(),
+    refundAmount,
+    refundStatus: refundAmount > 0 ? 'Refunded' : (question.refundStatus || 'None'),
+    history: [
+      ...(question.history || []),
+      `Cancelled automatically - ${ANSWER_DEADLINE_EXCEEDED_REASON}`,
+      refundAmount > 0 ? `Refund of ${refundAmount} processed` : 'No refund applicable for a free question',
+    ],
+  }
+}
+
+export function cancelExpiredQuestions(questions = [], nowMs = Date.now()) {
+  return questions.map((question) => applyAnswerDeadlineCancellation(question, nowMs))
 }

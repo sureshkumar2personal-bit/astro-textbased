@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X, Paperclip } from 'lucide-react'
+import { Search, X, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
-import TextBasedQuestionsModuleTabs from '../components/TextBasedQuestionsModuleTabs.jsx'
+import SummaryCard from '../components/ui/SummaryCard.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import DisputeDetailsModal from '../components/DisputeDetailsModal.jsx'
 import AnswerAttachmentPanel from '../components/AnswerAttachmentPanel.jsx'
@@ -24,10 +24,12 @@ import {
   getQuestionTypeLabel,
   hasOpenDispute,
   isQuestionAnswered,
+  isQuestionCancelled,
   sortAnswerQueue,
   ANSWER_CHAR_LIMIT,
   canEditQuestionAnswer,
 } from '../utils/answer.js'
+import { getQuestionSourceLabel } from '../utils/questions.js'
 import {
   TempleArchIcon,
   TempleLampIcon,
@@ -36,17 +38,16 @@ import {
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-const DUE_FILTERS = ['All', 'Pending', 'Due Soon', 'Overdue', 'Answered', 'Disputed']
-
 const DUE_FILTER_KEY = {
   'Pending': 'pending',
   'Due Soon': 'dueSoon',
   'Overdue': 'overdue',
   'Answered': 'answered',
   'Disputed': 'disputed',
+  'Cancelled': 'cancelled',
 }
 
-const TYPE_OPTIONS = ['All', 'General Pending', 'Personal']
+const QUESTIONS_PAGE_SIZE = 8
 
 const TYPE_FILTER_KEY = {
   'General Pending': 'generalPending',
@@ -61,6 +62,7 @@ const DUE_PILL_STYLE = {
   disputed: { background: '#FFF7ED', color: '#EA580C', border: 'rgba(234, 88, 12, 0.32)' },
   inProgress: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.26)' },
   closed: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.25)' },
+  cancelled: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.30)' },
 }
 
 const DUE_PILL_LABEL = {
@@ -71,6 +73,7 @@ const DUE_PILL_LABEL = {
   disputed: 'Dispute',
   inProgress: 'In Progress',
   closed: 'Closed',
+  cancelled: 'Cancelled',
 }
 
 const CARD_TONE = {
@@ -81,9 +84,25 @@ const CARD_TONE = {
   disputed: '#EA580C',
   inProgress: '#5B21B6',
   closed: '#64748B',
+  cancelled: '#DC2626',
 }
 
 const DEADLINE_TONE_STATES = ['pending', 'dueSoon', 'overdue']
+
+// Page numbers to render, with ellipsis markers when the range is wide.
+function buildPageTokens(currentPage, totalPages) {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const tokens = [1]
+  const start = Math.max(2, currentPage - 1)
+  const end = Math.min(totalPages - 1, currentPage + 1)
+
+  if (start > 2) tokens.push('start-ellipsis')
+  for (let value = start; value <= end; value += 1) tokens.push(value)
+  if (end < totalPages - 1) tokens.push('end-ellipsis')
+  tokens.push(totalPages)
+  return tokens
+}
 
 function formatDateTime(value) {
   if (!value) return ''
@@ -124,32 +143,12 @@ function TypeBadge({ type }) {
   return <span className={isPersonal ? 'badge badge-blue' : 'badge badge-violet'}>{getQuestionTypeLabel({ type })}</span>
 }
 
-function SummaryCard({ label, value, hint, background, color, border }) {
-  return (
-    <Card style={{ padding: 16 }}>
-      <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}>
-        <div
-          className="text-center"
-          style={{
-            padding: '4px 8px 14px',
-            borderRadius: 18,
-            background,
-            border: `1px solid ${border}`,
-          }}
-        >
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color }}>{label}</div>
-          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1.15, marginTop: 6 }}>{value}</div>
-          <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{hint}</div>
-        </div>
-      </div>
-    </Card>
-  )
-}
-
 function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
   const dueState = getQuestionDueState(question, nowMs)
   const deadline = getAnswerDeadlineLabel(question, nowMs)
   const typeLabel = getQuestionTypeLabel(question)
+  const source = getQuestionSourceLabel(question)
+  const openQuestion = source === 'Open Question'
   const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
   const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
   const accent = CARD_TONE[dueState] || CARD_TONE.pending
@@ -158,16 +157,19 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
   const canEditAnswered = dueState === 'answered' && canEditQuestionAnswer(question, nowMs)
   const isDisputed = dueState === 'disputed'
   const isAnswered = dueState === 'answered'
+  const isCancelled = dueState === 'cancelled'
 
-  const remainingLine = isPending
-    ? <span style={{ color: accent, fontWeight: 700 }}>{deadline?.label}</span>
-    : isAnswered
-      ? <span style={{ color: 'var(--green-600)', fontWeight: 700 }}>Answered {formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || ''}</span>
-      : isDisputed
-        ? <span style={{ color: '#EA580C', fontWeight: 700 }}>Under dispute</span>
-        : <span className="muted">Closed</span>
+  const remainingLine = isCancelled
+    ? <span style={{ color: accent, fontWeight: 700 }}>{question.cancellationReason || 'Answer deadline exceeded'}</span>
+    : isPending
+      ? <span style={{ color: accent, fontWeight: 700 }}>{deadline?.label}</span>
+      : isAnswered
+        ? <span style={{ color: 'var(--green-600)', fontWeight: 700 }}>Answered {formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || ''}</span>
+        : isDisputed
+          ? <span style={{ color: '#EA580C', fontWeight: 700 }}>Under dispute</span>
+          : <span className="muted">Closed</span>
 
-  const actionLabel = isDisputed ? 'View Dispute' : isAnswered ? (canEditAnswered ? 'Edit Answer' : 'View Answer') : 'Answer Now'
+  const actionLabel = isDisputed ? 'View Dispute' : isAnswered ? (canEditAnswered ? 'Edit Answer' : 'View Answer') : isCancelled ? 'View Details' : 'Answer Now'
   const handleOpen = () => (isDisputed ? onViewDispute(question.id) : onAnswer(question.id))
 
   return (
@@ -201,9 +203,10 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
             </span>
             <span className="badge badge-gray">{question.submittedByUserId || 'user-demo'}</span>
             <TypeBadge type={typeLabel} />
+            {openQuestion && <span className="badge badge-blue">Open Question</span>}
           </div>
           <div className="muted" style={{ marginTop: 6, fontSize: 12.5 }}>
-            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</span> · {question.campaignName || 'Open Question'} · {question.category || 'Others'}
+            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</span> · Source: {source} · {question.category || 'Others'}
           </div>
         </div>
         <div style={{ flex: 'none' }}>
@@ -240,13 +243,16 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
         }}
       >
         <div className="muted" style={{ fontSize: 12, lineHeight: 1.6 }}>
-          <div>Received: {received || '—'} · Answer by: {deadlineDate || '—'}</div>
+          <div>Asked: {received || '—'} · Answer by: {deadlineDate || '—'}</div>
           <div style={{ marginTop: 2 }}>{remainingLine}</div>
+          {isCancelled && Number(question.refundAmount) > 0 && (
+            <div style={{ marginTop: 2 }}>Refund: {question.refundStatus || 'Refunded'} of {Number(question.refundAmount).toLocaleString('en-IN')}</div>
+          )}
         </div>
         <button
           type="button"
           className={isDisputed ? 'btn btn-outline btn-sm' : isAnswered && !canEditAnswered ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm'}
-          style={isDisputed ? { color: '#EA580C', borderColor: 'rgba(234, 88, 12, 0.4)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : undefined}
+          style={isDisputed ? { color: '#EA580C', borderColor: 'rgba(234, 88, 12, 0.4)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: 'var(--red-600)', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
           onClick={(event) => {
             event.stopPropagation()
             handleOpen()
@@ -267,13 +273,19 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
   const deadline = getAnswerDeadlineLabel(question, nowMs)
   const editWindow = getAnswerEditWindowLabel(question, nowMs)
   const birthDetails = question?.customer || null
+  const source = getQuestionSourceLabel(question)
+  const openQuestion = source === 'Open Question'
+  const cancelled = isQuestionCancelled(question)
+  const refundAmount = Number(question.refundAmount) || 0
   const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
   const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
-  const remaining = dueState === 'answered'
-    ? `Answered ${formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || '—'}`
-    : dueState === 'disputed'
-      ? 'Under dispute'
-      : deadline?.label || '—'
+  const remaining = cancelled
+    ? (question.cancellationReason || 'Answer deadline exceeded')
+    : dueState === 'answered'
+      ? `Answered ${formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || '—'}`
+      : dueState === 'disputed'
+        ? 'Under dispute'
+        : deadline?.label || '—'
   const pillLabel = DEADLINE_TONE_STATES.includes(dueState) ? deadline?.label : undefined
 
   const [editing, setEditing] = useState(false)
@@ -315,7 +327,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
       <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header flex items-center justify-between gap-4">
           <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-            <div className="astrologer-modal-title">Answer Question</div>
+            <div className="astrologer-modal-title">Question Details</div>
             <div className="muted" style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {question.campaignName || 'Open Question'} · {question.id}
             </div>
@@ -333,12 +345,29 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
             <div className="astrologer-modal-highlight astrologer-modal-details-grid">
               <div><strong>Customer Name</strong><div className="muted">{question.user}</div></div>
               <div><strong>User ID</strong><div className="muted">{question.submittedByUserId || question.userId || '—'}</div></div>
+              <div><strong>Question ID</strong><div className="muted">{question.id}</div></div>
+              <div><strong>Source</strong><div className="muted">{openQuestion ? 'Open Question' : source}</div></div>
               <div><strong>Question Type</strong><div className="muted">{question.type}</div></div>
-              <div><strong>Campaign Name</strong><div className="muted">{question.campaignName || 'Open Question'}</div></div>
-              <div><strong>Received Date</strong><div className="muted">{received || '—'}</div></div>
-              <div><strong>Answer Deadline</strong><div className="muted">{deadlineDate || '—'}</div></div>
-              <div><strong>Remaining</strong><div className="muted" style={dueState === 'overdue' ? { color: 'var(--red-600)', fontWeight: 700 } : dueState === 'dueSoon' ? { color: 'var(--coral-600)', fontWeight: 700 } : undefined}>{remaining}</div></div>
+              <div><strong>Campaign</strong><div className="muted">{openQuestion ? 'Not from a campaign' : source}</div></div>
+              <div><strong>Asked On</strong><div className="muted">{received || '—'}</div></div>
+              <div><strong>Answer Deadline</strong><div className="muted">{deadlineDate || '—'} (asked date + 30 days)</div></div>
+              <div>
+                <strong>Remaining</strong>
+                <div className="muted" style={cancelled ? { color: 'var(--red-600)', fontWeight: 700 } : dueState === 'overdue' ? { color: 'var(--red-600)', fontWeight: 700 } : dueState === 'dueSoon' ? { color: 'var(--coral-600)', fontWeight: 700 } : undefined}>{remaining}</div>
+              </div>
               <div><strong>Current Status</strong><div className="muted">{question.status}</div></div>
+              {cancelled && (
+                <>
+                  <div><strong>Cancellation Reason</strong><div className="muted">{question.cancellationReason || 'Answer deadline exceeded'}</div></div>
+                  <div>
+                    <strong>Refund</strong>
+                    <div className="muted">
+                      {question.refundStatus || 'Refunded'}
+                      {refundAmount > 0 ? ` · ${refundAmount.toLocaleString('en-IN')}` : ' · No amount paid for this question'}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -397,6 +426,23 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
           <div className="astrologer-modal-section">
             <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleLampIcon size={14} />Your Answer</div>
 
+            {cancelled && (
+              <div
+                style={{
+                  padding: '14px 16px',
+                  borderRadius: 14,
+                  border: '1px solid rgba(239, 68, 68, 0.30)',
+                  background: 'var(--danger-bg)',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ fontWeight: 700, color: 'var(--red-600)' }}>This question was cancelled - {question.cancellationReason || 'Answer deadline exceeded'}</div>
+                <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>
+                  The 30-day answer deadline passed without an answer, so the question was cancelled automatically{refundAmount > 0 ? ` and ${refundAmount.toLocaleString('en-IN')} was refunded to the user` : ''}. It can no longer be answered.
+                </div>
+              </div>
+            )}
+
             {disputed && (
               <div
                 style={{
@@ -427,7 +473,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
               </div>
             )}
 
-            {!answered && !disputed && (
+            {!answered && !disputed && !cancelled && (
               <>
                 <textarea
                   className="textarea-box"
@@ -467,7 +513,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
             )}
           </div>
 
-          {!disputed && (
+          {!disputed && !cancelled && (
             <div className="astrologer-modal-section">
               <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Paperclip size={14} />Attachments &amp; References</div>
               {answered && !editing ? (
@@ -499,7 +545,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
 
         <div className="modal-card__footer astrologer-modal-footer-actions">
           <button className="btn btn-ghost" onClick={onClose}>Close</button>
-          {!answered && !disputed && (
+          {!answered && !disputed && !cancelled && (
             <>
               <button className="btn btn-outline" disabled={!text.trim()} onClick={saveDraft}>Save Draft</button>
               <button className="btn btn-primary" disabled={!text.trim()} onClick={submit}>Submit Answer</button>
@@ -526,6 +572,7 @@ export default function AnswerQuestion() {
   const [typeOption, setTypeOption] = useState('All')
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
+  const [page, setPage] = useState(1)
   const [answerId, setAnswerId] = useState(null)
   const [disputeId, setDisputeId] = useState(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
@@ -560,13 +607,24 @@ export default function AnswerQuestion() {
   const summary = useMemo(() => getAnswerSummary(myQuestions, nowMs), [myQuestions, nowMs])
 
   const filteredQuestions = useMemo(() => {
-    const statusDue = DUE_FILTERS.includes(dueFilter)
-      ? DUE_FILTER_KEY[dueFilter] || 'All'
-      : 'All'
+    // The status cards drive these two states directly, so only the card-backed
+    // statuses need mapping here.
+    const statusDue = DUE_FILTER_KEY[dueFilter] || 'All'
     const typeDue = typeOption === 'All' ? 'All' : TYPE_FILTER_KEY[typeOption] || 'All'
     const due = typeDue !== 'All' ? typeDue : statusDue
     return filterAnswerQuestions(queue, { due, search: appliedSearch }, nowMs)
   }, [queue, dueFilter, typeOption, appliedSearch, nowMs])
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / QUESTIONS_PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedQuestions = filteredQuestions.slice(
+    (currentPage - 1) * QUESTIONS_PAGE_SIZE,
+    currentPage * QUESTIONS_PAGE_SIZE,
+  )
+
+  useEffect(() => {
+    setPage(1)
+  }, [appliedSearch, dueFilter, typeOption])
 
   const answerQuestion = useMemo(
     () => (answerId ? myQuestions.find((question) => question.id === answerId) || null : null),
@@ -584,7 +642,7 @@ export default function AnswerQuestion() {
       next.set('questionId', id)
       return next
     })
-actions.viewQuestion(id)
+    actions.viewQuestion(id)
   }, [setSearchParams])
 
   const clearQuestionParam = useCallback(() => {
@@ -638,76 +696,103 @@ actions.viewQuestion(id)
     <div>
       <PageHeader
         eyebrow="Astrologer"
-        title="Answer Questions"
+        title="Question Details"
         subtitle="Answer received questions within 30 days, oldest first."
         showBack
         backTo={routes.textBasedQuestions}
         backIcon={backIcon}
       />
 
-      <TextBasedQuestionsModuleTabs />
-
       <Section>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          <SummaryCard label="General Pending" value={summary.generalPending} hint={`${summary.inProgress} in progress`} background="var(--primary-bg)" color="var(--primary)" border="rgba(91, 33, 182, 0.20)" />
-          <SummaryCard label="Personal Pending" value={summary.personalPending} hint={`${summary.needsAnswer} awaiting answers`} background="var(--sky-bg)" color="var(--sky-600)" border="rgba(2, 132, 199, 0.20)" />
-          <SummaryCard label="Due Soon" value={summary.dueSoon} hint="Within 7 days of deadline" background="var(--coral-100)" color="var(--coral-600)" border="rgba(242, 102, 42, 0.24)" />
-          <SummaryCard label="Overdue" value={summary.overdue} hint={`${summary.answered} answered · ${summary.disputed} disputed`} background="var(--danger-bg)" color="var(--red-600)" border="rgba(239, 68, 68, 0.24)" />
-          <SummaryCard label="Disputed" value={summary.disputed} hint="Dispute Raised" background="#FFF7ED" color="#EA580C" border="rgba(234, 88, 12, 0.32)" />
-        </div>
+        <Card style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="search-filter-row__group" style={{ gap: 10, width: 'min(100%, 320px)' }}>
+            <div className="search-bar" style={{ width: '100%' }}>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by customer, user ID, question ID, category, or keyword"
+                className="text-input search-bar__input"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setAppliedSearch(search)
+                }}
+              />
+              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
+                <Search size={18} />
+              </button>
+            </div>
+          </div>
+        </Card>
       </Section>
 
       <Section>
-        <Card>
-          <div className="search-filter-row">
-            <div className="search-filter-row__group" style={{ gap: 10 }}>
-              <div className="search-bar">
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by customer, user ID, question ID, category, or keyword"
-                  className="text-input search-bar__input"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') setAppliedSearch(search)
-                  }}
-                />
-                <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
-                  <Search size={18} />
-                </button>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2" style={{ alignItems: 'center' }}>
-              {DUE_FILTERS.map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  className={`btn btn-sm ${dueFilter === filter ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setDueFilter(filter)}
-                >
-                  {filter}
-                  {filter !== 'All' && (
-                    <span style={{ opacity: 0.75 }}>
-                      {' '}
-                      ({filterAnswerQuestions(queue, { due: DUE_FILTER_KEY[filter] || 'All' }, nowMs).length})
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2" style={{ alignItems: 'center', marginTop: 12 }}>
-            {TYPE_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`btn btn-sm ${typeOption === option ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => setTypeOption(option)}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </Card>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5" style={{ gridAutoRows: '1fr' }}>
+          <SummaryCard
+            label="General Pending"
+            value={summary.generalPending}
+            hint={`${summary.inProgress} in progress`}
+            background="var(--primary-bg)"
+            color="var(--primary)"
+            border="rgba(91, 33, 182, 0.20)"
+            onClick={() => {
+              if (dueFilter === 'Pending' && typeOption === 'General Pending') {
+                setTypeOption('All')
+                setDueFilter('All')
+                return
+              }
+              setTypeOption('General Pending')
+              setDueFilter('Pending')
+            }}
+            active={dueFilter === 'Pending' && typeOption === 'General Pending'}
+          />
+          <SummaryCard
+            label="Personal Pending"
+            value={summary.personalPending}
+            hint={`${summary.needsAnswer} awaiting answers`}
+            background="var(--sky-bg)"
+            color="var(--sky-600)"
+            border="rgba(2, 132, 199, 0.20)"
+            onClick={() => {
+              if (dueFilter === 'Pending' && typeOption === 'Personal') {
+                setTypeOption('All')
+                setDueFilter('All')
+                return
+              }
+              setTypeOption('Personal')
+              setDueFilter('Pending')
+            }}
+            active={dueFilter === 'Pending' && typeOption === 'Personal'}
+          />
+          <SummaryCard
+            label="Due Soon"
+            value={summary.dueSoon}
+            hint="Within 7 days of deadline"
+            background="var(--coral-100)"
+            color="var(--coral-600)"
+            border="rgba(242, 102, 42, 0.24)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Due Soon' ? 'All' : 'Due Soon') }}
+            active={dueFilter === 'Due Soon'}
+          />
+          <SummaryCard
+            label="Disputed"
+            value={summary.disputed}
+            hint="Dispute Raised"
+            background="#FFF7ED"
+            color="#EA580C"
+            border="rgba(234, 88, 12, 0.32)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Disputed' ? 'All' : 'Disputed') }}
+            active={dueFilter === 'Disputed'}
+          />
+          <SummaryCard
+            label="Cancelled"
+            value={summary.cancelled}
+            hint="Answer deadline exceeded"
+            background="var(--danger-bg)"
+            color="var(--red-600)"
+            border="rgba(239, 68, 68, 0.24)"
+            onClick={() => { setTypeOption('All'); setDueFilter(dueFilter === 'Cancelled' ? 'All' : 'Cancelled') }}
+            active={dueFilter === 'Cancelled'}
+          />
+        </div>
       </Section>
 
       <Section
@@ -720,9 +805,8 @@ actions.viewQuestion(id)
             <div className="muted">No matching questions found. Try a different search term or filter.</div>
           </Card>
         )}
-
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filteredQuestions.map((question) => (
+          {pagedQuestions.map((question) => (
             <QuestionCard
               key={question.id}
               question={question}
@@ -731,6 +815,58 @@ actions.viewQuestion(id)
               onViewDispute={openDispute}
             />
           ))}
+        </div>
+        {totalPages > 1 && (
+          <div
+            className="flex flex-wrap items-center justify-center gap-2"
+            style={{ marginTop: 20 }}
+            role="navigation"
+            aria-label="Questions pagination"
+          >
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              disabled={currentPage <= 1}
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </button>
+            {buildPageTokens(currentPage, totalPages).map((token) => {
+              if (typeof token === 'string') {
+                return (
+                  <span key={token} className="muted" style={{ padding: '0 4px', fontSize: 13 }}>&hellip;</span>
+                )
+              }
+              const isCurrent = token === currentPage
+              return (
+                <button
+                  key={token}
+                  type="button"
+                  className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
+                  aria-current={isCurrent ? 'page' : undefined}
+                  style={{ minWidth: 34, justifyContent: 'center' }}
+                  onClick={() => setPage(token)}
+                >
+                  {token}
+                </button>
+              )
+            })}
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        )}
+        <div className="muted" style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5 }}>
+          Showing {pagedQuestions.length} of {filteredQuestions.length} questions
+          {' · '}
+          Page {currentPage} of {totalPages}
         </div>
       </Section>
 

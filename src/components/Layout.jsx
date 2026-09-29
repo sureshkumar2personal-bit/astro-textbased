@@ -177,7 +177,7 @@ const PAGE_META = {
     '/astrologer/audience/follower': { title: 'Follower Profile', sub: 'Audience member details' },
     '/astrologer/audience/subscriber': { title: 'Subscriber Profile', sub: 'Audience member details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
-    '/astrologer/answer-question': { title: 'Answer Questions', sub: 'Respond to a user question' },
+    '/astrologer/answer-question': { title: 'Question Details', sub: 'Respond to a user question' },
     '/astrologer/text-based-question-history': { title: 'Text-Based Question History', sub: 'Review completed question records and dispute outcomes' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
     '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },

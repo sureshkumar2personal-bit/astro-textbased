@@ -61,6 +61,21 @@ export function getQuestionMonthKey(question = {}, fallbackDate = new Date()) {
   return getMonthKeyFromDate(safe)
 }
 
+// Questions either belong to a campaign or were raised straight from Open
+// Questions. The model already encodes that by leaving campaignId / campaignName
+// empty, so this only resolves the label for display - it adds no new field.
+export function getQuestionSourceLabel(question = {}) {
+  const campaignName = String(question.campaignName || '').trim()
+  if (campaignName && campaignName.toLowerCase() !== 'open question') return campaignName
+  const campaignId = String(question.campaignId || '').trim()
+  if (campaignId) return campaignId
+  return 'Open Question'
+}
+
+export function isOpenQuestion(question = {}) {
+  return getQuestionSourceLabel(question) === 'Open Question'
+}
+
 export function countQuestionsInMonth(questions = [], astrologerId, monthKey, fallbackDate = new Date()) {
   if (!monthKey) return 0
   return questions.filter((question) => {
@@ -206,21 +221,38 @@ export function getCampaignAllowedActions(campaign = {}, monthKey, nowIso) {
 
 const CLOSED_CAMPAIGN_STATUSES = new Set(['Closed', 'Completed', 'Cancelled', 'Expired', 'Paused'])
 
+// Status is resolved against the *selected* month rather than the wall clock, so
+// the month selector drives the outcome:
+//   - a month before the current one is historical, so everything in it is Closed
+//   - the current month keeps each campaign's real status
+//   - a future month is evaluated against that future window, so campaigns whose
+//     period already ended stay Closed while campaigns that have not started yet
+//     read as Scheduled. Drafts stay Draft in every future month.
 export function getCampaignDisplayStatus(campaign = {}, monthKey, nowIso) {
   const now = new Date(nowIso || Date.now())
   const currentMonth = getMonthKeyFromDate(now)
-  if (monthKey && currentMonth && monthKey < currentMonth) return 'Closed'
+  const selectedMonth = monthKey ? String(monthKey) : ''
+
+  if (selectedMonth && currentMonth && selectedMonth < currentMonth) return 'Closed'
+
   const status = String(campaign.status || 'Draft')
-  if (status === 'Draft') return 'Draft'
-  if (status === 'Scheduled') return 'Scheduled'
   if (CLOSED_CAMPAIGN_STATUSES.has(status)) return 'Closed'
+  if (status === 'Draft') return 'Draft'
+
   const start = parseCampaignDate(campaign.date)
   const end = parseCampaignDate(campaign.endDate)
-  if (start && now.getTime() < start.getTime()) return 'Scheduled'
-  if (end) {
-    const lastDay = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999)
-    if (now.getTime() > lastDay.getTime()) return 'Closed'
-  }
+  const periodEnd = end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999) : null
+
+  // A future month is judged against its own start for "has the period ended",
+  // while "has the period started" always compares against now. That keeps an
+  // already-published future campaign reading as Scheduled until it really opens.
+  const bounds = selectedMonth ? getMonthBounds(selectedMonth) : null
+  const isFutureMonth = Boolean(bounds && currentMonth && selectedMonth > currentMonth)
+  const frameStart = isFutureMonth ? bounds.start : now
+
+  if (periodEnd && periodEnd.getTime() < frameStart.getTime()) return 'Closed'
+  if (status === 'Scheduled') return 'Scheduled'
+  if (start && start.getTime() > now.getTime()) return 'Scheduled'
   return 'Active'
 }
 
@@ -264,13 +296,16 @@ export function getCampaignMetricCounts(campaigns = [], monthKey, referenceDate 
   let active = 0
   let scheduled = 0
   let draft = 0
+  let closed = 0
   applicable.forEach((campaign) => {
     const status = getCampaignDisplayStatus(campaign, key, now)
     if (status === 'Active') active += 1
     else if (status === 'Scheduled') scheduled += 1
     else if (status === 'Draft') draft += 1
+    // Anything else is Closed, so the buckets always add up to the total.
+    else closed += 1
   })
-  return { total: applicable.length, active, scheduled, draft }
+  return { total: applicable.length, active, scheduled, draft, closed }
 }
 
 export function filterCampaignsByStatus(campaigns = [], filter = 'All', monthKey, referenceDate = new Date()) {

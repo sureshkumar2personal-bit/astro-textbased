@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import {
   Activity,
   AlertTriangle,
+  Archive,
   ArrowLeft,
   ArrowRight,
   CalendarClock,
   Copy,
   Eye,
   FileText,
-  Inbox,
   Layers,
   LayoutGrid,
   Megaphone,
@@ -57,6 +57,8 @@ import {
   validateCampaignDateRange,
   validateCapacityAllocation,
 } from '../utils/questions.js'
+import { formatAnswerDate, getQuestionAnswerDeadline, isQuestionCancelled } from '../utils/answer.js'
+import { getQuestionSourceLabel, isOpenQuestion } from '../utils/questions.js'
 import { CAMPAIGN_TEMPLATES, CREATE_FROM_SCRATCH } from '../utils/campaignTemplates.js'
 import {
   TempleDonationBoxIcon,
@@ -66,9 +68,9 @@ import {
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
 
-const QUESTION_STATUS_FILTERS = ['All', 'Pending', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Closed']
+const QUESTION_STATUS_FILTERS = ['All', 'Pending', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Cancelled', 'Closed']
 const DISCOUNT_CHOICES = [40, 50, 60, 70, 80, 90]
-const DEFAULT_OPEN_SETTINGS = { generalPrice: 200, personalPrice: 500, capacity: 0, generalEnabled: true, personalEnabled: true }
+const DEFAULT_OPEN_SETTINGS = { generalPrice: 200, personalPrice: 500, capacity: 0, generalEnabled: true, personalEnabled: true, offerEnabled: false, discountPercent: 0 }
 function getWordPreview(content) {
   const text = String(content || '').trim()
   const words = text.split(/\s+/).filter(Boolean)
@@ -84,6 +86,16 @@ function getWordPreview(content) {
 function inr(value) {
   return Number(value || 0).toLocaleString('en-IN')
 }
+
+// The Text-Based Questions page is scoped with `.tbq-page` (see index.css), which
+// keeps the page heading compact and lets the Questions / Answer / Question History
+// navigation directly beneath it read as the primary navigation. Campaigns
+// additionally moves its actions onto their own full-width row so
+// "Create Campaign" sits left and Back sits on the far right of the same line.
+const PAGE_ROOT_CLASS = 'tbq-page'
+const headerClassCompact = ''
+const headerClassCampaigns = '[&_.page-header-actions]:w-full [&_.page-header-actions]:justify-between'
+const CAMPAIGNS_PER_PAGE = 6
 
 function toInputDate(value) {
   const date = parseDisplayDate(value)
@@ -148,14 +160,14 @@ function CapacityMetric({ label, value, hint, background, color, border }) {
       style={{
         flex: '1 1 140px',
         minWidth: 104,
-        padding: '16px 12px',
-        borderRadius: 18,
+        padding: '11px 10px',
+        borderRadius: 14,
         background,
         border: `1px solid ${border}`,
       }}
     >
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1.15, marginTop: 6 }}>{value}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1.15, marginTop: 4 }}>{value}</div>
       <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{hint}</div>
     </div>
   )
@@ -273,7 +285,10 @@ function OverviewStat({ label, value, icon: Icon, tone, gradient, border, accent
       className="flex items-center gap-3"
       style={{
         width: '100%',
-        padding: '16px 18px',
+        height: '100%',
+        minWidth: 0,
+        overflow: 'hidden',
+        padding: '16px 15px',
         borderRadius: 18,
         cursor: 'pointer',
         textAlign: 'left',
@@ -283,25 +298,25 @@ function OverviewStat({ label, value, icon: Icon, tone, gradient, border, accent
         transition: 'border-color 200ms var(--ease-premium), background 200ms var(--ease-premium), box-shadow 200ms var(--ease-premium)',
       }}
     >
-      <span className={`stat-icon ${tone}`} style={{ width: 42, height: 42, borderRadius: 12 }}><Icon size={18} /></span>
-      <div style={{ minWidth: 0 }}>
-        <div className="muted" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{label}</div>
-        <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1.15, marginTop: 2 }}>{value}</div>
+      <span className={`stat-icon ${tone}`} style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0 }}><Icon size={18} /></span>
+      <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+        <div className="muted" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1.25, minHeight: 26, overflowWrap: 'anywhere' }}>{label}</div>
+        <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--ink)', lineHeight: 1.15, marginTop: 2 }}>{value}</div>
       </div>
       {active && (
         <span
           style={{
             marginLeft: 'auto',
             alignSelf: 'center',
-            width: 24,
-            height: 24,
+            width: 20,
+            height: 20,
             borderRadius: '50%',
             background: accent,
             color: '#fff',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 800,
             flexShrink: 0,
           }}
@@ -311,6 +326,57 @@ function OverviewStat({ label, value, icon: Icon, tone, gradient, border, accent
         </span>
       )}
     </button>
+  )
+}
+
+function CampaignPagination({ page, totalPages, onChange }) {
+  if (totalPages <= 1) return null
+
+  const pages = Array.from({ length: totalPages }, (unused, index) => index + 1)
+
+  return (
+    <nav
+      aria-label="Campaign pages"
+      className="flex flex-wrap items-center justify-center gap-2"
+      style={{ marginTop: 22 }}
+    >
+      <button
+        type="button"
+        className="btn btn-outline btn-sm"
+        disabled={page <= 1}
+        onClick={() => onChange(page - 1)}
+      >
+        <ArrowLeft size={14} /> Previous
+      </button>
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
+        {pages.map((pageNumber) => {
+          const isCurrent = pageNumber === page
+          return (
+            <button
+              key={pageNumber}
+              type="button"
+              className={`btn btn-sm${isCurrent ? ' btn-primary' : ' btn-outline'}`}
+              aria-current={isCurrent ? 'page' : undefined}
+              onClick={() => onChange(pageNumber)}
+              style={{ minWidth: 38, justifyContent: 'center' }}
+            >
+              {pageNumber}
+            </button>
+          )
+        })}
+      </div>
+      <button
+        type="button"
+        className="btn btn-outline btn-sm"
+        disabled={page >= totalPages}
+        onClick={() => onChange(page + 1)}
+      >
+        Next <ArrowRight size={14} />
+      </button>
+      <span className="muted" style={{ width: '100%', textAlign: 'center', fontSize: 12, fontWeight: 600, marginTop: 4 }}>
+        Page {page} of {totalPages}
+      </span>
+    </nav>
   )
 }
 
@@ -369,7 +435,14 @@ export default function TextBasedQuestions() {
     .sort((a, b) => new Date(b.raisedAt || b.submittedAt || 0) - new Date(a.raisedAt || a.submittedAt || 0)),
   [questions, astrologerId])
 
-  const [view, setView] = useState('overview')
+  // Honours an explicit ?view= so other pages (e.g. the Dashboard "Create
+  // Campaign" quick action) can deep-link straight into a section of this page
+  // instead of the overview landing screen. Unrecognised values fall back to
+  // the default overview, so the existing behaviour is unchanged.
+  const [view, setView] = useState(() => {
+    const requested = searchParams.get('view')
+    return requested === 'campaigns' || requested === 'received' ? requested : 'overview'
+  })
   const [panelQuestionId, setPanelQuestionId] = useState(null)
   const [statusFilter, setStatusFilter] = useState('All')
   const [campaignStatusFilter, setCampaignStatusFilter] = useState('All')
@@ -395,6 +468,7 @@ export default function TextBasedQuestions() {
   const [openError, setOpenError] = useState('')
   const [openSettingsModalOpen, setOpenSettingsModalOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [campaignPage, setCampaignPage] = useState(1)
 
   const editingCampaign = editingCampaignId ? campaigns.find((campaign) => campaign.id === editingCampaignId) || null : null
 
@@ -434,6 +508,25 @@ export default function TextBasedQuestions() {
     () => filterCampaignsByStatus(campaigns, campaignStatusFilter, selectedMonthKey, new Date(now)),
     [campaigns, campaignStatusFilter, selectedMonthKey, now],
   )
+
+  // Filtering always happens first; pagination is applied to the filtered list.
+  const totalCampaignPages = Math.max(1, Math.ceil(filteredCampaigns.length / CAMPAIGNS_PER_PAGE))
+  const pagedCampaigns = useMemo(() => {
+    const start = (campaignPage - 1) * CAMPAIGNS_PER_PAGE
+    return filteredCampaigns.slice(start, start + CAMPAIGNS_PER_PAGE)
+  }, [filteredCampaigns, campaignPage])
+  const campaignPageStart = filteredCampaigns.length === 0 ? 0 : (campaignPage - 1) * CAMPAIGNS_PER_PAGE + 1
+  const campaignPageEnd = campaignPageStart === 0 ? 0 : campaignPageStart + pagedCampaigns.length - 1
+
+  // Month / status changes always restart from the first page.
+  useEffect(() => {
+    setCampaignPage(1)
+  }, [campaignStatusFilter, selectedMonthKey])
+
+  // Deletions (or any other count change) can invalidate the current page.
+  useEffect(() => {
+    setCampaignPage((page) => (page > totalCampaignPages ? totalCampaignPages : page))
+  }, [totalCampaignPages])
 
   const deletePendingCampaign = deletePendingCampaignId
     ? campaigns.find((campaign) => campaign.id === deletePendingCampaignId) || null
@@ -540,6 +633,30 @@ export default function TextBasedQuestions() {
     setView('campaigns')
     setCampaignModalOpen(true)
   }
+
+  // ?create=1 deep-links the Dashboard "Create Campaign" action straight into the
+  // existing Create Campaign form on the Campaigns view. It deliberately reuses
+  // startCreateCampaign so there is exactly one code path for opening that form
+  // and no second/duplicate implementation. Runs once on mount and then strips
+  // the param so a later refresh does not re-open the form over a saved list.
+  //
+  // This block is declared AFTER startCreateCampaign on purpose: startCreateCampaign
+  // is a const, so referencing it any earlier would throw a temporal dead zone
+  // ReferenceError. The ref keeps the effect free of the per-render dependency.
+  const autoCreateHandled = useRef(false)
+  const startCreateCampaignRef = useRef(startCreateCampaign)
+  startCreateCampaignRef.current = startCreateCampaign
+  useEffect(() => {
+    if (autoCreateHandled.current) return
+    if (searchParams.get('create') !== '1') return
+    autoCreateHandled.current = true
+    startCreateCampaignRef.current()
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous)
+      next.delete('create')
+      return next
+    }, { replace: true })
+  }, [searchParams, setSearchParams])
 
   const startEditCampaign = (campaign) => {
     setEditingCampaignId(campaign.id)
@@ -711,6 +828,13 @@ export default function TextBasedQuestions() {
   const openCapacityValue = Math.max(Number(openForm.capacity) || 0, 0)
   const openRemaining = availableOpenAllocation - openCapacityValue
 
+  // Open question offer preview, using the same getDiscountPreview helper and
+  // the same "offer off => feed 0" idiom as the campaign offer above. The base
+  // price is always the open question's own price, never a hardcoded amount.
+  const openOfferPercent = openForm.offerEnabled ? Number(openForm.discountPercent) || 0 : 0
+  const openGeneralPreview = getDiscountPreview(openForm.generalPrice, openOfferPercent)
+  const openPersonalPreview = getDiscountPreview(openForm.personalPrice, openOfferPercent)
+
   const validateCampaignForm = () => {
     if (!form.name.trim()) throw new Error('Enter a campaign name.')
     if (!form.date) throw new Error('Select a campaign start date.')
@@ -840,12 +964,18 @@ export default function TextBasedQuestions() {
       if (openForm.generalEnabled === false && openForm.personalEnabled === false) {
         throw new Error('Enable at least one open question type.')
       }
+      // Same bounds the campaign offer enforces.
+      if (openForm.offerEnabled && (Number(openForm.discountPercent) < 0 || Number(openForm.discountPercent) > 100)) {
+        throw new Error('Subscriber discount must be between 0% and 100%.')
+      }
       actions.updateOpenQuestionSettings({
         generalPrice: Math.max(Number(openForm.generalPrice) || 0, 0),
         personalPrice: Math.max(Number(openForm.personalPrice) || 0, 0),
         capacity: Math.max(Number(openForm.capacity) || 0, 0),
         generalEnabled: openForm.generalEnabled !== false,
         personalEnabled: openForm.personalEnabled !== false,
+        offerEnabled: openForm.offerEnabled === true,
+        discountPercent: openForm.offerEnabled ? Number(openForm.discountPercent) || 0 : 0,
       })
       setSuccessMessage('Open question settings saved successfully.')
       closeOpenSettingsModal()
@@ -855,37 +985,40 @@ export default function TextBasedQuestions() {
   }
 
   return (
-    <div>
+    <div className={PAGE_ROOT_CLASS}>
       <PageHeader
+        className={view === 'campaigns' ? headerClassCampaigns : headerClassCompact}
         eyebrow="Astrologer"
         title={view === 'campaigns' ? 'Campaigns' : 'Text Based Questions'}
         showBack
-        backTo={routes.dashboard}
+        backTo={view === 'campaigns' ? routes.textBasedQuestions : routes.dashboard}
+        backOnClick={view === 'campaigns' ? goToOverview : undefined}
         backIcon={backIcon}
         subtitle={view === 'campaigns'
           ? 'Create, manage, and monitor your topic-based question campaigns.'
           : 'Manage campaigns, open questions, and incoming customer questions from one place.'}
         actions={view === 'campaigns' ? (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            <button type="button" className="btn btn-outline" onClick={goToOverview}><ArrowLeft size={15} /> Overview</button>
-            <button type="button" className="btn btn-primary" onClick={startCreateCampaign}><Plus size={15} /> Create Campaign</button>
-          </div>
+          <button type="button" className="btn btn-primary" onClick={startCreateCampaign}><Plus size={15} /> Create Campaign</button>
         ) : undefined}
       />
 
-      <TextBasedQuestionsModuleTabs />
+      {view !== 'campaigns' && (
+        <div>
+          <TextBasedQuestionsModuleTabs />
+        </div>
+      )}
 
       {view === 'overview' && (
         <>
-          <Section>
+          <Section className="!mt-4">
             <div
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
                 alignItems: 'center',
-                gap: 30,
-                padding: 'clamp(20px, 3.2vw, 30px)',
-                borderRadius: 24,
+                gap: 20,
+                padding: 'clamp(14px, 2vw, 20px)',
+                borderRadius: 20,
                 border: '1px solid rgba(91, 33, 182, 0.18)',
                 background: 'linear-gradient(150deg, #ECE5F8 0%, #F7F2FC 46%, #FFFFFF 100%)',
                 boxShadow: '0 22px 48px rgba(91, 33, 182, 0.12)',
@@ -896,16 +1029,16 @@ export default function TextBasedQuestions() {
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-light), var(--primary))', boxShadow: '0 0 0 4px rgba(91, 33, 182, 0.12)', flexShrink: 0 }} />
                   <span className="muted" style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Monthly Question Capacity</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
-                  <span style={{ fontSize: 46, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--ink)', lineHeight: 1 }}>{inr(currentMonthSummary.capacity)}</span>
-                  <span className="muted" style={{ fontSize: 15, fontWeight: 700 }}>questions / month</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 12, marginTop: 8 }}>
+                  <span style={{ fontSize: 34, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--ink)', lineHeight: 1 }}>{inr(currentMonthSummary.capacity)}</span>
+                  <span className="muted" style={{ fontSize: 14, fontWeight: 700 }}>questions / month</span>
                 </div>
-                <div className="muted" style={{ fontSize: 13, marginTop: 10, maxWidth: 340 }}>
+                <div className="muted" style={{ fontSize: 12.5, marginTop: 6, maxWidth: 340 }}>
                   Maximum questions per astrologer, per calendar month. Metric tiles below reflect <strong style={{ color: 'var(--ink)' }}>{currentMonthLabel}</strong>.
                 </div>
               </div>
               <div style={{ flex: '1 1 420px', minWidth: 0 }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                   <CapacityMetric label="Allocated" value={inr(currentMonthSummary.allocated)} hint="Campaign + Open Questions" background="var(--sky-bg)" color="var(--sky-600)" border="rgba(2, 132, 199, 0.22)" />
                   <CapacityMetric label="Used" value={inr(currentMonthSummary.used)} hint={`Consumed in ${currentMonthLabel}`} background="var(--gold-100)" color="var(--accent-dark)" border="rgba(242, 102, 42, 0.24)" />
                   <CapacityMetric label="Remaining" value={inr(currentMonthSummary.remaining)} hint="Unallocated capacity" background="var(--success-bg)" color="var(--green-600)" border="rgba(16, 185, 129, 0.24)" />
@@ -914,9 +1047,9 @@ export default function TextBasedQuestions() {
             </div>
           </Section>
 
-          <Section title="Manage Text-Based Questions" icon={LayoutGrid}>
-            <p className="muted" style={{ margin: '0 0 18px' }}>Choose what you want to manage.</p>
-            <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Section title="Manage Text-Based Questions" icon={LayoutGrid} className="!mt-5">
+            <p className="muted" style={{ margin: '0 0 12px' }}>Choose what you want to manage.</p>
+            <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2">
               <ManageNavCard
                 icon={Target}
                 tone="tone-violet"
@@ -941,18 +1074,6 @@ export default function TextBasedQuestions() {
                 shadow="0 14px 34px rgba(16, 185, 129, 0.10)"
                 onClick={openOpenSettings}
               />
-              <ManageNavCard
-                icon={Inbox}
-                tone="tone-gold"
-                title="Received Questions"
-                description="Review and answer questions submitted by customers."
-                action="View Received Questions"
-                actionColor="var(--accent-dark)"
-                gradient="linear-gradient(160deg, #FFEDE1 0%, #FFF8F2 55%, #FFFFFF 100%)"
-                border="rgba(242, 102, 42, 0.24)"
-                shadow="0 14px 34px rgba(242, 102, 42, 0.10)"
-                onClick={() => { setStatusFilter('All'); setView('received') }}
-              />
             </div>
           </Section>
         </>
@@ -963,12 +1084,12 @@ export default function TextBasedQuestions() {
           <Section>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
               <span className="muted" style={{ fontSize: 13, fontWeight: 600 }}>
-                Showing {filteredCampaigns.length} of {campaigns.length} campaigns · {monthLabel}
+                Showing {campaignPageStart}–{campaignPageEnd} of {filteredCampaigns.length} campaigns · {monthLabel}
               </span>
               <MonthSelector monthKey={selectedMonthKey} onChange={setSelectedMonthKey} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 items-stretch gap-4 sm:grid-cols-3 lg:grid-cols-5">
               <OverviewStat
                 label="Total Campaigns"
                 value={campaignCounts.total}
@@ -1021,6 +1142,19 @@ export default function TextBasedQuestions() {
                 active={campaignStatusFilter === 'Draft'}
                 onClick={() => setCampaignStatusFilter('Draft')}
               />
+              <OverviewStat
+                label="Closed"
+                value={campaignCounts.closed}
+                icon={Archive}
+                tone="tone-neutral"
+                accent="var(--muted)"
+                gradient="linear-gradient(150deg, #EDEBF0 0%, #FFFFFF 100%)"
+                border="rgba(107, 114, 128, 0.22)"
+                activeGradient="linear-gradient(150deg, #DEDBE4 0%, #FFFFFF 100%)"
+                activeBorder="rgba(107, 114, 128, 0.55)"
+                active={campaignStatusFilter === 'Closed'}
+                onClick={() => setCampaignStatusFilter('Closed')}
+              />
             </div>
           </Section>
 
@@ -1053,17 +1187,17 @@ export default function TextBasedQuestions() {
                 }}
               >
                 <span className="stat-icon tone-neutral" style={{ width: 56, height: 56, borderRadius: 18, margin: '0 auto 14px' }}><Search size={24} /></span>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--ink)' }}>No {campaignStatusFilter === 'Active' ? 'Active' : campaignStatusFilter} campaigns</h2>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: 'var(--ink)' }}>No {campaignStatusFilter.toLowerCase()} campaigns</h2>
                 <p className="muted" style={{ margin: '6px auto 16px', maxWidth: 380, fontSize: 13, lineHeight: 1.6 }}>
-                  There are no {campaignStatusFilter === 'Active' ? 'active' : campaignStatusFilter.toLowerCase()} campaigns to show right now.
+                  There are no {campaignStatusFilter.toLowerCase()} campaigns to show for {monthLabel}.
                 </p>
                 <button type="button" className="btn btn-outline" onClick={() => setCampaignStatusFilter('All')}>Show all campaigns</button>
               </div>
             </Section>
           ) : (
             <Section>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {filteredCampaigns.map((campaign) => {
+              <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                {pagedCampaigns.map((campaign) => {
                   const displayStatus = getCampaignDisplayStatus(campaign, selectedMonthKey, now)
                   const style = campaignStatusStyle(displayStatus)
                   const types = getCampaignQuestionTypes(campaign)
@@ -1198,6 +1332,12 @@ export default function TextBasedQuestions() {
                   )
                 })}
               </div>
+
+              <CampaignPagination
+                page={campaignPage}
+                totalPages={totalCampaignPages}
+                onChange={setCampaignPage}
+              />
             </Section>
           )}
         </>
@@ -1281,18 +1421,6 @@ export default function TextBasedQuestions() {
                 <label className="field-group" style={{ margin: 0 }}>
                   <span className="field-label-top">Short Description</span>
                   <input className="text-input" value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} placeholder="One-line summary shown on the campaign" />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">What Users Can Ask?</span>
-                  <textarea className="textarea-box" style={{ minHeight: 76 }} value={form.whatUsersCanAsk} onChange={(event) => setForm({ ...form, whatUsersCanAsk: event.target.value })} placeholder="e.g. Career timing, job changes, business moves, education guidance..." />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Example Questions</span>
-                  <textarea className="textarea-box" style={{ minHeight: 76 }} value={form.exampleQuestions} onChange={(event) => setForm({ ...form, exampleQuestions: event.target.value })} placeholder="One example per line. e.g.&#10;When should I switch jobs?&#10;Will I get a government job based on my horoscope?" />
-                </label>
-                <label className="field-group" style={{ margin: 0 }}>
-                  <span className="field-label-top">Detailed Description <span className="muted" style={{ fontSize: 12, fontWeight: 500 }}>(Optional)</span></span>
-                  <textarea className="textarea-box" style={{ minHeight: 76 }} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Explain the scope of this campaign in detail." />
                 </label>
               </div>
 
@@ -1635,6 +1763,47 @@ export default function TextBasedQuestions() {
               </div>
 
               <div className="astrologer-modal-section" style={{ borderTop: '1px solid var(--divider)', paddingTop: 18 }}>
+                <div className="section-title" style={{ fontSize: 14 }}>Subscriber Offer</div>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="field-label-top">Enable offer</div>
+                    <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>Give first-time subscribers a discount on open questions.</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" className={`btn btn-sm ${openForm.offerEnabled ? 'btn-primary' : 'btn-outline'}`} onClick={() => setOpenForm({ ...openForm, offerEnabled: true })}>Yes</button>
+                    <button type="button" className={`btn btn-sm ${!openForm.offerEnabled ? 'btn-primary' : 'btn-outline'}`} onClick={() => setOpenForm({ ...openForm, offerEnabled: false })}>No</button>
+                  </div>
+                </div>
+                {openForm.offerEnabled && (
+                  <>
+                    <div>
+                      <div className="field-label-top">Discount</div>
+                      <div className="flex flex-wrap gap-2" style={{ marginTop: 8 }}>
+                        {DISCOUNT_CHOICES.map((value) => (
+                          <button key={value} type="button" className={`btn btn-sm ${Number(openForm.discountPercent) === value ? 'btn-primary' : 'btn-outline'}`} onClick={() => setOpenForm({ ...openForm, discountPercent: value })}>{value}%</button>
+                        ))}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input type="number" min="0" max="100" className="text-input" style={{ width: 84 }} value={Number(openForm.discountPercent) || ''} onChange={(event) => setOpenForm({ ...openForm, discountPercent: Number(event.target.value) })} />
+                          <span className="muted">%</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div className="rounded-[14px] bg-[color:var(--surface-soft)] px-4 py-3 grid gap-2">
+                      {openForm.generalEnabled !== false && (
+                        <div className="flex items-center justify-between"><span className="muted">General</span><span className="font-bold" style={{ color: 'var(--ink)' }}>₹{inr(openGeneralPreview.originalPrice)} → ₹{inr(openGeneralPreview.offerPrice)}</span></div>
+                      )}
+                      {openForm.personalEnabled !== false && (
+                        <div className="flex items-center justify-between"><span className="muted">Personal</span><span className="font-bold" style={{ color: 'var(--ink)' }}>₹{inr(openPersonalPreview.originalPrice)} → ₹{inr(openPersonalPreview.offerPrice)}</span></div>
+                      )}
+                    </div>
+                    <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+                      This offer applies to open questions only and does not change any campaign pricing.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              <div className="astrologer-modal-section" style={{ borderTop: '1px solid var(--divider)', paddingTop: 18 }}>
                 <div className="section-title" style={{ fontSize: 14 }}>Monthly Question Capacity · {monthLabel}</div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-[12px] bg-[color:var(--surface-soft)] px-4 py-2 text-center">
@@ -1688,7 +1857,7 @@ export default function TextBasedQuestions() {
 
       {view === 'received' && (
         <>
-          <Section title="Received Questions" icon={MessageCircleQuestion} titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>{filteredQuestions.length} questions</span>}>
+          <Section>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <button type="button" className="btn btn-outline btn-sm" onClick={goToOverview}><ArrowLeft size={14} /> Overview</button>
               <div className="search-filter-row__group">
@@ -1781,10 +1950,19 @@ export default function TextBasedQuestions() {
             <div className="modal-card__content astrologer-modal-content">
               <div className="astrologer-modal-highlight astrologer-modal-details-grid">
                 <div><strong>User</strong><div className="muted">{panelQuestion.user}</div></div>
-                <div><strong>Campaign</strong><div className="muted">{panelQuestion.campaignName || 'Open Question'}</div></div>
+                <div><strong>Source</strong><div className="muted">{getQuestionSourceLabel(panelQuestion)}</div></div>
+                <div><strong>Campaign</strong><div className="muted">{isOpenQuestion(panelQuestion) ? 'Not from a campaign' : getQuestionSourceLabel(panelQuestion)}</div></div>
                 <div><strong>Type</strong><div className="muted">{panelQuestion.type || 'General'} Question</div></div>
                 <div><strong>Price</strong><div className="muted">{panelQuestion.purchaseType === 'Free' ? 'Free' : `₹${inr(panelQuestion.purchaseAmount)}`} {panelQuestion.purchaseType === 'Paid' ? '(Paid)' : panelQuestion.purchaseType === 'Purchased Slot' ? '(Purchased Slot)' : ''}</div></div>
                 <div><strong>Question For</strong><div className="muted">{panelQuestion.questionFor}</div></div>
+                <div><strong>Asked On</strong><div className="muted">{panelQuestion.raised || '—'}</div></div>
+                <div><strong>Answer Deadline</strong><div className="muted">{formatAnswerDate(getQuestionAnswerDeadline(panelQuestion)) || '—'} (asked date + 30 days)</div></div>
+                {isQuestionCancelled(panelQuestion) && (
+                  <>
+                    <div><strong>Cancellation Reason</strong><div className="muted">{panelQuestion.cancellationReason || 'Answer deadline exceeded'}</div></div>
+                    <div><strong>Refund</strong><div className="muted">{panelQuestion.refundStatus || 'Refunded'}{Number(panelQuestion.refundAmount) > 0 ? ` · ₹${inr(panelQuestion.refundAmount)}` : ''}</div></div>
+                  </>
+                )}
                 <div><strong>Language</strong><div className="muted">{panelQuestion.language}</div></div>
               </div>
 

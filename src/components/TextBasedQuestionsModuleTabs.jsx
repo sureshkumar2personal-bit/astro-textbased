@@ -7,7 +7,7 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 const MODULE_TABS = [
   {
     key: 'questions',
-    label: 'Questions',
+    label: 'Manage Questions',
     icon: MessageCircleQuestion,
     routeKey: 'textBasedQuestions',
     color: 'var(--primary)',
@@ -17,7 +17,7 @@ const MODULE_TABS = [
   },
   {
     key: 'answer',
-    label: 'Answer Questions',
+    label: 'Questions',
     icon: TempleLotusIcon,
     routeKey: 'answerQuestion',
     color: 'var(--green-600)',

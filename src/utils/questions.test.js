@@ -467,7 +467,7 @@ describe('month-based campaign status rules', () => {
 
   it('a historical campaign cannot be reopened: it is never Active/Scheduled/Draft in a past month', () => {
     const past = [{ id: 'aug', status: 'Active', month: '2026-08', date: '5 Aug 2026', endDate: '31 Aug 2026' }]
-    expect(getCampaignMetricCounts(past, '2026-08', now)).toEqual({ total: 1, active: 0, scheduled: 0, draft: 0 })
+    expect(getCampaignMetricCounts(past, '2026-08', now)).toEqual({ total: 1, active: 0, scheduled: 0, draft: 0, closed: 1 })
     expect(filterCampaignsByStatus(past, 'Active', '2026-08', now)).toHaveLength(0)
     expect(filterCampaignsByStatus(past, 'Scheduled', '2026-08', now)).toHaveLength(0)
     expect(filterCampaignsByStatus(past, 'Draft', '2026-08', now)).toHaveLength(0)
@@ -518,17 +518,19 @@ describe('selected month scopes the overview cards and campaign list', () => {
   })
 
   it('September counts come only from September campaigns and their status', () => {
-    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 4, active: 2, scheduled: 1, draft: 1 })
+    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 4, active: 2, scheduled: 1, draft: 1, closed: 0 })
     expect(filterCampaignsByStatus(campaigns, 'Active', '2026-09', now).map((c) => c.id)).toEqual(['sep-active', 'sep-active-2'])
     expect(filterCampaignsByStatus(campaigns, 'Scheduled', '2026-09', now).map((c) => c.id)).toEqual(['sep-scheduled'])
     expect(filterCampaignsByStatus(campaigns, 'Draft', '2026-09', now).map((c) => c.id)).toEqual(['sep-draft'])
+    expect(filterCampaignsByStatus(campaigns, 'Closed', '2026-09', now)).toHaveLength(0)
   })
 
   it('October counts come only from October campaigns (published ones show Scheduled until October arrives)', () => {
-    expect(getCampaignMetricCounts(campaigns, '2026-10', now)).toEqual({ total: 3, active: 0, scheduled: 2, draft: 1 })
+    expect(getCampaignMetricCounts(campaigns, '2026-10', now)).toEqual({ total: 3, active: 0, scheduled: 2, draft: 1, closed: 0 })
     expect(filterCampaignsByStatus(campaigns, 'Scheduled', '2026-10', now).map((c) => c.id)).toEqual(['oct-campaign', 'oct-scheduled'])
     expect(filterCampaignsByStatus(campaigns, 'Draft', '2026-10', now).map((c) => c.id)).toEqual(['oct-draft'])
-    expect(getCampaignMetricCounts(campaigns, '2026-10', '2026-10-10T10:00:00+05:30')).toEqual({ total: 3, active: 1, scheduled: 1, draft: 1 })
+    expect(filterCampaignsByStatus(campaigns, 'Closed', '2026-10', now)).toHaveLength(0)
+    expect(getCampaignMetricCounts(campaigns, '2026-10', '2026-10-10T10:00:00+05:30')).toEqual({ total: 3, active: 1, scheduled: 1, draft: 1, closed: 0 })
   })
 
   it('August + Total shows only campaigns that belonged to August (Closed history)', () => {
@@ -537,13 +539,15 @@ describe('selected month scopes the overview cards and campaign list', () => {
     expect(counts.active).toBe(0)
     expect(counts.scheduled).toBe(0)
     expect(counts.draft).toBe(0)
+    expect(counts.closed).toBe(1)
+    expect(filterCampaignsByStatus(campaigns, 'Closed', '2026-08', now).map((c) => c.id)).toEqual(['aug-historical'])
     expect(filterCampaignsByStatus(campaigns, 'All', '2026-08', now).map((c) => c.id)).toEqual(['aug-historical'])
   })
 
   it('switching months updates the list and overview counts correctly', () => {
-    expect(getCampaignMetricCounts(campaigns, '2026-08', now)).toEqual({ total: 1, active: 0, scheduled: 0, draft: 0 })
-    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 4, active: 2, scheduled: 1, draft: 1 })
-    expect(getCampaignMetricCounts(campaigns, '2026-10', now)).toEqual({ total: 3, active: 0, scheduled: 2, draft: 1 })
+    expect(getCampaignMetricCounts(campaigns, '2026-08', now)).toEqual({ total: 1, active: 0, scheduled: 0, draft: 0, closed: 1 })
+    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 4, active: 2, scheduled: 1, draft: 1, closed: 0 })
+    expect(getCampaignMetricCounts(campaigns, '2026-10', now)).toEqual({ total: 3, active: 0, scheduled: 2, draft: 1, closed: 0 })
     expect(filterCampaignsByStatus(campaigns, 'All', '2026-10', now).map((c) => c.id)).not.toContain('sep-active')
     expect(filterCampaignsByStatus(campaigns, 'All', '2026-09', now).map((c) => c.id)).not.toContain('oct-campaign')
   })
@@ -733,7 +737,7 @@ describe('single-month campaign model', () => {
       { id: 'sep-draft', status: 'Draft', month: '2026-09', date: '10 Sep 2026', endDate: '30 Sep 2026' },
       { id: 'oct-live', status: 'Active', month: '2026-10', date: '5 Oct 2026', endDate: '31 Oct 2026' },
     ]
-    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 2, active: 1, scheduled: 0, draft: 1 })
+    expect(getCampaignMetricCounts(campaigns, '2026-09', now)).toEqual({ total: 2, active: 1, scheduled: 0, draft: 1, closed: 0 })
     expect(filterCampaignsByStatus(campaigns, 'All', '2026-09', now).map((c) => c.id)).toEqual(['sep-live', 'sep-draft'])
   })
 

@@ -54,10 +54,11 @@ export function getQuestionSaleBreakdown(question = {}, campaigns = []) {
 }
 
 export function getQuestionSaleStatus(question = {}) {
-  const refunded = getQuestionRefundAmount(question) > 0 || String(question.refundStatus || '').toLowerCase() === 'completed'
+  const refundState = String(question.refundStatus || '').trim().toLowerCase()
+  const refunded = getQuestionRefundAmount(question) > 0 || refundState === 'completed' || refundState === 'refunded'
   if (refunded) return 'Refunded'
   if (question.status === 'Disputed' || (question.dispute && String(question.dispute.status || '').toLowerCase() === 'open')) return 'Disputed'
-  if (question.status === 'Closed') return 'Cancelled'
+  if (String(question.status || '').trim().toLowerCase() === 'cancelled' || question.status === 'Closed') return 'Cancelled'
   return 'Completed'
 }
 
