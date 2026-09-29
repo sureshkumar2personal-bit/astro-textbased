@@ -19,6 +19,7 @@ import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import { maskAccountNumber, maskCard, maskUPI } from '../../../utils/wallet.js'
+import { WalletSectionTabs } from '../wallet/WalletHistory.jsx'
 
 const METHOD_ICONS = {
   bank: Building2,
@@ -89,11 +90,17 @@ export default function PaymentMethods() {
         showBack
         backTo={routes.dashboard}
         actions={
-          <button type="button" className="btn btn-primary" onClick={() => navigate(routes.addPaymentMethod)}>
-            <Plus size={16} /> Add New Method
-          </button>
+          <div className="wallet-header-actions">
+            <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.autopay)}>
+              Manage Autopay
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => navigate(routes.addPaymentMethod)}>
+              <Plus size={16} /> Add New Method
+            </button>
+          </div>
         }
       />
+      <WalletSectionTabs />
 
       <Section title="Saved Methods" icon={CreditCard}>
         {sorted.length === 0 ? (
