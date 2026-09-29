@@ -2,11 +2,15 @@ export const ROLES = {
   USER: 'user',
   ASTROLOGER: 'astrologer',
   EDITOR: 'editor',
+  ADMIN: 'admin',
 }
 
 export function getRoleBasePath(role) {
   if (role === ROLES.USER) return '/user'
   if (role === ROLES.EDITOR) return '/editor'
+  // Explicit rather than relying on the /astrologer fallthrough below, so an
+  // admin can never be silently routed into the astrologer workspace.
+  if (role === ROLES.ADMIN) return '/admin'
   return '/astrologer'
 }
 

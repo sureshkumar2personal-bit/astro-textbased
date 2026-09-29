@@ -95,6 +95,28 @@ import AppointmentHistoryTab from './pages/astrologer/appointments/AppointmentHi
 import AstrologerAppointmentCalendar from './pages/astrologer/appointments/Appointments.jsx'
 import EditorLayout from './pages/editor/EditorLayout.jsx'
 import EditorDashboard from './pages/editor/EditorDashboard.jsx'
+import AdminLayout from './pages/admin/AdminLayout.jsx'
+import AdminDashboard from './pages/admin/AdminDashboard.jsx'
+import AdminUsers from './pages/admin/AdminUsers.jsx'
+import AdminUserDetails from './pages/admin/AdminUserDetails.jsx'
+import AdminAstrologers from './pages/admin/AdminAstrologers.jsx'
+import AdminAstrologerDetails from './pages/admin/AdminAstrologerDetails.jsx'
+import AdminQuestions from './pages/admin/AdminQuestions.jsx'
+import AdminQuestionDetails from './pages/admin/AdminQuestionDetails.jsx'
+import AdminAppointments from './pages/admin/AdminAppointments.jsx'
+import AdminAppointmentDetails from './pages/admin/AdminAppointmentDetails.jsx'
+import AdminSubscriptions from './pages/admin/AdminSubscriptions.jsx'
+import AdminSubscriptionDetails from './pages/admin/AdminSubscriptionDetails.jsx'
+import AdminPayments from './pages/admin/AdminPayments.jsx'
+import AdminTransactionDetails from './pages/admin/AdminTransactionDetails.jsx'
+import AdminDisputes from './pages/admin/AdminDisputes.jsx'
+import AdminDisputeDetails from './pages/admin/AdminDisputeDetails.jsx'
+import AdminReviews from './pages/admin/AdminReviews.jsx'
+import AdminReviewDetails from './pages/admin/AdminReviewDetails.jsx'
+import AdminContent from './pages/admin/AdminContent.jsx'
+import AdminContentDetails from './pages/admin/AdminContentDetails.jsx'
+import AdminReports from './pages/admin/AdminReports.jsx'
+import AdminAudit from './pages/admin/AdminAudit.jsx'
 import AcceptInvitation from './pages/editor/AcceptInvitation.jsx'
 import EditorLogin from './pages/editor/EditorLogin.jsx'
 import EditorAccessDenied from './pages/editor/EditorAccessDenied.jsx'
@@ -308,6 +330,37 @@ function EditorRoutes() {
   </>
 }
 
+function AdminRoutes() {
+return <>
+<Route element={<RequireRole role={ROLES.ADMIN} />}>
+<Route element={<AdminLayout />}>
+<Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+<Route path="/admin/dashboard" element={<AdminDashboard />} />
+<Route path="/admin/users" element={<AdminUsers />} />
+<Route path="/admin/users/:userId" element={<AdminUserDetails />} />
+<Route path="/admin/astrologers" element={<AdminAstrologers />} />
+<Route path="/admin/astrologers/:astrologerId" element={<AdminAstrologerDetails />} />
+<Route path="/admin/text-based-questions" element={<AdminQuestions />} />
+<Route path="/admin/text-based-questions/:questionId" element={<AdminQuestionDetails />} />
+<Route path="/admin/appointments" element={<AdminAppointments />} />
+<Route path="/admin/appointments/:appointmentId" element={<AdminAppointmentDetails />} />
+<Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+<Route path="/admin/subscriptions/:subscriptionKey" element={<AdminSubscriptionDetails />} />
+<Route path="/admin/payments" element={<AdminPayments />} />
+<Route path="/admin/payments/:transactionId" element={<AdminTransactionDetails />} />
+<Route path="/admin/disputes" element={<AdminDisputes />} />
+<Route path="/admin/disputes/:disputeKey" element={<AdminDisputeDetails />} />
+<Route path="/admin/reviews" element={<AdminReviews />} />
+<Route path="/admin/reviews/:reviewId" element={<AdminReviewDetails />} />
+<Route path="/admin/content" element={<AdminContent />} />
+<Route path="/admin/content/:contentId" element={<AdminContentDetails />} />
+<Route path="/admin/reports" element={<AdminReports />} />
+<Route path="/admin/audit" element={<AdminAudit />} />
+</Route>
+</Route>
+</>
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -326,10 +379,11 @@ function AppRoutes() {
         element={<Login />}
       />
 
-      <Route element={<RequireAuth />}>
-        {AstrologerRoutes()}
-        {UserRoutes()}
-      </Route>
+<Route element={<RequireAuth />}>
+{AstrologerRoutes()}
+{UserRoutes()}
+{AdminRoutes()}
+</Route>
 
       {EditorRoutes()}
 

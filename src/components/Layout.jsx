@@ -33,6 +33,10 @@ import {
   Send,
   RefreshCw,
   Flame,
+  Star,
+  BarChart3,
+  ShieldCheck,
+  Megaphone,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -167,6 +171,29 @@ const ROLE_CONFIG = {
       { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
+  // Platform/Admin. Registered here so the shared role config knows the role
+  // (and so it never falls through to the astrologer workspace). The admin UI
+  // itself is rendered by pages/admin/AdminLayout.jsx, which uses the same
+  // token-based shell; this entry keeps ROLE_CONFIG complete for the role.
+  [ROLES.ADMIN]: {
+    title: 'Platform Admin',
+    subtitle: 'Users, astrologers, and platform modules',
+    navLabel: 'Admin',
+    nav: [
+      { to: 'admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: 'admin/users', label: 'Users', icon: UserRound },
+      { to: 'admin/astrologers', label: 'Astrologers', icon: UserRound },
+      { to: 'admin/text-based-questions', label: 'Text-Based Questions', icon: MessageCircle },
+      { to: 'admin/appointments', label: 'Appointments', icon: CalendarDays },
+      { to: 'admin/subscriptions', label: 'Subscriptions', icon: Star },
+      { to: 'admin/payments', label: 'Payments & Finance', icon: Wallet },
+      { to: 'admin/disputes', label: 'Disputes', icon: Megaphone },
+      { to: 'admin/reviews', label: 'Reviews & Ratings', icon: Star },
+      { to: 'admin/content', label: 'Content Management', icon: FileText },
+      { to: 'admin/reports', label: 'Reports / Analytics', icon: BarChart3 },
+      { to: 'admin/audit', label: 'Admin & Audit', icon: ShieldCheck },
+    ],
+  },
 }
 
 const PAGE_META = {
@@ -239,6 +266,9 @@ const PAGE_META = {
     '/user/autopay': { title: 'Autopay', sub: 'Manage automatic payments for subscriptions and top-ups.' },
     '/user/withdraw': { title: 'Withdraw Funds', sub: 'Transfer money from your wallet to your bank or UPI.' },
     '/user/transaction-history': { title: 'Transaction History', sub: 'Complete record of all wallet movements.' },
+  },
+  [ROLES.ADMIN]: {
+    '/admin/dashboard': { title: 'Platform Admin', sub: 'Manage users, astrologers, and platform modules.' },
   },
 }
 

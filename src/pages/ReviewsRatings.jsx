@@ -4,7 +4,9 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 
-const REVIEWS = [
+// Exported so the admin Reviews module can read the same records. Rendering
+// here is unchanged.
+export const REVIEWS = [
   { id: 1, name: 'Priya', rating: 5, type: 'Call', date: '28 Aug 2026', text: 'Dr. Rani explained everything very clearly during my call consultation. She was patient and answered all my questions.', helpful: 42 },
   { id: 2, name: 'Sandhya', rating: 5, type: 'Chat', date: '26 Aug 2026', text: 'I had a chat consultation regarding my career and marriage. The guidance was detailed and easy to understand.', helpful: 35 },
   { id: 3, name: 'Ramesh', rating: 5, type: 'Appointment', date: '24 Aug 2026', text: 'The appointment was very smooth. Dr. Rani listened carefully and gave practical guidance.', helpful: 29 },
