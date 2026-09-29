@@ -48,49 +48,6 @@ function formatSentAt(value) {
   return date.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-function formatDayDate(value) {
-  const date = value ? new Date(value) : null
-  if (!date || Number.isNaN(date.getTime())) return ''
-  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
-function AstrologerPariharamProgress({ appointment, consultation }) {
-  const atonement = consultation?.atonement && typeof consultation.atonement === 'object' ? consultation.atonement : {}
-  const progress = consultation?.pariharamProgress && typeof consultation.pariharamProgress === 'object' ? consultation.pariharamProgress : {}
-  const start = new Date(atonement.startAt || progress.startAt || consultation?.startDate || appointment.completedAt || appointment.dateIso)
-  const totalDays = Number.parseInt(String(atonement.completionDays || consultation?.validity || 7).match(/\d+/)?.[0] || '7', 10)
-  if (Number.isNaN(start.getTime()) || !totalDays) return null
-  const completed = Array.from({ length: totalDays }, (_, index) => {
-    const date = new Date(start)
-    date.setDate(date.getDate() + index)
-    const saved = progress.days?.[`day-${index + 1}`]
-    return { day: index + 1, date, completed: Boolean(saved?.completed) }
-  })
-  const completedCount = completed.filter((day) => day.completed).length
-  const todayKey = new Date().toDateString()
-  const currentDay = completed.find((day) => day.date.toDateString() === todayKey)?.day || null
-  return (
-    <div className="apt-astrologer-pariharam-progress">
-      <div className="apt-astrologer-pariharam-progress-head"><strong>Pariharam Progress</strong><span>{completedCount} of {totalDays} days completed</span></div>
-      <div className="apt-astrologer-pariharam-progress-bar"><span style={{ width: `${(completedCount / totalDays) * 100}%` }} /></div>
-      <div className="apt-astrologer-pariharam-days">
-        {completed.map((day) => {
-          const previousComplete = completed.slice(0, day.day - 1).every((item) => item.completed)
-          const status = day.completed ? 'Completed' : day.day === currentDay && previousComplete ? 'Available' : day.day > (currentDay || 0) ? 'Upcoming' : 'Pending'
-          return (
-          <div className={`apt-astrologer-pariharam-day${day.completed ? ' is-completed' : ''}`} key={day.day}>
-            <span>{day.completed ? <Check size={13} /> : <CalendarCheck2 size={13} />}</span>
-            <strong>Day {day.day}</strong>
-            <small>{formatDayDate(day.date)}</small>
-            <em>{status}</em>
-          </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 function ConsultationSection({ appointment, consultation, onSave, onOpen, readOnly = false }) {
   const [notes, setNotes] = useState(consultation?.notes || '')
   const [attached, setAttached] = useState(consultation?.fileName ? { name: consultation.fileName, type: consultation.fileType, size: consultation.fileSize } : null)
@@ -133,12 +90,6 @@ function ConsultationSection({ appointment, consultation, onSave, onOpen, readOn
       {sent && sentAt && (
         <div className="apt-consultation-sent-meta">Sent {formatSentAt(sentAt)}</div>
       )}
-      {consultation?.atonement && (() => {
-        const atonement = consultation.atonement
-        const overdue = atonement.dueAt && !atonement.completedAt && new Date(atonement.dueAt) < new Date()
-        return <div className={`apt-consultation-atonement-status${atonement.completedAt ? ' completed' : overdue ? ' overdue' : ''}`}><strong>{atonement.title}</strong><span>{atonement.completedAt ? `✓ Completed — ${formatSentAt(atonement.completedAt)}` : overdue ? 'Overdue' : 'In Progress'}</span></div>
-      })()}
-      {(consultation?.atonement || consultation?.pariharamProgress) && <AstrologerPariharamProgress appointment={appointment} consultation={consultation} />}
       <textarea
         className="apt-consultation-notes"
         rows={3}
