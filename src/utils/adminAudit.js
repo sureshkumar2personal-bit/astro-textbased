@@ -1,15 +1,18 @@
 // Pure selectors for the Admin -> Admin & Audit module.
 //
-// Merges the two activity sources the app already records. Neither source is
-// an admin log: the editor audit and the astrologer activity log both describe
-// actions taken by astrologers and their assistants. This application has no
-// admin write path, so no admin actions exist to record and none are invented.
+// Merges the three activity sources the app already records. Two of them are
+// not admin logs: the editor audit and the astrologer activity log both
+// describe actions taken by astrologers and their assistants. The third is the
+// admin audit written by state/AdminContext.jsx, which is the only genuine
+// admin source; it is labelled separately so the three are never confused.
 //
 // Timestamps are read only from the fields the records already carry. No audit
-// history is reconstructed from other created/updated fields.
+// history is reconstructed from other created/updated fields, and no admin
+// entry is invented for an action that did not happen.
 
 export const AUDIT_SOURCE_EDITOR = 'editor-audit'
 export const AUDIT_SOURCE_ASTROLOGER = 'astrologer-activity'
+export const AUDIT_SOURCE_ADMIN = 'admin-audit'
 
 // Any entry whose actor is an admin role would be a genuine admin record. The
 // editor audit entry has no role field, so this deliberately matches nothing
@@ -27,6 +30,23 @@ function normalizeEditorAuditEntry(entry) {
     occurredAt: entry.occurredAt || '',
     module: entry.module || '',
     actor: entry.editorName || entry.editorId || '',
+    action: entry.action || '',
+    details: entry.details || '',
+  }
+}
+
+// The only genuine admin records. Entries are gated by isAdminActivity() so a
+// stray or hand-edited record without actorRole === ROLES.ADMIN is dropped
+// rather than presented as admin activity.
+function normalizeAdminAuditEntry(entry) {
+  return {
+    key: `admin-${entry.id}`,
+    id: entry.id,
+    source: AUDIT_SOURCE_ADMIN,
+    sourceLabel: 'Admin audit',
+    occurredAt: entry.occurredAt || '',
+    module: entry.module || '',
+    actor: entry.actorName || entry.adminId || '',
     action: entry.action || '',
     details: entry.details || '',
   }
@@ -57,9 +77,14 @@ function toTime(value) {
   return Number.isNaN(parsed) ? 0 : parsed
 }
 
-// Newest first, which is the order both sources already store in.
-export function mergeActivity(audit = [], activityLog = []) {
+// Newest first, which is the order every source already stores in.
+// adminAudit is optional so existing callers that only pass the editor and
+// astrologer logs keep working unchanged.
+export function mergeActivity(audit = [], activityLog = [], adminAudit = []) {
   return [
+    ...(Array.isArray(adminAudit) ? adminAudit : [])
+      .filter(isAdminActivity)
+      .map(normalizeAdminAuditEntry),
     ...(Array.isArray(audit) ? audit : []).map(normalizeEditorAuditEntry),
     ...(Array.isArray(activityLog) ? activityLog : []).map(normalizeAstrologerActivityEntry),
   ]
@@ -67,8 +92,8 @@ export function mergeActivity(audit = [], activityLog = []) {
     .sort((a, b) => toTime(b.occurredAt) - toTime(a.occurredAt))
 }
 
-// Only the editor audit records carry a `module`, so the filter is built from
-// those values alone and never from the astrologer log's `kind`.
+// Only the editor and admin audit records carry a `module`, so the filter is
+// built from those values alone and never from the astrologer log's `kind`.
 export function selectAuditModuleFilters(activity) {
   const modules = new Set()
   for (const entry of Array.isArray(activity) ? activity : []) {

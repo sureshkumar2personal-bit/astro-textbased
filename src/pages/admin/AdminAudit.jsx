@@ -7,7 +7,9 @@ import StatCard from '../../components/ui/StatCard.jsx'
 import StatusBadge from '../../components/StatusBadge.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useEditor } from '../../state/EditorContext.jsx'
+import { useAdmin } from '../../state/AdminContext.jsx'
 import {
+  AUDIT_SOURCE_ADMIN,
   AUDIT_SOURCE_ASTROLOGER,
   AUDIT_SOURCE_EDITOR,
   filterAuditActivity,
@@ -19,23 +21,25 @@ import { formatDisplayDate } from '../../utils/adminUsers.js'
 
 // Admin -> Admin & Audit.
 //
-// Read-only. This merges the two activity logs the app already records and
-// shows the editor approval queue separately. No audit entry is created here,
-// and there is no admin write path in this application, so no admin actions
-// exist to record.
+// Read-only. This merges the three activity logs the app already records and
+// shows the editor approval queue separately. No audit entry is created here.
+// The admin source is the store written by state/AdminContext.jsx, so it only
+// ever contains admin sign-in and sign-out events that actually happened.
 
 const SOURCE_TONES = {
   [AUDIT_SOURCE_EDITOR]: 'badge-violet',
   [AUDIT_SOURCE_ASTROLOGER]: 'badge-blue',
+  [AUDIT_SOURCE_ADMIN]: 'badge-green',
 }
 
 export default function AdminAudit() {
   const { audit, approvals } = useEditor()
+  const { audit: adminAudit } = useAdmin()
   const { activityLog } = useAppData()
   const [query, setQuery] = useState('')
   const [module, setModule] = useState('All')
 
-  const activity = useMemo(() => mergeActivity(audit, activityLog), [audit, activityLog])
+  const activity = useMemo(() => mergeActivity(audit, activityLog, adminAudit), [audit, activityLog, adminAudit])
   const moduleFilters = useMemo(() => selectAuditModuleFilters(activity), [activity])
   const visibleActivity = useMemo(
     () => filterAuditActivity(activity, { query, module }),
@@ -43,6 +47,7 @@ export default function AdminAudit() {
   )
   const approvalSummary = useMemo(() => summariseApprovals(approvals), [approvals])
 
+  const adminCount = activity.filter((entry) => entry.source === AUDIT_SOURCE_ADMIN).length
   const editorCount = activity.filter((entry) => entry.source === AUDIT_SOURCE_EDITOR).length
   const astrologerCount = activity.filter((entry) => entry.source === AUDIT_SOURCE_ASTROLOGER).length
 
@@ -58,18 +63,22 @@ export default function AdminAudit() {
         <Card>
           <h2 style={{ margin: '0 0 6px', fontSize: 16 }}>Admin activity</h2>
           <p className="muted" style={{ margin: 0 }}>
-            No admin activity has been recorded yet.
+            {adminCount === 0
+              ? 'No admin activity has been recorded yet.'
+              : `${adminCount} admin event${adminCount === 1 ? '' : 's'} recorded, most recently ${formatDisplayDate(activity.find((entry) => entry.source === AUDIT_SOURCE_ADMIN)?.occurredAt)}.`}
           </p>
           <p className="muted" style={{ margin: '8px 0 0', fontSize: 13.5 }}>
-            This application has no admin write path, so no admin actions are recorded anywhere. The
-            activity below comes from astrologers and their assistants, not from platform
-            administrators, and is labelled by source so the two are never confused.
+            Admin entries are written by the admin session store when a platform administrator signs
+            in or out, and are identified by their recorded role. The remaining activity below comes
+            from astrologers and their assistants, and is labelled by source so the two are never
+            confused.
           </p>
         </Card>
       </Section>
 
       <Section className="!mt-5">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard icon={ShieldCheck} tone="green" value={adminCount} label="Admin audit entries" />
           <StatCard icon={ShieldCheck} tone="violet" value={editorCount} label="Editor audit entries" />
           <StatCard icon={FileText} tone="sky" value={astrologerCount} label="Astrologer activity entries" />
           <StatCard icon={FileText} tone="gold" value={approvalSummary.pending} label="Approvals pending" />

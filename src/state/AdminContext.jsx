@@ -133,8 +133,9 @@ export function AdminProvider({ children }) {
       id: id('audit'),
       adminId: actor?.id || currentAdmin?.id || null,
       actorName: actor?.name || currentAdmin?.name || 'Administrator',
-      // Recorded explicitly so the future admin audit module can tell these
-      // entries apart via isAdminActivity() in utils/adminAudit.js.
+      // Recorded explicitly so utils/adminAudit.js can tell these entries apart
+      // via isAdminActivity() and the Admin & Audit page shows them as admin
+      // activity rather than as editor or astrologer activity.
       actorRole: ROLES.ADMIN,
       action,
       module,
