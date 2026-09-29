@@ -19,9 +19,10 @@ import {
 
 // Admin -> Payments & Finance list.
 //
-// Read-only. The app stores a single wallet with no owner on it, so there are no
-// user-linked transactions to list yet and no owner is inferred for them. Refunds,
-// edits and deletions are handled in their own modules and are not here.
+// Read-only. A transaction is attributed to a user only when it records that
+// user's own id; ownership is never inferred from a label, an amount or a date,
+// and transactions without one show as unavailable. Refunds, edits and deletions
+// are handled in their own modules and are not here.
 
 function TransactionTable({ rows }) {
   return (
@@ -153,10 +154,10 @@ export default function AdminPayments() {
               No user-linked transactions found.
             </p>
             <p className="muted" style={{ marginBottom: 0 }}>
-              User-level transaction data is not currently available. This app stores a single wallet with
-              no owner recorded on the wallet or on its transactions, so transactions cannot be attributed
-              to a specific user. No owner is inferred here and nothing is listed in its place. Once
-              transactions carry a user reference they will appear in this table automatically.
+              Only transactions that record a signed-in user's own id can be attributed here, and the
+              app stores a single wallet whose earlier transactions carry no owner. No owner is
+              inferred for those and nothing is listed in their place; they will keep showing as
+              unavailable until a real user transaction exists.
             </p>
           </Card>
         </Section>

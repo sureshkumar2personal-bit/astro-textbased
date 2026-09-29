@@ -699,6 +699,17 @@ function loadUserWallet() {
   return initialUserWallet
 }
 
+// The authenticated User's own id, or null when the session is not a User.
+//
+// This is the only ownership signal the app can honestly supply: it is never
+// derived from a label, an amount, a date or a position in the transaction list,
+// and it is never back-filled onto a record that already exists. A session that
+// is not a User yields null, so such a transaction is recorded as unowned
+// rather than attributed to somebody.
+function actingUserId(currentUser) {
+  return currentUser?.role === ROLES.USER ? currentUser.id : null
+}
+
 const USER_PAYMENT_METHODS_STORAGE_KEY = 'astroconnect-user-payment-methods'
 const USER_AUTOPAYS_STORAGE_KEY = 'astroconnect-user-autopays'
 const USER_WITHDRAWALS_STORAGE_KEY = 'astroconnect-user-withdrawals'
@@ -1719,6 +1730,7 @@ export function AppDataProvider({ children }) {
               date: new Date().toISOString(),
               type: 'purchase',
               duration,
+              userId: actingUserId(currentUser),
             },
             ...prev.transactions,
           ],
@@ -1732,7 +1744,7 @@ export function AppDataProvider({ children }) {
         ...prev,
         balance: prev.balance + value,
         toppedUp: (prev.toppedUp || 0) + value,
-        transactions: [{ id: crypto.randomUUID(), label: 'Wallet top-up', amount: `+₹${value.toLocaleString('en-IN')}`, time: 'just now', date: new Date().toISOString(), type: 'topup' }, ...prev.transactions],
+        transactions: [{ id: crypto.randomUUID(), label: 'Wallet top-up', amount: `+₹${value.toLocaleString('en-IN')}`, time: 'just now', date: new Date().toISOString(), type: 'topup', userId: actingUserId(currentUser) }, ...prev.transactions],
       }))
     },
     updateAstrologerServices(patch) {
@@ -2127,7 +2139,8 @@ export function AppDataProvider({ children }) {
             : campaign,
         ),
       )
-      const setWallet = purchase.source === 'astrologer' ? setAstrologerWallet : setUserWallet
+      const isUserPurchase = purchase.source !== 'astrologer'
+      const setWallet = isUserPurchase ? setUserWallet : setAstrologerWallet
       setWallet((prev) => ({
         ...prev,
         balance: prev.balance + purchase.totalAmount,
@@ -2138,7 +2151,10 @@ export function AppDataProvider({ children }) {
             amount: `+₹${purchase.totalAmount.toLocaleString('en-IN')}`,
             time: 'just now',
             date: new Date().toISOString(),
-            type: purchase.source === 'astrologer' ? 'earning' : 'purchase',
+            type: isUserPurchase ? 'purchase' : 'earning',
+            // The astrologer ledger is a different book of record, so ownership
+            // is only stamped on the user's own wallet transaction.
+            ...(isUserPurchase ? { userId: actingUserId(currentUser) } : {}),
           },
           ...prev.transactions,
         ],
@@ -2418,6 +2434,7 @@ export function AppDataProvider({ children }) {
               time: 'just now',
               date: new Date().toISOString(),
               type: 'refund',
+              userId: actingUserId(currentUser),
             },
             ...prev.transactions,
           ],

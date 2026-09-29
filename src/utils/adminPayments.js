@@ -2,14 +2,15 @@ import { getUserTxnTypeLabel, parseUserTxn } from './userWallet.js'
 
 // Pure selectors for the Admin -> Payments & Finance module.
 //
-// The app currently keeps ONE wallet (astroconnect-app-data-user-wallet) with no
-// owner on the wallet and none on its transactions. There is therefore no
-// user-linked transaction record anywhere in the project today.
+// The app keeps ONE wallet (astroconnect-app-data-user-wallet) shared by the user
+// and admin views. The wallet itself still carries no owner, but transactions
+// created by a signed-in User now record that User's own id.
 //
 // Nothing here invents that link. selectUserLinkedTransactions() returns only
-// records that genuinely carry a user reference, so this module stays correct
-// the moment transactions are stored per user, and stays honestly empty until
-// then. Wallet maths, running balances and settlement are not reimplemented.
+// records that genuinely carry a user reference, so a transaction that predates
+// this field — or one written by a session that was not a User — stays unowned
+// and is simply not listed as attributable. Wallet maths, running balances and
+// settlement are not reimplemented.
 
 function transactionUserReference(transaction) {
   return transaction?.userId || transaction?.userEmail || transaction?.accountId || ''
