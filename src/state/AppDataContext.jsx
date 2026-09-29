@@ -941,6 +941,7 @@ const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
 const FAMILY_HOROSCOPES_STORAGE_KEY = 'astroconnect-family-horoscopes'
 const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
 const ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY = 'astroconnect-astrologer-activity-log'
+const SUBSCRIPTIONS_STORAGE_KEY = 'astroconnect-subscriptions'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -1381,7 +1382,18 @@ export function AppDataProvider({ children }) {
     return [...stored.map(normalizeAtonement), ...seed.filter((atonement) => !storedIds.has(atonement.id))]
   })
   const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
+  // Subscriptions are one shared collection: the User pages and the Admin
+  // subscription pages both read this same state, so it is persisted rather than
+  // being session-only. Hydration runs once, on mount, using the same
+  // load-then-seed pattern as the collections above. Persisted records always
+  // win, and the existing demo seed only runs when the store holds nothing, so
+  // a real subscription is never replaced by a default on a later render or on
+  // the next login.
   const [subscriptions, setSubscriptions] = useState(() => {
+    const stored = loadFromStorage(SUBSCRIPTIONS_STORAGE_KEY, null)
+    if (Array.isArray(stored) && stored.length) return stored
+    // The demo seed is scoped to a signed-in User exactly as it always was. It
+    // is not run for an Admin session, which must not gain invented records.
     if (currentUser?.role !== ROLES.USER || !currentUser?.id) return []
     return subscribedAstrologers.map((astrologer, index) => ({
       id: `demo-subscription-${astrologer.id}`,
@@ -1560,6 +1572,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(APPOINTMENT_CALLS_STORAGE_KEY, appointmentCalls)
   }, [appointmentCalls])
+
+  useEffect(() => {
+    saveToStorage(SUBSCRIPTIONS_STORAGE_KEY, subscriptions)
+  }, [subscriptions])
 
   useEffect(() => {
     const onStorage = (e) => {
