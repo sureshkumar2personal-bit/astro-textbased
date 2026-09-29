@@ -1,9 +1,10 @@
-import { Navigate, Outlet, Route, BrowserRouter, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
 import { EditorProvider } from './state/EditorContext.jsx'
 import { useEditor } from './state/EditorContext.jsx'
+import { AdminProvider, useAdmin } from './state/AdminContext.jsx'
 import { ThemeProvider } from './state/ThemeContext.jsx'
 import { ToastProvider } from './components/Toast.jsx'
 import { getRoleRoutes, ROLES } from './utils/roleRoutes.js'
@@ -96,6 +97,7 @@ import AstrologerAppointmentCalendar from './pages/astrologer/appointments/Appoi
 import EditorLayout from './pages/editor/EditorLayout.jsx'
 import EditorDashboard from './pages/editor/EditorDashboard.jsx'
 import AdminLayout from './pages/admin/AdminLayout.jsx'
+import AdminLogin from './pages/admin/AdminLogin.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import AdminUsers from './pages/admin/AdminUsers.jsx'
 import AdminUserDetails from './pages/admin/AdminUserDetails.jsx'
@@ -134,6 +136,8 @@ import EditorPerks from './pages/editor/EditorPerks.jsx'
 import EditorDiscounts from './pages/editor/EditorDiscounts.jsx'
 import EditorAtonementTracking from './pages/editor/EditorAtonementTracking.jsx'
 import { hasEditorPermission } from './utils/editorAccess.js'
+
+const ADMIN_LOGIN_PATH = '/admin/login'
 
 function RequireAuth() {
   const { currentUser } = useAuth()
@@ -176,8 +180,26 @@ function RequireEditorPermission({ group, permission }) {
   return (isSessionValid(currentUser.editorId || currentUser.id) && hasEditorPermission(currentEditor || currentUser, group, permission)) ? <Outlet /> : <EditorAccessDenied />
 }
 
+function RequireAdminSession() {
+  const { adminSession, currentAdmin, isSessionValid } = useAdmin()
+
+  if (!adminSession || !currentAdmin || !isSessionValid(adminSession.adminId)) {
+    return <Navigate to={ADMIN_LOGIN_PATH} replace />
+  }
+
+  return <Outlet />
+}
+
 function NotFoundRedirect() {
   const { currentUser } = useAuth()
+  const { adminSession, currentAdmin, isSessionValid } = useAdmin()
+  const location = useLocation()
+
+  // Any unmatched /admin/* URL follows the same rule as a protected admin page,
+  // so a mistyped admin URL never lands on the User/Astrologer login portal.
+  if (location.pathname.startsWith(getRoleRoutes(ROLES.ADMIN).base)) {
+    return <Navigate to={adminSession && currentAdmin && isSessionValid(adminSession.adminId) ? getRoleRoutes(ROLES.ADMIN).dashboard : ADMIN_LOGIN_PATH} replace />
+  }
 
   if (!currentUser) {
     return <Navigate to="/login" replace />
@@ -332,7 +354,8 @@ function EditorRoutes() {
 
 function AdminRoutes() {
 return <>
-<Route element={<RequireRole role={ROLES.ADMIN} />}>
+<Route path="/admin/login" element={<AdminLogin />} />
+<Route element={<RequireAdminSession />}>
 <Route element={<AdminLayout />}>
 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -382,10 +405,11 @@ function AppRoutes() {
 <Route element={<RequireAuth />}>
 {AstrologerRoutes()}
 {UserRoutes()}
-{AdminRoutes()}
 </Route>
 
       {EditorRoutes()}
+
+      {AdminRoutes()}
 
       <Route
         path="*"
@@ -399,6 +423,7 @@ function App() {
   return (
     <AuthProvider>
       <EditorProvider>
+        <AdminProvider>
         <AppDataProvider>
         <ThemeProvider>
           <ToastProvider>
@@ -408,6 +433,7 @@ function App() {
           </ToastProvider>
         </ThemeProvider>
         </AppDataProvider>
+        </AdminProvider>
       </EditorProvider>
     </AuthProvider>
   )

@@ -17,7 +17,7 @@ import {
   Megaphone,
   BarChart3,
 } from 'lucide-react'
-import { useAuth } from '../../state/AuthContext.jsx'
+import { useAdmin } from '../../state/AdminContext.jsx'
 import ThemeToggle from '../../components/ThemeToggle.jsx'
 import { getRoleRoutes, ROLES } from '../../utils/roleRoutes.js'
 
@@ -69,7 +69,7 @@ const ADMIN_GROUPS = [
 ]
 
 export default function AdminLayout() {
-  const { currentUser } = useAuth()
+  const { currentAdmin, logoutAdmin } = useAdmin()
   const navigate = useNavigate()
   const location = useLocation()
   const [openSections, setOpenSections] = useState({})
@@ -142,15 +142,18 @@ export default function AdminLayout() {
             <ThemeToggle />
             <span className="avatar-chip">
               <span className="avatar-circle">
-                {(currentUser?.name || 'Admin').split(' ').map((part) => part[0]).slice(0, 2).join('')}
+                {(currentAdmin?.name || 'Admin').split(' ').map((part) => part[0]).slice(0, 2).join('')}
               </span>
-              <span>{currentUser?.name || 'Admin'}</span>
+              <span>{currentAdmin?.name || 'Admin'}</span>
             </span>
             <button
               type="button"
               className="icon-btn danger"
               aria-label="Logout"
-              onClick={() => navigate('/login', { replace: true })}
+              onClick={() => {
+                logoutAdmin()
+                navigate('/admin/login', { replace: true })
+              }}
             >
               <LogOut size={18} />
             </button>
