@@ -1749,6 +1749,7 @@ const ASTROLOGER_LIVE_SESSIONS_STORAGE_KEY = 'astroconnect-astrologer-live-sessi
 const APPOINTMENT_AVAILABILITY_STORAGE_KEY = 'astroconnect-appointment-availability'
 const APPOINTMENTS_STORAGE_KEY = 'astroconnect-appointments'
 const CONSULTATIONS_STORAGE_KEY = 'astroconnect-appointment-consultations'
+const APPOINTMENT_CALLS_STORAGE_KEY = 'astroconnect-appointment-calls'
 const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
@@ -2190,6 +2191,7 @@ export function AppDataProvider({ children }) {
     if (Array.isArray(stored) && stored.length) return stored
     return mockConsultations
   })
+  const [appointmentCalls, setAppointmentCalls] = useState(() => loadFromStorage(APPOINTMENT_CALLS_STORAGE_KEY, []))
   const [atonements, setAtonements] = useState(() => {
     const stored = loadFromStorage(ATONEMENTS_STORAGE_KEY, null)
     const seed = initialAtonements.map(normalizeAtonement)
@@ -2377,6 +2379,51 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(CONSULTATIONS_STORAGE_KEY, consultations)
   }, [consultations])
+
+  useEffect(() => {
+    saveToStorage(APPOINTMENT_CALLS_STORAGE_KEY, appointmentCalls)
+  }, [appointmentCalls])
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === APPOINTMENT_CALLS_STORAGE_KEY && e.newValue) {
+        try { setAppointmentCalls(JSON.parse(e.newValue) || []) } catch {}
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    const poll = window.setInterval(() => {
+      const raw = loadFromStorage(APPOINTMENT_CALLS_STORAGE_KEY, null)
+      if (Array.isArray(raw)) {
+        const cur = JSON.stringify(raw)
+        const prev = JSON.stringify(appointmentCalls)
+        if (cur !== prev) setAppointmentCalls(raw)
+      }
+    }, 1000)
+    return () => { window.removeEventListener('storage', onStorage); window.clearInterval(poll) }
+  }, [appointmentCalls])
+
+  useEffect(() => {
+    const missedThresholdMs = 45 * 1000
+    const now = Date.now()
+    const toMiss = appointmentCalls.filter((c) => c.status === 'ringing' && now - new Date(c.createdAt).getTime() > missedThresholdMs)
+    if (!toMiss.length) return
+    setAppointmentCalls((prev) => prev.map((c) => toMiss.some((m) => m.id === c.id) ? { ...c, status: 'missed', missedAt: new Date().toISOString() } : c))
+    toMiss.forEach((call) => {
+      const appointment = appointments.find((a) => a.id === call.appointmentId)
+      setNotifications((prev) => [{
+        id: `acall-missed-${call.id}`,
+        title: `Missed call from ${call.astrologerName || appointment?.astrologer || 'your astrologer'}`,
+        detail: `You missed a call for ${appointment?.time || ''} ${appointment?.date || ''}. Tap to call back or view appointment.`,
+        time: 'just now',
+        route: `/user/incoming/${call.appointmentId}`,
+        audience: ROLES.USER,
+        category: 'appointments',
+        read: false,
+        appointmentId: call.appointmentId,
+        callId: call.id,
+      }, ...prev])
+    })
+  }, [appointmentCalls, appointments])
 
   useEffect(() => {
     saveToStorage(ATONEMENTS_STORAGE_KEY, atonements)
@@ -3717,19 +3764,26 @@ if (question) {
     savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed) {
       if (!appointmentId || !pariharamId || !dayId) return null
       const completedAt = completed ? new Date().toISOString() : null
-      setConsultations((prev) => prev.map((consultation) => consultation.appointmentId === appointmentId
-        ? {
-            ...consultation,
-            pariharamProgress: {
-              pariharamId,
-              days: {
-                ...(consultation.pariharamProgress?.pariharamId === pariharamId ? consultation.pariharamProgress.days : {}),
-                [dayId]: { date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt },
-              },
+      setConsultations((prev) => {
+        const index = prev.findIndex((consultation) => consultation.appointmentId === appointmentId)
+        const current = index >= 0 ? prev[index] : { id: `cons-${appointmentId}`, appointmentId }
+        const next = {
+          ...current,
+          pariharamProgress: {
+            pariharamId,
+            startAt: current.pariharamProgress?.startAt || date || null,
+            days: {
+              ...(current.pariharamProgress?.pariharamId === pariharamId ? current.pariharamProgress.days : {}),
+              [dayId]: { date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt },
             },
-            updatedAt: new Date().toISOString(),
-          }
-        : consultation))
+          },
+          updatedAt: new Date().toISOString(),
+        }
+        if (index < 0) return [next, ...prev]
+        const updated = prev.slice()
+        updated[index] = next
+        return updated
+      })
       return { appointmentId, pariharamId, dayId, date: date || null, dayNumber: dayNumber || null, completed: Boolean(completed), completedAt }
     },
     updateAppointment(appointmentId, patch = {}) {
@@ -3753,7 +3807,8 @@ if (question) {
       })
     },
     savePreCallAnalysis(appointmentId, preCallAnalysis) {
-      this.updateAppointment(appointmentId, { preCallAnalysis: preCallAnalysis ?? '' })
+      const value = preCallAnalysis ?? ''
+      this.updateAppointment(appointmentId, { preCallAnalysis: value })
       const appointment = appointments.find((item) => item.id === appointmentId)
       logActivity({
         astrologerId: appointment?.astrologerId,
@@ -3765,6 +3820,7 @@ if (question) {
         customerName: appointment?.customerName,
         moduleStatus: appointment?.status,
       })
+      return { appointmentId, preCallAnalysis: value }
     },
     saveHoroscopeAttachment(appointmentId, horoscope) {
       this.updateAppointment(appointmentId, { horoscope: horoscope || null })
@@ -3789,6 +3845,7 @@ if (question) {
         consultationFollowUpRequired: true,
       }
       this.updateAppointment(appointmentId, patch)
+      setAppointmentCalls((prev) => prev.map((c) => c.appointmentId === appointmentId && (c.status === 'ringing' || c.status === 'accepted') ? { ...c, status: 'ended', endedAt: new Date().toISOString(), durationSeconds: callDurationSeconds || 0 } : c))
       logActivity({
         astrologerId: appointment?.astrologerId,
         kind: 'appointments',
@@ -3800,6 +3857,54 @@ if (question) {
         amount: appointment?.amount ?? appointment?.price,
         moduleStatus: 'Completed',
       })
+    },
+    initiateAppointmentCall(appointmentId) {
+      const appointment = appointments.find((item) => item.id === appointmentId)
+      if (!appointment) return null
+      const existing = appointmentCalls.find((c) => c.appointmentId === appointmentId && c.status === 'ringing')
+      if (existing) return existing
+      const call = {
+        id: `acall-${Date.now().toString(36)}`,
+        appointmentId,
+        astrologerId: appointment.astrologerId,
+        astrologerName: appointment.astrologer,
+        userId: appointment.userId,
+        customerName: appointment.customerName,
+        status: 'ringing',
+        createdAt: new Date().toISOString(),
+        rating: null,
+        feedback: '',
+      }
+      setAppointmentCalls((prev) => [call, ...prev])
+      setNotifications((prev) => [{
+        id: `acall-notif-${call.id}`,
+        title: `Incoming call from ${appointment.astrologer}`,
+        detail: `Your appointment at ${appointment.time} is starting.`,
+        time: 'just now',
+        route: `/user/incoming/${appointmentId}`,
+        audience: ROLES.USER,
+        category: 'appointments',
+        read: false,
+        appointmentId,
+        callId: call.id,
+      }, ...prev])
+      return call
+    },
+    acceptAppointmentCall(callId) {
+      setAppointmentCalls((prev) => prev.map((c) => c.id === callId ? { ...c, status: 'accepted', acceptedAt: new Date().toISOString() } : c))
+    },
+    declineAppointmentCall(callId) {
+      setAppointmentCalls((prev) => prev.map((c) => c.id === callId ? { ...c, status: 'declined', endedAt: new Date().toISOString() } : c))
+    },
+    endAppointmentCall(callId, { durationSeconds } = {}) {
+      setAppointmentCalls((prev) => prev.map((c) => c.id === callId ? { ...c, status: 'ended', endedAt: new Date().toISOString(), durationSeconds: durationSeconds || 0 } : c))
+    },
+    rateAppointmentCall(callId, rating, feedback) {
+      setAppointmentCalls((prev) => prev.map((c) => c.id === callId ? { ...c, rating, feedback, ratedAt: new Date().toISOString() } : c))
+      const call = appointmentCalls.find((c) => c.id === callId)
+      if (call && currentUser?.role === ROLES.USER) {
+        recordUserActivity({ userId: currentUser.id, type: 'review', title: 'Call rated', summary: `You rated the call with ${call.astrologerName} ${rating} stars.`, metadata: feedback || `${rating}/5` })
+      }
     },
     rescheduleAppointment({ originalId, date, dateIso, time, start, end }) {
       const original = appointments.find((item) => item.id === originalId)
@@ -4401,7 +4506,7 @@ if (question) {
       setUserWithdrawals((prev) => [withdrawal, ...prev])
       return withdrawal
     },
-  }), [astrologerPosts, appointments, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, openQuestionSettings, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
+  }), [astrologerPosts, appointments, appointmentCalls, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, openQuestionSettings, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
 
   useEffect(() => {
     const runQuestionAutomation = () => {
@@ -4436,6 +4541,7 @@ if (question) {
     questionPreviewId,
     appointments,
     consultations,
+    appointmentCalls,
     followedAstrologerIds,
     subscriptions,
     blockedUserIds,

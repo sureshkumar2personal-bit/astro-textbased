@@ -231,7 +231,9 @@ export default function AppointmentDetails() {
     </div>
     <UserAppointmentDetailsDrawer
       appointment={detailsAppointment}
-      consultation={detailsAppointment ? consultations.find((item) => item.appointmentId === detailsAppointment.id && (item.sent || item.sentToUser || item.completedAt)) : null}
+      consultation={detailsAppointment && getAppointmentDisplayStatus(detailsAppointment) === 'Completed'
+        ? consultations.find((item) => String(item.appointmentId) === String(detailsAppointment.id))
+        : null}
       currentUser={currentUser}
       onClose={() => closeDetailsDrawer(detailsAppointment)}
       onBookAgain={bookAgain}

@@ -361,6 +361,7 @@ export default function AppointmentCalendarTab() {
       appointment,
     )
     setToastAppointment(null)
+    actions.initiateAppointmentCall(appointment.id)
   }
 
   const handleCompleteCall = (
@@ -788,6 +789,7 @@ export default function AppointmentCalendarTab() {
             handleCompleteCall
           }
           onSavePrivateCallNotes={(id, notes) => actions.savePrivateCallNotes(id, notes)}
+          onSavePreCallAnalysis={(id, notes) => actions.savePreCallAnalysis(id, notes)}
           onSaveConsultation={(payload) => actions.saveConsultation(payload)}
         />
       )}
