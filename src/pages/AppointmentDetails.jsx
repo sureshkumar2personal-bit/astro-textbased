@@ -8,6 +8,7 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import UserAppointmentDetailsDrawer from '../components/user/UserAppointmentDetailsDrawer.jsx'
+import AppointmentSectionTabs from './user/appointments/AppointmentSectionTabs.jsx'
 import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -199,6 +200,7 @@ export default function AppointmentDetails() {
 
   return <div className="apt-page user-appointment-history">
     <PageHeader eyebrow="User portal" title="Appointment History" showBack />
+    <AppointmentSectionTabs />
     <section className="appointment-history-recommendation" aria-label="Continue your journey">
       <div className="appointment-history-recommendation__ornament" aria-hidden="true">✦</div>
       <div className="appointment-history-recommendation__copy">
