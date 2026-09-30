@@ -570,6 +570,12 @@ textarea:focus-visible {
   gap: 0;
 }
 
+/* User-side overlays must sit above the complete authenticated shell,
+   including the sticky dashboard header. */
+.user-shell-overlay {
+  z-index: 10000 !important;
+}
+
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
@@ -4020,6 +4026,13 @@ tbody tr:hover {
   margin-top: 2px;
 }
 
+.activity-meta--compact {
+  max-width: min(100%, 300px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* My Activity — premium "Recent Activity" card list (scoped to this page only,
    deliberately not reusing the shared .activity-row/.activity-list classes
    above, which are still used by other pages). */
@@ -4290,6 +4303,10 @@ tbody tr:hover {
   flex-direction: column;
   overflow: hidden;
   padding: 0;
+}
+
+.wallet-topup-modal {
+  max-height: calc(100vh - 32px) !important;
 }
 
 .modal-card__header {
@@ -5727,26 +5744,50 @@ tbody tr:hover {
   justify-content: flex-end;
   gap: 10px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+.wallet-txn-toolbar .wallet-txn-filters {
+  flex: 1;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.wallet-txn-toolbar .wallet-custom-range {
+  margin: 0;
+  flex-wrap: nowrap;
 }
 
 .wallet-txn-filters {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 10px;
   margin-bottom: 14px;
 }
 
 .wallet-txn-filters .select-input {
-  min-width: 150px;
+  width: 128px;
+  min-width: 128px;
+  padding: 8px 36px 8px 10px;
+  font-size: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--surface-strong);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6475' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
 }
 
 .wallet-txn-search {
   position: relative;
   display: inline-flex;
   align-items: center;
-  min-width: 220px;
-  flex: 1;
+  width: 190px;
+  min-width: 150px;
+  flex: 1 1 190px;
 }
 
 .wallet-txn-search svg {
@@ -5758,7 +5799,21 @@ tbody tr:hover {
 
 .wallet-txn-search .text-input {
   width: 100%;
-  padding-left: 36px;
+  padding: 8px 10px 8px 36px;
+  font-size: 12px;
+}
+
+.wallet-txn-toolbar > .btn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.wallet-txn-toolbar .wallet-custom-range .text-input {
+  width: 132px;
+  padding: 8px 9px;
+  font-size: 12px;
 }
 
 .wallet-quick-amounts {
@@ -6350,8 +6405,10 @@ tbody tr:hover {
   .wallet-stat-card { flex-direction: column; gap: 10px; }
   .wallet-earnings-row { grid-template-columns: 32px 1fr 80px 40px 16px; }
   .wallet-earnings-row__bar { display: none; }
+  .wallet-txn-toolbar { flex-wrap: wrap; }
   .wallet-txn-filters { flex-direction: column; width: 100%; }
   .wallet-txn-filters .select-input { min-width: 0; width: 100%; }
+  .wallet-txn-toolbar > .btn { width: 100%; justify-content: center; }
   .wallet-detail-grid { grid-template-columns: 1fr; }
   .wallet-custom-range .text-input { width: 100%; }
 }
@@ -13763,12 +13820,15 @@ button.apt-week-day:focus-visible {
 /* =============================================================
    Rewards Center
    ============================================================= */
-.rewards-center { display: grid; gap: 24px; padding-top: 18px; }
-.reward-results { display: grid; gap: 28px; }
+.rewards-center { display: grid; gap: 32px; padding-top: 18px; }
+.reward-results { display: grid; gap: 36px; }
 
 /* --- Summary strip (stat-card based, consistent with astrologer dashboard) --- */
 .reward-summary-strip { gap: 20px !important; }
 .reward-summary-strip .stat-card { background: var(--surface-strong); border: 1px solid var(--surface-border); border-radius: var(--radius-m); padding: 16px 18px; box-shadow: var(--shadow-card); }
+.reward-summary-strip .stat-card.is-clickable { cursor: pointer; }
+.reward-summary-strip .stat-card.is-clickable:hover { transform: translateY(-2px); border-color: var(--primary-border, rgba(124, 58, 237, .28)); box-shadow: var(--shadow-float); }
+.reward-summary-strip .stat-card.is-clickable:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .reward-summary-strip .stat-card:hover { transform: translateY(-2px); }
 .reward-summary-strip .stat-icon { width: 42px; height: 42px; flex: 0 0 42px; }
 .reward-summary-strip .stat-value { font-size: 28px; font-weight: 700; }
@@ -13776,6 +13836,7 @@ button.apt-week-day:focus-visible {
 /* --- Filter tabs (consistent with perks-tab-navigation) --- */
 .reward-filter {
   display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 8px;
   padding: 6px; border: 1px solid var(--surface-border, #e2e8f0); border-radius: 14px;
   background: var(--surface-soft, #f8fafc); width: fit-content; max-width: 100%;
 }
@@ -13790,39 +13851,10 @@ button.apt-week-day:focus-visible {
 .reward-filter-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .reward-filter-tab.is-active { background: var(--primary, #7c3aed); color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.22); }
 
-/* --- How rewards work strip --- */
-.reward-how-card {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px 18px; border: 1px solid var(--surface-border); border-radius: var(--radius-m);
-  background: linear-gradient(90deg, var(--surface-strong), var(--surface-soft));
-  box-shadow: var(--shadow-card);
-}
-.reward-how-icon {
-  display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px;
-  border-radius: 12px; color: var(--primary); background: var(--primary-bg);
-}
-.reward-how-copy { flex: 1; min-width: 0; }
-.reward-how-copy strong { display: block; margin-bottom: 10px; font-size: 13px; color: var(--ink, var(--text-primary)); }
-.reward-how-steps { display: flex; align-items: stretch; gap: 12px; flex-wrap: wrap; }
-.reward-how-step { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.reward-how-step-link {
-  display: inline-flex; align-items: center; gap: 9px; width: 100%; padding: 0;
-  border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer;
-}
-.reward-how-step-icon {
-  display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px;
-  border-radius: 10px; color: var(--accent-dark); background: var(--gold-100);
-}
-.reward-how-step-text { display: grid; gap: 1px; }
-.reward-how-step-title { font-size: 12px; font-weight: 800; color: var(--ink, var(--text-primary)); }
-.reward-how-step-copy { font-size: 11px; color: var(--text-secondary); }
-.reward-how-step-link:hover .reward-how-step-title { color: var(--primary); }
-.reward-how-step-link:hover .reward-how-step-icon { color: var(--primary); background: var(--primary-bg); }
-.reward-how-arrow { color: var(--muted); font-weight: 800; }
-
 /* --- Expiring banner --- */
 .reward-expiring {
   display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+  margin-bottom: 8px;
   padding: 14px 18px; border: 1px solid var(--amber-200, #fde68a); border-radius: var(--radius-s);
   background: var(--warning-bg, #fffbeb);
 }
@@ -14100,7 +14132,7 @@ button.apt-week-day:focus-visible {
   .reward-summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 @media (max-width: 640px) {
-  .rewards-center { gap: 20px; }
+  .rewards-center { gap: 28px; }
   .reward-grid, .reward-grid--full { grid-template-columns: minmax(0, 1fr); }
   .reward-grid__action { min-height: auto; justify-content: flex-start; }
   .reward-summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }

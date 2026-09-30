@@ -74,7 +74,7 @@ body:has(.my-account-page) {
 }
 
 .my-account-page .page-header-row .muted {
-  color: #756b82;
+  color: #51465f;
   font-size: 14px;
 }
 
@@ -153,9 +153,9 @@ body:has(.my-account-page) {
 .my-account-settings-section + .my-account-settings-section { border-top: 1px solid rgba(226, 216, 237, .9); }
 .my-account-settings-section:nth-child(3) { grid-column: 1 / -1; }
 .my-account-section-heading { margin-bottom: 8px; }
-.my-account-settings-title { color: #30233f; font-size: 19px; }
-.my-account-settings-desc { color: #81778c; font-size: 12px; }
-.my-account-settings-edit { width: 33px; height: 33px; color: #76529b; background: #faf6ff; border-color: #e4d8f1; }
+.my-account-settings-title { color: #241a31; font-size: 19px; }
+.my-account-settings-desc { color: #5e536b; font-size: 12px; }
+.my-account-settings-edit { width: 33px; height: 33px; color: #60368d; background: #faf6ff; border-color: #e4d8f1; }
 
 .my-account-info-row {
   grid-template-columns: 145px minmax(0, 1fr);
@@ -166,13 +166,26 @@ body:has(.my-account-page) {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #81778c;
+  color: #7652a8;
   font-size: 12px;
 }
 
-.my-account-info-row span svg { color: #8d62b4; }
-.my-account-info-row strong { color: #342841; font-size: 13px; }
-.my-account-info-row strong.is-empty { color: #9a91a3; }
+.my-account-info-row span svg { color: #70439c; }
+.my-account-info-row strong { color: #21182d; font-size: 13px; }
+.my-account-info-row strong.is-empty { color: #21182d; }
+
+.my-account-page label,
+.my-account-page legend,
+.my-account-page .field-label-top {
+  color: #342841;
+}
+
+.my-account-page .text-input,
+.my-account-page .select-input,
+.my-account-page select,
+.my-account-page input {
+  color: #21182d;
+}
 
 .my-account-settings-card .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 

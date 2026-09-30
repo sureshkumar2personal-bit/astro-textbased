@@ -10,7 +10,6 @@ import {
   Clock3,
   Gift,
   IndianRupee,
-  Info,
   Lock,
   MessageSquareText,
   Newspaper,
@@ -18,7 +17,6 @@ import {
   Star,
   Ticket,
   TicketPercent,
-  UserRoundPlus,
   Video,
   X,
 } from 'lucide-react'
@@ -38,16 +36,8 @@ function formatDay(ts) {
 const astrologerProfileRoute = (id) => `/user/astrologer/${encodeURIComponent(id)}`
 const bookAppointmentRoute = (id) => `/user/appointments/book/${encodeURIComponent(id)}`
 
-const STATE_TABS = [
-  { key: 'all', label: 'All Rewards' },
-  { key: 'ready', label: 'Ready to Use' },
-  { key: 'locked', label: 'Locked' },
-  { key: 'used', label: 'Used' },
-  { key: 'benefits', label: 'Benefits' },
-]
-
 const CATEGORY_META = {
-  questions: { label: 'Questions', icon: MessageSquareText, description: 'Discounted question rewards from your subscribed astrologers.' },
+  questions: { label: 'Questions', icon: MessageSquareText },
   appointments: { label: 'Appointments', icon: CalendarCheck, description: 'Booking discounts and priority slots from your astrologers.' },
   content: { label: 'Content', icon: Newspaper, description: 'Posts, videos, and subscriber-only articles shared by your astrologers.' },
   benefits: { label: 'Benefits', icon: Ticket, description: 'Redeemable perks from your active subscriptions.' },
@@ -114,38 +104,6 @@ function AstrologerMeta({ astrologer, name }) {
   )
 }
 
-const HOW_REWARDS_WORK = [
-  { key: 'subscribe', icon: UserRoundPlus, title: 'Subscribe', copy: 'Pick an astrologer plan' },
-  { key: 'perks', icon: TicketPercent, title: 'Get monthly perks', copy: 'A discount question + benefits' },
-  { key: 'save', icon: IndianRupee, title: 'Save on questions', copy: 'Pay less as a subscriber' },
-]
-
-// Tiny explainer strip: how rewards accumulate.
-function HowRewardsStrip({ onNavigate }) {
-  return (
-    <div className="reward-how-card">
-      <span className="reward-how-icon" aria-hidden="true"><Info size={18} /></span>
-      <div className="reward-how-copy">
-        <strong>How rewards work</strong>
-        <div className="reward-how-steps">
-          {HOW_REWARDS_WORK.map((step, index) => (
-            <div key={step.key} className="reward-how-step">
-              <button type="button" className="reward-how-step-link" onClick={() => onNavigate(step.key)}>
-                <span className="reward-how-step-icon"><step.icon size={15} /></span>
-                <span className="reward-how-step-text">
-                  <span className="reward-how-step-title">{step.title}</span>
-                  <span className="reward-how-step-copy">{step.copy}</span>
-                </span>
-              </button>
-              {index < HOW_REWARDS_WORK.length - 1 && <span className="reward-how-arrow" aria-hidden="true">→</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function ExpiringBanner({ items }) {
   const navigate = useNavigate()
   const routes = getRoleRoutes('user')
@@ -161,17 +119,12 @@ function ExpiringBanner({ items }) {
           const astrologer = getAstrologerById(reward.astrologerId)
           const name = reward.astrologerName || astrologer?.name || (reward.category === 'benefits' ? 'Subscriber' : 'Astrologer')
           return (
-            <button
-              type="button"
-              key={reward.id}
-              className="reward-expiring-item"
-              onClick={() => {
-                if (reward.category === 'questions') navigate(`${routes.discountQuestions}?astrologer=${encodeURIComponent(reward.astrologerId || '')}`)
-                else if (reward.category === 'appointments') navigate(bookAppointmentRoute(reward.astrologerId))
-                else if (reward.category === 'content') navigate(routes.astrologers)
-                else if (reward.category === 'benefits') navigate(`${routes.discountQuestions}`)
-              }}
-            >
+            <button type="button" key={reward.id} className="reward-expiring-item" onClick={() => {
+              if (reward.category === 'questions') navigate(`${routes.discountQuestions}?astrologer=${encodeURIComponent(reward.astrologerId || '')}`)
+              else if (reward.category === 'appointments') navigate(bookAppointmentRoute(reward.astrologerId))
+              else if (reward.category === 'content') navigate(routes.astrologers)
+              else if (reward.category === 'benefits') navigate(`${routes.discountQuestions}`)
+            }}>
               <span className="reward-expiring-item-name">{name}</span>
               <span className="reward-expiring-item-title">{reward.title}</span>
               <span className="reward-expiring-item-days">{Math.abs(reward.expiresInDays)} days left</span>
@@ -223,7 +176,6 @@ function QuestionSection({ rewards, openDrawer, expand, onViewMore, viewMoreLabe
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><MessageSquareText size={20} /> {CATEGORY_META.questions.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.questions.description}</p>
       </div>
       <Reveal
         items={byAstrologer}
@@ -462,7 +414,7 @@ function RewardDrawer({ astrologerId, category, rewards, onClose, onViewContent 
   }
 
   return createPortal(
-    <div className="reward-drawer-overlay" onClick={onClose}>
+    <div className="reward-drawer-overlay user-shell-overlay" onClick={onClose}>
       <aside
         className="reward-drawer"
         role="dialog"
@@ -532,7 +484,7 @@ function ContentReaderDrawer({ reward, onClose }) {
   const ContentIcon = CONTENT_ICON[reward.contentType] || Newspaper
   const name = reward.astrologerName || astrologer?.name
   return createPortal(
-    <div className="reward-drawer-overlay" onClick={onClose}>
+    <div className="reward-drawer-overlay user-shell-overlay" onClick={onClose}>
       <aside
         className="reward-drawer reward-content-reader"
         role="dialog"
@@ -765,39 +717,17 @@ export default function RewardsPerks() {
       <PageHeader
         eyebrow="Member Rewards"
         title="Perks & Benefits"
-        subtitle="Your subscriber perks, discount questions, and savings — all in one place."
       />
 
       <ExpiringBanner items={expiringItems} />
 
       <div className="stat-grid reward-summary-strip">
-        <StatCard icon={Gift} value={summary.available} tone="violet" label={<>Available Rewards<br /><span className="reward-summary-hint">Ready to use now</span></>} />
-        <StatCard icon={MessageSquareText} value={summary.questions} tone="gold" label={<>Discount Questions<br /><span className="reward-summary-hint">Live from your subscriptions</span></>} />
-        <StatCard icon={CalendarCheck} value={summary.appointments} tone="green" label={<>Appointment Rewards<br /><span className="reward-summary-hint">Discounts & priority slots</span></>} />
-        <StatCard icon={Ticket} value={summary.benefits} tone="green" label={<>Benefits<br /><span className="reward-summary-hint">From your subscriptions</span></>} />
-        <StatCard icon={IndianRupee} value={`₹${summary.savings}`} tone="gold" label={<>Total Savings<br /><span className="reward-summary-hint">With your discount questions</span></>} />
-        <StatCard icon={AlertTriangle} value={summary.expiring} tone="red" label={<>Expiring Soon<br /><span className="reward-summary-hint">Use before they are lost</span></>} />
+        <StatCard icon={Gift} value={summary.available} tone="violet" label="Total" onClick={() => setFilter('all')} />
+        <StatCard icon={MessageSquareText} value={summary.questions} tone="gold" label="Text-Based Questions" onClick={() => setFilter('questions')} />
+        <StatCard icon={CalendarCheck} value={summary.appointments} tone="green" label="Appointments" onClick={() => setFilter('appointments')} />
+        <StatCard icon={Ticket} value={summary.benefits} tone="green" label="Benefits" onClick={() => setFilter('benefits')} />
+        <StatCard icon={IndianRupee} value={`₹${summary.savings}`} tone="gold" label="Savings" />
       </div>
-
-      <div className="reward-filter" role="tablist" aria-label="Filter rewards">
-        {STATE_TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={filter === tab.key}
-            className={`reward-filter-tab${filter === tab.key ? ' is-active' : ''}`}
-            onClick={() => setFilter(tab.key)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <HowRewardsStrip onNavigate={(key) => {
-        if (key === 'subscribe') navigate(routes.astrologers)
-        else navigate(routes.discountQuestions)
-      }} />
 
       <div className="reward-results">
         {filter === 'all' && (
@@ -807,6 +737,12 @@ export default function RewardsPerks() {
             <ContentSection rewards={contentRewards} openContent={openContent} expand={expandedSections.content} onViewMore={() => expandSection('content')} viewMoreLabel="View All Content" />
             <BenefitSection rewards={benefitRewards} expand />
           </>
+        )}
+        {filter === 'appointments' && (
+          <AppointmentSection rewards={appointmentRewards} expand />
+        )}
+        {filter === 'questions' && (
+          <QuestionSection rewards={questionRewards} openDrawer={openDrawer} expand />
         )}
         {filter === 'ready' && renderStateSections(readyGroups, 'Nothing ready to use yet', 'Your available rewards will appear here once you subscribe to an astrologer.')}
         {filter === 'locked' && renderStateSections(lockedGroups, 'No locked rewards', 'Rewards you need to unlock will appear here.')}

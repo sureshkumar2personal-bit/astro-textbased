@@ -158,7 +158,6 @@ export default function BookAppointmentSlots() {
       <PageHeader
         eyebrow="USER PORTAL"
         title="Book an Appointment"
-        subtitle="Pick an available date, review its open slots and pay from your wallet."
       />
 
       <section className="book-slots-astrologer">
@@ -191,7 +190,6 @@ export default function BookAppointmentSlots() {
 
       <section className="book-slots-select-head">
         <h2 className="section-title">Select Date</h2>
-        <p className="book-slots-section-support">Start from the current month and move forward through {astrologer.name}&apos;s published availability.</p>
       </section>
 
       <section className="book-slots-calendar">
@@ -232,11 +230,6 @@ export default function BookAppointmentSlots() {
           <span><i className="is-closed" />Closed</span>
         </div>
       </section>
-
-      <div className="book-slots-info">
-        <p>Select a date to open its published appointment slots, then continue to payment.</p>
-        <p>Slots, buffers and prices come from each astrologer&apos;s published availability.</p>
-      </div>
 
       {slotsDate && (
         <AppointmentSlotsModal

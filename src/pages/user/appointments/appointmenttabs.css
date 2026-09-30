@@ -1,30 +1,28 @@
 .appointment-section-tabs {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
-  width: fit-content;
+  gap: 32px;
+  width: 100%;
   margin: 4px 0 2px;
-  padding: 5px;
-  border: 1px solid rgba(226, 221, 238, .95);
-  border-radius: 14px;
-  background: rgba(248, 247, 252, .92);
-  box-shadow: 0 3px 12px rgba(67, 45, 99, .06);
+  border-bottom: 1px solid rgba(226, 221, 238, .95);
 }
 
 .appointment-section-tab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 7px 16px;
-  border-radius: 9px;
+  min-height: 44px;
+  padding: 8px 2px 11px;
+  border: 0;
+  border-bottom: 3px solid transparent;
   color: #697083;
-  font-size: 12px;
-  font-weight: 750;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
-  transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+  transition: color .18s ease, border-color .18s ease;
 }
 
 .appointment-section-tab:hover {
@@ -33,19 +31,20 @@
 
 .appointment-section-tab.is-active {
   color: var(--primary, #6d28d9);
-  background: #fff;
-  box-shadow: 0 2px 7px rgba(67, 45, 99, .08);
+  border-bottom-color: var(--primary, #6d28d9);
 }
 
 @media (max-width: 520px) {
   .appointment-section-tabs {
-    display: flex;
-    width: 100%;
+    gap: 18px;
+    overflow-x: auto;
   }
 
   .appointment-section-tab {
     flex: 1;
-    padding-inline: 10px;
+    min-width: max-content;
+    padding-inline: 2px;
+    font-size: 16px;
     text-align: center;
   }
 }

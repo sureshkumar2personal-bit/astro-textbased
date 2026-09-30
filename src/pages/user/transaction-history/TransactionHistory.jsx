@@ -308,7 +308,7 @@ export default function TransactionHistory() {
 
       {/* Transaction Detail Modal */}
       {selectedTxn && createPortal(
-        <div className="modal-overlay" onClick={() => setSelectedTxn(null)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSelectedTxn(null)}>
           <div className="modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><History size={20} /> Transaction Details</div>

@@ -362,7 +362,6 @@ export default function AddPaymentMethod() {
       <PageHeader
         eyebrow="User portal"
         title="Add Payment Method"
-        subtitle="Choose a method type and enter your details below."
         showBack
         backTo={routes.paymentMethods}
       />

@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import {
   RefreshCw,
   Zap,
-  Plus,
   Pause,
   Play,
   Trash2,
@@ -21,16 +20,6 @@ import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import { WalletSectionTabs } from '../wallet/WalletHistory.jsx'
 
-const AUTOPAY_TYPES = [
-  { key: 'subscription', label: 'Subscription Renewal', icon: RefreshCw, description: 'Auto-debit before subscription expiry' },
-  { key: 'low-balance', label: 'Low Balance Top-up', icon: Zap, description: 'Auto top-up when balance falls below threshold' },
-]
-
-const FREQUENCY_OPTIONS = [
-  { key: 'monthly', label: 'Monthly' },
-  { key: 'weekly', label: 'Weekly' },
-]
-
 const STATUS_CONFIG = {
   active: { label: 'Active', color: 'var(--success)', bg: 'var(--success-bg)' },
   paused: { label: 'Paused', color: 'var(--amber-600)', bg: 'var(--warning-bg)' },
@@ -45,105 +34,11 @@ function maskMethod(method) {
   return 'Saved method'
 }
 
-function CreateAutopayModal({ onClose, userPaymentMethods, actions, onSuccess }) {
-  const [autopayType, setAutopayType] = useState('subscription')
-  const [methodId, setMethodId] = useState('')
-  const [amount, setAmount] = useState('')
-  const [threshold, setThreshold] = useState('')
-  const [frequency, setFrequency] = useState('monthly')
-  const [saving, setSaving] = useState(false)
-
-  const defaultMethod = userPaymentMethods.find((m) => m.isDefault)
-
-  useEffect(() => {
-    if (!methodId && defaultMethod) setMethodId(defaultMethod.id)
-  }, [methodId, defaultMethod])
-
-  const handleCreate = () => {
-    if (!methodId || !amount || Number(amount) <= 0) return
-    if (autopayType === 'low-balance' && (!threshold || Number(threshold) <= 0)) return
-    setSaving(true)
-    setTimeout(() => {
-      actions.createUserAutopay({
-        type: autopayType,
-        paymentMethodId: methodId,
-        amount: Number(amount),
-        triggerThreshold: autopayType === 'low-balance' ? Number(threshold) : null,
-        frequency,
-        status: 'active',
-      })
-      onSuccess('Autopay rule created.')
-      onClose()
-    }, 400)
-  }
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-        <div className="modal-card__header flex items-center justify-between gap-4">
-          <div className="section-title" style={{ marginBottom: 0 }}><Plus size={20} /> Create Autopay</div>
-          <button type="button" className="icon-btn" onClick={onClose}><X size={16} /></button>
-        </div>
-        <div className="modal-card__content">
-          <div className="autopay-type-select">
-            {AUTOPAY_TYPES.map(({ key, label, icon: Icon, description }) => (
-              <button key={key} type="button" className={`autopay-type-option ${autopayType === key ? 'is-active' : ''}`} onClick={() => setAutopayType(key)}>
-                <Icon size={18} />
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{label}</div>
-                  <div style={{ color: 'var(--muted)', fontSize: 11 }}>{description}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {userPaymentMethods.length > 0 && (
-            <div className="pm-field" style={{ marginTop: 16 }}>
-              <label className="field-label-top">Payment Method</label>
-              <select className="select-input" value={methodId} onChange={(e) => setMethodId(e.target.value)}>
-                {userPaymentMethods.map((m) => <option key={m.id} value={m.id}>{maskMethod(m)}{m.isDefault ? ' (Default)' : ''}</option>)}
-              </select>
-            </div>
-          )}
-
-          <div className="pm-field" style={{ marginTop: 12 }}>
-            <label className="field-label-top">{autopayType === 'low-balance' ? 'Top-up Amount' : 'Amount'}</label>
-            <input type="number" className="text-input" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} min={1} />
-          </div>
-
-          {autopayType === 'low-balance' && (
-            <div className="pm-field" style={{ marginTop: 12 }}>
-              <label className="field-label-top">Trigger When Balance Below</label>
-              <input type="number" className="text-input" placeholder="e.g. 200" value={threshold} onChange={(e) => setThreshold(e.target.value)} min={1} />
-            </div>
-          )}
-
-          {autopayType === 'subscription' && (
-            <div className="pm-field" style={{ marginTop: 12 }}>
-              <label className="field-label-top">Frequency</label>
-              <select className="select-input" value={frequency} onChange={(e) => setFrequency(e.target.value)}>
-                {FREQUENCY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-              </select>
-            </div>
-          )}
-        </div>
-        <div className="modal-card__footer">
-          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button type="button" className="btn btn-primary" disabled={!methodId || !amount || Number(amount) <= 0 || saving} onClick={handleCreate}>
-            {saving ? 'Creating...' : 'Create Autopay'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function Autopay() {
   const { currentUser } = useAuth()
   const { userAutopays, userPaymentMethods, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-  const [showCreate, setShowCreate] = useState(false)
   const [confirmRevoke, setConfirmRevoke] = useState(null)
   const [successMessage, setSuccessMessage] = useState('')
 
@@ -250,13 +145,6 @@ export default function Autopay() {
         subtitle="Manage automatic payments for subscriptions and wallet top-ups."
         showBack
         backTo={routes.dashboard}
-        actions={
-          userPaymentMethods.length > 0 ? (
-            <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
-              <Plus size={16} /> Create Autopay
-            </button>
-          ) : null
-        }
       />
       <WalletSectionTabs />
 
@@ -295,24 +183,15 @@ export default function Autopay() {
             <Card>
               <div style={{ padding: '40px 20px', textAlign: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 6 }}>No autopay rules</div>
-                <div style={{ color: 'var(--muted)', fontSize: 13 }}>Create an autopay rule to automate your payments.</div>
+                <div style={{ color: 'var(--muted)', fontSize: 13 }}>There are no autopay rules to manage.</div>
               </div>
             </Card>
           )}
         </>
       )}
 
-      {showCreate && (
-        <CreateAutopayModal
-          onClose={() => setShowCreate(false)}
-          userPaymentMethods={userPaymentMethods}
-          actions={actions}
-          onSuccess={setSuccessMessage}
-        />
-      )}
-
       {confirmRevoke && createPortal(
-        <div className="modal-overlay" onClick={() => setConfirmRevoke(null)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setConfirmRevoke(null)}>
           <div className="modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><AlertTriangle size={20} /> Revoke Autopay?</div>
@@ -340,4 +219,3 @@ export default function Autopay() {
     </div>
   )
 }
-

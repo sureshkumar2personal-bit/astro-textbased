@@ -67,10 +67,9 @@ export default function AppointmentSlotsModal({ astrologer, availability, appoin
           </div>
 
           <div className="appointment-slots-section-head">
-            <div>
-              <h3>Appointment Slots</h3>
-              <p>Select an Available slot to continue booking.</p>
-            </div>
+          <div>
+            <h3>Appointment Slots</h3>
+          </div>
             <span className="appointment-slots-status-badge"><i aria-hidden="true" />Available</span>
           </div>
 
@@ -99,9 +98,7 @@ export default function AppointmentSlotsModal({ astrologer, availability, appoin
         </div>
 
         <div className="appointment-slots-modal__foot">
-          <p className="appointment-slots-modal__meta">
-            {selectedSlot ? `Selected slot · ${selectedSlot.timeLabel} – ${selectedSlot.endLabel} · ₹${summary.price.toLocaleString('en-IN')}` : 'Select an Available slot to continue.'}
-          </p>
+          {selectedSlot && <p className="appointment-slots-modal__meta">Selected slot · {selectedSlot.timeLabel} – {selectedSlot.endLabel} · ₹{summary.price.toLocaleString('en-IN')}</p>}
           <button type="button" className="btn btn-primary" disabled={!selectedSlot} onClick={continueBooking}>
             <CalendarCheck2 size={15} aria-hidden="true" />
             Continue with Booking

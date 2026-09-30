@@ -282,7 +282,7 @@ function AttachmentViewer({ attachment, onClose, completedDays, currentDayNumber
   const isImage = type.startsWith('image') || attachment.viewUrl?.startsWith('data:image/')
   const isPdf = type.includes('pdf') || attachment.viewUrl?.startsWith('data:application/pdf')
   return (
-    <div className="apt-user-attachment-viewer-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+    <div className="apt-user-attachment-viewer-overlay user-shell-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
       <section className="apt-user-attachment-viewer" role="dialog" aria-modal="true" aria-labelledby="apt-user-attachment-viewer-title">
         <header className="apt-user-attachment-viewer-head">
           <div><span>Attachment</span><h2 id="apt-user-attachment-viewer-title">{attachment.name}</h2></div>
@@ -456,7 +456,7 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
   ))
 
   return createPortal(
-    <div className="apt-drawer-overlay" onClick={onClose}>
+    <div className="apt-drawer-overlay user-shell-overlay" onClick={onClose}>
       <aside className="apt-drawer" role="dialog" aria-modal="true" aria-labelledby="user-apt-drawer-title" onClick={(event) => event.stopPropagation()}>
         <header className="apt-drawer-head">
           <div className="apt-drawer-head-copy">

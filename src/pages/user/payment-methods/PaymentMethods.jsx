@@ -86,7 +86,6 @@ export default function PaymentMethods() {
       <PageHeader
         eyebrow="User portal"
         title="Payment Methods"
-        subtitle="Manage your saved bank accounts, UPI IDs, and cards for seamless payments."
         showBack
         backTo={routes.dashboard}
         actions={
@@ -110,7 +109,6 @@ export default function PaymentMethods() {
                 <CreditCard size={26} style={{ color: 'var(--primary)' }} />
               </div>
               <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 6 }}>No payment methods saved</div>
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 16 }}>Add a bank account, UPI ID, or card to start seamless transactions.</div>
               <button type="button" className="btn btn-primary" onClick={() => navigate(routes.addPaymentMethod)}>
                 <Plus size={16} /> Add Payment Method
               </button>
@@ -162,14 +160,12 @@ export default function PaymentMethods() {
               <Shield size={18} style={{ color: 'var(--success)' }} />
               <div>
                 <div style={{ fontWeight: 600, fontSize: 13 }}>Your data is encrypted</div>
-                <div style={{ color: 'var(--muted)', fontSize: 12 }}>Card numbers and account details are masked and stored securely.</div>
               </div>
             </div>
             <div className="pm-security-item">
               <Shield size={18} style={{ color: 'var(--primary)' }} />
               <div>
                 <div style={{ fontWeight: 600, fontSize: 13 }}>PCI DSS compliant</div>
-                <div style={{ color: 'var(--muted)', fontSize: 12 }}>We follow industry-standard security practices for payment data.</div>
               </div>
             </div>
           </div>
@@ -178,7 +174,7 @@ export default function PaymentMethods() {
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && createPortal(
-        <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>

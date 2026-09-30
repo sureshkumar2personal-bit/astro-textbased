@@ -92,7 +92,6 @@ export default function Withdraw() {
       <PageHeader
         eyebrow="User portal"
         title="Withdraw Funds"
-        subtitle="Transfer money from your wallet to your bank account or UPI."
         showBack
       />
 
@@ -221,7 +220,6 @@ export default function Withdraw() {
               >
                 <ArrowDownToLine size={16} /> Withdraw ₹{youReceive.toLocaleString('en-IN')}
               </button>
-              <div className="withdraw-processing-note">Processing time: 1-2 business days</div>
             </Card>
           </Section>
         </div>
@@ -229,7 +227,7 @@ export default function Withdraw() {
 
       {/* Review Modal */}
       {showReview && createPortal(
-        <div className="modal-overlay" onClick={() => setShowReview(false)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setShowReview(false)}>
           <div className="modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><ArrowDownToLine size={20} /> Review Withdrawal</div>
@@ -252,9 +250,6 @@ export default function Withdraw() {
                 <div className="withdraw-review-row withdraw-review-total">
                   <span>You receive</span>
                   <strong>₹{youReceive.toLocaleString('en-IN')}</strong>
-                </div>
-                <div className="withdraw-review-note">
-                  <Info size={14} /> Processing: 1-2 business days
                 </div>
               </div>
             </div>

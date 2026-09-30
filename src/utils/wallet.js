@@ -61,6 +61,7 @@ export function getDateRangeForPeriod(period, options = {}) {
 
   if (period === 'today') return { start: todayIso, end: todayIso, label: 'Today' }
   if (period === 'last7days') return { start: addDaysISO(todayIso, -6), end: todayIso, label: 'Last 7 Days' }
+  if (period === 'last10days') return { start: addDaysISO(todayIso, -9), end: todayIso, label: 'Last 10 Days' }
 
   const firstOfMonth = (offset) => toISO(new Date(today.getFullYear(), today.getMonth() + offset, 1))
   const lastOfMonth = (offset) => toISO(new Date(today.getFullYear(), today.getMonth() + offset + 1, 0))

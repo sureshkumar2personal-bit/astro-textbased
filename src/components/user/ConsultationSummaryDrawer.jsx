@@ -75,7 +75,7 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
   }
 
   return createPortal(
-    <div className="consultation-drawer-overlay" onClick={onClose}>
+    <div className="consultation-drawer-overlay user-shell-overlay" onClick={onClose}>
       <aside className="consultation-drawer" role="dialog" aria-modal="true" aria-label="Consultation summary" onClick={(event) => event.stopPropagation()}>
         <header className="consultation-drawer__head">
           <strong>Consultation summary</strong>
@@ -184,7 +184,7 @@ function AttachmentPreview({ preview, onClose }) {
   const isImage = isProfile || isImageAttachment(attachment)
 
   return (
-    <div className="consultation-preview-overlay" role="presentation" onClick={(event) => { event.stopPropagation(); onClose() }}>
+    <div className="consultation-preview-overlay user-shell-overlay" role="presentation" onClick={(event) => { event.stopPropagation(); onClose() }}>
       <section className="consultation-preview" role="dialog" aria-modal="true" aria-labelledby="consultation-preview-title" onClick={(event) => event.stopPropagation()}>
         <header className="consultation-preview__head">
           <div>

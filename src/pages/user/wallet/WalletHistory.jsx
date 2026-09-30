@@ -6,7 +6,6 @@ import {
   TrendingUp,
   Plus,
   X,
-  Filter,
   Download,
   History,
   ChevronRight,
@@ -56,6 +55,7 @@ const TXN_DATE_OPTIONS = [
   { key: 'all', label: 'All Dates' },
   { key: 'today', label: 'Today' },
   { key: 'last7days', label: 'Last 7 Days' },
+  { key: 'last10days', label: 'Last 10 Days' },
   { key: 'thismonth', label: 'This Month' },
   { key: 'last3months', label: 'Last 3 Months' },
   { key: 'custom', label: 'Custom Range' },
@@ -144,9 +144,8 @@ export default function UserWallet({ section = 'overview' }) {
   const navigate = useNavigate()
   const walletPath = routes.walletManagement
 
-  const [showFilters, setShowFilters] = useState(false)
   const [txnTypeFilter, setTxnTypeFilter] = useState('all')
-  const [txnDateFilter, setTxnDateFilter] = useState('all')
+  const [txnDateFilter, setTxnDateFilter] = useState('last10days')
   const [txnSearch, setTxnSearch] = useState('')
   const [txnCustomStart, setTxnCustomStart] = useState('')
   const [txnCustomEnd, setTxnCustomEnd] = useState('')
@@ -355,7 +354,6 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Wallet"
-            subtitle="Manage your balance, top-ups, spending and refunds."
             actions={
               <div className="wallet-header-actions">
                 <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
@@ -393,7 +391,6 @@ export default function UserWallet({ section = 'overview' }) {
               <div className="wallet-stat-card__body">
                 <div className="wallet-stat-card__value">₹{stats.toppedUp.toLocaleString('en-IN')}</div>
                 <div className="wallet-stat-card__label">Total Topped Up</div>
-                <div className="wallet-stat-card__meta">Money added to your wallet</div>
               </div>
             </button>
 
@@ -402,7 +399,6 @@ export default function UserWallet({ section = 'overview' }) {
               <div className="wallet-stat-card__body">
                 <div className="wallet-stat-card__value">₹{stats.spent.toLocaleString('en-IN')}</div>
                 <div className="wallet-stat-card__label">Total Spent</div>
-                <div className="wallet-stat-card__meta">Spent on consultations</div>
               </div>
             </button>
 
@@ -411,7 +407,6 @@ export default function UserWallet({ section = 'overview' }) {
               <div className="wallet-stat-card__body">
                 <div className="wallet-stat-card__value">₹{stats.refunded.toLocaleString('en-IN')}</div>
                 <div className="wallet-stat-card__label">Total Refunded</div>
-                <div className="wallet-stat-card__meta">Refunds back to your wallet</div>
               </div>
             </button>
           </div>
@@ -474,7 +469,6 @@ export default function UserWallet({ section = 'overview' }) {
                 <span>{dateRange ? dateRange.label : 'Selected period'}</span>
                 <span>Total Spent ₹{spendingBreakdown.total.toLocaleString('en-IN')}</span>
               </div>
-              <div className="wallet-earnings-hint">Click a category to view the individual transactions in this period.</div>
             </Card>
           </Section>
 
@@ -514,28 +508,13 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Transactions"
-            subtitle="Browse and export your wallet transaction statement."
+            actions={<BackButton to={`${walletPath}/overview`} />}
           />
           <WalletSectionTabs />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="All Transactions" icon={History}>
             <Card className="wallet-txn-card">
               <div className="wallet-txn-toolbar">
-                <button
-                  type="button"
-                  className="icon-btn"
-                  onClick={() => setShowFilters(!showFilters)}
-                  title="Filters"
-                >
-                  <Filter size={18} />
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={downloadTransactionsPdf} disabled={filteredTxns.length === 0}>
-                  <Download size={16} /> Download PDF
-                </button>
-              </div>
-
-              {showFilters && (
                 <div className="wallet-txn-filters">
                   <select className="select-input" value={txnTypeFilter} onChange={(e) => setTxnTypeFilter(e.target.value)}>
                     {TXN_TYPE_FILTER_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
@@ -561,7 +540,10 @@ export default function UserWallet({ section = 'overview' }) {
                     </div>
                   )}
                 </div>
-              )}
+                <button type="button" className="btn btn-ghost" onClick={downloadTransactionsPdf} disabled={filteredTxns.length === 0}>
+                  <Download size={16} /> Download PDF
+                </button>
+              </div>
 
               <div className="wallet-txn-table-wrap">
                 <table className="wallet-txn-table">
@@ -595,7 +577,6 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Top-ups"
-            subtitle="Add money to your wallet and review your top-up history."
           />
           <WalletSectionTabs />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
@@ -683,7 +664,6 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Refunds"
-            subtitle="Money refunded back to your wallet."
           />
           <WalletSectionTabs />
           <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
@@ -714,8 +694,8 @@ export default function UserWallet({ section = 'overview' }) {
 
       {/* Top Up Modal */}
       {topUpOpen && createPortal((
-        <div className="modal-overlay" onClick={() => setTopUpOpen(false)}>
-          <div className="modal-card" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setTopUpOpen(false)}>
+          <div className="modal-card modal-card--scroll wallet-topup-modal" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 <Wallet size={20} /> Add Money
@@ -779,7 +759,7 @@ export default function UserWallet({ section = 'overview' }) {
 
       {/* Top Up Confirm Modal */}
       {topUpConfirmOpen && createPortal((
-        <div className="modal-overlay" onClick={() => setTopUpConfirmOpen(false)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setTopUpConfirmOpen(false)}>
           <div className="modal-card" style={{ width: 'min(440px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
@@ -805,9 +785,6 @@ export default function UserWallet({ section = 'overview' }) {
                   <span>Total to charge</span>
                   <strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong>
                 </div>
-                <div className="withdraw-review-note">
-                  <Info size={14} /> Amount is added to your wallet immediately.
-                </div>
               </div>
             </div>
             <div className="modal-card__footer">
@@ -827,7 +804,7 @@ export default function UserWallet({ section = 'overview' }) {
 
       {/* Spending Category Detail Modal */}
       {categoryDetailKind && createPortal((
-        <div className="modal-overlay" onClick={() => setCategoryDetailKind(null)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setCategoryDetailKind(null)}>
           <div className="modal-card modal-card--scroll" style={{ width: 'min(760px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
@@ -872,7 +849,7 @@ export default function UserWallet({ section = 'overview' }) {
 
       {/* Transaction Detail Modal */}
       {selectedTxn && createPortal((
-        <div className="modal-overlay" onClick={() => setSelectedTxn(null)}>
+        <div className="modal-overlay user-modal-overlay" onClick={() => setSelectedTxn(null)}>
           <div className="modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>

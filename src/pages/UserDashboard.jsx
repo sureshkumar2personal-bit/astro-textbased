@@ -27,6 +27,11 @@ function formatActivityDate(value) {
   return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function truncateWords(value, limit = 5) {
+  const words = String(value || '').trim().split(/\s+/).filter(Boolean)
+  return words.length > limit ? `${words.slice(0, limit).join(' ')}…` : words.join(' ')
+}
+
 export default function UserDashboard() {
   const { currentUser } = useAuth()
   const { questions, consultationHistory, appointments, userWallet, astrologerLiveSessions, followedAstrologerIds, subscriptions, actions } = useAppData()
@@ -229,11 +234,10 @@ export default function UserDashboard() {
                     navigate(activityTarget)
                   }
                 }}
-              >
+                >
                 <div>
-                  <div className="activity-id">{activity.title}</div>
-                  <div className="activity-meta">{activity.summary || 'Activity recorded.'}</div>
-                  <div className="activity-meta">{formatActivityDate(activity.occurredAt)}</div>
+                  <div className="activity-id">{truncateWords(activity.title)}</div>
+                  <div className="activity-meta activity-meta--compact">{truncateWords(activity.summary || 'Activity recorded.')} · {formatActivityDate(activity.occurredAt)}</div>
                 </div>
                 <StatusBadge label={activity.status || 'Recorded'} />
               </div>

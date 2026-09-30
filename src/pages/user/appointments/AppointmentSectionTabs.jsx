@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import './appointmenttabs.css'
 
 const TABS = [
-  { to: '/user/appointments/book', label: 'Appointment Booking' },
+  { to: '/user/appointments/book', label: 'Book an Appointment' },
   { to: '/user/appointments/my', label: 'Appointment History' },
 ]
 
