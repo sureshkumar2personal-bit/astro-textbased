@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE } from './bookingAstrologerData.js'
@@ -7,6 +7,7 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import AppointmentSectionTabs from './AppointmentSectionTabs.jsx'
 import './bookappointment.css'
 
 function initials(name = '') {
@@ -85,12 +86,9 @@ export default function BookAppointment() {
         showBack={fromDashboard}
         backTo={routes.dashboard}
         backLabel="Back to Dashboard"
-        actions={
-          <Link className="appointment-history-link" to="/user/appointments/my">
-            Appointment History
-          </Link>
-        }
       />
+
+      <AppointmentSectionTabs />
 
       <div className="book-appointment-section-head">
         <h2 className="section-title">Your Subscribed Astrologers</h2>
