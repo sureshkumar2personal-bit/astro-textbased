@@ -7,6 +7,7 @@ import { useAuth } from '../../../state/AuthContext.jsx'
 import { consultationAstrologers } from '../../../data/consultationAstrologers.js'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, getAppointmentDisplayStatus, resolveAppointmentWindow } from '../../../utils/appointments.js'
+import AppointmentSectionTabs from './AppointmentSectionTabs.jsx'
 import './appointmenthistory.css'
 
 const FILTERS = [
@@ -169,6 +170,7 @@ export default function AppointmentHistoryPage() {
   return (
     <div className="appointment-history-page">
       <PageHeader title="Appointment History" subtitle="View your previous appointments, consultation details, and appointment status." />
+      <AppointmentSectionTabs />
       <section className="appointment-history-statistics" aria-label="Appointment statistics">
         {statistics.map(({ label, value }) => <div className="appointment-history-statistic" key={label}><span>{label}</span><strong>{value}</strong></div>)}
       </section>
