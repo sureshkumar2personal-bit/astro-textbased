@@ -102,6 +102,7 @@ export default function Atonements() {
       const viaRecords = records.find((a) => a.sourceId === appointmentId || a.appointmentId === appointmentId)
       if (viaRecords) return viaRecords
     }
+    if (selectedId === null) return null
     if (selectedId === undefined) return records[0] || null
     return records.find((item) => item.id === selectedId) || records[0] || null
   }, [appointmentId, allAtonements, records, selectedId])
@@ -125,6 +126,14 @@ export default function Atonements() {
     setSelectedId(undefined)
   }
 
+  const closeDetails = () => {
+    if (appointmentId) {
+      searchParams.delete('appointmentId')
+      setSearchParams(searchParams)
+    }
+    setSelectedId(null)
+  }
+
   return <div className="user-atonements-page atonements-page">
     <PageHeader eyebrow="User portal" title="Atonement" subtitle="Track the poojas and remedies suggested by your astrologers, one day at a time." />
     {appointmentId && (
@@ -143,6 +152,6 @@ export default function Atonements() {
     <Section title="Your atonements" icon={Sparkles} titleRight={<span className="muted">{records.length} record{records.length === 1 ? '' : 's'}</span>}>
       {records.length ? <div className="atonement-card-list">{records.map((atonement) => <AtonementCard key={atonement.id} atonement={atonement} selected={selected?.id === atonement.id} onSelect={() => setSelectedId(atonement.id)} onToggleDay={(index, completed) => actions.updateAtonementDay(atonement.id, index, completed)} />)}</div> : <Card className="atonement-empty"><Compass size={30} /><h2>No Atonements Yet</h2><p>Atonements suggested by your astrologers will appear here after your consultations.</p></Card>}
     </Section>
-    {selected && <div className="atonement-details-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedId(null) }}><div className="atonement-details-popup"><AtonementDetailsPanel atonement={selected} onClose={() => setSelectedId(null)} onToggleDay={(index, completed) => actions.updateAtonementDay(selected.id, index, completed)} /></div></div>}
+    {selected && <div className="atonement-details-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetails() }}><div className="atonement-details-popup"><AtonementDetailsPanel atonement={selected} onClose={closeDetails} onToggleDay={(index, completed) => actions.updateAtonementDay(selected.id, index, completed)} /></div></div>}
   </div>
 }
