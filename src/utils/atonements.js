@@ -9,6 +9,18 @@ export const ATONEMENT_SOURCE_LABELS = {
   appointment: 'Appointment',
 }
 
+export const RECORD_CATEGORIES = {
+  text: 'Text Question',
+  call: 'Call',
+  chat: 'Chat',
+  appointment: 'Appointment',
+  atonement: 'Atonement / Pariharam',
+}
+
+export function categoryLabel(category) {
+  return RECORD_CATEGORIES[category] || RECORD_CATEGORIES.atonement
+}
+
 export const ATONEMENT_SOURCE_GROUPS = {
   all: ATONEMENT_SOURCE_TYPES,
   text: ['question'],
@@ -29,6 +41,18 @@ export function createEmptyAtonementDay() {
   }
 }
 
+export function normalizeProof(proof) {
+  if (!proof || typeof proof !== 'object' || !proof.dataUrl) return null
+  return { name: clean(proof.name) || 'Proof', type: clean(proof.type), dataUrl: proof.dataUrl, addedAt: proof.addedAt || null }
+}
+
+export function setAtonementDayProof(atonement, index, proof) {
+  const day = atonement.days?.[index]
+  if (!day || !day.completed) return atonement
+  const days = atonement.days.map((item, i) => (i === index ? { ...item, proof: normalizeProof(proof) } : item))
+  return { ...atonement, days }
+}
+
 export function normalizeAtonementDay(day = {}, index = 0) {
   const notes = normalizeRemedyNotes(day)
   return {
@@ -37,6 +61,7 @@ export function normalizeAtonementDay(day = {}, index = 0) {
     dayNumber: Number(day.dayNumber) || index + 1,
     completed: day.completed === true,
     completedAt: day.completedAt || null,
+    proof: normalizeProof(day.proof),
   }
 }
 
@@ -54,12 +79,14 @@ export function normalizeAtonement(record = {}) {
   const first = sequentialDays[0]
   return {
     id: record.id || crypto.randomUUID(),
+    category: 'atonement',
     userId: record.userId || record.recipient || '',
     recipient: record.recipient || record.userId || '',
     astrologerId: record.astrologerId || '',
     astrologerName: record.astrologerName || 'Astrologer',
     sourceType: ATONEMENT_SOURCE_TYPES.includes(record.sourceType) ? record.sourceType : 'question',
     sourceId: record.sourceId || '',
+    method: record.method && typeof record.method === 'object' ? record.method : null,
     sourceLabel: record.sourceLabel || 'Consultation',
     summary: clean(record.summary || first.summary),
     day: clean(record.day || first.day),

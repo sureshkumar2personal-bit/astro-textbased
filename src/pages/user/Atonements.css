@@ -79,3 +79,296 @@
     min-height: 0;
   }
 }
+
+.atonement-flow { display: grid; gap: 14px; padding: 18px; border-radius: 16px; background: #fff; border: 1px solid rgba(79,70,229,0.14); }
+.atonement-flow-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.atonement-flow-head h2 { margin: 4px 0 0; font-size: 1.15rem; }
+.atonement-flow-progress { font-weight: 600; color: #4F46E5; }
+.atonement-flow-days { display: grid; gap: 12px; }
+.atonement-flow-day { border: 1px solid rgba(79,70,229,0.14); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+.atonement-flow-day.is-completed { background: #F0FDF4; border-color: rgba(22,163,74,0.25); }
+.atonement-flow-day.is-locked { opacity: 0.6; }
+.atonement-flow-day-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.atonement-flow-day-date, .atonement-flow-day-state { display: inline-flex; align-items: center; gap: 5px; font-size: 0.85rem; color: #64748B; }
+.atonement-flow-day-state { margin-left: auto; font-weight: 600; }
+.atonement-flow-columns { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+.atonement-flow-astrologer, .atonement-flow-user { display: grid; gap: 8px; align-content: start; padding: 12px; border-radius: 10px; background: #F8FAFC; }
+.atonement-flow-user { background: #EEF2FF; }
+.atonement-flow-instruction span { font-size: 0.75rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em; }
+.atonement-flow-instruction p { margin: 2px 0 0; white-space: pre-wrap; }
+.atonement-flow-proof { display: grid; gap: 8px; }
+.atonement-flow-proof-file { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.atonement-flow-proof-file strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; }
+.atonement-flow-proof-preview { width: 56px; height: 56px; flex: none; border-radius: 8px; overflow: hidden; background: #fff; display: grid; place-items: center; }
+.atonement-flow-proof-preview img, .atonement-flow-proof-preview video { width: 100%; height: 100%; object-fit: cover; }
+.atonement-flow-proof-preview audio { width: 56px; }
+.atonement-flow-proof-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 700px) { .atonement-flow-columns { grid-template-columns: 1fr; } }
+
+.atonement-flow-summary { display: grid; grid-template-columns: repeat(3, minmax(0, auto)); gap: 8px 28px; }
+.atonement-flow-summary > div { display: grid; gap: 2px; }
+.atonement-card-summary { margin: 0; font-size: 1rem; }
+.atonement-card-status-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+@media (max-width: 700px) { .atonement-flow-summary { grid-template-columns: 1fr; } }
+
+.user-atonements-page .rem-card-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.user-atonements-page .rem-card { display: grid; gap: 10px; align-content: start; height: auto; min-height: 0; padding: 22px; border: 1px solid rgba(115,70,163,0.16); border-radius: 16px; background: #fff; box-shadow: 0 4px 16px rgba(61,42,82,0.06); }
+.user-atonements-page .rem-card.is-selected { border-color: #bda1df; }
+.user-atonements-page .rem-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.user-atonements-page .rem-card-astrologer { color: #30263b; font-size: 15px; }
+.user-atonements-page .rem-card-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.user-atonements-page .rem-card-status.is-pending { color: #d97706; }
+.user-atonements-page .rem-card-status.is-completed { color: #16a34a; }
+.user-atonements-page .rem-card-duration { color: #7346a3; font-size: 12px; font-weight: 800; letter-spacing: .02em; }
+.user-atonements-page .rem-card-title { margin: 0; color: #30263b; font-size: 17px; line-height: 1.4; font-weight: 700; }
+.user-atonements-page .rem-card-progress { display: grid; gap: 2px; margin-top: 4px; }
+.user-atonements-page .rem-card-progress small { color: #8b8295; font-size: 11px; }
+.user-atonements-page .rem-card-progress strong { color: #30263b; font-size: 14px; }
+.user-atonements-page .rem-card-button { justify-self: start; margin-top: 4px; padding: 8px 16px; border: 1px solid #7346a3; border-radius: 999px; background: #f5efff; color: #7346a3; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.user-atonements-page .rem-card-button:hover { background: #7346a3; color: #fff; }
+@media (max-width: 1100px) { .user-atonements-page .rem-card-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .user-atonements-page .rem-card-list { grid-template-columns: 1fr; } }
+.atonement-flow { margin-top: 4px; }
+
+.atonement-back { justify-self: start; }
+.atonement-detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 20px; }
+.atonement-detail-summary > div { display: grid; gap: 4px; align-content: start; }
+.atonement-detail-summary-wide { grid-column: 1 / -1; order: 3; }
+.atonement-detail-summary small, .atonement-detail-instructions small { color: #8b8295; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+.atonement-detail-summary strong { color: #30263b; }
+.atonement-detail-instructions { display: grid; gap: 10px; }
+.atonement-detail-instructions p { margin: 2px 0 0; white-space: pre-wrap; }
+@media (max-width: 800px) { .atonement-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.user-atonements-page .atonement-detail-summary, .user-atonements-page .atonement-detail-instructions { padding: 20px; border: 1px solid rgba(115,70,163,0.16); border-radius: 16px; background: #fff; box-shadow: 0 4px 16px rgba(61,42,82,0.06); }
+
+.user-atonements-page .rem-card-list { align-items: stretch; }
+.user-atonements-page .rem-card { display: flex; flex-direction: column; gap: 10px; border-radius: 14px; box-shadow: 0 2px 10px rgba(61,42,82,0.05); transition: box-shadow .18s ease, border-color .18s ease; }
+.user-atonements-page .rem-card:hover { border-color: #bda1df; box-shadow: 0 6px 18px rgba(91,55,132,0.12); }
+.user-atonements-page .rem-card-category { align-self: flex-start; padding: 3px 10px; border-radius: 999px; background: #f3ebff; color: #6d3fa0; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.user-atonements-page .rem-card-duration { color: #8b8295; font-size: 12px; font-weight: 700; }
+.user-atonements-page .rem-card-button { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; transition: background .15s ease, color .15s ease, transform .15s ease; }
+.user-atonements-page .rem-card-button:hover { transform: translateX(2px); }
+.user-atonements-page .rem-card-progress { margin-bottom: 6px; }
+
+.am-flow { display: grid; gap: 14px; }
+.am-card { display: grid; gap: 12px; padding: 20px; border: 1px solid rgba(115,70,163,0.16); border-radius: 16px; background: #fff; box-shadow: 0 4px 16px rgba(61,42,82,0.06); }
+.am-card h3 { margin: 0; font-size: 1.05rem; color: #30263b; }
+.am-muted { margin: 0; color: #8b8295; font-size: 0.85rem; }
+.am-summary-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.am-summary h2 { margin: 4px 0 6px; font-size: 1.3rem; color: #30263b; }
+.am-summary p { margin: 0; color: #6f667b; }
+.am-status { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.am-status.is-progress { background: #fff4e5; color: #d97706; }
+.am-status.is-completed { background: #e8f8ee; color: #16a34a; }
+.am-summary-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.am-summary-meta span { padding: 4px 12px; border-radius: 999px; background: #f3ebff; color: #6d3fa0; font-size: 12px; font-weight: 700; }
+.am-progress-bar { height: 6px; border-radius: 999px; background: #efe8f8; overflow: hidden; }
+.am-progress-bar span { display: block; height: 100%; background: #7346a3; border-radius: inherit; }
+.am-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.am-pills span { padding: 5px 12px; border-radius: 999px; background: #f3ebff; color: #6d3fa0; font-size: 12.5px; font-weight: 600; }
+.am-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.am-tabs button { display: inline-flex; align-items: center; gap: 4px; padding: 6px 14px; border: 1px solid rgba(115,70,163,0.25); border-radius: 999px; background: #fff; color: #49365c; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.am-tabs button.completed { border-color: rgba(22,163,74,0.4); color: #16a34a; }
+.am-tabs button.locked { color: #a79fb2; }
+.am-tabs button.active { background: #7346a3; border-color: #7346a3; color: #fff; }
+.am-day { display: grid; gap: 12px; padding: 14px; border-radius: 12px; background: #faf7ff; }
+.am-day-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.am-day-head span { display: inline-flex; align-items: center; gap: 4px; color: #6f667b; font-size: 13px; }
+.am-rituals { display: grid; gap: 10px; }
+.am-ritual { padding: 12px; border-radius: 10px; background: #fff; border: 1px solid rgba(115,70,163,0.12); display: grid; gap: 6px; }
+.am-ritual h4 { margin: 0; font-size: 0.95rem; }
+.am-ritual p { margin: 0; color: #49365c; white-space: pre-wrap; }
+.am-ritual small { color: #8b8295; }
+.am-ritual-meta { display: flex; gap: 14px; flex-wrap: wrap; color: #6f667b; font-size: 12px; }
+.am-ritual-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.am-materials em, .am-fields em, .am-completion em { font-style: normal; font-size: 0.7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #6d3fa0; }
+.am-materials ul { margin: 6px 0 0; padding-left: 18px; }
+.am-fields { display: grid; gap: 10px; }
+.am-fields p { margin: 2px 0 0; white-space: pre-wrap; }
+.am-completion { display: grid; gap: 8px; padding: 14px; border-radius: 12px; background: #eef2ff; }
+.am-completion.is-completed { background: #f0fdf4; }
+@media (max-width: 700px) { .am-summary-top { flex-direction: column; } }
+
+/* Atonement Details – structured card layout */
+.atonement-details-page { gap: 14px; }
+.atonement-details-page .page-title { font-size: 1.6rem; }
+.atonement-details-page .page-header-row .muted { margin-top: 4px !important; }
+.am-card { border-radius: 14px; padding: 18px 20px; gap: 14px; box-shadow: 0 2px 10px rgba(61,42,82,0.05); }
+.am-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 24px; }
+.am-summary-grid > div { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.am-summary-main { grid-column: span 2; }
+.am-summary-grid em, .am-field em, .am-completed-on em, .am-completion h4, .am-instructions h4 { font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #8b8295; }
+.am-summary-grid strong { color: #30263b; font-size: 15px; line-height: 1.35; }
+.am-summary-grid small { color: #6f667b; }
+.am-status { justify-self: start; }
+.am-progress { display: grid; gap: 6px; }
+.am-progress small { color: #6f667b; font-size: 12px; }
+.am-tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 12px; background: #f3ebff; justify-self: start; }
+.am-tabs button { border: 0; border-radius: 9px; background: transparent; padding: 7px 16px; }
+.am-tabs button.completed { background: #e8f8ee; color: #15803d; }
+.am-tabs button.active { background: #7346a3; color: #fff; box-shadow: 0 2px 6px rgba(115,70,163,.3); }
+.am-tabs button.completed.active { background: #16a34a; }
+.am-day-card { border: 1px solid rgba(115,70,163,0.14); border-radius: 14px; overflow: hidden; background: #fff; }
+.am-day-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 18px; background: #faf7ff; border-bottom: 1px solid rgba(115,70,163,0.12); }
+.am-day-head > div { display: grid; gap: 2px; }
+.am-day-head strong { font-size: 1.1rem; color: #30263b; }
+.am-day-head > div span { color: #6f667b; font-size: 13px; }
+.am-day-time { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; background: #fff; border: 1px solid rgba(115,70,163,0.2); color: #6d3fa0; font-size: 12.5px; font-weight: 700; }
+.am-day-body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr); }
+.am-instructions { display: grid; gap: 16px; align-content: start; padding: 18px; }
+.am-instructions h4, .am-completion h4 { margin: 0; }
+.am-field { display: grid; gap: 4px; }
+.am-field em { display: inline-flex; align-items: center; gap: 6px; color: #6d3fa0; }
+.am-field p { margin: 0; color: #30263b; font-weight: 600; line-height: 1.55; white-space: pre-wrap; }
+.am-completion { display: grid; gap: 12px; align-content: start; padding: 18px; background: #f6f2ff; border-left: 1px solid rgba(115,70,163,0.12); border-radius: 0; }
+.am-completion.is-completed { background: #f2fbf5; }
+.am-completed-on { display: grid; gap: 2px; }
+.am-completed-on strong { font-size: 13.5px; color: #30263b; }
+.am-add-proof { display: inline-flex; align-items: center; gap: 10px; justify-self: start; padding: 9px 16px 9px 12px; border: 1px solid #7346a3; border-radius: 12px; background: #fff; color: #7346a3; font: inherit; cursor: pointer; text-align: left; }
+.am-add-proof span { display: grid; }
+.am-add-proof small { color: #8b8295; font-size: 11px; }
+.am-add-proof:hover { background: #f3ebff; }
+.atonement-flow-proof-file > div:last-child { display: grid; min-width: 0; }
+.atonement-flow-proof-file small { color: #8b8295; font-size: 11px; }
+@media (max-width: 900px) { .am-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .am-summary-main { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .am-day-body { grid-template-columns: 1fr; } .am-completion { border-left: 0; border-top: 1px solid rgba(115,70,163,0.12); } }
+
+/* Atonement Details – dashboard redesign */
+.atonement-details-page { max-width: 1180px; width: 100%; margin: 0 auto; gap: 14px; }
+.ad-flow { display: grid; gap: 14px; }
+.ad-hero, .ad-procedure { background: #fff; border: 1px solid rgba(115,70,163,0.13); border-radius: 16px; box-shadow: 0 1px 6px rgba(61,42,82,0.05); padding: 20px; display: grid; gap: 16px; }
+.ad-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+.ad-eyebrow { display: inline-flex; align-items: center; gap: 6px; color: #7346a3; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ad-hero h2 { margin: 6px 0 0; font-size: 1.35rem; line-height: 1.3; color: #30263b; max-width: 560px; }
+.ad-hero p { margin: 6px 0 0; color: #6f667b; font-size: 14px; }
+.ad-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.ad-stats > div { display: grid; gap: 2px; min-width: 112px; padding: 10px 16px; border-radius: 12px; background: #f7f3fd; border: 1px solid rgba(115,70,163,0.1); }
+.ad-stats strong { font-size: 1.05rem; color: #30263b; }
+.ad-stats small { color: #8b8295; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ad-stats .is-done { background: #ecfaf1; border-color: rgba(22,163,74,0.25); } .ad-stats .is-done strong { color: #15803d; }
+.ad-stats .is-active strong { color: #d97706; }
+.ad-progress { height: 6px; border-radius: 999px; background: #efe8f8; overflow: hidden; }
+.ad-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #7346a3, #9b6bd3); }
+.ad-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.ad-pills span { padding: 3px 10px; border-radius: 999px; background: #f3ebff; color: #6d3fa0; font-size: 12px; font-weight: 600; }
+.ad-procedure-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ad-procedure h3 { margin: 0; font-size: 1.05rem; color: #30263b; }
+.ad-procedure-head p { margin: 2px 0 0; color: #8b8295; font-size: 13px; }
+.ad-tabs { display: flex; gap: 6px; max-width: 100%; overflow-x: auto; padding-bottom: 2px; }
+.ad-tabs button { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 5px 12px; border: 1px solid rgba(115,70,163,0.18); border-radius: 999px; background: #fff; color: #49365c; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.ad-tabs button.completed { background: #ecfaf1; border-color: rgba(22,163,74,0.3); color: #15803d; }
+.ad-tabs button.locked { color: #a79fb2; }
+.ad-tabs button.active { background: #7346a3; border-color: #7346a3; color: #fff; }
+.ad-tabs button.completed.active { background: #16a34a; border-color: #16a34a; }
+.ad-day { border: 1px solid rgba(115,70,163,0.13); border-radius: 14px; overflow: hidden; }
+.ad-day-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 18px; background: #faf7ff; border-bottom: 1px solid rgba(115,70,163,0.1); }
+.ad-day-head > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ad-day-badge { padding: 3px 10px; border-radius: 8px; background: #7346a3; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.ad-day-head strong { color: #30263b; font-size: 14.5px; }
+.ad-day-time { display: inline-flex; align-items: center; gap: 5px; color: #6d3fa0; font-size: 13px; font-weight: 700; }
+.ad-day-body { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(250px, 1fr); }
+.ad-plan { display: grid; gap: 12px; align-content: start; padding: 18px; }
+.ad-plan h4, .ad-completion h4 { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #8b8295; }
+.ad-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ad-tile, .ad-instruction { display: grid; gap: 6px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1px solid rgba(115,70,163,0.14); align-content: start; min-width: 0; }
+.ad-tile.is-wide { grid-column: 1 / -1; }
+.ad-tile-label { display: inline-flex; align-items: center; gap: 6px; color: #7346a3; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.ad-tile strong { color: #30263b; font-size: 15px; line-height: 1.4; }
+.ad-tile ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ad-tile li { padding: 3px 10px; border-radius: 999px; background: #f3ebff; color: #49365c; font-size: 13px; font-weight: 600; }
+.ad-instruction { background: #f7f3fd; border-color: rgba(115,70,163,0.18); }
+.ad-instruction p { margin: 0; color: #30263b; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+.ad-rituals { display: grid; gap: 8px; }
+.ad-ritual { display: flex; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid rgba(115,70,163,0.14); }
+.ad-ritual-icon { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 10px; background: #f3ebff; }
+.ad-ritual strong { color: #30263b; } .ad-ritual p { margin: 2px 0 0; color: #49365c; font-size: 14px; }
+.ad-ritual small { color: #8b8295; } .ad-ritual-meta { display: flex; gap: 12px; margin-top: 4px; color: #6f667b; font-size: 12px; }
+.ad-ritual-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.ad-empty { margin: 0; color: #8b8295; }
+.ad-completion { display: grid; gap: 12px; align-content: start; padding: 18px; background: #f8f5fc; border-left: 1px solid rgba(115,70,163,0.1); }
+.ad-completion.is-completed { background: #f1fbf5; }
+.ad-success { display: flex; align-items: center; gap: 10px; color: #15803d; }
+.ad-success strong { display: block; font-size: 15px; } .ad-success small { color: #4d7a5e; font-size: 12.5px; }
+.ad-completed-on { display: grid; gap: 2px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid rgba(22,163,74,0.2); }
+.ad-completed-on small { color: #8b8295; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ad-completed-on strong { color: #30263b; font-size: 14px; }
+.ad-hint { display: inline-flex; align-items: center; gap: 5px; color: #8b8295; }
+@media (max-width: 800px) { .ad-day-body { grid-template-columns: 1fr; } .ad-completion { border-left: 0; border-top: 1px solid rgba(115,70,163,0.1); } .ad-tiles { grid-template-columns: 1fr; } .ad-stats > div { flex: 1; min-width: 0; } }
+
+/* Atonement Details – ritual journey */
+.jr-page { display: grid; gap: 0; background: #fff; border: 1px solid rgba(115,70,163,0.12); border-radius: 16px; box-shadow: 0 1px 6px rgba(61,42,82,0.05); overflow: hidden; }
+.jr-header { display: grid; gap: 8px; padding: 24px 28px 20px; }
+.jr-eyebrow { color: #7346a3; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.jr-header h2 { margin: 0; font-size: 1.6rem; line-height: 1.25; color: #30263b; max-width: 620px; }
+.jr-header p { margin: 0; color: #6f667b; }
+.jr-meta { display: flex; flex-wrap: wrap; gap: 6px 20px; color: #6f667b; font-size: 13.5px; font-weight: 600; }
+.jr-meta span { display: inline-flex; align-items: center; gap: 6px; }
+.jr-status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.jr-status.is-done { color: #16a34a; } .jr-status.is-active { color: #d97706; }
+.jr-progress { height: 5px; border-radius: 999px; background: #efe8f8; overflow: hidden; margin-top: 4px; }
+.jr-progress span { display: block; height: 100%; border-radius: inherit; background: #7346a3; }
+.jr-included { display: flex; flex-wrap: wrap; gap: 6px; }
+.jr-included span { padding: 2px 10px; border-radius: 999px; background: #f3ebff; color: #6d3fa0; font-size: 12px; font-weight: 600; }
+.jr-journey { display: flex; align-items: flex-start; overflow-x: auto; padding: 16px 28px; border-top: 1px solid rgba(115,70,163,0.1); border-bottom: 1px solid rgba(115,70,163,0.1); background: #faf8fd; }
+.jr-node { position: relative; display: grid; justify-items: center; gap: 6px; flex: 1 0 72px; min-width: 72px; padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
+.jr-node:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: calc(50% + 18px); right: calc(-50% + 18px); height: 2px; background: #e3d8f2; }
+.jr-node.completed:not(:last-child)::after { background: #86d3a3; }
+.jr-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid #d9cbee; background: #fff; color: #7a6d8a; font-size: 12px; font-weight: 700; }
+.jr-node.completed .jr-dot { background: #e8f8ee; border-color: #4ade80; color: #15803d; }
+.jr-node.active .jr-dot { background: #7346a3; border-color: #7346a3; color: #fff; box-shadow: 0 0 0 4px rgba(115,70,163,0.16); }
+.jr-node.completed.active .jr-dot { background: #16a34a; border-color: #16a34a; box-shadow: 0 0 0 4px rgba(22,163,74,0.16); }
+.jr-node.locked .jr-dot { color: #b3a9c0; border-style: dashed; }
+.jr-node-label { font-size: 12px; font-weight: 600; color: #6f667b; white-space: nowrap; }
+.jr-node.active .jr-node-label { color: #30263b; font-weight: 800; }
+.jr-day { display: grid; gap: 22px; padding: 24px 28px 28px; }
+.jr-day-head { display: flex; align-items: center; gap: 18px; }
+.jr-day-title { display: grid; justify-items: center; line-height: 1; padding-right: 18px; border-right: 2px solid #e3d8f2; }
+.jr-day-title span { color: #8b8295; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.jr-day-title strong { color: #7346a3; font-size: 2.6rem; font-weight: 800; }
+.jr-day-head h3 { margin: 0; font-size: 1.15rem; color: #30263b; }
+.jr-day-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; color: #6f667b; font-size: 13.5px; font-weight: 600; }
+.jr-day-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.jr-steps { list-style: none; margin: 0; padding: 0; max-width: 760px; }
+.jr-step { position: relative; display: flex; gap: 16px; padding-bottom: 22px; }
+.jr-step:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 34px; bottom: 2px; width: 2px; background: #e3d8f2; }
+.jr-step-node { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: #f3ebff; color: #7346a3; font-size: 13px; font-weight: 700; }
+.jr-step-body { display: grid; gap: 4px; align-content: start; min-width: 0; padding-top: 4px; }
+.jr-step-body > strong { color: #30263b; font-size: 15.5px; line-height: 1.4; }
+.jr-step-body > small { color: #8b8295; font-size: 12.5px; }
+.jr-step-body p { margin: 0; color: #49365c; line-height: 1.6; white-space: pre-wrap; }
+.jr-step-body .jr-note { color: #8b8295; font-size: 13px; }
+.jr-step-body blockquote { margin: 2px 0 0; padding: 12px 16px; border-left: 3px solid #7346a3; border-radius: 0 10px 10px 0; background: #f7f3fd; color: #30263b; font-size: 15.5px; line-height: 1.6; white-space: pre-wrap; }
+.jr-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.jr-chips span { padding: 2px 10px; border-radius: 999px; border: 1px solid rgba(115,70,163,0.2); color: #49365c; font-size: 12.5px; font-weight: 600; background: #fff; }
+.jr-final { padding-bottom: 0; }
+.jr-final.is-completed .jr-step-node { background: #16a34a; color: #fff; }
+.jr-done-label { color: #16a34a; font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.jr-final .atonement-flow-proof { margin-top: 6px; }
+@media (max-width: 700px) { .jr-header { padding: 18px 16px 16px; } .jr-header h2 { font-size: 1.3rem; } .jr-journey { padding: 14px 16px; } .jr-day { padding: 18px 16px 22px; } .jr-day-title strong { font-size: 2rem; } .jr-day-head { gap: 12px; } .jr-day-title { padding-right: 12px; } }
+.jr-pending-label { color: #8b8295; font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.jr-mark { justify-self: start; margin-top: 4px; }
+.jr-mark:disabled { opacity: .55; cursor: not-allowed; }
+.jr-day-state { margin-left: 8px; padding: 2px 10px; border-radius: 999px; background: #fff4e5; color: #d97706; font-size: 11.5px; font-weight: 700; vertical-align: middle; }
+.jr-day-state.is-done { background: #e8f8ee; color: #16a34a; }
+.jr-step-node:empty { border: 2px solid #d9cbee; background: #fff; }
+
+/* Atonement Details – compact top spacing */
+.atonement-details-page .atonement-back { display: flex; width: fit-content; min-height: 34px; height: 34px; padding: 0 12px; margin: -24px 0 10px; font-size: 13px; }
+@media (max-width: 700px) { .atonement-details-page .atonement-back { margin-top: -10px; } }
+
+.at-marker { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #d9cbee; background: #fff; color: #fff; }
+.at-marker.is-done { background: #16a34a; border-color: #16a34a; }
+.user-atonements-page .rem-card-status { gap: 6px; }
+.user-atonements-page .rem-card-status.is-pending .at-marker { border-color: #f5b971; }
+
+/* Compact Source / Status filter area */
+.user-atonements-page .section:has(.atonement-filter-card) { margin-top: 16px; }
+.user-atonements-page .section:has(.atonement-filter-card) + .section { margin-top: 20px; }
+@media (max-width: 700px) {
+  .user-atonements-page .section:has(.atonement-filter-card) { margin-top: 12px; }
+  .user-atonements-page .section:has(.atonement-filter-card) + .section { margin-top: 16px; }
+}
+
+.user-atonements-page .atonement-status-select { appearance: none; -webkit-appearance: none; min-width: 150px; height: 42px; padding: 0 38px 0 16px; border: 1px solid rgba(115,70,163,0.3); border-radius: 999px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237346a3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center; color: #49365c; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.user-atonements-page .atonement-status-select:hover { border-color: #7346a3; }
+.user-atonements-page .atonement-status-select:focus-visible { outline: 2px solid rgba(115,70,163,0.35); outline-offset: 2px; }

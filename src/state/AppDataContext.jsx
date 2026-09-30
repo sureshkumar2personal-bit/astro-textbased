@@ -7,7 +7,7 @@ import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
-import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
+import { createAtonementRecord, normalizeAtonement, setAtonementDayProof, updateAtonementDay } from '../utils/atonements.js'
 import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
 import {
   MONTHLY_QUESTION_CAPACITY,
@@ -2488,6 +2488,9 @@ export function AppDataProvider({ children }) {
         return updated
       }))
       return updated
+    },
+    setAtonementDayProof(atonementId, dayIndex, proof) {
+      setAtonements((prev) => prev.map((record) => (record.id === atonementId ? setAtonementDayProof(record, dayIndex, proof) : record)))
     },
     togglePostLike(postId) {
       const post = astrologerPosts.find((entry) => entry.id === postId)

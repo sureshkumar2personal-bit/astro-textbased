@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation, useParams } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
@@ -64,6 +64,7 @@ import AppointmentDetails from './pages/AppointmentDetails.jsx'
 import PoojaDetails from './pages/PoojaDetails.jsx'
 import LiveSession from './pages/user/live-sessions/LiveSession.jsx'
 import Atonements from './pages/user/Atonements.jsx'
+import AtonementDetails from './pages/user/AtonementDetails.jsx'
 import ConsultationHistory from './pages/ConsultationHistory.jsx'
 import MyAccount from './pages/MyAccount.jsx'
 import AstrologerAccountManagement from './pages/AstrologerAccountManagement.jsx'
@@ -277,6 +278,8 @@ function UserRoutes() {
         <Route path="/user/pooja-details" element={<PoojaDetails />} />
         <Route path="/user/live-session" element={<LiveSession />} />
         <Route path="/user/atonements" element={<Atonements />} />
+        <Route path="/user/atonements/:atonementId" element={<AtonementDetails />} />
+        <Route path="/atonement/:atonementId" element={<AtonementRedirect />} />
         <Route path="/user/payment-methods" element={<PaymentMethods />} />
         <Route path="/user/payment-methods/add" element={<AddPaymentMethod />} />
         <Route path="/user/autopay" element={<Autopay />} />
@@ -312,6 +315,11 @@ function EditorRoutes() {
       </Route>
     </Route>
   </>
+}
+
+function AtonementRedirect() {
+  const { atonementId } = useParams()
+  return <Navigate to={`/user/atonements/${encodeURIComponent(atonementId)}`} replace />
 }
 
 function AppRoutes() {

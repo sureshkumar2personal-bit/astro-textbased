@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarDays, ChevronRight, Clock3, Download, Eye, FileText, Hash, Languages, NotebookPen, Phone, PhoneCall, Shield, Timer, UserRound, Wallet, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SavedAtonementDetails from '../atonement/SavedAtonementDetails.jsx'
 import StatusBadge from '../StatusBadge.jsx'
 import { formatDisplayDate, formatTimeRange, getAppointmentDisplayStatus, resolveAppointmentWindow } from '../../utils/appointments.js'
+import { useAppData } from '../../state/AppDataContext.jsx'
+import useUserAtonements from '../../state/useUserAtonements.js'
 import { mergeAstrologerNotes } from '../../data/mockAstrologerNotes.js'
 
 function initials(name = '') {
@@ -303,35 +305,68 @@ function AttachmentViewer({ attachment, onClose, completedDays, currentDayNumber
   )
 }
 
-function ConsultationNotesContent({ mapped, onUpdateProgress }) {
+function ConsultationNotesContent({ mapped, onUpdateProgress, appointmentId, appointment, currentUser, onOpenAtonement }) {
+  const navigate = useNavigate()
+  const { actions } = useAppData()
+  const { allAtonements, toggleDay } = useUserAtonements()
+
+  // The Atonement record is the single source of truth for this Pariharam's progress.
+  const slugify = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const savedTitles = (mapped?.attachments || []).filter((item) => item.savedContent).map((item) => item.savedContent.title || item.name)
+  const candidateTitles = [mapped?.title, ...savedTitles].filter(Boolean)
+  const findRecord = (titles = candidateTitles) => allAtonements
+    .filter((record) => record.sourceId === appointmentId || record.appointmentId === appointmentId)
+    .find((candidate) => titles.some((title) => [candidate.summary, candidate.method?.title].includes(title)))
+  const relatedRecord = mapped ? findRecord() : null
+
+  // Finds the record for this Pariharam, creating it from the astrologer's saved content when it does not exist yet.
+  const ensureRecord = (title, content = {}) => {
+    const found = findRecord([title]) || (relatedRecord && candidateTitles.includes(title) ? relatedRecord : null)
+    if (found) return found
+    return actions.createAtonement({
+      id: `ATN-${appointmentId}-${slugify(title)}`,
+      category: 'atonement',
+      userId: currentUser?.id,
+      astrologerId: appointment?.astrologerId,
+      astrologerName: appointment?.astrologer || 'Astrologer',
+      sourceType: 'appointment',
+      sourceId: appointmentId,
+      appointmentId,
+      sourceLabel: `Appointment ${appointmentId}`,
+      summary: title,
+      method: Object.keys(content).length ? { ...content, title } : null,
+      days: mapped.days.map(() => ({
+        date: '',
+        hour: content.hour || '',
+        place: content.place || '',
+        god: content.god || content.deity || '',
+        things: content.things || '',
+        poojas: content.poojas || '',
+        extraNotes: content.extraNotes || '',
+      })).map((day, index) => ({ ...day, date: mapped.days[index].dateIso })),
+    })
+  }
+
+  const openRelatedAtonement = (item) => {
+    const title = item.savedContent.title || item.name
+    const record = ensureRecord(title, item.savedContent.content || {})
+    onOpenAtonement?.()
+    navigate(`/user/atonements/${encodeURIComponent(record.id)}`)
+  }
   const [attachmentViewer, setAttachmentViewer] = useState(null)
-  const [dayProgress, setDayProgress] = useState(() => mapped?.progress || {})
-  const progressKey = JSON.stringify(mapped?.progress || {})
-
-  useEffect(() => {
-    setDayProgress(mapped?.progress || {})
-  }, [progressKey])
-
   if (!mapped) return null
   const today = calendarDate(new Date())
   const currentDayNumber = mapped.days.find((day) => calendarDate(day.dateIso)?.getTime() === today?.getTime())?.dayNumber || null
-  const isDayCompleted = (day) => Boolean(dayProgress.days?.[day.id]?.completed && (!day.dateIso || !dayProgress.days[day.id]?.date || dayProgress.days[day.id].date === day.dateIso))
+  const isDayCompleted = (day) => Boolean(relatedRecord?.days?.[day.dayNumber - 1]?.completed)
   const arePreviousDaysComplete = (day) => mapped.days.slice(0, day.dayNumber - 1).every(isDayCompleted)
   const updateDay = (day) => {
     if (day.dayNumber !== currentDayNumber || !arePreviousDaysComplete(day) || isDayCompleted(day)) return
-    const completedAt = new Date().toISOString()
-    const nextProgress = {
-      ...dayProgress,
-      pariharamId: mapped.pariharamId,
-      days: {
-        ...(dayProgress.days || {}),
-        [day.id]: { date: day.dateIso, dayNumber: day.dayNumber, completed: true, completedAt },
-      },
-    }
-    setDayProgress(nextProgress)
-    onUpdateProgress?.(mapped.pariharamId, day.id, day.dateIso, day.dayNumber, true)
+    const record = relatedRecord || ensureRecord(mapped.title || savedTitles[0] || 'Pariharam', (mapped.attachments.find((item) => item.savedContent)?.savedContent.content) || {})
+    toggleDay(record, day.dayNumber - 1, true)
   }
   const completedCount = mapped.days.filter(isDayCompleted).length
+  const overallStatus = mapped.days.length > 0 && completedCount === mapped.days.length ? 'Completed' : 'Pending'
+  const completedDays = Object.fromEntries(mapped.days.filter(isDayCompleted).map((day) => [day.id, { completed: true }]))
   const updateViewerDay = (dayId) => {
     const day = mapped.days.find((item) => item.id === dayId)
     if (day) updateDay(day)
@@ -343,7 +378,7 @@ function ConsultationNotesContent({ mapped, onUpdateProgress }) {
           {(mapped.title || mapped.statusLabel) && (
             <div className="apt-user-consultation-header-top">
               {mapped.title && <strong>{mapped.title}</strong>}
-              {mapped.statusLabel && <StatusBadge label={mapped.statusLabel} />}
+              {mapped.statusLabel && <StatusBadge label={mapped.days.length ? overallStatus : mapped.statusLabel} />}
             </div>
           )}
           {mapped.completionText && <span>{mapped.completionText}</span>}
@@ -378,7 +413,7 @@ function ConsultationNotesContent({ mapped, onUpdateProgress }) {
               <div className="apt-user-astrologer-notes-attachment" key={`${item.name}-${index}`}>
                 <span className="apt-user-astrologer-notes-attachment-icon"><FileText size={14} /></span>
                 <div><strong>{item.name}</strong><small>{item.type}</small></div>
-                <button className="btn btn-outline" type="button" onClick={() => setAttachmentViewer(item)}><Eye size={13} /> {item.viewUrl ? 'View' : 'Open'}</button>
+                <button className="btn btn-outline" type="button" onClick={() => { if (item.savedContent && appointmentId && mapped.days.length) openRelatedAtonement(item); else setAttachmentViewer(item) }}><Eye size={13} /> {item.viewUrl ? 'View' : 'Open'}</button>
               </div>
             ))}
           </div>
@@ -390,7 +425,7 @@ function ConsultationNotesContent({ mapped, onUpdateProgress }) {
           <div>{mapped.history.map((item, index) => <div className={`apt-user-astrologer-notes-history-row${index === mapped.history.length - 1 ? ' is-current' : ''}`} key={`history-${index}`}><span>{item.text}</span><small>{item.date}</small></div>)}</div>
         </div>
       )}
-      <AttachmentViewer attachment={attachmentViewer} completedDays={dayProgress.days || {}} currentDayNumber={currentDayNumber} onToggleDay={updateViewerDay} onClose={() => setAttachmentViewer(null)} />
+      <AttachmentViewer attachment={attachmentViewer} completedDays={completedDays} currentDayNumber={currentDayNumber} onToggleDay={updateViewerDay} onClose={() => setAttachmentViewer(null)} />
     </>
   )
 }
@@ -500,6 +535,10 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
                     {hasSharedNotes
                       ? <ConsultationNotesContent
                           mapped={mappedConsultation}
+                          appointmentId={appointment.id}
+                          appointment={appointment}
+                          currentUser={currentUser}
+                          onOpenAtonement={onClose}
                           onUpdateProgress={onUpdatePariharamProgress ? (pariharamId, dayId, dateIso, dayNumber, completed) => onUpdatePariharamProgress(appointment.id, pariharamId, dayId, dateIso, dayNumber, completed) : undefined}
                         />
                       : <p className="apt-user-astrologer-notes-empty">No astrologer notes have been shared for this appointment yet.</p>}
