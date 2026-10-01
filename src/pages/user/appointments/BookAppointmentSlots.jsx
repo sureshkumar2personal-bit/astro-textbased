@@ -8,6 +8,7 @@ import {
   CONSULTATION_PACKAGE,
   CONSULTATION_TYPE,
   buildCalendarAvailability,
+  countAvailableSlots,
   getBookingOverride,
   gridOpenSlotCount,
   keyFor,
@@ -67,6 +68,10 @@ export default function BookAppointmentSlots() {
     }
     return buildCalendarAvailability(astrologer)
   }, [astrologer, hasScheduleTemplates, appointmentAvailabilityTemplates, appointments])
+  const availableSlots = useMemo(
+    () => countAvailableSlots({ availability: calendarAvailability, astrologerId: astrologer?.id, appointments }),
+    [calendarAvailability, astrologer?.id, appointments],
+  )
 
   const [month, setMonth] = useState(() => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState('')
@@ -177,7 +182,7 @@ export default function BookAppointmentSlots() {
               </span>
               <span className="book-slots-available">
                 <i aria-hidden="true" />
-                {bookingOverride.availableSlots.toLocaleString('en-IN')} slots available
+                {availableSlots.toLocaleString('en-IN')} slots available
               </span>
             </div>
           </div>

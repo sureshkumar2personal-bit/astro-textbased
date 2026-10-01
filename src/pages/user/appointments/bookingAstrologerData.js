@@ -15,22 +15,31 @@ export const MOCK_SEPTEMBER_AVAILABILITY = {
 }
 export const MOCK_FULL_DATES = new Set(['2026-09-09', '2026-09-11', '2026-09-16', '2026-09-21'])
 
-export const BOOKING_WINDOW_END = '2026-09-30'
+// Keep the user booking window aligned with the astrologer's scheduling rule:
+// today through 90 days from today. A fixed demo date made a freshly
+// published October schedule appear as zero available slots on the user side.
+const bookingWindowToday = new Date()
+const bookingWindowEndDate = new Date(
+  bookingWindowToday.getFullYear(),
+  bookingWindowToday.getMonth(),
+  bookingWindowToday.getDate() + 90,
+)
+export const BOOKING_WINDOW_END = `${bookingWindowEndDate.getFullYear()}-${String(bookingWindowEndDate.getMonth() + 1).padStart(2, '0')}-${String(bookingWindowEndDate.getDate()).padStart(2, '0')}`
 export const MAX_SELECTABLE_SLOTS = 4
 
 export const BOOKING_OVERRIDES = {
-  'astrologer-demo': { availableSlots: 1304, price: 798 },
-  'acharya-meena': { availableSlots: 1630, price: 499 },
-  'astrologer-demo-3': { availableSlots: 950, price: 799 },
-  'astrologer-4': { availableSlots: 950, price: 799 },
-  'astrologer-5': { availableSlots: 1630, price: 499 },
-  'astrologer-6': { availableSlots: 950, price: 799 },
-  'astrologer-7': { availableSlots: 850, price: 599 },
-  'astrologer-8': { availableSlots: 720, price: 699 },
-  'astrologer-9': { availableSlots: 980, price: 449 },
+  'astrologer-demo': { price: 798 },
+  'acharya-meena': { price: 499 },
+  'astrologer-demo-3': { price: 799 },
+  'astrologer-4': { price: 799 },
+  'astrologer-5': { price: 499 },
+  'astrologer-6': { price: 799 },
+  'astrologer-7': { price: 599 },
+  'astrologer-8': { price: 699 },
+  'astrologer-9': { price: 449 },
 }
 
-export const DEFAULT_OVERRIDE = { availableSlots: 900, price: 499 }
+export const DEFAULT_OVERRIDE = { price: 499 }
 
 export const CONSULTATION_TYPE = 'Audio Call'
 export const CONSULTATION_DURATION = '30 Minutes'
@@ -98,6 +107,35 @@ function hashString(value) {
 
 export function getBookingOverride(astrologer) {
   return astrologer ? (BOOKING_OVERRIDES[astrologer.id] || DEFAULT_OVERRIDE) : DEFAULT_OVERRIDE
+}
+
+// Count the slots the user can actually book. Availability is keyed by date,
+// but migrated/demo data can contain the same time more than once for a date.
+// Count each date/time pair once and remove already-booked appointments.
+export function countAvailableSlots({ availability = {}, astrologerId, appointments = [], now = new Date() }) {
+  const today = keyFor(now)
+  const booked = new Set(
+    appointments
+      .filter((appointment) => appointment.astrologerId === astrologerId && appointment.status !== 'Cancelled')
+      .map((appointment) => {
+        const date = normalizeAppointmentDate(appointment.date, appointment.dateIso)
+        const minutes = timeToMinutes(appointment.time)
+        return date && minutes >= 0 ? `${date}|${minutes}` : null
+      })
+      .filter(Boolean),
+  )
+  const seen = new Set()
+  Object.entries(availability || {}).forEach(([date, times]) => {
+    if (date < today || date > BOOKING_WINDOW_END) return
+    if (!Array.isArray(times)) return
+    times.forEach((time) => {
+      const minutes = timeToMinutes(time)
+      if (minutes < 0) return
+      const key = `${date}|${minutes}`
+      if (!booked.has(key)) seen.add(key)
+    })
+  })
+  return seen.size
 }
 
 export function buildPublishedAvailability(astrologer) {

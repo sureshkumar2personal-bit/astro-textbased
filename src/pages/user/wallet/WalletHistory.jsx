@@ -10,7 +10,7 @@ import {
   History,
   ChevronRight,
   ArrowUpRight,
-  ArrowDownToLine,
+  ArrowUpFromLine,
   Receipt,
   Search,
   CalendarDays,
@@ -360,7 +360,7 @@ export default function UserWallet({ section = 'overview' }) {
                   <Plus size={16} /> Add Money
                 </button>
                 <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                  <ArrowDownToLine size={16} /> Withdraw
+                  <ArrowUpFromLine size={16} /> Withdraw
                 </button>
                 <button
                   type="button"
@@ -368,7 +368,7 @@ export default function UserWallet({ section = 'overview' }) {
                   onClick={downloadTransactionsPdf}
                   disabled={filteredTxns.length === 0}
                 >
-                  <Download size={16} /> Download Statement
+                  <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
                 </button>
               </div>
             }

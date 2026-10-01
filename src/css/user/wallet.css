@@ -786,6 +786,20 @@
   font-size: 13px;
 }
 
+.wallet-pdf-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 18px;
+  padding: 0 3px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .wallet-page-back {
   display: flex;
   align-items: center;

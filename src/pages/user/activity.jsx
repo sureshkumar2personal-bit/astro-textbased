@@ -158,7 +158,7 @@ export default function Activity() {
       />
 
       <Card className="user-activity-card">
-        <div className="user-activity-card__heading"><div><span className="user-activity-eyebrow">ACTIVITY TIMELINE</span><h2>Recent Activity</h2><p className="user-activity-card__subtitle">Review your activity from the last 7 days.</p></div><span className="user-activity-count">{visibleActivities.length} {visibleActivities.length === 1 ? 'entry' : 'entries'}</span></div>
+        <div className="user-activity-card__heading"><span className="user-activity-count">{visibleActivities.length} {visibleActivities.length === 1 ? 'entry' : 'entries'}</span></div>
         {visibleActivities.length ? (
           <div className="user-activity-list">
             {visibleActivities.map((item) => {
