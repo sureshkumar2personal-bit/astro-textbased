@@ -10,7 +10,7 @@ import {
   History,
   ChevronRight,
   ArrowUpRight,
-  ArrowDownToLine,
+  ArrowUpFromLine,
   Receipt,
   Search,
   CalendarDays,
@@ -268,6 +268,26 @@ export default function UserWallet({ section = 'overview' }) {
     })
   }
 
+  const downloadAllTransactionsPdf = () => {
+    const allTransactions = transactions
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    downloadPdf({
+      title: 'Wallet Statement',
+      subtitle: 'All Dates · All Types',
+      columns: ['Transaction ID', 'Date', 'Type', 'Description', 'Amount'],
+      rows: allTransactions.map((txn) => [
+        txn.id,
+        `${txn.date}${txn.time ? ` ${txn.time}` : ''}`,
+        getUserTxnTypeLabel(txn),
+        txn.label || '—',
+        formatINR(txn.amount),
+      ]),
+      filename: 'wallet-statement-all-dates',
+      brand: 'AstroConnect User Wallet',
+    })
+  }
+
   const downloadCategoryPdf = () => {
     downloadPdf({
       title: `${USER_SPENDING_CATEGORY_LABELS[categoryEarnings.kind]} Spending`,
@@ -360,15 +380,15 @@ export default function UserWallet({ section = 'overview' }) {
                   <Plus size={16} /> Add Money
                 </button>
                 <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                  <ArrowDownToLine size={16} /> Withdraw
+                  <ArrowUpFromLine size={16} /> Withdraw
                 </button>
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  onClick={downloadTransactionsPdf}
-                  disabled={filteredTxns.length === 0}
+                  onClick={downloadAllTransactionsPdf}
+                  disabled={transactions.length === 0}
                 >
-                  <Download size={16} /> Download Statement
+                  <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
                 </button>
               </div>
             }

@@ -158,7 +158,7 @@ export default function MyAccount() {
   return (
     <div className="my-account-page">
       <BackButton to={backTo} label="Back to Dashboard" />
-      <PageHeader title="My Account" subtitle="Manage your personal information, astrology details and preferences." />
+      <PageHeader title="My Account" />
       <Card className="my-account-summary">
         <div className="my-account-summary__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} /> : initials(name)}</div>
         <div className="my-account-summary__copy">

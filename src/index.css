@@ -13821,6 +13821,7 @@ button.apt-week-day:focus-visible {
    Rewards Center
    ============================================================= */
 .rewards-center { display: grid; gap: 32px; padding-top: 18px; }
+.rewards-center > .page-header-row { margin: 14px 0 12px; }
 .reward-results { display: grid; gap: 36px; }
 
 /* --- Summary strip (stat-card based, consistent with astrologer dashboard) --- */

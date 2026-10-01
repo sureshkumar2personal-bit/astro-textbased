@@ -213,7 +213,7 @@ export default function TransactionHistory() {
         backTo={routes.dashboard}
         actions={
           <button type="button" className="btn btn-ghost" onClick={downloadAllPdf} disabled={filtered.length === 0}>
-            <Download size={16} /> Export PDF
+            <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
           </button>
         }
       />
