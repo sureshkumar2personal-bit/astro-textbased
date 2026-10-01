@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowRight,
   BellRing,
@@ -159,7 +159,9 @@ function handleLiveReminder(session, reminderSet, toggleLiveReminder) {
 }
 
 function UserLiveSessionCard({ session, access }) {
-  const { toggleLiveReminder, liveReminders } = useAppData()
+  const { actions, liveReminders } = useAppData()
+  const { toggleLiveReminder } = actions
+  const navigate = useNavigate()
   const reminderSet = liveReminders.some((reminder) => reminder.sessionId === session.id)
   const status = statusMeta(session)
   const audience = audienceMeta(session)
@@ -179,8 +181,24 @@ function UserLiveSessionCard({ session, access }) {
     actionIcon = <Play size={15} />
   }
 
+  const openSession = () => navigate(to)
+
   return (
-    <Link to={to} className={`user-live-card${access.allowed ? '' : ' is-locked'}`}>
+    <div
+      className={`user-live-card${access.allowed ? '' : ' is-locked'}`}
+      role="link"
+      tabIndex={0}
+      onClick={(event) => {
+        if (event.target.closest('button')) return
+        openSession()
+      }}
+      onKeyDown={(event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('button')) {
+          event.preventDefault()
+          openSession()
+        }
+      }}
+    >
       <div className="user-live-card__top">
         <span className={`user-live-status user-live-status--${status.tone}`}><span /> {status.label}</span>
         <span className={`user-live-audience user-live-audience--${audience.tone}`}>
@@ -228,13 +246,14 @@ function UserLiveSessionCard({ session, access }) {
           <span className={`user-live-card__action${access.allowed ? '' : ' is-locked'}`}>{actionIcon} {actionLabel} <ArrowRight size={14} /></span>
         )}
       </div>
-    </Link>
+    </div>
   )
 }
 
 function UserLiveRoom({ session, onBack }) {
   const { currentUser } = useAuth()
-  const { followedAstrologerIds, subscriptions, toggleLiveReminder, liveReminders } = useAppData()
+  const { followedAstrologerIds, subscriptions, actions, liveReminders } = useAppData()
+  const { toggleLiveReminder } = actions
 
   const isLive = session.status === 'live'
   const isUpcoming = session.status === 'upcoming'

@@ -1697,7 +1697,8 @@ export function audienceAccessDefaults(session) {
 }
 
 export function normalizeLiveSession(session) {
-  const now = new Date().toISOString()
+  const nowDate = new Date()
+  const now = nowDate.toISOString()
   const audiences = sessionAudiences(session)
   const defaultAccess = audienceAccessDefaults(session)
   const validAccess = ['public', 'followers', 'subscribers', 'silver', 'gold', 'pro']
@@ -1707,6 +1708,16 @@ export function normalizeLiveSession(session) {
   const startedAt = session.startedAt || null
   const endedAt = session.endedAt || null
   const expired = session.status === 'live' && hasLiveSessionExpired({ startedAt })
+  const scheduledStart = new Date(session.scheduledStartAt || nowDate)
+  const scheduledEnd = new Date(session.scheduledEndAt || new Date(nowDate.getTime() + 60 * 60 * 1000))
+  const hasValidStart = Number.isFinite(scheduledStart.getTime())
+  const hasValidEnd = Number.isFinite(scheduledEnd.getTime())
+  const requestedStatus = ['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming'
+  const timeAwareStatus = requestedStatus === 'upcoming' && hasValidEnd && scheduledEnd <= nowDate
+    ? 'past'
+    : requestedStatus === 'upcoming' && hasValidStart && scheduledStart <= nowDate && (!hasValidEnd || scheduledEnd > nowDate)
+      ? 'live'
+      : requestedStatus
   return {
     id: session.id || crypto.randomUUID(),
     astrologerId: session.astrologerId || 'astrologer-demo',
@@ -1734,7 +1745,7 @@ export function normalizeLiveSession(session) {
     earnings: toNonNegativeNumber(session.earnings),
     scheduledStartAt: session.scheduledStartAt || now,
     scheduledEndAt: session.scheduledEndAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    status: expired ? 'past' : (['upcoming', 'live', 'past'].includes(session.status) ? session.status : 'upcoming'),
+    status: expired ? 'past' : timeAwareStatus,
     startedAt,
     endedAt: expired ? new Date(getLiveSessionExpiry({ startedAt })).toISOString() : endedAt,
     createdAt: session.createdAt || now,
