@@ -15468,7 +15468,9 @@ button.apt-week-day:focus-visible {
 .atonement-progress-select:focus, .atonement-progress-date:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
 
 /* Horizontal progress cards */
-.atonement-progress-list { display: grid; gap: 12px; }
+.atonement-progress-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+@media (max-width: 1100px) { .atonement-progress-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .atonement-progress-list { grid-template-columns: minmax(0, 1fr); } }
 .atonement-progress-card { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.9fr) minmax(150px, auto); align-items: center; gap: 20px; padding: 16px 20px; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-strong); box-shadow: var(--shadow-xs); transition: border-color 200ms var(--ease-premium), box-shadow 200ms var(--ease-premium), transform 200ms var(--ease-premium); }
 .atonement-progress-card:hover { border-color: color-mix(in srgb, var(--primary) 24%, var(--surface-border)); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 .atonement-progress-card-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -15700,3 +15702,48 @@ button.apt-week-day:focus-visible {
 .sidebar--user .sidebar-nav-section {
   gap: 4px;
 }
+
+.atonement-progress-card.is-stacked { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+.atonement-pcard-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.atonement-pcard-name { overflow: hidden; color: var(--text-primary); font-size: 13.5px; text-overflow: ellipsis; white-space: nowrap; }
+.atonement-pcard-booking { color: var(--muted); font-size: 11px; font-weight: 600; }
+.atonement-pcard-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.atonement-pcard-body { display: grid; gap: 10px; min-width: 0; }
+.atonement-pcard-foot { display: flex; justify-content: flex-end; }
+.atonement-pcard-foot .btn { border-radius: 10px; white-space: nowrap; }
+.atonement-progress-card.is-stacked { height: 100%; }
+.atonement-pcard-head { flex-wrap: nowrap; }
+.atonement-pcard-head .atonement-progress-card-left { flex: 1 1 auto; min-width: 0; }
+.atonement-pcard-badges { flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
+.atonement-pcard-body { flex: 1 1 auto; }
+.atonement-pcard-body .atonement-progress-pariharam strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-primary); font-size: 14px; line-height: 1.4; }
+.atonement-pcard-foot { margin-top: auto; }
+.atonement-pcard-badges { flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 6px; }
+.atonement-pcard-badges .atonement-progress-status { gap: 4px; padding: 4px 10px; }
+.atonement-pcard-body { gap: 8px; }
+.atonement-pcard-meta { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; color: var(--muted); font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.atonement-pcard-meta svg { flex-shrink: 0; }
+.atonement-pcard-head { flex-wrap: wrap; row-gap: 8px; }
+.atonement-pcard-head .atonement-progress-card-left { flex: 1 1 140px; }
+.atonement-day-proof { display: grid; gap: 8px; justify-items: start; margin-top: 8px; }
+.atonement-day-proof-label { display: inline-flex; align-items: center; gap: 5px; color: var(--success, #16a34a); font-size: 11.5px; font-weight: 800; }
+.atonement-day-proof-thumb { padding: 0; border: 1px solid var(--surface-border); border-radius: 10px; background: none; cursor: zoom-in; overflow: hidden; }
+.atonement-day-proof-thumb img { display: block; width: 120px; height: 90px; object-fit: cover; }
+.atonement-day-proof video { max-width: 240px; border-radius: 10px; }
+.atonement-day-proof audio { max-width: 100%; }
+.atonement-day-proof-file { display: flex; align-items: center; gap: 8px; max-width: 100%; padding: 8px 10px; border: 1px solid var(--surface-border); border-radius: 10px; font-size: 12px; }
+.atonement-day-proof-file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.atonement-proof-lightbox { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .78); }
+.atonement-proof-lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 12px; }
+.atonement-proof-lightbox .icon-btn { position: absolute; top: 16px; right: 16px; }
+
+/* My Activity pagination footer */
+.my-activity-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; padding-top: 16px; border-top: 1px solid var(--surface-border); }
+.my-activity-pagination__range { color: var(--muted); font-size: 13px; font-weight: 500; }
+.my-activity-pagination__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 560px) {
+  .my-activity-pagination { flex-direction: column; align-items: stretch; text-align: center; }
+  .my-activity-pagination__controls { justify-content: center; }
+}
+.my-activity-window { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.my-activity-window svg { color: var(--primary); }

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Check, Clock3, Eye, LockKeyhole, MapPin, Paperclip, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import { ATONEMENT_ICONS } from './atonementIcons.jsx'
 import { formatRemedyHour } from '../../utils/remedyNotes.js'
-import { getAtonementProgress, isAtonementDayActionable, isAtonementDayLocked, localDateIso } from '../../utils/atonements.js'
+import { getAtonementProgress, isAtonementDayActionable, isAtonementDayLocked, localDateIso, openProofInNewTab } from '../../utils/atonements.js'
 
 const MAX_PROOF_BYTES = 2 * 1024 * 1024
 
@@ -65,7 +65,7 @@ function ProofPreview({ proof }) {
   return <Paperclip size={18} />
 }
 
-function ProofSection({ proof, onSave, onRemove }) {
+function ProofSection({ proof, onSave, onRemove, requirements = [] }) {
   const inputRef = useRef(null)
   const pick = async (event) => {
     const file = event.target.files?.[0]
@@ -75,11 +75,12 @@ function ProofSection({ proof, onSave, onRemove }) {
     onSave({ name: file.name, type: file.type, dataUrl: await readFile(file), addedAt: new Date().toISOString() })
   }
   return <div className="atonement-flow-proof">
+    {requirements.length > 0 && <small className="atonement-flow-proof-required">Astrologer asks for: {requirements.map((r) => `${r.label} (${r.required ? 'required' : 'optional'})`).join(' · ')}</small>}
     <input ref={inputRef} type="file" accept="image/*,video/*,audio/*" hidden onChange={pick} />
     {proof ? <>
       <div className="atonement-flow-proof-file"><div className="atonement-flow-proof-preview"><ProofPreview proof={proof} /></div><div><strong title={proof.name}>{proof.name}</strong>{proof.addedAt && <small>Added {formatStamp(proof.addedAt)}</small>}</div></div>
       <div className="atonement-flow-proof-actions">
-        <a className="btn btn-outline btn-sm" href={proof.dataUrl} target="_blank" rel="noreferrer"><Eye size={13} /> View Proof</a>
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => openProofInNewTab(proof)}><Eye size={13} /> View Proof</button>
         <button type="button" className="btn btn-outline btn-sm" onClick={() => inputRef.current?.click()}><RefreshCw size={13} /> Replace Proof</button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onRemove}><Trash2 size={13} /> Remove</button>
       </div>
@@ -173,7 +174,7 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
               <span className="jr-done-label">Completed</span>
               <strong>Day {index + 1} completed successfully</strong>
               {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
-              <ProofSection proof={day.proof} onSave={(proof) => onSaveProof(index, proof)} onRemove={() => onSaveProof(index, null)} />
+              <ProofSection requirements={atonement.proofRequirements} proof={day.proof} onSave={(proof) => onSaveProof(index, proof)} onRemove={() => onSaveProof(index, null)} />
             </> : <>
               <span className="jr-pending-label">Status</span>
               <strong>Not Completed</strong>

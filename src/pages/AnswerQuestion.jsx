@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, X, Paperclip, ChevronLeft, ChevronRight, Sparkles, FileText, Check } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -10,6 +10,9 @@ import SummaryCard from '../components/ui/SummaryCard.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import DisputeDetailsModal from '../components/DisputeDetailsModal.jsx'
 import AnswerAttachmentPanel from '../components/AnswerAttachmentPanel.jsx'
+import SavedAtonementPicker from '../components/atonement/SavedAtonementPicker.jsx'
+import SavedAtonementDetails from '../components/atonement/SavedAtonementDetails.jsx'
+import { buildRecommendation, COMPLETION_PERIODS, defaultCompletionDays, readSavedAtonementContent } from '../utils/atonementTemplates.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -266,6 +269,18 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
 }
 
 function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCorrection, onViewHoroscope }) {
+  const { currentUser: astrologerUser } = useAuth()
+  const { atonements } = useAppData()
+  const savedContent = useMemo(() => readSavedAtonementContent(astrologerUser?.id), [astrologerUser?.id])
+  // Attached "Saved" atonement for this question: { templateId (saved record id), days }. Restored from the
+  // saved draft / sent answer so the astrologer never has to attach it again.
+  const sentDays = atonements.find((item) => item.id === question?.recommendedAtonementId)?.days?.length || null
+  const [recommendation, setRecommendation] = useState(() => (question?.recommendedTemplateId
+    ? { templateId: question.recommendedTemplateId, days: sentDays || 7 }
+    : question?.draftRecommendedAtonement || null))
+  const [savedPickerOpen, setSavedPickerOpen] = useState(false)
+  const [savedPreview, setSavedPreview] = useState(null)
+  const attachedSaved = recommendation ? savedContent.find((item) => item.id === recommendation.templateId) || null : null
   const answered = isQuestionAnswered(question)
   const disputed = hasOpenDispute(question)
   const canEdit = answered && canEditQuestionAnswer(question, nowMs)
@@ -308,12 +323,20 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
 
   const saveDraft = () => {
     if (!text.trim()) return
-    onSaveDraft(question.id, text, attachments, links)
+    onSaveDraft(question.id, text, attachments, links, recommendation)
   }
 
   const submit = () => {
     if (!text.trim()) return
-    onSubmit(question.id, text, attachments, links)
+    const item = recommendation ? savedContent.find((entry) => entry.id === recommendation.templateId) : null
+    onSubmit(question.id, text, attachments, links, buildRecommendation(item, recommendation?.days))
+  }
+
+  const attachSavedAtonement = (selected) => {
+    // One atonement per question (same rule as call end: the first attached Saved Content is the atonement).
+    const first = selected[0]
+    if (first) setRecommendation({ templateId: first.id, days: defaultCompletionDays(first) })
+    setSavedPickerOpen(false)
   }
 
   const saveCorrection = () => {
@@ -541,6 +564,56 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
               )}
             </div>
           )}
+
+          {answered && question.recommendedAtonementId && (() => {
+            const record = atonements.find((item) => item.id === question.recommendedAtonementId)
+            if (!record) return null
+            return (
+              <div className="astrologer-modal-section">
+                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Sparkles size={14} />Recommended Atonement</div>
+                <div className="ra-selected is-sent">
+                  <span className="ra-selected-flag"><Check size={13} /> Atonement Recommended</span>
+                  <strong className="ra-selected-name">{record.title || record.summary}</strong>
+                  <div className="ra-selected-meta">
+                    <span>{record.days.length}-Day Remedy</span>
+                    <span>Recommended to: <b>{question.user || 'User'}</b></span>
+                    <span>Status: <b>Sent</b></span>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
+          {!answered && !disputed && !cancelled && (
+            <div className="astrologer-modal-section">
+              <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Sparkles size={14} />Recommend Atonement (optional)</div>
+              <div className="apt-consultation-attachments">
+                <div className="apt-consultation-attachment-controls">
+                  <button type="button" className="apt-consultation-attach" onClick={() => setSavedPickerOpen(true)}><FileText size={14} /> Saved</button>
+                </div>
+                {attachedSaved && (
+                  <div className="apt-consultation-attachment-list">
+                    <div className="apt-consultation-attachment-card">
+                      <span className="apt-consultation-attachment-icon"><FileText size={14} /></span>
+                      <span><strong>{attachedSaved.name}</strong><small>Saved Content · {recommendation.days}-Day Remedy</small></span>
+                      <button type="button" className="apt-saved-view" onClick={() => setSavedPreview(attachedSaved)}>View</button>
+                      <button type="button" aria-label={`Remove ${attachedSaved.name}`} onClick={() => setRecommendation(null)}><X size={14} /></button>
+                    </div>
+                  </div>
+                )}
+                {attachedSaved && (
+                  <div className="apt-atonement-duration">
+                    <label>Completion Period</label>
+                    <select value={recommendation.days} onChange={(event) => setRecommendation({ ...recommendation, days: Number(event.target.value) })}>
+                      {[...new Set([...COMPLETION_PERIODS, recommendation.days])].sort((x, y) => x - y).map((days) => <option key={days} value={days}>{days} {days === 1 ? 'Day' : 'Days'}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+              {savedPickerOpen && <SavedAtonementPicker items={savedContent} onClose={() => setSavedPickerOpen(false)} onAttach={attachSavedAtonement} />}
+              {savedPreview && <SavedAtonementDetails name={savedPreview.name} content={savedPreview.content} preview={savedPreview.preview} onClose={() => setSavedPreview(null)} onAttach={() => { attachSavedAtonement([savedPreview]); setSavedPreview(null) }} />}
+            </div>
+          )}
         </div>
 
         <div className="modal-card__footer astrologer-modal-footer-actions">
@@ -590,7 +663,7 @@ export default function AnswerQuestion() {
     [questions, astrologerId],
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (bootRef.current) return
     bootRef.current = true
     const id = searchParams.get('questionId')
@@ -675,13 +748,13 @@ export default function AnswerQuestion() {
     clearQuestionParam()
   }, [clearQuestionParam])
 
-  const handleSaveDraft = useCallback((id, draft, attachments = [], referenceLinks = []) => {
-    actions.saveQuestionDraft(id, draft, attachments, referenceLinks)
+  const handleSaveDraft = useCallback((id, draft, attachments = [], referenceLinks = [], recommendation = null) => {
+    actions.saveQuestionDraft(id, draft, attachments, referenceLinks, recommendation)
     setAlert('Draft saved. You can continue anytime before the answer deadline.')
   }, [actions])
 
-  const handleSubmit = useCallback((id, answerText, attachments = [], referenceLinks = []) => {
-    actions.submitQuestionAnswer(id, answerText, attachments, referenceLinks)
+  const handleSubmit = useCallback((id, answerText, attachments = [], referenceLinks = [], atonement = null) => {
+    actions.submitQuestionAnswer(id, answerText, attachments, referenceLinks, atonement)
     closeAnswer()
     setAlert('Answer submitted. The customer can now view it and you can edit it for the next 24 hours.')
   }, [actions, closeAnswer])

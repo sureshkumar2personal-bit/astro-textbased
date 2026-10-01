@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { ChipGroup } from '../components/OptionGroup.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -11,6 +11,8 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { hasOpenDispute } from '../utils/answer.js'
+import { getAtonementProgress } from '../utils/atonements.js'
+import useUserAtonements from '../state/useUserAtonements.js'
 import '../css/user/question-tracking.css'
 
 const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered', 'Resolved']
@@ -99,11 +101,18 @@ export default function TrackQuestions() {
   const [searchParams] = useSearchParams()
   const { questions, questionPreviewId, setQuestionPreviewId, actions } = useAppData()
   const { currentUser } = useAuth()
+  const { allAtonements } = useUserAtonements()
   const routes = getRoleRoutes(currentUser?.role)
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState(() => normalizeStatusFilter(searchParams.get('status') || 'All'))
-  const [detailsOpen, setDetailsOpen] = useState(false)
+  // Coming back from Atonement Details (?questionId=...): start with the modal already open so the
+  // list never paints first and the modal never flashes open/closed/open.
+  const [initialPreviewId, setInitialPreviewId] = useState(() => {
+    const id = searchParams.get('questionId')
+    return id && questions.some((question) => question.id === id) ? id : null
+  })
+  const [detailsOpen, setDetailsOpen] = useState(() => Boolean(initialPreviewId))
   const [timeElapsed, setTimeElapsed] = useState(0)
 
   const matchesStatusFilter = useCallback((question) => {
@@ -156,9 +165,12 @@ export default function TrackQuestions() {
   const visibleQuestions = ownedQuestions
 
   const selectedQuestion = detailsOpen
-    ? visibleQuestions.find((question) => question.id === questionPreviewId) || null
+    ? visibleQuestions.find((question) => question.id === (questionPreviewId || initialPreviewId)) || null
     : null
 
+  const recommendedAtonement = selectedQuestion
+    ? (allAtonements.find((item) => item.id === selectedQuestion.recommendedAtonementId) || allAtonements.find((item) => item.sourceType === 'question' && item.sourceId === selectedQuestion.id))
+    : null
   const selectedDisputeStatus = selectedQuestion?.dispute?.status || null
   const showRaiseDispute = selectedQuestion?.status === 'Answered' && !selectedQuestion?.dispute
   const showViewDispute = selectedDisputeStatus === 'Resolved'
@@ -223,7 +235,15 @@ export default function TrackQuestions() {
     setDetailsOpen(true)
   }
 
+  const requestedQuestionId = searchParams.get('questionId')
+  useEffect(() => {
+    if (!requestedQuestionId || detailsOpen) return
+    if (questions.some((question) => question.id === requestedQuestionId)) openQuestion(requestedQuestionId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedQuestionId, questions.length])
+
   const closeQuestion = useCallback(() => {
+    setInitialPreviewId(null)
     setDetailsOpen(false)
     setQuestionPreviewId(null)
     setFullContent(null)
@@ -341,41 +361,28 @@ export default function TrackQuestions() {
       {detailsOpen && selectedQuestion && createPortal(
         <div className="modal-overlay user-modal-overlay" onClick={closeQuestion}>
           <div
-            className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll"
+            className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll qd-modal"
             style={{ width: 'min(820px, calc(100vw - 32px))' }}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
-              <div style={{ minWidth: 0 }}>
-                <div className="section-title" style={{ marginBottom: 0 }}>Question Details</div>
-                <div
-                  className="muted"
-                  style={{ fontSize: 13, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
+              <div className="qd-header-copy">
+                <div className="section-title qd-title">Question Details</div>
+                <div className="muted qd-subtitle">
                   {selectedQuestion.campaignName || 'User question'} · {selectedQuestion.id}
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <div className="qd-header-actions">
                 <StatusBadge label={selectedQuestion.status} />
-                <button type="button" className="icon-btn" aria-label="Close question details" onClick={closeQuestion}>
+                <button type="button" className="icon-btn qd-close" aria-label="Close question details" onClick={closeQuestion}>
                   <X size={16} />
                 </button>
               </div>
             </div>
-            <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div className="modal-card__content user-modal-card__content qd-body">
               <div>
-                <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question Details</div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',
-                    gap: 14,
-                    background: 'var(--violet-50)',
-                    borderRadius: 'var(--radius-s)',
-                    padding: 14,
-                    fontSize: 14,
-                  }}
-                >
+                <div className="field-label-top qd-section-label">Question Details</div>
+                <div className="qd-info">
                   <div><strong>ID</strong><div className="muted">{selectedQuestion.id}</div></div>
                   <div><strong>User</strong><div className="muted">{selectedQuestion.user}</div></div>
                   <div><strong>Campaign</strong><div className="muted">{selectedQuestion.campaignName || 'No campaign'}</div></div>
@@ -386,20 +393,58 @@ export default function TrackQuestions() {
               </div>
 
               <div>
-                <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
-                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                <div className="field-label-top qd-section-label">Your Question</div>
+                <div className="qd-content qd-content--question">
                   <ContentPreview content={selectedQuestion.question} title="Your Question" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                 </div>
               </div>
 
               {selectedQuestion.status === 'Answered' && (
                 <div>
-                  <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
-                  <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
+                  <div className="field-label-top qd-section-label">Astrologer's Answer</div>
+                  <div className="qd-content qd-content--answer">
                     <ContentPreview content={selectedQuestion.answer || 'No answer yet.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
                   </div>
                 </div>
               )}
+
+              {selectedQuestion.status === 'Answered' && recommendedAtonement && (() => {
+                const progress = getAtonementProgress(recommendedAtonement)
+                const statusLabel = progress.total && progress.completed === progress.total ? 'Completed' : progress.completed > 0 ? 'In Progress' : 'Not Started'
+                return (
+                  <div>
+                    <div className="qd-atonement">
+                      <div className="qd-atonement-head">
+                        <span className="qd-atonement-icon" aria-hidden="true"><Sparkles size={16} /></span>
+                        <div className="qd-atonement-heading">
+                          <div className="qd-atonement-kicker">Recommended Atonement</div>
+                          <div className="qd-atonement-hint">Your astrologer has recommended the following atonement for you.</div>
+                        </div>
+                        <StatusBadge label={statusLabel} />
+                      </div>
+                      <div className="qd-atonement-title">
+                        <strong>{recommendedAtonement.title || recommendedAtonement.summary}</strong>
+                        <span>{progress.total}-Day Remedy</span>
+                      </div>
+                      <div className="qd-atonement-progress">
+                        <div className="qd-atonement-progress-row">
+                          <span className="qd-atonement-progress-label">Progress</span>
+                          <span className="qd-atonement-progress-count">{progress.completed} of {progress.total} days completed</span>
+                          <strong>{progress.percent}%</strong>
+                        </div>
+                        <div className="atonement-progress"><span style={{ width: `${progress.percent}%` }} /></div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm qd-atonement-action"
+                        onClick={() => navigate(`/user/atonements/${recommendedAtonement.id}`, { state: { from: `${routes.trackQuestions || '/user/track-questions'}?questionId=${selectedQuestion.id}` } })}
+                      >
+                        View Atonement Details <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )
+              })()}
 
               {selectedQuestion.status === 'Pending' && selectedQuestion.submittedAt && (
                 <div>
@@ -441,32 +486,31 @@ export default function TrackQuestions() {
               )}
 
               {ratingMode && (
-                <Card style={{ padding: 14, display: 'grid', gap: 12 }}>
-                  <div className="section-title" style={{ marginBottom: 0 }}>
+                <Card className="qd-rating">
+                  <div className="section-title qd-rating-title">
                     {ratingMode === 'dispute' ? 'Rate Dispute Resolution' : 'Rate & Review the Astrologer'}
                   </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div className="qd-stars">
                     {[1, 2, 3, 4, 5].map((value) => (
                       <button
                         key={value}
                         type="button"
-                        className={`btn ${rating >= value ? 'btn-primary' : 'btn-outline'}`}
+                        className={`qd-star${rating >= value ? ' is-active' : ''}`}
                         onClick={() => setRating(value)}
                         aria-label={`${value} star${value === 1 ? '' : 's'}`}
                       >
-                        ★ {value}
+                        <Star size={15} fill={rating >= value ? 'currentColor' : 'none'} /> {value}
                       </button>
                     ))}
                   </div>
-                  <div className="muted">
+                  <div className="muted qd-rating-hint">
                     {rating ? `Selected rating: ${rating} star${rating === 1 ? '' : 's'}` : 'Select a star rating and save it.'}
                   </div>
                   {ratingMode === 'answer' && (
-                    <div className="field-group" style={{ marginBottom: 0 }}>
+                    <div className="field-group qd-feedback">
                       <label className="field-label-top">Your Feedback (Optional)</label>
                       <textarea
                         className="textarea-box"
-                        style={{ minHeight: 80 }}
                         placeholder="Share your experience with the astrologer's answer..."
                         maxLength={500}
                         value={review}

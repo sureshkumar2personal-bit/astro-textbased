@@ -132,3 +132,67 @@
     padding: 12px;
   }
 }
+
+/* =====================================================
+   Typography + tab prominence — Appointments page only
+   Uses the project's existing font pair (Plus Jakarta Sans / Inter); presentation only.
+   ===================================================== */
+.apt-page { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; }
+.apt-page :where(button, input, select, textarea) { font-family: inherit; }
+
+/* Page header */
+.apt-page .page-eyebrow { font-size: 12.5px; font-weight: 600; letter-spacing: .08em; }
+.apt-page .page-title { font-size: 32px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+.apt-page .page-header-row p { font-size: 15px; font-weight: 400; line-height: 1.55; }
+
+/* Schedule / History tabs — one style for both; only the active state changes the colour.
+   Colours are explicit for the link states too (visited / hover / focus / NavLink's own "active"). */
+.apt-page .wd-tabs { gap: 8px; margin: 8px 0 12px; }
+.apt-page .wd-tabs a.wd-tab,
+.apt-page .wd-tabs a.wd-tab:visited { gap: 9px; padding: 14px 24px; border-radius: 10px 10px 0 0; background: transparent; color: var(--muted); font-size: 15.5px; font-weight: 600; letter-spacing: -.005em; transition: color .15s ease, background .15s ease; }
+.apt-page .wd-tabs a.wd-tab svg { width: 18px; height: 18px; flex: 0 0 18px; color: inherit; stroke: currentColor; }
+/* hover: same subtle tint on both tabs, text colour unchanged */
+.apt-page .wd-tabs a.wd-tab:hover,
+.apt-page .wd-tabs a.wd-tab:focus-visible { background: color-mix(in srgb, var(--primary) 6%, transparent); color: var(--muted); }
+.apt-page .wd-tabs a.wd-tab::after { left: 16px; right: 16px; height: 3px; background: transparent; }
+/* active: purple text + icon + underline (hover/focus keep it purple) */
+.apt-page .wd-tabs a.wd-tab.is-active,
+.apt-page .wd-tabs a.wd-tab.is-active:visited,
+.apt-page .wd-tabs a.wd-tab.is-active:hover,
+.apt-page .wd-tabs a.wd-tab.is-active:focus-visible { color: var(--primary); font-weight: 700; }
+.apt-page .wd-tabs a.wd-tab.is-active::after { background: var(--primary); }
+
+/* Section headings */
+.apt-page .apt-schedule-header h2 { font-size: 20px; font-weight: 600; letter-spacing: -.015em; }
+.apt-page .apt-schedule-header p { font-size: 14px; font-weight: 400; line-height: 1.5; }
+.apt-page .apt-policy-card__head { font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.apt-page .apt-weekly-quick__label { font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+
+/* Field labels */
+.apt-page .apt-policy-card > div > span,
+.apt-page .apt-policy-card > label > span,
+.apt-page .apt-period-card label > span,
+.apt-page .apt-period-card__fields span { font-size: 12.5px; font-weight: 600; letter-spacing: .05em; color: var(--muted); }
+
+/* Values */
+.apt-page .apt-segmented button { font-size: 14px; font-weight: 500; }
+.apt-page .apt-segmented button.is-active { font-weight: 600; }
+.apt-page .apt-policy-price input,
+.apt-page .apt-policy-price b,
+.apt-page .apt-period-card input,
+.apt-page .apt-date-picker { font-size: 14.5px; font-weight: 600; }
+
+/* Help / description text */
+.apt-page .apt-policy-card > p,
+.apt-page .apt-policy-note,
+.apt-page .apt-period-card__hint,
+.apt-page .apt-published-card__note { font-size: 13.5px; font-weight: 400; line-height: 1.5; }
+
+/* Buttons keep a balanced weight */
+.apt-page .apt-schedule-actions .btn { font-weight: 600; }
+
+@media (max-width: 720px) {
+  .apt-page .page-title { font-size: 26px; }
+  .apt-page .wd-tabs { gap: 4px; }
+  .apt-page .wd-tabs a.wd-tab { flex: 1 1 0; justify-content: center; padding: 13px 14px; font-size: 15px; }
+}

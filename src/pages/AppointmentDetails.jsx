@@ -122,7 +122,8 @@ export default function AppointmentDetails() {
   const [filter, setFilter] = useState('all')
   const [notice, setNotice] = useState('')
   const [rescheduleTarget, setRescheduleTarget] = useState(null)
-  const [detailsAppointment, setDetailsAppointment] = useState(null)
+  // Start open when arriving with ?id= (e.g. Back from Atonement Details) so the drawer never flashes in late.
+  const [detailsAppointment, setDetailsAppointment] = useState(() => requested || null)
 
   const filteredAppointments = useMemo(() => userAppointments.filter((appointment) => {
     const bucket = appointmentStatusBucket(appointment, now)

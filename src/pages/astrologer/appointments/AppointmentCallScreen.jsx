@@ -6,7 +6,8 @@ import { getCallType, resolveAppointmentWindow, formatTimeRange } from '../../..
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useToast } from '../../../components/Toast.jsx'
-import SavedAtonementDetails from '../../../components/atonement/SavedAtonementDetails.jsx'
+import SavedAtonementPicker from '../../../components/atonement/SavedAtonementPicker.jsx'
+import { readSavedAtonementContent } from '../../../utils/atonementTemplates.js'
 
 function Avatar({ name, size = 96 }) {
   const initials = String(name || '?')
@@ -61,8 +62,6 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
   const [linkDraft, setLinkDraft] = useState('')
   const [linkOpen, setLinkOpen] = useState(false)
   const [savedPickerOpen, setSavedPickerOpen] = useState(false)
-  const [selectedSavedIds, setSelectedSavedIds] = useState([])
-  const [savedPreview, setSavedPreview] = useState(null)
   const [completionPeriod, setCompletionPeriod] = useState('7')
   const [customCompletionDays, setCustomCompletionDays] = useState('')
   const [followupSaved, setFollowupSaved] = useState(false)
@@ -171,21 +170,7 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
     event.target.value = ''
   }
 
-  const savedContent = (() => {
-    if (typeof window === 'undefined') return []
-    try {
-      const userId = currentUser?.id || 'guest'
-      const records = JSON.parse(window.localStorage.getItem(`astroconnect:atonement:${userId}:records`) || '[]')
-      return records.map((record) => {
-        const form = record.form || {}
-        const item = form.attachment || form.content || {}
-        const type = item.type || (item.url ? 'Link' : item.name ? (item.mimeType?.startsWith('image/') ? 'Image' : 'PDF') : 'Text')
-        return { id: record.id, name: item.name || form.name || 'Untitled Atonement', type, date: record.updatedAt || record.createdAt, preview: item.preview || item.dataUrl || '', url: item.url || '', content: form }
-      })
-    } catch {
-      return []
-    }
-  })()
+  const savedContent = readSavedAtonementContent(currentUser?.id)
 
   const addLink = () => {
     const url = linkDraft.trim()
@@ -196,11 +181,9 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
     setLinkOpen(false)
   }
 
-  const attachSaved = () => {
-    const selected = savedContent.filter((item) => selectedSavedIds.includes(item.id))
+  const attachSaved = (selected) => {
     setAttachments((items) => [...items, ...selected.filter((item) => !items.some((attached) => attached.savedId === item.id)).map((item) => ({ ...item, id: `saved-${item.id}`, savedId: item.id, originalType: item.type, type: 'Saved Content' }))])
     setSavedPickerOpen(false)
-    setSelectedSavedIds([])
   }
 
   const saveInCallNotes = () => {
@@ -440,16 +423,7 @@ export default function AppointmentCallScreen({ appointment, consultation, onEnd
               </div>
             </div>
           )}
-          {savedPickerOpen && <div className="apt-saved-content-backdrop" role="dialog" aria-modal="true" aria-labelledby="saved-content-title" onClick={() => setSavedPickerOpen(false)}>
-            <div className="apt-saved-content-modal" onClick={(event) => event.stopPropagation()}>
-              <div className="apt-saved-content-head"><div><h3 id="saved-content-title">Saved Atonement Content</h3><p>Select one or more saved items to attach.</p></div><button type="button" className="icon-btn" aria-label="Close saved content" onClick={() => setSavedPickerOpen(false)}><X size={16} /></button></div>
-              <div className="apt-saved-content-list">
-                {savedContent.length ? savedContent.map((item) => <label className="apt-saved-content-item" key={item.id}><input type="checkbox" checked={selectedSavedIds.includes(item.id)} onChange={() => setSelectedSavedIds((ids) => ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id])} /><span className="apt-saved-content-type">{item.type}</span><span><strong>{item.name}</strong><small>{item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Saved content'}</small></span><button type="button" className="apt-saved-view" onClick={(event) => { event.preventDefault(); setSavedPreview(item) }}>View</button></label>) : <div className="apt-saved-content-empty">No saved Atonement content yet.</div>}
-              </div>
-              <div className="apt-saved-content-actions"><button type="button" className="btn btn-ghost" onClick={() => setSavedPickerOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" disabled={!selectedSavedIds.length} onClick={attachSaved}>Attach Selected</button></div>
-            </div>
-          </div>}
-          {savedPreview && <SavedAtonementDetails name={savedPreview.name} content={savedPreview.content} preview={savedPreview.preview} onClose={() => setSavedPreview(null)} onAttach={() => { setSelectedSavedIds((ids) => ids.includes(savedPreview.id) ? ids : [...ids, savedPreview.id]); setSavedPreview(null) }} />}
+          {savedPickerOpen && <SavedAtonementPicker items={savedContent} onClose={() => setSavedPickerOpen(false)} onAttach={attachSaved} />}
         </div>
       ) : (
       <>

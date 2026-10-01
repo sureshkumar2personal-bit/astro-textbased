@@ -351,7 +351,7 @@ function ConsultationNotesContent({ mapped, onUpdateProgress, appointmentId, app
     const title = item.savedContent.title || item.name
     const record = ensureRecord(title, item.savedContent.content || {})
     onOpenAtonement?.()
-    navigate(`/user/atonements/${encodeURIComponent(record.id)}`)
+    navigate(`/user/atonements/${encodeURIComponent(record.id)}`, { state: appointmentId ? { from: `/user/appointment-details?id=${encodeURIComponent(appointmentId)}` } : undefined })
   }
   const [attachmentViewer, setAttachmentViewer] = useState(null)
   if (!mapped) return null

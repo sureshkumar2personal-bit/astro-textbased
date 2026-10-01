@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ListChecks, ScrollText } from 'lucide-react'
+import { CalendarDays, History } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -7,8 +7,8 @@ import '../../../css/astrologer/wallet-dashboard.css'
 import '../../../css/astrologer/appointments-dashboard.css'
 
 const TABS = [
-  { key: 'schedule', icon: ScrollText, label: 'Schedule' },
-  { key: 'history', icon: ListChecks, label: 'History' },
+  { key: 'schedule', icon: CalendarDays, label: 'Schedule' },
+  { key: 'history', icon: History, label: 'History' },
 ]
 
 export default function AppointmentsShell() {

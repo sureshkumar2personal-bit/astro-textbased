@@ -23,7 +23,6 @@ export function getRoleRoutes(role) {
     raiseDispute: `${base}/raise-dispute`,
     textBasedQuestions: `${base}/text-based-questions`,
     salesManagement: `${base}/sales-management`,
-    campaigns: `${base}/campaigns`,
     answerQuestion: `${base}/answer-question`,
     textBasedQuestionHistory: `${base}/text-based-question-history`,
     disputeManagement: `${base}/dispute-management`,

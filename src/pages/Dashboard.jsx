@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Megaphone,
   MessageCircleReply,
   MessageCircleQuestion,
-  MoreVertical,
   MessageCircle,
   PhoneCall,
   ChevronDown,
@@ -21,15 +20,25 @@ import {
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
+import {
+  countCampaignQuestionsInMonth,
+  filterCampaignsByStatus,
+  getCampaignAllocation,
+  getCampaignDisplayStatus,
+  getCampaignQuestionTypes,
+  getMonthKeyFromDate,
+} from '../utils/questions.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
-const showcaseCampaigns = [
-  { id: 'health-wellness', name: 'Health & Wellness', category: 'Vedic Astrology', status: 'Active', sold: 45, target: 100, Icon: HeartPulse, thumb: 'adash-thumb--health' },
-  { id: 'love-relationship', name: 'Love & Relationship', category: 'Marriage Astrology', status: 'Active', sold: 32, target: 50, Icon: HeartHandshake, thumb: 'adash-thumb--love' },
-  { id: 'career-finance', name: 'Career & Finance', category: 'Numerology', status: 'Active', sold: 20, target: 50, Icon: TrendingUp, thumb: 'adash-thumb--career' },
-  { id: 'planetary-guidance', name: 'Planetary Guidance', category: 'General Astrology', status: 'Paused', sold: 10, target: 50, Icon: Orbit, thumb: 'adash-thumb--planetary' },
+// Card look (icon + thumb tint) keyed off the campaign topic; purely presentational.
+const CAMPAIGN_CARD_STYLES = [
+  { match: /health|well|medical/i, Icon: HeartPulse, thumb: 'adash-thumb--health' },
+  { match: /love|marriage|relationship|family/i, Icon: HeartHandshake, thumb: 'adash-thumb--love' },
+  { match: /career|finance|business|job|money/i, Icon: TrendingUp, thumb: 'adash-thumb--career' },
+  { match: /./, Icon: Orbit, thumb: 'adash-thumb--planetary' },
 ]
+const DASHBOARD_CAMPAIGN_LIMIT = 4
 
 const recentActivities = [
   { id: 'QTN-2026-000124', type: 'Question', icon: MessageCircle, user: 'Kannan', detail: 'Health', status: 'Pending', date: '22-Jul-2026 01:15 PM', actionLabel: 'Open' },
@@ -41,10 +50,33 @@ const recentActivities = [
 ]
 
 export default function Dashboard() {
-  const { astrologerServices, actions } = useAppData()
+  const { astrologerServices, actions, campaigns, questions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const astrologerId = currentUser?.id || 'astrologer-demo'
+
+  // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
+  const showcaseCampaigns = useMemo(() => {
+    const now = new Date()
+    const monthKey = getMonthKeyFromDate(now)
+    return filterCampaignsByStatus(campaigns, 'All', monthKey, now)
+      .slice(0, DASHBOARD_CAMPAIGN_LIMIT)
+      .map((campaign, index) => {
+        const label = `${campaign.name || ''} ${campaign.category || ''} ${campaign.categories?.[0]?.name || ''}`
+        const look = CAMPAIGN_CARD_STYLES.find((style, i) => (i === CAMPAIGN_CARD_STYLES.length - 1 ? false : style.match.test(label))) || CAMPAIGN_CARD_STYLES[index % CAMPAIGN_CARD_STYLES.length]
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          category: campaign.category || campaign.categories?.[0]?.name || getCampaignQuestionTypes(campaign).join(' · '),
+          status: getCampaignDisplayStatus(campaign, monthKey, now.getTime()),
+          sold: countCampaignQuestionsInMonth(campaign, questions, monthKey, astrologerId),
+          target: getCampaignAllocation(campaign),
+          Icon: look.Icon,
+          thumb: look.thumb,
+        }
+      })
+  }, [campaigns, questions, astrologerId])
   const [serviceMenuOpen, setServiceMenuOpen] = useState(false)
   const serviceMenuRef = useRef(null)
 
@@ -183,14 +215,18 @@ export default function Dashboard() {
         title="Your Campaigns"
         icon={Megaphone}
         action={
-          <Link to={routes.campaigns} className="text-sm font-semibold text-[color:var(--primary)] hover:text-[color:var(--primary-dark)]">
+          <Link
+            to={`${routes.textBasedQuestions}?view=campaigns`}
+            className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-[color:var(--primary)] transition-colors hover:text-[color:var(--primary-dark)] hover:underline"
+          >
             View All →
           </Link>
         }
       >
+        {!showcaseCampaigns.length && <p className="muted" style={{ margin: 0, fontSize: 14 }}>No campaigns yet. Use Create Campaign to add one.</p>}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {showcaseCampaigns.map((campaign) => {
-            const pct = Math.min(100, Math.round((campaign.sold / campaign.target) * 100))
+            const pct = campaign.target ? Math.min(100, Math.round((campaign.sold / campaign.target) * 100)) : 0
             return (
               <article key={campaign.id} className="adash-campaign">
                 <div className={`adash-campaign-thumb ${campaign.thumb}`}>
@@ -202,10 +238,6 @@ export default function Dashboard() {
                   <h3 className="adash-campaign-name">{campaign.name}</h3>
                   <div className="adash-campaign-sold">{campaign.sold} / {campaign.target} Questions Sold</div>
                   <div className="adash-campaign-track"><span style={{ width: `${pct}%` }} /></div>
-                  <div className="adash-campaign-actions">
-                    <button type="button" className="adash-campaign-btn" onClick={() => navigate(`${routes.campaigns}?campaignId=${encodeURIComponent(campaign.id)}`)}>View</button>
-                    <button type="button" className="adash-campaign-btn adash-campaign-btn--primary" onClick={() => navigate(routes.campaigns)}>Manage</button>
-                  </div>
                 </div>
               </article>
             )
@@ -228,7 +260,6 @@ export default function Dashboard() {
                 <th>Detail</th>
                 <th>Status</th>
                 <th className="adash-q-col-time">Date</th>
-                <th aria-label="Actions" />
               </tr>
             </thead>
             <tbody>
@@ -245,12 +276,6 @@ export default function Dashboard() {
                   <td>{activity.detail}</td>
                   <td><StatusBadge label={activity.status} className="!px-2 !py-0.5 !text-[11px]" /></td>
                   <td className="muted adash-q-col-time" style={{ fontSize: 12.5, whiteSpace: 'nowrap' }}>{activity.date}</td>
-                  <td>
-                    <div className="adash-q-actions">
-                      <button type="button" className="adash-q-btn">{activity.actionLabel}</button>
-                      <button type="button" className="adash-q-more" aria-label={`More options for ${activity.id}`}><MoreVertical size={15} /></button>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>

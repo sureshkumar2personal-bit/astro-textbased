@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Activity, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, Trash2, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight } from 'lucide-react'
+import { Activity, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, Trash2, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight, ChevronLeft } from 'lucide-react'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -9,6 +9,11 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { fromIsoDate, parseTimeToMinutes } from '../utils/appointments.js'
+import { buildPageTokens } from '../utils/pagination.js'
+
+const ACTIVITY_PAGE_SIZE = 7
+const ACTIVITY_WINDOW_DAYS = 7
+const ACTIVITY_MAX_TOTAL = 20
 
 function formatDateTime(value) {
   const date = new Date(value)
@@ -59,6 +64,7 @@ export default function AstrologerActivity() {
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const [selectedItem, setSelectedItem] = useState(null)
+  const [page, setPage] = useState(1)
   const [hiddenActivityIds, setHiddenActivityIds] = useState(() => {
     try { return JSON.parse(window.localStorage.getItem('astroconnect-hidden-astrologer-activities') || '[]') } catch { return [] }
   })
@@ -337,16 +343,22 @@ export default function AstrologerActivity() {
     ]
   }, [questionItems, callItems, chatItems, walletItems, liveSessionItems, campaignItems, disputeItems, activityLogItems])
 
-  // A single, complete chronological history — every activity from every
-  // module, newest first. No time-window cutoff: a hard "last 7 days" filter
-  // would hide most non-appointment demo history and make the merge look
-  // broken, so every record source is shown regardless of age.
+  // One chronological history across every module, newest first, limited to the last
+  // 7 days (by each record's own timestamp) — matching the "last 7 days" label below.
   const recentItems = useMemo(() => {
     return allItems
-      .filter((item) => item.occurredAtMs <= now)
+      .filter((item) => item.occurredAtMs <= now && item.occurredAtMs >= now - ACTIVITY_WINDOW_DAYS * 86400000)
       .filter((item) => !hiddenActivityIds.includes(item.id))
       .sort((a, b) => b.occurredAtMs - a.occurredAtMs)
+      // My Activity lists at most the 20 most recent activities in total.
+      .slice(0, ACTIVITY_MAX_TOTAL)
   }, [allItems, now, hiddenActivityIds])
+
+  // Pagination follows the real list: hiding an activity can shrink it, so the page is clamped.
+  const totalPages = Math.max(1, Math.ceil(recentItems.length / ACTIVITY_PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pageStart = (currentPage - 1) * ACTIVITY_PAGE_SIZE
+  const pagedItems = recentItems.slice(pageStart, pageStart + ACTIVITY_PAGE_SIZE)
 
   return (
     <div>
@@ -358,9 +370,10 @@ export default function AstrologerActivity() {
 
       <Section title="Recent Activity">
         <p className="my-activity-subtitle">Everything you've done across appointments, questions, calls, chats, wallet, live sessions, campaigns, disputes and audience — newest first.</p>
+        <p className="my-activity-window"><Clock3 size={13} /> Showing activities for the last {ACTIVITY_WINDOW_DAYS} days</p>
         {recentItems.length ? (
           <div className="my-activity-list">
-            {recentItems.map((item) => {
+            {pagedItems.map((item) => {
               const Icon = item.icon
               const meta = ACTIVITY_KIND_META[item.kind] || { label: item.kind, tone: 'tone-neutral' }
               return (
@@ -393,6 +406,36 @@ export default function AstrologerActivity() {
                 </div>
               )
             })}
+            {recentItems.length > ACTIVITY_PAGE_SIZE && (
+              <div className="my-activity-pagination" role="navigation" aria-label="Activity pagination">
+                <span className="my-activity-pagination__range">
+                  {pageStart + 1}–{pageStart + pagedItems.length} of {recentItems.length} activities
+                </span>
+                <div className="my-activity-pagination__controls">
+                  <button type="button" className="btn btn-outline btn-sm" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+                    <ChevronLeft size={16} /> Previous
+                  </button>
+                  {buildPageTokens(currentPage, totalPages).map((token) => {
+                    const isCurrent = token === currentPage
+                    return (
+                      <button
+                        key={token}
+                        type="button"
+                        className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
+                        aria-current={isCurrent ? 'page' : undefined}
+                        style={{ minWidth: 34, justifyContent: 'center' }}
+                        onClick={() => setPage(token)}
+                      >
+                        {token}
+                      </button>
+                    )
+                  })}
+                  <button type="button" className="btn btn-outline btn-sm" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+                    Next <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <Card>

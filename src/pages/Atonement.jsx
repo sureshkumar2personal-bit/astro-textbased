@@ -32,11 +32,18 @@ import {
   AlertTriangle,
   CheckCircle2,
   Circle,
+  MessageSquare,
+  Phone,
+  XCircle,
+  Paperclip,
 } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
+import { useLocation } from 'react-router-dom'
 import { useToast } from '../components/Toast.jsx'
+import { isCancelledStatus } from '../utils/appointments.js'
+import { ATONEMENT_SOURCE_GROUPS, normalizeProofRequirements, openProofInNewTab } from '../utils/atonements.js'
 
 const RITUAL_TYPES = [
   { id: 'pooja', label: 'Pooja', icon: '🪔' },
@@ -1826,13 +1833,15 @@ const PARIHARAM_STATUS_TONE = {
   'In Progress': 'tone-violet',
   Completed: 'tone-green',
   Overdue: 'tone-red',
+  Cancelled: 'tone-red',
 }
 
 // Local status pill (rather than the shared StatusBadge) because that component's
 // appointment-status branch hardcodes light-pastel colors that lose contrast on
 // this page's dark theme — the theme-aware tone-* classes stay legible either way.
 function PariharamStatusBadge({ status }) {
-  return <span className={`atonement-progress-status ${PARIHARAM_STATUS_TONE[status] || 'tone-neutral'}`}>{status}</span>
+  const Icon = PROGRESS_STATUS_ICONS[status]
+  return <span className={`atonement-progress-status ${PARIHARAM_STATUS_TONE[status] || 'tone-neutral'}`}>{Icon && <Icon size={12} />}{status === 'Not Started' ? 'Upcoming' : status}</span>
 }
 
 function enrichPariharamRecord(record) {
@@ -1852,68 +1861,87 @@ function enrichPariharamRecord(record) {
   }
 }
 
-function buildRealPariharamRecords(consultations, appointments, astrologerId) {
+function cardWhenLabel(appointment, fallbackIso) {
+  const dateIso = appointment?.dateIso || (fallbackIso ? String(fallbackIso).slice(0, 10) : '')
+  const date = dateIso ? formatProgressDate(dateIso) : ''
+  const time = appointment?.time || (!appointment?.dateIso ? formatProgressTime(fallbackIso) : '')
+  return [date === 'Not available' ? '' : date, time].filter(Boolean).join(', ')
+}
+
+function buildAtonementProgressRecords(atonements, astrologerId, appointments = []) {
+  return atonements
+    .filter((a) => !astrologerId || !a.astrologerId || a.astrologerId === astrologerId)
+    .filter((a) => a.days?.length)
+    .map((a) => {
+      const appointment = appointments.find((item) => item.id === (a.appointmentId || a.sourceId))
+      const startAt = a.days[0]?.date || a.assignedAt
+      const days = a.days.map((day, index) => {
+        const dateIso = day.date || ''
+        const todayIso = toIsoDate(new Date())
+        return {
+          id: `day-${index + 1}`,
+          dayNumber: index + 1,
+          dateIso,
+          dateLabel: formatProgressDate(dateIso),
+          completed: day.completed,
+          completedAt: day.completedAt,
+          proof: day.proof || null,
+          state: day.completed ? 'completed' : dateIso === todayIso ? 'available' : dateIso && dateIso < todayIso ? 'pending' : 'upcoming',
+        }
+      })
+      return {
+        id: a.id,
+        sourceType: a.sourceType,
+        userId: a.userId || null,
+        userName: a.customerName || appointment?.customerName || 'Unknown User',
+        bookingId: appointment?.orderId || a.appointmentId || a.sourceId || a.id,
+        cancelled: isCancelledStatus(appointment?.status),
+        whenLabel: cardWhenLabel(appointment, a.assignedAt),
+        appointmentId: a.appointmentId || a.sourceId,
+        pariharamName: a.title || a.method?.title || a.summary || 'Pariharam',
+        totalDays: days.length,
+        startAt,
+        dueAt: days.at(-1)?.dateIso || pariharamDueDate(startAt, days.length),
+        assignedAt: a.assignedAt,
+        proofRequirements: a.proofRequirements || [],
+        days,
+      }
+    })
+}
+
+// Consultations sent with an atonement before the shared record existed: show them as "Not Started".
+function buildLegacyPariharamRecords(consultations, appointments, astrologerId, coveredAppointmentIds) {
   return consultations
-    .filter((c) => c.atonement && typeof c.atonement === 'object' && (c.atonement.title || c.atonement.content))
+    .filter((c) => c.sent && c.atonement && typeof c.atonement === 'object' && (c.atonement.title || c.atonement.content))
     .filter((c) => !astrologerId || !c.astrologerId || c.astrologerId === astrologerId)
+    .filter((c) => !coveredAppointmentIds.has(c.appointmentId))
     .map((c) => {
       const appointment = appointments.find((a) => a.id === c.appointmentId)
-      const atonement = c.atonement
-      const totalDays = Number.parseInt(String(atonement.completionDays || c.validity || 7).match(/\d+/)?.[0] || '7', 10)
-      const startAt = atonement.startAt || c.pariharamProgress?.startAt || c.startDate || appointment?.completedAt || appointment?.dateIso || c.sentAt
-      const progressDays = c.pariharamProgress?.days && typeof c.pariharamProgress.days === 'object' ? c.pariharamProgress.days : {}
-      const days = buildPariharamDays(startAt, totalDays, progressDays)
+      const totalDays = Number.parseInt(String(c.atonement.completionDays || 7).match(/\d+/)?.[0] || '7', 10)
+      const startAt = c.atonement.startAt || c.sentAt
       return {
         id: c.id,
-        source: 'real',
+        sourceType: 'appointment',
         userId: c.userId || appointment?.userId || null,
         userName: c.customerName || appointment?.customerName || 'Unknown User',
         bookingId: appointment?.orderId || c.appointmentId || c.id,
         appointmentId: c.appointmentId,
-        pariharamName: atonement.title || c.consultationTitle || 'Pariharam',
+        pariharamName: c.atonement.title || c.consultationTitle || 'Pariharam',
         totalDays,
         startAt,
         dueAt: pariharamDueDate(startAt, totalDays),
-        days,
+        assignedAt: c.sentAt,
+        cancelled: isCancelledStatus(appointment?.status),
+        whenLabel: cardWhenLabel(appointment, c.sentAt),
+        proofRequirements: normalizeProofRequirements(c.atonement.content?.proof),
+        days: buildPariharamDays(startAt, totalDays, {}),
       }
     })
     .filter((record) => record.days.length)
 }
 
-const MOCK_PARIHARAM_PROGRESS = [
-  { id: 'mock-progress-kani', userId: 'u-demo-kani', userName: 'Kani', bookingId: '#AH4001', appointmentId: 'apt-demo-kani-1', pariharamName: 'Marriage Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1, 2, 3] },
-  { id: 'mock-progress-priya', userId: 'u-demo-priya', userName: 'Priya', bookingId: '#AH4002', appointmentId: 'apt-demo-priya-1', pariharamName: 'Career Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1] },
-  { id: 'mock-progress-sangeetha', userId: 'u-demo-sangeetha', userName: 'Sangeetha', bookingId: '#AH4003', appointmentId: 'apt-demo-sangeetha-1', pariharamName: 'Career Obstacle Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [] },
-  { id: 'mock-progress-meena', userId: 'u-demo-meena', userName: 'Meena', bookingId: '#AH4004', appointmentId: 'apt-demo-meena-1', pariharamName: 'Rahu Dosha Pariharam', totalDays: 7, startAt: '2026-09-28', completedDays: [1, 2, 3, 4, 5, 6, 7] },
-]
-
-function buildMockPariharamRecords() {
-  return MOCK_PARIHARAM_PROGRESS.map((entry) => {
-    const progressDays = {}
-    entry.completedDays.forEach((dayNumber) => {
-      const date = calendarDay(entry.startAt)
-      date.setDate(date.getDate() + dayNumber - 1)
-      // Stagger a plausible completion time per day instead of leaving every mock entry at midnight.
-      date.setHours(7 + (dayNumber % 4) * 3, (dayNumber * 17) % 60, 0, 0)
-      progressDays[`day-${dayNumber}`] = { completed: true, completedAt: date.toISOString(), date: toIsoDate(date) }
-    })
-    return {
-      id: entry.id,
-      source: 'mock',
-      userId: entry.userId,
-      userName: entry.userName,
-      bookingId: entry.bookingId,
-      appointmentId: entry.appointmentId,
-      pariharamName: entry.pariharamName,
-      totalDays: entry.totalDays,
-      startAt: entry.startAt,
-      dueAt: pariharamDueDate(entry.startAt, entry.totalDays),
-      days: buildPariharamDays(entry.startAt, entry.totalDays, progressDays),
-    }
-  })
-}
-
 function PariharamProgressModal({ record, onClose }) {
+  const [zoomProof, setZoomProof] = useState(null)
   const isComplete = record.completedCount >= record.totalDays
   const lastCompletedAt = [...record.days].reverse().find((day) => day.completed)?.completedAt
 
@@ -1932,8 +1960,12 @@ function PariharamProgressModal({ record, onClose }) {
           <div><span>User ID</span><strong>{record.userId || 'Not available'}</strong></div>
           <div><span>Appointment ID</span><strong>{record.appointmentId || 'Not available'}</strong></div>
           <div><span>Pariharam</span><strong>{record.pariharamName}</strong></div>
+          <div><span>Duration</span><strong>{record.totalDays} {record.totalDays === 1 ? 'Day' : 'Days'}</strong></div>
+          <div><span>Pending Days</span><strong>{record.totalDays - record.completedCount}</strong></div>
           <div><span>Start Date</span><strong>{formatProgressDate(record.startAt)}</strong></div>
           <div><span>Due Date</span><strong>{formatProgressDate(record.dueAt)}</strong></div>
+          <div><span>Assigned</span><strong>{formatProgressDate(record.assignedAt)}</strong></div>
+          <div><span>Proof Needed</span><strong>{record.proofRequirements?.length ? record.proofRequirements.map((r) => `${r.label}${r.required ? '*' : ''}`).join(', ') : 'None'}</strong></div>
         </div>
 
         <div className="atonement-progress-row">
@@ -1953,6 +1985,26 @@ function PariharamProgressModal({ record, onClose }) {
                   <div className="atonement-day-details">
                     <span>{`Completed${formatProgressTime(day.completedAt) ? ` · ${formatProgressTime(day.completedAt)}` : ''}`}</span>
                   </div>
+                  {day.proof ? (
+                    <div className="atonement-day-proof">
+                      <span className="atonement-day-proof-label"><Check size={12} /> Proof Uploaded</span>
+                      {day.proof.type?.startsWith('image/') && (
+                        <button type="button" className="atonement-day-proof-thumb" onClick={() => setZoomProof(day.proof)} aria-label={`Enlarge ${day.proof.name}`}>
+                          <img src={day.proof.dataUrl} alt={day.proof.name} />
+                        </button>
+                      )}
+                      {day.proof.type?.startsWith('video/') && <video src={day.proof.dataUrl} controls />}
+                      {day.proof.type?.startsWith('audio/') && <audio src={day.proof.dataUrl} controls />}
+                      {!/^(image|video|audio)\//.test(day.proof.type || '') && (
+                        <div className="atonement-day-proof-file"><Paperclip size={16} /><span title={day.proof.name}>{day.proof.name}</span></div>
+                      )}
+                      <button type="button" className="btn btn-outline btn-sm" onClick={() => (day.proof.type?.startsWith('image/') ? setZoomProof(day.proof) : openProofInNewTab(day.proof))}>
+                        <Eye size={13} /> View Proof
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="atonement-day-details"><span>{record.proofRequirements?.some((r) => r.required) ? 'Proof pending' : 'No proof uploaded'}</span></div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1971,35 +2023,50 @@ function PariharamProgressModal({ record, onClose }) {
           </div>
         )}
       </div>
+      {zoomProof && (
+        <div className="atonement-proof-lightbox" role="dialog" aria-modal="true" onClick={(event) => { event.stopPropagation(); setZoomProof(null) }}>
+          <button type="button" className="icon-btn" aria-label="Close preview" onClick={() => setZoomProof(null)}><X size={18} /></button>
+          <img src={zoomProof.dataUrl} alt={zoomProof.name} onClick={(event) => event.stopPropagation()} />
+        </div>
+      )}
     </div>,
     document.body,
   )
 }
 
+const PROGRESS_SOURCE_LABELS = { appointment: 'Appointment', call: 'Call', chat: 'Chat', question: 'Text' }
+const PROGRESS_SOURCE_META = {
+  appointment: { Icon: CalendarDays, tone: 'tone-violet' },
+  call: { Icon: Phone, tone: 'tone-green' },
+  chat: { Icon: MessageSquare, tone: 'tone-amber' },
+  question: { Icon: FileText, tone: 'tone-neutral' },
+}
+const PROGRESS_STATUS_ICONS = { 'Not Started': Circle, 'In Progress': Clock, Completed: CheckCircle2, Overdue: AlertTriangle, Cancelled: XCircle }
+
 const PROGRESS_STATUS_OPTIONS = ['All', 'Not Started', 'In Progress', 'Completed', 'Overdue']
 
-function UserProgressTab({ astrologerId, consultations, appointments }) {
+function UserProgressTab({ astrologerId, consultations, appointments, atonements }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
+  const [sourceFilter, setSourceFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
   const [viewTarget, setViewTarget] = useState(null)
 
   const records = useMemo(() => {
-    const real = buildRealPariharamRecords(consultations, appointments, astrologerId)
-    const realAppointmentIds = new Set(real.map((record) => record.appointmentId))
-    const mock = buildMockPariharamRecords().filter((record) => !realAppointmentIds.has(record.appointmentId))
-    return [...real, ...mock].map(enrichPariharamRecord)
-  }, [consultations, appointments, astrologerId])
+    const shared = buildAtonementProgressRecords(atonements, astrologerId, appointments)
+    const covered = new Set(shared.map((record) => record.appointmentId))
+    const legacy = buildLegacyPariharamRecords(consultations, appointments, astrologerId, covered)
+    return [...shared, ...legacy].map(enrichPariharamRecord)
+  }, [atonements, consultations, appointments, astrologerId])
 
-  const stats = useMemo(() => ({
-    'Not Started': records.filter((record) => record.status === 'Not Started').length,
-    'In Progress': records.filter((record) => record.status === 'In Progress').length,
-    Completed: records.filter((record) => record.status === 'Completed').length,
-    Overdue: records.filter((record) => record.status === 'Overdue').length,
-  }), [records])
+  const viewRecord = viewTarget ? records.find((record) => record.id === viewTarget.id) || viewTarget : null
+
+  const sourceCounts = useMemo(() => Object.fromEntries(
+    Object.entries(ATONEMENT_SOURCE_GROUPS).map(([key, types]) => [key, records.filter((record) => types.includes(record.sourceType)).length]),
+  ), [records])
 
   const filtered = useMemo(() => {
-    let list = records
+    let list = records.filter((record) => ATONEMENT_SOURCE_GROUPS[sourceFilter].includes(record.sourceType))
     if (statusFilter !== 'All') list = list.filter((record) => record.status === statusFilter)
     if (search.trim()) {
       const q = search.trim().toLowerCase()
@@ -2017,23 +2084,22 @@ function UserProgressTab({ astrologerId, consultations, appointments }) {
       })
     }
     return list
-  }, [records, statusFilter, search, dateFilter])
+  }, [records, sourceFilter, statusFilter, search, dateFilter])
 
   return (
     <div className="atonement-user-progress">
       <div className="stat-grid">
         {[
-          ['All', records.length, 'Total Users', 'tone-violet', Users],
-          ['Not Started', stats['Not Started'], 'Not Started', 'tone-neutral', Circle],
-          ['In Progress', stats['In Progress'], 'In Progress', 'tone-amber', ClipboardList],
-          ['Completed', stats.Completed, 'Completed', 'tone-green', CheckCircle2],
-          ['Overdue', stats.Overdue, 'Overdue', 'tone-red', AlertTriangle],
+          ['all', sourceCounts.all, 'All Sources', 'tone-violet', Users],
+          ['text', sourceCounts.text, 'Text', 'tone-neutral', FileText],
+          ['calls-chats', sourceCounts['calls-chats'], 'Calls & Chats', 'tone-amber', MessageSquare],
+          ['appointments', sourceCounts.appointments, 'Appointments', 'tone-green', CalendarDays],
         ].map(([value, count, label, tone, Icon]) => (
           <button
             key={label}
             type="button"
-            className={`stat-card stat-card-clickable${statusFilter === value ? ' is-active' : ''}`}
-            onClick={() => setStatusFilter(value)}
+            className={`stat-card stat-card-clickable${sourceFilter === value ? ' is-active' : ''}`}
+            onClick={() => setSourceFilter(value)}
           >
             <div className={`stat-icon ${tone}`}><Icon size={20} /></div>
             <div className="stat-card-body"><div className="stat-value">{count}</div><div className="stat-label">{label}</div></div>
@@ -2055,34 +2121,33 @@ function UserProgressTab({ astrologerId, consultations, appointments }) {
       {filtered.length ? (
         <div className="atonement-progress-list">
           {filtered.map((record) => (
-            <div key={record.id} className="atonement-progress-card">
-              <div className="atonement-progress-card-left">
-                <span className="atonement-avatar">{initialsFor(record.userName)}</span>
-                <div className="atonement-progress-identity">
-                  <div className="atonement-progress-user">
-                    <strong>{record.userName}</strong>
-                    <span>{record.bookingId}</span>
+            <div key={record.id} className="atonement-progress-card is-stacked">
+              <div className="atonement-pcard-head">
+                <div className="atonement-progress-card-left">
+                  <span className="atonement-avatar">{initialsFor(record.userName)}</span>
+                  <div className="atonement-progress-identity">
+                    <strong className="atonement-pcard-name">{record.userName}</strong>
+                    <span className="atonement-pcard-booking">{record.bookingId}</span>
                   </div>
-                  <div className="atonement-progress-pariharam">
-                    <strong>{record.pariharamName}</strong>
-                    <span><Clock size={12} /> {record.totalDays} Days · Start {formatProgressDate(record.startAt)} · Due {formatProgressDate(record.dueAt)}</span>
-                  </div>
+                </div>
+                <div className="atonement-pcard-badges">
+                  {(() => {
+                    const meta = PROGRESS_SOURCE_META[record.sourceType] || PROGRESS_SOURCE_META.appointment
+                    return <span className={`atonement-progress-status ${meta.tone}`}><meta.Icon size={12} />{PROGRESS_SOURCE_LABELS[record.sourceType] || 'Appointment'}</span>
+                  })()}
+                  <PariharamStatusBadge status={record.cancelled && record.status !== 'Completed' ? 'Cancelled' : record.status} />
                 </div>
               </div>
 
-              <div className="atonement-progress-card-center">
-                <div className="atonement-progress-row">
-                  <span>{record.completedCount} / {record.totalDays} Days Completed</span>
-                  <strong>{record.progressPercent}%</strong>
+              <div className="atonement-pcard-body">
+                <div className="atonement-progress-pariharam">
+                  <strong>{record.pariharamName}</strong>
                 </div>
-                <div className="atonement-progress"><span style={{ width: `${record.progressPercent}%` }} /></div>
-                <span className="atonement-progress-current-day">{record.currentDay}</span>
               </div>
 
-              <div className="atonement-progress-card-right">
-                <PariharamStatusBadge status={record.status} />
+              <div className="atonement-pcard-foot">
                 <button type="button" className="btn btn-primary btn-sm" onClick={() => setViewTarget(record)}>
-                  <Eye size={14} /> View Progress
+                  <Eye size={14} /> View
                 </button>
               </div>
             </div>
@@ -2096,12 +2161,12 @@ function UserProgressTab({ astrologerId, consultations, appointments }) {
         </div>
       )}
 
-      {viewTarget && <PariharamProgressModal record={viewTarget} onClose={() => setViewTarget(null)} />}
+      {viewRecord && <PariharamProgressModal record={viewRecord} onClose={() => setViewTarget(null)} />}
     </div>
   )
 }
 
-function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod, onCreateManually, savedAtonements, initialView = 'platform', astrologerId, consultations, appointments }) {
+function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod, onCreateManually, savedAtonements, initialView = 'platform', astrologerId, consultations, appointments, atonements }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [viewMode, setViewMode] = useState(initialView)
@@ -2139,7 +2204,7 @@ function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod
       </div>
 
       {viewMode === 'progress' && (
-        <UserProgressTab astrologerId={astrologerId} consultations={consultations} appointments={appointments} />
+        <UserProgressTab astrologerId={astrologerId} consultations={consultations} appointments={appointments} atonements={atonements} />
       )}
 
       {viewMode === 'saved' && (
@@ -2261,7 +2326,9 @@ function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod
 
 export default function Atonement() {
   const { currentUser } = useAuth()
-  const { consultations, appointments } = useAppData()
+  const { consultations, appointments, atonements } = useAppData()
+  const routerState = useLocation().state
+  const returnTo = typeof routerState?.returnTo === 'string' && routerState.returnTo.startsWith('/astrologer/') ? routerState.returnTo : null
   const { success, toast } = useToast()
   const userId = currentUser?.id || 'guest'
   const categoryKey = atonementStorageKey(userId, 'categories')
@@ -2471,6 +2538,9 @@ export default function Atonement() {
         title="Atonement"
         subtitle="Create and manage atonement services"
         actions={null}
+        showBack={Boolean(returnTo)}
+        backTo={returnTo || undefined}
+        backLabel="Back to Question"
       />
       {source === 'platform-default' && (
         <div className="atonement-source-banner">
@@ -2514,6 +2584,7 @@ export default function Atonement() {
               astrologerId={userId}
               consultations={consultations}
               appointments={appointments}
+              atonements={atonements}
             />}
       </div>
     </div>

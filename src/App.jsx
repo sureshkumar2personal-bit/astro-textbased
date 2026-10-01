@@ -14,7 +14,6 @@ import Dashboard from './pages/Dashboard.jsx'
 import UserDashboard from './pages/UserDashboard.jsx'
 import TextBasedQuestions from './pages/TextBasedQuestions.jsx'
 import SalesManagement from './pages/SalesManagement.jsx'
-import Campaigns from './pages/Campaigns.jsx'
 import PurchasePackage from './pages/PurchasePackage.jsx'
 import AskQuestion from './pages/AskQuestion.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
@@ -187,7 +186,6 @@ function AstrologerRoutes() {
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
         <Route path="/astrologer/atonement" element={<Atonement />} />
-        <Route path="/astrologer/campaigns" element={<Campaigns />} />
         <Route path="/astrologer/my-account" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/account/editors-assistants" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />

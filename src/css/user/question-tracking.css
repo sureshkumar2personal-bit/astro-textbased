@@ -607,3 +607,75 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
+
+/* =====================================================
+   Question Details modal — presentation only (.qd-modal)
+   ===================================================== */
+.qd-modal { --qd-radius: 12px; --qd-border: var(--surface-border, #e6e3f0); border-radius: 16px; }
+.qd-modal .modal-card__header { padding: 18px 22px; border-bottom: 1px solid var(--qd-border); gap: 16px; }
+.qd-header-copy { min-width: 0; }
+.qd-title { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+.qd-subtitle { margin-top: 3px; overflow: hidden; font-size: 12.5px; text-overflow: ellipsis; white-space: nowrap; }
+.qd-header-actions { display: flex; flex-shrink: 0; align-items: center; gap: 10px; }
+.qd-modal .qd-close { width: 30px; height: 30px; min-width: 30px; border-radius: 8px; }
+.qd-body { display: flex; flex-direction: column; gap: 22px; padding: 20px 22px; }
+.qd-modal .qd-section-label { margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+.qd-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; overflow: hidden; border: 1px solid var(--qd-border); border-radius: var(--qd-radius); background: var(--surface-strong, #fff); }
+.qd-info > div { display: grid; gap: 3px; padding: 12px 14px; border-right: 1px solid var(--qd-border); border-bottom: 1px solid var(--qd-border); margin: -0 -1px -1px 0; min-width: 0; }
+.qd-info > div strong { font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
+.qd-info > div .muted { overflow-wrap: anywhere; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+
+.qd-content { padding: 14px 16px; border: 1px solid var(--qd-border); border-radius: var(--qd-radius); font-size: 14.5px; line-height: 1.65; color: var(--ink); background: var(--surface-strong, #fff); }
+.qd-content--answer { border-left: 3px solid var(--primary); background: color-mix(in srgb, var(--primary) 3%, var(--surface-strong, #fff)); }
+
+.qd-atonement { display: grid; gap: 14px; padding: 16px 18px; border: 1px solid var(--qd-border); border-radius: var(--qd-radius); background: var(--surface-strong, #fff); box-shadow: 0 1px 3px rgba(20, 16, 40, .06); }
+.qd-atonement-head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--qd-border); }
+.qd-atonement-icon { display: grid; flex-shrink: 0; width: 32px; height: 32px; place-items: center; border-radius: 9px; color: var(--primary); background: color-mix(in srgb, var(--primary) 9%, transparent); }
+.qd-atonement-heading { flex: 1 1 auto; min-width: 0; }
+.qd-atonement-kicker { font-size: 15px; font-weight: 700; line-height: 1.25; letter-spacing: -.005em; color: var(--ink); }
+.qd-atonement-hint { margin-top: 2px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+.qd-atonement-head > :last-child { flex-shrink: 0; align-self: flex-start; font-size: 11.5px; }
+.qd-atonement-title { display: grid; gap: 2px; }
+.qd-atonement-title strong { font-size: 15.5px; font-weight: 700; line-height: 1.35; color: var(--ink); }
+.qd-atonement-title span { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.qd-atonement-progress { display: grid; gap: 7px; }
+.qd-atonement-progress-row { display: flex; align-items: baseline; gap: 8px; font-size: 12px; }
+.qd-atonement-progress-label { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.qd-atonement-progress-count { margin-right: auto; font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.qd-atonement-progress-row strong { font-size: 12.5px; font-weight: 700; color: var(--primary); }
+.qd-atonement .atonement-progress { height: 4px; border-radius: 999px; overflow: hidden; }
+.qd-atonement .atonement-progress > span { border-radius: 999px; transition: width 300ms ease; }
+.qd-atonement .qd-atonement-action { justify-self: start; gap: 6px; border-color: color-mix(in srgb, var(--primary) 45%, transparent); border-radius: 9px; color: var(--primary); font-weight: 600; transition: background 150ms, color 150ms, border-color 150ms, transform 150ms; }
+.qd-atonement .qd-atonement-action:hover { border-color: var(--primary); color: #fff; background: var(--primary); transform: translateY(-1px); }
+.qd-atonement .qd-atonement-action svg { transition: transform 150ms; }
+.qd-atonement .qd-atonement-action:hover svg { transform: translateX(2px); }
+
+.qd-modal .qd-rating { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--qd-border); border-radius: var(--qd-radius); box-shadow: none; }
+.qd-rating-title { margin: 0; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.qd-stars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 420px; }
+.qd-star { display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 38px; border: 1px solid var(--qd-border); border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); background: var(--surface-strong, #fff); cursor: pointer; transition: border-color 150ms, background 150ms, color 150ms, transform 150ms; }
+.qd-star:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+.qd-star:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.qd-star.is-active { border-color: var(--primary); color: #fff; background: var(--primary); }
+.qd-rating-hint { margin-top: -4px; font-size: 12.5px; }
+.qd-feedback { margin: 0; }
+.qd-modal .qd-feedback .textarea-box { min-height: 84px; padding: 11px 13px; border-radius: 10px; font-size: 13.5px; line-height: 1.5; resize: vertical; }
+.qd-modal .qd-feedback .textarea-box::placeholder { font-size: 13px; color: var(--muted); opacity: .8; }
+.qd-modal .qd-rating .btn-row .btn { min-width: 120px; border-radius: 9px; }
+
+.qd-modal .modal-card__footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--qd-border); }
+.qd-modal .modal-card__footer .btn { min-width: 96px; height: 38px; padding: 0 18px; border-radius: 9px; font-size: 13.5px; font-weight: 600; }
+.qd-modal .modal-card__footer .btn-primary { background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 82%, #000)); }
+.qd-modal .modal-card__footer .btn-ghost { border: 1px solid var(--qd-border); background: transparent; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .qd-modal .modal-card__header, .qd-body, .qd-modal .modal-card__footer { padding-left: 16px; padding-right: 16px; }
+  .qd-info { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .qd-atonement { padding: 14px; }
+  .qd-atonement-head { flex-wrap: wrap; }
+  .qd-atonement-heading { flex-basis: calc(100% - 52px); }
+  .qd-atonement-progress-row { flex-wrap: wrap; }
+  .qd-modal .modal-card__footer { flex-wrap: wrap; }
+  .qd-modal .modal-card__footer .btn { flex: 1 1 auto; }
+}

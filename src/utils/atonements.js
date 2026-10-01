@@ -46,6 +46,21 @@ export function normalizeProof(proof) {
   return { name: clean(proof.name) || 'Proof', type: clean(proof.type), dataUrl: proof.dataUrl, addedAt: proof.addedAt || null }
 }
 
+export const PROOF_TYPE_LABELS = {
+  photo: 'Photo',
+  video: 'Video',
+  'audio-sankalpam': 'Audio Sankalpam',
+  'temple-receipt': 'Temple Receipt',
+}
+
+// Astrologer-configured proof map ({photo:'required'|'optional'}) -> list of {key,label,required}.
+export function normalizeProofRequirements(value) {
+  if (!value || typeof value !== 'object') return []
+  return Object.entries(value)
+    .filter(([, mode]) => mode === 'required' || mode === 'optional')
+    .map(([key, mode]) => ({ key, label: PROOF_TYPE_LABELS[key] || key, required: mode === 'required' }))
+}
+
 export function setAtonementDayProof(atonement, index, proof) {
   const day = atonement.days?.[index]
   if (!day || !day.completed) return atonement
@@ -86,6 +101,14 @@ export function normalizeAtonement(record = {}) {
     astrologerName: record.astrologerName || 'Astrologer',
     sourceType: ATONEMENT_SOURCE_TYPES.includes(record.sourceType) ? record.sourceType : 'question',
     sourceId: record.sourceId || '',
+    appointmentId: record.appointmentId || '',
+    consultationId: record.consultationId || '',
+    templateId: record.templateId || '',
+    customerName: record.customerName || '',
+    title: clean(record.title || record.method?.title),
+    assignedBy: record.assignedBy || record.astrologerId || '',
+    assignedAt: record.assignedAt || record.createdAt || null,
+    proofRequirements: normalizeProofRequirements(record.proofRequirements || record.method?.proof),
     method: record.method && typeof record.method === 'object' ? record.method : null,
     sourceLabel: record.sourceLabel || 'Consultation',
     summary: clean(record.summary || first.summary),
@@ -171,4 +194,15 @@ export function updateAtonementDay(atonement, index, completed, date = new Date(
 
 export function sourceLabel(sourceType) {
   return ATONEMENT_SOURCE_LABELS[sourceType] || 'Consultation'
+}
+
+// Chrome blocks top-level navigation to data: URLs, so open proof through a blob URL instead.
+export async function openProofInNewTab(proof) {
+  if (!proof?.dataUrl) return
+  try {
+    const blob = await (await fetch(proof.dataUrl)).blob()
+    window.open(URL.createObjectURL(blob), '_blank', 'noopener')
+  } catch {
+    window.open(proof.dataUrl, '_blank', 'noopener')
+  }
 }

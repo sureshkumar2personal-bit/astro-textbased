@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Activity,
@@ -129,7 +129,6 @@ const PAGE_META = {
     '/astrologer/perks-benefits/history': { title: 'History', sub: 'Track your monthly fulfillment rate against customer commitments.' },
     '/astrologer/text-based-questions': { title: 'Text-Based Questions', sub: 'Questions, campaigns, and queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
-    '/astrologer/campaigns': { title: 'All Campaigns', sub: 'Browse campaigns and view full details' },
     '/astrologer/audience/follower': { title: 'Follower Profile', sub: 'Audience member details' },
     '/astrologer/audience/subscriber': { title: 'Subscriber Profile', sub: 'Audience member details' },
     '/astrologer/wallet-history': { title: 'Wallet History', sub: 'Balance and transaction history' },
@@ -388,6 +387,10 @@ function UserConsultationDetails({ consultation, history, onSelect, onComplete, 
 
 export default function Layout() {
   const location = useLocation()
+  // Captured per render so AnimatePresence keeps the OLD route's element while it fades out.
+  // A bare <Outlet /> would render the NEW route inside the exiting wrapper, mounting the page
+  // (and any modal it opens) twice.
+  const outlet = useOutlet()
   const navigate = useNavigate()
   const { currentUser, logout } = useAuth()
   const { notifications, consultations, actions, astrologerServices, incomingRequests } = useAppData()
@@ -596,7 +599,7 @@ export default function Layout() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Outlet />
+              {outlet}
             </motion.div>
           </AnimatePresence>
         </div>

@@ -7,7 +7,7 @@ import { ROLES } from '../utils/roleRoutes.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
-import { createAtonementRecord, normalizeAtonement, setAtonementDayProof, updateAtonementDay } from '../utils/atonements.js'
+import { createAtonementRecord, localDateIso, normalizeAtonement, setAtonementDayProof, updateAtonementDay } from '../utils/atonements.js'
 import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
 import {
   MONTHLY_QUESTION_CAPACITY,
@@ -3058,10 +3058,13 @@ export function AppDataProvider({ children }) {
         moduleStatus: question.status,
       })
     },
-    saveQuestionDraft(questionId, draftAnswer, attachments = [], referenceLinks = []) {
+    saveQuestionDraft(questionId, draftAnswer, attachments = [], referenceLinks = [], recommendation = null) {
       const question = questions.find((item) => item.id === questionId)
       setQuestions((prev) =>
-        updateQuestion(prev, questionId, (question) => applyQuestionDraft(question, draftAnswer, attachments, referenceLinks)),
+        updateQuestion(prev, questionId, (question) => {
+          const next = applyQuestionDraft(question, draftAnswer, attachments, referenceLinks)
+          return next === question ? next : { ...next, draftRecommendedAtonement: recommendation || null }
+        }),
       )
       if (question) {
         logActivity({
@@ -3077,10 +3080,20 @@ export function AppDataProvider({ children }) {
         })
       }
     },
-    submitQuestionAnswer(questionId, answer, attachments = [], referenceLinks = []) {
+    submitQuestionAnswer(questionId, answer, attachments = [], referenceLinks = [], atonement = null) {
       const question = questions.find((item) => item.id === questionId)
+      if (question && atonement) this.assignAtonementFromQuestion(question, atonement)
+      // The question points at the user's progress record (and the template it came from).
+      const recommendedAtonementId = question && atonement
+        ? (atonements.find((item) => item.sourceType === 'question' && item.sourceId === questionId)?.id || `ATN-${questionId}`)
+        : null
       setQuestions((prev) =>
-        updateQuestion(prev, questionId, (question) => applyAnswerSubmit(question, answer, Date.now(), attachments, referenceLinks)),
+        updateQuestion(prev, questionId, (question) => {
+          const next = applyAnswerSubmit(question, answer, Date.now(), attachments, referenceLinks)
+          return atonement
+            ? { ...next, recommendedAtonementId, recommendedTemplateId: atonement.templateId || null, draftRecommendedAtonement: null }
+            : { ...next, draftRecommendedAtonement: null }
+        }),
       )
 if (question) {
         logActivity({
@@ -3730,6 +3743,7 @@ if (question) {
           consultationFollowUpRequired: false,
           consultationSentAt: record.sentAt,
         })
+        if (record.atonement && record.userId) this.assignAtonementFromConsultation(record)
       }
       logActivity({
         astrologerId,
@@ -3744,6 +3758,86 @@ if (question) {
         moduleStatus: send ? 'Completed' : 'Draft',
       })
       return record
+    },
+    // Single source of truth: the astrologer's assignment becomes an `atonements[]` record that
+    // both the user (tick days, add proof) and the astrologer (progress, proof) read and write.
+    assignAtonementFromConsultation(consultation) {
+      if (!consultation.atonement || !consultation.userId) return null
+      return this.upsertAssignedAtonement({
+        sourceType: 'appointment',
+        sourceId: consultation.appointmentId,
+        sourceLabel: `Appointment ${consultation.appointmentId}`,
+        appointmentId: consultation.appointmentId,
+        consultationId: consultation.id,
+        userId: consultation.userId,
+        customerName: consultation.customerName,
+        astrologerId: consultation.astrologerId,
+        astrologerName: consultation.astrologerName,
+        atonement: consultation.atonement,
+        notes: consultation.notes,
+        assignedAt: consultation.sentAt,
+      })
+    },
+    assignAtonementFromQuestion(question, atonement) {
+      const userId = question?.submittedByUserId
+      if (!question || !atonement || !userId) return null
+      return this.upsertAssignedAtonement({
+        sourceType: 'question',
+        sourceId: question.id,
+        sourceLabel: `Question ${question.id}`,
+        userId,
+        customerName: question.user,
+        astrologerId: question.astrologerId,
+        astrologerName: mockAstrologers.find((item) => item.id === question.astrologerId)?.name,
+        atonement,
+        notes: '',
+        assignedAt: new Date().toISOString(),
+      })
+    },
+    upsertAssignedAtonement({ sourceType, sourceId, sourceLabel, appointmentId = '', consultationId = '', userId, customerName, astrologerId, astrologerName, atonement: at, notes, assignedAt }) {
+      const content = at.content || {}
+      const daysCount = Math.max(1, Number(at.completionDays) || 1)
+      const start = at.startAt ? new Date(at.startAt) : new Date()
+      const days = Array.from({ length: daysCount }, (_, i) => ({
+        date: localDateIso(new Date(start.getTime() + i * 86400000)),
+        dayNumber: i + 1,
+        hour: content.hour || at.hour || '',
+        place: content.place || at.place || '',
+        god: content.god || content.deity || at.god || '',
+        things: content.things || at.things || '',
+        poojas: content.poojas || at.poojas || notes || '',
+        extraNotes: content.extraNotes || at.extraNotes || '',
+        summary: at.title || 'Pariharam',
+        completed: false,
+      }))
+      const base = {
+        userId,
+        customerName: customerName || '',
+        astrologerId,
+        astrologerName: astrologerName || 'Astrologer',
+        assignedBy: astrologerId,
+        assignedAt: assignedAt || new Date().toISOString(),
+        sourceType,
+        sourceId,
+        appointmentId,
+        consultationId,
+        templateId: at.templateId || '',
+        sourceLabel,
+        title: at.title || 'Pariharam',
+        summary: at.title || notes?.slice(0, 80) || 'Pariharam',
+        method: Object.keys(content).length ? { ...content, title: content.title || at.title } : null,
+        proofRequirements: content.proof,
+      }
+      let saved = null
+      setAtonements((prev) => {
+        const existing = prev.find((item) => item.sourceId === sourceId && item.sourceType === sourceType)
+        // Re-sending keeps whatever the user has already completed / uploaded.
+        saved = existing
+          ? normalizeAtonement({ ...existing, ...base, id: existing.id, days: existing.days.some((d) => d.completed) ? existing.days : days, createdAt: existing.createdAt })
+          : createAtonementRecord({ ...base, id: `ATN-${sourceId}`, days, createdAt: base.assignedAt })
+        return [saved, ...prev.filter((item) => item.id !== saved.id)]
+      })
+      return saved
     },
     sendConsultation(appointmentId) {
       setConsultations((prev) =>
@@ -4509,7 +4603,7 @@ if (question) {
       setUserWithdrawals((prev) => [withdrawal, ...prev])
       return withdrawal
     },
-  }), [astrologerPosts, appointments, appointmentCalls, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, openQuestionSettings, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
+  }), [astrologerPosts, atonements, appointments, appointmentCalls, campaigns, consultations, currentUser?.id, followedAstrologerIds, incomingRequests, openQuestionSettings, payoutMethods, questions, subscriptions, astrologerWallet, userPaymentMethods, astrologerLiveSessions, liveReminders])
 
   useEffect(() => {
     const runQuestionAutomation = () => {
