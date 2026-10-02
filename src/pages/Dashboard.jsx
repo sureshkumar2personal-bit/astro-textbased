@@ -214,6 +214,7 @@ export default function Dashboard() {
       <Section
         title="Your Campaigns"
         icon={Megaphone}
+        onNavigate={() => navigate(`${routes.textBasedQuestions}?view=campaigns`)}
         action={
           <Link
             to={`${routes.textBasedQuestions}?view=campaigns`}
@@ -289,9 +290,25 @@ export default function Dashboard() {
   )
 }
 
-function Section({ title, icon: Icon, subtitle, action, children }) {
+function Section({ title, icon: Icon, subtitle, action, onNavigate, children }) {
+  const clickableProps = onNavigate
+    ? {
+        role: 'link',
+        tabIndex: 0,
+        onClick: (event) => {
+          if (event.target.closest('a, button')) return
+          onNavigate()
+        },
+        onKeyDown: (event) => {
+          if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault()
+            onNavigate()
+          }
+        },
+      }
+    : {}
   return (
-    <div className="section">
+    <div className={`section${onNavigate ? ' adash-section--clickable' : ''}`} {...clickableProps}>
       {title && (
         <div className="section-title">
           <span className="flex items-center gap-2.5">

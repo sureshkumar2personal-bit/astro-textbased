@@ -22,6 +22,7 @@ export default function AppointmentsShell() {
         eyebrow="Astrologer Workspace"
         title="Appointments"
         subtitle="Publish availability first, review the calendar after publish, and check appointment history here."
+        showBack
       />
 
       <div className="wd-tabs" role="tablist" aria-label="Appointment sections">

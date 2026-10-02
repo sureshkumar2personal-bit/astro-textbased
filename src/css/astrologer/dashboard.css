@@ -8575,6 +8575,9 @@ button.apt-week-day:focus-visible {
 .adash-campaign-track > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
 .adash-campaign-actions { display: flex; gap: 8px; margin-top: 4px; }
 .adash-campaign-btn { flex: 1; min-height: 34px; padding: 0 10px; border: 1px solid var(--surface-border); border-radius: 10px; background: var(--surface-soft); color: var(--text-secondary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 180ms var(--ease-premium); }
+.adash-section--clickable { cursor: pointer; }
+.adash-section--clickable:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 12px; }
+.adash-section--clickable > .section-title:hover { color: var(--primary); }
 .adash-campaign-btn:hover { border-color: var(--primary); color: var(--primary); }
 .adash-campaign-btn--primary { border-color: var(--primary); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
 .adash-campaign-btn--primary:hover { border-color: var(--primary-dark); color: #fff; box-shadow: 0 6px 14px rgba(109, 40, 217, 0.25); }
