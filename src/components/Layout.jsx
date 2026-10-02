@@ -70,6 +70,7 @@ const ROLE_CONFIG = {
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
       { to: 'activity', label: 'My Activity', icon: Activity },
+      { to: 'profile', label: 'My Profile', icon: UserRound },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
@@ -139,6 +140,7 @@ const PAGE_META = {
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/profile': { title: 'My Profile', sub: 'Your professional identity and how you appear to users' },
     '/astrologer/my-account': { title: 'Account Management', sub: 'Profile, access, security, and account preferences' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
