@@ -73,6 +73,7 @@ import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
+import AstrologerMyProfile from './pages/astrologer/MyProfile.jsx'
 import PaymentMethods from './pages/user/payment-methods/PaymentMethods.jsx'
 import AddPaymentMethod from './pages/user/payment-methods/AddPaymentMethod.jsx'
 import Autopay from './pages/user/autopay/Autopay.jsx'
@@ -186,6 +187,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
         <Route path="/astrologer/atonement" element={<Atonement />} />
+        <Route path="/astrologer/profile" element={<AstrologerMyProfile />} />
         <Route path="/astrologer/my-account" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/account/editors-assistants" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />
