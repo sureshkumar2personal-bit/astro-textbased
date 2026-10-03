@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildPageTokens } from './pagination.js'
+import { buildPageTokens, paginateViewMore } from './pagination.js'
 
 describe('buildPageTokens (3-number window)', () => {
   it('shows every page when there are three or fewer', () => {
@@ -19,5 +19,26 @@ describe('buildPageTokens (3-number window)', () => {
   })
   it('never emits ellipsis tokens', () => {
     for (let page = 1; page <= 20; page += 1) expect(buildPageTokens(page, 20).every((t) => typeof t === 'number')).toBe(true)
+  })
+})
+
+describe('paginateViewMore (first page + View More)', () => {
+  const items = Array.from({ length: 12 }, (_, index) => `a${index + 1}`)
+
+  it('limits the first page and reveals everything when expanded', () => {
+    expect(paginateViewMore(items, { pageSize: 6 })).toEqual(items.slice(0, 6))
+    expect(paginateViewMore(items, { expanded: true, pageSize: 6 })).toEqual(items)
+  })
+
+  it('never duplicates or drops records across the two states', () => {
+    const collapsed = paginateViewMore(items, { pageSize: 6 })
+    const expanded = paginateViewMore(items, { expanded: true, pageSize: 6 })
+    expect(new Set(expanded).size).toBe(expanded.length)
+    expect(expanded.filter((item) => collapsed.includes(item))).toEqual(collapsed)
+  })
+
+  it('keeps the whole list when it is shorter than the first page', () => {
+    expect(paginateViewMore(['only-one'], { pageSize: 6 })).toEqual(['only-one'])
+    expect(paginateViewMore([], { pageSize: 6 })).toEqual([])
   })
 })

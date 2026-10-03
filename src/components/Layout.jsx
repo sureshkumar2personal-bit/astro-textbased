@@ -6,10 +6,7 @@ import {
   Sparkles,
   Gift,
   LayoutDashboard,
-  ShoppingBag,
   CircleHelp,
-  ListChecks,
-  Gavel,
   Bell,
   ChevronRight,
   Wallet,
@@ -84,15 +81,13 @@ const ROLE_CONFIG = {
         label: 'Explore Astrologers',
         icon: Sparkles,
       },
+      // Single Ask a Question entry: it opens the question dashboard, whose four
+      // sections (Ask New, My Questions, Disputes, History) replace the old
+      // Text-Based Questions sub-items.
       {
-        label: 'Text-Based Questions',
+        label: 'Ask a Question',
         to: 'ask-question',
         icon: CircleHelp,
-        children: [
-          { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
-          { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
-          { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
-        ],
       },
       {
         label: 'Appointments',
@@ -185,6 +180,14 @@ const PAGE_META = {
     '/user/withdraw': { title: 'Withdraw Funds', sub: 'Transfer money from your wallet to your bank or UPI.' },
     '/user/transaction-history': { title: 'Transaction History', sub: 'Complete record of all wallet movements.' },
   },
+}
+
+// The Ask a Question dashboard is one page with four tabs, so each tab needs its
+// own heading in the top bar.
+const QUESTION_DASHBOARD_META = {
+  '/user/ask-question/my-questions': { title: 'My Questions', sub: 'Review your questions, their status and available answers.' },
+  '/user/ask-question/disputes': { title: 'Disputes', sub: 'Track the disputes you raised and their current status.' },
+  '/user/ask-question/history': { title: 'History', sub: 'Your question history for the last 6 months.' },
 }
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
@@ -410,7 +413,8 @@ export default function Layout() {
   const dynamicBookingMeta = role === ROLES.USER && location.pathname.startsWith('/user/appointments/book/')
     ? { title: 'Book Appointment', sub: 'Pick an available date, review its open slots and pay from your wallet.' }
     : null
-  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
+  const dynamicQuestionMeta = role === ROLES.USER ? QUESTION_DASHBOARD_META[location.pathname] || null : null
+  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]

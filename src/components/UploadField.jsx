@@ -1,9 +1,21 @@
 import { useRef, useState } from 'react'
 import { UploadCloud, CheckCircle2 } from 'lucide-react'
 
-export default function UploadField({ label, accept }) {
+// The app's single upload primitive. It has always been fire-and-forget (it only
+// shows the picked file name), so `onFileSelect` is optional: callers that do not
+// pass it keep the previous behaviour exactly.
+export default function UploadField({ label, accept, onFileSelect, fileName: controlledFileName, hint }) {
   const inputRef = useRef(null)
-  const [fileName, setFileName] = useState('')
+  const [internalFileName, setInternalFileName] = useState('')
+  const fileName = controlledFileName ?? internalFileName
+
+  const handleChange = (event) => {
+    const file = event.target.files?.[0] || null
+    // Clearing the value lets the same file be picked again after a removal.
+    event.target.value = ''
+    setInternalFileName(file?.name || '')
+    onFileSelect?.(file)
+  }
 
   return (
     <div>
@@ -21,7 +33,7 @@ export default function UploadField({ label, accept }) {
           type="file"
           accept={accept}
           style={{ display: 'none' }}
-          onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
+          onChange={handleChange}
         />
       </div>
       {fileName && (
@@ -30,6 +42,7 @@ export default function UploadField({ label, accept }) {
           {fileName}
         </div>
       )}
+      {hint && <div className="muted mt-2 text-xs">{hint}</div>}
     </div>
   )
 }

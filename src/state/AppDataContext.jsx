@@ -22,6 +22,7 @@ import {
   validateCapacityAllocation,
 } from '../utils/questions.js'
 import { ANSWER_DEADLINE_EXCEEDED_REASON, applyAnswerDeadlineCancellation, applyAnswerEdit, applyAnswerSubmit, applyQuestionDraft } from '../utils/answer.js'
+import { QUESTION_CREDIT_WINDOW_DAYS, consumeQuestionCreditInSlots, createQuestionCreditRecord, upsertQuestionCreditInSlots } from '../utils/questionCredits.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -1589,6 +1590,11 @@ function updatePurchasedSlotBalance(list, userId, campaignId, slotType, amount) 
       : { ...slot, personalPurchased: slot.personalPurchased + amount }
   })
 }
+
+// Adds a paid-but-unwritten question credit to the purchased-slot record that
+// already owns this campaign for this user (creating it when the user has no
+// package yet). Implemented in utils/questionCredits so the balance and the
+// credit records can never drift apart.
 
 function loadFromStorage(key, fallback) {
   try {
@@ -3218,6 +3224,32 @@ if (question) {
         })),
       )
     },
+    // "Pay Now, Ask Later": the payment happens here, the question text does not.
+    // The receipt is a credit on the existing purchased-slot record, so the user
+    // can come back and submit the question later. No wallet movement is
+    // introduced - a Paid question in this app records its amount on the
+    // question itself, and the credit keeps that same paid amount.
+    purchaseQuestionCredit(payload) {
+      const nowMs = Date.now()
+      const credit = createQuestionCreditRecord(payload, { nowMs, id: crypto.randomUUID() })
+      if (!credit.userId) return null
+
+      setPurchasedSlots((prev) => upsertQuestionCreditInSlots(prev, credit))
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Question purchased',
+          detail: `₹${credit.paidPrice.toLocaleString('en-IN')} paid for a ${credit.questionType.toLowerCase()} question with ${credit.astrologerName}. Submit it from Available Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.`,
+          time: 'just now',
+          route: '/user/ask-question/my-questions',
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+      return credit.id
+    },
     createQuestion(payload) {
       const nextId = `QTN-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
       const submittedAt = new Date().toISOString()
@@ -3273,7 +3305,15 @@ if (question) {
           answerReview: '',
           disputeRating: null,
           horoscopeMode: payload.horoscopeMode || 'Continue Without Horoscope',
-          attachments: [],
+          // Which horoscope this question carries: a reference to the saved
+          // profile horoscope, a freshly uploaded attachment, or neither.
+          horoscopeSource: payload.horoscopeSource || 'none',
+          horoscopeReference: payload.horoscopeReference || null,
+          horoscopeAttachment: payload.horoscopeAttachment || null,
+          // Birth details snapshot for the saved-horoscope case. The astrologer
+          // answer view already reads `customer`, so no new view is needed.
+          customer: payload.customer || null,
+          attachments: Array.isArray(payload.attachmentNames) ? payload.attachmentNames : [],
           previousQuestions: [],
           dispute: null,
           history: ['Question created'],
@@ -3281,7 +3321,18 @@ if (question) {
         ...prev,
       ])
       if (payload.purchaseType === 'Purchased Slot' && payload.slotType) {
-        setPurchasedSlots((prev) => updatePurchasedSlotBalance(prev, payload.userId, payload.campaignId, payload.slotType, -1))
+        setPurchasedSlots((prev) => consumeQuestionCreditInSlots(
+          updatePurchasedSlotBalance(prev, payload.userId, payload.campaignId, payload.slotType, -1),
+          {
+            creditId: payload.creditId || null,
+            userId: payload.userId,
+            // creditCampaignId keeps the Open Question case explicit: a credit
+            // bought for Open Question has a null campaignId.
+            campaignId: payload.creditCampaignId ?? null,
+            questionType: payload.slotType,
+            questionId: nextId,
+          },
+        ))
       }
       setQuestionPreviewId(nextId)
       setNotifications((prev) => [

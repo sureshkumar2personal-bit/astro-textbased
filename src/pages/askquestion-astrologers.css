@@ -1,0 +1,757 @@
+/* =========================================================================
+   Ask a Question - astrologer chooser (user side)
+   Compact, equal-height chooser cards for the "Choose an Astrologer" step.
+   Scoped to .aq-astro-* so nothing outside this step is affected.
+   ========================================================================= */
+
+/* Step rail for the shortened flow:
+   1 Choose Astrologer -> 2 Campaign & Type -> 3 Question */
+.aq-flow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.aq-flow-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.aq-flow-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.aq-flow-step.is-done {
+  color: var(--green-600);
+}
+
+.aq-flow-step.is-done .aq-flow-step__num {
+  background: var(--success-bg);
+  border-color: transparent;
+  color: var(--green-600);
+}
+
+.aq-flow-step.is-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.aq-flow-step.is-active .aq-flow-step__num {
+  background: var(--primary);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+/* Campaign + question type on one card. */
+.aq-type-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.aq-type-picker__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.aq-type-picker__hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.aq-type-picker__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+  gap: 8px;
+}
+
+.aq-type-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--primary);
+  background: var(--surface-strong);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.aq-type-pill:hover {
+  background: var(--primary-bg);
+  transform: translateY(-1px);
+}
+
+.aq-type-pill.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 26%, transparent);
+}
+
+.aq-type-pill.is-active .aq-type-pill__label,
+.aq-type-pill.is-active .aq-type-pill__price,
+.aq-type-pill.is-active .aq-type-pill__bottom {
+  color: #ffffff;
+}
+
+.aq-type-pill__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aq-type-pill__label {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.aq-type-pill__price {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.aq-type-pill__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.aq-type-pill__offer {
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  color: #ffffff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.aq-astro-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 212px), 1fr));
+  gap: 14px;
+}
+
+.aq-astro-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  height: 100%;
+  min-height: 164px;
+  padding: 14px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--surface-border);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--surface-strong)) 0%, var(--surface-strong) 58%),
+    var(--surface-strong);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.aq-astro-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.aq-astro-card.is-selected {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 30%, transparent), var(--shadow-xs);
+}
+
+/* Thin gradient ribbon on the top edge keeps the card colourful without
+   turning it into a tall banner. */
+.aq-astro-card__accent {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--violet-500), var(--gold-500));
+  opacity: 0.9;
+}
+
+.aq-astro-card.is-selected .aq-astro-card__accent {
+  opacity: 1;
+  background: linear-gradient(90deg, var(--violet-500), var(--primary), var(--gold-500));
+}
+
+.aq-astro-card__head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  margin-top: 4px;
+}
+
+.aq-astro-card__ident {
+  min-width: 0;
+}
+
+.aq-astro-card__name {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-astro-card__spec {
+  margin-top: 2px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-astro-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.aq-astro-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.aq-astro-card__badge--offer {
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.28);
+}
+
+.aq-astro-card__badge--first {
+  background: linear-gradient(90deg, #10b981, #0ea5e9);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.26);
+}
+
+.aq-astro-card__badge--demo {
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.26);
+}
+
+.aq-astro-card__badge--soft {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.aq-astro-card__badge--neutral {
+  background: var(--surface-soft);
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+}
+
+/* margin-top:auto keeps every action button on the same line across the row,
+   even when a name or specialisation is longer than its neighbours. */
+.aq-astro-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-astro-card__meta > svg {
+  flex: none;
+}
+
+.aq-astro-card__meta > span {
+  min-width: 0;
+}
+
+.aq-astro-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.aq-astro-chooser-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.aq-astro-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  border: 1px solid var(--surface-border);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.aq-astro-viewmore {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+@media (max-width: 480px) {
+  .aq-astro-card {
+    min-height: 0;
+  }
+}
+/* -------------------------------------------------------------------------
+   Purchase action bar: Ask Now / Pay & Ask Later for the chosen
+   campaign + question type.
+   ------------------------------------------------------------------------- */
+.aq-purchase-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--primary);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--surface-strong)) 0%, var(--surface-strong) 70%);
+  box-shadow: var(--shadow-xs);
+}
+
+.aq-purchase-bar__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+
+.aq-purchase-bar__source {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.aq-purchase-bar__type {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.aq-purchase-bar__price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.aq-purchase-bar__offer {
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.aq-purchase-bar__note {
+  flex: 1 1 100%;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.aq-purchase-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* -------------------------------------------------------------------------
+   Available Questions (paid-but-unwritten credits)
+   ------------------------------------------------------------------------- */
+.aq-credit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 15px 16px;
+}
+
+.aq-credit-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aq-credit-card__offer {
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #f97316, #ef4444);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.28);
+}
+
+.aq-credit-card__meta {
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 11px;
+  border-top: 1px solid var(--surface-border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.aq-credit-card__meta strong {
+  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  margin-right: 6px;
+}
+
+.aq-credit-card__action {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.aq-credit-card__expired {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--radius-s);
+  background: var(--neutral-bg, var(--surface-soft));
+  border: 1px solid var(--surface-border);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .aq-purchase-bar__actions {
+    width: 100%;
+  }
+
+  .aq-purchase-bar__actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+/* -------------------------------------------------------------------------
+   Horoscope block in the question form (shared by General and Personal).
+   ------------------------------------------------------------------------- */
+.aq-horoscope-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 8px;
+}
+
+.aq-horoscope-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-strong);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.aq-horoscope-option:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  transform: translateY(-1px);
+}
+
+.aq-horoscope-option.is-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.aq-horoscope-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.aq-horoscope-option__label {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.aq-horoscope-option__hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-horoscope-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 6%, var(--surface-strong)), var(--surface-strong));
+  color: var(--green-600);
+}
+
+.aq-horoscope-selected__title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-horoscope-selected__meta {
+  margin-top: 1px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aq-horoscope-selected__state {
+  margin-left: auto;
+  flex: none;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--success-bg);
+  color: var(--green-600);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+/* -------------------------------------------------------------------------
+   Track My Questions - month selector and lifecycle question cards.
+   ------------------------------------------------------------------------- */
+.aq-track-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 20px;
+}
+
+.aq-track-head__title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.aq-track-month {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.aq-track-month .select-input {
+  min-width: 190px;
+  height: 40px;
+  min-height: 40px;
+}
+
+.aq-track-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.aq-track-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aq-track-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.aq-track-card__question {
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  background: var(--surface-soft);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.aq-track-card__answer,
+.aq-track-card__dispute {
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  border-left: 3px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface-strong, #fff));
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aq-track-card__dispute {
+  border-left-color: var(--red-600);
+}
+
+.aq-track-card__answer-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.aq-track-card__refund {
+  padding: 8px 11px;
+  border-radius: var(--radius-s);
+  background: var(--success-bg);
+  color: var(--green-600);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.aq-track-card__note {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.aq-track-card__window {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 11px;
+  border-radius: var(--radius-s);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: var(--amber-100);
+  color: var(--amber-600);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.aq-track-card__window svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* Red, high-attention dispute action using the app's own button tokens. */
+.aq-track-card__dispute-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: var(--danger-bg);
+  color: var(--red-600);
+  font-weight: 700;
+}
+
+.aq-track-card__dispute-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}

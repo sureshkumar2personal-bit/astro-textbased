@@ -1,47 +1,163 @@
 import { createPortal } from 'react-dom'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
-import { ChipGroup } from '../components/OptionGroup.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
+import SummaryCard from '../components/ui/SummaryCard.jsx'
+import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
-import { hasOpenDispute } from '../utils/answer.js'
+import { formatAnswerDate, getQuestionReceivedAt, getQuestionTypeLabel, isQuestionAnswered } from '../utils/answer.js'
+import { getMonthKeyFromDate, getMonthLabel, getQuestionMonthKey, getQuestionSourceLabel, isOpenQuestion } from '../utils/questions.js'
+import {
+  LIFECYCLE_FILTERS,
+  STAGE_ANSWERED,
+  STAGE_DISPUTED,
+  STAGE_RESOLVED,
+  STAGE_WAITING,
+  countLifecycleFilters,
+  getDisputeWindowLabel,
+  getQuestionLifecycleStage,
+  getQuestionRefundInfo,
+  isDisputeWindowOpen,
+  selectTrackedQuestions,
+} from '../utils/questionLifecycle.js'
+import {
+  QUESTION_CREDIT_AVAILABLE,
+  getQuestionCreditDaysRemaining,
+  getQuestionCreditOfferLabel,
+  getQuestionCreditSourceLabel,
+  getQuestionCreditsForUser,
+} from '../utils/questionCredits.js'
 import { getAtonementProgress } from '../utils/atonements.js'
 import useUserAtonements from '../state/useUserAtonements.js'
 import '../css/user/question-tracking.css'
 
-const STATUS_FILTERS = ['All', 'Pending', 'Dispute', 'Answered', 'Resolved']
 const EDIT_TIME_LIMIT_MS = 30 * 60 * 1000
 const DELETE_TIME_LIMIT_MS = 60 * 60 * 1000
+// Months offered by the selector. Track My Questions is always scoped to one
+// selected month, so this is a bounded navigation, not a history list.
+const MONTH_OPTION_LIMIT = 12
 
-// Reuses hasOpenDispute, the same helper the astrologer answer queue and
-// History use, so "is this dispute settled?" has one definition app-wide.
-function isDisputeResolved(question) {
-  return Boolean(question?.dispute) && !hasOpenDispute(question)
+// Stages that describe where a question sits right now. These are the app's own
+// lifecycle words; question.status and dispute.status remain the stored truth.
+const LIFECYCLE_STAGE_META = {
+  [STAGE_WAITING]: { background: 'var(--sky-bg)', color: 'var(--sky-600)', border: 'rgba(14, 165, 233, 0.28)', hint: 'Submitted, waiting for the astrologer' },
+  [STAGE_ANSWERED]: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answered, within the dispute window' },
+  [STAGE_DISPUTED]: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.24)', hint: 'Dispute in progress' },
+  [STAGE_RESOLVED]: { background: 'var(--amber-100)', color: 'var(--amber-600)', border: 'rgba(245, 158, 11, 0.30)', hint: 'Dispute resolved, closing soon' },
+  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Active questions this month' },
 }
 
-function normalizeStatusFilter(value) {
-  if (STATUS_FILTERS.includes(value)) return value
-  if (value === 'Paid') return 'All'
-  if (value === 'Submitted') return 'Answered'
-  return 'All'
+// One active question, shown as a full record: identity, source, type, date,
+// the question text, the current lifecycle stage, the answer once it exists and
+// the dispute / refund state that belongs to the same question record.
+function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
+  const stage = getQuestionLifecycleStage(question, nowMs)
+  const answered = isQuestionAnswered(question)
+  const dispute = question.dispute || null
+  const refund = getQuestionRefundInfo(question)
+  const canRaiseDispute = isDisputeWindowOpen(question, nowMs)
+  const astrologerName = mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
+  const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
+
+  return (
+    <Card className="aq-track-card">
+      <div className="aq-track-card__head">
+        <div style={{ fontWeight: 800, color: 'var(--ink)' }}>{question.id}</div>
+        <StatusBadge label={stage} />
+      </div>
+
+      <div className="aq-track-card__meta">
+        <span>{astrologerName}</span>
+        <span>·</span>
+        <span>{sourceLabel}</span>
+        <span>·</span>
+        <span>{getQuestionTypeLabel(question)}</span>
+      </div>
+      <div className="muted" style={{ fontSize: 12.5 }}>
+        Asked: {formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '—'} · {question.purchaseType}
+      </div>
+
+      <div className="aq-track-card__question">{question.question}</div>
+
+      {answered && (
+        <div className="aq-track-card__answer">
+          <div className="aq-track-card__answer-label">Astrologer&apos;s answer</div>
+          {question.answer || 'No answer text yet.'}
+        </div>
+      )}
+
+      {dispute && (
+        <div className="aq-track-card__dispute">
+          <div className="aq-track-card__answer-label">Dispute · {dispute.status || 'Open'}</div>
+          <div>{dispute.reason || '—'}</div>
+          {dispute.description ? <div className="muted" style={{ fontSize: 12.5 }}>{dispute.description}</div> : null}
+          {dispute.response ? <div className="muted" style={{ fontSize: 12.5 }}>Astrologer: {dispute.response}</div> : null}
+          {dispute.resolution ? <div style={{ fontSize: 12.5 }}>Resolution: {dispute.resolution}</div> : null}
+          {dispute.resolvedAt ? <div className="muted" style={{ fontSize: 12.5 }}>Resolved on {formatAnswerDate(dispute.resolvedAt)}</div> : null}
+        </div>
+      )}
+
+      {refund && (
+        <div className="aq-track-card__refund">
+          Refund ₹{refund.amount.toLocaleString('en-IN')} · {refund.status}
+          {refund.processedAt ? ` · ${formatAnswerDate(refund.processedAt)}` : ''}
+        </div>
+      )}
+
+      {stage === STAGE_WAITING && (
+        <div className="aq-track-card__note">Waiting for the astrologer to answer.</div>
+      )}
+
+      {canRaiseDispute && (
+        <div className="aq-track-card__window">
+          <AlertTriangle size={14} aria-hidden="true" />
+          <span>You can raise a dispute within 7 days of receiving this answer · {getDisputeWindowLabel(question, nowMs)}</span>
+        </div>
+      )}
+
+      <div className="btn-row" style={{ marginTop: 14 }}>
+        {answered && <button className="btn btn-outline" onClick={onOpen}>View Answer</button>}
+        {!answered && <button className="btn btn-outline" onClick={onOpen}>View Question</button>}
+        {canRaiseDispute && (
+          <button className="btn aq-track-card__dispute-btn" onClick={(event) => { event.stopPropagation(); onRaiseDispute(question.id) }}>
+            <Gavel size={14} aria-hidden="true" />
+            Raise a Dispute
+          </button>
+        )}
+      </div>
+    </Card>
+  )
 }
 
-function getWordPreview(content) {
-  const text = String(content || '').trim()
-  const words = text.split(/\s+/).filter(Boolean)
+// Month selector. "All" below it means "every active question in this month".
+function MonthSelector({ monthKey, options, onChange }) {
+  return (
+    <label className="aq-track-month">
+      <CalendarDays size={15} aria-hidden="true" />
+      <select
+        className="select-input"
+        value={monthKey}
+        aria-label="Select month"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {options.map((key) => (
+          <option key={key} value={key}>{getMonthLabel(key)}</option>
+        ))}
+      </select>
+    </label>
+  )
+}
 
-  if (words.length <= 4) return { preview: text, isTruncated: false }
-
-  return {
-    preview: words.slice(0, 4).join(' '),
-    isTruncated: true,
-  }
+function formatCreditDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function formatTimeRemaining(ms) {
@@ -96,16 +212,78 @@ function TimeLimitBadge({ label, timeRemaining, tooltip, isEnabled }) {
   )
 }
 
-export default function TrackQuestions() {
+// `embedded` renders this page as a section of the Ask a Question dashboard,
+// where the dashboard already shows the page header and the section tabs.
+// "Pay Now, Ask Later" receipts. These are paid questions that have not been
+// written yet, so they are listed here - never as a submitted question - until
+// the question is actually sent.
+function AvailableQuestionCredits({ credits, onAskNow }) {
+  if (credits.length === 0) return null
+
+  return (
+    <Section className="!mt-0">
+      <Card>
+        <div className="section-title">Available Questions</div>
+        <div className="muted" style={{ marginTop: -6, marginBottom: 14 }}>
+          Paid questions you can submit now or come back to later. A credit expires after 7 days.
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {credits.map((credit) => {
+            const isAvailable = credit.status === QUESTION_CREDIT_AVAILABLE
+            const offerLabel = getQuestionCreditOfferLabel(credit)
+            const daysLeft = getQuestionCreditDaysRemaining(credit)
+            return (
+              <Card key={credit.id} className="aq-credit-card">
+                <div className="aq-credit-card__head">
+                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{credit.astrologerName}</div>
+                  <StatusBadge label={isAvailable ? 'Available' : 'Expired'} />
+                </div>
+                <div className="muted" style={{ fontSize: 13.5 }}>
+                  {getQuestionCreditSourceLabel(credit)} · {credit.questionType} question
+                </div>
+                {offerLabel ? <span className="aq-credit-card__offer">{offerLabel}</span> : null}
+                <div className="aq-credit-card__meta">
+                  <span><strong>Purchased</strong> {formatCreditDate(credit.purchasedAt)}</span>
+                  <span><strong>Paid</strong> ₹{Number(credit.paidPrice || 0).toLocaleString('en-IN')}</span>
+                  <span>
+                    <strong>Expires</strong> {formatCreditDate(credit.expiresAt)}
+                    {isAvailable ? ` · in ${daysLeft} day${daysLeft === 1 ? '' : 's'}` : ''}
+                  </span>
+                </div>
+                {isAvailable ? (
+                  <button type="button" className="btn btn-primary aq-credit-card__action" onClick={() => onAskNow(credit)}>
+                    Ask Now
+                  </button>
+                ) : (
+                  <div className="aq-credit-card__expired">Expired — this question can no longer be submitted.</div>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+      </Card>
+    </Section>
+  )
+}
+
+export default function TrackQuestions({ embedded = false }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { questions, questionPreviewId, setQuestionPreviewId, actions } = useAppData()
+  const { questions, questionPreviewId, setQuestionPreviewId, purchasedSlots, actions } = useAppData()
   const { currentUser } = useAuth()
   const { allAtonements } = useUserAtonements()
   const routes = getRoleRoutes(currentUser?.role)
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState(() => normalizeStatusFilter(searchParams.get('status') || 'All'))
+  // Lifecycle filter. "All" is scoped to the selected month, never all time.
+  const [lifecycleFilter, setLifecycleFilter] = useState(() => {
+    const requested = searchParams.get('status')
+    return LIFECYCLE_FILTERS.includes(requested) ? requested : 'All'
+  })
+  // Month selector. Defaults to the current month so Track My Questions never
+  // opens on an unbounded list.
+  const [monthKey, setMonthKey] = useState(() => getMonthKeyFromDate(new Date()))
+  const [nowMs, setNowMs] = useState(() => Date.now())
   // Coming back from Atonement Details (?questionId=...): start with the modal already open so the
   // list never paints first and the modal never flashes open/closed/open.
   const [initialPreviewId, setInitialPreviewId] = useState(() => {
@@ -115,19 +293,6 @@ export default function TrackQuestions() {
   const [detailsOpen, setDetailsOpen] = useState(() => Boolean(initialPreviewId))
   const [timeElapsed, setTimeElapsed] = useState(0)
 
-  const matchesStatusFilter = useCallback((question) => {
-    if (statusFilter === 'All') return true
-    if (statusFilter === 'Pending') return question.status === 'Pending'
-    // A resolved dispute is no longer an active dispute, so it must drop out of
-    // the Dispute bucket even on records resolved before the status was promoted.
-    if (statusFilter === 'Dispute') return question.status === 'Disputed' && !isDisputeResolved(question)
-    if (statusFilter === 'Answered') return question.status === 'Answered'
-    // Matches the astrologer History rule: a settled dispute reads as Resolved
-    // whether the status was promoted (current flow) or the dispute simply
-    // carries a resolved status (legacy records).
-    if (statusFilter === 'Resolved') return question.status === 'Resolved' || isDisputeResolved(question)
-    return false
-  }, [statusFilter])
   const matchesSearchFilter = useCallback((question) => {
     const term = appliedSearch.trim().toLowerCase()
     if (!term) return true
@@ -142,7 +307,7 @@ export default function TrackQuestions() {
   const [fullContent, setFullContent] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
 
-  const ownedQuestions = useMemo(() => {
+  const myQuestions = useMemo(() => {
     const scope = questions.filter((question) => {
       const isOwnQuestion =
         currentUser?.role !== 'user' ||
@@ -155,24 +320,75 @@ export default function TrackQuestions() {
 
     const source = currentUser?.role === 'user' && scope.length === 0 ? questions : scope
 
-    const base = source.filter((question) => {
-      return matchesSearchFilter(question) && matchesStatusFilter(question)
+    return source.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
+  }, [currentUser?.email, currentUser?.id, currentUser?.role, questions])
+
+  // Only questions whose lifecycle is still active, scoped to the selected month.
+  const visibleQuestions = useMemo(
+    () => selectTrackedQuestions(myQuestions, { monthKey, filter: lifecycleFilter, nowMs })
+      .filter((question) => matchesSearchFilter(question)),
+    [myQuestions, monthKey, lifecycleFilter, matchesSearchFilter, nowMs],
+  )
+
+  const lifecycleCounts = useMemo(
+    () => countLifecycleFilters(myQuestions, { monthKey, nowMs }),
+    [myQuestions, monthKey, nowMs],
+  )
+
+  // Bounded month navigation built from the user's own questions.
+  const monthOptions = useMemo(() => {
+    const keys = new Set([getMonthKeyFromDate(new Date())])
+    myQuestions.forEach((question) => {
+      const key = getQuestionMonthKey(question, null)
+      if (key) keys.add(key)
     })
+    return Array.from(keys).sort((a, b) => b.localeCompare(a)).slice(0, MONTH_OPTION_LIMIT)
+  }, [myQuestions])
 
-    return base.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
-  }, [currentUser?.email, currentUser?.id, currentUser?.role, questions, matchesSearchFilter, matchesStatusFilter])
+  // Arriving on Track My Questions defaults to the current month, but an empty
+  // screen is unhelpful, so it falls back once to the most recent month that
+  // actually holds an active question. A month the user picks by hand is never
+  // overridden.
+  const monthTouched = useRef(false)
+  useEffect(() => {
+    if (monthTouched.current) return
+    if (countLifecycleFilters(myQuestions, { monthKey, nowMs }).All > 0) return
+    const latest = monthOptions.find((key) => countLifecycleFilters(myQuestions, { monthKey: key, nowMs }).All > 0)
+    if (latest && latest !== monthKey) setMonthKey(latest)
+  }, [monthKey, monthOptions, myQuestions, nowMs])
 
-  const visibleQuestions = ownedQuestions
+  const handleMonthChange = (nextMonthKey) => {
+    monthTouched.current = true
+    setMonthKey(nextMonthKey)
+  }
 
-  const selectedQuestion = detailsOpen
-    ? visibleQuestions.find((question) => question.id === (questionPreviewId || initialPreviewId)) || null
+  // Day-based lifecycle changes (dispute window closing) are picked up here.
+  useEffect(() => {
+    const interval = setInterval(() => setNowMs(Date.now()), 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Unused "Pay Now, Ask Later" credits plus the ones whose 7-day window has
+  // closed, so the user can see both what they can still use and what expired.
+  const questionCredits = useMemo(
+    () => getQuestionCreditsForUser(purchasedSlots, currentUser).filter((credit) => credit.status !== 'Used'),
+    [purchasedSlots, currentUser],
+  )
+
+  // Deep links (?questionId=...) can point at a record outside the current month or
+// filter, so the detail lookup uses the user's own questions, not the filtered
+// list.
+const selectedQuestion = detailsOpen
+    ? myQuestions.find((question) => question.id === (questionPreviewId || initialPreviewId)) || null
     : null
 
   const recommendedAtonement = selectedQuestion
     ? (allAtonements.find((item) => item.id === selectedQuestion.recommendedAtonementId) || allAtonements.find((item) => item.sourceType === 'question' && item.sourceId === selectedQuestion.id))
     : null
   const selectedDisputeStatus = selectedQuestion?.dispute?.status || null
-  const showRaiseDispute = selectedQuestion?.status === 'Answered' && !selectedQuestion?.dispute
+  // A dispute can only be raised inside the 7-day window that opens when the
+// answer arrives, which is the same rule the lifecycle card uses.
+const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(selectedQuestion, nowMs)
   const showViewDispute = selectedDisputeStatus === 'Resolved'
   const ratingMode =
     selectedQuestion?.dispute?.status === 'Resolved'
@@ -273,19 +489,32 @@ export default function TrackQuestions() {
     }
   }, [closeQuestion, detailsOpen, fullContent, selectedQuestion])
 
-  function getStatusDotClass(status) {
-    const s = String(status).toLowerCase()
-    if (s === 'pending') return 'status-dot--pending'
-    if (s === 'dispute' || s === 'disputed') return 'status-dot--dispute'
-    if (s === 'answered') return 'status-dot--answered'
-    return ''
-  }
-
   return (
     <div>
-      <PageHeader eyebrow="User portal" title="Track My Questions" showBack backTo={routes.askQuestion} />
+      {/* Month selector. Every record below belongs to the selected month. */}
+      {embedded ? (
+        <div className="aq-track-head">
+          <div className="aq-track-head__title">Track My Questions</div>
+          <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
+        </div>
+      ) : (
+        <PageHeader
+          eyebrow="User portal"
+          title="Track My Questions"
+          showBack
+          backTo={routes.askQuestion}
+          actions={<MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />}
+        />
+      )}
 
-      <Section>
+      {/* Paid-but-unwritten questions come first: they still need the user to
+          write the question, so they are not part of the submitted list. */}
+      <AvailableQuestionCredits
+        credits={questionCredits}
+        onAskNow={(credit) => navigate(`${routes.askQuestion}?redeemCreditId=${encodeURIComponent(credit.id)}`)}
+      />
+
+<Section>
         <Card>
           <div className="search-filter-row">
             <div className="search-filter-row__group">
@@ -307,54 +536,53 @@ export default function TrackQuestions() {
               </button>
               </div>
             </div>
-            <div className="search-filter-row__group search-filter-row__status">
-              <div className="search-filter-row__heading">Status</div>
-              <ChipGroup options={STATUS_FILTERS} value={statusFilter} onChange={setStatusFilter} />
-            </div>
           </div>
         </Card>
       </Section>
 
+      <Section className="!mt-6">
+        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-5" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
+          {LIFECYCLE_FILTERS.map((filter) => {
+            const meta = LIFECYCLE_STAGE_META[filter]
+            return (
+              <div key={filter} className="h-full" style={{ minHeight: 132 }}>
+                <SummaryCard
+                  label={filter}
+                  value={lifecycleCounts[filter] || 0}
+                  hint={meta?.hint || ''}
+                  background={meta?.background}
+                  color={meta?.color}
+                  border={meta?.border}
+                  onClick={() => setLifecycleFilter(filter)}
+                  active={lifecycleFilter === filter}
+                />
+              </div>
+            )
+          })}
+        </div>
+      </Section>
+
       <div className="section">
         <Card style={{ marginTop: 0 }}>
-          <div className="section-title">My Questions</div>
+          <div className="section-title">{getMonthLabel(monthKey)} · Active Questions</div>
           {visibleQuestions.length === 0 && (
             <div className="mb-4 rounded-[14px] border border-[color:var(--border)] bg-white/90 px-4 py-3 text-sm text-[color:var(--muted)]">
-              No matching questions found. Clear filters or submit a question from the Ask Question page.
+              {lifecycleFilter === 'All'
+                ? `No active questions in ${getMonthLabel(monthKey)}. Finished questions are in History.`
+                : `No ${lifecycleFilter.toLowerCase()} questions in ${getMonthLabel(monthKey)}.`}
             </div>
            )}
            <div className="track-questions-grid">
-            {visibleQuestions.map((question) => {
-              return (
-                <Card
-                  key={question.id}
-                  className="cursor-pointer track-question-row"
-                  onClick={() => openQuestion(question.id)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'grid', gap: 8 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="badge badge-green">{question.type}</span>
-                        <span className="badge badge-gold">{question.purchaseType}</span>
-                      </div>
-                      <div className="muted">Raised: {question.raised}</div>
-                    </div>
-                    <div className={`status-dot ${getStatusDotClass(question.status)}`} />
-                  </div>
-                  <div className="btn-row" style={{ marginTop: 14 }}>
-                    <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
-                    {question.status === 'Answered' && !question.dispute && (
-                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); navigate(`${routes.raiseDispute}?questionId=${question.id}`) }}>Raise Dispute</button>
-                    )}
-                    {question.dispute?.status === 'Resolved' && (
-                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
-                    )}
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
+             {visibleQuestions.map((question) => (
+               <LifecycleQuestionCard
+                 key={question.id}
+                 question={question}
+                 nowMs={nowMs}
+                 onOpen={() => openQuestion(question.id)}
+                 onRaiseDispute={(id) => navigate(`${routes.raiseDispute}?questionId=${id}`)}
+               />
+             ))}
+           </div>
         </Card>
       </div>
 

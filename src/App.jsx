@@ -16,6 +16,9 @@ import TextBasedQuestions from './pages/TextBasedQuestions.jsx'
 import SalesManagement from './pages/SalesManagement.jsx'
 import PurchasePackage from './pages/PurchasePackage.jsx'
 import AskQuestion from './pages/AskQuestion.jsx'
+import AskQuestionDashboard from './pages/user/question-dashboard/AskQuestionDashboard.jsx'
+import QuestionDisputes from './pages/user/question-dashboard/QuestionDisputes.jsx'
+import QuestionHistory from './pages/user/question-dashboard/QuestionHistory.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
 import TextBasedQuestionHistory from './pages/TextBasedQuestionHistory.jsx'
 import TrackQuestions from './pages/TrackQuestions.jsx'
@@ -235,7 +238,14 @@ function UserRoutes() {
         <Route path="/user/wallet/topups" element={<UserWalletTopUps />} />
         <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
-        <Route path="/user/ask-question" element={<AskQuestion />} />
+        {/* Ask a Question dashboard: the sidebar entry opens the "Ask New" tab and the
+            four sections live inside this one module instead of separate sidebar items. */}
+        <Route path="/user/ask-question" element={<AskQuestionDashboard />}>
+          <Route index element={<AskQuestion embedded />} />
+          <Route path="my-questions" element={<TrackQuestions embedded />} />
+          <Route path="disputes" element={<QuestionDisputes />} />
+          <Route path="history" element={<QuestionHistory />} />
+        </Route>
         <Route path="/user/track-questions" element={<TrackQuestions />} />
         <Route path="/user/raise-dispute" element={<RaiseDispute />} />
         <Route path="/user/chat-astrologers" element={<ChatAstrologers />} />
