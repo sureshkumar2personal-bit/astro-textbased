@@ -170,7 +170,7 @@ export function AdminProvider({ children }) {
       const email = normalizeEmail(typeof credentials === 'string' ? credentials : credentials?.email)
       if (!email.includes('@')) throw new Error('Enter your administrator email address.')
 
-      const admin = admins.find((entry) => entry.email === email)
+      const admin = admins.find((entry) => normalizeEmail(entry.email) === email)
       // One message for "no such admin" and anything else unresolvable, so the
       // form cannot be used to enumerate which addresses have admin access.
       if (!admin) throw new Error('No administrator access was found for this address.')

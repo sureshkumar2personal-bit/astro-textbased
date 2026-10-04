@@ -9,6 +9,22 @@ import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
 import { createAtonementRecord, normalizeAtonement, updateAtonementDay } from '../utils/atonements.js'
 import { LIVE_SESSION_MAX_DURATION_MS, getLiveSessionExpiry, hasLiveSessionExpired } from '../utils/liveSessions.js'
+import {
+  DISPUTE_RESPONSE_WINDOW_DAYS,
+  DISPUTE_STATUS_AWAITING_RESPONSE,
+  DISPUTE_STATUS_OVERDUE,
+  DISPUTE_STATUS_RESOLVED,
+  DISPUTE_STATUS_UNDER_REVIEW,
+  DISPUTE_OUTCOME_ASTROLOGER,
+  DISPUTE_OUTCOME_CUSTOMER,
+  DISPUTE_OUTCOME_PARTIAL,
+  PAYMENT_STATE_RELEASED,
+  addDaysIso,
+  getQuestionPaidAmount,
+  isDisputeOverdue,
+  isDisputeUnresolved,
+  isQuestionOverdue,
+} from '../utils/paymentRules.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -708,6 +724,19 @@ function loadUserWallet() {
 // rather than attributed to somebody.
 function actingUserId(currentUser) {
   return currentUser?.role === ROLES.USER ? currentUser.id : null
+}
+
+// Id for records the compliance sweep creates.
+//
+// Deliberately not crypto.randomUUID(). That API only exists in a secure context, so
+// on a plain-HTTP origin that is not localhost — a LAN IP or a machine hostname — it is
+// undefined and calling it throws. The sweep runs from a mount effect rather than from
+// a click, so that throw happened on every page load and aborted React's commit after
+// the URL had already changed, leaving the previous page painted.
+//
+// Same shape as the `id()` helper already used in AdminContext and EditorContext.
+function complianceId(prefix) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 }
 
 const USER_PAYMENT_METHODS_STORAGE_KEY = 'astroconnect-user-payment-methods'
@@ -2332,6 +2361,367 @@ export function AppDataProvider({ children }) {
         })),
       )
     },
+
+    // ---------------------------------------------------------------------
+    // Compliance sweeps.
+    //
+    // These run on a timer from the effect below, following the same shape as the
+    // existing deliverDueQuestionAnswers sweep. Each one is idempotent: it only
+    // touches a record whose own fields say the transition has not happened yet,
+    // so running it twice — or running it against a record that was already handled
+    // — cannot double-refund, double-notify or resurrect a closed question.
+    //
+    // None of this is a backend. It is a browser timer over localStorage, which is
+    // the same trust level as every other rule in this build.
+    // ---------------------------------------------------------------------
+
+    // A paid question that ran out its 30-day answer window moves to Expired with
+    // its amount in Refund Pending. The amount is NOT released to the astrologer
+    // here: nothing is credited to any wallet, and the record is left holding the
+    // money until the refund actually settles.
+    //
+    // Every existing question field is preserved. Only status, the three lifecycle
+    // fields below and one history line are added, so the question text, answer,
+    // attachments, notes, dispute and previous-question history all survive.
+    expireOverdueQuestions() {
+      const now = Date.now()
+      const nowIso = new Date(now).toISOString()
+      const overdue = questions.filter((question) => isQuestionOverdue(question, now))
+      if (!overdue.length) return []
+
+      setQuestions((prev) =>
+        prev.map((question) => {
+          if (!overdue.some((row) => row.id === question.id)) return question
+          const paidAmount = getQuestionPaidAmount(question)
+          return {
+            ...question,
+            status: 'Expired',
+            expiredAt: nowIso,
+            // Refund Pending only where there is a real amount to refund. A paid
+            // question whose amount was never recorded cannot produce a real refund,
+            // so it is left to the admin queue instead of being auto-credited ₹0.
+            refundStatus: paidAmount !== null ? 'Pending' : question.refundStatus || 'None',
+            history: [
+              ...question.history,
+              'Answer window expired after 30 days',
+              paidAmount !== null ? 'Refund of ₹' + paidAmount.toLocaleString('en-IN') + ' pending' : '',
+            ].filter(Boolean),
+          }
+        }),
+      )
+
+      setNotifications((prev) => [
+        ...overdue.map((question) => ({
+          id: complianceId('ntf-expired'),
+          title: 'Question expired',
+          detail: `Question ${question.id} passed its 30-day answer window and is now pending refund.`,
+          time: 'just now',
+          route: `/user/track-questions?questionId=${question.id}`,
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        })),
+        ...prev,
+      ])
+
+      return overdue.map((question) => question.id)
+    },
+
+    // Settles refunds that the expiry sweep queued. Crediting is guarded on
+    // refundSettledAt, which is written only here, so this cannot credit the same
+    // question twice no matter how often the timer fires.
+    //
+    // The credit follows the exact shape revokeQuestion already uses, so the user's
+    // wallet and transaction list gain a row indistinguishable from a manual refund.
+    settlePendingQuestionRefunds() {
+      const pending = questions.filter((question) => {
+        if (question.refundSettledAt) return false
+        if (question.refundStatus !== 'Pending') return false
+        return getQuestionPaidAmount(question) !== null
+      })
+      if (!pending.length) return []
+
+      const settledAt = new Date().toISOString()
+      setQuestions((prev) =>
+        prev.map((question) => {
+          if (!pending.some((row) => row.id === question.id)) return question
+          return {
+            ...question,
+            refundStatus: 'Completed',
+            refundSettledAt: settledAt,
+            history: [...question.history, 'Refund settled to customer wallet'],
+          }
+        }),
+      )
+
+      const total = pending.reduce((sum, question) => sum + (getQuestionPaidAmount(question) || 0), 0)
+      setUserWallet((prev) => ({
+        ...prev,
+        balance: prev.balance + total,
+        refunded: (prev.refunded || 0) + total,
+        transactions: [
+          ...pending.map((question) => {
+            const amount = getQuestionPaidAmount(question) || 0
+            return {
+              id: complianceId('txn-refund'),
+              label: `Refund - ${question.id}`,
+              amount: `+₹${amount.toLocaleString('en-IN')}`,
+              time: 'just now',
+              date: settledAt,
+              type: 'refund',
+              userId: actingUserId(currentUser),
+            }
+          }),
+          ...prev.transactions,
+        ],
+      }))
+
+      setNotifications((prev) => [
+        ...pending.map((question) => ({
+          id: complianceId('ntf-refund'),
+          title: 'Refund processed',
+          detail: `₹${(getQuestionPaidAmount(question) || 0).toLocaleString('en-IN')} has been refunded to your wallet for expired question ${question.id}.`,
+          time: 'just now',
+          route: '/user/wallet-history',
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        })),
+        ...prev,
+      ])
+
+      return pending.map((question) => question.id)
+    },
+
+    // A dispute that passes its 7-day response window is flagged Overdue so an admin
+    // reviews it. It is deliberately NOT resolved: the status change records that
+    // time ran out, and nothing else. No side is awarded, no money moves, and the
+    // dispute stays unresolved until requestAstrologerResponse or resolveDispute is
+    // called.
+    flagOverdueDisputes() {
+      const now = Date.now()
+      const flagged = questions.filter((question) => {
+        const dispute = question?.dispute
+        if (!dispute) return false
+        // Only flag a dispute that is not already flagged.
+        //
+        // isDisputeOverdue() keeps returning true for a dispute whose status is
+        // already Overdue, because Overdue means "unresolved and still awaiting a
+        // response" — which is exactly what the admin queue needs to keep seeing. That
+        // is correct for reporting, but it means the selector cannot tell "needs
+        // flagging" from "already flagged".
+        //
+        // Re-flagging would stamp a fresh overdueAt and append another history line on
+        // every pass, producing a new questions array identity each time. That
+        // recomputes the `actions` memo, which re-runs the sweep effect that called
+        // this, which loops forever and surfaces as "Maximum update depth exceeded".
+        //
+        // Skipping already-flagged records keeps the behaviour intact: if an admin
+        // requests a response, the status becomes Awaiting Astrologer Response with a
+        // new deadline, and once that window elapses the dispute is flagged again.
+        if (String(dispute.status || '').trim() === DISPUTE_STATUS_OVERDUE) return false
+        return isDisputeOverdue(dispute, now)
+      })
+      if (!flagged.length) return []
+
+      setQuestions((prev) =>
+        prev.map((question) => {
+          const row = flagged.find((item) => item.id === question.id)
+          if (!row) return question
+          return {
+            ...question,
+            dispute: {
+              ...question.dispute,
+              status: DISPUTE_STATUS_OVERDUE,
+              overdueAt: new Date(now).toISOString(),
+            },
+            history: [...question.history, 'Dispute response window of 7 days elapsed — admin review required'],
+          }
+        }),
+      )
+
+      return flagged.map((question) => question.id)
+    },
+
+    // ---------------------------------------------------------------------
+    // Admin dispute actions.
+    //
+    // These two are the admin-side counterpart to the existing astrologer-side
+    // respondToDispute. They are declared here, next to the records they change,
+    // rather than in a page, so the questions store stays the single owner of the
+    // dispute model. The caller is responsible for writing the admin audit entry via
+    // AdminContext.recordAudit — this module must not depend on AdminContext.
+    // ---------------------------------------------------------------------
+
+    // Admin asks the astrologer for a response and restarts the 7-day window from
+    // now. The deadline is stored in the same ISO shape the model already uses, and
+    // reuses the same 7-day rule rather than introducing a second dispute timer.
+    requestAstrologerResponse(questionId, { reason } = {}) {
+      const question = questions.find((item) => item.id === questionId)
+      if (!question?.dispute) return null
+      if (!isDisputeUnresolved(question.dispute)) return null
+
+      const requestedAt = new Date().toISOString()
+      const responseDueAt = addDaysIso(requestedAt, DISPUTE_RESPONSE_WINDOW_DAYS)
+      const note = String(reason || '').trim()
+
+      setQuestions((prev) =>
+        updateQuestion(prev, questionId, (current) => ({
+          ...current,
+          dispute: {
+            ...current.dispute,
+            status: DISPUTE_STATUS_AWAITING_RESPONSE,
+            adminRequestedAt: requestedAt,
+            responseDueAt,
+            adminRequestReason: note,
+          },
+          history: [
+            ...current.history,
+            note
+              ? 'Admin requested an astrologer response: ' + note
+              : 'Admin requested an astrologer response',
+          ],
+        })),
+      )
+
+      setQuestionPreviewId(questionId)
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Response requested by admin',
+          detail: note
+            ? `An admin asked you to respond to the dispute on question ${questionId}: ${note}`
+            : `An admin asked you to respond to the dispute on question ${questionId}. You have 7 days.`,
+          time: 'just now',
+          route: `/astrologer/dispute-management?questionId=${questionId}`,
+          audience: ROLES.ASTROLOGER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+
+      return { questionId, status: DISPUTE_STATUS_AWAITING_RESPONSE, responseDueAt, requestedAt }
+    },
+
+    // Admin marks a dispute as under review. Purely a workflow state: the amount
+    // stays withheld and no response window is restarted.
+    markDisputeUnderReview(questionId) {
+      const question = questions.find((item) => item.id === questionId)
+      if (!question?.dispute) return null
+      if (!isDisputeUnresolved(question.dispute)) return null
+
+      setQuestions((prev) =>
+        updateQuestion(prev, questionId, (current) => ({
+          ...current,
+          dispute: { ...current.dispute, status: DISPUTE_STATUS_UNDER_REVIEW },
+          history: [...current.history, 'Admin marked the dispute under review'],
+        })),
+      )
+      return { questionId, status: DISPUTE_STATUS_UNDER_REVIEW }
+    },
+
+    // Admin decides the dispute and, where money is attached, settles it in the same
+    // step using the existing wallet model:
+    //
+    //   customer  -> the amount is refunded to the customer wallet, exactly as
+    //                revokeQuestion does it. Guarded on refundSettledAt so a dispute
+    //                cannot be resolved twice and refund the customer twice.
+    //   astrologer -> the amount becomes release eligible. The shared astrologer
+    //                wallet is a single unattributed balance in this build, so no
+    //                ledger entry is written; paymentState records the decision
+    //                instead and an admin payout would read it.
+    //   partial   -> the smaller of the requested amount and the amount actually
+    //                paid is refunded, and the remainder is marked released. The
+    //                existing ledger model supports a partial figure because a refund
+    //                is just a smaller signed amount.
+    //
+    // The dispute is only resolved when this is called. Time alone never resolves it.
+    resolveDispute(questionId, { outcome, refundAmount, reason } = {}) {
+      const question = questions.find((item) => item.id === questionId)
+      if (!question?.dispute) return null
+      if (!isDisputeUnresolved(question.dispute)) return null
+
+      const resolvedAt = new Date().toISOString()
+      const note = String(reason || '').trim()
+      const paidAmount = getQuestionPaidAmount(question)
+      const chosen = outcome || DISPUTE_OUTCOME_CUSTOMER
+
+      let credited = 0
+      let nextRefundStatus = question.refundStatus || 'None'
+      let nextPaymentState = question.paymentState || null
+
+      if (chosen === DISPUTE_OUTCOME_CUSTOMER) {
+        credited = paidAmount || 0
+        nextRefundStatus = credited > 0 ? 'Pending' : 'None'
+      } else if (chosen === DISPUTE_OUTCOME_PARTIAL) {
+        const requested = Number(refundAmount)
+        credited = Number.isFinite(requested) && requested > 0
+          ? Math.min(requested, paidAmount || 0)
+          : 0
+        nextRefundStatus = credited > 0 ? 'Pending' : 'None'
+      } else if (chosen === DISPUTE_OUTCOME_ASTROLOGER) {
+        nextPaymentState = PAYMENT_STATE_RELEASED
+      }
+
+      setQuestions((prev) =>
+        updateQuestion(prev, questionId, (current) => ({
+          ...current,
+          status: 'Closed',
+          ...(nextPaymentState ? { paymentState: nextPaymentState } : null),
+          ...(credited > 0 ? { refundAmount: credited, refundStatus: nextRefundStatus } : null),
+          dispute: {
+            ...current.dispute,
+            status: DISPUTE_STATUS_RESOLVED,
+            resolution: {
+              outcome: chosen,
+              refundAmount: credited,
+              reason: note,
+              resolvedAt,
+            },
+          },
+          history: [
+            ...current.history,
+            'Dispute resolved by admin (' + chosen + ')',
+            credited > 0 ? 'Refund of ₹' + credited.toLocaleString('en-IN') + ' pending' : '',
+            chosen === DISPUTE_OUTCOME_ASTROLOGER ? 'Amount marked release eligible' : '',
+          ].filter(Boolean),
+        })),
+      )
+
+      // A customer-favoured or partial resolution queues a real refund by setting
+      // refundStatus to Pending. settlePendingQuestionRefunds() picks it up on its
+      // next run and credits the wallet through the same guarded path the expiry
+      // sweep uses, so a dispute still cannot refund twice.
+
+      setQuestionPreviewId(questionId)
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Dispute resolved',
+          detail: credited > 0
+            ? `The dispute on question ${questionId} was resolved in the customer's favour. A refund of ₹${credited.toLocaleString('en-IN')} is pending.`
+            : chosen === DISPUTE_OUTCOME_ASTROLOGER
+              ? `The dispute on question ${questionId} was resolved in the astrologer's favour.`
+              : `The dispute on question ${questionId} has been resolved by an admin.`,
+          time: 'just now',
+          route: `/user/raise-dispute?questionId=${questionId}`,
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+
+      return {
+        questionId,
+        status: DISPUTE_STATUS_RESOLVED,
+        outcome: chosen,
+        refundAmount: credited,
+        paymentState: nextPaymentState,
+        resolvedAt,
+      }
+    },
     createQuestion(payload) {
       const nextId = `QTN-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
       const submittedAt = new Date().toISOString()
@@ -2344,6 +2734,13 @@ export function AppDataProvider({ children }) {
           category: payload.category || 'Others',
           type: payload.type || 'General',
           purchaseType: payload.purchaseType || 'Free',
+          // AskQuestion.jsx has always passed purchaseAmount, but createQuestion used
+          // to drop it, so every runtime-created question recorded no amount at all.
+          // That made revokeQuestion refund ₹0, and it would equally have made the
+          // 30-day expiry refund nothing. Preserved now, using the existing fields.
+          purchaseAmount: payload.purchaseAmount,
+          refundAmount: payload.refundAmount ?? 0,
+          refundStatus: payload.refundStatus || 'None',
           questionFor: payload.questionFor || 'Myself',
           language: payload.language || 'English',
           status: 'Pending',
@@ -2455,6 +2852,12 @@ export function AppDataProvider({ children }) {
       }
     },
     raiseDispute(questionId, payload) {
+      // The dispute needs its own timestamp before any response deadline can exist.
+      // One seed dispute already carries `raisedAt`; this writes the same field for
+      // every dispute raised from here on, so the 7-day window is never silently
+      // skipped. Uses the same ISO shape the rest of the dispute model already uses.
+      const raisedAt = new Date().toISOString()
+      const responseDueAt = addDaysIso(raisedAt, DISPUTE_RESPONSE_WINDOW_DAYS)
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => {
           if (question.dispute) {
@@ -2471,6 +2874,8 @@ export function AppDataProvider({ children }) {
               response: '',
               status: 'Open',
               attachment: payload.attachment || 'Attachment.pdf',
+              raisedAt,
+              responseDueAt,
             },
             history: [...question.history, 'Dispute raised'],
           }
@@ -3616,6 +4021,29 @@ export function AppDataProvider({ children }) {
     const deliverDueAnswers = () => actions.deliverDueQuestionAnswers()
     deliverDueAnswers()
     const timer = window.setInterval(deliverDueAnswers, 30 * 1000)
+    return () => window.clearInterval(timer)
+  }, [actions])
+
+  // Compliance sweeps for the payment-hold, refund and dispute-deadline rules.
+  //
+  // Same shape and trust level as the answer-delivery sweep above: a browser timer
+  // over localStorage, not a backend job. Each action is individually idempotent, so
+  // running this on mount and then on an interval can never double-refund or
+  // re-notify.
+  //
+  // Order matters. Expiry has to run before settlement so a question that has just
+  // crossed its 30-day window is settled for refund on a later pass rather than in
+  // the same one — the store update from expiry is not visible to the settlement
+  // action until the next render, and pretending otherwise would mean reading a
+  // pre-update snapshot and risking a double credit.
+  useEffect(() => {
+    const runComplianceSweeps = () => {
+      actions.expireOverdueQuestions()
+      actions.settlePendingQuestionRefunds()
+      actions.flagOverdueDisputes()
+    }
+    runComplianceSweeps()
+    const timer = window.setInterval(runComplianceSweeps, 60 * 1000)
     return () => window.clearInterval(timer)
   }, [actions])
 

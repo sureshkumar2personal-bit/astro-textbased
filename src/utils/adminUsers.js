@@ -12,6 +12,20 @@ import { parseDisplayDate, sortByDateDesc } from './date.js'
 
 export const ADMIN_USER_STATUS_FILTERS = ['All', 'Active', 'Blocked', 'Suspended']
 
+export const ADMIN_USER_SUBSCRIPTION_FILTERS = ['All', 'Normal', 'Silver', 'Gold', 'Platinum']
+
+// Subscription category for the Admin -> Users filter. A stored tier
+// (`subscriptionTier`) wins when present; anything absent, blank or
+// unrecognised means the account holds no subscription and reports as
+// "Normal". Read-only derivation, same contract as getUserAccountStatus.
+export function getUserSubscription(user) {
+  const stored = String(user?.subscriptionTier || user?.subscription?.tier || '').trim().toLowerCase()
+  if (stored === 'silver') return 'Silver'
+  if (stored === 'gold') return 'Gold'
+  if (stored === 'platinum') return 'Platinum'
+  return 'Normal'
+}
+
 // The current user record in AuthContext has no account-state field, and login()
 // checks nothing but email and password, so there is no blocked/suspended state
 // anywhere in the app yet. A stored value is used when one exists so this stays
@@ -62,10 +76,11 @@ export function matchesUserQuery(user, query) {
   return [user?.id, user?.name, user?.email, user?.phone].some((field) => String(field || '').toLowerCase().includes(search))
 }
 
-export function filterAdminUsers(users, { query = '', status = 'All' } = {}) {
+export function filterAdminUsers(users, { query = '', status = 'All', subscription = 'All' } = {}) {
   return selectCustomerUsers(users).filter((user) => {
     if (!matchesUserQuery(user, query)) return false
     if (status && status !== 'All' && getUserAccountStatus(user) !== status) return false
+    if (subscription && subscription !== 'All' && getUserSubscription(user) !== subscription) return false
     return true
   })
 }
