@@ -15932,3 +15932,85 @@ button.apt-week-day:focus-visible {
 }
 .my-activity-window { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
 .my-activity-window svg { color: var(--primary); }
+
+/* User Profile and Horoscope route-specific dark theme overrides. */
+html[data-theme='dark'] .app-shell--profile {
+  background: linear-gradient(135deg, #0b1020 0%, #111827 50%, #172033 100%);
+  color: #cbd5e1;
+}
+html[data-theme='dark'] .app-shell--profile .topbar-header { border-color: #334155; background: rgba(15, 23, 42, .96); box-shadow: 0 4px 16px rgba(2, 6, 23, .3); }
+html[data-theme='dark'] .app-shell--profile .profile-topbar-brand,
+html[data-theme='dark'] .app-shell--profile .page-title,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__copy h1,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading h2,
+html[data-theme='dark'] .app-shell--profile .horoscope-card-heading h2 { color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .profile-home-btn { color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .topbar-actions .icon-btn,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .theme-toggle { border-color: #334155; background: #1e293b; color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .topbar-actions .icon-btn:hover,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex { border-color: #475569; background: #1e293b; color: #e2e8f0; box-shadow: 0 4px 12px rgba(2, 6, 23, .24); }
+html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .page-header-row .muted,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__copy .muted,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__bio,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading p,
+html[data-theme='dark'] .app-shell--profile .horoscope-card-heading p { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header,
+html[data-theme='dark'] .app-shell--profile .user-profile-card,
+html[data-theme='dark'] .app-shell--profile .user-profile-expanded,
+html[data-theme='dark'] .app-shell--profile .horoscope-selector-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-star-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-planets-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-notes-card { border-color: rgba(148, 163, 184, .22); background: #0f172a; box-shadow: 0 12px 32px rgba(2, 6, 23, .28); }
+html[data-theme='dark'] .app-shell--profile .user-profile-header { background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%); }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__top { border-bottom-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__actions .btn-outline,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading .btn { border-color: #8b5cf6; background: #1e293b; color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__actions .btn-outline:hover,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading .btn:hover { background: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats strong,
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows strong,
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-copy strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips strong { color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats span,
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows span,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile > span:not(.horoscope-birth-tile__icon),
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips span,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile div span { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > * + * { border-left-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > *::before { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs { border-color: #334155; background: rgba(15, 23, 42, .92); }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs button { color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs button:hover { color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows > div { border-bottom-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-private { background: rgba(139, 92, 246, .2); color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile { border-color: #334155; background: #1e293b; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row:hover { border-color: #8b5cf6; background: #273449; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-avatar,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile__icon,
+html[data-theme='dark'] .app-shell--profile .horoscope-heading-icon { background: rgba(139, 92, 246, .18); color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .horoscope-heading-icon--gold,
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips > div { background: rgba(245, 158, 11, .14); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .horoscope-star-card__orb { border-color: #a16207; background: rgba(245, 158, 11, .14); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .horoscope-notes-card p { background: #1e293b; color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .select-input,
+html[data-theme='dark'] .app-shell--profile .text-input,
+html[data-theme='dark'] .app-shell--profile .textarea-box,
+html[data-theme='dark'] .app-shell--profile select,
+html[data-theme='dark'] .app-shell--profile input,
+html[data-theme='dark'] .app-shell--profile textarea { border-color: #475569; background: #1e293b; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .select-input::placeholder,
+html[data-theme='dark'] .app-shell--profile .text-input::placeholder,
+html[data-theme='dark'] .app-shell--profile textarea::placeholder { color: #94a3b8; }
+html[data-theme='dark'] .user-modal-card { border-color: #334155; background: #0f172a; box-shadow: 0 30px 80px rgba(2, 6, 23, .58); }
+html[data-theme='dark'] .user-modal-card__header { border-bottom-color: #334155; }
+html[data-theme='dark'] .user-modal-card__header .section-title,
+html[data-theme='dark'] .user-modal-card .field-label-top { color: #e2e8f0; }
+html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
