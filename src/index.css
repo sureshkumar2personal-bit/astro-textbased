@@ -5111,8 +5111,12 @@ tbody tr:hover {
 .app-shell--profile .user-profile-header__actions .btn-outline:hover { background: #fcf6ea; }
 .app-shell--profile .user-profile-header__actions .btn-primary { border: 0; background: linear-gradient(135deg, #6127c8, #8d39d4); box-shadow: 0 8px 18px rgba(102, 42, 190, .2); }
 .app-shell--profile .user-profile-stats { position: relative; z-index: 1; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 20px 28px 0; padding: 4px 12px 0; border-top: 0; }
+.app-shell--profile .user-profile-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
 .app-shell--profile .user-profile-stats > * { position: relative; display: flex; flex-direction: row; align-items: center; gap: 14px; min-height: 44px; padding: 0; border-radius: 0; background: transparent; }
-.app-shell--profile .user-profile-stats > * + * { padding-left: 24px; border-left: 1px solid #e8dccb; }
+.app-shell--profile .user-profile-stats > * + * { padding-left: 14px; border-left: 0; }
+.app-shell--profile .user-profile-stats > * + *::after { position: absolute; top: 50%; left: 0; width: 1px; height: 30px; border-radius: 999px; background: #e8dccb; content: ''; transform: translateY(-50%); }
+.app-shell--profile .user-profile-stats > * { min-width: 0; }
+.app-shell--profile .user-profile-stats span { white-space: nowrap; }
 .app-shell--profile .user-profile-stats > *::before { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #fbf2df; color: #9b6815; font-size: 19px; }
 .app-shell--profile .user-profile-stats > *:nth-child(1)::before { content: '✦'; }
 .app-shell--profile .user-profile-stats > *:nth-child(2)::before { content: '◈'; }
@@ -5148,6 +5152,11 @@ tbody tr:hover {
 .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy small { font-size: 11px; }
 .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-meta { margin-top: 1px; font-size: 10px; }
 .app-shell--profile .user-profile-astro-list--expanded .user-profile-see-more { margin-top: 6px; }
+.app-shell--profile .profile-section-accent { color: #a66a08; }
+.app-shell--profile .user-profile-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.app-shell--profile .user-profile-chart-grid > div { display: grid; gap: 5px; padding: 12px; border: 1px solid #efe3d2; border-radius: 12px; background: #fffaf1; }
+.app-shell--profile .user-profile-chart-grid span { color: #766c7b; font-size: 11px; }
+.app-shell--profile .user-profile-chart-grid strong { color: #2c2337; font-size: 12px; }
 
 /* Horoscope page: compact cards replace the former long separator list. */
 .horoscope-page { width: 100%; }
@@ -5222,6 +5231,7 @@ tbody tr:hover {
   .app-shell--profile .user-profile-header__actions .btn { flex: 1; justify-content: center; min-width: 0; }
   .app-shell--profile .user-profile-stats { grid-template-columns: 1fr; gap: 14px; margin: 20px; padding: 0; }
   .app-shell--profile .user-profile-stats > * + * { padding-left: 0; border-left: 0; }
+  .app-shell--profile .user-profile-stats > * + *::after { display: none; }
   .app-shell--profile .user-profile-card { padding: 20px; border-radius: 20px; }
   .app-shell--profile .user-profile-tabs { justify-content: flex-start; display: flex; overflow-x: auto; }
   .app-shell--profile .user-profile-tabs button { min-width: 120px; flex: 0 0 auto; }
@@ -5230,6 +5240,7 @@ tbody tr:hover {
   .app-shell--profile .user-profile-expanded .user-profile-card__heading { align-items: flex-start; margin-bottom: 16px; }
   .app-shell--profile .user-profile-expanded .user-profile-card__heading .btn { flex: none; }
   .app-shell--profile .user-profile-astro-list--expanded { grid-template-columns: 1fr; gap: 10px; }
+  .app-shell--profile .user-profile-chart-grid { grid-template-columns: 1fr; }
   }
 
 /* Consultation-provider treatment for the existing astrologer profile route */
@@ -15983,7 +15994,12 @@ html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile > span:not(.ho
 html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips span,
 html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile div span { color: #94a3b8; }
 html[data-theme='dark'] .app-shell--profile .user-profile-stats > * + * { border-left-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > * + *::after { background: #334155; }
 html[data-theme='dark'] .app-shell--profile .user-profile-stats > *::before { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .profile-section-accent { color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid > div { border-color: #334155; background: #1e293b; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid span { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid strong { color: #f8fafc; }
 html[data-theme='dark'] .app-shell--profile .user-profile-tabs { border-color: #334155; background: rgba(15, 23, 42, .92); }
 html[data-theme='dark'] .app-shell--profile .user-profile-tabs button { color: #cbd5e1; }
 html[data-theme='dark'] .app-shell--profile .user-profile-tabs button:hover { color: #c4b5fd; }

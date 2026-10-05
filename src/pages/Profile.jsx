@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Eye, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Sparkles, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -29,8 +29,6 @@ const VISIBILITY_OPTIONS = [
   ['subscribers', 'Subscribers'],
   ['private', 'Private'],
 ]
-const CONTACT_PRIVACY_OPTIONS = [['public', 'General / Visible'], ['email', 'Email Only'], ['private', 'Private']]
-const contactPrivacyLabel = (value) => CONTACT_PRIVACY_OPTIONS.find(([option]) => option === value)?.[1] || 'Private'
 const BIRTH_PLACE_OPTIONS = [
   'Ahmedabad, Gujarat, India', 'Bengaluru, Karnataka, India', 'Chennai, Tamil Nadu, India',
   'Chengalpattu, Tamil Nadu, India', 'Chidambaram, Tamil Nadu, India', 'Coimbatore, Tamil Nadu, India',
@@ -79,7 +77,7 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds, questions, userWallet, familyHoroscopes } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds, questions, familyHoroscopes } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
@@ -108,7 +106,6 @@ export default function Profile() {
   const [expandedSection, setExpandedSection] = useState(null)
   const [expandedLimit, setExpandedLimit] = useState(6)
   const [profileTab, setProfileTab] = useState('about')
-  const [privacyOpen, setPrivacyOpen] = useState(null)
   const [profilePlaceMenuOpen, setProfilePlaceMenuOpen] = useState(false)
   const profilePlaceMenuRef = useRef(null)
   const [familyPlaceMenuOpen, setFamilyPlaceMenuOpen] = useState(false)
@@ -208,19 +205,6 @@ export default function Profile() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update your profile.')
     }
-  }
-  const updateContactPrivacy = (field, value) => {
-    try {
-      updateProfile({ name: currentUser?.name, email: currentUser?.email, phone: currentUser?.phone, [field]: value })
-      setPrivacyOpen(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update privacy settings.')
-    }
-  }
-  const renderContactPrivacyControl = (field, label) => {
-    const controlKey = field === 'phoneVisibility' ? 'phone' : 'email'
-    const selectedPrivacy = currentUser?.[field] || 'private'
-    return <div className="privacy-control-wrap"><button type="button" className={`privacy-control${privacyOpen === controlKey ? ' is-open' : ''}`} aria-label={`Change ${label} privacy. Current setting: ${contactPrivacyLabel(selectedPrivacy)}`} aria-expanded={privacyOpen === controlKey} onClick={() => setPrivacyOpen(privacyOpen === controlKey ? null : controlKey)}><Lock size={11} /></button>{privacyOpen === controlKey && <div className="privacy-control-menu" role="menu">{CONTACT_PRIVACY_OPTIONS.map(([value, optionLabel]) => <button type="button" role="menuitem" className={selectedPrivacy === value ? 'is-selected' : ''} key={value} onClick={() => updateContactPrivacy(field, value)}><span>{optionLabel}</span>{selectedPrivacy === value && <Eye size={12} />}</button>)}</div>}</div>
   }
   const profilePlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(editForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
   const familyPlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(familyForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
@@ -715,7 +699,9 @@ export default function Profile() {
               <div className="user-profile-stats">
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'following' ? ' is-active' : ''}`} onClick={() => toggleSection('following')}><strong>{followedAstrologerIds.length}</strong><span>{expandedSection === 'following' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Following</span></button>
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'subscriptions' ? ' is-active' : ''}`} onClick={() => toggleSection('subscriptions')}><strong>{subscriptions.length}</strong><span>{expandedSection === 'subscriptions' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Subscriptions</span></button>
-                <Link to={routes.walletHistory} state={{ from: 'profile' }}><strong>₹{Number(userWallet?.balance || 0).toLocaleString('en-IN')}</strong><span>Wallet balance</span></Link>
+                <Link to={routes.myAppointments} state={{ from: 'profile' }}><strong>{userConsultationHistory.length}</strong><span>Consultations</span></Link>
+                <div><strong>0</strong><span>Reviews</span></div>
+                <Link to={routes.followedAstrologersFull} state={{ from: 'profile' }}><strong>{savedPostIds.length}</strong><span>Saved Astrologers</span></Link>
               </div>
             </Card>
 
@@ -762,9 +748,21 @@ export default function Profile() {
                 <div className="user-profile-detail-rows">
                   <div><span>Name</span><strong>{currentUser?.name || 'Not added'}</strong></div>
                   <div><span>Username</span><strong>@{username}</strong></div>
-                  <div><span>Email <em className="user-profile-private"><Lock size={10} /> {contactPrivacyLabel(currentUser?.emailVisibility)}</em></span><div className="user-profile-private-value"><strong>{currentUser?.email || 'Not added'}</strong>{renderContactPrivacyControl('emailVisibility', 'email')}</div></div>
-                  <div><span>Phone <em className="user-profile-private"><Lock size={10} /> {contactPrivacyLabel(currentUser?.phoneVisibility)}</em></span><div className="user-profile-private-value"><strong>{currentUser?.phone || 'Not added'}</strong>{renderContactPrivacyControl('phoneVisibility', 'phone number')}</div></div>
+                  <div><span>Gender</span><strong>{currentUser?.gender || 'Not added'}</strong></div>
+                  <div><span>Languages</span><strong>{currentUser?.languages?.join(', ') || 'Not added'}</strong></div>
+                  <div><span>Interests</span><strong>{currentUser?.astrologerPreferences?.consultationTitles?.join(', ') || 'Not added'}</strong></div>
                   <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
+                  <div><span>About Me</span><strong>{currentUser?.bio || bio}</strong></div>
+                </div>
+              </Card>}
+
+              {profileTab === 'about' && <Card className="user-profile-card">
+                <div className="user-profile-card__heading"><div><span className="profile-kicker">ASTROLOGY IDENTITY</span><h2>Your Astrology Identity</h2></div><Sparkles size={20} className="profile-section-accent" /></div>
+                <div className="user-profile-detail-rows">
+                  <div><span>Rasi / Moon Sign</span><strong>{currentUser?.rasi || 'Rishabam'}</strong></div>
+                  <div><span>Nakshatra</span><strong>{currentUser?.nakshatra || 'Rohini'} · Pada 2</strong></div>
+                  <div><span>Lagna</span><strong>{currentUser?.lagna || 'Vrishabha'}</strong></div>
+                  <div><span>Sun Sign</span><strong>{currentUser?.sunSign || 'Meenam'}</strong></div>
                 </div>
               </Card>}
 
@@ -774,6 +772,12 @@ export default function Profile() {
                   <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
                   <div><span>Time of Birth</span><strong>{horoscopeBirth.timeOfBirth || 'Not added'}</strong></div>
                   <div><span>Place of Birth</span><strong>{horoscopeBirth.placeOfBirth || 'Not added'}</strong></div>
+                </div>
+                <div className="user-profile-chart-grid">
+                  <div><span>Kundli / Birth Chart</span><strong>Available</strong></div>
+                  <div><span>Navamsa Chart</span><strong>Available</strong></div>
+                  <div><span>Planetary Positions</span><strong>View Horoscope</strong></div>
+                  <div><span>Current Dasha</span><strong>Vimshottari Dasha</strong></div>
                 </div>
                 <div className="user-profile-birth-actions">
                   <Link to={routes.horoscope} state={{ from: 'profile' }} className="btn btn-outline btn-sm">View Full Horoscope <ArrowRight size={14} /></Link>
@@ -790,7 +794,10 @@ export default function Profile() {
                 <div className="user-profile-activity">
                   <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
                   <Link to={routes.myAppointments}><strong>{activitySummary.appointments}</strong><span><CalendarDays size={13} /> Appointments</span></Link>
-                  <Link to={routes.liveSession}><strong>{activitySummary.liveSessions}</strong><span><Radio size={13} /> Live now</span></Link>
+                  <Link to={routes.followedAstrologersFull}><strong>{followedAstrologerIds.length}</strong><span><Users size={13} /> Astrologers followed</span></Link>
+                  <div><strong>0</strong><span><Heart size={13} /> Reviews given</span></div>
+                  <div><strong>{savedPostIds.length}</strong><span><Bookmark size={13} /> Saved content</span></div>
+                  <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
                 </div>
               </Card>}
             </div>
@@ -804,8 +811,6 @@ export default function Profile() {
                   <label className="field-group"><span className="field-label-top">Name</span><input className="text-input" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} /></label>
                   <label className="field-group"><span className="field-label-top">Username</span><input className="text-input" value={editForm.username} onChange={(event) => setEditForm({ ...editForm, username: event.target.value })} placeholder="your-username" /></label>
                   <label className="field-group"><span className="field-label-top">Profile photo URL</span><input className="text-input" value={editForm.profileImage} onChange={(event) => setEditForm({ ...editForm, profileImage: event.target.value })} placeholder="https://..." /></label>
-                  <label className="field-group"><span className="field-label-top">Email Address</span><div className="profile-edit-privacy-field"><input type="email" className="text-input" value={editForm.email} onChange={(event) => setEditForm({ ...editForm, email: event.target.value })} />{renderContactPrivacyControl('emailVisibility', 'email')}</div></label>
-                  <label className="field-group"><span className="field-label-top">Phone Number</span><div className="profile-edit-privacy-field"><input type="tel" className="text-input" value={editForm.phone} onChange={(event) => setEditForm({ ...editForm, phone: event.target.value })} />{renderContactPrivacyControl('phoneVisibility', 'phone number')}</div></label>
                   <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={editForm.gender} onChange={(event) => setEditForm({ ...editForm, gender: event.target.value })} placeholder="Optional" /></label>
                   <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={editForm.dateOfBirth} onChange={(event) => setEditForm({ ...editForm, dateOfBirth: event.target.value })} /></label>
                   <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={editForm.birthTime} onChange={(event) => setEditForm({ ...editForm, birthTime: event.target.value })} /></label>

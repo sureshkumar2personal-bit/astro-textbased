@@ -261,6 +261,24 @@ export function AuthProvider({ children }) {
       setCurrentUser(updatedUser)
       return updatedUser
     },
+    changePassword({ currentPassword, newPassword }) {
+      if (!currentUser) throw new Error('No profile is currently signed in.')
+      if (String(currentPassword || '') !== String(currentUser.password || '')) throw new Error('Current password is incorrect.')
+      if (String(newPassword || '').length < 8) throw new Error('New password must be at least 8 characters.')
+      const updatedUser = { ...currentUser, password: String(newPassword) }
+      setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
+      setCurrentUser(updatedUser)
+      return updatedUser
+    },
+    deleteAccount() {
+      if (!currentUser) throw new Error('No profile is currently signed in.')
+      setUsers((prev) => prev.filter((entry) => entry.id !== currentUser.id))
+      setCurrentUser(null)
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(AUTH_STORAGE_KEY)
+        window.localStorage.removeItem('astroconnect-user-birth-details')
+      }
+    },
     logout() {
       setCurrentUser(null)
       if (typeof window !== 'undefined') window.localStorage.removeItem(EDITOR_SESSION_KEY)

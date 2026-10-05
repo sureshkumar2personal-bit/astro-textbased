@@ -372,10 +372,22 @@ body:has(.my-account-page) {
 .my-account-language-menu small,
 .my-account-language-empty { padding: 5px 8px 2px; color: #8b8298; font-size: 10px; }
 
+.my-account-management-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.my-account-management-section { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 23px 24px; border: 1px solid rgba(226, 216, 237, .9); border-radius: 18px; background: rgba(255, 255, 255, .9); box-shadow: 0 10px 24px rgba(70, 45, 93, .07); }
+.my-account-management-icon { color: #70439c; }
+.my-account-management-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.my-account-management-link { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 8px 12px; border: 1px solid #d8c5ec; border-radius: 10px; background: #faf6ff; color: #60368d; font-size: 11px; font-weight: 750; text-decoration: none; }
+.my-account-management-link:hover { border-color: #a477d8; background: #f2eafd; color: #4f238b; }
+.my-account-management-section--account-actions { grid-column: 1 / -1; }
+.my-account-account-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.my-account-management-link--danger { border-color: #f2b8b5; background: #fff5f5; color: #b42318; }
+.my-account-management-link--danger:hover { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+
 @media (max-width: 720px) {
   .app-shell:has(.my-account-page) .page-content { padding: 24px 16px 44px; }
   .my-account-settings-card { grid-template-columns: 1fr; }
   .my-account-settings-section:nth-child(3) { grid-column: auto; }
+  .my-account-management-card { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {
@@ -411,6 +423,12 @@ html[data-theme='dark'] .my-account-settings-section {
   box-shadow: 0 10px 24px rgba(2, 6, 23, .24);
 }
 html[data-theme='dark'] .my-account-settings-section + .my-account-settings-section { border-top-color: rgba(148, 163, 184, .18); }
+html[data-theme='dark'] .my-account-management-section { border-color: rgba(148, 163, 184, .18); background: rgba(15, 23, 42, .84); box-shadow: 0 10px 24px rgba(2, 6, 23, .24); }
+html[data-theme='dark'] .my-account-management-icon { color: #c4b5fd; }
+html[data-theme='dark'] .my-account-management-link { border-color: #475569; background: rgba(139, 92, 246, .16); color: #ddd6fe; }
+html[data-theme='dark'] .my-account-management-link:hover { border-color: #8b5cf6; background: rgba(139, 92, 246, .28); color: #fff; }
+html[data-theme='dark'] .my-account-management-link--danger { border-color: rgba(248, 113, 113, .45); background: rgba(127, 29, 29, .25); color: #fca5a5; }
+html[data-theme='dark'] .my-account-management-link--danger:hover { border-color: #f87171; background: rgba(127, 29, 29, .4); color: #fecaca; }
 html[data-theme='dark'] .my-account-info-row span { color: #c4b5fd; }
 html[data-theme='dark'] .my-account-info-row span svg { color: #a78bfa; }
 html[data-theme='dark'] .my-account-info-row strong,

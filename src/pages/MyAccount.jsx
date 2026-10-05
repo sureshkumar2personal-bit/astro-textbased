@@ -1,10 +1,11 @@
-import { AtSign, CalendarDays, Check, ChevronDown, Clock3, Eye, Languages, Lock, Mail, MapPin, Moon, Pencil, Phone, SlidersHorizontal, Sparkles, Star, UserRound, VenusAndMars, X } from 'lucide-react'
+import { AtSign, CalendarDays, Check, ChevronDown, Clock3, CreditCard, Download, Eye, KeyRound, Languages, Lock, Mail, MapPin, Moon, Pencil, Phone, ShieldCheck, SlidersHorizontal, Sparkles, Star, Trash2, UserRound, UsersRound, VenusAndMars, WalletCards, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import BackButton from '../components/BackButton.jsx'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import { useToast } from '../components/Toast.jsx'
+import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { NAKSHATRA_OPTIONS } from '../data/astrologyOptions.js'
@@ -73,8 +74,8 @@ const PERSONAL_FIELD_ICONS = { fullName: UserRound, username: AtSign, dob: Calen
 const ASTROLOGY_FIELD_ICONS = { rasi: Sparkles, nakshatra: Star, lagna: Moon }
 const PREFERENCE_ROWS = [
   ['languages', 'Preferred Language'],
-  ['astrologerTypes', 'Astrological Type'],
-  ['consultationTitles', 'Consultation Title'],
+  ['astrologerTypes', 'Astrology Type'],
+  ['consultationTitles', 'Consultation Interests'],
 ]
 
 function timeInputValue(value) {
@@ -94,7 +95,8 @@ function formatTime(value) {
 }
 
 export default function MyAccount() {
-  const { currentUser, updateProfile } = useAuth()
+  const { currentUser, updateProfile, changePassword, deleteAccount } = useAuth()
+  const { userWallet, subscriptions, userPaymentMethods, userAutopays, blockedUserIds } = useAppData()
   const { success } = useToast()
   const routes = getRoleRoutes(currentUser?.role)
   const location = useLocation()
@@ -105,6 +107,7 @@ export default function MyAccount() {
   const [detailsError, setDetailsError] = useState('')
   const syncDetails = () => ({
     fullName: currentUser?.name || '',
+    username: currentUser?.username || deriveUsername(currentUser?.name),
     dob: currentUser?.dateOfBirth || '',
     birthTime: timeInputValue(currentUser?.birthTime),
     birthPlace: currentUser?.birthPlace || '',
@@ -126,6 +129,9 @@ export default function MyAccount() {
   const languageMenuRef = useRef(null)
   const [placeMenuOpen, setPlaceMenuOpen] = useState(false)
   const placeMenuRef = useRef(null)
+  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [accountActionError, setAccountActionError] = useState('')
 
   useEffect(() => {
     if (!languageMenuOpen) return undefined
@@ -188,6 +194,7 @@ export default function MyAccount() {
       const placeDetails = getBirthPlaceDetails(personalDetails.birthPlace) || {}
       updateProfile({
         name: personalDetails.fullName,
+        username: personalDetails.username,
         email: personalDetails.email,
         phone: personalDetails.phone,
         dateOfBirth: toDateInputValue(personalDetails.dob),
@@ -257,6 +264,35 @@ export default function MyAccount() {
     setPreferencesOpen(false)
     success('Preferences saved')
   }
+  const downloadUserData = () => {
+    const exportData = { profile: currentUser, subscriptions, wallet: userWallet, paymentMethods: userPaymentMethods }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'astro-connect-account-data.json'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+  const savePassword = () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setAccountActionError('New password and confirmation do not match.')
+      return
+    }
+    try {
+      changePassword(passwordForm)
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setPasswordOpen(false)
+      setAccountActionError('')
+      success('Password updated')
+    } catch (err) {
+      setAccountActionError(err instanceof Error ? err.message : 'Unable to update your password.')
+    }
+  }
+  const handleDeleteAccount = () => {
+    if (!window.confirm('Delete your Astro Connect account? This action cannot be undone.')) return
+    deleteAccount()
+  }
 
   return (
     <div className="my-account-page">
@@ -283,7 +319,8 @@ export default function MyAccount() {
           {editingDetails ? (
             <>
               <div className="form-grid">
-                <label>Name<input className="text-input" value={personalDetails.fullName} onChange={(event) => setPersonalDetails((details) => ({ ...details, fullName: event.target.value }))} /></label>
+                <label>Full Name<input className="text-input" value={personalDetails.fullName} onChange={(event) => setPersonalDetails((details) => ({ ...details, fullName: event.target.value }))} /></label>
+                <label>Username<input className="text-input" value={personalDetails.username} onChange={(event) => setPersonalDetails((details) => ({ ...details, username: event.target.value }))} placeholder="your-username" /></label>
                 <label>Date of Birth<input type="date" className="text-input" value={personalDetails.dob} onChange={(event) => setPersonalDetails((details) => ({ ...details, dob: event.target.value }))} /></label>
                 <label>Gender<select className="select-input" value={personalDetails.gender} onChange={(event) => setPersonalDetails((details) => ({ ...details, gender: event.target.value }))}><option value="">Select gender</option>{GENDER_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
                 <label>Phone Number<div className="my-account-edit-privacy-field"><input className="text-input" value={personalDetails.phone} onChange={(event) => setPersonalDetails((details) => ({ ...details, phone: event.target.value }))} />{renderPrivacyControl('phoneVisibility', 'phone number')}</div></label>
@@ -334,7 +371,49 @@ export default function MyAccount() {
           </div>
         </section>
       </Card>
-      {preferencesOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="preferences-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrologer matching</div><h2 id="preferences-heading">Your Preferences</h2><p className="muted">Tell us what kind of guidance you are looking for.</p></div><button type="button" className="icon-btn" aria-label="Close preferences" onClick={() => setPreferencesOpen(false)}><X size={17} /></button></div>{Object.entries({ languages: LANGUAGE_OPTIONS, astrologerTypes: PREFERENCE_OPTIONS.methods, consultationTitles: PREFERENCE_OPTIONS.topics }).map(([group, options]) => <fieldset className="preferences-group" key={group}><legend>{group === 'languages' ? 'Preferred Language' : group === 'astrologerTypes' ? 'Astrological Type' : 'Consultation Title'} <span>*</span></legend><div className="preferences-options">{options.map((option) => <button type="button" key={option} className={preferences[group].includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => togglePreference(group, option)}>{option}</button>)}</div></fieldset>)}{preferencesError && <p className="preferences-error">{preferencesError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPreferencesOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePreferences}>Save Preferences</button></div></Card></div>}
+      <Card className="my-account-management-card">
+        <section className="my-account-management-section">
+          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Account &amp; Security</h2><p className="muted my-account-settings-desc">Manage access, privacy, and account status.</p></div><ShieldCheck size={20} className="my-account-management-icon" /></div>
+          <div className="my-account-info-rows">
+            <div className="my-account-info-row"><span><ShieldCheck size={14} />Account Status</span><strong>Active</strong></div>
+            <div className="my-account-info-row"><span><Lock size={14} />Two-Factor Authentication</span><strong>Not enabled</strong></div>
+            <div className="my-account-info-row"><span><Lock size={14} />Password</span><strong>••••••••</strong></div>
+            <div className="my-account-info-row"><span><UsersRound size={14} />Profile Visibility</span><strong>{currentUser?.profileVisibility || 'Private'}</strong></div>
+            <div className="my-account-info-row"><span><ShieldCheck size={14} />Active Sessions</span><strong>1 device</strong></div>
+            <div className="my-account-info-row"><span><UsersRound size={14} />Blocked Users</span><strong>{blockedUserIds?.length || 0}</strong></div>
+          </div>
+        </section>
+        <section className="my-account-management-section">
+          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Wallet &amp; Billing</h2><p className="muted my-account-settings-desc">View your balance, payments, and subscriptions.</p></div><WalletCards size={20} className="my-account-management-icon" /></div>
+          <div className="my-account-info-rows">
+            <div className="my-account-info-row"><span><WalletCards size={14} />Wallet</span><strong>₹{Number(userWallet?.balance || 0).toLocaleString('en-IN')}</strong></div>
+            <div className="my-account-info-row"><span><CreditCard size={14} />Payment Methods</span><strong>{userPaymentMethods?.length || 0} saved</strong></div>
+            <div className="my-account-info-row"><span><Star size={14} />Subscriptions</span><strong>{subscriptions?.length || 0} active</strong></div>
+            <div className="my-account-info-row"><span><CalendarDays size={14} />Renewal Status</span><strong>{userAutopays?.some((item) => item.status === 'active') ? 'Autopay enabled' : 'Manual renewal'}</strong></div>
+          </div>
+          <div className="my-account-management-links"><Link className="my-account-management-link" to={routes.walletHistory}><WalletCards size={14} /> Wallet &amp; transactions</Link><Link className="my-account-management-link" to={routes.paymentMethods}><CreditCard size={14} /> Payment settings</Link></div>
+        </section>
+        <section className="my-account-management-section">
+          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Notifications</h2><p className="muted my-account-settings-desc">Choose how Astro Connect keeps you informed.</p></div><Mail size={20} className="my-account-management-icon" /></div>
+          <div className="my-account-info-rows">
+            <div className="my-account-info-row"><span>Consultation notifications</span><strong>Enabled</strong></div>
+            <div className="my-account-info-row"><span>Messages</span><strong>Enabled</strong></div>
+            <div className="my-account-info-row"><span>Puja &amp; order notifications</span><strong>Enabled</strong></div>
+            <div className="my-account-info-row"><span>Payment notifications</span><strong>Enabled</strong></div>
+            <div className="my-account-info-row"><span>Promotional notifications</span><strong>Off</strong></div>
+          </div>
+        </section>
+        <section className="my-account-management-section my-account-management-section--account-actions">
+          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Account Management</h2><p className="muted my-account-settings-desc">Export or manage your Astro Connect account.</p></div><KeyRound size={20} className="my-account-management-icon" /></div>
+          <div className="my-account-account-actions">
+            <button type="button" className="my-account-management-link" onClick={() => { setAccountActionError(''); setPasswordOpen(true) }}><KeyRound size={14} /> Reset Password</button>
+            <button type="button" className="my-account-management-link" onClick={downloadUserData}><Download size={14} /> Download My Data</button>
+            <button type="button" className="my-account-management-link my-account-management-link--danger" onClick={handleDeleteAccount}><Trash2 size={14} /> Delete Account</button>
+          </div>
+        </section>
+      </Card>
+      {passwordOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="password-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Security</div><h2 id="password-heading">Reset Password</h2><p className="muted">Choose a new password for your account.</p></div><button type="button" className="icon-btn" aria-label="Close reset password" onClick={() => setPasswordOpen(false)}><X size={17} /></button></div><div className="form-grid"><label className="field-group"><span className="field-label-top">Current Password</span><input type="password" className="text-input" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, currentPassword: event.target.value }))} autoComplete="current-password" /></label><label className="field-group"><span className="field-label-top">New Password</span><input type="password" className="text-input" value={passwordForm.newPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, newPassword: event.target.value }))} autoComplete="new-password" /></label><label className="field-group"><span className="field-label-top">Confirm New Password</span><input type="password" className="text-input" value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, confirmPassword: event.target.value }))} autoComplete="new-password" /></label></div>{accountActionError && <p className="preferences-error">{accountActionError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPasswordOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePassword}>Update Password</button></div></Card></div>}
+      {preferencesOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="preferences-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrologer matching</div><h2 id="preferences-heading">Your Preferences</h2><p className="muted">Tell us what kind of guidance you are looking for.</p></div><button type="button" className="icon-btn" aria-label="Close preferences" onClick={() => setPreferencesOpen(false)}><X size={17} /></button></div>{Object.entries({ languages: LANGUAGE_OPTIONS, astrologerTypes: PREFERENCE_OPTIONS.methods, consultationTitles: PREFERENCE_OPTIONS.topics }).map(([group, options]) => <fieldset className="preferences-group" key={group}><legend>{group === 'languages' ? 'Preferred Language' : group === 'astrologerTypes' ? 'Astrology Type' : 'Consultation Interests'} <span>*</span></legend><div className="preferences-options">{options.map((option) => <button type="button" key={option} className={preferences[group].includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => togglePreference(group, option)}>{option}</button>)}</div></fieldset>)}{preferencesError && <p className="preferences-error">{preferencesError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPreferencesOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePreferences}>Save Preferences</button></div></Card></div>}
       {horoscopeOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="horoscope-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrology Details</div><h2 id="horoscope-heading">Edit Horoscope</h2><p className="muted">Select your Rasi, Nakshatra, and Lagna / Ascendant.</p></div><button type="button" className="icon-btn" aria-label="Close edit horoscope" onClick={() => setHoroscopeOpen(false)}><X size={17} /></button></div><div className="form-grid"><label className="field-group"><span className="field-label-top">Rasi</span><select className="select-input" value={horoscopeForm.rasi} onChange={(event) => setHoroscopeForm((form) => ({ ...form, rasi: event.target.value }))}><option value="">Select Rasi</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group"><span className="field-label-top">Nakshatra</span><select className="select-input" value={horoscopeForm.nakshatra} onChange={(event) => setHoroscopeForm((form) => ({ ...form, nakshatra: event.target.value }))}><option value="">Select Nakshatra</option>{NAKSHATRA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group" style={{ marginBottom: 0 }}><span className="field-label-top">Lagna / Ascendant</span><select className="select-input" value={horoscopeForm.lagna} onChange={(event) => setHoroscopeForm((form) => ({ ...form, lagna: event.target.value }))}><option value="">Select Lagna</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></div>{horoscopeError && <p className="preferences-error">{horoscopeError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setHoroscopeOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveHoroscopeDetails}>Save Horoscope</button></div></Card></div>}
     </div>
   )
