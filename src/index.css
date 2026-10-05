@@ -900,7 +900,7 @@ textarea:focus-visible {
 .user-profile-detail-rows > div:last-child { padding-bottom: 0; border-bottom: 0; }
 .user-profile-detail-rows span { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 12px; }
 .user-profile-detail-rows strong { color: var(--ink); font-size: 13px; overflow-wrap: anywhere; }
-.user-profile-private { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 999px; background: var(--surface-soft); color: var(--primary); font-size: 9px; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; vertical-align: 1px; }
+.user-profile-private { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; padding: 2px 6px; border-radius: 999px; background: var(--surface-soft); color: var(--primary); font-size: 9px; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; line-height: 1; white-space: nowrap; vertical-align: 1px; }
 .user-profile-astro-list { display: grid; gap: 8px; }
 .user-profile-astro-row { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; transition: border-color .16s ease, box-shadow .16s ease; }
 .user-profile-astro-row:hover { border-color: var(--primary); box-shadow: var(--shadow-xs); }
@@ -4577,6 +4577,9 @@ tbody tr:hover {
 
 .user-modal-card {
   width: min(440px, 100%);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border-radius: 28px;
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -5047,6 +5050,187 @@ tbody tr:hover {
 .member-profile__layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; margin-top:22px; }.profile-section,.about-card,.profile-tip { padding:22px; border:1px solid var(--surface-border); border-radius:18px; background:var(--surface); }.profile-section + .profile-section { margin-top:22px; }.section-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }.section-heading h2 { margin:3px 0 0; font-size:17px; }.quick-actions { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }.quick-actions a { display:flex; align-items:center; gap:11px; padding:13px; border:1px solid var(--surface-border); border-radius:12px; color:var(--text-primary); text-decoration:none; }.quick-actions a:hover { border-color:var(--primary); background:var(--primary-bg); }.quick-actions a span { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; color:var(--primary); background:var(--primary-bg); }.quick-actions b { flex:1; font-size:12px; }.profile-tabs { display:flex; gap:22px; overflow-x:auto; border-bottom:1px solid var(--surface-border); }.profile-tabs button { flex:none; padding:0 0 12px; border:0; border-bottom:2px solid transparent; color:var(--text-secondary); background:none; font-size:12px; font-weight:700; cursor:pointer; }.profile-tabs button.is-active { border-color:var(--primary); color:var(--primary); }.profile-empty { display:grid; place-items:center; padding:38px 15px 22px; text-align:center; }.profile-empty > span { display:grid; place-items:center; width:44px; height:44px; border-radius:14px; color:var(--primary); background:var(--primary-bg); }.profile-empty h3 { margin:13px 0 4px; font-size:16px; }.profile-empty p { margin:0 0 16px; color:var(--text-secondary); font-size:13px; }.about-card { margin-bottom:16px; }.about-copy { margin:0 0 18px; color:var(--text-secondary); font-size:13px; line-height:1.6; }.about-list { display:grid; gap:12px; }.about-list div { display:flex; gap:10px; align-items:flex-start; color:var(--primary); }.about-list span { display:flex; flex-direction:column; gap:2px; color:var(--text-secondary); font-size:12px; }.about-list b { color:var(--text-primary); font-size:12px; }.profile-tip { display:flex; gap:11px; color:var(--primary); background:#f8f5ff; }.profile-tip b { color:var(--text-primary); font-size:12px; }.profile-tip p { margin:4px 0 0; color:var(--text-secondary); font-size:11px; line-height:1.5; }.profile-edit-form { display:grid; gap:12px; }
 @media (max-width: 760px) { .member-profile { padding:0 0 36px; }.member-profile__hero { padding:22px 18px; }.member-profile__identity { align-items:flex-start; gap:13px; }.member-avatar { width:76px; height:76px; font-size:22px; }.member-profile__name-row h2 { font-size:19px; }.member-badge { font-size:10px; }.member-profile__hero-actions { position:static; margin:20px 0 0 89px; }.member-profile__hero-actions .icon-btn { display:none; }.profile-stats { grid-template-columns:repeat(5,minmax(70px,1fr)); gap:16px; overflow:auto; margin-top:20px; }.profile-stats div { min-width:70px; }.profile-stats strong { font-size:17px; }.member-profile__layout { grid-template-columns:1fr; }.quick-actions { grid-template-columns:1fr; }.member-profile__intro h1 { font-size:24px; } }
 @media (max-width: 640px) { .audience-member-page { padding-bottom: 24px; }.audience-member-hero__body { flex-wrap: wrap; gap: 12px; padding: 0 18px 18px; }.audience-member-avatar { flex-basis: 86px; width: 86px; height: 86px; margin-top: -43px; font-size: 23px; }.audience-member-identity { flex-basis: calc(100% - 98px); }.audience-member-identity h1 { font-size: 21px; }.audience-member-tier { width: 100%; grid-template-columns: 1fr auto; align-items: center; }.audience-member-tier small { grid-column: 1 / -1; }.audience-member-tier span { text-align: right; }.audience-member-hero__summary { gap: 10px; padding: 13px 18px; }.audience-member-hero__summary span:last-child { margin-left: auto; }.audience-member-tabs { gap: 20px; }.audience-member-details { grid-template-columns: 1fr; } }
+
+/* Premium light Vedic styling for the existing User Profile content. */
+.app-shell--profile {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fbf8f2 0%, #f7f0e6 50%, #faf5ed 100%);
+  color: #2c2337;
+}
+
+.app-shell--profile .main-column { min-width: 0; }
+.app-shell--profile .topbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 72px;
+  margin: 0;
+  padding: 0 32px;
+  border-width: 0 0 1px;
+  border-color: rgba(181, 143, 70, .16);
+  border-radius: 0;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(60, 40, 20, .06);
+}
+.app-shell--profile .profile-topbar-brand { color: #241b36; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 600; }
+.app-shell--profile .profile-topbar-mark { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6b2bd9, #e58b61); box-shadow: 0 4px 12px rgba(92, 54, 130, .2); }
+.app-shell--profile .profile-home-btn { color: #5e5365; }
+.app-shell--profile .profile-home-btn:hover { background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .topbar-actions { gap: 8px; }
+.app-shell--profile .topbar-actions .icon-btn,
+.app-shell--profile .topbar-actions .avatar-chip { border-color: #e9ddcb; background: #fffdf9; color: #4d4158; }
+.app-shell--profile .topbar-actions .icon-btn { width: 40px; height: 40px; border-radius: 50%; }
+.app-shell--profile .topbar-actions .icon-btn:hover,
+.app-shell--profile .topbar-actions .avatar-chip:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .topbar-actions .avatar-chip { min-height: 40px; padding: 0 10px 0 5px; border-radius: 999px; }
+.app-shell--profile .topbar-actions .avatar-circle { width: 32px; height: 32px; background: linear-gradient(135deg, #6b2bd9, #a343d5); }
+.app-shell--profile .topbar-actions .theme-toggle { border-color: #e9ddcb; background: #fffdf9; }
+
+.app-shell--profile .page-content { max-width: 1120px; padding: 28px 24px 64px; }
+.app-shell--profile .page-header-row { position: relative; display: block; margin-bottom: 28px; padding-top: 60px; }
+.app-shell--profile .page-header-actions { position: absolute; top: 0; left: 0; }
+.app-shell--profile .page-header-actions .inline-flex { height: 40px; padding: 0 16px; border: 1px solid #e8dcc8; border-radius: 12px; background: #fffdf9; color: #2c2337; box-shadow: 0 4px 12px rgba(60, 40, 20, .04); }
+.app-shell--profile .page-header-actions .inline-flex:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .page-eyebrow { height: 30px; margin-bottom: 10px; padding: 0 12px; border-radius: 999px; background: #f6ebd7; color: #a66a08; font-size: 11px; letter-spacing: .08em; box-shadow: none; }
+.app-shell--profile .page-title { color: #251a38; font-family: Georgia, 'Times New Roman', serif; font-size: 42px; font-weight: 600; line-height: 1.1; letter-spacing: 0; }
+.app-shell--profile .page-header-row .muted { margin: 0; color: #766c80; font-size: 15px; line-height: 24px; }
+
+.app-shell--profile .user-profile { position: relative; z-index: 0; width: 100%; max-width: 1120px; gap: 20px; }
+.app-shell--profile .user-profile::before { content: '☼'; position: absolute; z-index: -1; top: -68px; right: 34px; width: 230px; height: 230px; border: 1px solid rgba(184, 137, 47, .08); border-radius: 50%; color: rgba(184, 137, 47, .09); font-size: 120px; line-height: 230px; text-align: center; pointer-events: none; box-shadow: 0 0 0 24px rgba(184, 137, 47, .035), 0 0 0 48px rgba(184, 137, 47, .025); }
+.app-shell--profile .user-profile-header { position: relative; overflow: hidden; min-height: 245px; border: 1px solid rgba(201, 158, 77, .45); border-radius: 26px; background: linear-gradient(135deg, #fffdf9 0%, #fff8ec 100%); box-shadow: 0 12px 40px rgba(91, 64, 27, .1), inset 0 0 0 1px rgba(255, 255, 255, .7); }
+.app-shell--profile .user-profile-header::after { content: '✦  ·  ☽'; position: absolute; right: 26px; bottom: 58px; color: rgba(184, 137, 47, .13); font-size: 25px; letter-spacing: 18px; pointer-events: none; }
+.app-shell--profile .user-profile-header__top { position: relative; z-index: 1; align-items: center; gap: 24px; padding: 28px 28px 24px; border-bottom: 1px solid #efe3d2; }
+.app-shell--profile .user-profile-header__identity { align-items: center; gap: 20px; }
+.app-shell--profile .user-profile-header__avatar { width: 108px; height: 108px; border: 4px solid #fff9ef; outline: 1px solid #d7ae65; background: linear-gradient(135deg, #6b2bd9, #a343d5 55%, #e58b61); font-family: Georgia, 'Times New Roman', serif; font-size: 30px; box-shadow: 0 8px 20px rgba(92, 54, 130, .2); }
+.app-shell--profile .user-profile-header__copy h1 { color: #241a36; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; font-weight: 600; letter-spacing: 0; }
+.app-shell--profile .user-profile-header__copy .muted { color: #776b7e; font-size: 14px; }
+.app-shell--profile .user-profile-header__bio { max-width: 500px; margin-top: 10px; color: #6f6576; font-size: 13px; line-height: 20px; }
+.app-shell--profile .user-profile-header__actions { position: relative; z-index: 2; gap: 12px; }
+.app-shell--profile .user-profile-header__actions .btn { height: 48px; padding: 0 18px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+.app-shell--profile .user-profile-header__actions .btn-outline { border-color: #b68a3a; background: #fff; color: #5e2bb7; }
+.app-shell--profile .user-profile-header__actions .btn-outline:hover { background: #fcf6ea; }
+.app-shell--profile .user-profile-header__actions .btn-primary { border: 0; background: linear-gradient(135deg, #6127c8, #8d39d4); box-shadow: 0 8px 18px rgba(102, 42, 190, .2); }
+.app-shell--profile .user-profile-stats { position: relative; z-index: 1; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 20px 28px 0; padding: 4px 12px 0; border-top: 0; }
+.app-shell--profile .user-profile-stats > * { position: relative; display: flex; flex-direction: row; align-items: center; gap: 14px; min-height: 44px; padding: 0; border-radius: 0; background: transparent; }
+.app-shell--profile .user-profile-stats > * + * { padding-left: 24px; border-left: 1px solid #e8dccb; }
+.app-shell--profile .user-profile-stats > *::before { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #fbf2df; color: #9b6815; font-size: 19px; }
+.app-shell--profile .user-profile-stats > *:nth-child(1)::before { content: '✦'; }
+.app-shell--profile .user-profile-stats > *:nth-child(2)::before { content: '◈'; }
+.app-shell--profile .user-profile-stats > *:nth-child(3)::before { content: '₹'; font-size: 17px; font-weight: 700; }
+.app-shell--profile .user-profile-stats strong { color: #241a36; font-size: 22px; font-weight: 700; }
+.app-shell--profile .user-profile-stats span { margin-top: 2px; color: #756a7b; font-size: 13px; }
+.app-shell--profile .user-profile-stats-btn span svg { display: none; }
+
+.app-shell--profile .user-profile-expanded { border-color: rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; min-height: 58px; padding: 5px; border: 1px solid #e9ddcb; border-radius: 18px; background: rgba(255, 253, 248, .95); }
+.app-shell--profile .user-profile-tabs button { justify-content: center; height: 48px; padding: 0 12px; border: 0; border-radius: 14px; color: #655a6c; font-size: 14px; font-weight: 600; transition: background 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
+.app-shell--profile .user-profile-tabs button:hover { color: #6728d4; transform: translateY(-1px); }
+.app-shell--profile .user-profile-tabs button.is-active { border: 0; background: linear-gradient(135deg, #6728d4, #a63fd4); color: #fff; box-shadow: 0 5px 14px rgba(104, 42, 211, .22); }
+.app-shell--profile .user-profile-content { width: 100%; max-width: none; }
+.app-shell--profile .user-profile-card { min-height: 290px; padding: 28px 36px 30px; border: 1px solid rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-card__heading { align-items: center; margin-bottom: 4px; }
+.app-shell--profile .user-profile-card__heading h2 { color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 600; }
+.app-shell--profile .user-profile-card__heading .profile-kicker { color: #b07817; font-size: 11px; letter-spacing: .1em; }
+.app-shell--profile .user-profile-card__heading .btn { height: 40px; padding: 0 14px; border: 1px solid #a477d8; border-radius: 10px; background: #fff; color: #652bbe; }
+.app-shell--profile .user-profile-detail-rows > div { grid-template-columns: 130px 1fr; height: 37px; padding: 0; border-bottom-color: #efe8dd; }
+.app-shell--profile .user-profile-detail-rows span { color: #766c7b; font-size: 13px; }
+.app-shell--profile .user-profile-detail-rows strong { color: #2c2337; font-size: 13px; font-weight: 600; }
+.app-shell--profile .user-profile-private { height: 20px; padding: 0 7px; border-radius: 999px; background: #f2e9ff; color: #6c32be; font-size: 10px; }
+.app-shell--profile .user-profile-expanded { padding: 24px 28px 28px; border-color: rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading { margin-bottom: 18px; }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading h2 { margin-top: 4px; }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading p { margin-top: 6px; }
+.app-shell--profile .user-profile-astro-list--expanded { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row { min-height: 68px; padding: 12px 14px; border-color: #efe3d2; border-radius: 14px; background: #fffaf1; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row:hover { border-color: #c8a2ed; background: #fdf8ff; box-shadow: 0 6px 16px rgba(92, 54, 130, .08); }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy { gap: 3px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy strong { font-size: 13px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy small { font-size: 11px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-meta { margin-top: 1px; font-size: 10px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-see-more { margin-top: 6px; }
+
+/* Horoscope page: compact cards replace the former long separator list. */
+.horoscope-page { width: 100%; }
+.horoscope-page__content { display: grid; gap: 18px; width: 100%; max-width: 1120px; margin: 0 auto; }
+.horoscope-selector-card,
+.horoscope-birth-card,
+.horoscope-star-card,
+.horoscope-planets-card,
+.horoscope-notes-card { padding: 22px 24px; border: 1px solid #e9ddcb; border-radius: 20px; background: #fffdf9; box-shadow: 0 8px 24px rgba(60, 40, 20, .06); }
+.horoscope-selector-card { display: flex; align-items: center; justify-content: space-between; gap: 24px; background: linear-gradient(135deg, #fffdf9, #fff8ec); }
+.horoscope-selector-card__copy { display: grid; gap: 4px; }
+.horoscope-selector-card__copy strong { color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; }
+.horoscope-selector-card__copy > span:last-child { color: #766c7b; font-size: 12px; }
+.horoscope-kicker { color: #b07817; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.horoscope-selector-card__field { display: grid; gap: 6px; width: min(360px, 100%); color: #766c7b; font-size: 11px; font-weight: 700; }
+.horoscope-selector-card__field .select-input { width: 100%; }
+.horoscope-overview-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .85fr); gap: 18px; }
+.horoscope-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.horoscope-card-heading h2 { margin: 4px 0 0; color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 600; }
+.horoscope-card-heading p { margin: 5px 0 0; color: #766c7b; font-size: 12px; }
+.horoscope-heading-icon { display: grid; width: 38px; height: 38px; flex: none; place-items: center; border-radius: 12px; background: #f2eafd; color: #6c32be; }
+.horoscope-heading-icon--gold { background: #fbf2df; color: #a66a08; }
+.horoscope-birth-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.horoscope-birth-tile { display: grid; gap: 7px; min-width: 0; padding: 15px 13px; border: 1px solid #efe3d2; border-radius: 14px; background: #fffaf1; }
+.horoscope-birth-tile__icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; background: #f2eafd; color: #6c32be; }
+.horoscope-birth-tile > span:not(.horoscope-birth-tile__icon) { color: #766c7b; font-size: 11px; }
+.horoscope-birth-tile strong { overflow-wrap: anywhere; color: #2c2337; font-size: 13px; }
+.horoscope-birth-card .user-profile-birth-actions { margin-top: 18px; }
+.horoscope-star-card { background: linear-gradient(145deg, #fffdf9, #fff8ec); }
+.horoscope-star-card__visual { display: flex; align-items: center; gap: 13px; margin: 24px 0 20px; }
+.horoscope-star-card__orb { display: grid; width: 58px; height: 58px; flex: none; place-items: center; border: 1px solid #d9b56a; border-radius: 50%; background: #fbf2df; color: #a66a08; }
+.horoscope-star-card__visual strong { display: block; color: #2c2337; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; }
+.horoscope-star-card__visual span { display: block; margin-top: 3px; color: #766c7b; font-size: 12px; }
+.horoscope-stat-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.horoscope-stat-chips > div { display: grid; gap: 4px; padding: 11px 12px; border-radius: 12px; background: #f8f0e3; }
+.horoscope-stat-chips span { color: #766c7b; font-size: 10px; }
+.horoscope-stat-chips strong { color: #2c2337; font-size: 14px; }
+.horoscope-planets-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.horoscope-planet-tile { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px; border: 1px solid #efe3d2; border-radius: 13px; background: #fffaf1; }
+.horoscope-planet-tile__symbol { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border-radius: 50%; background: #f2eafd; color: #6c32be; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: 700; }
+.horoscope-planet-tile strong, .horoscope-planet-tile span { display: block; overflow-wrap: anywhere; }
+.horoscope-planet-tile strong { color: #2c2337; font-size: 12px; }
+.horoscope-planet-tile div span { margin-top: 3px; color: #766c7b; font-size: 10px; }
+.horoscope-notes-card p { margin: 18px 0 0; padding: 14px 16px; border-radius: 12px; background: #fff8ec; color: #5f5369; font-size: 13px; line-height: 1.6; }
+@media (max-width: 800px) {
+  .horoscope-selector-card { align-items: stretch; flex-direction: column; }
+  .horoscope-selector-card__field { width: 100%; }
+  .horoscope-overview-grid { grid-template-columns: 1fr; }
+  .horoscope-planets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .horoscope-selector-card,
+  .horoscope-birth-card,
+  .horoscope-star-card,
+  .horoscope-planets-card,
+  .horoscope-notes-card { padding: 18px; border-radius: 16px; }
+  .horoscope-birth-tiles { grid-template-columns: 1fr; }
+  .horoscope-planets-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767px) {
+  .app-shell--profile .topbar-header { height: auto; min-height: 72px; padding: 12px 16px; }
+  .app-shell--profile .profile-topbar-brand { font-size: 17px; }
+  .app-shell--profile .topbar-actions .avatar-chip > span:last-child { display: none; }
+  .app-shell--profile .page-content { padding: 16px 16px 48px; }
+  .app-shell--profile .page-header-row { padding-top: 56px; margin-bottom: 24px; }
+  .app-shell--profile .page-title { font-size: 32px; }
+  .app-shell--profile .user-profile-header { border-radius: 20px; }
+  .app-shell--profile .user-profile-header__top { align-items: flex-start; flex-direction: column; padding: 20px; }
+  .app-shell--profile .user-profile-header__identity { align-items: flex-start; flex-direction: column; }
+  .app-shell--profile .user-profile-header__actions { width: 100%; }
+  .app-shell--profile .user-profile-header__actions .btn { flex: 1; justify-content: center; min-width: 0; }
+  .app-shell--profile .user-profile-stats { grid-template-columns: 1fr; gap: 14px; margin: 20px; padding: 0; }
+  .app-shell--profile .user-profile-stats > * + * { padding-left: 0; border-left: 0; }
+  .app-shell--profile .user-profile-card { padding: 20px; border-radius: 20px; }
+  .app-shell--profile .user-profile-tabs { justify-content: flex-start; display: flex; overflow-x: auto; }
+  .app-shell--profile .user-profile-tabs button { min-width: 120px; flex: 0 0 auto; }
+  .app-shell--profile .user-profile-detail-rows > div { grid-template-columns: 1fr; height: auto; min-height: 52px; gap: 4px; padding: 10px 0; }
+  .app-shell--profile .user-profile-expanded { padding: 20px; border-radius: 20px; }
+  .app-shell--profile .user-profile-expanded .user-profile-card__heading { align-items: flex-start; margin-bottom: 16px; }
+  .app-shell--profile .user-profile-expanded .user-profile-card__heading .btn { flex: none; }
+  .app-shell--profile .user-profile-astro-list--expanded { grid-template-columns: 1fr; gap: 10px; }
+  }
 
 /* Consultation-provider treatment for the existing astrologer profile route */
 .social-profile { max-width:1040px; margin:0 auto; }.social-profile__header { overflow:hidden; border:1px solid #e6e0f3; border-radius:22px; background:linear-gradient(120deg,#fff 38%,#f7f2ff); box-shadow:0 12px 30px rgba(58,42,106,.06); }.social-profile__cover { height:86px; background:radial-gradient(circle at 82% 15%,#d9c8ff 0 5%,transparent 6%), linear-gradient(115deg,#26153f,#6c43a9 54%,#d6c1ff); opacity:.95; }.social-profile__avatar { width:104px; height:104px; margin-top:-50px; border:5px solid #fff; box-shadow:0 8px 20px #36205a33; }.social-profile__identity { padding:0 28px 22px; }.social-profile__name { font-size:25px; }.social-profile__meta { color:var(--text-secondary); }.social-profile__actions .btn-primary { box-shadow:0 7px 16px #6b46c133; }.social-profile__stats { margin:0 28px; padding:18px 0; border-color:#e6e0f3; }.social-profile__stats strong { font-size:20px; }.social-profile__bio { padding:18px 28px 24px; font-size:14px; }.social-profile__tabs { margin-top:22px; padding:0 6px; border:1px solid var(--surface-border); border-radius:14px; background:var(--surface); }.social-profile__posts { grid-template-columns:repeat(3,minmax(0,1fr)); }.social-profile__post { min-height:190px; border-top-width:3px; border-radius:16px; background:var(--surface); }.social-profile__panel { border-radius:16px; }.profile-service-status { display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:99px; background:var(--surface-soft); font-size:12px; font-weight:700; }.social-profile__footer-actions { justify-content:flex-end; }.social-profile__footer-actions .btn-primary { order:-1; }

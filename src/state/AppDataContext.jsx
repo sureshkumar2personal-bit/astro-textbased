@@ -30,6 +30,7 @@ const AppDataContext = createContext(null)
 const QUESTIONS_DEMO_NOW = Date.now()
 const questionsDemoIso = (millisAgo) => new Date(QUESTIONS_DEMO_NOW - millisAgo).toISOString()
 const DAY_MS = 24 * 60 * 60 * 1000
+const DEFAULT_FOLLOWED_ASTROLOGER_IDS = ['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6']
 
 
 const DEFAULT_CAMPAIGN_CATEGORIES = [
@@ -1765,6 +1766,8 @@ const POST_INTERACTIONS_STORAGE_KEY = 'astroconnect-post-interactions'
 const POST_COMMENTS_STORAGE_KEY = 'astroconnect-post-comments'
 const LIVE_REMINDERS_STORAGE_KEY = 'astroconnect-user-live-reminders-v1'
 const FAMILY_HOROSCOPES_STORAGE_KEY = 'astroconnect-family-horoscopes'
+const FOLLOWED_ASTROLOGERS_STORAGE_KEY = 'astroconnect-followed-astrologers'
+const SUBSCRIPTIONS_STORAGE_KEY = 'astroconnect-user-subscriptions'
 const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
 const ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY = 'astroconnect-astrologer-activity-log'
 
@@ -2169,6 +2172,21 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
   }
 }
 
+function createDefaultUserSubscriptions(user) {
+  if (user?.role !== ROLES.USER || !user?.id) return []
+  return subscribedAstrologers.map((astrologer, index) => ({
+    id: `demo-subscription-${astrologer.id}`,
+    userId: user.id,
+    userName: user.name || user.id,
+    astrologerId: astrologer.id,
+    astrologerName: astrologer.name,
+    tier: index % 3 === 0 ? 'Gold' : 'Silver',
+    subscribedAt: new Date().toISOString(),
+    expiresAt: addDaysMs(30),
+    discountQuestions: [],
+  }))
+}
+
 export function AppDataProvider({ children }) {
   const { currentUser } = useAuth()
   const consultationEditLocks = useRef(new Set())
@@ -2210,20 +2228,15 @@ export function AppDataProvider({ children }) {
     const storedIds = new Set(stored.map((atonement) => atonement.id))
     return [...stored.map(normalizeAtonement), ...seed.filter((atonement) => !storedIds.has(atonement.id))]
   })
-  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(['astrologer-demo', 'astrologer-10', 'astrologer-11', 'astrologer-13', 'astrologer-4', 'astrologer-5', 'astrologer-6'])
+  const [followedAstrologerIds, setFollowedAstrologerIds] = useState(() => {
+    const stored = loadFromStorage(`${FOLLOWED_ASTROLOGERS_STORAGE_KEY}-${currentUser?.id || 'guest'}`, null)
+    return Array.isArray(stored) ? stored : currentUser?.role === ROLES.USER ? DEFAULT_FOLLOWED_ASTROLOGER_IDS : []
+  })
   const [subscriptions, setSubscriptions] = useState(() => {
     if (currentUser?.role !== ROLES.USER || !currentUser?.id) return []
-    return subscribedAstrologers.map((astrologer, index) => ({
-      id: `demo-subscription-${astrologer.id}`,
-      userId: currentUser.id,
-      userName: currentUser.name || currentUser.id,
-      astrologerId: astrologer.id,
-      astrologerName: astrologer.name,
-      tier: index % 3 === 0 ? 'Gold' : 'Silver',
-      subscribedAt: new Date().toISOString(),
-      expiresAt: addDaysMs(30),
-      discountQuestions: [],
-    }))
+    const stored = loadFromStorage(`${SUBSCRIPTIONS_STORAGE_KEY}-${currentUser.id}`, null)
+    if (Array.isArray(stored)) return stored
+    return createDefaultUserSubscriptions(currentUser)
   })
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
@@ -2455,6 +2468,22 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(FAMILY_HOROSCOPES_STORAGE_KEY, familyHoroscopes)
   }, [familyHoroscopes])
+
+  useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    setFollowedAstrologerIds(loadFromStorage(`${FOLLOWED_ASTROLOGERS_STORAGE_KEY}-${userKey}`, currentUser?.role === ROLES.USER ? DEFAULT_FOLLOWED_ASTROLOGER_IDS : []))
+    setSubscriptions(loadFromStorage(`${SUBSCRIPTIONS_STORAGE_KEY}-${userKey}`, createDefaultUserSubscriptions(currentUser)))
+  }, [currentUser, currentUser?.id, currentUser?.role])
+
+  useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    saveToStorage(`${FOLLOWED_ASTROLOGERS_STORAGE_KEY}-${userKey}`, followedAstrologerIds)
+  }, [currentUser?.id, followedAstrologerIds])
+
+  useEffect(() => {
+    const userKey = currentUser?.id || 'guest'
+    saveToStorage(`${SUBSCRIPTIONS_STORAGE_KEY}-${userKey}`, subscriptions)
+  }, [currentUser?.id, subscriptions])
 
   const selectedCampaign = campaigns.find((campaign) => campaign.id === selectedCampaignId) || campaigns[0]
   const selectedQuestion = questionPreviewId ? questions.find((question) => question.id === questionPreviewId) : null
@@ -4533,19 +4562,33 @@ if (question) {
 
     // Family Horoscopes
     addFamilyHoroscope(payload) {
+      if (currentUser?.role !== ROLES.USER) return null
       const entry = {
         id: crypto.randomUUID(),
         userId: currentUser?.id || 'guest',
+        gender: '',
+        dateOfBirth: '',
+        timeOfBirth: '',
+        birthPlace: '',
+        latitude: '',
+        longitude: '',
+        timezone: '',
+        profileImage: '',
         ...payload,
       }
       setFamilyHoroscopes((prev) => [...prev, entry])
+      recordUserActivity({ userId: currentUser.id, type: 'family-profile', title: 'Family horoscope added', summary: `Added ${entry.name || 'a family member'} to your family profiles.`, metadata: entry.relationship })
       return entry
     },
     updateFamilyHoroscope(id, patch) {
-      setFamilyHoroscopes((prev) => prev.map((entry) => (entry.id === id ? { ...entry, ...patch } : entry)))
+      if (currentUser?.role !== ROLES.USER) return null
+      setFamilyHoroscopes((prev) => prev.map((entry) => (entry.id === id && entry.userId === currentUser?.id ? { ...entry, ...patch } : entry)))
+      recordUserActivity({ userId: currentUser.id, type: 'family-profile', title: 'Family horoscope updated', summary: 'Updated a family member’s birth details.', metadata: id })
     },
     deleteFamilyHoroscope(id) {
-      setFamilyHoroscopes((prev) => prev.filter((entry) => entry.id !== id))
+      if (currentUser?.role !== ROLES.USER) return null
+      setFamilyHoroscopes((prev) => prev.filter((entry) => !(entry.id === id && entry.userId === currentUser?.id)))
+      recordUserActivity({ userId: currentUser.id, type: 'family-profile', title: 'Family horoscope removed', summary: 'Removed a family member from your family profiles.', metadata: id })
     },
 
     // User Payment Methods
