@@ -387,3 +387,69 @@ body:has(.my-account-page) {
   .my-account-info-row { grid-template-columns: 1fr; gap: 5px; }
   .my-account-info-value { justify-content: flex-start; }
 }
+
+html[data-theme='dark'] body:has(.my-account-page) {
+  background:
+    radial-gradient(760px 360px at 7% 4%, rgba(249, 115, 22, .1), transparent 64%),
+    radial-gradient(840px 440px at 94% 12%, rgba(139, 92, 246, .14), transparent 64%),
+    linear-gradient(135deg, #0b1020 0%, #111827 100%);
+}
+
+html[data-theme='dark'] .my-account-page > .inline-flex {
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, .3);
+  background: rgba(30, 41, 59, .72);
+}
+
+html[data-theme='dark'] .my-account-page .page-title,
+html[data-theme='dark'] .my-account-settings-title { color: #f8fafc; }
+html[data-theme='dark'] .my-account-page .page-header-row .muted,
+html[data-theme='dark'] .my-account-settings-desc { color: #94a3b8; }
+html[data-theme='dark'] .my-account-settings-section {
+  border-color: rgba(148, 163, 184, .18);
+  background: rgba(15, 23, 42, .84);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, .24);
+}
+html[data-theme='dark'] .my-account-settings-section + .my-account-settings-section { border-top-color: rgba(148, 163, 184, .18); }
+html[data-theme='dark'] .my-account-info-row span { color: #c4b5fd; }
+html[data-theme='dark'] .my-account-info-row span svg { color: #a78bfa; }
+html[data-theme='dark'] .my-account-info-row strong,
+html[data-theme='dark'] .my-account-info-row strong.is-empty,
+html[data-theme='dark'] .my-account-page label,
+html[data-theme='dark'] .my-account-page legend,
+html[data-theme='dark'] .my-account-page .field-label-top { color: #e2e8f0; }
+html[data-theme='dark'] .my-account-page .text-input,
+html[data-theme='dark'] .my-account-page .select-input,
+html[data-theme='dark'] .my-account-page select,
+html[data-theme='dark'] .my-account-page input,
+html[data-theme='dark'] .my-account-language-select {
+  border-color: #334155;
+  background: #1e293b;
+  color: #f8fafc;
+}
+html[data-theme='dark'] .privacy-control {
+  border-color: #475569;
+  background: rgba(139, 92, 246, .16);
+  color: #c4b5fd;
+}
+html[data-theme='dark'] .privacy-control:hover,
+html[data-theme='dark'] .privacy-control.is-open { border-color: #8b5cf6; background: rgba(139, 92, 246, .28); color: #f8fafc; }
+html[data-theme='dark'] .privacy-control-menu,
+html[data-theme='dark'] .my-account-place-menu,
+html[data-theme='dark'] .my-account-language-menu,
+html[data-theme='dark'] .profile-place-menu {
+  border-color: #475569;
+  background: #0f172a;
+  box-shadow: 0 12px 28px rgba(2, 6, 23, .42);
+}
+html[data-theme='dark'] .privacy-control-menu button,
+html[data-theme='dark'] .my-account-place-menu button,
+html[data-theme='dark'] .my-account-place-menu > span,
+html[data-theme='dark'] .my-account-language-option,
+html[data-theme='dark'] .my-account-language-menu small,
+html[data-theme='dark'] .my-account-language-empty { color: #cbd5e1; }
+html[data-theme='dark'] .privacy-control-menu button:hover,
+html[data-theme='dark'] .privacy-control-menu button.is-selected,
+html[data-theme='dark'] .my-account-place-menu button:hover,
+html[data-theme='dark'] .my-account-language-option:hover,
+html[data-theme='dark'] .my-account-language-option.is-selected { background: rgba(139, 92, 246, .2); color: #f8fafc; }
