@@ -1,5 +1,6 @@
-import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Sparkles, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -9,6 +10,7 @@ import { consultationAstrologers as consultationAstrologersData } from '../data/
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
+import { deriveUsername, getBirthPlaceDetails, isFutureDate } from '../utils/profile.js'
 
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
@@ -27,6 +29,14 @@ const VISIBILITY_OPTIONS = [
   ['subscribers', 'Subscribers'],
   ['private', 'Private'],
 ]
+const BIRTH_PLACE_OPTIONS = [
+  'Ahmedabad, Gujarat, India', 'Bengaluru, Karnataka, India', 'Chennai, Tamil Nadu, India',
+  'Chengalpattu, Tamil Nadu, India', 'Chidambaram, Tamil Nadu, India', 'Coimbatore, Tamil Nadu, India',
+  'Cuddalore, Tamil Nadu, India', 'Delhi, India', 'Hyderabad, Telangana, India', 'Kochi, Kerala, India',
+  'Kolkata, West Bengal, India', 'Madurai, Tamil Nadu, India', 'Mumbai, Maharashtra, India',
+  'Pune, Maharashtra, India', 'Theni, Tamil Nadu, India', 'Tiruchirappalli, Tamil Nadu, India',
+  'Tirunelveli, Tamil Nadu, India', 'Visakhapatnam, Andhra Pradesh, India',
+].sort((first, second) => first.localeCompare(second))
 
 const POST_INTERACTION_OPTIONS = [
   ['like', 'Likes', 'Allow users to like this post.'],
@@ -67,7 +77,7 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds, questions, userWallet, familyHoroscopes } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds, questions, familyHoroscopes } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
@@ -88,20 +98,24 @@ export default function Profile() {
   const [consultationTab, setConsultationTab] = useState('appointments')
   const [selectedConsultationAstrologerId, setSelectedConsultationAstrologerId] = useState(null)
   const [showEditProfile, setShowEditProfile] = useState(false)
-  const [editForm, setEditForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
+  const [editForm, setEditForm] = useState({ name: currentUser?.name || '', username: currentUser?.username || '', email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
   const [familyFormOpen, setFamilyFormOpen] = useState(false)
   const [editingFamilyId, setEditingFamilyId] = useState(null)
-  const [familyForm, setFamilyForm] = useState({ relationship: '', name: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '' })
+  const [familyForm, setFamilyForm] = useState({ relationship: '', name: '', gender: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '', latitude: '', longitude: '', timezone: '', profileImage: '' })
   const [handledFamilyMemberId, setHandledFamilyMemberId] = useState(null)
   const [expandedSection, setExpandedSection] = useState(null)
   const [expandedLimit, setExpandedLimit] = useState(6)
   const [profileTab, setProfileTab] = useState('about')
+  const [profilePlaceMenuOpen, setProfilePlaceMenuOpen] = useState(false)
+  const profilePlaceMenuRef = useRef(null)
+  const [familyPlaceMenuOpen, setFamilyPlaceMenuOpen] = useState(false)
+  const familyPlaceMenuRef = useRef(null)
   const mediaInputRef = useRef(null)
   const postRecorderRef = useRef(null)
   const postRecordingStreamRef = useRef(null)
 
   const name = currentUser?.name || (isAstrologer ? 'Astrologer' : 'User')
-  const username = name.toLowerCase().replace(/[^a-z0-9]+/g, '') || 'profile'
+  const username = currentUser?.username || deriveUsername(name)
   const bio = isAstrologer
     ? 'Helping you find clarity through thoughtful guidance.'
     : 'Astro Connect member\nAsk questions, explore astrologers, and follow your journey with clarity.'
@@ -155,7 +169,7 @@ export default function Profile() {
       return { ...astro, profileImage: consultation?.profileImage || '', tier: sub.tier || 'Silver' }
     }).filter(Boolean)
   }, [subscriptions, isAstrologer])
-  const familyMembers = familyHoroscopes.filter((entry) => entry.userId === currentUser?.id || !isAstrologer)
+  const familyMembers = familyHoroscopes.filter((entry) => entry.userId === currentUser?.id)
   const horoscopeBirth = useMemo(() => {
     let stored = {}
     if (typeof window !== 'undefined') {
@@ -169,30 +183,46 @@ export default function Profile() {
     }
   }, [currentUser?.name, currentUser?.dateOfBirth, currentUser?.birthTime, currentUser?.birthPlace])
   const activeQuestionCount = questions.filter((question) => question.status !== 'Closed').length
+  const ownedAppointments = appointments.filter((appointment) => appointment.userId === currentUser?.id || appointment.customerId === currentUser?.id)
   const activitySummary = {
-    questions: activeQuestionCount,
-    appointments: appointments.filter((appointment) => appointment.status !== 'Cancelled').length,
+    questions: questions.filter((question) => question.userId === currentUser?.id || question.customerId === currentUser?.id || (currentUser?.id === 'user-demo' && question.userId === 'user-demo')).length || activeQuestionCount,
+    appointments: (ownedAppointments.length ? ownedAppointments : appointments.filter((appointment) => appointment.status !== 'Cancelled')).length,
     liveSessions: astrologerLiveSessions.filter((session) => session.status === 'live').length,
   }
   const openEditProfile = () => {
-    setEditForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
+    setEditForm({ name: currentUser?.name || '', username: currentUser?.username || deriveUsername(currentUser?.name), email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
     setError('')
     setSaved(false)
+    setProfilePlaceMenuOpen(false)
     setShowEditProfile(true)
   }
   const saveProfile = () => {
     try {
       updateProfile(editForm)
       setShowEditProfile(false)
+      setProfilePlaceMenuOpen(false)
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update your profile.')
     }
   }
+  const profilePlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(editForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
+  const familyPlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(familyForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
+
+  useEffect(() => {
+    if (!profilePlaceMenuOpen && !familyPlaceMenuOpen) return undefined
+    const closeOnOutsideClick = (event) => {
+      if (!profilePlaceMenuRef.current?.contains(event.target)) setProfilePlaceMenuOpen(false)
+      if (!familyPlaceMenuRef.current?.contains(event.target)) setFamilyPlaceMenuOpen(false)
+    }
+    document.addEventListener('mousedown', closeOnOutsideClick)
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick)
+  }, [profilePlaceMenuOpen, familyPlaceMenuOpen])
   const openFamilyForm = (member = null) => {
     setEditingFamilyId(member ? member.id : null)
-    setFamilyForm(member ? { relationship: member.relationship, name: member.name, dateOfBirth: member.dateOfBirth, timeOfBirth: member.timeOfBirth, birthPlace: member.birthPlace } : { relationship: '', name: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '' })
+    setFamilyForm(member ? { relationship: member.relationship || '', name: member.name || '', gender: member.gender || '', dateOfBirth: member.dateOfBirth || '', timeOfBirth: member.timeOfBirth || '', birthPlace: member.birthPlace || '', latitude: member.latitude || '', longitude: member.longitude || '', timezone: member.timezone || '', profileImage: member.profileImage || '' } : { relationship: '', name: '', gender: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '', latitude: '', longitude: '', timezone: '', profileImage: '' })
     setError('')
+    setFamilyPlaceMenuOpen(false)
     setFamilyFormOpen(true)
   }
   const saveFamilyMember = () => {
@@ -200,10 +230,16 @@ export default function Profile() {
       setError('Add a name and relationship for this family member.')
       return
     }
-    if (editingFamilyId) actions.updateFamilyHoroscope(editingFamilyId, { ...familyForm, name: familyForm.name.trim(), relationship: familyForm.relationship.trim() })
-    else actions.addFamilyHoroscope(familyForm)
+    if (isFutureDate(familyForm.dateOfBirth)) {
+      setError('Date of birth cannot be in the future.')
+      return
+    }
+    const payload = { ...familyForm, name: familyForm.name.trim(), relationship: familyForm.relationship.trim() }
+    if (editingFamilyId) actions.updateFamilyHoroscope(editingFamilyId, payload)
+    else actions.addFamilyHoroscope(payload)
     setFamilyFormOpen(false)
     setEditingFamilyId(null)
+    setFamilyPlaceMenuOpen(false)
   }
   const deleteFamilyMember = (member) => {
     if (!window.confirm(`Remove ${member.name} from family horoscopes?`)) return
@@ -663,7 +699,9 @@ export default function Profile() {
               <div className="user-profile-stats">
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'following' ? ' is-active' : ''}`} onClick={() => toggleSection('following')}><strong>{followedAstrologerIds.length}</strong><span>{expandedSection === 'following' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Following</span></button>
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'subscriptions' ? ' is-active' : ''}`} onClick={() => toggleSection('subscriptions')}><strong>{subscriptions.length}</strong><span>{expandedSection === 'subscriptions' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Subscriptions</span></button>
-                <Link to={routes.walletHistory} state={{ from: 'profile' }}><strong>₹{Number(userWallet?.balance || 0).toLocaleString('en-IN')}</strong><span>Wallet balance</span></Link>
+                <Link to={routes.myAppointments} state={{ from: 'profile' }}><strong>{userConsultationHistory.length}</strong><span>Consultations</span></Link>
+                <div><strong>0</strong><span>Reviews</span></div>
+                <Link to={routes.followedAstrologersFull} state={{ from: 'profile' }}><strong>{savedPostIds.length}</strong><span>Saved Astrologers</span></Link>
               </div>
             </Card>
 
@@ -710,9 +748,21 @@ export default function Profile() {
                 <div className="user-profile-detail-rows">
                   <div><span>Name</span><strong>{currentUser?.name || 'Not added'}</strong></div>
                   <div><span>Username</span><strong>@{username}</strong></div>
-                  <div><span>Email <em className="user-profile-private"><Lock size={10} /> Private</em></span><strong>{currentUser?.email || 'Not added'}</strong></div>
-                  <div><span>Phone <em className="user-profile-private"><Lock size={10} /> Private</em></span><strong>{currentUser?.phone || 'Not added'}</strong></div>
+                  <div><span>Gender</span><strong>{currentUser?.gender || 'Not added'}</strong></div>
+                  <div><span>Languages</span><strong>{currentUser?.languages?.join(', ') || 'Not added'}</strong></div>
+                  <div><span>Interests</span><strong>{currentUser?.astrologerPreferences?.consultationTitles?.join(', ') || 'Not added'}</strong></div>
                   <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
+                  <div><span>About Me</span><strong>{currentUser?.bio || bio}</strong></div>
+                </div>
+              </Card>}
+
+              {profileTab === 'about' && <Card className="user-profile-card">
+                <div className="user-profile-card__heading"><div><span className="profile-kicker">ASTROLOGY IDENTITY</span><h2>Your Astrology Identity</h2></div><Sparkles size={20} className="profile-section-accent" /></div>
+                <div className="user-profile-detail-rows">
+                  <div><span>Rasi / Moon Sign</span><strong>{currentUser?.rasi || 'Rishabam'}</strong></div>
+                  <div><span>Nakshatra</span><strong>{currentUser?.nakshatra || 'Rohini'} · Pada 2</strong></div>
+                  <div><span>Lagna</span><strong>{currentUser?.lagna || 'Vrishabha'}</strong></div>
+                  <div><span>Sun Sign</span><strong>{currentUser?.sunSign || 'Meenam'}</strong></div>
                 </div>
               </Card>}
 
@@ -722,6 +772,12 @@ export default function Profile() {
                   <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
                   <div><span>Time of Birth</span><strong>{horoscopeBirth.timeOfBirth || 'Not added'}</strong></div>
                   <div><span>Place of Birth</span><strong>{horoscopeBirth.placeOfBirth || 'Not added'}</strong></div>
+                </div>
+                <div className="user-profile-chart-grid">
+                  <div><span>Kundli / Birth Chart</span><strong>Available</strong></div>
+                  <div><span>Navamsa Chart</span><strong>Available</strong></div>
+                  <div><span>Planetary Positions</span><strong>View Horoscope</strong></div>
+                  <div><span>Current Dasha</span><strong>Vimshottari Dasha</strong></div>
                 </div>
                 <div className="user-profile-birth-actions">
                   <Link to={routes.horoscope} state={{ from: 'profile' }} className="btn btn-outline btn-sm">View Full Horoscope <ArrowRight size={14} /></Link>
@@ -738,45 +794,59 @@ export default function Profile() {
                 <div className="user-profile-activity">
                   <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
                   <Link to={routes.myAppointments}><strong>{activitySummary.appointments}</strong><span><CalendarDays size={13} /> Appointments</span></Link>
-                  <Link to={routes.liveSession}><strong>{activitySummary.liveSessions}</strong><span><Radio size={13} /> Live now</span></Link>
+                  <Link to={routes.followedAstrologersFull}><strong>{followedAstrologerIds.length}</strong><span><Users size={13} /> Astrologers followed</span></Link>
+                  <div><strong>0</strong><span><Heart size={13} /> Reviews given</span></div>
+                  <div><strong>{savedPostIds.length}</strong><span><Bookmark size={13} /> Saved content</span></div>
+                  <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
                 </div>
               </Card>}
             </div>
           </div>
 
-          {showEditProfile && <div className="modal-overlay user-modal-overlay" onClick={() => setShowEditProfile(false)}>
+          {showEditProfile && createPortal(<div className="modal-overlay user-modal-overlay" onClick={() => setShowEditProfile(false)}>
             <div className="modal-card user-modal-card" style={{ width: 'min(440px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
               <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4"><div><div className="section-title" style={{ marginBottom: 0 }}>Edit Profile</div><p className="muted">Update the details shown on your profile.</p></div><button type="button" className="icon-btn" aria-label="Close edit profile" onClick={() => setShowEditProfile(false)}><X size={16} /></button></div>
               <div className="modal-card__content user-modal-card__content">
                 <div className="form-grid">
                   <label className="field-group"><span className="field-label-top">Name</span><input className="text-input" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} /></label>
+                  <label className="field-group"><span className="field-label-top">Username</span><input className="text-input" value={editForm.username} onChange={(event) => setEditForm({ ...editForm, username: event.target.value })} placeholder="your-username" /></label>
                   <label className="field-group"><span className="field-label-top">Profile photo URL</span><input className="text-input" value={editForm.profileImage} onChange={(event) => setEditForm({ ...editForm, profileImage: event.target.value })} placeholder="https://..." /></label>
-                  <label className="field-group"><span className="field-label-top">Email Address</span><input type="email" className="text-input" value={editForm.email} onChange={(event) => setEditForm({ ...editForm, email: event.target.value })} /></label>
-                  <label className="field-group"><span className="field-label-top">Phone Number</span><input type="tel" className="text-input" value={editForm.phone} onChange={(event) => setEditForm({ ...editForm, phone: event.target.value })} /></label>
+                  <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={editForm.gender} onChange={(event) => setEditForm({ ...editForm, gender: event.target.value })} placeholder="Optional" /></label>
+                  <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={editForm.dateOfBirth} onChange={(event) => setEditForm({ ...editForm, dateOfBirth: event.target.value })} /></label>
+                  <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={editForm.birthTime} onChange={(event) => setEditForm({ ...editForm, birthTime: event.target.value })} /></label>
+                  <label className="field-group profile-place-field"><span className="field-label-top">Place of Birth</span><div className="profile-place-wrap" ref={profilePlaceMenuRef}><input className="text-input" value={editForm.birthPlace} onChange={(event) => { setEditForm({ ...editForm, birthPlace: event.target.value, latitude: '', longitude: '', timezone: '' }); setProfilePlaceMenuOpen(true) }} onFocus={(event) => { event.currentTarget.select(); setProfilePlaceMenuOpen(true) }} placeholder="Type a city or place" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={profilePlaceMenuOpen} />{profilePlaceMenuOpen && <div className="profile-place-menu" role="listbox">{profilePlaceSuggestions.map((option) => <button type="button" role="option" key={option} onClick={() => { const details = getBirthPlaceDetails(option); setEditForm({ ...editForm, birthPlace: option, ...details }); setProfilePlaceMenuOpen(false) }}>{option}</button>)}{!profilePlaceSuggestions.length && <span>No matching cities found.</span>}</div>}</div></label>
+                  <label className="field-group"><span className="field-label-top">Latitude</span><input inputMode="decimal" className="text-input" value={editForm.latitude} onChange={(event) => setEditForm({ ...editForm, latitude: event.target.value })} placeholder="Optional" /></label>
+                  <label className="field-group"><span className="field-label-top">Longitude</span><input inputMode="decimal" className="text-input" value={editForm.longitude} onChange={(event) => setEditForm({ ...editForm, longitude: event.target.value })} placeholder="Optional" /></label>
+                  <label className="field-group"><span className="field-label-top">Timezone</span><input className="text-input" value={editForm.timezone} onChange={(event) => setEditForm({ ...editForm, timezone: event.target.value })} placeholder="e.g. Asia/Kolkata" /></label>
                   <label className="field-group"><span className="field-label-top">About / Bio</span><textarea className="textarea-box" rows="3" value={editForm.bio} onChange={(event) => setEditForm({ ...editForm, bio: event.target.value })} /></label>
                 </div>
                 {error && <div className="profile-message profile-message--error">{error}</div>}
                 <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setShowEditProfile(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveProfile}>Save Changes</button></div>
               </div>
             </div>
-          </div>}
+          </div>, document.body)}
 
-          {familyFormOpen && <div className="modal-overlay user-modal-overlay" onClick={() => setFamilyFormOpen(false)}>
+          {familyFormOpen && createPortal(<div className="modal-overlay user-modal-overlay" onClick={() => setFamilyFormOpen(false)}>
             <div className="modal-card user-modal-card" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
               <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4"><div><div className="section-title" style={{ marginBottom: 0 }}>{editingFamilyId ? 'Edit' : 'Add'} Family Horoscope</div><p className="muted">Save the birth details of a family member.</p></div><button type="button" className="icon-btn" aria-label="Close family form" onClick={() => setFamilyFormOpen(false)}><X size={16} /></button></div>
               <div className="modal-card__content user-modal-card__content">
                 <div className="form-grid">
                   <label className="field-group"><span className="field-label-top">Relationship</span><input className="text-input" value={familyForm.relationship} onChange={(event) => setFamilyForm({ ...familyForm, relationship: event.target.value })} placeholder="Mother, Father, Partner..." /></label>
                   <label className="field-group"><span className="field-label-top">Full Name</span><input className="text-input" value={familyForm.name} onChange={(event) => setFamilyForm({ ...familyForm, name: event.target.value })} placeholder="Member's name" /></label>
+                  <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={familyForm.gender} onChange={(event) => setFamilyForm({ ...familyForm, gender: event.target.value })} placeholder="Optional" /></label>
                   <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={familyForm.dateOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, dateOfBirth: event.target.value })} /></label>
                   <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={familyForm.timeOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, timeOfBirth: event.target.value })} /></label>
-                  <label className="field-group"><span className="field-label-top">Place of Birth</span><input className="text-input" value={familyForm.birthPlace} onChange={(event) => setFamilyForm({ ...familyForm, birthPlace: event.target.value })} placeholder="City, State, Country" /></label>
+                  <label className="field-group profile-place-field"><span className="field-label-top">Place of Birth</span><div className="profile-place-wrap" ref={familyPlaceMenuRef}><input className="text-input" value={familyForm.birthPlace} onChange={(event) => { setFamilyForm({ ...familyForm, birthPlace: event.target.value, latitude: '', longitude: '', timezone: '' }); setFamilyPlaceMenuOpen(true) }} onFocus={(event) => { event.currentTarget.select(); setFamilyPlaceMenuOpen(true) }} placeholder="Type a city or place" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={familyPlaceMenuOpen} />{familyPlaceMenuOpen && <div className="profile-place-menu" role="listbox">{familyPlaceSuggestions.map((option) => <button type="button" role="option" key={option} onClick={() => { const details = getBirthPlaceDetails(option); setFamilyForm({ ...familyForm, birthPlace: option, ...details }); setFamilyPlaceMenuOpen(false) }}>{option}</button>)}{!familyPlaceSuggestions.length && <span>No matching cities found.</span>}</div>}</div></label>
+                  <label className="field-group"><span className="field-label-top">Latitude</span><input inputMode="decimal" className="text-input" value={familyForm.latitude} onChange={(event) => setFamilyForm({ ...familyForm, latitude: event.target.value })} placeholder="Optional" /></label>
+                  <label className="field-group"><span className="field-label-top">Longitude</span><input inputMode="decimal" className="text-input" value={familyForm.longitude} onChange={(event) => setFamilyForm({ ...familyForm, longitude: event.target.value })} placeholder="Optional" /></label>
+                  <label className="field-group"><span className="field-label-top">Timezone</span><input className="text-input" value={familyForm.timezone} onChange={(event) => setFamilyForm({ ...familyForm, timezone: event.target.value })} placeholder="e.g. Asia/Kolkata" /></label>
+                  <label className="field-group"><span className="field-label-top">Profile photo URL</span><input className="text-input" value={familyForm.profileImage} onChange={(event) => setFamilyForm({ ...familyForm, profileImage: event.target.value })} placeholder="https://..." /></label>
                 </div>
                 {error && <div className="profile-message profile-message--error">{error}</div>}
                 <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setFamilyFormOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveFamilyMember}>{editingFamilyId ? 'Save Changes' : 'Add Member'}</button></div>
               </div>
             </div>
-          </div>}
+          </div>, document.body)}
         </>
       )}
 
