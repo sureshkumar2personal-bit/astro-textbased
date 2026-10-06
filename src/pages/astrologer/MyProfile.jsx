@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Award, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Sparkles, Star, Trash2, UserRound, X,
+  Award, ArrowLeft, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Sparkles, Star, Trash2, UserRound, X,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
@@ -532,6 +532,7 @@ export default function MyProfile() {
 
   return (
     <div className="mp-page">
+      <button type="button" className="mp-back-button" onClick={() => navigate(-1)}><ArrowLeft size={16} aria-hidden="true" /> <span>Back</span></button>
       <PageHeader className="mp-hero-header" eyebrow="Astrologer Workspace" title="My Profile" subtitle="Manage your professional identity and how you appear to users." actions={(
         <div className="mp-hero-meta">
           <div><small>Profile Status</small><b className={`account-status account-status--${stored.status === 'Approved' ? 'success' : stored.status === 'Rejected' ? 'danger' : 'pending'}`}>{stored.status}</b></div>
