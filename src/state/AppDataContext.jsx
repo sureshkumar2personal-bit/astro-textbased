@@ -1647,6 +1647,8 @@ export function normalizePost(post) {
     visibility: normalizeVisibility(post.visibility),
     commentsEnabled: post.commentsEnabled !== false,
     interactionAccess: normalizeInteractionAccess(post),
+    status: ['Published', 'Scheduled', 'Draft'].includes(post.status) ? post.status : 'Published',
+    scheduledAt: post.scheduledAt || null,
     createdAt: post.createdAt || now,
     updatedAt: post.updatedAt || post.createdAt || now,
   }
@@ -1978,6 +1980,7 @@ const initialAstrologerPosts = [
   { id: 'post-rani-1', astrologerId: 'astrologer-demo', tone: 'violet', title: 'Understanding the right time to begin', body: 'Timing becomes clearer when preparation and patience work together. Look for the small signs that your next step is ready.', visibility: 'public', likeCount: 128, comments: [{ id: 'comment-rani-1', author: 'Priya V.', text: 'This was exactly what I needed today.' }], createdAt: '2026-08-24T10:00:00+05:30', updatedAt: '2026-08-24T10:00:00+05:30' },
   { id: 'post-rani-2', astrologerId: 'astrologer-demo', tone: 'coral', title: 'A simple weekly reflection', body: 'Write down one question, one intention, and one action for the week ahead. Clarity grows through consistent reflection.', visibility: 'followers', likeCount: 94, comments: [], createdAt: '2026-08-21T10:00:00+05:30', updatedAt: '2026-08-21T10:00:00+05:30' },
   { id: 'post-rani-3', astrologerId: 'astrologer-demo', tone: 'gold', title: 'Your chart is a guide', body: 'Astrology can help you understand patterns, but your choices give those patterns direction.', visibility: 'subscribers', likeCount: 0, comments: [], createdAt: '2026-08-18T10:00:00+05:30', updatedAt: '2026-08-18T10:00:00+05:30' },
+  { id: 'post-rani-scheduled', astrologerId: 'astrologer-demo', tone: 'violet', title: 'October new moon intentions', body: 'Use the new moon as a quiet reset: write one intention, choose one practical action, and give the rest time to unfold.', visibility: 'public', status: 'Scheduled', scheduledAt: '2026-10-10T18:30', likeCount: 0, comments: [], createdAt: '2026-10-05T10:00:00+05:30', updatedAt: '2026-10-05T10:00:00+05:30' },
 ]
 
 const DEMO_NOW = new Date()
