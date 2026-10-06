@@ -71,6 +71,8 @@ import FullHoroscope from './pages/user/horoscope/FullHoroscope.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
+import InstantCallUser from './pages/user/instantcalluser.jsx'
+import InstantChatUser from './pages/user/instantchatuser.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
 import AstrologerMyProfile from './pages/astrologer/MyProfile.jsx'
@@ -253,6 +255,8 @@ function UserRoutes() {
         <Route path="/call-payment/:astrologerId" element={<CallPaymentInformation />} />
         <Route path="/call-payment-success" element={<CallPaymentSuccess />} />
         <Route path="/call/:astrologerId" element={<VoiceCallScreen />} />
+        <Route path="/user/instantcall/:astrologerId" element={<InstantCallUser />} />
+        <Route path="/user/instantchat/:astrologerId" element={<InstantChatUser />} />
         <Route path="/user/chat-booking" element={<ChatBooking />} />
         <Route path="/chat-birth-details/:astrologerId" element={<ChatBirthDetails />} />
         <Route path="/chat-booking/:astrologerId" element={<ChatBooking />} />
