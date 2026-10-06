@@ -130,7 +130,7 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
             </Card>
           ) : (
             filteredAstrologers.map((astrologer) => (
-              <AstrologerCard key={astrologer.id} astrologer={astrologer} kind={kind} onSelect={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onStart={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onViewProfile={viewProfile} />
+              <AstrologerCard key={astrologer.id} astrologer={astrologer} kind={kind} onSelect={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onStart={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onInstant={(entry) => navigate(`/user/instant${kind === 'call' ? 'call' : 'chat'}/${entry.id}`)} onViewProfile={viewProfile} />
             ))
           )}
         </div>

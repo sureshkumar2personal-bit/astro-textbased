@@ -35,6 +35,8 @@ import {
   Flame,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
+import InstantCallAstrologer from '../pages/astrologer/instantcallastrologer.jsx'
+import InstantChatAstrologer from '../pages/astrologer/instantchatastrologer.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
 import NotificationsPanel from './NotificationsPanel.jsx'
@@ -605,7 +607,7 @@ export default function Layout() {
             </motion.div>
           </AnimatePresence>
         </div>
-        {isAstrologer && <IncomingRequestOverlay callRequest={activeCallRequest} chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} />}
+        {isAstrologer && <><IncomingRequestOverlay callRequest={activeCallRequest} chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><InstantCallAstrologer /><InstantChatAstrologer /></>}
       </div>
     </div>
   )
