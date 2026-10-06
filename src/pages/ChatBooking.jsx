@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { useAuth } from '../state/AuthContext.jsx'
+import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 const DURATIONS = [
   { minutes: 10, amount: 70 },
@@ -22,6 +23,7 @@ export default function ChatBooking() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
+  const routes = getRoleRoutes(currentUser?.role)
   const astrologer = mockAstrologers.find(({ id }) => id === astrologerId) || mockAstrologers[0]
   const consultationAstrologer = consultationAstrologers.find(({ id }) => id === astrologer.id)
   const [selectedMinutes, setSelectedMinutes] = useState(null)
@@ -46,8 +48,10 @@ export default function ChatBooking() {
     navigate('/payment-information')
   }
 
+  const backPath = searchParams.get('from') === 'explore' ? routes.astrologers : routes.chatAstrologers
+
   return <main className="chat-booking-page">
-    <button type="button" className="chat-booking-page__back" onClick={() => navigate('/user/chat-astrologers')}><ArrowLeft size={16} /> Back to Astrologers</button>
+    <button type="button" className="chat-booking-page__back" onClick={() => navigate(backPath)}><ArrowLeft size={16} /> Back to Astrologers</button>
     <section className="chat-booking-page__panel">
       <header className="chat-booking-page__profile"><div className="chat-booking-page__avatar-wrap"><div className="chat-booking-page__avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><span className="chat-booking-page__status chat-booking-page__status--online" /></div><div><h1>Start Chat with {astrologer.name}</h1><p>{astrologer.specialization}</p><span>● {consultationAstrologer?.chatStatus || astrologer.availability}</span></div></header>
       <section className="chat-booking-page__packages"><h2>Choose Your Chat Duration</h2><div className="chat-booking-page__package-grid chat-booking-page__package-grid--two">{DURATIONS.map(({ minutes, amount }) => <button key={minutes} type="button" aria-pressed={selectedMinutes === minutes} onClick={() => setSelectedMinutes(minutes)} className={`chat-package ${selectedMinutes === minutes ? 'chat-package--selected' : ''}`}>{selectedMinutes === minutes && <span className="chat-package__check"><Check size={13} /></span>}<span>{minutes} Minutes</span><strong>₹{amount}</strong><em>{selectedMinutes === minutes ? 'Selected' : 'Select'}</em></button>)}</div></section>

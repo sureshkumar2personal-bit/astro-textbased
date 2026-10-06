@@ -5,7 +5,7 @@ export const PROFILE_SECTIONS = [
   { id: 'services', label: 'Consultation Services' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'credentials', label: 'Credentials' },
-  { id: 'about', label: 'About Me' },
+  { id: 'about', label: 'About & Approach' },
   { id: 'availability', label: 'Availability' },
 ]
 
@@ -17,7 +17,10 @@ export const EXPERTISE_OPTIONS = [
 ]
 export const LANGUAGE_OPTIONS = ['Tamil', 'English', 'Hindi', 'Telugu', 'Malayalam', 'Kannada', 'Other']
 export const CONSULTATION_STYLES = ['Traditional', 'Practical', 'Spiritual', 'Detailed', 'Friendly', 'Guidance-focused']
+export const GUIDANCE_AREAS = ['Marriage & Relationships', 'Career & Business', 'Finance & Wealth', 'Health & Wellbeing', 'Family & Children', 'Education', 'Property & Vastu', 'Remedies & Gemstones']
 export const BIO_LIMIT = 1500
+export const SECTION_TEXT_LIMIT = 800
+export const VISIBILITY_STATES = ['Visible', 'Hidden', 'Under Review', 'Suspended']
 export const PHOTO_MAX_BYTES = 2 * 1024 * 1024
 export const PHOTO_TYPES = ['image/jpeg', 'image/png']
 export const PROFILE_STATUSES = ['Draft', 'Pending Review', 'Approved', 'Rejected']
@@ -54,7 +57,7 @@ export const SECTION_KEYS = {
   services: ['services'],
   pricing: ['services'],
   credentials: ['credentials'],
-  about: ['bio', 'tagline', 'consultationStyle'],
+  about: ['bio', 'tagline', 'approach', 'consultationStyle', 'guidanceAreas', 'expectations'],
   availability: [],
 }
 
@@ -83,7 +86,13 @@ export function createDefaultProfile(user = {}) {
     credentials: [],
     bio: '',
     tagline: '',
+    approach: '',
     consultationStyle: [],
+    guidanceAreas: [],
+    expectations: '',
+    showInExplore: true,
+    visibility: 'Visible',
+    lastUpdated: '',
     status: 'Draft',
   }
 }
@@ -99,6 +108,7 @@ export function mergeProfile(stored, user) {
     languages: Array.isArray(stored.languages) ? stored.languages : [],
     credentials: Array.isArray(stored.credentials) ? stored.credentials : [],
     consultationStyle: Array.isArray(stored.consultationStyle) ? stored.consultationStyle : [],
+    guidanceAreas: Array.isArray(stored.guidanceAreas) ? stored.guidanceAreas : [],
   }
 }
 
@@ -144,6 +154,8 @@ export function validateSection(sectionId, data, today = new Date()) {
     })
   }
   if (sectionId === 'about') {
+    if ((data.approach || '').length > SECTION_TEXT_LIMIT) errors.approach = `Astrology approach must be ${SECTION_TEXT_LIMIT} characters or fewer.`
+    if ((data.expectations || '').length > SECTION_TEXT_LIMIT) errors.expectations = `This section must be ${SECTION_TEXT_LIMIT} characters or fewer.`
     if (data.bio.length > BIO_LIMIT) errors.bio = `Bio must be ${BIO_LIMIT} characters or fewer.`
   }
   return errors
@@ -178,7 +190,7 @@ export function calculateCompletion(profile, { hasAvailability = false } = {}) {
     ['Languages', profile.languages.length > 0 && Boolean(profile.primaryLanguage)],
     ['Consultation Services', enabled.length > 0],
     ['Credentials', profile.credentials.length > 0],
-    ['About Me', !isBlank(profile.bio)],
+    ['About & Approach', !isBlank(profile.bio)],
     ['Availability', hasAvailability],
   ]
   const missing = checks.filter(([, done]) => !done).map(([label]) => label)
@@ -187,4 +199,16 @@ export function calculateCompletion(profile, { hasAvailability = false } = {}) {
 
 export function profileStorageKey(userId) {
   return `astroconnect-astrologer-profile:${userId}`
+}
+
+/** Effective visibility: moderation states win over the astrologer's own toggle. */
+export function effectiveVisibility(profile) {
+  if (profile.visibility === 'Suspended' || profile.visibility === 'Under Review') return profile.visibility
+  return profile.showInExplore === false ? 'Hidden' : 'Visible'
+}
+
+export function formatProfileDate(value) {
+  const date = value ? new Date(value) : new Date()
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
