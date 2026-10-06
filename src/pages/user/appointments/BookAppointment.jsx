@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
+import { consultationAstrologers } from '../../../data/consultationAstrologers.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE, buildCalendarAvailability, countAvailableSlots } from './bookingAstrologerData.js'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
@@ -21,6 +22,25 @@ function initials(name = '') {
     .toUpperCase()
 }
 
+const ASTROLOGER_PHOTOS = {
+  'Dr. Rani': '/astrologer-photos/reference/dr-rani.png',
+  'Acharya Meena': '/astrologer-photos/reference/acharya-meena.png',
+  'Arjun Sharma': '/astrologer-photos/reference/arjun-sharma.png',
+  'Nandini Kapoor': '/astrologer-photos/reference/nandini-kapoor.png',
+  'Dev Malhotra': '/astrologer-photos/reference/dev-malhotra.png',
+  'Priya Sharma': '/astrologer-photos/reference/priya-sharma.png',
+  'Meera Desai': '/astrologer-photos/dashboard-reference/meera-desai.png',
+  'Ishita Sen': '/astrologer-photos/dashboard-reference/ishita-sen.png',
+  'Aditi Menon': '/astrologer-photos/dashboard-reference/aditi-menon.png',
+  'Bhavana Joshi': '/astrologer-photos/dashboard-reference/bhavana-j.png',
+}
+
+const CONSULTATION_PHOTOS = new Map(consultationAstrologers.map((astrologer) => [astrologer.id, astrologer.profileImage]))
+
+function profilePhoto(astrologer) {
+  return ASTROLOGER_PHOTOS[astrologer.name] || CONSULTATION_PHOTOS.get(astrologer.id) || astrologer.profileImage || ''
+}
+
 function ratingScore(rating) {
   return String(rating || '0').split('/')[0].trim() || '0'
 }
@@ -28,22 +48,25 @@ function ratingScore(rating) {
 function SubscribedAstrologerCard({ astrologer, override, availableSlots, onViewSlots, actionLabel = 'View Slots' }) {
   return (
     <article className="book-appointment-card">
-      <div className="book-appointment-card__top">
+      <div className="book-appointment-card__profile">
         <div className="book-appointment-avatar-wrap">
-          <div className="book-appointment-avatar" aria-hidden="true">{initials(astrologer.name)}</div>
+          <div className="book-appointment-avatar" aria-hidden="true">
+            {profilePhoto(astrologer)
+              ? <img src={profilePhoto(astrologer)} alt={`${astrologer.name} profile`} />
+              : initials(astrologer.name)}
+          </div>
           <span className="book-appointment-availability-dot" title="Available now" />
         </div>
-        <span className="book-appointment-price-badge">From ₹{override.price}</span>
-      </div>
-
-      <div className="book-appointment-card__body">
-        <h3 className="book-appointment-card__name">{astrologer.name}</h3>
-        <p className="book-appointment-card__spec">{astrologer.specialization}</p>
-        <div className="book-appointment-card__rating" aria-label={`Rated ${ratingScore(astrologer.rating)} out of 5`}>
-          <Star size={14} aria-hidden="true" />
-          <strong>{ratingScore(astrologer.rating)}</strong>
-          <span> / 5</span>
+        <div className="book-appointment-card__body">
+          <h3 className="book-appointment-card__name">{astrologer.name}</h3>
+          <p className="book-appointment-card__spec">{astrologer.specialization}</p>
+          <div className="book-appointment-card__rating" aria-label={`Rated ${ratingScore(astrologer.rating)} out of 5`}>
+            <Star size={14} aria-hidden="true" />
+            <strong>{ratingScore(astrologer.rating)}</strong>
+            <span> / 5</span>
+          </div>
         </div>
+        <span className="book-appointment-price-badge">From ₹{override.price}</span>
       </div>
 
       <div className="book-appointment-card__slots">
