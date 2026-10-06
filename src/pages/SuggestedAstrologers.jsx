@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { getSuggestedAstrologers } from '../data/notificationData.js'
+import { resolvePublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import BackButton from '../components/BackButton.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -20,7 +21,7 @@ export default function SuggestedAstrologers() {
   const subscribedAstrologerIds = subscriptions
     .filter((subscription) => subscription.userId === currentUser?.id)
     .map((subscription) => subscription.astrologerId)
-  const suggestedAstrologers = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
+  const suggestedAstrologers = resolvePublicAstrologers(getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds, preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences }))
   const visibleAstrologers = suggestedAstrologers.slice(0, visibleCount)
   const hasMore = visibleCount < suggestedAstrologers.length && visibleCount < MAX_VISIBLE
 
@@ -34,7 +35,7 @@ export default function SuggestedAstrologers() {
         <BackButton to={routes.astrologers} />
       </div>
 
-      <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
         {visibleAstrologers.map((astrologer) => (
           <AstrologerCard
             key={astrologer.id}

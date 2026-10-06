@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Award, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Pencil, Phone, Plus, Quote, Save, Sparkles, Trash2, UserRound, X,
+  Award, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Sparkles, Star, Trash2, UserRound, X,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { mockAstrologers } from '../../data/notificationData.js'
+import { buildPublicProfile, publishPublicProfile } from '../../utils/publicAstrologerProfile.js'
 import { getRoleRoutes } from '../../utils/roleRoutes.js'
 import {
-  ASTROLOGY_SYSTEMS, BIO_LIMIT, CONSULTATION_STYLES, EXPERTISE_OPTIONS, GENDERS, LANGUAGE_OPTIONS, PRICING_FIELDS, PROFILE_SECTIONS,
-  SECTION_KEYS, SERVICE_DEFINITIONS, calculateCompletion, mergeProfile, profileStorageKey, validateCredential, validatePhoto, validateSection,
+  ASTROLOGY_SYSTEMS, BIO_LIMIT, CONSULTATION_STYLES, EXPERTISE_OPTIONS, GENDERS, GUIDANCE_AREAS, LANGUAGE_OPTIONS, SECTION_TEXT_LIMIT, PRICING_FIELDS, PROFILE_SECTIONS,
+  SECTION_KEYS, SERVICE_DEFINITIONS, calculateCompletion, effectiveVisibility, formatProfileDate, mergeProfile, profileStorageKey, validateCredential, validatePhoto, validateSection,
 } from '../../utils/astrologerProfile.js'
 import '../../css/astrologer/my-profile.css'
 
@@ -20,7 +23,7 @@ const SECTION_DESCRIPTIONS = {
   services: 'Choose the consultation services you offer.',
   pricing: 'Manage your professional consultation pricing.',
   credentials: 'Add the qualifications that support your practice.',
-  about: 'Introduce yourself to users.',
+  about: 'Introduce yourself and describe how you guide users.',
   availability: 'Control when users can reach you.',
 }
 
@@ -103,6 +106,16 @@ function ChipGroup({ options, selected, onToggle, label }) {
   )
 }
 
+function PreviewBlock({ title, children }) {
+  const hasContent = Array.isArray(children) ? children.some(Boolean) : Boolean(children)
+  return (
+    <section className="mp-preview__block">
+      <h3>{title}</h3>
+      {hasContent ? children : <p className="mp-empty">Not added yet.</p>}
+    </section>
+  )
+}
+
 export default function MyProfile() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -119,6 +132,8 @@ export default function MyProfile() {
   const [errors, setErrors] = useState({})
   const [toast, setToast] = useState(null)
   const [editingCredential, setEditingCredential] = useState(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const photoInput = useRef(null)
 
   const requested = searchParams.get('section')
@@ -162,6 +177,30 @@ export default function MyProfile() {
     availability: !hasAvailability,
   }
 
+  const checklist = [
+    ['Basic Information', 'basic'], ['Languages', 'languages'], ['Experience & Expertise', 'experience'],
+    ['Credentials', 'credentials'], ['About & Approach', 'about'], ['Availability', 'availability'],
+  ].map(([label, id]) => ({ label, id, done: !incomplete[id] }))
+  const visibility = effectiveVisibility(live)
+  const locked = visibility === 'Under Review' || visibility === 'Suspended'
+  const visibilityNote = {
+    Visible: 'Users can find you in Explore Astrologers.',
+    Hidden: 'Your profile is hidden from Explore Astrologers.',
+    'Under Review': 'Your profile is being reviewed by our team.',
+    Suspended: 'Your profile has been suspended. Contact support to restore it.',
+  }[visibility]
+  const rating = mockAstrologers.find((item) => item.id === astrologerId)
+
+  // The single public record: saved profile -> public profile -> preview and user-side Explore read the same data.
+  const publicProfile = useMemo(
+    () => buildPublicProfile(live, { astrologerId, isOnline: astrologerServices.isOnline, acceptingConsultations: !astrologerServices.dndEnabled, hasAvailability }),
+    [live, astrologerId, astrologerServices.isOnline, astrologerServices.dndEnabled, hasAvailability],
+  )
+  useEffect(() => { publishPublicProfile(astrologerId, publicProfile) }, [astrologerId, publicProfile])
+
+  const pub = publicProfile
+  const toggleExplore = (checked) => persist({ ...stored, showInExplore: checked }, checked ? 'Your profile is now visible in Explore Astrologers.' : 'Your profile is hidden from Explore Astrologers.')
+
   const selectSection = (id) => {
     setErrors({})
     setEditingCredential(null)
@@ -176,7 +215,7 @@ export default function MyProfile() {
   }))
 
   const persist = (next, message) => {
-    const withStatus = { ...next, status: next.status === 'Draft' && calculateCompletion(withSharedServices(next), { hasAvailability }).percent >= 75 ? 'Pending Review' : next.status }
+    const withStatus = { ...next, lastUpdated: new Date().toISOString(), status: next.status === 'Draft' && calculateCompletion(withSharedServices(next), { hasAvailability }).percent >= 75 ? 'Pending Review' : next.status }
     if (!writeStored(userId, withStatus)) {
       setToast({ kind: 'error', text: 'Could not save. Your browser storage may be full — try a smaller photo.' })
       return false
@@ -440,15 +479,29 @@ export default function MyProfile() {
       )
     }
     if (section === 'about') {
+      const counter = (value, limit) => <small className={`mp-counter${value.length > limit ? ' is-over' : ''}`}>{value.length} / {limit}</small>
       return (
         <>
           <TextField label="Professional Tagline" value={shown.tagline} onChange={(e) => setField('tagline', e.target.value)} placeholder="Helping you understand life's path through Vedic astrology." maxLength={120} />
+          <h3 className="mp-subtitle">About Me</h3>
           <TextField label="Professional Bio" error={errors.bio}>
-            <textarea rows="7" value={shown.bio} onChange={(e) => setField('bio', e.target.value)} placeholder="Tell users about your astrology experience, consultation style, areas of expertise and approach." />
+            <textarea rows="6" value={shown.bio} onChange={(e) => setField('bio', e.target.value)} placeholder="Tell users about your astrology experience, background and expertise." />
           </TextField>
-          <small className={`mp-counter${shown.bio.length > BIO_LIMIT ? ' is-over' : ''}`}>{shown.bio.length} / {BIO_LIMIT}</small>
+          {counter(shown.bio, BIO_LIMIT)}
+          <h3 className="mp-subtitle">Astrology Approach</h3>
+          <TextField label="How do you read a chart?" error={errors.approach}>
+            <textarea rows="4" value={shown.approach} onChange={(e) => setField('approach', e.target.value)} placeholder="Describe the systems, techniques and principles behind your readings." />
+          </TextField>
+          {counter(shown.approach, SECTION_TEXT_LIMIT)}
           <h3 className="mp-subtitle">Consultation Style</h3>
           <ChipGroup label="Consultation style" options={CONSULTATION_STYLES} selected={shown.consultationStyle} onToggle={(value) => toggleIn('consultationStyle', value)} />
+          <h3 className="mp-subtitle">Areas of Guidance</h3>
+          <ChipGroup label="Areas of guidance" options={GUIDANCE_AREAS} selected={shown.guidanceAreas} onToggle={(value) => toggleIn('guidanceAreas', value)} />
+          <h3 className="mp-subtitle">What Users Can Expect</h3>
+          <TextField label="Set expectations for your consultations" error={errors.expectations}>
+            <textarea rows="4" value={shown.expectations} onChange={(e) => setField('expectations', e.target.value)} placeholder="e.g. Session flow, what to prepare (birth details), follow-up support, and what you do not predict." />
+          </TextField>
+          {counter(shown.expectations, SECTION_TEXT_LIMIT)}
         </>
       )
     }
@@ -480,26 +533,50 @@ export default function MyProfile() {
   return (
     <div className="mp-page">
       <PageHeader className="mp-hero-header" eyebrow="Astrologer Workspace" title="My Profile" subtitle="Manage your professional identity and how you appear to users." actions={(
-        <figure className="mp-quote">
-          <Quote size={16} aria-hidden="true" />
-          <blockquote>The stars incline, they do not compel.</blockquote>
-          <figcaption>Guide with wisdom, advise with care.</figcaption>
-        </figure>
+        <div className="mp-hero-meta">
+          <div><small>Profile Status</small><b className={`account-status account-status--${stored.status === 'Approved' ? 'success' : stored.status === 'Rejected' ? 'danger' : 'pending'}`}>{stored.status}</b></div>
+          <div><small>Last Updated</small><strong>{formatProfileDate(stored.lastUpdated)}</strong></div>
+          <button type="button" className="mp-link-btn" onClick={() => setReviewing(true)}>View Review Status <ChevronRight size={14} /></button>
+        </div>
       )} />
 
-      <section className="account-panel mp-completion" aria-label="Profile completion">
-        <div className="mp-completion__main">
-          <CircularProgress percent={completion.percent} />
-          <div className="mp-completion__text">
-            <div className="mp-completion__title">
-              <strong>Profile Completion</strong>
-              <b className={`account-status account-status--${stored.status === 'Approved' ? 'success' : stored.status === 'Rejected' ? 'danger' : 'pending'}`}>{stored.status}</b>
+      <div className="mp-top">
+        <section className="account-panel mp-completion" aria-label="Profile completion">
+          <div className="mp-completion__main">
+            <CircularProgress percent={completion.percent} />
+            <div className="mp-completion__text">
+              <div className="mp-completion__title">
+                <b className={`account-status account-status--${stored.status === 'Approved' ? 'success' : stored.status === 'Rejected' ? 'danger' : 'pending'}`}>{stored.status}</b>
+              </div>
+              <small>Complete your profile to attract more users and build trust.</small>
+              <div className="mp-progress"><span style={{ width: `${completion.percent}%` }} /></div>
             </div>
-            <small>Complete your profile to attract more users and build trust.</small>
-            <div className="mp-progress"><span style={{ width: `${completion.percent}%` }} /></div>
           </div>
-        </div>
-      </section>
+          <ul className="mp-checklist" aria-label="Completion checklist">
+            {checklist.map(({ label, id, done }) => (
+              <li key={id} className={done ? 'is-done' : ''}>
+                <button type="button" onClick={() => selectSection(id)}><span aria-hidden="true">{done ? '✓' : '○'}</span>{label}<span className="mp-sr-only">{done ? ' (complete)' : ' (incomplete)'}</span></button>
+              </li>
+            ))}
+          </ul>
+          <div className="mp-completion__actions">
+            <button type="button" className="account-btn account-btn--outline" onClick={() => setPreviewing(true)}><Eye size={15} /> Preview Public Profile</button>
+          </div>
+        </section>
+
+        <section className="account-panel mp-visibility" aria-label="Profile visibility">
+          <div className="mp-visibility__head">
+            <strong>Profile Visibility</strong>
+            <span className={`mp-visibility__state is-${visibility.toLowerCase().replace(' ', '-')}`}><i aria-hidden="true">●</i> {visibility === 'Visible' ? 'Visible to Users' : visibility}</span>
+          </div>
+          <small>{visibilityNote}</small>
+          <label className="account-toggle">
+            <span><strong>Show my profile in Explore Astrologers</strong></span>
+            <input type="checkbox" checked={!locked && live.showInExplore !== false} disabled={locked} onChange={(e) => toggleExplore(e.target.checked)} />
+            <i />
+          </label>
+        </section>
+      </div>
 
       <div className="mp-layout">
         <nav className="mp-tabs" aria-label="Profile sections">
@@ -523,6 +600,82 @@ export default function MyProfile() {
           {actionsBar}
         </section>
       </div>
+
+      {previewing && createPortal(
+        <div className="mp-modal" role="dialog" aria-modal="true" aria-label="Public profile preview" onClick={(e) => { if (e.target === e.currentTarget) setPreviewing(false) }}>
+          <div className="mp-preview">
+            <div className="mp-preview__bar">
+              <span><Eye size={15} /> Preview — this is how users see your profile</span>
+              <button type="button" className="icon-btn" aria-label="Close preview" onClick={() => setPreviewing(false)}><X size={16} /></button>
+            </div>
+            <div className="mp-preview__body">
+              {visibility !== 'Visible' && <p className="mp-note">Your profile is currently {visibility.toLowerCase()}, so users cannot find it in Explore Astrologers.</p>}
+              <div className="mp-preview__head">
+                <span className="mp-photo__avatar">{pub.photo ? <img src={pub.photo} alt={pub.name} /> : (pub.name || 'A').split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span>
+                <div>
+                  <h2>{pub.name || 'Your name'}</h2>
+                  {pub.tagline && <p>{pub.tagline}</p>}
+                  <div className="mp-preview__facts">
+                    {pub.yearsOfExperience && <span>{pub.yearsOfExperience} yrs experience</span>}
+                    {pub.primarySystem && <span>{pub.primarySystem}</span>}
+                    {rating && <span><Star size={13} /> {rating.rating} · {rating.reviews}</span>}
+                    <span className={pub.isOnline ? 'is-online' : ''}>{pub.isOnline ? 'Online now' : 'Offline'}</span>
+                  </div>
+                </div>
+              </div>
+              <PreviewBlock title="Expertise">{pub.expertise.length ? <div className="mp-chips">{pub.expertise.map((item) => <span className="mp-chip is-active" key={item}>{item}</span>)}</div> : null}</PreviewBlock>
+              <PreviewBlock title="Languages">{pub.languages.length ? <div className="mp-chips">{pub.languages.map((item) => <span className="mp-chip is-active" key={item}>{item}{item === pub.primaryLanguage ? ' · Primary' : ''}</span>)}</div> : null}</PreviewBlock>
+              <PreviewBlock title="Consultation Services & Pricing">
+                {pub.services.length ? (
+                  <ul className="mp-preview__list">
+                    {pub.services.map(({ key, label, unit, price, duration }) => (
+                      <li key={key}><span>{label}{duration ? ` · ${duration} min` : ''}</span><b>{price ? `₹${price} / ${unit}` : 'Price not set'}</b></li>
+                    ))}
+                  </ul>
+                ) : null}
+              </PreviewBlock>
+              <PreviewBlock title="Ratings & Reviews">{rating ? <p><Star size={14} /> {rating.rating} from {rating.reviews}</p> : null}</PreviewBlock>
+              <PreviewBlock title="Availability">
+                <p>{pub.acceptingConsultations ? 'Accepting consultations.' : 'Not accepting new consultations right now.'} {pub.hasAvailability ? 'Appointment slots are available to book.' : ''}</p>
+              </PreviewBlock>
+              <PreviewBlock title="Credentials">
+                {pub.credentials.length ? (
+                  <ul className="mp-preview__list">
+                    {pub.credentials.map((item) => <li key={item.id}><span>{item.name}<small>{[item.institution, item.year].filter(Boolean).join(' · ')}</small></span><b>Verified</b></li>)}
+                  </ul>
+                ) : <p className="mp-empty">No approved credentials yet. Credentials appear to users once they are verified.</p>}
+              </PreviewBlock>
+              <PreviewBlock title="About & Approach">
+                {pub.bio && <><h4>About Me</h4><p>{pub.bio}</p></>}
+                {pub.approach && <><h4>Astrology Approach</h4><p>{pub.approach}</p></>}
+                {pub.consultationStyle.length > 0 && <><h4>Consultation Style</h4><div className="mp-chips">{pub.consultationStyle.map((item) => <span className="mp-chip" key={item}>{item}</span>)}</div></>}
+                {pub.guidanceAreas.length > 0 && <><h4>Areas of Guidance</h4><div className="mp-chips">{pub.guidanceAreas.map((item) => <span className="mp-chip" key={item}>{item}</span>)}</div></>}
+                {pub.expectations && <><h4>What Users Can Expect</h4><p>{pub.expectations}</p></>}
+              </PreviewBlock>
+            </div>
+          </div>
+        </div>
+      , document.body)}
+
+      {reviewing && createPortal(
+        <div className="mp-modal" role="dialog" aria-modal="true" aria-label="Review status" onClick={(e) => { if (e.target === e.currentTarget) setReviewing(false) }}>
+          <div className="mp-preview mp-preview--small">
+            <div className="mp-preview__bar">
+              <span>Review Status</span>
+              <button type="button" className="icon-btn" aria-label="Close review status" onClick={() => setReviewing(false)}><X size={16} /></button>
+            </div>
+            <div className="mp-preview__body">
+              <ul className="mp-preview__list">
+                <li><span>Profile</span><b>{stored.status}</b></li>
+                <li><span>Visibility</span><b>{visibility}</b></li>
+                <li><span>Last updated</span><b>{formatProfileDate(stored.lastUpdated)}</b></li>
+                {stored.credentials.map((item) => <li key={item.id}><span>Credential: {item.name}</span><b>{item.verificationStatus}</b></li>)}
+              </ul>
+              <p className="mp-note">{stored.status === 'Approved' ? 'Your profile is approved.' : stored.status === 'Rejected' ? 'Your profile was not approved. Update the highlighted sections and save to resubmit.' : stored.status === 'Draft' ? 'Reach 75% completion to submit your profile for review.' : 'Our team usually reviews profiles within 2–3 business days.'}</p>
+            </div>
+          </div>
+        </div>
+      , document.body)}
 
       {toast && <div className={`account-toast${toast.kind === 'error' ? ' mp-toast--error' : ''}`} role="status"><Check size={17} /> {toast.text}</div>}
     </div>
