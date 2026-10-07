@@ -144,7 +144,7 @@ export default function Autopay() {
         title="Autopay"
         subtitle="Manage automatic payments for subscriptions and wallet top-ups."
         showBack
-        backTo={routes.dashboard}
+        backTo={routes.paymentMethods}
       />
       <WalletSectionTabs />
 

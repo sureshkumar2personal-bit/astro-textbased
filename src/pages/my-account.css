@@ -126,7 +126,7 @@ body:has(.my-account-page) {
 .my-account-summary__copy { position: relative; z-index: 1; display: grid; gap: 4px; min-width: 0; }
 .my-account-summary__copy strong { color: #fff; font-size: 21px; font-weight: 800; }
 .my-account-summary__copy .muted { color: rgba(255, 255, 255, .78); font-size: 13px; }
-.my-account-summary__tag { position: relative; z-index: 1; margin-left: auto; padding: 6px 11px; border: 1px solid rgba(255, 255, 255, .42); border-radius: 999px; color: #fff; background: rgba(255, 255, 255, .14); font-size: 11px; font-weight: 750; }
+.my-account-summary__tag { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 38px; margin-left: auto; padding: 0 18px; border: 1px solid #4900af; border-radius: 10px; color: #fff; background: #4900af; font-size: 13px; font-weight: 750; text-decoration: none; box-shadow: 0 6px 14px rgba(73, 0, 175, .22); transition: background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease; }.my-account-summary__tag:hover, .my-account-summary__tag:focus-visible { border-color: #3d0094; background: #3d0094; transform: translateY(-1px); box-shadow: 0 8px 18px rgba(73, 0, 175, .3); outline: none; }
 .my-account-summary__edit { position: relative; z-index: 1; min-height: 38px; border: 1px solid rgba(255, 255, 255, .58); color: #5b347e; background: #fff; box-shadow: 0 6px 16px rgba(52, 27, 82, .16); }
 
 .my-account-settings-card {

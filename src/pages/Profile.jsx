@@ -11,6 +11,7 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
 import { deriveUsername, getBirthPlaceDetails, isFutureDate } from '../utils/profile.js'
+import { getInstantConsultations, subscribeToInstantConsultations } from '../utils/instantConsultation.js'
 
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
@@ -96,6 +97,9 @@ export default function Profile() {
   const [editingContent, setEditingContent] = useState(null)
   const [contentError, setContentError] = useState('')
   const [consultationTab, setConsultationTab] = useState('appointments')
+  const [instantConsultationTab, setInstantConsultationTab] = useState('all')
+  const [instantConsultations, setInstantConsultations] = useState(() => getInstantConsultations())
+  const [selectedInstantConsultation, setSelectedInstantConsultation] = useState(null)
   const [selectedConsultationAstrologerId, setSelectedConsultationAstrologerId] = useState(null)
   const [showEditProfile, setShowEditProfile] = useState(false)
   const [editForm, setEditForm] = useState({ name: currentUser?.name || '', username: currentUser?.username || '', email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
@@ -113,6 +117,8 @@ export default function Profile() {
   const mediaInputRef = useRef(null)
   const postRecorderRef = useRef(null)
   const postRecordingStreamRef = useRef(null)
+
+  useEffect(() => subscribeToInstantConsultations(setInstantConsultations), [])
 
   const name = currentUser?.name || (isAstrologer ? 'Astrologer' : 'User')
   const username = currentUser?.username || deriveUsername(name)
@@ -144,6 +150,17 @@ export default function Profile() {
     if (ownedSessions.length) return ownedSessions
     return consultationHistory.filter((session) => session.customerId === 'user-demo' || session.customerId === 'customer-priya')
   }, [consultationHistory, currentUser?.id, isAstrologer])
+  const userInstantConsultations = useMemo(() => {
+    if (isAstrologer || !currentUser?.id) return []
+    return instantConsultations
+      .filter((session) => session.userId === currentUser.id)
+      .sort((first, second) => new Date(second.startedAt || second.createdAt).getTime() - new Date(first.startedAt || first.createdAt).getTime())
+  }, [currentUser?.id, instantConsultations, isAstrologer])
+  const visibleInstantConsultations = useMemo(() => {
+    if (instantConsultationTab === 'call') return userInstantConsultations.filter((session) => session.type === 'call')
+    if (instantConsultationTab === 'chat') return userInstantConsultations.filter((session) => session.type === 'chat')
+    return userInstantConsultations
+  }, [instantConsultationTab, userInstantConsultations])
   const filteredConsultationHistory = userConsultationHistory.filter((session) => consultationTab === 'chat' ? session.type === 'Chat' : consultationTab === 'call' ? session.type === 'Audio Call' : false)
   const consultationAstrologers = [...new Map(filteredConsultationHistory.map((session) => [session.astrologerId, session.astrologerId])).values()].map((astrologerId) => {
     const astrologerSessions = filteredConsultationHistory.filter((session) => session.astrologerId === astrologerId)
@@ -677,7 +694,7 @@ export default function Profile() {
       </>)
       : (
         <>
-          <PageHeader eyebrow="PROFILE" title="My Profile" subtitle="Review your details, astrologers, and horoscope information." showBack backTo={routes.dashboard} />
+          <PageHeader eyebrow="PROFILE" title="My Profile" subtitle="Review your details, astrologers, and horoscope information." showBack backTo={routes.myAccount} backLabel="Back to My Account" />
           {saved && <div className="profile-message profile-message--success">Profile updated successfully.</div>}
 
           <div className="section user-profile">
@@ -699,8 +716,8 @@ export default function Profile() {
               <div className="user-profile-stats">
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'following' ? ' is-active' : ''}`} onClick={() => toggleSection('following')}><strong>{followedAstrologerIds.length}</strong><span>{expandedSection === 'following' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Following</span></button>
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'subscriptions' ? ' is-active' : ''}`} onClick={() => toggleSection('subscriptions')}><strong>{subscriptions.length}</strong><span>{expandedSection === 'subscriptions' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Subscriptions</span></button>
-                <Link to={routes.myAppointments} state={{ from: 'profile' }}><strong>{userConsultationHistory.length}</strong><span>Consultations</span></Link>
-                <div><strong>0</strong><span>Reviews</span></div>
+                <Link to={routes.myAppointments} state={{ from: 'profile' }}><strong>{activitySummary.appointments}</strong><span>Appointments</span></Link>
+                <button type="button" className="user-profile-stats-btn" onClick={() => { setProfileTab('activity'); setInstantConsultationTab('all'); window.setTimeout(() => document.getElementById('user-profile-instant-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0) }}><strong>{userInstantConsultations.length}</strong><span>Consultations</span></button>
                 <Link to={routes.followedAstrologersFull} state={{ from: 'profile' }}><strong>{savedPostIds.length}</strong><span>Saved Astrologers</span></Link>
               </div>
             </Card>
@@ -794,12 +811,24 @@ export default function Profile() {
                 <div className="user-profile-activity">
                   <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
                   <Link to={routes.myAppointments}><strong>{activitySummary.appointments}</strong><span><CalendarDays size={13} /> Appointments</span></Link>
-                  <Link to={routes.followedAstrologersFull}><strong>{followedAstrologerIds.length}</strong><span><Users size={13} /> Astrologers followed</span></Link>
+                  <button type="button" className="user-profile-consultation-tile" onClick={() => { setInstantConsultationTab('all'); document.getElementById('user-profile-instant-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}><strong>{userInstantConsultations.length}</strong><span><Headphones size={13} /> Consultations</span></button>
                   <div><strong>0</strong><span><Heart size={13} /> Reviews given</span></div>
                   <div><strong>{savedPostIds.length}</strong><span><Bookmark size={13} /> Saved content</span></div>
                   <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
                 </div>
               </Card>}
+              {profileTab === 'activity' && <Card id="user-profile-instant-history" className="user-profile-card user-profile-instant-history-card">
+                <div className="user-profile-card__heading"><div><span className="profile-kicker">INSTANT CONSULTATIONS</span><h2>Call &amp; Chat History</h2><p className="muted">Your recent instant consultations with astrologers.</p></div><Headphones size={20} className="profile-section-accent" /></div>
+                <div className="user-profile-consultation-tabs" role="tablist" aria-label="Instant consultation history">
+                  {[["all", "All"], ["call", "Instant Calls"], ["chat", "Instant Chats"]].map(([value, label]) => <button type="button" role="tab" aria-selected={instantConsultationTab === value} className={instantConsultationTab === value ? 'is-active' : ''} key={value} onClick={() => setInstantConsultationTab(value)}>{label}<span>{value === 'all' ? userInstantConsultations.length : userInstantConsultations.filter((session) => session.type === value).length}</span></button>)}
+                </div>
+                {visibleInstantConsultations.length ? <div className="user-profile-instant-history-list">{visibleInstantConsultations.map((session) => {
+                  const isChat = session.type === 'chat'
+                  const occurredAt = session.startedAt || session.createdAt
+                  return <article className={`user-profile-instant-history-row user-profile-instant-history-row--${session.type}`} key={session.id} role="button" tabIndex={0} aria-label={`View ${isChat ? 'instant chat' : 'instant call'} with ${session.astrologerName || 'astrologer'}`} onClick={() => setSelectedInstantConsultation(session)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedInstantConsultation(session) } }}><span className="user-profile-instant-history-icon">{isChat ? <MessageCircle size={17} /> : <PhoneCall size={17} />}</span><div><strong>{isChat ? 'Instant Chat' : 'Instant Call'} <span className="user-profile-instant-history-separator">·</span> {session.astrologerName || 'Astrologer'}</strong><small>{occurredAt ? new Date(occurredAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date unavailable'} <span className="user-profile-instant-history-separator">·</span> {session.durationMinutes || 0} min</small></div><span className={`user-profile-instant-history-status user-profile-instant-history-status--${String(session.status || '').toLowerCase()}`}>{session.status || 'Unknown'}</span></article>
+                })}</div> : <div className="user-profile-instant-history-empty"><MessageCircle size={22} /><strong>No instant {instantConsultationTab === 'all' ? 'consultations' : `${instantConsultationTab}s`} yet</strong><p>Your instant call and chat history will appear here.</p></div>}
+              </Card>}
+              {selectedInstantConsultation && createPortal(<div className={`user-profile-consultation-modal-backdrop user-profile-consultation-modal-backdrop--${selectedInstantConsultation.type}`} role="presentation" onClick={() => setSelectedInstantConsultation(null)}><section className={`user-profile-consultation-modal user-profile-consultation-modal--${selectedInstantConsultation.type}`} role="dialog" aria-modal="true" aria-labelledby="instant-consultation-summary-title" onClick={(event) => event.stopPropagation()}><header className="user-profile-consultation-modal__topbar"><h2 id="instant-consultation-summary-title">Consultation Details</h2><button type="button" className="user-profile-consultation-modal__close" aria-label="Close consultation summary" onClick={() => setSelectedInstantConsultation(null)}><X size={18} /></button></header><div className="user-profile-consultation-modal__content"><div className="user-profile-consultation-modal__identity-row"><div className="user-profile-consultation-modal__person"><span>{initials(selectedInstantConsultation.astrologerName || 'Astrologer')}</span><div><strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong><small>ASTROLOGER</small></div></div><div className="user-profile-consultation-modal__id"><small>CONSULTATION ID</small><strong>{selectedInstantConsultation.id}</strong></div></div><div className="user-profile-consultation-modal__amount-panel"><span>AMOUNT</span><strong>₹{Number(selectedInstantConsultation.amount || ((selectedInstantConsultation.pricePerMinute || 0) * (selectedInstantConsultation.durationMinutes || 0))).toLocaleString('en-IN')}</strong><em>{selectedInstantConsultation.paymentStatus || (['ended', 'accepted'].includes(String(selectedInstantConsultation.status || '').toLowerCase()) ? 'Paid' : 'Pending')}</em></div><div className="user-profile-consultation-modal__details"><div><span className="user-profile-consultation-modal__detail-icon"><UserCircle2 size={15} /></span><span><small>ASTROLOGER</small><strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} STARTED</small><strong>{selectedInstantConsultation.startedAt ? new Date(selectedInstantConsultation.startedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not started'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} ENDED</small><strong>{selectedInstantConsultation.endedAt ? new Date(selectedInstantConsultation.endedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not ended'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>DURATION</small><strong>{selectedInstantConsultation.durationMinutes || 0} min</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon">₹</span><span><small>AMOUNT</small><strong>₹{Number(selectedInstantConsultation.amount || ((selectedInstantConsultation.pricePerMinute || 0) * (selectedInstantConsultation.durationMinutes || 0))).toLocaleString('en-IN')}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span><span><small>PAYMENT</small><strong>{selectedInstantConsultation.paymentStatus || (['ended', 'accepted'].includes(String(selectedInstantConsultation.status || '').toLowerCase()) ? 'Paid' : 'Pending')}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span><span><small>STATUS</small><strong>{selectedInstantConsultation.status || 'Unknown'}</strong></span></div></div></div><footer className="user-profile-consultation-modal__footer"><button type="button" className="user-profile-consultation-modal__close-action" onClick={() => setSelectedInstantConsultation(null)}>Close</button></footer></section></div>, document.body)}
             </div>
           </div>
 

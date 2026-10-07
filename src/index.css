@@ -911,8 +911,39 @@ textarea:focus-visible {
 .user-profile-astro-copy small { color: var(--text-secondary); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-profile-astro-chevron { flex: none; color: var(--muted); margin-left: auto; }
 .user-profile-activity { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.user-profile-activity a { display: grid; place-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; text-align: center; }
-.user-profile-activity a:hover { border-color: var(--primary); }
+.user-profile-activity a, .user-profile-activity > button, .user-profile-activity > div { display: grid; place-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; text-align: center; transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+.user-profile-activity a:hover, .user-profile-activity > button:hover, .user-profile-activity > div:hover, .user-profile-activity a:focus-visible, .user-profile-activity > button:focus-visible { border-color: var(--primary); box-shadow: var(--shadow-xs); outline: none; }
+.user-profile-activity > button { width: 100%; appearance: none; cursor: pointer; font: inherit; }
+.user-profile-consultation-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.user-profile-consultation-tabs button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-soft); color: var(--text-secondary); padding: 8px 12px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.user-profile-consultation-tabs button span { min-width: 18px; border-radius: 999px; background: var(--surface); padding: 2px 5px; text-align: center; font-size: 10px; }
+.user-profile-consultation-tabs button.is-active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+.user-profile-instant-history-list { display: grid; gap: 9px; }
+.user-profile-instant-history-row { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.user-profile-instant-history-row:hover, .user-profile-instant-history-row:focus-visible { border-color: var(--primary); box-shadow: var(--shadow-xs); outline: none; transform: translateY(-1px); }
+.user-profile-instant-history-icon { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--primary-bg); color: var(--primary); }
+.user-profile-instant-history-row--call .user-profile-instant-history-icon { background: var(--success-bg); color: var(--success); }
+.user-profile-instant-history-row > div { min-width: 0; flex: 1; }
+.user-profile-instant-history-row strong { display: block; color: var(--ink); font-size: 13px; }
+.user-profile-instant-history-row small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.user-profile-instant-history-separator { color: var(--muted); }
+.user-profile-instant-history-status { flex: 0 0 auto; border-radius: 999px; padding: 5px 8px; background: var(--surface-soft); color: var(--text-secondary); font-size: 10px; font-weight: 800; text-transform: capitalize; }
+.user-profile-instant-history-status--accepted, .user-profile-instant-history-status--ended { background: var(--success-bg); color: var(--success); }
+.user-profile-instant-history-status--rejected, .user-profile-instant-history-status--cancelled { background: var(--danger-bg); color: var(--danger); }
+.user-profile-instant-history-empty { display: grid; justify-items: center; gap: 7px; padding: 28px 12px; color: var(--text-secondary); text-align: center; }
+.user-profile-instant-history-empty strong { color: var(--ink); }
+.user-profile-instant-history-empty p { margin: 0; font-size: 12px; }
+.user-profile-consultation-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(25, 17, 38, .42); backdrop-filter: blur(4px); }
+.user-profile-consultation-modal { width: min(440px, 100%); overflow: hidden; padding: 0; border: 1px solid rgba(111, 65, 214, .12); border-radius: 24px; background: var(--surface); box-shadow: 0 28px 80px rgba(35, 20, 52, .28); }
+.user-profile-consultation-modal--call { --consultation-accent: #6d28d9; }.user-profile-consultation-modal--chat { --consultation-accent: #6d28d9; }
+.user-profile-consultation-modal__topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 23px; border-bottom: 1px solid var(--surface-border); background: linear-gradient(135deg, #f4efff, #fff); }.user-profile-consultation-modal__topbar h2 { margin: 0; color: #28213b; font-size: 20px; font-weight: 800; }
+.user-profile-consultation-modal__close { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--surface-border); border-radius: 13px; background: rgba(255, 255, 255, .72); color: #756f80; cursor: pointer; transition: border-color .16s ease, color .16s ease, box-shadow .16s ease; }.user-profile-consultation-modal__close:hover, .user-profile-consultation-modal__close:focus-visible { border-color: var(--primary); color: var(--primary); box-shadow: var(--shadow-xs); outline: none; }
+.user-profile-consultation-modal__content { padding: 23px; }.user-profile-consultation-modal__identity-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; padding-bottom: 13px; border-bottom: 1px solid var(--surface-border); }.user-profile-consultation-modal__id { display: grid; flex: 0 1 185px; gap: 5px; min-width: 0; text-align: right; }.user-profile-consultation-modal__id small { color: #777184; font-size: 9px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__id strong { overflow: hidden; color: #28213b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }.user-profile-consultation-modal__person { display: flex; align-items: center; gap: 12px; min-width: 0; }.user-profile-consultation-modal__person > span { display: grid; flex: 0 0 auto; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; font-size: 15px; font-weight: 800; box-shadow: 0 8px 18px rgba(109, 40, 217, .25); }.user-profile-consultation-modal__person div { display: grid; gap: 3px; min-width: 0; }.user-profile-consultation-modal__person strong { overflow: hidden; color: #28213b; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }.user-profile-consultation-modal__person small { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+.user-profile-consultation-modal__amount-panel { display: grid; position: relative; gap: 4px; min-height: 82px; margin-bottom: 16px; padding: 16px; border: 1px solid rgba(109, 40, 217, .08); border-radius: 15px; background: linear-gradient(135deg, #f1eaff, #faf7ff); }.user-profile-consultation-modal__amount-panel > span { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__amount-panel > strong { color: #5b21b6; font-size: 26px; line-height: 1; }.user-profile-consultation-modal__amount-panel > em { position: absolute; top: 16px; right: 16px; padding: 5px 8px; border: 1px solid rgba(16, 185, 129, .16); border-radius: 999px; background: #ecfdf5; color: var(--success); font-size: 10px; font-style: normal; font-weight: 800; }
+.user-profile-consultation-modal__status-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 82px; margin-bottom: 16px; padding: 16px; border: 1px solid rgba(109, 40, 217, .08); border-radius: 15px; background: linear-gradient(135deg, #f1eaff, #faf7ff); }.user-profile-consultation-modal__status-panel > span { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__status-panel > strong { display: inline-flex; align-items: center; gap: 5px; color: var(--success); font-size: 13px; text-transform: capitalize; }.user-profile-consultation-modal__status-panel > strong::before { content: '✓'; display: grid; place-items: center; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; }
+.user-profile-consultation-modal__status-panel--rejected > strong, .user-profile-consultation-modal__status-panel--cancelled > strong { color: var(--danger); }.user-profile-consultation-modal__status-panel--rejected > strong::before, .user-profile-consultation-modal__status-panel--cancelled > strong::before { content: '×'; }
+.user-profile-consultation-modal__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; padding: 18px; border: 1px solid var(--surface-border); border-radius: 15px; background: var(--surface-soft); }.user-profile-consultation-modal__details > div { display: flex; align-items: flex-start; gap: 10px; min-width: 0; min-height: 40px; }.user-profile-consultation-modal__detail-icon { display: grid; flex: 0 0 auto; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #f0e8ff; color: #6d28d9; }.user-profile-consultation-modal__details > div > span:last-child { display: grid; align-content: start; gap: 5px; min-width: 0; padding-top: 1px; }.user-profile-consultation-modal__details small { color: #777184; font-size: 9px; font-weight: 800; letter-spacing: .04em; line-height: 1.2; }.user-profile-consultation-modal__details strong { overflow: hidden; color: #28213b; font-size: 12px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.user-profile-consultation-modal__footer { display: flex; justify-content: flex-end; padding: 20px 23px; border-top: 1px solid var(--surface-border); }.user-profile-consultation-modal__close-action { min-width: 84px; padding: 13px 20px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #6d28d9, #7c3aed); color: #fff; font: inherit; font-size: 13px; font-weight: 800; box-shadow: 0 10px 20px rgba(109, 40, 217, .25); cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }.user-profile-consultation-modal__close-action:hover, .user-profile-consultation-modal__close-action:focus-visible { transform: translateY(-1px); box-shadow: 0 14px 24px rgba(109, 40, 217, .3); outline: none; }
 .user-profile-activity strong { color: var(--ink); font-size: 19px; }
 .user-profile-activity span { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 11px; font-weight: 600; }
 .user-profile-family { grid-column: 1 / -1; }
@@ -957,6 +988,14 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   .user-profile-tabs { justify-content: flex-start; overflow-x: auto; }
   .user-profile-tabs button { padding: 12px 15px; }
   .user-profile-content { width: 100%; }
+}
+@media (max-width: 480px) {
+  .user-profile-consultation-modal__content { padding: 18px; }
+  .user-profile-consultation-modal__topbar { padding: 17px 18px; }
+  .user-profile-consultation-modal__footer { padding: 16px 18px; }
+  .user-profile-consultation-modal__identity-row { gap: 10px; }
+  .user-profile-consultation-modal__id { flex-basis: 125px; }
+  .user-profile-consultation-modal__details { gap: 18px 10px; padding: 14px; }
 }
 
 /* User consultation flow */
@@ -5120,7 +5159,8 @@ tbody tr:hover {
 .app-shell--profile .user-profile-stats > *::before { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #fbf2df; color: #9b6815; font-size: 19px; }
 .app-shell--profile .user-profile-stats > *:nth-child(1)::before { content: '✦'; }
 .app-shell--profile .user-profile-stats > *:nth-child(2)::before { content: '◈'; }
-.app-shell--profile .user-profile-stats > *:nth-child(3)::before { content: '₹'; font-size: 17px; font-weight: 700; }
+.app-shell--profile .user-profile-stats > *:nth-child(3)::before { content: '▦'; font-size: 17px; font-weight: 700; }
+.app-shell--profile .user-profile-stats > *:nth-child(4)::before { content: '◉'; font-size: 17px; font-weight: 700; }
 .app-shell--profile .user-profile-stats strong { color: #241a36; font-size: 22px; font-weight: 700; }
 .app-shell--profile .user-profile-stats span { margin-top: 2px; color: #756a7b; font-size: 13px; }
 .app-shell--profile .user-profile-stats-btn span svg { display: none; }

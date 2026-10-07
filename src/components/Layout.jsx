@@ -109,10 +109,10 @@ const ROLE_CONFIG = {
         label: 'Wallet',
         to: 'wallet/overview',
         icon: Wallet,
+        activeWhen: ['wallet/transactions', 'wallet/topups', 'wallet/refunds', 'payment-methods', 'autopay'],
       },
       { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
-      { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
 }
@@ -227,7 +227,8 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
       {links.map((link) => {
         if (!link.children) {
           const route = `${basePath}/${link.to}`.replace(/\/$/, '')
-          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
+          const activeWhen = (link.activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
+          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} activeWhen={activeWhen} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
         }
 
         const isOpen = Boolean(openSections[link.label])
@@ -504,7 +505,7 @@ export default function Layout() {
 
       <div className="main-column">
         <header className="topbar-header">
-          {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to dashboard" onClick={() => navigate(basePath)}><span aria-hidden="true">‹</span></button>}
+          {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
           {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
           <div className="topbar-heading">
             <div className="topbar-crumb">{meta.title}</div>
