@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Activity, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, Trash2, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Activity, ArrowLeft, CalendarDays, Headphones, MessageCircle, PhoneCall, MessageSquare, Phone, Trash2, X, Clock3, Timer, Tag, CheckCircle2, User, Wallet, Radio, Megaphone, AlertTriangle, Users, ChevronRight, ChevronLeft } from 'lucide-react'
+import { useSafeBack } from '../utils/useSafeBack.js'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -60,6 +61,9 @@ const ACTIVITY_KIND_META = {
 
 export default function AstrologerActivity() {
   const { currentUser } = useAuth()
+  // Reached in-app from the My Account profile tabs; fall back there when the page
+  // was opened directly, so Back never leaves the app.
+  const goBack = useSafeBack('/astrologer/my-account')
   const { questions, consultationHistory, activityLog, campaigns, astrologerLiveSessions, astrologerWallet } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
@@ -362,6 +366,7 @@ export default function AstrologerActivity() {
 
   return (
     <div>
+      <button type="button" className="account-management-back" onClick={goBack}><ArrowLeft size={16} aria-hidden="true" /> <span>Back</span></button>
       <PageHeader
         eyebrow="Astrologer workspace"
         title="My Activity"

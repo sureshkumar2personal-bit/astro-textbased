@@ -71,8 +71,6 @@ const ROLE_CONFIG = {
       // Single Wallet entry: /wallet redirects to the overview and every
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
-      { to: 'activity', label: 'My Activity', icon: Activity },
-      { to: 'profile', label: 'My Profile', icon: UserRound },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
