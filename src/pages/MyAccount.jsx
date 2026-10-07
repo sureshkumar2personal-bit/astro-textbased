@@ -304,7 +304,7 @@ export default function MyAccount() {
           <strong>{name || 'Astro Connect Member'}</strong>
           <span className="muted">@{username}</span>
         </div>
-        <span className="my-account-summary__tag">Member</span>
+        <Link className="my-account-summary__tag" to={routes.profile} state={{ from: 'my-account' }}>Profile</Link>
         <button type="button" className="btn btn-primary my-account-summary__edit" onClick={openPersonalDetailsEditor}><Pencil size={15} /> Edit Profile</button>
       </Card>
       <Card className="my-account-settings-card">
