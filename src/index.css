@@ -14665,7 +14665,8 @@ button.apt-week-day:focus-visible {
 .profile-account-hero::before { content: ''; position: absolute; right: -70px; top: -70px; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, .28), transparent 66%); filter: blur(2px); }
 .profile-account-cover { position: absolute; inset: 0; z-index: 0; height: 100%; opacity: .45; background: radial-gradient(circle at 82% 20%, rgba(255, 255, 255, .5) 0 34px, transparent 36px), radial-gradient(circle at 84% 22%, rgba(255, 235, 200, .4) 0 72px, transparent 74px), linear-gradient(120deg, transparent, rgba(255, 255, 255, .12)); }
 .profile-account-cover::after { display: none; }
-.profile-account-identity, .profile-account-about { position: relative; z-index: 1; }
+.profile-account-identity { position: relative; z-index: 2; }
+.profile-account-about { position: relative; z-index: 1; }
 .profile-account-identity { min-height: 152px; align-items: flex-start; padding: 40px 32px 10px; margin: 0; }
 .profile-account-avatar { flex-basis: 96px; height: 96px; border: 4px solid rgba(255, 255, 255, .92); border-radius: 50%; background: linear-gradient(145deg, #ffd9a3, #b588ef); color: #3b1470; font-size: 27px; box-shadow: 0 14px 30px rgba(15, 6, 32, .38); }
 .profile-account-name h2 { margin: 0; color: #fff; font-size: 32px; letter-spacing: -.03em; }
@@ -14677,6 +14678,59 @@ button.apt-week-day:focus-visible {
 .profile-account-status { min-width: 96px; border-color: rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .14); border-radius: 14px; backdrop-filter: blur(6px); }
 .profile-account-status small { color: rgba(255, 255, 255, .72); font-size: 9px; }
 .profile-account-status strong { color: #fff; font-size: 11px; }
+
+/* ---- Consultation dropdown on the profile hero ---- */
+.profile-consultation { position: relative; }
+.profile-status-wrap { position: relative; display: block; }
+.profile-account-status { margin: 0; font: inherit; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.profile-account-status i { background: var(--success); }
+.profile-account-status.is-dnd i { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .28); }
+.profile-account-status.is-dnd { border-color: rgba(245, 158, 11, .5); }
+.profile-account-status:hover { background: rgba(255, 255, 255, .2); }
+.profile-consultation-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 20;
+  width: max-content;
+  min-width: 250px;
+  padding: 14px;
+  border: 1px solid rgba(226, 216, 240, .95);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 24px 48px rgba(38, 14, 74, .22), 0 4px 12px rgba(38, 14, 74, .1);
+  animation: profile-consultation-menu-in .16s ease-out;
+}
+@keyframes profile-consultation-menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.profile-consultation-menu__pointer {
+  position: absolute;
+  top: -6px;
+  right: 28px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid rgba(226, 216, 240, .95);
+  border-left: 1px solid rgba(226, 216, 240, .95);
+  border-radius: 3px 0 0 0;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.profile-consultation-menu h4 { margin: 0 0 10px; padding: 0 2px; color: #2b2337; font-size: 12px; font-weight: 800; letter-spacing: -.01em; }
+.profile-consultation-menu__note { margin: -4px 2px 8px; color: #8a8195; font-size: 10.5px; line-height: 1.5; }
+.profile-consultation-menu__row { display: flex; align-items: center; gap: 10px; padding: 9px 2px; }
+.profile-consultation-menu__row + .profile-consultation-menu__row { border-top: 1px solid #f1ecf7; }
+.profile-consultation-menu__icon { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 9px; background: #f3edfd; color: #6d28d9; }
+.profile-consultation-menu__copy { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.profile-consultation-menu__copy strong { color: #39323f; font-size: 12px; }
+.profile-consultation-menu__copy small { color: #8a8195; font-size: 10px; }
+.profile-consultation-switch { position: relative; flex: none; width: 34px; height: 20px; padding: 0; border: 0; border-radius: 999px; background: #e3dced; cursor: pointer; transition: background .18s ease; }
+.profile-consultation-switch i { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(43, 20, 72, .28); transition: transform .18s ease; }
+.profile-consultation-switch.is-on { background: linear-gradient(135deg, #8b46d8 0%, #6d28d9 100%); }
+.profile-consultation-switch.is-on i { transform: translateX(14px); }
+.profile-consultation-switch:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
+.profile-account-service-grid .profile-account-toggle { padding: 0; border: 0; cursor: pointer; }
+/* The hero clips its decorations, so the dropdown needs reserved room below the
+   actions row once the actions wrap onto their own line. */
+@media (max-width: 860px) { .profile-account-hero { min-height: 400px; } }
 .profile-account-about { padding: 16px 32px 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
 .profile-account-about b { color: rgba(255, 255, 255, .85); font-size: 11px; }
 .profile-account-about p { color: rgba(255, 255, 255, .74); font-size: 15px; line-height: 1.6; }

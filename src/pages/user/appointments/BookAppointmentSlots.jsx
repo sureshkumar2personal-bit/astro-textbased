@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useSafeBack } from '../../../utils/useSafeBack.js'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import {
@@ -45,6 +46,7 @@ export default function BookAppointmentSlots() {
   const { appointments, consultations, userWallet, actions, appointmentAvailabilityTemplates } = useAppData()
   const location = useLocation()
   const navigate = useNavigate()
+  const goBack = useSafeBack('/user/appointments/book')
 
   const astrologer = useMemo(() => mockAstrologers.find((item) => item.id === astrologerId), [astrologerId])
 
@@ -159,7 +161,7 @@ export default function BookAppointmentSlots() {
 
   return (
     <div className="book-slots-page">
-      <button type="button" className="book-slots-back" onClick={() => navigate(-1)}><span aria-hidden="true">←</span> Back</button>
+      <button type="button" className="book-slots-back" onClick={goBack}><span aria-hidden="true">←</span> Back</button>
       <PageHeader
         eyebrow="USER PORTAL"
         title="Book an Appointment"
