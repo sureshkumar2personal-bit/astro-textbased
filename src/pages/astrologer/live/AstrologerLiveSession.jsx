@@ -435,6 +435,15 @@ function LiveSessionShellInner({ children }) {
     navigate(routes.profile)
   }
 
+  // The "X Close" on the Create Live entry page leaves the whole live workspace
+  // for the Astrologer Dashboard rather than the profile page. Kept separate from
+  // closeWorkspace so the Exit/Close actions elsewhere in the live flow are
+  // unaffected.
+  const closeCreateLiveToDashboard = () => {
+    resetFlow()
+    navigate(routes.dashboard)
+  }
+
   const goToSetup = () => goTo(routes.liveSessionSetup)
   const goToConfigure = () => goTo(routes.liveSessionConfigure)
   const goToRoom = (sessionId) => goTo(routes.liveSessionRoom, sessionId)
@@ -574,6 +583,7 @@ function LiveSessionShellInner({ children }) {
     stopStream,
     resetFlow,
     closeWorkspace,
+    closeCreateLiveToDashboard,
     goToSetup,
     goToConfigure,
     goToRoom,
@@ -602,6 +612,7 @@ function LiveSessionShellInner({ children }) {
     requestMedia,
     resetFlow,
     closeWorkspace,
+    closeCreateLiveToDashboard,
     goToSetup,
     goToConfigure,
     goToRoom,
@@ -675,7 +686,7 @@ export function AstrologerLiveSessionSetup() {
     draft,
     mediaStatus,
     requestMedia,
-    closeWorkspace,
+    closeCreateLiveToDashboard,
     goToConfigure,
     startBroadcast,
     existingSession,
@@ -700,7 +711,7 @@ export function AstrologerLiveSessionSetup() {
         subtitle={enteredForLive
           ? 'Check your camera and microphone, then enter the live room'
           : 'Check your camera and microphone before you continue'}
-        onClose={closeWorkspace}
+        onClose={closeCreateLiveToDashboard}
       />
       <div className="ld-setup-grid">
         <Card className="ld-card ld-card--media">

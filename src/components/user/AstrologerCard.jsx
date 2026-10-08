@@ -10,7 +10,7 @@ function formatExperience(experience) {
   return String(experience || '').match(/\d+/)?.[0] || experience || '—'
 }
 
-export default function AstrologerCard({ astrologer, kind = 'chat', onSelect, onStart, onViewProfile }) {
+export default function AstrologerCard({ astrologer, kind = 'chat', onSelect, onStart, onInstant, onViewProfile }) {
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
 
@@ -57,6 +57,10 @@ export default function AstrologerCard({ astrologer, kind = 'chat', onSelect, on
             {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
             <span>{kind === 'call' ? 'Call' : 'Chat'}</span>
           </button>
+          {onInstant && <button type="button" className="astrologer-card__action" onClick={() => onInstant(astrologer)}>
+            {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
+            <span>Instant {kind === 'call' ? 'Call' : 'Chat'}</span>
+          </button>}
         </div>
       </div>
 

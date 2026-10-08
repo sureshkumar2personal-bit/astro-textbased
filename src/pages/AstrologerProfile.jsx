@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw } from 'lucide-react'
-import { getSuggestedAstrologers, mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
+import { getPublicAstrologer } from '../utils/publicAstrologerProfile.js'
+import { mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { NAKSHATRA_OPTIONS, RASHI_OPTIONS } from '../data/astrologyOptions.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { publishedAvailabilityMap } from '../utils/appointments.js'
@@ -164,7 +165,7 @@ export default function AstrologerProfile() {
   const astrologerId = routeAstrologerId || searchParams.get('id') || mockAstrologers[0].id
   const astrologer = useMemo(
     () => {
-      const profile = mockAstrologers.find((item) => item.id === astrologerId) || mockAstrologers[0]
+      const profile = getPublicAstrologer(astrologerId) || getPublicAstrologer(mockAstrologers[0].id)
       if (currentUser?.role !== 'astrologer' || currentUser.id !== profile.id) return profile
       return {
         ...profile,
@@ -267,10 +268,8 @@ export default function AstrologerProfile() {
     setCalendarView('day')
   }
   const visiblePosts = footerTab === 'Saved Posts' ? savedPosts : astrologerPosts
-  const selectedAstrologerTypes = currentUser?.astrologerPreferences?.astrologerTypes || currentUser?.astrologerPreferences?.methods || []
-  const selectedConsultationTitles = currentUser?.astrologerPreferences?.consultationTitles || currentUser?.astrologerPreferences?.topics || []
-  const suggestedForUser = getSuggestedAstrologers({ followedAstrologerIds, subscribedAstrologerIds: subscriptions.filter((subscription) => subscription.userId === currentUser?.id).map((subscription) => subscription.astrologerId), preferencesEnabled: currentUser?.astrologerPreferencesEnabled, preferences: currentUser?.astrologerPreferences })
-  const showPreferenceChips = !isOwner && suggestedForUser.some((suggested) => suggested.id === astrologer.id) && (selectedAstrologerTypes.length || selectedConsultationTitles.length) > 0
+  const astrologerTypes = [astrologer.specialization].filter(Boolean)
+  const consultationAreas = astrologer.guidanceAreas?.length ? astrologer.guidanceAreas : (astrologer.expertise || [])
   const liveGroups = [
     ['Upcoming', liveSessions.filter((session) => session.status === 'Upcoming')],
     ['Present / Live Now', liveSessions.filter((session) => ['Live now', 'Present', 'Live'].includes(session.status))],
@@ -418,6 +417,15 @@ export default function AstrologerProfile() {
     return firstId
   }
 
+  if (astrologer.visible === false && currentUser?.role !== 'astrologer') {
+    return (
+      <div>
+        <PageHeader eyebrow="User portal" title="Astrologer Profile" showBack />
+        <Card className="section"><p className="muted" role="status">This astrologer's profile is not available right now.</p></Card>
+      </div>
+    )
+  }
+
   return (
     <div>
       {!isOwner && <PageHeader eyebrow="User portal" title="Astrologer Profile" showBack />}
@@ -490,13 +498,13 @@ export default function AstrologerProfile() {
         <div className="astrologer-profile-compact">
           <Card className="section astrologer-compact-header">
             <div className="astrologer-compact-identity">
-              <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-[18px] font-bold text-white">
-                {astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+              <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-[18px] font-bold text-white">
+                {astrologer.photo ? <img className="h-full w-full object-cover" src={astrologer.photo} alt={`${astrologer.name} profile`} /> : astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
               </div>
               <div className="astrologer-compact-identity-copy">
                 <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>{astrologer.name}</div>
                 <div className="muted">{astrologer.specialization}</div>
-                {showPreferenceChips && <div className="astrologer-preference-chips"><div><small>Astrologer Type</small><div>{selectedAstrologerTypes.map((value) => <span key={value}>{value}</span>)}</div></div><div><small>Consultation For</small><div>{selectedConsultationTitles.map((value) => <span key={value}>{value}</span>)}</div></div></div>}
+                {!isOwner && <div className="astrologer-preference-chips"><div><small>Astrologer Type</small><div>{astrologerTypes.map((value) => <span key={value}>{value}</span>)}</div></div><div><small>Consultation For</small><div>{consultationAreas.length ? consultationAreas.map((value) => <span key={value}>{value}</span>) : <span>General guidance</span>}</div></div></div>}
                 <div className="astrologer-inline-about"><span>About</span>{astrologer.bio}</div>
                 <div className="astrologer-profile-highlights"><span><strong>{astrologer.experience}</strong> Experience</span><span><Star size={13} /> <strong>{astrologer.rating}</strong><small>{astrologer.reviews}</small></span></div>
               </div>

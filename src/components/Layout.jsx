@@ -32,6 +32,8 @@ import {
   Flame,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
+import InstantCallAstrologer from '../pages/astrologer/instantcallastrologer.jsx'
+import InstantChatAstrologer from '../pages/astrologer/instantchatastrologer.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
 import NotificationsPanel from './NotificationsPanel.jsx'
@@ -66,7 +68,6 @@ const ROLE_CONFIG = {
       // Single Wallet entry: /wallet redirects to the overview and every
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
-      { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
     ],
   },
@@ -101,10 +102,10 @@ const ROLE_CONFIG = {
         label: 'Wallet',
         to: 'wallet/overview',
         icon: Wallet,
+        activeWhen: ['wallet/transactions', 'wallet/topups', 'wallet/refunds', 'payment-methods', 'autopay'],
       },
       { to: 'activity', label: 'My Activity', icon: Activity },
       { to: 'my-account', label: 'My Account', icon: UserRound },
-      { to: 'profile', label: 'My Profile', icon: UserRound },
     ],
   },
 }
@@ -134,6 +135,7 @@ const PAGE_META = {
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
+    '/astrologer/profile': { title: 'My Profile', sub: 'Your professional identity and how you appear to users' },
     '/astrologer/my-account': { title: 'Account Management', sub: 'Profile, access, security, and account preferences' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
@@ -226,7 +228,8 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
       {links.map((link) => {
         if (!link.children) {
           const route = `${basePath}/${link.to}`.replace(/\/$/, '')
-          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
+          const activeWhen = (link.activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
+          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} activeWhen={activeWhen} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
         }
 
         const isOpen = Boolean(openSections[link.label])
@@ -504,7 +507,7 @@ export default function Layout() {
 
       <div className="main-column">
         <header className="topbar-header">
-          {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to dashboard" onClick={() => navigate(basePath)}><span aria-hidden="true">‹</span></button>}
+          {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
           {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
           <div className="topbar-heading">
             <div className="topbar-crumb">{meta.title}</div>
@@ -607,7 +610,7 @@ export default function Layout() {
             </motion.div>
           </AnimatePresence>
         </div>
-        {isAstrologer && <IncomingRequestOverlay callRequest={activeCallRequest} chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} />}
+        {isAstrologer && <><IncomingRequestOverlay callRequest={activeCallRequest} chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><InstantCallAstrologer /><InstantChatAstrologer /></>}
       </div>
     </div>
   )

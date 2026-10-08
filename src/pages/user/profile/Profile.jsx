@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Activity, BookOpen, CalendarDays, ChevronRight, CircleHelp, Globe2, Languages, MapPin, MoreHorizontal, Pencil, Settings, Sparkles, UserRound, Users } from 'lucide-react'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
+import { deriveUsername } from '../../../utils/profile.js'
 
 const initials = (name = '') => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'
 
@@ -19,7 +20,7 @@ export default function Profile() {
   return <div className="member-profile">
     <div className="member-profile__intro"><div><span className="profile-kicker">YOUR ASTRO CONNECT SPACE</span><h1>Profile</h1><p>Keep your journey, questions and consultations in one place.</p></div><button className="icon-btn" aria-label="Profile settings"><Settings size={18} /></button></div>
     <section className="member-profile__hero">
-      <div className="member-profile__identity"><div className="member-avatar">{initials(currentUser?.name)}</div><div><div className="member-profile__name-row"><h2>{currentUser?.name || 'Astro Connect Member'}</h2><span className="member-badge">✦ Astro Connect Member</span></div><p className="profile-handle">@{(currentUser?.name || 'member').toLowerCase().replace(/[^a-z0-9]+/g, '')}</p><div className="profile-meta"><span><MapPin size={14} /> India</span><span><Globe2 size={14} /> Exploring the stars</span></div><p className="member-bio">Curious about the patterns shaping your next chapter. Ask, reflect and find clarity with trusted astrologers.</p></div></div>
+      <div className="member-profile__identity"><div className="member-avatar">{initials(currentUser?.name)}</div><div><div className="member-profile__name-row"><h2>{currentUser?.name || 'Astro Connect Member'}</h2><span className="member-badge">✦ Astro Connect Member</span></div><p className="profile-handle">@{currentUser?.username || deriveUsername(currentUser?.name || 'member')}</p><div className="profile-meta"><span><MapPin size={14} /> India</span><span><Globe2 size={14} /> Exploring the stars</span></div><p className="member-bio">Curious about the patterns shaping your next chapter. Ask, reflect and find clarity with trusted astrologers.</p></div></div>
       <div className="member-profile__hero-actions"><button className="btn btn-primary" onClick={() => setEditing(true)}><Pencil size={15} /> Edit Profile</button><button className="icon-btn" aria-label="More profile actions"><MoreHorizontal size={19} /></button></div>
       <div className="profile-stats">{stats.map(([value, label]) => <div key={label}><strong>{value}</strong><span>{label}</span></div>)}</div>
     </section>

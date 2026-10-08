@@ -1,80 +1,83 @@
-import { MessageCircle, Phone } from 'lucide-react'
+import { ArrowRight, MessageCircle, Phone, Star, UserRound } from 'lucide-react'
+import { getStartingRate } from '../utils/publicAstrologerProfile.js'
 import Card from './ui/Card.jsx'
 
+const MAX_EXPERTISE = 3
+const MAX_LANGUAGES = 3
+
 function formatCount(count) {
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`
-  }
-
-  return String(count)
+  const value = Number(count) || 0
+  return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : String(value)
 }
 
-function formatExperience(experience) {
-  return String(experience).match(/\d+/)?.[0] || experience
+function formatYears(experience) {
+  const years = String(experience || '').match(/\d+/)?.[0]
+  if (!years) return '—'
+  return `${years} ${Number(years) === 1 ? 'Year' : 'Years'}`
 }
 
-function getConsultationRate(astrologer) {
-  if (astrologer.consultationRate) return astrologer.consultationRate
+function shortLabel(value) {
+  return String(value).replace(/\s+Astrology$/i, '')
+}
 
-  const rateOptions = [15, 20, 25]
-  const years = Number(formatExperience(astrologer.experience)) || 0
-  return rateOptions[years % rateOptions.length]
+function TagRow({ items, limit, className, label, tone = 'soft' }) {
+  const visible = items.slice(0, limit)
+  const remaining = items.length - visible.length
+  return (
+    <div className={`explore-astrologer-card__tags explore-astrologer-card__tags--${tone} ${className}`} aria-label={label}>
+      {visible.map((item) => <span key={item} title={item}>{shortLabel(item)}</span>)}
+      {remaining > 0 && <span title={items.slice(limit).join(', ')}>+{remaining}</span>}
+    </div>
+  )
 }
 
 export default function AstrologerCard({ astrologer, onViewProfile, onCall, onChat }) {
+  const rate = getStartingRate(astrologer) ?? astrologer.consultationRate ?? null
+  const initials = astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+  const photo = astrologer.photo || astrologer.profileImage
+  const online = astrologer.availability === 'Online'
+
   return (
-    <Card hover className="astrologer-card">
-      <span className="astrologer-card__rate" aria-label={`Consultation rate: ${getConsultationRate(astrologer)} rupees per minute`}>
-        ₹{getConsultationRate(astrologer)}/min
-      </span>
-      <div className="astrologer-card__content">
-        <div className="astrologer-card__avatar-wrap">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-lg font-bold text-white shadow-lg">
-            {astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+    <Card hover className="explore-astrologer-card">
+      {rate && <span className="explore-astrologer-card__price" aria-label={`Consultation rate: ${rate} rupees per minute`}>₹{rate}/min</span>}
+
+      <div className="explore-astrologer-card__main">
+        <div className="explore-astrologer-card__avatar-wrap">
+          <div className="explore-astrologer-card__avatar">
+            {photo ? <img src={photo} alt={`${astrologer.name} profile`} /> : initials}
           </div>
-          <span
-            className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white ${
-              astrologer.availability === 'Online' ? 'bg-[color:var(--success)]' : 'bg-[color:var(--muted)]'
-            }`}
-          />
+          <span className={`explore-astrologer-card__status${online ? ' is-online' : ''}`} role="img" aria-label={online ? 'Online' : 'Offline'} />
         </div>
 
-        <h3 className="astrologer-card__name">{astrologer.name}</h3>
-        <p className="astrologer-card__specialization">{astrologer.specialization}</p>
+        <div className="explore-astrologer-card__details">
+          <h3 className="explore-astrologer-card__name" title={astrologer.name}>{astrologer.name}</h3>
+          <p className="explore-astrologer-card__specialization" title={astrologer.specialization}>{astrologer.specialization}</p>
 
-        <div className="astrologer-card__meta" aria-label="Astrologer details">
-          <span>Exp {formatExperience(astrologer.experience)}</span>
-          <span aria-hidden="true">·</span>
-          <strong>{formatCount(astrologer.followers)} Followers</strong>
-        </div>
-
-        <div className="astrologer-card__languages">
-          {astrologer.languages.map((lang) => (
-            <span key={lang} className="rounded-full bg-[color:var(--surface-soft)] px-2 py-0.5 text-xs text-[color:var(--text-secondary)]">
-              {lang}
+          <div className="explore-astrologer-card__meta" aria-label="Astrologer details">
+            <span className="explore-astrologer-card__rating" aria-label={`Rated ${astrologer.ratingValue} out of 5 from ${astrologer.reviewCount} reviews`}>
+              <Star size={14} aria-hidden="true" /> <strong>{astrologer.ratingValue?.toFixed(1) || '—'}</strong>
+              <span>({Number(astrologer.reviewCount || 0).toLocaleString('en-IN')})</span>
             </span>
-          ))}
+            <span className="explore-astrologer-card__meta-divider" aria-hidden="true" />
+            <span className="explore-astrologer-card__experience"><UserRound size={14} aria-hidden="true" /> <strong>{formatYears(astrologer.experience)}</strong></span>
+          </div>
+
+          <div className="explore-astrologer-card__followers"><strong>{formatCount(astrologer.followers)}</strong> Followers</div>
+          <TagRow items={astrologer.expertise || []} limit={MAX_EXPERTISE} className="explore-astrologer-card__expertise" label="Areas of expertise" tone="accent" />
+          <TagRow items={astrologer.languages || []} limit={MAX_LANGUAGES} className="explore-astrologer-card__languages" label="Languages" />
         </div>
       </div>
 
-      <div className="astrologer-card__stats">
-        <div className="astrologer-card__actions" aria-label={`Contact ${astrologer.name}`}>
-          <button type="button" className="astrologer-card__action" onClick={() => onCall?.(astrologer.id)}>
-            <Phone size={15} aria-hidden="true" />
-            <span>Call</span>
-          </button>
-          <span className="astrologer-card__action-divider" aria-hidden="true" />
-          <button type="button" className="astrologer-card__action" onClick={() => onChat?.(astrologer.id)}>
-            <MessageCircle size={15} aria-hidden="true" />
-            <span>Chat</span>
-          </button>
-        </div>
+      <div className="explore-astrologer-card__actions" aria-label={`Contact ${astrologer.name}`}>
+        <button type="button" className="explore-astrologer-card__action" disabled={astrologer.voiceEnabled === false} onClick={(event) => { event.stopPropagation(); onCall?.(astrologer.id) }}>
+          <Phone size={17} aria-hidden="true" /> <span>Call</span>
+        </button>
+        <span className="explore-astrologer-card__action-divider" aria-hidden="true" />
+        <button type="button" className="explore-astrologer-card__action" disabled={astrologer.chatEnabled === false} onClick={(event) => { event.stopPropagation(); onChat?.(astrologer.id) }}>
+          <MessageCircle size={17} aria-hidden="true" /> <span>Chat</span>
+        </button>
+        {onViewProfile && <button type="button" className="explore-astrologer-card__profile" onClick={() => onViewProfile(astrologer.id)}>View Profile <ArrowRight size={16} aria-hidden="true" /></button>}
       </div>
-
-      {onViewProfile && <button type="button" className="btn btn-primary btn-sm astrologer-card__profile-button" onClick={() => onViewProfile(astrologer.id)}>
-        View Profile
-      </button>}
-
     </Card>
   )
 }

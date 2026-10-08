@@ -900,7 +900,7 @@ textarea:focus-visible {
 .user-profile-detail-rows > div:last-child { padding-bottom: 0; border-bottom: 0; }
 .user-profile-detail-rows span { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 12px; }
 .user-profile-detail-rows strong { color: var(--ink); font-size: 13px; overflow-wrap: anywhere; }
-.user-profile-private { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 999px; background: var(--surface-soft); color: var(--primary); font-size: 9px; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; vertical-align: 1px; }
+.user-profile-private { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; padding: 2px 6px; border-radius: 999px; background: var(--surface-soft); color: var(--primary); font-size: 9px; font-style: normal; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; line-height: 1; white-space: nowrap; vertical-align: 1px; }
 .user-profile-astro-list { display: grid; gap: 8px; }
 .user-profile-astro-row { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; transition: border-color .16s ease, box-shadow .16s ease; }
 .user-profile-astro-row:hover { border-color: var(--primary); box-shadow: var(--shadow-xs); }
@@ -911,8 +911,39 @@ textarea:focus-visible {
 .user-profile-astro-copy small { color: var(--text-secondary); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-profile-astro-chevron { flex: none; color: var(--muted); margin-left: auto; }
 .user-profile-activity { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.user-profile-activity a { display: grid; place-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; text-align: center; }
-.user-profile-activity a:hover { border-color: var(--primary); }
+.user-profile-activity a, .user-profile-activity > button, .user-profile-activity > div { display: grid; place-items: center; gap: 4px; padding: 13px 8px; border: 1px solid var(--surface-border); border-radius: 11px; background: var(--surface-strong); color: inherit; text-decoration: none; text-align: center; transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+.user-profile-activity a:hover, .user-profile-activity > button:hover, .user-profile-activity > div:hover, .user-profile-activity a:focus-visible, .user-profile-activity > button:focus-visible { border-color: var(--primary); box-shadow: var(--shadow-xs); outline: none; }
+.user-profile-activity > button { width: 100%; appearance: none; cursor: pointer; font: inherit; }
+.user-profile-consultation-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.user-profile-consultation-tabs button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-soft); color: var(--text-secondary); padding: 8px 12px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.user-profile-consultation-tabs button span { min-width: 18px; border-radius: 999px; background: var(--surface); padding: 2px 5px; text-align: center; font-size: 10px; }
+.user-profile-consultation-tabs button.is-active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+.user-profile-instant-history-list { display: grid; gap: 9px; }
+.user-profile-instant-history-row { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.user-profile-instant-history-row:hover, .user-profile-instant-history-row:focus-visible { border-color: var(--primary); box-shadow: var(--shadow-xs); outline: none; transform: translateY(-1px); }
+.user-profile-instant-history-icon { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--primary-bg); color: var(--primary); }
+.user-profile-instant-history-row--call .user-profile-instant-history-icon { background: var(--success-bg); color: var(--success); }
+.user-profile-instant-history-row > div { min-width: 0; flex: 1; }
+.user-profile-instant-history-row strong { display: block; color: var(--ink); font-size: 13px; }
+.user-profile-instant-history-row small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+.user-profile-instant-history-separator { color: var(--muted); }
+.user-profile-instant-history-status { flex: 0 0 auto; border-radius: 999px; padding: 5px 8px; background: var(--surface-soft); color: var(--text-secondary); font-size: 10px; font-weight: 800; text-transform: capitalize; }
+.user-profile-instant-history-status--accepted, .user-profile-instant-history-status--ended { background: var(--success-bg); color: var(--success); }
+.user-profile-instant-history-status--rejected, .user-profile-instant-history-status--cancelled { background: var(--danger-bg); color: var(--danger); }
+.user-profile-instant-history-empty { display: grid; justify-items: center; gap: 7px; padding: 28px 12px; color: var(--text-secondary); text-align: center; }
+.user-profile-instant-history-empty strong { color: var(--ink); }
+.user-profile-instant-history-empty p { margin: 0; font-size: 12px; }
+.user-profile-consultation-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(25, 17, 38, .42); backdrop-filter: blur(4px); }
+.user-profile-consultation-modal { width: min(440px, 100%); overflow: hidden; padding: 0; border: 1px solid rgba(111, 65, 214, .12); border-radius: 24px; background: var(--surface); box-shadow: 0 28px 80px rgba(35, 20, 52, .28); }
+.user-profile-consultation-modal--call { --consultation-accent: #6d28d9; }.user-profile-consultation-modal--chat { --consultation-accent: #6d28d9; }
+.user-profile-consultation-modal__topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 23px; border-bottom: 1px solid var(--surface-border); background: linear-gradient(135deg, #f4efff, #fff); }.user-profile-consultation-modal__topbar h2 { margin: 0; color: #28213b; font-size: 20px; font-weight: 800; }
+.user-profile-consultation-modal__close { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--surface-border); border-radius: 13px; background: rgba(255, 255, 255, .72); color: #756f80; cursor: pointer; transition: border-color .16s ease, color .16s ease, box-shadow .16s ease; }.user-profile-consultation-modal__close:hover, .user-profile-consultation-modal__close:focus-visible { border-color: var(--primary); color: var(--primary); box-shadow: var(--shadow-xs); outline: none; }
+.user-profile-consultation-modal__content { padding: 23px; }.user-profile-consultation-modal__identity-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; padding-bottom: 13px; border-bottom: 1px solid var(--surface-border); }.user-profile-consultation-modal__id { display: grid; flex: 0 1 185px; gap: 5px; min-width: 0; text-align: right; }.user-profile-consultation-modal__id small { color: #777184; font-size: 9px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__id strong { overflow: hidden; color: #28213b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }.user-profile-consultation-modal__person { display: flex; align-items: center; gap: 12px; min-width: 0; }.user-profile-consultation-modal__person > span { display: grid; flex: 0 0 auto; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; font-size: 15px; font-weight: 800; box-shadow: 0 8px 18px rgba(109, 40, 217, .25); }.user-profile-consultation-modal__person div { display: grid; gap: 3px; min-width: 0; }.user-profile-consultation-modal__person strong { overflow: hidden; color: #28213b; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }.user-profile-consultation-modal__person small { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+.user-profile-consultation-modal__amount-panel { display: grid; position: relative; gap: 4px; min-height: 82px; margin-bottom: 16px; padding: 16px; border: 1px solid rgba(109, 40, 217, .08); border-radius: 15px; background: linear-gradient(135deg, #f1eaff, #faf7ff); }.user-profile-consultation-modal__amount-panel > span { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__amount-panel > strong { color: #5b21b6; font-size: 26px; line-height: 1; }.user-profile-consultation-modal__amount-panel > em { position: absolute; top: 16px; right: 16px; padding: 5px 8px; border: 1px solid rgba(16, 185, 129, .16); border-radius: 999px; background: #ecfdf5; color: var(--success); font-size: 10px; font-style: normal; font-weight: 800; }
+.user-profile-consultation-modal__status-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 82px; margin-bottom: 16px; padding: 16px; border: 1px solid rgba(109, 40, 217, .08); border-radius: 15px; background: linear-gradient(135deg, #f1eaff, #faf7ff); }.user-profile-consultation-modal__status-panel > span { color: #777184; font-size: 10px; font-weight: 800; letter-spacing: .05em; }.user-profile-consultation-modal__status-panel > strong { display: inline-flex; align-items: center; gap: 5px; color: var(--success); font-size: 13px; text-transform: capitalize; }.user-profile-consultation-modal__status-panel > strong::before { content: '✓'; display: grid; place-items: center; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; }
+.user-profile-consultation-modal__status-panel--rejected > strong, .user-profile-consultation-modal__status-panel--cancelled > strong { color: var(--danger); }.user-profile-consultation-modal__status-panel--rejected > strong::before, .user-profile-consultation-modal__status-panel--cancelled > strong::before { content: '×'; }
+.user-profile-consultation-modal__details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; padding: 18px; border: 1px solid var(--surface-border); border-radius: 15px; background: var(--surface-soft); }.user-profile-consultation-modal__details > div { display: flex; align-items: flex-start; gap: 10px; min-width: 0; min-height: 40px; }.user-profile-consultation-modal__detail-icon { display: grid; flex: 0 0 auto; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #f0e8ff; color: #6d28d9; }.user-profile-consultation-modal__details > div > span:last-child { display: grid; align-content: start; gap: 5px; min-width: 0; padding-top: 1px; }.user-profile-consultation-modal__details small { color: #777184; font-size: 9px; font-weight: 800; letter-spacing: .04em; line-height: 1.2; }.user-profile-consultation-modal__details strong { overflow: hidden; color: #28213b; font-size: 12px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.user-profile-consultation-modal__footer { display: flex; justify-content: flex-end; padding: 20px 23px; border-top: 1px solid var(--surface-border); }.user-profile-consultation-modal__close-action { min-width: 84px; padding: 13px 20px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #6d28d9, #7c3aed); color: #fff; font: inherit; font-size: 13px; font-weight: 800; box-shadow: 0 10px 20px rgba(109, 40, 217, .25); cursor: pointer; transition: transform .16s ease, box-shadow .16s ease; }.user-profile-consultation-modal__close-action:hover, .user-profile-consultation-modal__close-action:focus-visible { transform: translateY(-1px); box-shadow: 0 14px 24px rgba(109, 40, 217, .3); outline: none; }
 .user-profile-activity strong { color: var(--ink); font-size: 19px; }
 .user-profile-activity span { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); font-size: 11px; font-weight: 600; }
 .user-profile-family { grid-column: 1 / -1; }
@@ -957,6 +988,14 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   .user-profile-tabs { justify-content: flex-start; overflow-x: auto; }
   .user-profile-tabs button { padding: 12px 15px; }
   .user-profile-content { width: 100%; }
+}
+@media (max-width: 480px) {
+  .user-profile-consultation-modal__content { padding: 18px; }
+  .user-profile-consultation-modal__topbar { padding: 17px 18px; }
+  .user-profile-consultation-modal__footer { padding: 16px 18px; }
+  .user-profile-consultation-modal__identity-row { gap: 10px; }
+  .user-profile-consultation-modal__id { flex-basis: 125px; }
+  .user-profile-consultation-modal__details { gap: 18px 10px; padding: 14px; }
 }
 
 /* User consultation flow */
@@ -1676,7 +1715,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
 }
 
 .astrologer-list-section {
-  margin: 0 0 40px;
+  margin: 0 0 36px;
 }
 
 .astrologer-list-section__title {
@@ -4577,6 +4616,9 @@ tbody tr:hover {
 
 .user-modal-card {
   width: min(440px, 100%);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border-radius: 28px;
   border: 1px solid rgba(226, 232, 240, 0.95);
@@ -5047,6 +5089,199 @@ tbody tr:hover {
 .member-profile__layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:22px; margin-top:22px; }.profile-section,.about-card,.profile-tip { padding:22px; border:1px solid var(--surface-border); border-radius:18px; background:var(--surface); }.profile-section + .profile-section { margin-top:22px; }.section-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }.section-heading h2 { margin:3px 0 0; font-size:17px; }.quick-actions { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }.quick-actions a { display:flex; align-items:center; gap:11px; padding:13px; border:1px solid var(--surface-border); border-radius:12px; color:var(--text-primary); text-decoration:none; }.quick-actions a:hover { border-color:var(--primary); background:var(--primary-bg); }.quick-actions a span { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; color:var(--primary); background:var(--primary-bg); }.quick-actions b { flex:1; font-size:12px; }.profile-tabs { display:flex; gap:22px; overflow-x:auto; border-bottom:1px solid var(--surface-border); }.profile-tabs button { flex:none; padding:0 0 12px; border:0; border-bottom:2px solid transparent; color:var(--text-secondary); background:none; font-size:12px; font-weight:700; cursor:pointer; }.profile-tabs button.is-active { border-color:var(--primary); color:var(--primary); }.profile-empty { display:grid; place-items:center; padding:38px 15px 22px; text-align:center; }.profile-empty > span { display:grid; place-items:center; width:44px; height:44px; border-radius:14px; color:var(--primary); background:var(--primary-bg); }.profile-empty h3 { margin:13px 0 4px; font-size:16px; }.profile-empty p { margin:0 0 16px; color:var(--text-secondary); font-size:13px; }.about-card { margin-bottom:16px; }.about-copy { margin:0 0 18px; color:var(--text-secondary); font-size:13px; line-height:1.6; }.about-list { display:grid; gap:12px; }.about-list div { display:flex; gap:10px; align-items:flex-start; color:var(--primary); }.about-list span { display:flex; flex-direction:column; gap:2px; color:var(--text-secondary); font-size:12px; }.about-list b { color:var(--text-primary); font-size:12px; }.profile-tip { display:flex; gap:11px; color:var(--primary); background:#f8f5ff; }.profile-tip b { color:var(--text-primary); font-size:12px; }.profile-tip p { margin:4px 0 0; color:var(--text-secondary); font-size:11px; line-height:1.5; }.profile-edit-form { display:grid; gap:12px; }
 @media (max-width: 760px) { .member-profile { padding:0 0 36px; }.member-profile__hero { padding:22px 18px; }.member-profile__identity { align-items:flex-start; gap:13px; }.member-avatar { width:76px; height:76px; font-size:22px; }.member-profile__name-row h2 { font-size:19px; }.member-badge { font-size:10px; }.member-profile__hero-actions { position:static; margin:20px 0 0 89px; }.member-profile__hero-actions .icon-btn { display:none; }.profile-stats { grid-template-columns:repeat(5,minmax(70px,1fr)); gap:16px; overflow:auto; margin-top:20px; }.profile-stats div { min-width:70px; }.profile-stats strong { font-size:17px; }.member-profile__layout { grid-template-columns:1fr; }.quick-actions { grid-template-columns:1fr; }.member-profile__intro h1 { font-size:24px; } }
 @media (max-width: 640px) { .audience-member-page { padding-bottom: 24px; }.audience-member-hero__body { flex-wrap: wrap; gap: 12px; padding: 0 18px 18px; }.audience-member-avatar { flex-basis: 86px; width: 86px; height: 86px; margin-top: -43px; font-size: 23px; }.audience-member-identity { flex-basis: calc(100% - 98px); }.audience-member-identity h1 { font-size: 21px; }.audience-member-tier { width: 100%; grid-template-columns: 1fr auto; align-items: center; }.audience-member-tier small { grid-column: 1 / -1; }.audience-member-tier span { text-align: right; }.audience-member-hero__summary { gap: 10px; padding: 13px 18px; }.audience-member-hero__summary span:last-child { margin-left: auto; }.audience-member-tabs { gap: 20px; }.audience-member-details { grid-template-columns: 1fr; } }
+
+/* Premium light Vedic styling for the existing User Profile content. */
+.app-shell--profile {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fbf8f2 0%, #f7f0e6 50%, #faf5ed 100%);
+  color: #2c2337;
+}
+
+.app-shell--profile .main-column { min-width: 0; }
+.app-shell--profile .topbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 72px;
+  margin: 0;
+  padding: 0 32px;
+  border-width: 0 0 1px;
+  border-color: rgba(181, 143, 70, .16);
+  border-radius: 0;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(60, 40, 20, .06);
+}
+.app-shell--profile .profile-topbar-brand { color: #241b36; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 600; }
+.app-shell--profile .profile-topbar-mark { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6b2bd9, #e58b61); box-shadow: 0 4px 12px rgba(92, 54, 130, .2); }
+.app-shell--profile .profile-home-btn { color: #5e5365; }
+.app-shell--profile .profile-home-btn:hover { background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .topbar-actions { gap: 8px; }
+.app-shell--profile .topbar-actions .icon-btn,
+.app-shell--profile .topbar-actions .avatar-chip { border-color: #e9ddcb; background: #fffdf9; color: #4d4158; }
+.app-shell--profile .topbar-actions .icon-btn { width: 40px; height: 40px; border-radius: 50%; }
+.app-shell--profile .topbar-actions .icon-btn:hover,
+.app-shell--profile .topbar-actions .avatar-chip:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .topbar-actions .avatar-chip { min-height: 40px; padding: 0 10px 0 5px; border-radius: 999px; }
+.app-shell--profile .topbar-actions .avatar-circle { width: 32px; height: 32px; background: linear-gradient(135deg, #6b2bd9, #a343d5); }
+.app-shell--profile .topbar-actions .theme-toggle { border-color: #e9ddcb; background: #fffdf9; }
+
+.app-shell--profile .page-content { max-width: 1120px; padding: 28px 24px 64px; }
+.app-shell--profile .page-header-row { position: relative; display: block; margin-bottom: 28px; padding-top: 60px; }
+.app-shell--profile .page-header-actions { position: absolute; top: 0; left: 0; }
+.app-shell--profile .page-header-actions .inline-flex { height: 40px; padding: 0 16px; border: 1px solid #e8dcc8; border-radius: 12px; background: #fffdf9; color: #2c2337; box-shadow: 0 4px 12px rgba(60, 40, 20, .04); }
+.app-shell--profile .page-header-actions .inline-flex:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .page-eyebrow { height: 30px; margin-bottom: 10px; padding: 0 12px; border-radius: 999px; background: #f6ebd7; color: #a66a08; font-size: 11px; letter-spacing: .08em; box-shadow: none; }
+.app-shell--profile .page-title { color: #251a38; font-family: Georgia, 'Times New Roman', serif; font-size: 42px; font-weight: 600; line-height: 1.1; letter-spacing: 0; }
+.app-shell--profile .page-header-row .muted { margin: 0; color: #766c80; font-size: 15px; line-height: 24px; }
+
+.app-shell--profile .user-profile { position: relative; z-index: 0; width: 100%; max-width: 1120px; gap: 20px; }
+.app-shell--profile .user-profile::before { content: '☼'; position: absolute; z-index: -1; top: -68px; right: 34px; width: 230px; height: 230px; border: 1px solid rgba(184, 137, 47, .08); border-radius: 50%; color: rgba(184, 137, 47, .09); font-size: 120px; line-height: 230px; text-align: center; pointer-events: none; box-shadow: 0 0 0 24px rgba(184, 137, 47, .035), 0 0 0 48px rgba(184, 137, 47, .025); }
+.app-shell--profile .user-profile-header { position: relative; overflow: hidden; min-height: 245px; border: 1px solid rgba(201, 158, 77, .45); border-radius: 26px; background: linear-gradient(135deg, #fffdf9 0%, #fff8ec 100%); box-shadow: 0 12px 40px rgba(91, 64, 27, .1), inset 0 0 0 1px rgba(255, 255, 255, .7); }
+.app-shell--profile .user-profile-header::after { content: '✦  ·  ☽'; position: absolute; right: 26px; bottom: 58px; color: rgba(184, 137, 47, .13); font-size: 25px; letter-spacing: 18px; pointer-events: none; }
+.app-shell--profile .user-profile-header__top { position: relative; z-index: 1; align-items: center; gap: 24px; padding: 28px 28px 24px; border-bottom: 1px solid #efe3d2; }
+.app-shell--profile .user-profile-header__identity { align-items: center; gap: 20px; }
+.app-shell--profile .user-profile-header__avatar { width: 108px; height: 108px; border: 4px solid #fff9ef; outline: 1px solid #d7ae65; background: linear-gradient(135deg, #6b2bd9, #a343d5 55%, #e58b61); font-family: Georgia, 'Times New Roman', serif; font-size: 30px; box-shadow: 0 8px 20px rgba(92, 54, 130, .2); }
+.app-shell--profile .user-profile-header__copy h1 { color: #241a36; font-family: Georgia, 'Times New Roman', serif; font-size: 25px; font-weight: 600; letter-spacing: 0; }
+.app-shell--profile .user-profile-header__copy .muted { color: #776b7e; font-size: 14px; }
+.app-shell--profile .user-profile-header__bio { max-width: 500px; margin-top: 10px; color: #6f6576; font-size: 13px; line-height: 20px; }
+.app-shell--profile .user-profile-header__actions { position: relative; z-index: 2; gap: 12px; }
+.app-shell--profile .user-profile-header__actions .btn { height: 48px; padding: 0 18px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+.app-shell--profile .user-profile-header__actions .btn-outline { border-color: #b68a3a; background: #fff; color: #5e2bb7; }
+.app-shell--profile .user-profile-header__actions .btn-outline:hover { background: #fcf6ea; }
+.app-shell--profile .user-profile-header__actions .btn-primary { border: 0; background: linear-gradient(135deg, #6127c8, #8d39d4); box-shadow: 0 8px 18px rgba(102, 42, 190, .2); }
+.app-shell--profile .user-profile-stats { position: relative; z-index: 1; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 20px 28px 0; padding: 4px 12px 0; border-top: 0; }
+.app-shell--profile .user-profile-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.app-shell--profile .user-profile-stats > * { position: relative; display: flex; flex-direction: row; align-items: center; gap: 14px; min-height: 44px; padding: 0; border-radius: 0; background: transparent; }
+.app-shell--profile .user-profile-stats > * + * { padding-left: 14px; border-left: 0; }
+.app-shell--profile .user-profile-stats > * + *::after { position: absolute; top: 50%; left: 0; width: 1px; height: 30px; border-radius: 999px; background: #e8dccb; content: ''; transform: translateY(-50%); }
+.app-shell--profile .user-profile-stats > * { min-width: 0; }
+.app-shell--profile .user-profile-stats span { white-space: nowrap; }
+.app-shell--profile .user-profile-stats > *::before { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #fbf2df; color: #9b6815; font-size: 19px; }
+.app-shell--profile .user-profile-stats > *:nth-child(1)::before { content: '✦'; }
+.app-shell--profile .user-profile-stats > *:nth-child(2)::before { content: '◈'; }
+.app-shell--profile .user-profile-stats > *:nth-child(3)::before { content: '▦'; font-size: 17px; font-weight: 700; }
+.app-shell--profile .user-profile-stats > *:nth-child(4)::before { content: '◉'; font-size: 17px; font-weight: 700; }
+.app-shell--profile .user-profile-stats strong { color: #241a36; font-size: 22px; font-weight: 700; }
+.app-shell--profile .user-profile-stats span { margin-top: 2px; color: #756a7b; font-size: 13px; }
+.app-shell--profile .user-profile-stats-btn span svg { display: none; }
+
+.app-shell--profile .user-profile-expanded { border-color: rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; min-height: 58px; padding: 5px; border: 1px solid #e9ddcb; border-radius: 18px; background: rgba(255, 253, 248, .95); }
+.app-shell--profile .user-profile-tabs button { justify-content: center; height: 48px; padding: 0 12px; border: 0; border-radius: 14px; color: #655a6c; font-size: 14px; font-weight: 600; transition: background 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
+.app-shell--profile .user-profile-tabs button:hover { color: #6728d4; transform: translateY(-1px); }
+.app-shell--profile .user-profile-tabs button.is-active { border: 0; background: linear-gradient(135deg, #6728d4, #a63fd4); color: #fff; box-shadow: 0 5px 14px rgba(104, 42, 211, .22); }
+.app-shell--profile .user-profile-content { width: 100%; max-width: none; }
+.app-shell--profile .user-profile-card { min-height: 290px; padding: 28px 36px 30px; border: 1px solid rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-card__heading { align-items: center; margin-bottom: 4px; }
+.app-shell--profile .user-profile-card__heading h2 { color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 600; }
+.app-shell--profile .user-profile-card__heading .profile-kicker { color: #b07817; font-size: 11px; letter-spacing: .1em; }
+.app-shell--profile .user-profile-card__heading .btn { height: 40px; padding: 0 14px; border: 1px solid #a477d8; border-radius: 10px; background: #fff; color: #652bbe; }
+.app-shell--profile .user-profile-detail-rows > div { grid-template-columns: 130px 1fr; height: 37px; padding: 0; border-bottom-color: #efe8dd; }
+.app-shell--profile .user-profile-detail-rows span { color: #766c7b; font-size: 13px; }
+.app-shell--profile .user-profile-detail-rows strong { color: #2c2337; font-size: 13px; font-weight: 600; }
+.app-shell--profile .user-profile-private { height: 20px; padding: 0 7px; border-radius: 999px; background: #f2e9ff; color: #6c32be; font-size: 10px; }
+.app-shell--profile .user-profile-expanded { padding: 24px 28px 28px; border-color: rgba(206, 174, 122, .4); border-radius: 24px; background: #fffdf9; box-shadow: 0 10px 32px rgba(75, 52, 25, .07); }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading { margin-bottom: 18px; }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading h2 { margin-top: 4px; }
+.app-shell--profile .user-profile-expanded .user-profile-card__heading p { margin-top: 6px; }
+.app-shell--profile .user-profile-astro-list--expanded { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row { min-height: 68px; padding: 12px 14px; border-color: #efe3d2; border-radius: 14px; background: #fffaf1; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row:hover { border-color: #c8a2ed; background: #fdf8ff; box-shadow: 0 6px 16px rgba(92, 54, 130, .08); }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy { gap: 3px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy strong { font-size: 13px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-copy small { font-size: 11px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-meta { margin-top: 1px; font-size: 10px; }
+.app-shell--profile .user-profile-astro-list--expanded .user-profile-see-more { margin-top: 6px; }
+.app-shell--profile .profile-section-accent { color: #a66a08; }
+.app-shell--profile .user-profile-chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
+.app-shell--profile .user-profile-chart-grid > div { display: grid; gap: 5px; padding: 12px; border: 1px solid #efe3d2; border-radius: 12px; background: #fffaf1; }
+.app-shell--profile .user-profile-chart-grid span { color: #766c7b; font-size: 11px; }
+.app-shell--profile .user-profile-chart-grid strong { color: #2c2337; font-size: 12px; }
+
+/* Horoscope page: compact cards replace the former long separator list. */
+.horoscope-page { width: 100%; }
+.horoscope-page__content { display: grid; gap: 18px; width: 100%; max-width: 1120px; margin: 0 auto; }
+.horoscope-selector-card,
+.horoscope-birth-card,
+.horoscope-star-card,
+.horoscope-planets-card,
+.horoscope-notes-card { padding: 22px 24px; border: 1px solid #e9ddcb; border-radius: 20px; background: #fffdf9; box-shadow: 0 8px 24px rgba(60, 40, 20, .06); }
+.horoscope-selector-card { display: flex; align-items: center; justify-content: space-between; gap: 24px; background: linear-gradient(135deg, #fffdf9, #fff8ec); }
+.horoscope-selector-card__copy { display: grid; gap: 4px; }
+.horoscope-selector-card__copy strong { color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 20px; }
+.horoscope-selector-card__copy > span:last-child { color: #766c7b; font-size: 12px; }
+.horoscope-kicker { color: #b07817; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.horoscope-selector-card__field { display: grid; gap: 6px; width: min(360px, 100%); color: #766c7b; font-size: 11px; font-weight: 700; }
+.horoscope-selector-card__field .select-input { width: 100%; }
+.horoscope-overview-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .85fr); gap: 18px; }
+.horoscope-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.horoscope-card-heading h2 { margin: 4px 0 0; color: #281d39; font-family: Georgia, 'Times New Roman', serif; font-size: 21px; font-weight: 600; }
+.horoscope-card-heading p { margin: 5px 0 0; color: #766c7b; font-size: 12px; }
+.horoscope-heading-icon { display: grid; width: 38px; height: 38px; flex: none; place-items: center; border-radius: 12px; background: #f2eafd; color: #6c32be; }
+.horoscope-heading-icon--gold { background: #fbf2df; color: #a66a08; }
+.horoscope-birth-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.horoscope-birth-tile { display: grid; gap: 7px; min-width: 0; padding: 15px 13px; border: 1px solid #efe3d2; border-radius: 14px; background: #fffaf1; }
+.horoscope-birth-tile__icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; background: #f2eafd; color: #6c32be; }
+.horoscope-birth-tile > span:not(.horoscope-birth-tile__icon) { color: #766c7b; font-size: 11px; }
+.horoscope-birth-tile strong { overflow-wrap: anywhere; color: #2c2337; font-size: 13px; }
+.horoscope-birth-card .user-profile-birth-actions { margin-top: 18px; }
+.horoscope-star-card { background: linear-gradient(145deg, #fffdf9, #fff8ec); }
+.horoscope-star-card__visual { display: flex; align-items: center; gap: 13px; margin: 24px 0 20px; }
+.horoscope-star-card__orb { display: grid; width: 58px; height: 58px; flex: none; place-items: center; border: 1px solid #d9b56a; border-radius: 50%; background: #fbf2df; color: #a66a08; }
+.horoscope-star-card__visual strong { display: block; color: #2c2337; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; }
+.horoscope-star-card__visual span { display: block; margin-top: 3px; color: #766c7b; font-size: 12px; }
+.horoscope-stat-chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.horoscope-stat-chips > div { display: grid; gap: 4px; padding: 11px 12px; border-radius: 12px; background: #f8f0e3; }
+.horoscope-stat-chips span { color: #766c7b; font-size: 10px; }
+.horoscope-stat-chips strong { color: #2c2337; font-size: 14px; }
+.horoscope-planets-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+.horoscope-planet-tile { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 12px; border: 1px solid #efe3d2; border-radius: 13px; background: #fffaf1; }
+.horoscope-planet-tile__symbol { display: grid; width: 30px; height: 30px; flex: none; place-items: center; border-radius: 50%; background: #f2eafd; color: #6c32be; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; font-weight: 700; }
+.horoscope-planet-tile strong, .horoscope-planet-tile span { display: block; overflow-wrap: anywhere; }
+.horoscope-planet-tile strong { color: #2c2337; font-size: 12px; }
+.horoscope-planet-tile div span { margin-top: 3px; color: #766c7b; font-size: 10px; }
+.horoscope-notes-card p { margin: 18px 0 0; padding: 14px 16px; border-radius: 12px; background: #fff8ec; color: #5f5369; font-size: 13px; line-height: 1.6; }
+@media (max-width: 800px) {
+  .horoscope-selector-card { align-items: stretch; flex-direction: column; }
+  .horoscope-selector-card__field { width: 100%; }
+  .horoscope-overview-grid { grid-template-columns: 1fr; }
+  .horoscope-planets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .horoscope-selector-card,
+  .horoscope-birth-card,
+  .horoscope-star-card,
+  .horoscope-planets-card,
+  .horoscope-notes-card { padding: 18px; border-radius: 16px; }
+  .horoscope-birth-tiles { grid-template-columns: 1fr; }
+  .horoscope-planets-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767px) {
+  .app-shell--profile .topbar-header { height: auto; min-height: 72px; padding: 12px 16px; }
+  .app-shell--profile .profile-topbar-brand { font-size: 17px; }
+  .app-shell--profile .topbar-actions .avatar-chip > span:last-child { display: none; }
+  .app-shell--profile .page-content { padding: 16px 16px 48px; }
+  .app-shell--profile .page-header-row { padding-top: 56px; margin-bottom: 24px; }
+  .app-shell--profile .page-title { font-size: 32px; }
+  .app-shell--profile .user-profile-header { border-radius: 20px; }
+  .app-shell--profile .user-profile-header__top { align-items: flex-start; flex-direction: column; padding: 20px; }
+  .app-shell--profile .user-profile-header__identity { align-items: flex-start; flex-direction: column; }
+  .app-shell--profile .user-profile-header__actions { width: 100%; }
+  .app-shell--profile .user-profile-header__actions .btn { flex: 1; justify-content: center; min-width: 0; }
+  .app-shell--profile .user-profile-stats { grid-template-columns: 1fr; gap: 14px; margin: 20px; padding: 0; }
+  .app-shell--profile .user-profile-stats > * + * { padding-left: 0; border-left: 0; }
+  .app-shell--profile .user-profile-stats > * + *::after { display: none; }
+  .app-shell--profile .user-profile-card { padding: 20px; border-radius: 20px; }
+  .app-shell--profile .user-profile-tabs { justify-content: flex-start; display: flex; overflow-x: auto; }
+  .app-shell--profile .user-profile-tabs button { min-width: 120px; flex: 0 0 auto; }
+  .app-shell--profile .user-profile-detail-rows > div { grid-template-columns: 1fr; height: auto; min-height: 52px; gap: 4px; padding: 10px 0; }
+  .app-shell--profile .user-profile-expanded { padding: 20px; border-radius: 20px; }
+  .app-shell--profile .user-profile-expanded .user-profile-card__heading { align-items: flex-start; margin-bottom: 16px; }
+  .app-shell--profile .user-profile-expanded .user-profile-card__heading .btn { flex: none; }
+  .app-shell--profile .user-profile-astro-list--expanded { grid-template-columns: 1fr; gap: 10px; }
+  .app-shell--profile .user-profile-chart-grid { grid-template-columns: 1fr; }
+  }
 
 /* Consultation-provider treatment for the existing astrologer profile route */
 .social-profile { max-width:1040px; margin:0 auto; }.social-profile__header { overflow:hidden; border:1px solid #e6e0f3; border-radius:22px; background:linear-gradient(120deg,#fff 38%,#f7f2ff); box-shadow:0 12px 30px rgba(58,42,106,.06); }.social-profile__cover { height:86px; background:radial-gradient(circle at 82% 15%,#d9c8ff 0 5%,transparent 6%), linear-gradient(115deg,#26153f,#6c43a9 54%,#d6c1ff); opacity:.95; }.social-profile__avatar { width:104px; height:104px; margin-top:-50px; border:5px solid #fff; box-shadow:0 8px 20px #36205a33; }.social-profile__identity { padding:0 28px 22px; }.social-profile__name { font-size:25px; }.social-profile__meta { color:var(--text-secondary); }.social-profile__actions .btn-primary { box-shadow:0 7px 16px #6b46c133; }.social-profile__stats { margin:0 28px; padding:18px 0; border-color:#e6e0f3; }.social-profile__stats strong { font-size:20px; }.social-profile__bio { padding:18px 28px 24px; font-size:14px; }.social-profile__tabs { margin-top:22px; padding:0 6px; border:1px solid var(--surface-border); border-radius:14px; background:var(--surface); }.social-profile__posts { grid-template-columns:repeat(3,minmax(0,1fr)); }.social-profile__post { min-height:190px; border-top-width:3px; border-radius:16px; background:var(--surface); }.social-profile__panel { border-radius:16px; }.profile-service-status { display:inline-flex; align-items:center; gap:7px; padding:7px 10px; border-radius:99px; background:var(--surface-soft); font-size:12px; font-weight:700; }.social-profile__footer-actions { justify-content:flex-end; }.social-profile__footer-actions .btn-primary { order:-1; }
@@ -14430,7 +14665,8 @@ button.apt-week-day:focus-visible {
 .profile-account-hero::before { content: ''; position: absolute; right: -70px; top: -70px; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 255, .28), transparent 66%); filter: blur(2px); }
 .profile-account-cover { position: absolute; inset: 0; z-index: 0; height: 100%; opacity: .45; background: radial-gradient(circle at 82% 20%, rgba(255, 255, 255, .5) 0 34px, transparent 36px), radial-gradient(circle at 84% 22%, rgba(255, 235, 200, .4) 0 72px, transparent 74px), linear-gradient(120deg, transparent, rgba(255, 255, 255, .12)); }
 .profile-account-cover::after { display: none; }
-.profile-account-identity, .profile-account-about { position: relative; z-index: 1; }
+.profile-account-identity { position: relative; z-index: 2; }
+.profile-account-about { position: relative; z-index: 1; }
 .profile-account-identity { min-height: 152px; align-items: flex-start; padding: 40px 32px 10px; margin: 0; }
 .profile-account-avatar { flex-basis: 96px; height: 96px; border: 4px solid rgba(255, 255, 255, .92); border-radius: 50%; background: linear-gradient(145deg, #ffd9a3, #b588ef); color: #3b1470; font-size: 27px; box-shadow: 0 14px 30px rgba(15, 6, 32, .38); }
 .profile-account-name h2 { margin: 0; color: #fff; font-size: 32px; letter-spacing: -.03em; }
@@ -14442,6 +14678,59 @@ button.apt-week-day:focus-visible {
 .profile-account-status { min-width: 96px; border-color: rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .14); border-radius: 14px; backdrop-filter: blur(6px); }
 .profile-account-status small { color: rgba(255, 255, 255, .72); font-size: 9px; }
 .profile-account-status strong { color: #fff; font-size: 11px; }
+
+/* ---- Consultation dropdown on the profile hero ---- */
+.profile-consultation { position: relative; }
+.profile-status-wrap { position: relative; display: block; }
+.profile-account-status { margin: 0; font: inherit; text-align: left; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.profile-account-status i { background: var(--success); }
+.profile-account-status.is-dnd i { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, .28); }
+.profile-account-status.is-dnd { border-color: rgba(245, 158, 11, .5); }
+.profile-account-status:hover { background: rgba(255, 255, 255, .2); }
+.profile-consultation-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 20;
+  width: max-content;
+  min-width: 250px;
+  padding: 14px;
+  border: 1px solid rgba(226, 216, 240, .95);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 24px 48px rgba(38, 14, 74, .22), 0 4px 12px rgba(38, 14, 74, .1);
+  animation: profile-consultation-menu-in .16s ease-out;
+}
+@keyframes profile-consultation-menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.profile-consultation-menu__pointer {
+  position: absolute;
+  top: -6px;
+  right: 28px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid rgba(226, 216, 240, .95);
+  border-left: 1px solid rgba(226, 216, 240, .95);
+  border-radius: 3px 0 0 0;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.profile-consultation-menu h4 { margin: 0 0 10px; padding: 0 2px; color: #2b2337; font-size: 12px; font-weight: 800; letter-spacing: -.01em; }
+.profile-consultation-menu__note { margin: -4px 2px 8px; color: #8a8195; font-size: 10.5px; line-height: 1.5; }
+.profile-consultation-menu__row { display: flex; align-items: center; gap: 10px; padding: 9px 2px; }
+.profile-consultation-menu__row + .profile-consultation-menu__row { border-top: 1px solid #f1ecf7; }
+.profile-consultation-menu__icon { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 9px; background: #f3edfd; color: #6d28d9; }
+.profile-consultation-menu__copy { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.profile-consultation-menu__copy strong { color: #39323f; font-size: 12px; }
+.profile-consultation-menu__copy small { color: #8a8195; font-size: 10px; }
+.profile-consultation-switch { position: relative; flex: none; width: 34px; height: 20px; padding: 0; border: 0; border-radius: 999px; background: #e3dced; cursor: pointer; transition: background .18s ease; }
+.profile-consultation-switch i { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(43, 20, 72, .28); transition: transform .18s ease; }
+.profile-consultation-switch.is-on { background: linear-gradient(135deg, #8b46d8 0%, #6d28d9 100%); }
+.profile-consultation-switch.is-on i { transform: translateX(14px); }
+.profile-consultation-switch:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
+.profile-account-service-grid .profile-account-toggle { padding: 0; border: 0; cursor: pointer; }
+/* The hero clips its decorations, so the dropdown needs reserved room below the
+   actions row once the actions wrap onto their own line. */
+@media (max-width: 860px) { .profile-account-hero { min-height: 400px; } }
 .profile-account-about { padding: 16px 32px 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
 .profile-account-about b { color: rgba(255, 255, 255, .85); font-size: 11px; }
 .profile-account-about p { color: rgba(255, 255, 255, .74); font-size: 15px; line-height: 1.6; }
@@ -15748,3 +16037,358 @@ button.apt-week-day:focus-visible {
 }
 .my-activity-window { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 12px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
 .my-activity-window svg { color: var(--primary); }
+
+/* Explore astrologer card: small avatar left, details right, fixed rows, pinned and never-clipped actions. */
+.astrologer-card.astrologer-card--explore { container-type: inline-size; display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 0; justify-self: stretch; padding: 16px; border-radius: 16px; overflow: hidden; }
+.astrologer-card--explore .astrologer-card__top { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
+.astrologer-card--explore .astrologer-card__avatar-wrap { position: relative; flex: none; width: 80px; height: 80px; margin: 0; }
+.astrologer-card--explore .astrologer-card__avatar { display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; overflow: hidden; border-radius: 50%; background: linear-gradient(135deg, var(--violet-500), var(--violet-700)); color: #fff; font-size: 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(43, 15, 79, 0.16); }
+.astrologer-card--explore .astrologer-card__avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.astrologer-card--explore .astrologer-card__status { position: absolute; right: 2px; bottom: 2px; width: 16px; height: 16px; border: 2px solid var(--surface-strong, #fff); border-radius: 50%; background: #a1a1aa; }
+.astrologer-card--explore .astrologer-card__status.is-online { background: var(--success, #16a34a); }
+.astrologer-card--explore .astrologer-card__info { display: grid; grid-auto-rows: min-content; row-gap: 4px; flex: 1; min-width: 0; text-align: left; }
+.astrologer-card--explore .astrologer-card__name,
+.astrologer-card--explore .astrologer-card__specialization { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.astrologer-card--explore .astrologer-card__name { height: 24px; padding-right: 72px; font-size: 17px; line-height: 24px; font-weight: 700; }
+.astrologer-card--explore .astrologer-card__specialization { height: 20px; font-size: 14px; line-height: 20px; font-weight: 600; }
+.astrologer-card--explore .astrologer-card__meta { display: flex; align-items: center; justify-content: flex-start; gap: 7px; height: 20px; margin: 0; font-size: 12.5px; white-space: nowrap; }
+.astrologer-card--explore .astrologer-card__rating,
+.astrologer-card--explore .astrologer-card__years { display: inline-flex; align-items: center; gap: 3px; }
+.astrologer-card--explore .astrologer-card__rating svg { width: 14px; height: 14px; color: #f5a524; fill: currentColor; }
+.astrologer-card--explore .astrologer-card__years svg { width: 14px; height: 14px; color: var(--text-secondary); }
+.astrologer-card--explore .astrologer-card__meta strong { color: var(--ink); font-weight: 700; }
+.astrologer-card--explore .astrologer-card__sep { flex: none; width: 1px; height: 14px; background: var(--border); }
+.astrologer-card--explore .astrologer-card__long { display: none; }
+.astrologer-card--explore .astrologer-card__followers { height: 18px; color: var(--text-secondary); font-size: 12px; line-height: 18px; }
+.astrologer-card--explore .astrologer-card__followers strong { color: var(--ink); font-weight: 700; }
+.astrologer-card--explore .astrologer-card__expertise,
+.astrologer-card--explore .astrologer-card__languages { display: flex; flex-wrap: nowrap; align-items: center; justify-content: flex-start; gap: 6px; min-width: 0; overflow: hidden; }
+.astrologer-card--explore .astrologer-card__expertise { height: 26px; margin-top: 2px; }
+.astrologer-card--explore .astrologer-card__languages { height: 24px; }
+.astrologer-card--explore .astrologer-card__expertise span,
+.astrologer-card--explore .astrologer-card__languages span { flex: 0 1 auto; min-width: 0; overflow: hidden; border-radius: 999px; text-overflow: ellipsis; white-space: nowrap; }
+.astrologer-card--explore .astrologer-card__expertise span { flex: none; padding: 3px 10px; background: var(--primary-bg); color: var(--primary-dark, var(--primary)); font-size: 12px; font-weight: 600; line-height: 20px; }
+.astrologer-card--explore .astrologer-card__languages span { padding: 2px 9px; background: var(--surface-soft); color: var(--text-secondary); font-size: 11.5px; line-height: 20px; }
+.astrologer-card--explore .astrologer-card__expertise .astrologer-card__more,
+.astrologer-card--explore .astrologer-card__languages .astrologer-card__more { flex: none; font-weight: 700; }
+.astrologer-card--explore .astrologer-card__rate { top: 12px; right: 14px; padding: 3px 8px; font-size: 11px; }
+.astrologer-card--explore .astrologer-card__stats { display: grid; grid-template-columns: 1fr 1px 1fr 168px; align-items: center; justify-content: stretch; gap: 8px; flex: none; height: 56px; min-height: 56px; margin-top: 12px; padding: 10px 0 0; border-top: 1px solid var(--border); }
+.astrologer-card--explore .astrologer-card__action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 100%; min-width: 0; padding: 0 8px; color: var(--primary); font-size: 14px; font-weight: 600; }
+.astrologer-card--explore .astrologer-card__action svg { width: 16px; height: 16px; flex: none; }
+.astrologer-card--explore .astrologer-card__action-divider { width: 1px; height: 24px; }
+.astrologer-card--explore .astrologer-card__profile-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 168px; justify-self: end; min-width: 0; height: 40px; min-height: 40px; margin: 0; padding: 0 12px; font-size: 14px; white-space: nowrap; }
+.astrologer-card__action:disabled { opacity: 0.45; cursor: not-allowed; }
+
+@container (min-width: 380px) {
+  .astrologer-card--explore .astrologer-card__long { display: inline; }
+  .astrologer-card--explore .astrologer-card__avatar-wrap, .astrologer-card--explore .astrologer-card__avatar { width: 88px; height: 88px; }
+  .astrologer-card--explore .astrologer-card__top { gap: 16px; }
+}
+
+/* Explore Astrologers page chrome */
+.explore-astrologers .astrologer-list-section__head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.explore-astrologers .astrologer-list-section__head .astrologer-list-section__title { margin: 0; }
+.explore-astrologers .astrologer-list-section__view-more { display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; color: var(--primary); font-size: 16px; font-weight: 600; text-decoration: none; }
+.explore-astrologers .astrologer-list-section__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.explore-toolbar { position: relative; display: flex; align-items: center; gap: 16px; width: min(540px, 100%); }
+.explore-toolbar .explore-search { display: flex; flex: 1 1 auto; align-items: center; gap: 10px; min-width: 0; height: 46px; padding: 0 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface); color: var(--text-secondary); }
+.explore-toolbar .explore-search > svg { flex: none; }
+.explore-toolbar .explore-search input { flex: 1 1 auto; width: 100%; min-width: 0; height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: var(--text-primary); font: inherit; font-size: 14px; outline: none; appearance: none; -webkit-appearance: none; text-overflow: ellipsis; }
+.explore-toolbar .explore-search input::-webkit-search-cancel-button { display: none; }
+.explore-toolbar .explore-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
+.explore-toolbar .explore-filters { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 18px; border: 1px solid var(--primary); border-radius: 12px; background: var(--surface); color: var(--primary); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.explore-toolbar .explore-filters.is-active { background: var(--primary-bg); }
+.explore-filters-panel { position: absolute; z-index: 10; top: calc(100% + 8px); right: 0; padding: 14px 16px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow-md); }
+.explore-filters-panel label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+@media (max-width: 1279px) { .explore-astrologers .astrologer-list-section__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .explore-astrologers .astrologer-list-section__grid { grid-template-columns: minmax(0, 1fr); } .explore-toolbar { width: 100%; } }
+
+.public-profile-details { display: grid; gap: 12px; }
+.public-profile-details__list { display: grid; gap: 14px; margin: 0; }
+.public-profile-details__list > div { display: grid; gap: 6px; }
+.public-profile-details__list dt { color: var(--text-secondary); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.public-profile-details__list dd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; color: var(--text-primary); font-size: 14px; line-height: 1.6; }
+.public-profile-details__list dd > span { padding: 3px 10px; border-radius: 999px; background: var(--primary-bg); color: var(--primary-dark, var(--primary)); font-size: 12.5px; font-weight: 600; }
+.public-profile-details__list dd em { color: var(--text-secondary); font-style: normal; }
+.public-profile-details__credentials > span { display: inline-flex; align-items: center; gap: 4px; }
+
+.astrologer-card--explore .astrologer-card__third,
+.astrologer-card--explore .astrologer-card__more--wide { display: none; }
+@container (min-width: 400px) {
+  .astrologer-card--explore .astrologer-card__third { display: inline-block; }
+  .astrologer-card--explore .astrologer-card__more--wide { display: inline-block; }
+  .astrologer-card--explore .astrologer-card__more--narrow { display: none; }
+}
+
+/* Explore Astrologers uses a wider content area so three full-size cards fit per row. */
+.page-content:has(.explore-astrologers) { max-width: 1300px; padding-left: 32px; padding-right: 32px; }
+.explore-astrologers .astrologer-list-section__grid { gap: 16px; }
+@media (max-width: 900px) { .page-content:has(.explore-astrologers) { padding-left: 16px; padding-right: 16px; } }
+
+/* Roomy cards (>= 420px wide): reference proportions. */
+@container (min-width: 420px) {
+  .astrologer-card--explore .astrologer-card__avatar-wrap, .astrologer-card--explore .astrologer-card__avatar { width: 104px; height: 104px; }
+  .astrologer-card--explore .astrologer-card__avatar { font-size: 30px; }
+  .astrologer-card--explore .astrologer-card__status { width: 18px; height: 18px; border-width: 3px; right: 4px; bottom: 4px; }
+  .astrologer-card--explore .astrologer-card__top { gap: 18px; }
+  .astrologer-card--explore .astrologer-card__info { row-gap: 5px; }
+  .astrologer-card--explore .astrologer-card__name { height: 26px; font-size: 19px; line-height: 26px; }
+  .astrologer-card--explore .astrologer-card__specialization { height: 22px; font-size: 15px; line-height: 22px; }
+  .astrologer-card--explore .astrologer-card__meta { height: 22px; gap: 9px; font-size: 13.5px; }
+  .astrologer-card--explore .astrologer-card__followers { height: 18px; font-size: 12.5px; }
+  .astrologer-card--explore .astrologer-card__expertise { height: 28px; }
+  .astrologer-card--explore .astrologer-card__expertise span { padding: 4px 12px; font-size: 12.5px; }
+  .astrologer-card--explore .astrologer-card__languages { height: 26px; }
+  .astrologer-card--explore .astrologer-card__languages span { padding: 3px 11px; font-size: 12px; }
+  .astrologer-card--explore .astrologer-card__stats { height: 68px; min-height: 68px; margin-top: 14px; padding-top: 12px; }
+  .astrologer-card--explore .astrologer-card__profile-button { height: 46px; min-height: 46px; font-size: 15px; }
+  .astrologer-card--explore .astrologer-card__action { font-size: 15px; }
+  .astrologer-card--explore .astrologer-card__action svg { width: 18px; height: 18px; }
+  .astrologer-card.astrologer-card--explore { padding: 20px; }
+}
+
+/* Slightly taller cards with a more prominent View Profile button. */
+@container (min-width: 420px) {
+  .astrologer-card--explore .astrologer-card__info { row-gap: 7px; }
+  .astrologer-card--explore .astrologer-card__expertise { margin-top: 4px; }
+  .astrologer-card--explore .astrologer-card__stats { height: 76px; min-height: 76px; margin-top: 18px; }
+  .astrologer-card--explore .astrologer-card__profile-button { height: 50px; min-height: 50px; border-radius: 12px; font-size: 16px; box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 30%, transparent); }
+}
+
+/* Compact cards: neutralize the height added for >=420px cards (cards are now ~400px wide). */
+@container (min-width: 420px) {
+  .astrologer-card--explore .astrologer-card__stats { height: 68px; min-height: 68px; margin-top: 14px; }
+  .astrologer-card--explore .astrologer-card__profile-button { height: 46px; min-height: 46px; font-size: 15px; }
+  .astrologer-card--explore .astrologer-card__info { row-gap: 5px; }
+  .astrologer-card--explore .astrologer-card__expertise { margin-top: 2px; }
+}
+
+/* User Profile and Horoscope route-specific dark theme overrides. */
+html[data-theme='dark'] .app-shell--profile {
+  background: linear-gradient(135deg, #0b1020 0%, #111827 50%, #172033 100%);
+  color: #cbd5e1;
+}
+html[data-theme='dark'] .app-shell--profile .topbar-header { border-color: #334155; background: rgba(15, 23, 42, .96); box-shadow: 0 4px 16px rgba(2, 6, 23, .3); }
+html[data-theme='dark'] .app-shell--profile .profile-topbar-brand,
+html[data-theme='dark'] .app-shell--profile .page-title,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__copy h1,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading h2,
+html[data-theme='dark'] .app-shell--profile .horoscope-card-heading h2 { color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .profile-home-btn { color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .topbar-actions .icon-btn,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .theme-toggle { border-color: #334155; background: #1e293b; color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .topbar-actions .icon-btn:hover,
+html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex { border-color: #475569; background: #1e293b; color: #e2e8f0; box-shadow: 0 4px 12px rgba(2, 6, 23, .24); }
+html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .page-header-row .muted,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__copy .muted,
+html[data-theme='dark'] .app-shell--profile .user-profile-header__bio,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading p,
+html[data-theme='dark'] .app-shell--profile .horoscope-card-heading p { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header,
+html[data-theme='dark'] .app-shell--profile .user-profile-card,
+html[data-theme='dark'] .app-shell--profile .user-profile-expanded,
+html[data-theme='dark'] .app-shell--profile .horoscope-selector-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-star-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-planets-card,
+html[data-theme='dark'] .app-shell--profile .horoscope-notes-card { border-color: rgba(148, 163, 184, .22); background: #0f172a; box-shadow: 0 12px 32px rgba(2, 6, 23, .28); }
+html[data-theme='dark'] .app-shell--profile .user-profile-header { background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%); }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__top { border-bottom-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__actions .btn-outline,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading .btn { border-color: #8b5cf6; background: #1e293b; color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-header__actions .btn-outline:hover,
+html[data-theme='dark'] .app-shell--profile .user-profile-card__heading .btn:hover { background: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats strong,
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows strong,
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-copy strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile strong,
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips strong { color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats span,
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows span,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile > span:not(.horoscope-birth-tile__icon),
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips span,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile div span { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > * + * { border-left-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > * + *::after { background: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-stats > *::before { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .profile-section-accent { color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid > div { border-color: #334155; background: #1e293b; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid span { color: #94a3b8; }
+html[data-theme='dark'] .app-shell--profile .user-profile-chart-grid strong { color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs { border-color: #334155; background: rgba(15, 23, 42, .92); }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs button { color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .user-profile-tabs button:hover { color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-detail-rows > div { border-bottom-color: #334155; }
+html[data-theme='dark'] .app-shell--profile .user-profile-private { background: rgba(139, 92, 246, .2); color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile,
+html[data-theme='dark'] .app-shell--profile .horoscope-planet-tile { border-color: #334155; background: #1e293b; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-list--expanded .user-profile-astro-row:hover { border-color: #8b5cf6; background: #273449; }
+html[data-theme='dark'] .app-shell--profile .user-profile-astro-avatar,
+html[data-theme='dark'] .app-shell--profile .horoscope-birth-tile__icon,
+html[data-theme='dark'] .app-shell--profile .horoscope-heading-icon { background: rgba(139, 92, 246, .18); color: #c4b5fd; }
+html[data-theme='dark'] .app-shell--profile .horoscope-heading-icon--gold,
+html[data-theme='dark'] .app-shell--profile .horoscope-stat-chips > div { background: rgba(245, 158, 11, .14); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .horoscope-star-card__orb { border-color: #a16207; background: rgba(245, 158, 11, .14); color: #fbbf24; }
+html[data-theme='dark'] .app-shell--profile .horoscope-notes-card p { background: #1e293b; color: #cbd5e1; }
+html[data-theme='dark'] .app-shell--profile .select-input,
+html[data-theme='dark'] .app-shell--profile .text-input,
+html[data-theme='dark'] .app-shell--profile .textarea-box,
+html[data-theme='dark'] .app-shell--profile select,
+html[data-theme='dark'] .app-shell--profile input,
+html[data-theme='dark'] .app-shell--profile textarea { border-color: #475569; background: #1e293b; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .select-input::placeholder,
+html[data-theme='dark'] .app-shell--profile .text-input::placeholder,
+html[data-theme='dark'] .app-shell--profile textarea::placeholder { color: #94a3b8; }
+html[data-theme='dark'] .user-modal-card { border-color: #334155; background: #0f172a; box-shadow: 0 30px 80px rgba(2, 6, 23, .58); }
+html[data-theme='dark'] .user-modal-card__header { border-bottom-color: #334155; }
+html[data-theme='dark'] .user-modal-card__header .section-title,
+html[data-theme='dark'] .user-modal-card .field-label-top { color: #e2e8f0; }
+html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
+
+.account-management-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  max-width: 100%;
+  min-height: 34px;
+  margin-bottom: 14px;
+  padding: 7px 12px;
+  border: 1px solid var(--surface-border, #e8ddf6);
+  border-radius: 10px;
+  background: var(--surface-strong, #fff);
+  color: var(--primary, #7040b5);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(69, 35, 110, .05);
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.account-management-back:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary, #7040b5);
+  background: var(--primary-bg, #f0e7ff);
+  color: var(--primary-dark, #5d319c);
+}
+
+.account-management-back:focus-visible {
+  outline: 2px solid var(--primary, #7040b5);
+  outline-offset: 2px;
+}
+
+.account-modal-backdrop { z-index: 1000; overflow-y: auto; overscroll-behavior: contain; }
+.account-modal-backdrop .account-modal { margin: auto; }
+
+.profile-account-stat-card {
+  position: relative;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.profile-account-stat-card:hover,
+.profile-account-stat-card:focus-visible {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(232, 218, 248, .95), rgba(246, 241, 252, .95));
+  box-shadow: 0 8px 18px rgba(91, 33, 182, .1);
+  outline: none;
+}
+
+.profile-account-stat-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, .2), 0 8px 18px rgba(91, 33, 182, .1);
+}
+
+.profile-account-avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+
+.stat-details-modal {
+  width: min(680px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow: visible;
+}
+
+.stat-details-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-right: 28px;
+}
+
+.stat-details-heading .account-modal-copy { margin-bottom: 0; }
+.stat-details-heading > strong { color: var(--primary-dark, #5b21b6); font-size: 25px; white-space: nowrap; }
+.stat-details-list { display: grid; gap: 9px; max-height: 430px; margin-top: 20px; overflow-y: auto; padding-right: 3px; }
+.stat-details-row { position: relative; display: grid; grid-template-columns: 42px minmax(0, 1fr) auto 34px; align-items: center; gap: 11px; min-width: 0; padding: 11px 8px 11px 10px; border: 1px solid var(--surface-border, #ebe6ef); border-radius: 14px; background: rgba(255, 255, 255, .72); }
+.stat-details-row > img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: var(--primary-bg); }
+.stat-details-row__copy { display: grid; min-width: 0; gap: 4px; }
+.stat-details-row__copy strong { overflow: hidden; color: var(--text-primary, #2b2337); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.stat-details-row__copy span, .stat-details-row__meta small { color: var(--text-secondary, #7c748c); font-size: 11px; }
+.stat-details-row__meta { display: grid; justify-items: end; gap: 4px; text-align: right; }
+.stat-details-row__menu { position: relative; display: flex; justify-content: flex-end; }
+.stat-details-menu-button { display: grid; place-items: center; width: 31px; height: 31px; border: 0; border-radius: 9px; background: transparent; color: var(--text-secondary, #7c748c); cursor: pointer; }
+.stat-details-menu-button:hover, .stat-details-menu-button[aria-expanded='true'] { background: var(--primary-bg, #f0e7ff); color: var(--primary, #7040b5); }
+.stat-details-menu { position: absolute; z-index: 2; top: calc(100% + 5px); right: 0; display: grid; min-width: 160px; padding: 5px; border: 1px solid var(--surface-border, #e8ddf6); border-radius: 11px; background: var(--surface-overlay, #fff); box-shadow: 0 14px 30px rgba(45, 25, 72, .16); }
+.stat-details-menu button { display: flex; align-items: center; gap: 8px; padding: 8px 9px; border: 0; border-radius: 7px; background: transparent; color: var(--text-primary, #2b2337); font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
+.stat-details-menu button:hover { background: var(--primary-bg, #f0e7ff); color: var(--primary-dark, #5b21b6); }
+
+.stat-user-profile-modal { width: min(620px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow-y: auto; }
+.stat-user-profile-back { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 18px; padding: 7px 10px; border: 1px solid var(--surface-border, #e8ddf6); border-radius: 9px; background: var(--surface, #fff); color: var(--primary, #7040b5); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.stat-user-profile-back:hover { border-color: var(--primary, #7040b5); background: var(--primary-bg, #f0e7ff); }
+.stat-user-profile-header { display: flex; align-items: center; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--divider, #eeeaf0); }
+.stat-user-profile-header > img { width: 76px; height: 76px; flex: none; border: 3px solid #eee2fb; border-radius: 50%; object-fit: cover; }
+.stat-user-profile-header > div { display: grid; align-items: center; gap: 5px; min-width: 0; }
+.stat-user-profile-header .account-eyebrow { color: var(--primary, #7040b5); font-size: 9px; font-weight: 800; letter-spacing: .11em; }
+.stat-user-profile-header h2 { margin: 0; color: var(--text-primary, #2b2337); font-size: 22px; }
+.stat-user-profile-header strong { color: var(--primary-dark, #5b21b6); font-size: 13px; }
+.stat-user-profile-status { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary, #7c748c); font-size: 11px; }
+.stat-user-profile-status i { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, .14); }
+.stat-user-profile-facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 18px 0; }
+.stat-user-profile-facts > div { display: grid; gap: 5px; padding: 11px 10px; border-radius: 11px; background: var(--primary-bg, #f0e7ff); }
+.stat-user-profile-facts small { color: var(--text-secondary, #7c748c); font-size: 10px; }
+.stat-user-profile-facts strong { color: var(--text-primary, #2b2337); font-size: 12px; }
+.stat-user-profile-section { padding: 14px 0; border-top: 1px solid var(--divider, #eeeaf0); }
+.stat-user-profile-section h3 { margin: 0 0 9px; color: var(--text-primary, #2b2337); font-size: 13px; }
+.stat-user-profile-section p { margin: 0; color: var(--text-secondary, #7c748c); font-size: 12px; line-height: 1.65; }
+.stat-user-profile-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.stat-user-profile-tags span { padding: 6px 9px; border-radius: 999px; background: var(--primary-bg, #f0e7ff); color: var(--primary-dark, #5b21b6); font-size: 11px; font-weight: 700; }
+
+.profile-content-post__top-actions { display: flex; align-items: flex-start; gap: 7px; }
+.profile-content-post__menu { position: relative; }
+.profile-content-post__menu > button { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: #8c8391; cursor: pointer; }
+.profile-content-post__menu > button:hover, .profile-content-post__menu > button[aria-expanded='true'] { background: #f3edf9; color: #6d28d9; }
+.profile-content-post__popover { position: absolute; z-index: 3; top: calc(100% + 4px); right: 0; display: grid; min-width: 145px; padding: 5px; border: 1px solid #e8ddf6; border-radius: 10px; background: #fff; box-shadow: 0 14px 28px rgba(45, 25, 72, .16); }
+.profile-content-post__popover button { display: flex; align-items: center; gap: 8px; padding: 8px 9px; border: 0; border-radius: 7px; background: transparent; color: #41384d; font: inherit; font-size: 11px; text-align: left; cursor: pointer; }
+.profile-content-post__popover button:hover { background: #f3edf9; color: #5b21b6; }
+.profile-content-post__popover button.is-danger { color: #b42318; }
+.profile-content-post__popover button.is-danger:hover { background: #fff0ef; color: #b42318; }
+.profile-content-post__status--scheduled { background: #eee3ff; color: #6d28d9; }
+.profile-content-post__status--draft { background: #fff3d8; color: #a16207; }
+.create-post-schedule-toggle { display: grid; gap: 6px; }
+.create-post-schedule-toggle span { color: #51485c; font-size: 11px; font-weight: 700; }
+.create-post-schedule-toggle select, .create-post-schedule-fields input { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #e5ddea; border-radius: 9px; background: #fff; color: #39313f; font: inherit; font-size: 12px; }
+.create-post-schedule-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.create-post-schedule-fields label { display: grid; gap: 6px; color: #51485c; font-size: 11px; font-weight: 700; }
+.create-post-schedule-summary { margin: 0; padding: 9px 10px; border-radius: 8px; background: #f3edf9; color: #6d28d9; font-size: 11px; font-weight: 700; }
+.account-post-access-panel { position: fixed; top: 50%; left: calc(50% + 235px); transform: translateY(-50%); }
+.account-management-page .profile-content-post__actions > button:nth-of-type(2), .account-management-page .profile-content-post__actions > span:nth-of-type(2) { display: none; }
+
+@media (max-width: 560px) {
+  .stat-details-modal { padding: 21px 17px; }
+  .stat-details-heading { gap: 12px; }
+  .stat-details-heading > strong { font-size: 21px; }
+  .stat-details-row { grid-template-columns: 38px minmax(0, 1fr) 30px; gap: 9px; }
+  .stat-details-row > img { width: 38px; height: 38px; }
+  .stat-details-row__meta { grid-column: 2 / 3; justify-items: start; text-align: left; }
+  .stat-details-row__menu { grid-column: 3; grid-row: 1 / span 2; }
+  .stat-user-profile-modal { padding: 21px 17px; }
+  .stat-user-profile-facts { grid-template-columns: repeat(2, 1fr); }
+  .stat-user-profile-header > img { width: 62px; height: 62px; }
+  .create-post-schedule-fields { grid-template-columns: 1fr; }
+  .account-post-access-panel { top: auto; right: 16px; bottom: 18px; left: 16px; width: auto; transform: none; }
+}

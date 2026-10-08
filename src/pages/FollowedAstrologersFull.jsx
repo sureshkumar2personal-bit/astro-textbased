@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { mockAstrologers } from '../data/notificationData.js'
+import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import BackButton from '../components/BackButton.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -14,7 +14,7 @@ export default function FollowedAstrologersFull() {
   const subscribedAstrologerIds = subscriptions
     .filter((subscription) => subscription.userId === currentUser?.id && new Date(subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil).getTime() > Date.now())
     .map((subscription) => subscription.astrologerId)
-  const followedAstrologers = mockAstrologers.filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
+  const followedAstrologers = getPublicAstrologers().filter((astrologer) => followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
 
   return (
     <div className="space-y-8">

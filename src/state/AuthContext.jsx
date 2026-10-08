@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { inferRoleFromEmail, ROLES } from '../utils/roleRoutes.js'
 import { recordUserActivity } from '../utils/userActivityLog.js'
+import { deriveUsername, validateProfilePayload } from '../utils/profile.js'
 
 const AUTH_STORAGE_KEY = 'astroconnect-auth-session'
 const EDITOR_SESSION_KEY = 'astroconnect-editor-session'
@@ -48,9 +49,43 @@ function normalizeEmail(email) {
 
 function normalizeUser(user) {
   if (!user) return user
-  return {
+  const normalized = {
     ...user,
     email: normalizeEmail(user.email),
+    username: String(user.username || deriveUsername(user.name)).replace(/^@+/, '').toLowerCase(),
+  }
+  if (user.role !== ROLES.USER) return normalized
+
+  const savedPreferences = user.astrologerPreferences && typeof user.astrologerPreferences === 'object' ? user.astrologerPreferences : {}
+  const preferenceValues = (primary, legacy, fallback) => {
+    const values = [savedPreferences[primary], savedPreferences[legacy]].find((entry) => Array.isArray(entry) && entry.length)
+    return values || [fallback]
+  }
+  return {
+    ...normalized,
+    gender: normalized.gender || 'Female',
+    dateOfBirth: normalized.dateOfBirth || '1995-03-12',
+    birthTime: normalized.birthTime || '07:05',
+    birthPlace: normalized.birthPlace || 'Theni, Tamil Nadu, India',
+    latitude: normalized.latitude || '10.0104',
+    longitude: normalized.longitude || '77.4768',
+    timezone: normalized.timezone || 'Asia/Kolkata',
+    languages: Array.isArray(normalized.languages) && normalized.languages.length ? normalized.languages : ['Tamil'],
+    rasi: normalized.rasi || 'Rishabam',
+    nakshatra: normalized.nakshatra || 'Rohini',
+    lagna: normalized.lagna || 'Vrishabha',
+    horoscopeDetails: normalized.horoscopeDetails || 'A grounded chart with a practical Taurus influence and a creative Rohini Moon.',
+    phoneVisibility: normalized.phoneVisibility || 'private',
+    emailVisibility: normalized.emailVisibility || 'private',
+    astrologerPreferencesEnabled: true,
+    astrologerPreferences: {
+      ...savedPreferences,
+      languages: preferenceValues('languages', 'preferredLanguages', 'Tamil'),
+      astrologerTypes: preferenceValues('astrologerTypes', 'methods', 'Vedic Astrology'),
+      consultationTitles: preferenceValues('consultationTitles', 'topics', 'Marriage'),
+      methods: preferenceValues('methods', 'astrologerTypes', 'Vedic Astrology'),
+      topics: preferenceValues('topics', 'consultationTitles', 'Marriage'),
+    },
   }
 }
 
@@ -76,13 +111,14 @@ function seedUsers() {
     writeJSON(USERS_STORAGE_KEY, normalized)
     return normalized
   }
-  writeJSON(USERS_STORAGE_KEY, defaultUsers)
-  return defaultUsers
+  const normalized = defaultUsers.map(normalizeUser)
+  writeJSON(USERS_STORAGE_KEY, normalized)
+  return normalized
 }
 
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(seedUsers)
-  const [currentUser, setCurrentUser] = useState(() => readJSON(AUTH_STORAGE_KEY, null) || readJSON(EDITOR_SESSION_KEY, null))
+  const [currentUser, setCurrentUser] = useState(() => normalizeUser(readJSON(AUTH_STORAGE_KEY, null) || readJSON(EDITOR_SESSION_KEY, null)))
 
   useEffect(() => {
     writeJSON(USERS_STORAGE_KEY, users)
@@ -128,6 +164,7 @@ export function AuthProvider({ children }) {
         id: crypto.randomUUID(),
         role,
         name: payload.name.trim(),
+        username: String(payload.username || deriveUsername(payload.name)).replace(/^@+/, '').toLowerCase(),
         email,
         phone: payload.phone || '',
         dateOfBirth: payload.dateOfBirth || '',
@@ -158,7 +195,7 @@ export function AuthProvider({ children }) {
     },
     updateProfile(payload) {
       if (!currentUser) throw new Error('No profile is currently signed in.')
-      const name = String(payload.name || '').trim()
+      const { name, username } = validateProfilePayload({ ...currentUser, ...payload }, users, currentUser.id)
       const email = normalizeEmail(payload.email)
       if (!name) throw new Error('Enter your name.')
       if (!email || !email.endsWith('.com')) throw new Error('Enter a valid .com email address.')
@@ -169,28 +206,34 @@ export function AuthProvider({ children }) {
       const updatedUser = {
         ...currentUser,
         name,
+        username,
         email,
-        phone: String(payload.phone || '').trim(),
+        phone: String(payload.phone ?? currentUser.phone ?? '').trim(),
+        phoneVisibility: payload.phoneVisibility || currentUser.phoneVisibility || 'private',
+        emailVisibility: payload.emailVisibility || currentUser.emailVisibility || 'private',
         gender: String(payload.gender ?? currentUser.gender ?? '').trim(),
         dateOfBirth: String(payload.dateOfBirth ?? currentUser.dateOfBirth ?? '').trim(),
         birthTime: String(payload.birthTime ?? currentUser.birthTime ?? '').trim(),
         birthPlace: String(payload.birthPlace ?? currentUser.birthPlace ?? '').trim(),
+        latitude: String(payload.latitude ?? currentUser.latitude ?? '').trim(),
+        longitude: String(payload.longitude ?? currentUser.longitude ?? '').trim(),
+        timezone: String(payload.timezone ?? currentUser.timezone ?? '').trim(),
         horoscopeDetails: String(payload.horoscopeDetails ?? currentUser.horoscopeDetails ?? '').trim(),
         rasi: String(payload.rasi ?? currentUser.rasi ?? '').trim(),
         nakshatra: String(payload.nakshatra ?? currentUser.nakshatra ?? '').trim(),
         lagna: String(payload.lagna ?? currentUser.lagna ?? '').trim(),
-        specialization: String(payload.specialization || '').trim(),
-        experience: String(payload.experience || '').trim(),
-        bio: String(payload.bio || '').trim(),
+        specialization: String(payload.specialization ?? currentUser.specialization ?? '').trim(),
+        experience: String(payload.experience ?? currentUser.experience ?? '').trim(),
+        bio: String(payload.bio ?? currentUser.bio ?? '').trim(),
         languages: Array.isArray(payload.languages)
           ? payload.languages
-          : String(payload.languages || '').split(',').map((language) => language.trim()).filter(Boolean),
-        profileImage: String(payload.profileImage || '').trim(),
+          : String(payload.languages ?? currentUser.languages ?? '').split(',').map((language) => language.trim()).filter(Boolean),
+        profileImage: String(payload.profileImage ?? currentUser.profileImage ?? '').trim(),
         astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
         astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
       }
-      const profileFields = ['name', 'email', 'phone', 'bio', 'profileImage']
-      const birthFields = ['gender', 'dateOfBirth', 'birthTime', 'birthPlace', 'horoscopeDetails', 'rasi', 'nakshatra', 'lagna']
+      const profileFields = ['name', 'username', 'email', 'phone', 'phoneVisibility', 'emailVisibility', 'bio', 'profileImage']
+      const birthFields = ['gender', 'dateOfBirth', 'birthTime', 'birthPlace', 'latitude', 'longitude', 'timezone', 'horoscopeDetails', 'rasi', 'nakshatra', 'lagna']
       const changedProfileFields = profileFields.filter((field) => updatedUser[field] !== currentUser[field])
       const changedBirthFields = birthFields.filter((field) => updatedUser[field] !== currentUser[field])
       if (changedProfileFields.length) {
@@ -199,12 +242,15 @@ export function AuthProvider({ children }) {
       if (changedBirthFields.length) {
         recordUserActivity({ userId: currentUser.id, type: 'horoscope', title: 'Horoscope details updated', summary: 'Your birth or horoscope details were updated.', metadata: changedBirthFields.join(', ') })
       }
-      if (payload.dateOfBirth !== undefined || payload.birthTime !== undefined || payload.birthPlace !== undefined || payload.horoscopeDetails !== undefined || payload.rasi !== undefined || payload.nakshatra !== undefined || payload.lagna !== undefined) {
+      if (payload.dateOfBirth !== undefined || payload.birthTime !== undefined || payload.birthPlace !== undefined || payload.latitude !== undefined || payload.longitude !== undefined || payload.timezone !== undefined || payload.horoscopeDetails !== undefined || payload.rasi !== undefined || payload.nakshatra !== undefined || payload.lagna !== undefined) {
         writeJSON('astroconnect-user-birth-details', {
           name: updatedUser.name,
           dateOfBirth: updatedUser.dateOfBirth,
           timeOfBirth: updatedUser.birthTime,
           placeOfBirth: updatedUser.birthPlace,
+          latitude: updatedUser.latitude,
+          longitude: updatedUser.longitude,
+          timezone: updatedUser.timezone,
           horoscopeDetails: updatedUser.horoscopeDetails,
           rasi: updatedUser.rasi,
           nakshatra: updatedUser.nakshatra,
@@ -214,6 +260,24 @@ export function AuthProvider({ children }) {
       setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
       setCurrentUser(updatedUser)
       return updatedUser
+    },
+    changePassword({ currentPassword, newPassword }) {
+      if (!currentUser) throw new Error('No profile is currently signed in.')
+      if (String(currentPassword || '') !== String(currentUser.password || '')) throw new Error('Current password is incorrect.')
+      if (String(newPassword || '').length < 8) throw new Error('New password must be at least 8 characters.')
+      const updatedUser = { ...currentUser, password: String(newPassword) }
+      setUsers((prev) => prev.map((entry) => (entry.id === currentUser.id ? updatedUser : entry)))
+      setCurrentUser(updatedUser)
+      return updatedUser
+    },
+    deleteAccount() {
+      if (!currentUser) throw new Error('No profile is currently signed in.')
+      setUsers((prev) => prev.filter((entry) => entry.id !== currentUser.id))
+      setCurrentUser(null)
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(AUTH_STORAGE_KEY)
+        window.localStorage.removeItem('astroconnect-user-birth-details')
+      }
     },
     logout() {
       setCurrentUser(null)

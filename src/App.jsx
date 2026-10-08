@@ -74,8 +74,11 @@ import FullHoroscope from './pages/user/horoscope/FullHoroscope.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
+import InstantCallUser from './pages/user/instantcalluser.jsx'
+import InstantChatUser from './pages/user/instantchatuser.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
+import AstrologerMyProfile from './pages/astrologer/MyProfile.jsx'
 import PaymentMethods from './pages/user/payment-methods/PaymentMethods.jsx'
 import AddPaymentMethod from './pages/user/payment-methods/AddPaymentMethod.jsx'
 import Autopay from './pages/user/autopay/Autopay.jsx'
@@ -189,6 +192,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
         <Route path="/astrologer/atonement" element={<Atonement />} />
+        <Route path="/astrologer/profile" element={<AstrologerMyProfile />} />
         <Route path="/astrologer/my-account" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/account/editors-assistants" element={<AstrologerAccountManagement />} />
         <Route path="/astrologer/wallet" element={<Navigate to="/astrologer/wallet/overview" replace />} />
@@ -261,6 +265,8 @@ function UserRoutes() {
         <Route path="/call-payment/:astrologerId" element={<CallPaymentInformation />} />
         <Route path="/call-payment-success" element={<CallPaymentSuccess />} />
         <Route path="/call/:astrologerId" element={<VoiceCallScreen />} />
+        <Route path="/user/instantcall/:astrologerId" element={<InstantCallUser />} />
+        <Route path="/user/instantchat/:astrologerId" element={<InstantChatUser />} />
         <Route path="/user/chat-booking" element={<ChatBooking />} />
         <Route path="/chat-birth-details/:astrologerId" element={<ChatBirthDetails />} />
         <Route path="/chat-booking/:astrologerId" element={<ChatBooking />} />

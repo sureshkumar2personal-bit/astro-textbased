@@ -5,6 +5,7 @@ import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { PURCHASE_KEY } from './ChatBooking.jsx'
+import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 const money = (value) => `₹${Number(value).toLocaleString('en-IN')}`
 
@@ -16,6 +17,7 @@ export default function ChatPaymentInformation() {
   const { currentUser } = useAuth()
   const { userWallet, actions } = useAppData()
   const navigate = useNavigate()
+  const routes = getRoleRoutes(currentUser?.role)
   const storageKey = `${PURCHASE_KEY}-${currentUser?.id || 'guest'}`
   const purchase = readPurchase(storageKey)
   const astrologer = mockAstrologers.find(({ id }) => id === purchase?.astrologerId) || mockAstrologers[0]
@@ -43,7 +45,7 @@ export default function ChatPaymentInformation() {
 
   const methods = [['wallet', Radio, 'Wallet', 'Pay from your Astro Connect wallet'], ['upi', Smartphone, 'UPI', 'Pay securely using UPI'], ['card', CreditCard, 'Card', 'Pay securely using your card']]
   return <main className="call-payment-page">
-    <button type="button" className="call-payment-page__back" onClick={() => navigate(`/chat-booking/${purchase.astrologerId}`)}><ArrowLeft size={16} /> Back to Chat Booking</button>
+    <button type="button" className="call-payment-page__back" onClick={() => navigate(`${routes.chatBooking}/${purchase.astrologerId}${purchase.returnPath === routes.astrologers ? '?from=explore' : ''}`)}><ArrowLeft size={16} /> Back to Chat Booking</button>
     <header className="call-payment-page__heading"><span>CHAT BOOKING</span><h1>Payment Information</h1><p>Complete your payment to confirm your chat.</p></header>
     <section className="call-payment-page__card"><h2>Payment Information</h2><dl className="call-payment-page__amounts"><div><dt>Astrologer</dt><dd>{astrologer.name}</dd></div><div><dt>Chat Duration</dt><dd>{purchase.selectedDuration} Minutes</dd></div><div className="is-total"><dt>Amount</dt><dd>{money(amount)}</dd></div></dl></section>
     <section className="call-payment-page__card"><h2>Payment Method</h2><div className="call-payment-page__methods">{methods.map(([id, Icon, title, description]) => <button type="button" key={id} className={`call-payment-method ${method === id ? 'is-selected' : ''}`} onClick={() => setMethod(id)}><span className="call-payment-method__icon"><Icon size={18} /></span><span><b>{title}</b><small>{description}</small></span><span className="call-payment-method__radio">{method === id ? '✓' : ''}</span></button>)}</div></section>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { mockAstrologers } from '../../../data/notificationData.js'
+import { getPublicAstrologers } from '../../../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../../../components/AstrologerCard.jsx'
 import BackButton from '../../../components/BackButton.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -11,7 +11,7 @@ export default function AstrologersFull() {
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const { subscriptions } = useAppData()
-  const subscribedAstrologers = mockAstrologers.filter((astrologer) => subscriptions.some((subscription) => subscription.userId === currentUser?.id && subscription.astrologerId === astrologer.id && new Date(subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil).getTime() > Date.now()))
+  const subscribedAstrologers = getPublicAstrologers().filter((astrologer) => subscriptions.some((subscription) => subscription.userId === currentUser?.id && subscription.astrologerId === astrologer.id && new Date(subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil).getTime() > Date.now()))
 
   return (
     <div className="space-y-8">
@@ -23,7 +23,7 @@ export default function AstrologersFull() {
         <BackButton to={routes.astrologers} />
       </div>
 
-      <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
         {subscribedAstrologers.map((astrologer) => (
           <AstrologerCard
             key={astrologer.id}

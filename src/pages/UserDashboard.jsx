@@ -15,8 +15,7 @@ import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils/memberCommunicationActivity.js'
-import { getConsultationAstrologers } from '../data/consultationAstrologers.js'
-import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
+import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 
@@ -34,14 +33,11 @@ function truncateWords(value, limit = 5) {
 
 export default function UserDashboard() {
   const { currentUser } = useAuth()
-  const { questions, consultationHistory, appointments, userWallet, astrologerLiveSessions, followedAstrologerIds, subscriptions, actions } = useAppData()
+  const { questions, consultationHistory, appointments, userWallet, astrologerLiveSessions, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
 
   const initialized = useRef(false)
-
-  const chatCount = useMemo(() => getConsultationAstrologers('chat').length, [])
-  const callCount = useMemo(() => getConsultationAstrologers('call').length, [])
 
   useEffect(() => {
     if (initialized.current || !currentUser?.id) return
@@ -68,30 +64,30 @@ export default function UserDashboard() {
   )
 
   const recommendedAstrologers = useMemo(() => {
-    if (!currentUser?.id) return []
-    const subscribedAstrologerIds = subscriptions
-      .filter((subscription) => subscription.userId === currentUser.id)
-      .filter((subscription) => {
-        const expiry = subscription.expiresAt || subscription.discountQuestions?.[0]?.validUntil
-        return Number.isFinite(new Date(expiry).getTime()) && new Date(expiry).getTime() > Date.now()
-      })
-      .map((subscription) => subscription.astrologerId)
-    const suggested = getSuggestedAstrologers({
-      followedAstrologerIds,
-      subscribedAstrologerIds,
-      preferencesEnabled: currentUser.astrologerPreferencesEnabled,
-      preferences: currentUser.astrologerPreferences,
-    })
-    if (suggested.length) return suggested.slice(0, 4)
-    return mockAstrologers
-      .filter((astrologer) => !followedAstrologerIds.includes(astrologer.id) && !subscribedAstrologerIds.includes(astrologer.id))
-      .slice(0, 4)
-  }, [currentUser, followedAstrologerIds, subscriptions])
+    const requestedNames = ['Meera Desai', 'Ishita Sen', 'Aditi Menon', 'Bhavana Joshi']
+    const displayOverrides = {
+      'Meera Desai': { expertise: ['Love', 'Career', 'Personal Growth'], languages: ['English', 'Gujarati', 'Hindi'], followers: 2500, photo: '/astrologer-photos/dashboard-reference/meera-desai.png' },
+      'Ishita Sen': { expertise: ['Career', 'Education', 'Timing'], languages: ['English', 'Bengali', 'Hindi'], followers: 2900, photo: '/astrologer-photos/dashboard-reference/ishita-sen.png' },
+      'Aditi Menon': { expertise: ['Relationship', 'Confidence', 'Clarity'], languages: ['English', 'Malayalam', 'Hindi'], followers: 2100, photo: '/astrologer-photos/dashboard-reference/aditi-menon.png' },
+      'Bhavana Joshi': { expertise: ['Career', 'Finance', 'Life Changes'], languages: ['English', 'Kannada', 'Hindi'], followers: 2500, photo: '/astrologer-photos/dashboard-reference/bhavana-j.png' },
+    }
+    const byName = new Map(getPublicAstrologers().map((astrologer) => [astrologer.name, astrologer]))
+    return requestedNames
+      .map((name) => byName.get(name))
+      .filter(Boolean)
+      .map((astrologer) => ({
+        ...astrologer,
+        ...displayOverrides[astrologer.name],
+        name: astrologer.name === 'Bhavana Joshi' ? 'Bhavana J.' : astrologer.name,
+      }))
+  }, [])
 
   const handleViewAstrologer = (astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=dashboard`)
+  const handleCallAstrologer = (astrologerId) => navigate(`/call-booking/${astrologerId}?from=dashboard`)
+  const handleChatAstrologer = (astrologerId) => navigate(`/chat-booking/${astrologerId}?from=dashboard`)
 
   return (
-    <div>
+    <div className="user-dashboard-page">
       <div className="hero-banner hero-banner-user">
         <div className="hero-banner-content">
           <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
@@ -116,8 +112,8 @@ export default function UserDashboard() {
           {[
             { icon: MessagesSquare, label: 'Ask Question', route: routes.askQuestion, fromDashboard: true },
             { icon: CalendarDays, label: 'Book Appointment', route: routes.appointmentBook, fromDashboard: true },
-            { icon: MessageCircle, label: 'Chat with Astrologer', route: routes.chatAstrologers, badge: chatCount ? `${chatCount} online` : undefined },
-            { icon: PhoneCall, label: 'Call with Astrologer', route: routes.callAstrologers, badge: callCount ? `${callCount} online` : undefined },
+            { icon: MessageCircle, label: 'Chat with Astrologer', route: routes.chatAstrologers, badge: '14 online' },
+            { icon: PhoneCall, label: 'Call with Astrologer', route: routes.callAstrologers, badge: '14 online' },
             { icon: ShoppingBag, label: 'Purchase Package', route: routes.purchasePackage, fromDashboard: true },
             { icon: Radio, label: 'Join Live', route: routes.liveSession, fromDashboard: true },
           ].map(({ icon: Icon, label, route, badge, fromDashboard }) => (
@@ -149,7 +145,7 @@ export default function UserDashboard() {
             </Link>
           }
         >
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="dashboard-recommended-grid grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {recommendedAstrologers.map((astrologer) => (
               <div
                 key={astrologer.id}
@@ -165,7 +161,7 @@ export default function UserDashboard() {
                   }
                 }}
               >
-                <AstrologerCard astrologer={astrologer} />
+                <AstrologerCard astrologer={astrologer} onCall={handleCallAstrologer} onChat={handleChatAstrologer} />
               </div>
             ))}
           </div>
