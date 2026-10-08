@@ -33,6 +33,7 @@ import {
   Send,
   RefreshCw,
   Flame,
+  Headphones,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import InstantCallAstrologer from '../pages/astrologer/instantcallastrologer.jsx'
@@ -61,6 +62,7 @@ const ROLE_CONFIG = {
       // Single Appointments entry: /appointments redirects to Schedule and every
       // /appointments/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'appointments', label: 'Appointments', icon: CalendarDays },
+      { to: 'consultation', label: 'Consultation', icon: Headphones },
       { to: 'atonement', label: 'Atonement', icon: Flame },
       // Single Live entry: /live-session redirects to setup and every
       // /live-session/* page keeps it highlighted; the sub-pages stay routable.
@@ -142,6 +144,10 @@ const PAGE_META = {
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
     '/astrologer/profile': { title: 'My Profile', sub: 'Your professional identity and how you appear to users' },
     '/astrologer/my-account': { title: 'Account Management', sub: 'Profile, access, security, and account preferences' },
+    '/astrologer/consultation': { title: 'Consultation', sub: 'Instant call and chat history and pricing' },
+    '/astrologer/consultation/instant-call': { title: 'Consultation', sub: 'Instant call history' },
+    '/astrologer/consultation/instant-chat': { title: 'Consultation', sub: 'Instant chat history' },
+    '/astrologer/consultation/pricing': { title: 'Consultation', sub: 'Set your per-minute prices' },
     '/astrologer/appointments': { title: 'Appointments', sub: 'Your booking calendar and consultation schedule' },
     '/astrologer/appointments/schedule': { title: 'Schedule', sub: 'Set monthly availability before publishing' },
     '/astrologer/appointments/calendar': { title: 'Calendar', sub: 'Review and manage published appointments' },

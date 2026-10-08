@@ -118,3 +118,8 @@
   .explore-astrologer-card__main { gap: 11px; }
   .explore-astrologer-card__actions { grid-template-columns: 52px 1px 52px minmax(0, max-content); gap: 6px; }
 }
+
+.explore-astrologer-card__pricing { display: flex; gap: 8px; margin: 12px 0 0; }
+.explore-astrologer-card__pricing > div { flex: 1 1 0; min-width: 0; padding: 6px 10px; border: 1px solid var(--surface-border, #e8ddf6); border-radius: 10px; background: var(--primary-bg, #f0e7ff); }
+.explore-astrologer-card__pricing dt { margin: 0; color: var(--muted, #6b6480); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.explore-astrologer-card__pricing dd { margin: 2px 0 0; color: var(--primary, #7040b5); font-size: 13px; font-weight: 800; white-space: nowrap; }

@@ -1,3 +1,4 @@
+import { getInstantRate } from '../utils/consultationPricing.js'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -37,7 +38,7 @@ export default function ChatBooking() {
       specialization: astrologer.specialization,
       profileImage: astrologer.profileImage,
       availability: astrologer.availability,
-      chatRatePerMinute: Number(consultationAstrologer?.chatRate || 0),
+      chatRatePerMinute: getInstantRate(astrologer.id, 'chat'),
       selectedDuration: selectedPackage.minutes,
       selectedAmount: selectedPackage.amount,
       birthDetails: location.state?.birthDetails || readBirthDetails(),
