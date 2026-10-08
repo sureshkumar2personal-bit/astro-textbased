@@ -1,6 +1,6 @@
 import { AtSign, CalendarDays, Check, ChevronDown, Clock3, CreditCard, Download, Eye, KeyRound, Languages, Lock, Mail, MapPin, Moon, Pencil, Phone, ShieldCheck, SlidersHorizontal, Sparkles, Star, Trash2, UserRound, UsersRound, VenusAndMars, WalletCards, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import BackButton from '../components/BackButton.jsx'
 import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
@@ -99,8 +99,6 @@ export default function MyAccount() {
   const { userWallet, subscriptions, userPaymentMethods, userAutopays, blockedUserIds } = useAppData()
   const { success } = useToast()
   const routes = getRoleRoutes(currentUser?.role)
-  const location = useLocation()
-  const backTo = location.state?.from === 'profile' ? routes.profile : location.state?.from === 'horoscope' ? routes.horoscope : null
   const name = currentUser?.name || ''
   const username = currentUser?.username || deriveUsername(name)
   const [editingDetails, setEditingDetails] = useState(false)
@@ -296,7 +294,7 @@ export default function MyAccount() {
 
   return (
     <div className="my-account-page">
-      <BackButton to={backTo} label="Back to Dashboard" />
+      <BackButton to={routes.dashboard} label="Back to Dashboard" />
       <PageHeader title="My Account" />
       <Card className="my-account-summary">
         <div className="my-account-summary__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} /> : initials(name)}</div>
