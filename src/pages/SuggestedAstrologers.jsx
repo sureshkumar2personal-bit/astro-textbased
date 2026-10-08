@@ -5,6 +5,7 @@ import { getSuggestedAstrologers } from '../data/notificationData.js'
 import { resolvePublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import BackButton from '../components/BackButton.jsx'
+import { useInstantCall } from '../state/InstantCallContext.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -17,6 +18,7 @@ export default function SuggestedAstrologers() {
   const { followedAstrologerIds, subscriptions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const { openInstantCall, openInstantChat } = useInstantCall()
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const subscribedAstrologerIds = subscriptions
     .filter((subscription) => subscription.userId === currentUser?.id)
@@ -40,8 +42,8 @@ export default function SuggestedAstrologers() {
           <AstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
-            onCall={(astrologerId) => navigate(`${routes.callPackages}?id=${astrologerId}`)}
-            onChat={(astrologerId) => navigate(`/chat-birth-details/${astrologerId}`)}
+            onCall={(astrologerId) => openInstantCall(astrologerId)}
+            onChat={(astrologerId) => openInstantChat(astrologerId)}
             onViewProfile={(astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=explore`)}
           />
         ))}

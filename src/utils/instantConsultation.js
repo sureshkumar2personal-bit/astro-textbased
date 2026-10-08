@@ -71,6 +71,9 @@ export function createInstantConsultation(payload) {
     astrologerId: payload.astrologerId,
     astrologerName: payload.astrologerName || 'Astrologer',
     durationMinutes: Number(payload.durationMinutes) || 10,
+    extraMinutes: 0,
+    amountPaid: Number(payload.amount) || 0,
+    birthDetails: payload.birthDetails || null,
     createdAt: now,
     updatedAt: now,
     messages: [],
@@ -89,6 +92,31 @@ export function updateInstantConsultation(id, patch) {
   })
   if (updated) writeAll(requests)
   return updated
+}
+
+export function getConsultationTotalMinutes(request) {
+  return (Number(request?.durationMinutes) || 0) + (Number(request?.extraMinutes) || 0)
+}
+
+export function getConsultationEndsAt(request) {
+  const startedAt = request?.startedAt ? new Date(request.startedAt).getTime() : 0
+  if (!startedAt) return 0
+  return startedAt + getConsultationTotalMinutes(request) * 60000
+}
+
+export function getConsultationSecondsLeft(request) {
+  const endsAt = getConsultationEndsAt(request)
+  if (!endsAt) return 0
+  return Math.max(0, Math.ceil((endsAt - Date.now()) / 1000))
+}
+
+export function addConsultationMinutes(id, minutes) {
+  const request = getInstantConsultation(id)
+  if (!request) return null
+  return updateInstantConsultation(id, {
+    extraMinutes: (Number(request.extraMinutes) || 0) + (Number(minutes) || 0),
+    amountPaid: (Number(request.amountPaid) || 0) + (Number(request.extensionAmount) || 0),
+  })
 }
 
 export function subscribeToInstantConsultations(listener) {

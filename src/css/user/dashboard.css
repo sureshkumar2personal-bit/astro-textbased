@@ -107,8 +107,12 @@
 
 .dashboard-recommended-grid .explore-astrologer-card__avatar-wrap,
 .dashboard-recommended-grid .explore-astrologer-card__avatar {
+  flex: 0 0 88px;
   width: 88px;
   height: 88px;
+  min-width: 88px;
+  min-height: 88px;
+  aspect-ratio: 1 / 1;
 }
 
 .dashboard-recommended-grid .explore-astrologer-card__details {

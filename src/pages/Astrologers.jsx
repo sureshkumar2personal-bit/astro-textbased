@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { getSuggestedAstrologers } from '../data/notificationData.js'
 import { getPublicAstrologers, resolvePublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
+import { useInstantCall } from '../state/InstantCallContext.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -35,6 +36,7 @@ export default function Astrologers() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const { openInstantCall, openInstantChat } = useInstantCall()
   const { followedAstrologerIds, subscriptions } = useAppData()
   const query = ''
   const onlineOnly = false
@@ -59,11 +61,11 @@ export default function Astrologers() {
   }
 
   const handleCall = (astrologerId) => {
-    navigate(`/call-booking/${astrologerId}?from=explore`)
+    openInstantCall(astrologerId)
   }
 
   const handleChat = (astrologerId) => {
-    navigate(`/chat-booking/${astrologerId}?from=explore`)
+    openInstantChat(astrologerId)
   }
 
   const handleViewProfile = (astrologerId) => {

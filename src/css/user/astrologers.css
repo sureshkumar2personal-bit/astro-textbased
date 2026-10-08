@@ -84,7 +84,7 @@
   box-shadow: 0 5px 14px rgba(69, 35, 110, .17);
 }
 
-.explore-astrologer-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.explore-astrologer-card__avatar img { display: block; width: 100%; height: 100%; aspect-ratio: 1 / 1; border-radius: inherit; object-fit: cover; object-position: center; }
 .explore-astrologer-card__status { position: absolute; right: 3px; bottom: 3px; width: 17px; height: 17px; border: 3px solid #fff; border-radius: 50%; background: #a8a5ad; }
 .explore-astrologer-card__status.is-online { background: #27b36a; }
 

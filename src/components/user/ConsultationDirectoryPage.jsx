@@ -9,8 +9,7 @@ import AstrologerCard from './AstrologerCard.jsx'
 import { consultationAstrologers, getConsultationAvailabilityLabel } from '../../data/consultationAstrologers.js'
 import { getRoleRoutes } from '../../utils/roleRoutes.js'
 import { useAuth } from '../../state/AuthContext.jsx'
-import ShareBirthDetailsModal from './ShareBirthDetailsModal.jsx'
-import { CALL_PACKAGES } from '../../data/notificationData.js'
+import { useInstantCall } from '../../state/InstantCallContext.jsx'
 
 function matchesPriceBand(rate, band) {
   if (!band) return true
@@ -38,6 +37,7 @@ function matchesSearch(astrologer, search) {
 
 export default function ConsultationDirectoryPage({ kind = 'chat' }) {
   const navigate = useNavigate()
+  const { openInstantCall, openInstantChat } = useInstantCall()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const title = kind === 'call' ? 'Call with Astrologer' : 'Chat with Astrologer'
@@ -65,7 +65,6 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
   const [minRating, setMinRating] = useState('')
   const [priceBand, setPriceBand] = useState('')
   const [availability, setAvailability] = useState('Available')
-  const [selectedAstrologer, setSelectedAstrologer] = useState(null)
 
   const filteredAstrologers = useMemo(() => {
     return uniqueConsultationAstrologers.filter((astrologer) => {
@@ -100,12 +99,12 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
         { value: '25-plus', label: '₹25+/min' },
       ]
 
-  const startConsultation = (astrologer, birthDetails = null) => {
+  const startConsultation = (astrologer) => {
     if (kind === 'chat') {
-      navigate(`/chat-booking/${astrologer.id}`, { state: { birthDetails } })
+      openInstantChat(astrologer.id)
       return
     }
-    navigate(`/call-booking/${astrologer.id}`)
+    openInstantCall(astrologer.id)
   }
 
   const viewProfile = (astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}`)
@@ -130,18 +129,16 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
             </Card>
           ) : (
             filteredAstrologers.map((astrologer) => (
-              <AstrologerCard key={astrologer.id} astrologer={astrologer} kind={kind} onSelect={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onStart={() => kind === 'chat' ? setSelectedAstrologer(astrologer) : startConsultation(astrologer)} onInstant={(entry) => navigate(`/user/instant${kind === 'call' ? 'call' : 'chat'}/${entry.id}`)} onViewProfile={viewProfile} />
+              <AstrologerCard
+                key={astrologer.id}
+                astrologer={astrologer}
+                kind={kind}
+                onStart={(entry) => startConsultation(entry)}
+                onViewProfile={viewProfile}
+              />
             ))
           )}
         </div>
-      {selectedAstrologer && (
-        <ShareBirthDetailsModal
-          currentUser={currentUser}
-          onCancel={() => setSelectedAstrologer(null)}
-          onSkip={() => { const astrologer = selectedAstrologer; setSelectedAstrologer(null); startConsultation(astrologer) }}
-          onProceed={(birthDetails) => { const astrologer = selectedAstrologer; setSelectedAstrologer(null); startConsultation(astrologer, birthDetails) }}
-        />
-      )}
     </div>
   )
 }
