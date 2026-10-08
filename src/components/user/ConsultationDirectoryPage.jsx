@@ -6,6 +6,7 @@ import Section from '../ui/Section.jsx'
 import Card from '../ui/Card.jsx'
 import FilterBar from './FilterBar.jsx'
 import AstrologerCard from './AstrologerCard.jsx'
+import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 import { consultationAstrologers, getConsultationAvailabilityLabel } from '../../data/consultationAstrologers.js'
 import { getRoleRoutes } from '../../utils/roleRoutes.js'
 import { useAuth } from '../../state/AuthContext.jsx'
@@ -38,6 +39,7 @@ function matchesSearch(astrologer, search) {
 export default function ConsultationDirectoryPage({ kind = 'chat' }) {
   const navigate = useNavigate()
   const { openInstantCall, openInstantChat } = useInstantCall()
+  const pricingVersion = usePricingVersion()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const title = kind === 'call' ? 'Call with Astrologer' : 'Chat with Astrologer'
@@ -69,7 +71,7 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
   const filteredAstrologers = useMemo(() => {
     return uniqueConsultationAstrologers.filter((astrologer) => {
       const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
-      const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
+      const rate = kind === 'call' ? withSavedRates(astrologer).callRate : withSavedRates(astrologer).chatRate
       // Chat is intentionally an available-only directory. Call keeps its
       // existing availability filter behavior.
       if (kind === 'chat' ? status !== 'Available' : availability && status !== availability) return false
@@ -79,7 +81,7 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
       if (!matchesSearch(astrologer, search)) return false
       return true
     })
-  }, [availability, kind, minRating, priceBand, search, specialization, uniqueConsultationAstrologers])
+  }, [availability, kind, minRating, priceBand, pricingVersion, search, specialization, uniqueConsultationAstrologers])
 
   const availabilityOptions = [
     { value: 'Available', label: 'Available only' },
@@ -134,6 +136,7 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
                 astrologer={astrologer}
                 kind={kind}
                 onStart={(entry) => startConsultation(entry)}
+                onInstant={(entry) => startConsultation(entry)}
                 onViewProfile={viewProfile}
               />
             ))

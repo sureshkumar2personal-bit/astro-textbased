@@ -1,3 +1,5 @@
+import { calculateInstantAmount, getInstantRate } from './consultationPricing.js'
+
 export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultations'
 
 function demoConsultations() {
@@ -13,6 +15,13 @@ function demoConsultations() {
       astrologerId: 'astrologer-demo',
       astrologerName,
       durationMinutes,
+      pricePerMinute: type === 'chat' ? 15 : 25,
+      amount: durationMinutes * (type === 'chat' ? 15 : 25),
+      userPhone: '+91 98765 43210',
+      language: 'Tamil',
+      topic: type === 'chat' ? 'Career guidance' : 'Marriage timing',
+      paymentMethod: 'Wallet',
+      transactionId: `TXN-${id.toUpperCase()}`,
       createdAt: startedAt,
       startedAt,
       endedAt: new Date(new Date(startedAt).getTime() + durationMinutes * 60000).toISOString(),
@@ -62,18 +71,31 @@ export function getInstantConsultation(id) {
 
 export function createInstantConsultation(payload) {
   const now = new Date().toISOString()
+  const type = payload.type === 'chat' ? 'chat' : 'call'
+  const durationMinutes = Number(payload.durationMinutes) || 10
+  // Price is locked in when the request is made so later price edits never change past amounts.
+  const pricePerMinute = Number.isFinite(Number(payload.pricePerMinute)) && payload.pricePerMinute !== undefined
+    ? Number(payload.pricePerMinute)
+    : getInstantRate(payload.astrologerId, type)
   const request = {
     id: crypto.randomUUID(),
-    type: payload.type === 'chat' ? 'chat' : 'call',
+    type,
     status: 'ringing',
     userId: payload.userId,
     userName: payload.userName || 'User',
     astrologerId: payload.astrologerId,
     astrologerName: payload.astrologerName || 'Astrologer',
-    durationMinutes: Number(payload.durationMinutes) || 10,
+    durationMinutes,
+    pricePerMinute,
+    amount: calculateInstantAmount(durationMinutes, pricePerMinute),
     extraMinutes: 0,
-    amountPaid: Number(payload.amount) || 0,
+    amountPaid: Number(payload.amount) || calculateInstantAmount(durationMinutes, pricePerMinute),
     birthDetails: payload.birthDetails || null,
+    userPhone: payload.userPhone || '',
+    language: payload.language || '',
+    topic: payload.topic || '',
+    paymentMethod: 'Wallet',
+    transactionId: `TXN${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
     createdAt: now,
     updatedAt: now,
     messages: [],
@@ -128,4 +150,17 @@ export function subscribeToInstantConsultations(listener) {
     window.removeEventListener('storage', notify)
     window.removeEventListener('astroconnect:instant-consultation', notify)
   }
+}
+
+const pad = (value) => String(value).padStart(2, '0')
+
+/** Session ID like IC20261006-001 (chat: CH...), numbered per type and day by request time. */
+export function getSessionCode(session, all = []) {
+  const created = new Date(session.createdAt || session.startedAt)
+  const day = `${created.getFullYear()}${pad(created.getMonth() + 1)}${pad(created.getDate())}`
+  const sameDay = all
+    .filter((item) => item.type === session.type && new Date(item.createdAt || item.startedAt).toDateString() === created.toDateString())
+    .sort((a, b) => new Date(a.createdAt || a.startedAt) - new Date(b.createdAt || b.startedAt))
+  const index = Math.max(0, sameDay.findIndex((item) => item.id === session.id)) + 1
+  return `${session.type === 'chat' ? 'CH' : 'IC'}${day}-${String(index).padStart(3, '0')}`
 }

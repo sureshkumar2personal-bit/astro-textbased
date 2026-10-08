@@ -1,5 +1,6 @@
 import { MessageCircle, Phone } from 'lucide-react'
 import Card from '../ui/Card.jsx'
+import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 
 function formatCount(count) {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
@@ -10,7 +11,9 @@ function formatExperience(experience) {
   return String(experience || '').match(/\d+/)?.[0] || experience || '—'
 }
 
-export default function AstrologerCard({ astrologer, kind = 'chat', onStart, onViewProfile }) {
+export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'chat', onSelect, onStart, onInstant, onViewProfile }) {
+  usePricingVersion()
+  const astrologer = withSavedRates(baseAstrologer)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
 
@@ -57,6 +60,10 @@ export default function AstrologerCard({ astrologer, kind = 'chat', onStart, onV
             {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
             <span>{kind === 'call' ? 'Call' : 'Chat'}</span>
           </button>
+          {onInstant && <button type="button" className="astrologer-card__action" onClick={() => onInstant(astrologer)}>
+            {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
+            <span>Instant {kind === 'call' ? 'Call' : 'Chat'}</span>
+          </button>}
         </div>
       </div>
 

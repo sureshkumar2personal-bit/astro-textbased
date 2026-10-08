@@ -1,3 +1,4 @@
+import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 import AvailabilityBadge from './AvailabilityBadge.jsx'
 import Rating from './Rating.jsx'
 
@@ -6,7 +7,9 @@ function formatExperience(experience) {
   return years ? `${years} years experience` : String(experience || 'Experience unavailable')
 }
 
-export default function ProfileHeader({ astrologer, kind, note, action, secondaryAction }) {
+export default function ProfileHeader({ astrologer: baseAstrologer, kind, note, action, secondaryAction }) {
+  usePricingVersion()
+  const astrologer = withSavedRates(baseAstrologer)
   const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const statusLabel = kind === 'call' ? 'Available for Call' : 'Available for Chat'
