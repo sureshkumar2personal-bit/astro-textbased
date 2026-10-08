@@ -11,7 +11,7 @@ function formatExperience(experience) {
   return String(experience || '').match(/\d+/)?.[0] || experience || '—'
 }
 
-export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'chat', onSelect, onStart, onInstant, onViewProfile }) {
+export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'chat', onInstant, onViewProfile }) {
   usePricingVersion()
   const astrologer = withSavedRates(baseAstrologer)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
@@ -56,11 +56,7 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
 
       <div className="astrologer-card__stats">
         <div className="astrologer-card__actions astrologer-card__actions--chat" aria-label={`Contact ${astrologer.name}`}>
-          <button type="button" className="astrologer-card__action astrologer-card__action--primary" onClick={() => onStart?.(astrologer)}>
-            {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
-            <span>{kind === 'call' ? 'Call' : 'Chat'}</span>
-          </button>
-          {onInstant && <button type="button" className="astrologer-card__action" onClick={() => onInstant(astrologer)}>
+          {onInstant && <button type="button" className="astrologer-card__action astrologer-card__action--primary" onClick={() => onInstant(astrologer)}>
             {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
             <span>Instant {kind === 'call' ? 'Call' : 'Chat'}</span>
           </button>}

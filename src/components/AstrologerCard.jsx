@@ -71,13 +71,6 @@ export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfi
         </div>
       </div>
 
-      {(Number(astrologer.callRate) > 0 || Number(astrologer.chatRate) > 0) && (
-        <dl className="explore-astrologer-card__pricing" aria-label="Consultation pricing">
-          {Number(astrologer.callRate) > 0 && astrologer.voiceEnabled !== false && <div><dt>Instant Call</dt><dd>₹{astrologer.callRate}/min</dd></div>}
-          {Number(astrologer.chatRate) > 0 && astrologer.chatEnabled !== false && <div><dt>Instant Chat</dt><dd>₹{astrologer.chatRate}/min</dd></div>}
-        </dl>
-      )}
-
       <div className="explore-astrologer-card__actions" aria-label={`Contact ${astrologer.name}`}>
         <button type="button" className="explore-astrologer-card__action" disabled={astrologer.voiceEnabled === false} onClick={(event) => { event.stopPropagation(); onCall?.(astrologer.id) }}>
           <Phone size={17} aria-hidden="true" /> <span>Call</span>

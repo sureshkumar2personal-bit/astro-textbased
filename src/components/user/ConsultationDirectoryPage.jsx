@@ -135,7 +135,6 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
                 key={astrologer.id}
                 astrologer={astrologer}
                 kind={kind}
-                onStart={(entry) => startConsultation(entry)}
                 onInstant={(entry) => startConsultation(entry)}
                 onViewProfile={viewProfile}
               />
