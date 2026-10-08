@@ -1,0 +1,335 @@
+/* Floating panel for the user's live instant call/chat. Mirrors the
+   astrologer-side panel: fixed bottom-right, same card shapes. */
+
+.floating-consult-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 80;
+  width: min(400px, calc(100vw - 32px));
+  border-radius: 18px;
+  box-shadow: 0 18px 55px rgba(15, 23, 42, .25);
+  overflow: hidden;
+}
+
+.floating-consult-card {
+  position: relative;
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-top: 5px solid #16a34a;
+}
+
+.floating-consult-card.is-ringing { border-top-color: #f59e0b; text-align: center; }
+.floating-consult-card.is-timeup { border-top-color: #f59e0b; }
+
+.floating-consult-card__dismiss {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.floating-consult-card__dismiss:hover { background: #f1f5f9; color: #b91c1c; }
+
+.floating-consult-request { text-align: center; }
+
+.floating-consult-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #b45309;
+  animation: floating-consult-ring 1.4s infinite;
+}
+
+@keyframes floating-consult-ring {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .5); }
+  70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.floating-consult-badge {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  color: #b45309;
+}
+
+.floating-consult-request h2 { margin: 9px 0 5px; font-size: 17px; }
+
+.floating-consult-request p {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.floating-consult-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+.floating-consult-actions button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.floating-consult-accept { background: #dc2626; }
+
+.floating-consult-active header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #15803d;
+}
+
+.floating-consult-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.floating-consult-live span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: floating-consult-blink 1.2s infinite;
+}
+
+@keyframes floating-consult-blink {
+  50% { opacity: .25; }
+}
+
+.floating-consult-live + strong { font-variant-numeric: tabular-nums; }
+
+.floating-consult-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.floating-consult-avatar {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-weight: 800;
+}
+
+.floating-consult-person h2 { margin: 0; font-size: 16px; }
+.floating-consult-person p { margin: 3px 0 0; color: #6b7280; font-size: 13px; }
+
+.floating-consult-timeup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.floating-consult-conversation {
+  max-height: 120px;
+  overflow: auto;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.floating-consult-message {
+  margin: 5px 0;
+  padding: 7px 9px;
+  border-radius: 9px;
+  background: #dcfce7;
+  font-size: 13px;
+}
+
+.floating-consult-message--user { background: #e5e7eb; }
+
+.floating-consult-conversation small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6b7280;
+}
+
+.floating-consult-hint { display: block; font-style: italic; }
+
+.floating-consult-composer {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.floating-consult-composer input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.floating-consult-composer button {
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #16a34a;
+  color: #fff;
+  cursor: pointer;
+}
+
+.floating-consult-composer button:disabled { opacity: .5; cursor: not-allowed; }
+
+.floating-consult-speaker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #374151;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.floating-consult-speaker.is-active { border-color: #16a34a; color: #15803d; background: #f0fdf4; }
+
+.floating-consult-extend-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px dashed #d1d5db;
+  border-radius: 9px;
+  background: #fff;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.floating-consult-extend-link:hover { border-color: #16a34a; color: #15803d; }
+
+.floating-consult-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.floating-consult-extension {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.floating-consult-extension > strong { display: block; margin-bottom: 9px; font-size: 14px; }
+
+.floating-consult-durations {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.floating-consult-durations button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.floating-consult-durations button small { font-weight: 600; color: #6b7280; font-size: 10px; }
+.floating-consult-durations button.is-selected { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+
+.floating-consult-error {
+  margin: 9px 0 0;
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+.floating-consult-extend,
+.floating-consult-addmoney {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #16a34a;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.floating-consult-addmoney { background: #d97706; }
+
+.floating-consult-cancel {
+  width: 100%;
+  margin-top: 7px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fff;
+  color: #6b7280;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}

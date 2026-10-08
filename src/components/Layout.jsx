@@ -20,8 +20,6 @@ import {
   CreditCard,
   LogOut,
   MessageCircle,
-  PhoneCall,
-  PhoneOff,
   X,
   ChevronDown,
   UserRound,
@@ -36,9 +34,10 @@ import {
   Headphones,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
-import InstantCallAstrologer from '../pages/astrologer/instantcallastrologer.jsx'
+import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
 import InstantChatAstrologer from '../pages/astrologer/instantchatastrologer.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
+import ActiveCallIndicator from './user/ActiveCallIndicator.jsx'
 import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
 import NotificationsPanel from './NotificationsPanel.jsx'
 import SidebarItem from './SidebarItem.jsx'
@@ -333,8 +332,6 @@ function AstrologerNav({ links, basePath }) {
   )
 }
 
-const CALL_QUICK_REPLIES = ['I’ll attend shortly.', 'Please wait a moment.', 'I’m finishing another session.', 'Please try again later.', 'Can we continue by chat?']
-
 function requestInitials(name) {
   return String(name || 'User').split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()
 }
@@ -344,26 +341,18 @@ function requestAudienceLabel(request) {
   return request.relationship || 'User'
 }
 
-function IncomingRequestOverlay({ callRequest, chatPreviewRequest, chatRequest, actions, onOpenChat, onCloseChat }) {
-  const [messageOpen, setMessageOpen] = useState(false)
-  const [customMessage, setCustomMessage] = useState('')
+function IncomingRequestOverlay({ chatPreviewRequest, chatRequest, actions, onOpenChat, onCloseChat }) {
   const [chatDraft, setChatDraft] = useState('')
-  const request = callRequest || chatPreviewRequest || chatRequest
+  const request = chatPreviewRequest || chatRequest
   if (!request) return null
 
-  const isCall = request.type === 'call'
-  const isPreview = Boolean(chatPreviewRequest && !chatRequest && !callRequest)
-  const sendMessage = (text) => {
-    actions.sendIncomingMessage(request.id, text)
-    setMessageOpen(false)
-    setCustomMessage('')
-  }
+  const isPreview = Boolean(chatPreviewRequest && !chatRequest)
 
   return <div className="incoming-request-overlay">
-    <section className={`incoming-request-card${!isCall ? ' incoming-request-card--chat' : ''}`} role="dialog" aria-modal="true" aria-labelledby="incoming-request-title">
-      <div className="incoming-request-card__header"><span className="incoming-request-card__type">{isCall ? <PhoneCall size={16} /> : <MessageCircle size={16} />} {isPreview ? 'New chat request' : isCall ? 'Incoming call' : 'Chat with user'}</span>{isCall && <span className="incoming-request-card__pulse" />}{!isCall && !isPreview && <button type="button" className="icon-btn" aria-label="Close chat" onClick={onCloseChat}><X size={16} /></button>}</div>
+    <section className="incoming-request-card incoming-request-card--chat" role="dialog" aria-modal="true" aria-labelledby="incoming-request-title">
+      <div className="incoming-request-card__header"><span className="incoming-request-card__type"><MessageCircle size={16} /> {isPreview ? 'New chat request' : 'Chat with user'}</span>{!isPreview && <button type="button" className="icon-btn" aria-label="Close chat" onClick={onCloseChat}><X size={16} /></button>}</div>
       <div className="incoming-request-card__profile"><div className="incoming-request-card__avatar">{requestInitials(request.userName)}</div><div><h2 id="incoming-request-title">{request.userName}</h2><p>ID: {request.userId} · @{request.userUsername}</p><span>{requestAudienceLabel(request)}</span></div></div>
-      {isPreview ? <div className="incoming-request-actions"><button type="button" className="btn btn-primary" onClick={() => { actions.acceptIncomingRequest(request.id); onOpenChat(request.id) }}><MessageCircle size={15} /> Open Chat</button></div> : isCall ? (messageOpen ? <div className="incoming-request-message"><div className="incoming-request-quick-replies">{CALL_QUICK_REPLIES.map((reply) => <button type="button" key={reply} onClick={() => sendMessage(reply)}>{reply}</button>)}</div><textarea value={customMessage} onChange={(event) => setCustomMessage(event.target.value)} placeholder="Write a custom message..." rows="3" /><button type="button" className="btn btn-primary" disabled={!customMessage.trim()} onClick={() => sendMessage(customMessage)}>Send Message</button></div> : <div className="incoming-request-actions"><button type="button" className="btn btn-primary" onClick={() => actions.acceptIncomingRequest(request.id)}><PhoneCall size={15} /> Attend Call</button><button type="button" className="btn btn-outline" onClick={() => actions.declineIncomingRequest(request.id)}><PhoneOff size={15} /> Decline</button><button type="button" className="btn btn-ghost" onClick={() => setMessageOpen(true)}><MessageCircle size={15} /> Message</button></div>) : <><div className="incoming-chat-messages">{(request.messages || []).map((message) => <p key={message.id} className={`incoming-chat-message incoming-chat-message--${message.sender}`}>{message.text}</p>)}{!(request.messages || []).length && <p className="muted">Start the conversation with {request.userName}.</p>}</div><form className="incoming-chat-composer" onSubmit={(event) => { event.preventDefault(); if (!chatDraft.trim()) return; actions.sendIncomingMessage(request.id, chatDraft); setChatDraft('') }}><input value={chatDraft} onChange={(event) => setChatDraft(event.target.value)} placeholder="Write a message..." aria-label="Message user" /><button type="submit" className="btn btn-primary" disabled={!chatDraft.trim()}><MessageCircle size={15} /> Send</button></form><button type="button" className="btn btn-outline incoming-chat-accept" onClick={() => { actions.acceptIncomingRequest(request.id); onCloseChat() }}>Accept Chat</button></>}
+      {isPreview ? <div className="incoming-request-actions"><button type="button" className="btn btn-primary" onClick={() => { actions.acceptIncomingRequest(request.id); onOpenChat(request.id) }}><MessageCircle size={15} /> Open Chat</button></div> : <><div className="incoming-chat-messages">{(request.messages || []).map((message) => <p key={message.id} className={`incoming-chat-message incoming-chat-message--${message.sender}`}>{message.text}</p>)}{!(request.messages || []).length && <p className="muted">Start the conversation with {request.userName}.</p>}</div><form className="incoming-chat-composer" onSubmit={(event) => { event.preventDefault(); if (!chatDraft.trim()) return; actions.sendIncomingMessage(request.id, chatDraft); setChatDraft('') }}><input value={chatDraft} onChange={(event) => setChatDraft(event.target.value)} placeholder="Write a message..." aria-label="Message user" /><button type="submit" className="btn btn-primary" disabled={!chatDraft.trim()}><MessageCircle size={15} /> Send</button></form><button type="button" className="btn btn-outline incoming-chat-accept" onClick={() => { actions.acceptIncomingRequest(request.id); onCloseChat() }}>Accept Chat</button></>}
     </section>
   </div>
 }
@@ -441,7 +430,6 @@ export default function Layout() {
   const actionRef = useRef(null)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const pendingRequests = incomingRequests.filter((request) => request.astrologerId === astrologerId && request.status === 'pending')
-  const activeCallRequest = pendingRequests.find((request) => request.type === 'call')
   const activeChatRequest = incomingRequests.find((request) => request.id === activeChatRequestId && request.astrologerId === astrologerId)
   const chatPreviewRequest = pendingRequests.find((request) => request.type === 'chat' && !request.notificationsSaved && Date.now() - new Date(request.createdAt).getTime() < 5000)
 
@@ -516,6 +504,7 @@ export default function Layout() {
             <div className="topbar-crumb-sub">{meta.sub}</div>
           </div>
           <div className="topbar-actions" ref={actionRef}>
+            {!isAstrologer && <ActiveCallIndicator />}
             <button
               type="button"
               className="icon-btn"
@@ -612,7 +601,7 @@ export default function Layout() {
             </motion.div>
           </AnimatePresence>
         </div>
-        {isAstrologer && <><IncomingRequestOverlay callRequest={activeCallRequest} chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><InstantCallAstrologer /><InstantChatAstrologer /></>}
+        {isAstrologer && <><IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><CallAstrologer /><InstantChatAstrologer /></>}
       </div>
     </div>
   )
