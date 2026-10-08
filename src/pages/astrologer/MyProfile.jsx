@@ -426,7 +426,9 @@ export default function MyProfile() {
           <p className="mp-note">Pricing changes may require admin approval before becoming publicly visible.</p>
           <div className="account-form-grid">
             {PRICING_FIELDS.map(({ key, label, suffix }) => (
-              <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
+              ['chat', 'voice'].includes(key)
+                ? <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" value={shown.services[key].price} readOnly disabled title="Managed in Consultation → Pricing" />
+                : <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
             ))}
             <TextField label="Currency" value="INR" readOnly disabled />
           </div>

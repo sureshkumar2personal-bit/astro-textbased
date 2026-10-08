@@ -1,4 +1,5 @@
 import { ArrowRight, MessageCircle, Phone, Star, UserRound } from 'lucide-react'
+import { usePricingVersion, withSavedRates } from '../utils/consultationPricing.js'
 import { getStartingRate } from '../utils/publicAstrologerProfile.js'
 import Card from './ui/Card.jsx'
 
@@ -31,7 +32,9 @@ function TagRow({ items, limit, className, label, tone = 'soft' }) {
   )
 }
 
-export default function AstrologerCard({ astrologer, onViewProfile, onCall, onChat }) {
+export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfile, onCall, onChat }) {
+  usePricingVersion()
+  const astrologer = withSavedRates(baseAstrologer)
   const rate = getStartingRate(astrologer) ?? astrologer.consultationRate ?? null
   const initials = astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
   const photo = astrologer.photo || astrologer.profileImage
@@ -67,6 +70,13 @@ export default function AstrologerCard({ astrologer, onViewProfile, onCall, onCh
           <TagRow items={astrologer.languages || []} limit={MAX_LANGUAGES} className="explore-astrologer-card__languages" label="Languages" />
         </div>
       </div>
+
+      {(Number(astrologer.callRate) > 0 || Number(astrologer.chatRate) > 0) && (
+        <dl className="explore-astrologer-card__pricing" aria-label="Consultation pricing">
+          {Number(astrologer.callRate) > 0 && astrologer.voiceEnabled !== false && <div><dt>Instant Call</dt><dd>₹{astrologer.callRate}/min</dd></div>}
+          {Number(astrologer.chatRate) > 0 && astrologer.chatEnabled !== false && <div><dt>Instant Chat</dt><dd>₹{astrologer.chatRate}/min</dd></div>}
+        </dl>
+      )}
 
       <div className="explore-astrologer-card__actions" aria-label={`Contact ${astrologer.name}`}>
         <button type="button" className="explore-astrologer-card__action" disabled={astrologer.voiceEnabled === false} onClick={(event) => { event.stopPropagation(); onCall?.(astrologer.id) }}>

@@ -92,6 +92,10 @@ import AstrologerLiveSessionShell, {
   AstrologerLiveSessionSummary,
 } from './pages/astrologer/live/AstrologerLiveSession.jsx'
 import { ScheduledLive, LiveHistory } from './pages/astrologer/live/LiveSessionLists.jsx'
+import ConsultationShell from './pages/astrologer/consultation/ConsultationShell.jsx'
+import InstantCallHistory from './pages/astrologer/consultation/InstantCallHistory.jsx'
+import InstantChatHistory from './pages/astrologer/consultation/InstantChatHistory.jsx'
+import ConsultationPricing from './pages/astrologer/consultation/ConsultationPricing.jsx'
 import AppointmentsShell from './pages/astrologer/appointments/AppointmentsShell.jsx'
 import AppointmentScheduleTab from './pages/astrologer/appointments/AppointmentSchedule.jsx'
 import AppointmentHistoryTab from './pages/astrologer/appointments/AppointmentHistory.jsx'
@@ -207,6 +211,12 @@ function AstrologerRoutes() {
         <Route path="/astrologer/dispute-management" element={<DisputeManagementRedirect />} />
         <Route path="/astrologer/activity" element={<AstrologerActivity />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
+        <Route path="/astrologer/consultation" element={<ConsultationShell />}>
+          <Route index element={<Navigate to="instant-call" replace />} />
+          <Route path="instant-call" element={<InstantCallHistory />} />
+          <Route path="instant-chat" element={<InstantChatHistory />} />
+          <Route path="pricing" element={<ConsultationPricing />} />
+        </Route>
         <Route path="/astrologer/appointments" element={<AppointmentsShell />}>
           <Route index element={<Navigate to="schedule" replace />} />
           <Route path="schedule" element={<AppointmentScheduleTab />} />

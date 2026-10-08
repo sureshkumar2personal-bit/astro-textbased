@@ -1,5 +1,6 @@
 import { MessageCircle, Phone } from 'lucide-react'
 import Card from '../ui/Card.jsx'
+import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 
 function formatCount(count) {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
@@ -10,7 +11,9 @@ function formatExperience(experience) {
   return String(experience || '').match(/\d+/)?.[0] || experience || '—'
 }
 
-export default function AstrologerCard({ astrologer, kind = 'chat', onSelect, onStart, onInstant, onViewProfile }) {
+export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'chat', onSelect, onStart, onInstant, onViewProfile }) {
+  usePricingVersion()
+  const astrologer = withSavedRates(baseAstrologer)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
 
