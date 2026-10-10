@@ -586,9 +586,9 @@ export default function MyProfile() {
       <div className="mp-layout">
         <nav className="mp-tabs" aria-label="Profile sections">
           {PROFILE_SECTIONS.map(({ id, label }) => (
-            <button type="button" key={id} className={`mp-tabs__item${section === id ? ' is-active' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => selectSection(id)}>
+            <button type="button" key={id} className={`mp-tabs__item${section === id ? ' is-active' : ''}${incomplete[id] ? ' is-incomplete' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => selectSection(id)}>
               {label}
-              {incomplete[id] && <><span className="mp-tabs__dot" aria-hidden="true" /><span className="mp-sr-only"> (incomplete)</span></>}
+              {incomplete[id] && <span className="mp-sr-only"> (incomplete)</span>}
             </button>
           ))}
         </nav>
