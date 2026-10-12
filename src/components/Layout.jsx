@@ -6,10 +6,7 @@ import {
   Sparkles,
   Gift,
   LayoutDashboard,
-  ShoppingBag,
   CircleHelp,
-  ListChecks,
-  Gavel,
   Bell,
   ChevronRight,
   Wallet,
@@ -31,6 +28,7 @@ import {
   Send,
   RefreshCw,
   Flame,
+  Search,
   Headphones,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -81,20 +79,15 @@ const ROLE_CONFIG = {
     navLabel: 'User',
     nav: [
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
+      // Explore Astrologers now lives in the top header (see the topbar actions)
+      // so the sidebar stays focused on the account modules.
+      // Single Ask a Question entry: it opens the question dashboard, whose
+      // sections (Ask New, My Questions, Purchased Questions, History) replace
+      // the old Text-Based Questions sub-items. Disputes live inside My Questions.
       {
-        to: 'astrologers',
-        label: 'Explore Astrologers',
-        icon: Sparkles,
-      },
-      {
-        label: 'Text-Based Questions',
+        label: 'Ask a Question',
         to: 'ask-question',
         icon: CircleHelp,
-        children: [
-          { to: 'purchase-package', label: 'Purchase Package', icon: ShoppingBag },
-          { to: 'track-questions', label: 'Track My Questions', icon: ListChecks },
-          { to: 'raise-dispute', label: 'Raise Dispute', icon: Gavel },
-        ],
       },
       {
         label: 'Appointments',
@@ -192,6 +185,15 @@ const PAGE_META = {
     '/user/withdraw': { title: 'Withdraw Funds', sub: 'Transfer money from your wallet to your bank or UPI.' },
     '/user/transaction-history': { title: 'Transaction History', sub: 'Complete record of all wallet movements.' },
   },
+}
+
+// The Ask a Question dashboard is one page with four tabs, so each tab needs its
+// own heading in the top bar.
+const QUESTION_DASHBOARD_META = {
+  '/user/ask-question/my-questions': { title: 'My Questions', sub: 'Review your questions, their status and available answers.' },
+  '/user/ask-question/purchased': { title: 'Purchased Questions', sub: 'Your purchased question packages and “Pay Now & Ask Later” questions you can still submit.' },
+  '/user/ask-question/disputes': { title: 'Disputes', sub: 'Track the disputes you raised and their current status.' },
+  '/user/ask-question/history': { title: 'History', sub: 'A read-only archive of your completed and cancelled questions.' },
 }
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
@@ -408,7 +410,8 @@ export default function Layout() {
   const dynamicBookingMeta = role === ROLES.USER && location.pathname.startsWith('/user/appointments/book/')
     ? { title: 'Book Appointment', sub: 'Pick an available date, review its open slots and pay from your wallet.' }
     : null
-  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
+  const dynamicQuestionMeta = role === ROLES.USER ? QUESTION_DASHBOARD_META[location.pathname] || null : null
+  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]
@@ -505,6 +508,18 @@ export default function Layout() {
           </div>
           <div className="topbar-actions" ref={actionRef}>
             {!isAstrologer && <ActiveCallIndicator />}
+            {!shellIsAstrologer && (
+              <button
+                type="button"
+                className="topbar-explore-btn"
+                aria-label="Explore Astrologers"
+                title="Explore Astrologers"
+                onClick={() => navigate(`${basePath}/astrologers`)}
+              >
+                <Search size={18} aria-hidden="true" />
+                <span className="topbar-explore-btn__label">Explore</span>
+              </button>
+            )}
             <button
               type="button"
               className="icon-btn"

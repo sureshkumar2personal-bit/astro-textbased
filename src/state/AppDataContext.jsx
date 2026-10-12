@@ -22,6 +22,8 @@ import {
   validateCapacityAllocation,
 } from '../utils/questions.js'
 import { ANSWER_DEADLINE_EXCEEDED_REASON, applyAnswerDeadlineCancellation, applyAnswerEdit, applyAnswerSubmit, applyQuestionDraft } from '../utils/answer.js'
+import { QUESTION_CREDIT_WINDOW_DAYS, consumeQuestionCreditInSlots, createQuestionCreditRecord, upsertQuestionCreditInSlots } from '../utils/questionCredits.js'
+import { buildSlotPricing, mergeSlotPricing } from '../utils/purchasedSlots.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -308,6 +310,49 @@ const DEMO_CAMPAIGNS = [
   },
 ]
 
+// One live Text-based Question campaign for each subscribed demo astrologer, so
+// the Choose Astrologer step can show everyone the user is subscribed to who
+// supports text questions. These carry no offer (offerEnabled: false,
+// discountPercent: 0) so they never change pricing - the first-question offer
+// badges on the chooser are presentation-only.
+const SUBSCRIBED_TEXT_CAMPAIGN_SPECS = [
+  ['acharya-meena', 'Health, Family & Remedies', 'Live family, health and remedy questions for subscribers.'],
+  ['astrologer-demo-3', 'Numerology Life Path', 'Live name, number and life-path questions.'],
+  ['astrologer-4', 'Palm & Fortune Reading', 'Live palm and fortune-reading questions.'],
+  ['astrologer-5', 'Tarot Future Guidance', 'Live tarot guidance for upcoming decisions.'],
+  ['astrologer-6', 'Crystal Energy Balance', 'Live energy-balancing and wellbeing questions.'],
+  ['astrologer-7', 'Vastu for Home & Work', 'Live home and workspace Vastu questions.'],
+  ['astrologer-8', 'Destiny Number Reading', 'Live numerology questions on life direction.'],
+  ['astrologer-9', 'Zodiac Compatibility', 'Live zodiac compatibility and timing questions.'],
+]
+
+const SUBSCRIBED_TEXT_CAMPAIGNS = SUBSCRIBED_TEXT_CAMPAIGN_SPECS.map(([astrologerId, name, shortDescription], index) => ({
+  id: `text-support-${astrologerId}`,
+  name,
+  month: DEMO_MONTH_KEY,
+  date: demoDate(demoMonthStart()),
+  endDate: demoDate(demoMonthEnd()),
+  priority: 'Medium',
+  status: 'Active',
+  categories: DEFAULT_CAMPAIGN_CATEGORIES,
+  shortDescription,
+  description: shortDescription,
+  questionTypes: ['General', 'Personal'],
+  offerEnabled: false,
+  discountPercent: 0,
+  generalOffer: false,
+  personalOffer: false,
+  generalPrice: 100 + (index % 2) * 20,
+  personalPrice: 250 + (index % 3) * 25,
+  packagePrice: 2000,
+  purchasedGeneral: 0,
+  purchasedPersonal: 0,
+  totalLimit: 30,
+  generalLimit: 18,
+  personalLimit: 12,
+  astrologerId,
+}))
+
 const initialCampaigns = [
   {
     id: 'july-premium',
@@ -376,20 +421,121 @@ const initialCampaigns = [
     astrologerId: 'astrologer-demo',
   },
   ...DEMO_CAMPAIGNS,
+  ...SUBSCRIBED_TEXT_CAMPAIGNS,
 ]
 
-const initialPurchasedSlots = initialCampaigns
-  .filter((campaign) => campaign.purchasedGeneral > 0 || campaign.purchasedPersonal > 0)
-  .map((campaign) => ({
-    id: `slots-user-demo-${campaign.id}`,
+// Demo purchased question-slot packages for the signed-in demo user, spread
+// across several astrologers so the consolidated "Purchase Slots" view has
+// something to show. These are presentation/sample records only: they never
+// touch a real wallet, gateway or production entitlement. Each carries the
+// pricing snapshot that would have been recorded at purchase time, except the
+// Health package which is intentionally left without pricing to exercise the
+// honest "amount not recorded" legacy path (never a misleading ₹0).
+const initialPurchasedSlots = [
+  {
+    id: 'slots-user-demo-marriage',
     userId: 'user-demo',
-    campaignId: campaign.id,
+    campaignId: 'demo-active-marriage',
+    campaignName: 'Marriage & Relationships',
     astrologerId: 'astrologer-demo',
-    generalPurchased: campaign.purchasedGeneral,
-    generalUsed: 0,
-    personalPurchased: campaign.purchasedPersonal,
+    astrologerName: 'Dr. Rani',
+    generalPurchased: 14,
+    generalUsed: 3,
+    personalPurchased: 7,
+    personalUsed: 2,
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 3150,
+      discountPercent: 60,
+      discountAmount: 1890,
+      paidAmount: 1260,
+      purchasedAt: '2026-09-12T09:30:00.000Z',
+      packageName: 'Marriage & Relationships',
+      isDemo: true,
+    }),
+  },
+  {
+    // Legacy sample: purchased before pricing was recorded, so no snapshot.
+    id: 'slots-user-demo-health',
+    userId: 'user-demo',
+    campaignId: 'demo-active-health',
+    campaignName: 'Health & Wellbeing',
+    astrologerId: 'astrologer-demo',
+    astrologerName: 'Dr. Rani',
+    generalPurchased: 9,
+    generalUsed: 2,
+    personalPurchased: 5,
+    personalUsed: 1,
+    demo: true,
+    pricing: null,
+  },
+  {
+    id: 'slots-user-demo-acharya-meena',
+    userId: 'user-demo',
+    campaignId: 'text-support-acharya-meena',
+    campaignName: 'Health, Family & Remedies',
+    astrologerId: 'acharya-meena',
+    astrologerName: 'Acharya Meena',
+    generalPurchased: 4,
+    generalUsed: 1,
+    personalPurchased: 1,
     personalUsed: 0,
-  }))
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 650,
+      discountPercent: 20,
+      discountAmount: 130,
+      paidAmount: 520,
+      purchasedAt: '2026-09-22T11:05:00.000Z',
+      packageName: 'Health, Family & Remedies',
+      isDemo: true,
+    }),
+  },
+  {
+    id: 'slots-user-demo-arjun-sharma',
+    userId: 'user-demo',
+    campaignId: 'text-support-astrologer-demo-3',
+    campaignName: 'Numerology Life Path',
+    astrologerId: 'astrologer-demo-3',
+    astrologerName: 'Arjun Sharma',
+    generalPurchased: 6,
+    generalUsed: 2,
+    personalPurchased: 3,
+    personalUsed: 0,
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 1545,
+      discountPercent: 0,
+      discountAmount: 0,
+      paidAmount: 1545,
+      purchasedAt: '2026-09-28T16:40:00.000Z',
+      packageName: 'Numerology Life Path',
+      isDemo: true,
+    }),
+  },
+  {
+    id: 'slots-user-demo-kavitha-iyer',
+    userId: 'user-demo',
+    campaignId: 'text-support-astrologer-4',
+    campaignName: 'Palm & Fortune Reading',
+    astrologerId: 'astrologer-4',
+    astrologerName: 'Kavitha Iyer',
+    generalPurchased: 5,
+    generalUsed: 1,
+    personalPurchased: 2,
+    personalUsed: 1,
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 1100,
+      discountPercent: 10,
+      discountAmount: 110,
+      paidAmount: 990,
+      purchasedAt: '2026-10-01T08:15:00.000Z',
+      packageName: 'Palm & Fortune Reading',
+      isDemo: true,
+    }),
+  },
+]
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -1590,6 +1736,11 @@ function updatePurchasedSlotBalance(list, userId, campaignId, slotType, amount) 
       : { ...slot, personalPurchased: slot.personalPurchased + amount }
   })
 }
+
+// Adds a paid-but-unwritten question credit to the purchased-slot record that
+// already owns this campaign for this user (creating it when the user has no
+// package yet). Implemented in utils/questionCredits so the balance and the
+// credit records can never drift apart.
 
 function loadFromStorage(key, fallback) {
   try {
@@ -2999,6 +3150,21 @@ export function AppDataProvider({ children }) {
     },
     purchasePackage(campaignId, purchase) {
       if (purchase.userId && purchase.source !== 'astrologer') {
+        // Record the receipt on the slot at the moment of purchase. The campaign
+        // price may change later, so this snapshot - not the live campaign - is
+        // what the purchased-slot views read back.
+        const pricing = buildSlotPricing({
+          generalQty: purchase.generalQty || 0,
+          personalQty: purchase.personalQty || 0,
+          generalPrice: purchase.generalPrice || 0,
+          personalPrice: purchase.personalPrice || 0,
+          discountPercent: purchase.discountPercent || 0,
+          originalAmount: purchase.originalAmount,
+          discountAmount: purchase.discountAmount,
+          paidAmount: purchase.paidAmount != null ? purchase.paidAmount : purchase.totalAmount,
+          purchasedAt: purchase.purchasedAt || new Date().toISOString(),
+          packageName: purchase.campaignName || '',
+        })
         setPurchasedSlots((prev) => {
           const existing = prev.find((slot) => slot.userId === purchase.userId && slot.campaignId === campaignId)
           if (existing) {
@@ -3009,18 +3175,26 @@ export function AppDataProvider({ children }) {
               'General',
               purchase.generalQty || 0,
             ).map((slot) => slot.userId === purchase.userId && slot.campaignId === campaignId
-              ? { ...slot, personalPurchased: slot.personalPurchased + (purchase.personalQty || 0) }
+              ? {
+                  ...slot,
+                  personalPurchased: slot.personalPurchased + (purchase.personalQty || 0),
+                  campaignName: purchase.campaignName || slot.campaignName,
+                  astrologerId: purchase.astrologerId || slot.astrologerId,
+                  pricing: mergeSlotPricing(slot.pricing, pricing),
+                }
               : slot)
           }
           return [...prev, {
             id: crypto.randomUUID(),
             userId: purchase.userId,
             campaignId,
+            campaignName: purchase.campaignName || '',
             astrologerId: purchase.astrologerId || 'astrologer-demo',
             generalPurchased: purchase.generalQty || 0,
             generalUsed: 0,
             personalPurchased: purchase.personalQty || 0,
             personalUsed: 0,
+            pricing,
           }]
         })
       }
@@ -3250,6 +3424,32 @@ if (question) {
         })),
       )
     },
+    // "Pay Now, Ask Later": the payment happens here, the question text does not.
+    // The receipt is a credit on the existing purchased-slot record, so the user
+    // can come back and submit the question later. No wallet movement is
+    // introduced - a Paid question in this app records its amount on the
+    // question itself, and the credit keeps that same paid amount.
+    purchaseQuestionCredit(payload) {
+      const nowMs = Date.now()
+      const credit = createQuestionCreditRecord(payload, { nowMs, id: crypto.randomUUID() })
+      if (!credit.userId) return null
+
+      setPurchasedSlots((prev) => upsertQuestionCreditInSlots(prev, credit))
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Question purchased',
+          detail: `₹${credit.paidPrice.toLocaleString('en-IN')} paid for a ${credit.questionType.toLowerCase()} question with ${credit.astrologerName}. Submit it from Purchased Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.`,
+          time: 'just now',
+          route: '/user/ask-question/purchased',
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+      return credit.id
+    },
     createQuestion(payload) {
       const nextId = `QTN-${new Date().getFullYear()}${String(Date.now()).slice(-6)}`
       const submittedAt = new Date().toISOString()
@@ -3305,7 +3505,15 @@ if (question) {
           answerReview: '',
           disputeRating: null,
           horoscopeMode: payload.horoscopeMode || 'Continue Without Horoscope',
-          attachments: [],
+          // Which horoscope this question carries: a reference to the saved
+          // profile horoscope, a freshly uploaded attachment, or neither.
+          horoscopeSource: payload.horoscopeSource || 'none',
+          horoscopeReference: payload.horoscopeReference || null,
+          horoscopeAttachment: payload.horoscopeAttachment || null,
+          // Birth details snapshot for the saved-horoscope case. The astrologer
+          // answer view already reads `customer`, so no new view is needed.
+          customer: payload.customer || null,
+          attachments: Array.isArray(payload.attachmentNames) ? payload.attachmentNames : [],
           previousQuestions: [],
           dispute: null,
           history: ['Question created'],
@@ -3313,7 +3521,18 @@ if (question) {
         ...prev,
       ])
       if (payload.purchaseType === 'Purchased Slot' && payload.slotType) {
-        setPurchasedSlots((prev) => updatePurchasedSlotBalance(prev, payload.userId, payload.campaignId, payload.slotType, -1))
+        setPurchasedSlots((prev) => consumeQuestionCreditInSlots(
+          updatePurchasedSlotBalance(prev, payload.userId, payload.campaignId, payload.slotType, -1),
+          {
+            creditId: payload.creditId || null,
+            userId: payload.userId,
+            // creditCampaignId keeps the Open Question case explicit: a credit
+            // bought for Open Question has a null campaignId.
+            campaignId: payload.creditCampaignId ?? null,
+            questionType: payload.slotType,
+            questionId: nextId,
+          },
+        ))
       }
       setQuestionPreviewId(nextId)
       setNotifications((prev) => [
@@ -3398,6 +3617,10 @@ if (question) {
       }
     },
     raiseDispute(questionId, payload) {
+      // A dispute is either directed at the astrologer who answered or at the
+      // AstroConnect platform itself. Only the astrologer path should notify the
+      // astrologer; platform disputes must not be pushed onto their queue.
+      const isPlatformDispute = payload.target === 'AstroConnect Platform'
       setQuestions((prev) =>
         updateQuestion(prev, questionId, (question) => {
           if (question.dispute) {
@@ -3413,7 +3636,10 @@ if (question) {
               description: payload.description,
               response: '',
               status: 'Open',
-              attachment: payload.attachment || 'Attachment.pdf',
+              raisedAt: new Date().toISOString(),
+              // Only carry an attachment when the user actually picked a file.
+              // Do not fabricate evidence that was never provided.
+              ...(payload.attachment ? { attachment: payload.attachment } : {}),
             },
             history: [...question.history, 'Dispute raised'],
           }
@@ -3424,23 +3650,25 @@ if (question) {
         {
           id: crypto.randomUUID(),
           title: 'Dispute raised',
-          detail: `Question ${questionId} is now in dispute.`,
+          detail: `Question ${questionId} is now in dispute with ${payload.target}.`,
           time: 'just now',
           route: `/user/raise-dispute?questionId=${questionId}`,
           audience: ROLES.USER,
           category: 'questions',
           read: false,
         },
-        {
-          id: crypto.randomUUID(),
-          title: 'Dispute raised by user',
-          detail: `A user raised a dispute on question ${questionId}. Please review and respond.`,
-          time: 'just now',
-          route: `/astrologer/text-based-question-history?questionId=${questionId}`,
-          audience: ROLES.ASTROLOGER,
-          category: 'questions',
-          read: false,
-        },
+        ...(isPlatformDispute
+          ? []
+          : [{
+              id: crypto.randomUUID(),
+              title: 'Dispute raised by user',
+              detail: `A user raised a dispute on question ${questionId}. Please review and respond.`,
+              time: 'just now',
+              route: `/astrologer/text-based-question-history?questionId=${questionId}`,
+              audience: ROLES.ASTROLOGER,
+              category: 'questions',
+              read: false,
+            }]),
         ...prev,
       ])
     },

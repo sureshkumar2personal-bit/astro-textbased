@@ -40,6 +40,23 @@ export function getDiscountPreview(price, percent) {
   }
 }
 
+// One pricing breakdown for a question: the advertised (original) price, the
+// discount applied exactly once, and the final payable amount. Every user-side
+// price display builds from this so the advertised price, the discount and the
+// amount actually charged can never drift apart. `offerEnabled: false` turns
+// the discount off without erasing the original price.
+export function getQuestionPricing({ price = 0, discountPercent = 0, offerEnabled = true } = {}) {
+  const originalPrice = Math.max(Number(price) || 0, 0)
+  const percent = offerEnabled === false ? 0 : discountPercent
+  const preview = getDiscountPreview(originalPrice, percent)
+  return {
+    originalPrice: preview.originalPrice,
+    discountPercent: preview.discountPercent,
+    discountAmount: preview.discountAmount,
+    payablePrice: preview.offerPrice,
+  }
+}
+
 export function sumCampaignAllocations(campaigns = []) {
   return campaigns.reduce((sum, campaign) => sum + getCampaignAllocation(campaign), 0)
 }
