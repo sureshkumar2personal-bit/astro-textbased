@@ -1,4 +1,5 @@
 import { ArrowRight, MessageCircle, Phone, Star, UserRound } from 'lucide-react'
+import { usePricingVersion, withSavedRates } from '../utils/consultationPricing.js'
 import { getStartingRate } from '../utils/publicAstrologerProfile.js'
 import Card from './ui/Card.jsx'
 
@@ -31,7 +32,9 @@ function TagRow({ items, limit, className, label, tone = 'soft' }) {
   )
 }
 
-export default function AstrologerCard({ astrologer, onViewProfile, onCall, onChat }) {
+export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfile, onCall, onChat }) {
+  usePricingVersion()
+  const astrologer = withSavedRates(baseAstrologer)
   const rate = getStartingRate(astrologer) ?? astrologer.consultationRate ?? null
   const initials = astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
   const photo = astrologer.photo || astrologer.profileImage

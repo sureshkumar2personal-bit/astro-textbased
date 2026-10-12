@@ -1078,7 +1078,7 @@ export default function PerksAndBenefits({ defaultTab }) {
           <button
             type="button"
             className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
+            onClick={() => navigate('/astrologer/perks-benefits/settings')}
           >
             <SlidersHorizontal size={18} />
             <span>1. Settings</span>
@@ -1086,7 +1086,7 @@ export default function PerksAndBenefits({ defaultTab }) {
           <button
             type="button"
             className={`perks-tab-btn ${activeTab === 'delivery' ? 'active' : ''}`}
-            onClick={() => setActiveTab('delivery')}
+            onClick={() => navigate('/astrologer/perks-benefits/delivery')}
           >
             <Send size={18} />
             <span>2. Benefit Management</span>
@@ -1095,7 +1095,7 @@ export default function PerksAndBenefits({ defaultTab }) {
           <button
             type="button"
             className={`perks-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
+            onClick={() => navigate('/astrologer/perks-benefits/history')}
           >
             <History size={18} />
             <span>3. History</span>

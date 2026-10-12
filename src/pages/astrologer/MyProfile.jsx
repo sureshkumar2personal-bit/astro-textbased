@@ -426,7 +426,9 @@ export default function MyProfile() {
           <p className="mp-note">Pricing changes may require admin approval before becoming publicly visible.</p>
           <div className="account-form-grid">
             {PRICING_FIELDS.map(({ key, label, suffix }) => (
-              <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
+              ['chat', 'voice'].includes(key)
+                ? <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" value={shown.services[key].price} readOnly disabled title="Managed in Consultation → Pricing" />
+                : <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
             ))}
             <TextField label="Currency" value="INR" readOnly disabled />
           </div>
@@ -584,9 +586,9 @@ export default function MyProfile() {
       <div className="mp-layout">
         <nav className="mp-tabs" aria-label="Profile sections">
           {PROFILE_SECTIONS.map(({ id, label }) => (
-            <button type="button" key={id} className={`mp-tabs__item${section === id ? ' is-active' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => selectSection(id)}>
+            <button type="button" key={id} className={`mp-tabs__item${section === id ? ' is-active' : ''}${incomplete[id] ? ' is-incomplete' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => selectSection(id)}>
               {label}
-              {incomplete[id] && <><span className="mp-tabs__dot" aria-hidden="true" /><span className="mp-sr-only"> (incomplete)</span></>}
+              {incomplete[id] && <span className="mp-sr-only"> (incomplete)</span>}
             </button>
           ))}
         </nav>

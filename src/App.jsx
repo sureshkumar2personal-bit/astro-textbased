@@ -4,6 +4,7 @@ import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
 import { EditorProvider } from './state/EditorContext.jsx'
 import { useEditor } from './state/EditorContext.jsx'
+import { InstantCallProvider } from './state/InstantCallContext.jsx'
 import { ThemeProvider } from './state/ThemeContext.jsx'
 import { ToastProvider } from './components/Toast.jsx'
 import { getRoleRoutes, ROLES } from './utils/roleRoutes.js'
@@ -46,19 +47,8 @@ import Astrologers from './pages/Astrologers.jsx'
 import AstrologersFull from './pages/astrologer/astrologers/AstrologersFull.jsx'
 import FollowedAstrologersFull from './pages/FollowedAstrologersFull.jsx'
 import SuggestedAstrologers from './pages/SuggestedAstrologers.jsx'
-import CallPackageSelection from './pages/CallPackageSelection.jsx'
-import ChatBooking from './pages/ChatBooking.jsx'
-import ChatBirthDetails from './pages/ChatBirthDetails.jsx'
-import ChatPaymentInformation from './pages/ChatPaymentInformation.jsx'
-import ChatPaymentSuccess from './pages/ChatPaymentSuccess.jsx'
-import ChatScreen from './pages/ChatScreen.jsx'
+import CallUser from './pages/user/calluser.jsx'
 import ChatDetails from './pages/ChatDetails.jsx'
-import CallScreen from './pages/CallScreen.jsx'
-import CallBooking from './pages/CallBooking.jsx'
-import CallPaymentInformation from './pages/CallPaymentInformation.jsx'
-import CallPaymentSuccess from './pages/CallPaymentSuccess.jsx'
-import VoiceCallScreen from './pages/VoiceCallScreen.jsx'
-import WalletPayment from './pages/WalletPayment.jsx'
 import DiscountQuestions from './pages/DiscountQuestions.jsx'
 import RewardsPerks from './pages/user/rewards/Rewards.jsx'
 import Activity from './pages/user/activity.jsx'
@@ -75,7 +65,6 @@ import FullHoroscope from './pages/user/horoscope/FullHoroscope.jsx'
 import AudienceMemberProfile from './pages/AudienceMemberProfile.jsx'
 import ChatAstrologers from './pages/ChatAstrologers.jsx'
 import CallAstrologers from './pages/CallAstrologers.jsx'
-import InstantCallUser from './pages/user/instantcalluser.jsx'
 import InstantChatUser from './pages/user/instantchatuser.jsx'
 import AstrologerProfile from './pages/AstrologerProfile.jsx'
 import ReviewsRatings from './pages/ReviewsRatings.jsx'
@@ -96,6 +85,10 @@ import AstrologerLiveSessionShell, {
   AstrologerLiveSessionSummary,
 } from './pages/astrologer/live/AstrologerLiveSession.jsx'
 import { ScheduledLive, LiveHistory } from './pages/astrologer/live/LiveSessionLists.jsx'
+import ConsultationShell from './pages/astrologer/consultation/ConsultationShell.jsx'
+import InstantCallHistory from './pages/astrologer/consultation/InstantCallHistory.jsx'
+import InstantChatHistory from './pages/astrologer/consultation/InstantChatHistory.jsx'
+import ConsultationPricing from './pages/astrologer/consultation/ConsultationPricing.jsx'
 import AppointmentsShell from './pages/astrologer/appointments/AppointmentsShell.jsx'
 import AppointmentScheduleTab from './pages/astrologer/appointments/AppointmentSchedule.jsx'
 import AppointmentHistoryTab from './pages/astrologer/appointments/AppointmentHistory.jsx'
@@ -211,6 +204,12 @@ function AstrologerRoutes() {
         <Route path="/astrologer/dispute-management" element={<DisputeManagementRedirect />} />
         <Route path="/astrologer/activity" element={<AstrologerActivity />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
+        <Route path="/astrologer/consultation" element={<ConsultationShell />}>
+          <Route index element={<Navigate to="instant-call" replace />} />
+          <Route path="instant-call" element={<InstantCallHistory />} />
+          <Route path="instant-chat" element={<InstantChatHistory />} />
+          <Route path="pricing" element={<ConsultationPricing />} />
+        </Route>
         <Route path="/astrologer/appointments" element={<AppointmentsShell />}>
           <Route index element={<Navigate to="schedule" replace />} />
           <Route path="schedule" element={<AppointmentScheduleTab />} />
@@ -262,23 +261,9 @@ function UserRoutes() {
         <Route path="/user/astrologers-full" element={<AstrologersFull />} />
         <Route path="/user/followed-astrologers" element={<FollowedAstrologersFull />} />
         <Route path="/user/suggested-astrologers" element={<SuggestedAstrologers />} />
-        <Route path="/user/call-packages" element={<CallPackageSelection />} />
-        <Route path="/call-booking/:astrologerId" element={<CallBooking />} />
-        <Route path="/call-payment/:astrologerId" element={<CallPaymentInformation />} />
-        <Route path="/call-payment-success" element={<CallPaymentSuccess />} />
-        <Route path="/call/:astrologerId" element={<VoiceCallScreen />} />
-        <Route path="/user/instantcall/:astrologerId" element={<InstantCallUser />} />
+        <Route path="/user/call/:astrologerId" element={<CallUser />} />
         <Route path="/user/instantchat/:astrologerId" element={<InstantChatUser />} />
-        <Route path="/user/chat-booking" element={<ChatBooking />} />
-        <Route path="/chat-birth-details/:astrologerId" element={<ChatBirthDetails />} />
-        <Route path="/chat-booking/:astrologerId" element={<ChatBooking />} />
-        <Route path="/payment-information" element={<ChatPaymentInformation />} />
-        <Route path="/payment-success" element={<ChatPaymentSuccess />} />
-        <Route path="/user/chat" element={<ChatScreen />} />
         <Route path="/user/chat-details" element={<ChatDetails />} />
-        <Route path="/user/call" element={<CallScreen />} />
-        <Route path="/user/wallet-payment" element={<WalletPayment />} />
-        <Route path="/chat/:astrologerId" element={<ChatScreen />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />
         <Route path="/user/rewards" element={<RewardsPerks />} />
         <Route path="/user/activity" element={<Activity />} />
@@ -379,7 +364,9 @@ function App() {
         <ThemeProvider>
           <ToastProvider>
             <BrowserRouter>
-              <AppRoutes />
+              <InstantCallProvider>
+                <AppRoutes />
+              </InstantCallProvider>
             </BrowserRouter>
           </ToastProvider>
         </ThemeProvider>

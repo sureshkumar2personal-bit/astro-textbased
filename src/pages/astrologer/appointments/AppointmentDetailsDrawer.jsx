@@ -12,7 +12,7 @@ import {
 } from '../../../utils/appointments.js'
 
 
-function Avatar({ name }) {
+export function Avatar({ name }) {
   const initials = String(name || '?')
     .split(' ')
     .map((p) => p[0])
@@ -30,7 +30,7 @@ function Avatar({ name }) {
   )
 }
 
-function DetailRow({ icon: Icon, label, value }) {
+export function DetailRow({ icon: Icon, label, value }) {
   const resolvedValue = value == null || value === '' ? 'Not available' : value
   return (
     <div className="apt-detail-row">

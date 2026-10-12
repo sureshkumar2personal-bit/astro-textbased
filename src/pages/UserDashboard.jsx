@@ -17,6 +17,7 @@ import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils
 import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import { useInstantCall } from '../state/InstantCallContext.jsx'
 
 function formatActivityDate(value) {
   if (!value) return 'Date unavailable'
@@ -32,6 +33,7 @@ function truncateWords(value, limit = 5) {
 
 export default function UserDashboard() {
   const { currentUser } = useAuth()
+  const { openInstantCall, openInstantChat } = useInstantCall()
   const { questions, consultationHistory, appointments, userWallet, astrologerLiveSessions, actions } = useAppData()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
@@ -82,8 +84,8 @@ export default function UserDashboard() {
   }, [])
 
   const handleViewAstrologer = (astrologerId) => navigate(`${routes.base}/astrologer/${astrologerId}?from=dashboard`)
-  const handleCallAstrologer = (astrologerId) => navigate(`/call-booking/${astrologerId}?from=dashboard`)
-  const handleChatAstrologer = (astrologerId) => navigate(`/chat-booking/${astrologerId}?from=dashboard`)
+  const handleCallAstrologer = (astrologerId) => openInstantCall(astrologerId)
+  const handleChatAstrologer = (astrologerId) => openInstantChat(astrologerId)
 
   return (
     <div className="user-dashboard-page">
@@ -261,7 +263,6 @@ export default function UserDashboard() {
           </div>
         </Section>
       )}
-
       </div>
   )
 }
