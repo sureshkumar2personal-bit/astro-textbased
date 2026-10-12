@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  ShoppingBag,
   MessagesSquare,
   Clock3,
   Sparkles,
@@ -108,13 +107,12 @@ export default function UserDashboard() {
       </div>
 
       <Section title="Quick Actions" icon={Sparkles}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {[
             { icon: MessagesSquare, label: 'Ask Question', route: routes.askQuestion, fromDashboard: true },
             { icon: CalendarDays, label: 'Book Appointment', route: routes.appointmentBook, fromDashboard: true },
             { icon: MessageCircle, label: 'Chat with Astrologer', route: routes.chatAstrologers, badge: '14 online' },
             { icon: PhoneCall, label: 'Call with Astrologer', route: routes.callAstrologers, badge: '14 online' },
-            { icon: ShoppingBag, label: 'Purchase Package', route: routes.purchasePackage, fromDashboard: true },
             { icon: Radio, label: 'Join Live', route: routes.liveSession, fromDashboard: true },
           ].map(({ icon: Icon, label, route, badge, fromDashboard }) => (
             <button
@@ -124,7 +122,7 @@ export default function UserDashboard() {
               onClick={() => navigate(route, fromDashboard ? { state: { from: 'dashboard' } } : undefined)}
             >
               <div className="action-card-icon">
-                <Icon size={20} />
+                <Icon size={22} />
               </div>
               <div className="action-card-body">
                 <div className="action-card-title">{label}</div>

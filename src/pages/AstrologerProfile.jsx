@@ -186,6 +186,22 @@ export default function AstrologerProfile() {
   const canBookAppointment = subscribed
   const walletBalance = Number(userWallet?.balance || 0)
   const defaultSubscribeMethod = userPaymentMethods.find((m) => m.isDefault)
+  // "Subscribe" cards on the Ask Question chooser deep-link here with
+  // ?subscribe=1 and open the existing subscribe dialog immediately, so the
+  // recommended list never drops the user on the profile without starting
+  // the subscription flow. Skipped once they are already subscribed.
+  useEffect(() => {
+    if (searchParams.get('subscribe') !== '1' || isOwner) return
+    const existingSub = subscriptions.find(
+      (sub) => sub.userId === currentUser?.id && sub.astrologerId === astrologer.id,
+    )
+    if (existingSub && getSubscriptionDaysRemaining(getSubscriptionExpiry(existingSub)) > 0) return
+    setSubscribeMethodId('')
+    setSubscribeAutopay(true)
+    setSubscribeConfirmOpen(false)
+    setSubscribeInsufficient(false)
+    setSubscribeOpen(true)
+  }, [astrologer, currentUser, isOwner, searchParams, subscriptions])
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingStep, setBookingStep] = useState('form')
   const [calendarView, setCalendarView] = useState('month')

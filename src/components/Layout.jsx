@@ -30,6 +30,7 @@ import {
   Send,
   RefreshCw,
   Flame,
+  Search,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import InstantCallAstrologer from '../pages/astrologer/instantcallastrologer.jsx'
@@ -77,14 +78,11 @@ const ROLE_CONFIG = {
     navLabel: 'User',
     nav: [
       { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
-      {
-        to: 'astrologers',
-        label: 'Explore Astrologers',
-        icon: Sparkles,
-      },
-      // Single Ask a Question entry: it opens the question dashboard, whose four
-      // sections (Ask New, My Questions, Disputes, History) replace the old
-      // Text-Based Questions sub-items.
+      // Explore Astrologers now lives in the top header (see the topbar actions)
+      // so the sidebar stays focused on the account modules.
+      // Single Ask a Question entry: it opens the question dashboard, whose
+      // sections (Ask New, My Questions, Purchased Questions, History) replace
+      // the old Text-Based Questions sub-items. Disputes live inside My Questions.
       {
         label: 'Ask a Question',
         to: 'ask-question',
@@ -188,8 +186,9 @@ const PAGE_META = {
 // own heading in the top bar.
 const QUESTION_DASHBOARD_META = {
   '/user/ask-question/my-questions': { title: 'My Questions', sub: 'Review your questions, their status and available answers.' },
+  '/user/ask-question/purchased': { title: 'Purchased Questions', sub: 'Your purchased question packages and “Pay Now & Ask Later” questions you can still submit.' },
   '/user/ask-question/disputes': { title: 'Disputes', sub: 'Track the disputes you raised and their current status.' },
-  '/user/ask-question/history': { title: 'History', sub: 'Your question history for the last 6 months.' },
+  '/user/ask-question/history': { title: 'History', sub: 'A read-only archive of your completed and cancelled questions.' },
 }
 
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
@@ -514,6 +513,18 @@ export default function Layout() {
             <div className="topbar-crumb-sub">{meta.sub}</div>
           </div>
           <div className="topbar-actions" ref={actionRef}>
+            {!shellIsAstrologer && (
+              <button
+                type="button"
+                className="topbar-explore-btn"
+                aria-label="Explore Astrologers"
+                title="Explore Astrologers"
+                onClick={() => navigate(`${basePath}/astrologers`)}
+              >
+                <Search size={18} aria-hidden="true" />
+                <span className="topbar-explore-btn__label">Explore</span>
+              </button>
+            )}
             <button
               type="button"
               className="icon-btn"

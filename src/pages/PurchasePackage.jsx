@@ -11,6 +11,7 @@ import { RadioGroup } from '../components/OptionGroup.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { getCampaignDiscountPercent, getDiscountPreview } from '../utils/questions.js'
 import { TempleReturnIcon } from '../components/TempleIcons.jsx'
 
 const QTY_OPTIONS = [1, 2, 3, 5, 10]
@@ -45,15 +46,38 @@ export default function PurchasePackage() {
     setQuantities((prev) => ({ ...prev, [campaignId]: { ...getQty(campaignId), ...patch } }))
   }
 
+  // Subtotals the selected quantities, then applies the campaign's offer
+  // percent to the whole package. The resulting receipt is what gets recorded
+  // on the purchased slot, so later price changes never rewrite the bill.
+  const getPurchaseBilling = (campaign, qty) => {
+    const generalPrice = Number(campaign.generalPrice) || 0
+    const personalPrice = Number(campaign.personalPrice) || 0
+    const subtotal = (qty.generalQty * generalPrice) + (qty.personalQty * personalPrice)
+    const discountPercent = getCampaignDiscountPercent(campaign)
+    return {
+      subtotal,
+      generalPrice,
+      personalPrice,
+      discountPercent,
+      preview: getDiscountPreview(subtotal, discountPercent),
+    }
+  }
+
   const handleBuyNow = () => {
     if (!selectedCampaign) return
     const { generalQty, personalQty } = getQty(selectedCampaign.id)
-    const totalAmount = (generalQty * selectedCampaign.generalPrice) + (personalQty * selectedCampaign.personalPrice)
+    const billing = getPurchaseBilling(selectedCampaign, { generalQty, personalQty })
     actions.purchasePackage(selectedCampaign.id, {
       campaignName: selectedCampaign.name,
       generalQty,
       personalQty,
-      totalAmount,
+      generalPrice: billing.generalPrice,
+      personalPrice: billing.personalPrice,
+      discountPercent: billing.discountPercent,
+      originalAmount: billing.preview.originalPrice,
+      discountAmount: billing.preview.discountAmount,
+      paidAmount: billing.preview.offerPrice,
+      totalAmount: billing.subtotal,
       userId: currentUser?.id,
       source: source || currentUser?.role,
     })
@@ -118,6 +142,7 @@ export default function PurchasePackage() {
                   <div className="muted" style={{ marginTop: 4 }}>Valid till: {campaign.date}</div>
                   <div className="muted" style={{ marginTop: 2 }}>
                     General ₹{campaign.generalPrice} · Individual ₹{campaign.personalPrice}
+                    {getCampaignDiscountPercent(campaign) > 0 && ` · ${getCampaignDiscountPercent(campaign)}% package offer`}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -132,7 +157,7 @@ export default function PurchasePackage() {
 
       {!isUser && selectedCampaign && (() => {
         const { generalQty, personalQty } = getQty(selectedCampaign.id)
-        const totalAmount = (generalQty * selectedCampaign.generalPrice) + (personalQty * selectedCampaign.personalPrice)
+        const { subtotal, preview } = getPurchaseBilling(selectedCampaign, { generalQty, personalQty })
 
         return (
           <Section title={`${selectedCampaign.name} — Purchase Details`}>
@@ -192,11 +217,23 @@ export default function PurchasePackage() {
                     <span>Individual Questions</span>
                     <strong>₹{personalQty * selectedCampaign.personalPrice}</strong>
                   </div>
+                  {preview.discountPercent > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--primary)' }}>
+                      <span>Package Offer ({preview.discountPercent}% off)</span>
+                      <strong>-₹{preview.discountAmount}</strong>
+                    </div>
+                  )}
                   <div className="divider" style={{ margin: '4px 0' }} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}>
                     <span>Total Amount</span>
-                    <strong>₹{totalAmount}</strong>
+                    <strong>₹{subtotal}</strong>
                   </div>
+                  {preview.discountPercent > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}>
+                      <span>You Pay</span>
+                      <strong>₹{preview.offerPrice}</strong>
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
@@ -230,7 +267,7 @@ export default function PurchasePackage() {
 
       {isUser && isPurchaseModalOpen && selectedCampaign && createPortal((() => {
         const { generalQty, personalQty } = getQty(selectedCampaign.id)
-        const totalAmount = (generalQty * selectedCampaign.generalPrice) + (personalQty * selectedCampaign.personalPrice)
+        const { subtotal, preview } = getPurchaseBilling(selectedCampaign, { generalQty, personalQty })
 
         return (
           <div className="modal-overlay user-modal-overlay" onClick={() => setIsPurchaseModalOpen(false)}>
@@ -275,8 +312,14 @@ export default function PurchasePackage() {
                   <div style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>General Questions</span><strong>₹{generalQty * selectedCampaign.generalPrice}</strong></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Individual Questions</span><strong>₹{personalQty * selectedCampaign.personalPrice}</strong></div>
+                    {preview.discountPercent > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--primary)' }}><span>Package Offer ({preview.discountPercent}% off)</span><strong>-₹{preview.discountAmount}</strong></div>
+                    )}
                     <div className="divider" style={{ margin: '4px 0' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Total Amount</span><strong>₹{totalAmount}</strong></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>Total Amount</span><strong>₹{subtotal}</strong></div>
+                    {preview.discountPercent > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16 }}><span>You Pay</span><strong>₹{preview.offerPrice}</strong></div>
+                    )}
                   </div>
                 </Card>
 

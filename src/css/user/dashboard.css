@@ -58,28 +58,28 @@
 }
 
 .user-dashboard-page .action-card--compact {
-  min-height: 116px;
-  padding: 16px;
+  min-height: 136px;
+  padding: 20px;
   border-color: #e8def4;
-  border-radius: 14px;
-  box-shadow: 0 5px 16px rgba(74, 42, 116, .045);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(74, 42, 116, .05);
 }
 
 .user-dashboard-page .action-card--compact .action-card-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
 }
 
 .user-dashboard-page .action-card-title {
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.35;
 }
 
 .user-dashboard-page .action-card-desc {
   margin-top: 5px;
   color: var(--primary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -175,5 +175,48 @@
   .user-dashboard-page .hero-banner-user .hero-banner-cta {
     justify-content: flex-start;
     margin-top: 16px;
+  }
+}
+
+/* "Explore Astrologers" moved from the user sidebar into the top header. The
+   button mirrors the existing header icon buttons (same border, surface, radius,
+   shadow and hover) and collapses to an icon on narrower screens so it never
+   crowds Wallet, Notifications or the profile chip. */
+.topbar-explore-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 15px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-strong);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: transform 200ms var(--ease-premium), background 200ms var(--ease-premium), border-color 200ms var(--ease-premium), color 200ms var(--ease-premium), box-shadow 200ms var(--ease-premium);
+}
+
+.topbar-explore-btn:hover {
+  background: var(--primary-bg);
+  border-color: var(--secondary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 1024px) {
+  .topbar-explore-btn {
+    width: 44px;
+    padding: 0;
+  }
+
+  .topbar-explore-btn__label {
+    display: none;
   }
 }

@@ -1,12 +1,16 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays, CircleHelp } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
+import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
+import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import SummaryCard from '../components/ui/SummaryCard.jsx'
+import SuccessAlert from '../components/ui/SuccessAlert.jsx'
+import RaiseDisputeModal from '../components/user/RaiseDisputeModal.jsx'
 import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -26,13 +30,6 @@ import {
   isDisputeWindowOpen,
   selectTrackedQuestions,
 } from '../utils/questionLifecycle.js'
-import {
-  QUESTION_CREDIT_AVAILABLE,
-  getQuestionCreditDaysRemaining,
-  getQuestionCreditOfferLabel,
-  getQuestionCreditSourceLabel,
-  getQuestionCreditsForUser,
-} from '../utils/questionCredits.js'
 import { getAtonementProgress } from '../utils/atonements.js'
 import useUserAtonements from '../state/useUserAtonements.js'
 import '../css/user/question-tracking.css'
@@ -53,6 +50,214 @@ const LIFECYCLE_STAGE_META = {
   All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Active questions this month' },
 }
 
+// Maps a lifecycle stage onto the CampaignCard tone palette for this screen.
+const STAGE_CARD_TONE = {
+  [STAGE_WAITING]: 'sky',
+  [STAGE_ANSWERED]: 'green',
+  [STAGE_DISPUTED]: 'rose',
+  [STAGE_RESOLVED]: 'teal',
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+// Presentation-only demo questions for the My Questions screen. They live only
+// in this page's render data - they are never added to AppDataContext or
+// localStorage, never touch a real question record, and are rebuilt on every
+// load so their dates always land in the current month. The `demo` flag and the
+// `QTN-DEMO-` id prefix keep them clearly identifiable. They are merged into the
+// same dataset used for both the summary counts and the filtered lists below.
+const DEMO_QUESTION_BASE = {
+  astrologerId: 'astrologer-demo',
+  submittedByUserId: 'user-demo',
+  submittedByEmail: 'user@astroconnect.com',
+  purchaseType: 'Paid',
+  refundAmount: 0,
+  refundStatus: 'None',
+  language: 'English',
+  priority: 'Medium',
+  demo: true,
+  attachments: [],
+  previousQuestions: [],
+  history: ['Presentation-only demo record'],
+  dispute: null,
+}
+
+// Runtime-relative timestamp that is always inside the current month. Small
+// "days ago" offsets can slip into the previous month when the screen is opened
+// near the start of a month, so the result is clamped to the 1st of the month.
+function demoQuestionWhen(daysAgo, hour = 10, minute = 30) {
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
+  const target = new Date(now.getTime() - daysAgo * DAY_MS)
+  target.setHours(hour, minute, 0, 0)
+  if (target.getTime() > now.getTime()) return new Date(now.getTime() - 60 * 60 * 1000).toISOString()
+  return (target.getTime() < monthStart.getTime() ? monthStart : target).toISOString()
+}
+
+function buildDemoQuestions() {
+  return [
+    // Waiting for Answer
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900001',
+      userId: 'customer-demo-1',
+      user: 'Priya V.',
+      category: 'Health',
+      type: 'Personal',
+      questionFor: 'Self',
+      priority: 'High',
+      status: 'Pending',
+      campaignId: 'july-premium',
+      campaignName: 'Health Campaign',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(1, 9, 15),
+      question: 'I have been feeling low on energy for a few weeks. Does my chart show a favourable window for recovery?',
+      answer: '',
+      draftAnswer: '',
+      horoscopeMode: 'Use Saved Horoscope',
+    },
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900002',
+      userId: 'customer-demo-2',
+      user: 'Kannan',
+      category: 'Career',
+      type: 'General',
+      questionFor: 'Self',
+      status: 'In Progress',
+      campaignId: 'festival-special',
+      campaignName: 'Career Campaign',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(3, 13, 5),
+      question: 'Is this a good month to negotiate a salary revision with my manager?',
+      answer: '',
+      draftAnswer: 'Reviewing your current transit before the detailed reading.',
+      horoscopeMode: 'Continue Without Horoscope',
+    },
+    // Answered (inside the 7-day dispute window)
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900003',
+      userId: 'customer-demo-3',
+      user: 'Meena R.',
+      category: 'Marriage',
+      type: 'Personal',
+      questionFor: 'Self',
+      priority: 'High',
+      status: 'Answered',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(2, 11, 20),
+      question: 'When is a favourable time for my marriage discussions to move forward?',
+      answer: 'The coming weeks favour a calm, well-prepared family conversation. Early mornings on a weekday are the most supportive for this.',
+      answeredAt: demoQuestionWhen(1, 16, 40),
+      draftAnswer: '',
+      horoscopeMode: 'Use Saved Horoscope',
+    },
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900004',
+      userId: 'customer-demo-4',
+      user: 'Arun',
+      category: 'Business',
+      type: 'General',
+      questionFor: 'Business',
+      status: 'Answered',
+      campaignId: 'vip-subscribers',
+      campaignName: 'VIP Subscribers',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(5, 10, 10),
+      question: 'Should I sign the new vendor agreement before the end of this month?',
+      answer: 'Yes, the timing is supportive. Read the renewal clauses once more and confirm before the final week of the month.',
+      answeredAt: demoQuestionWhen(4, 18, 5),
+      draftAnswer: '',
+      horoscopeMode: 'Continue Without Horoscope',
+    },
+    // Disputed
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900005',
+      userId: 'customer-demo-5',
+      user: 'Devi',
+      category: 'Health',
+      type: 'Personal',
+      questionFor: 'Self',
+      priority: 'High',
+      status: 'Disputed',
+      campaignId: 'july-premium',
+      campaignName: 'Health Campaign',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(6, 17, 25),
+      question: 'Does my chart indicate a long-term recovery path for my health, or should I seek a second opinion?',
+      answer: 'Your chart shows gradual improvement. Follow the suggested remedies for at least two months before reassessing.',
+      answeredAt: demoQuestionWhen(5, 12, 0),
+      draftAnswer: '',
+      horoscopeMode: 'Use Saved Horoscope',
+      dispute: {
+        target: 'Astrologer',
+        reason: 'The response feels too generic for a personal health question.',
+        description: 'I expected the answer to relate more directly to my chart and to explain the recovery timeline clearly.',
+        response: '',
+        status: 'Open',
+      },
+    },
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900006',
+      userId: 'customer-demo-6',
+      user: 'Arjun D.',
+      category: 'Career',
+      type: 'General',
+      questionFor: 'Self',
+      status: 'Disputed',
+      campaignId: 'festival-special',
+      campaignName: 'Career Campaign',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(7, 14, 45),
+      question: 'Is this the right time to accept the new role I was offered?',
+      answer: 'The opportunity looks promising, but review the responsibilities carefully before deciding.',
+      answeredAt: demoQuestionWhen(6, 9, 30),
+      draftAnswer: '',
+      horoscopeMode: 'Continue Without Horoscope',
+      dispute: {
+        target: 'Astrologer',
+        reason: 'Please clarify the timing and the responsibilities.',
+        description: 'The answer was helpful but I would like more specific guidance about the joining window.',
+        response: '',
+        status: 'Open',
+      },
+    },
+    // Resolved
+    {
+      ...DEMO_QUESTION_BASE,
+      id: 'QTN-DEMO-900007',
+      userId: 'customer-demo-7',
+      user: 'Lakshmi',
+      category: 'Career',
+      type: 'Personal',
+      questionFor: 'Self',
+      priority: 'High',
+      status: 'Answered',
+      raised: 'Demo record',
+      raisedAt: demoQuestionWhen(5, 9, 5),
+      question: 'Will my interview next week go well, and how should I prepare?',
+      answer: 'The interview window is favourable. Revise your key projects and keep the first half of the week free for preparation.',
+      answeredAt: demoQuestionWhen(4, 15, 0),
+      draftAnswer: '',
+      horoscopeMode: 'Continue Without Horoscope',
+      dispute: {
+        target: 'Astrologer',
+        reason: 'The answer did not mention how to handle a delayed response.',
+        description: 'I wanted clarity on what to do if the result is delayed beyond a week.',
+        response: 'If the result is delayed, follow up politely after one full week and avoid over-preparing for a rejection scenario.',
+        status: 'Resolved',
+        raisedAt: demoQuestionWhen(3, 10, 0),
+        resolvedAt: demoQuestionWhen(1, 12, 0),
+        resolution: 'The answer was revised with a clear follow-up timeline and the customer confirmed it resolved the concern.',
+      },
+    },
+  ]
+}
+
 // One active question, shown as a full record: identity, source, type, date,
 // the question text, the current lifecycle stage, the answer once it exists and
 // the dispute / refund state that belongs to the same question record.
@@ -61,30 +266,18 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
   const answered = isQuestionAnswered(question)
   const dispute = question.dispute || null
   const refund = getQuestionRefundInfo(question)
+  // Eligibility is the shared dispute rule: the question is answered, still
+  // inside its 7-day window, and does not already have an open dispute.
   const canRaiseDispute = isDisputeWindowOpen(question, nowMs)
   const astrologerName = mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
   const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
+  const typeLabel = getQuestionTypeLabel(question)
+  const tone = STAGE_CARD_TONE[stage]
+  const accentStyle = campaignCardToneStyle(tone) || campaignCardStatusStyle('Active')
+  const chipStyle = { background: 'var(--neutral-bg)', color: 'var(--muted)', border: '1px solid var(--surface-border)' }
 
-  return (
-    <Card className="aq-track-card">
-      <div className="aq-track-card__head">
-        <div style={{ fontWeight: 800, color: 'var(--ink)' }}>{question.id}</div>
-        <StatusBadge label={stage} />
-      </div>
-
-      <div className="aq-track-card__meta">
-        <span>{astrologerName}</span>
-        <span>·</span>
-        <span>{sourceLabel}</span>
-        <span>·</span>
-        <span>{getQuestionTypeLabel(question)}</span>
-      </div>
-      <div className="muted" style={{ fontSize: 12.5 }}>
-        Asked: {formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '—'} · {question.purchaseType}
-      </div>
-
-      <div className="aq-track-card__question">{question.question}</div>
-
+  const footer = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {answered && (
         <div className="aq-track-card__answer">
           <div className="aq-track-card__answer-label">Astrologer&apos;s answer</div>
@@ -121,7 +314,7 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
         </div>
       )}
 
-      <div className="btn-row" style={{ marginTop: 14 }}>
+      <div className="btn-row" style={{ marginTop: 4 }}>
         {answered && <button className="btn btn-outline" onClick={onOpen}>View Answer</button>}
         {!answered && <button className="btn btn-outline" onClick={onOpen}>View Question</button>}
         {canRaiseDispute && (
@@ -131,7 +324,29 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
           </button>
         )}
       </div>
-    </Card>
+    </div>
+  )
+
+  return (
+    <CampaignCard
+      status={stage}
+      tone={tone}
+      icon={<CircleHelp size={22} aria-hidden="true" />}
+      name={question.id}
+      subtitle={`${astrologerName} · ${sourceLabel} · ${typeLabel}`}
+      description={question.question}
+      chips={[
+        <CampaignStatusChip key="type" style={{ background: accentStyle.softBg, color: accentStyle.accent, border: `1px solid ${accentStyle.border}` }}>{typeLabel}</CampaignStatusChip>,
+        <CampaignStatusChip key="source" style={chipStyle}>{sourceLabel}</CampaignStatusChip>,
+        <CampaignStatusChip key="purchase" style={chipStyle}>{question.purchaseType}</CampaignStatusChip>,
+      ]}
+      details={[
+        { label: 'Asked', value: formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '—' },
+        { label: 'Purchase', value: question.purchaseType || '—' },
+        { label: 'Stage', value: stage },
+      ]}
+      footer={footer}
+    />
   )
 }
 
@@ -154,12 +369,6 @@ function MonthSelector({ monthKey, options, onChange }) {
   )
 }
 
-function formatCreditDate(value) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 function formatTimeRemaining(ms) {
   if (ms <= 0) return 'Expired'
   const totalSeconds = Math.floor(ms / 1000)
@@ -167,6 +376,21 @@ function formatTimeRemaining(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   if (hours > 0) return `${hours}h ${minutes}m`
   return `${minutes}m`
+}
+
+// Short "See more…" preview: only the first few words are shown inline, and the
+// rest is revealed in the full-content modal. Shared by every field the details
+// view trims (question, answer, dispute reason/description/response).
+function getWordPreview(content) {
+  const text = String(content || '').trim()
+  const words = text.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 4) return { preview: text, isTruncated: false }
+
+  return {
+    preview: words.slice(0, 4).join(' '),
+    isTruncated: true,
+  }
 }
 
 function ContentPreview({ content, title, onViewFull, quoted = false, className = 'muted' }) {
@@ -214,62 +438,10 @@ function TimeLimitBadge({ label, timeRemaining, tooltip, isEnabled }) {
 
 // `embedded` renders this page as a section of the Ask a Question dashboard,
 // where the dashboard already shows the page header and the section tabs.
-// "Pay Now, Ask Later" receipts. These are paid questions that have not been
-// written yet, so they are listed here - never as a submitted question - until
-// the question is actually sent.
-function AvailableQuestionCredits({ credits, onAskNow }) {
-  if (credits.length === 0) return null
-
-  return (
-    <Section className="!mt-0">
-      <Card>
-        <div className="section-title">Available Questions</div>
-        <div className="muted" style={{ marginTop: -6, marginBottom: 14 }}>
-          Paid questions you can submit now or come back to later. A credit expires after 7 days.
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {credits.map((credit) => {
-            const isAvailable = credit.status === QUESTION_CREDIT_AVAILABLE
-            const offerLabel = getQuestionCreditOfferLabel(credit)
-            const daysLeft = getQuestionCreditDaysRemaining(credit)
-            return (
-              <Card key={credit.id} className="aq-credit-card">
-                <div className="aq-credit-card__head">
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{credit.astrologerName}</div>
-                  <StatusBadge label={isAvailable ? 'Available' : 'Expired'} />
-                </div>
-                <div className="muted" style={{ fontSize: 13.5 }}>
-                  {getQuestionCreditSourceLabel(credit)} · {credit.questionType} question
-                </div>
-                {offerLabel ? <span className="aq-credit-card__offer">{offerLabel}</span> : null}
-                <div className="aq-credit-card__meta">
-                  <span><strong>Purchased</strong> {formatCreditDate(credit.purchasedAt)}</span>
-                  <span><strong>Paid</strong> ₹{Number(credit.paidPrice || 0).toLocaleString('en-IN')}</span>
-                  <span>
-                    <strong>Expires</strong> {formatCreditDate(credit.expiresAt)}
-                    {isAvailable ? ` · in ${daysLeft} day${daysLeft === 1 ? '' : 's'}` : ''}
-                  </span>
-                </div>
-                {isAvailable ? (
-                  <button type="button" className="btn btn-primary aq-credit-card__action" onClick={() => onAskNow(credit)}>
-                    Ask Now
-                  </button>
-                ) : (
-                  <div className="aq-credit-card__expired">Expired — this question can no longer be submitted.</div>
-                )}
-              </Card>
-            )
-          })}
-        </div>
-      </Card>
-    </Section>
-  )
-}
-
 export default function TrackQuestions({ embedded = false }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { questions, questionPreviewId, setQuestionPreviewId, purchasedSlots, actions } = useAppData()
+  const { questions, questionPreviewId, setQuestionPreviewId, actions } = useAppData()
   const { currentUser } = useAuth()
   const { allAtonements } = useUserAtonements()
   const routes = getRoleRoutes(currentUser?.role)
@@ -306,6 +478,10 @@ export default function TrackQuestions({ embedded = false }) {
   const [ratingSaved, setRatingSaved] = useState(false)
   const [fullContent, setFullContent] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  // Raise Dispute opens inline on this screen. It is keyed by question id so the
+  // same modal serves the lifecycle card button and the details-modal button.
+  const [disputeQuestionId, setDisputeQuestionId] = useState(null)
+  const [disputeSubmitted, setDisputeSubmitted] = useState(false)
 
   const myQuestions = useMemo(() => {
     const scope = questions.filter((question) => {
@@ -320,7 +496,12 @@ export default function TrackQuestions({ embedded = false }) {
 
     const source = currentUser?.role === 'user' && scope.length === 0 ? questions : scope
 
-    return source.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
+    // Presentation-only demo records are merged here, upstream of both the
+    // summary counts and the filtered lists, so they always read the exact same
+    // dataset. They are never written back to AppDataContext / localStorage.
+    const merged = [...source, ...buildDemoQuestions()]
+
+    return merged.sort((a, b) => new Date(b.raisedAt || b.raised) - new Date(a.raisedAt || a.raised))
   }, [currentUser?.email, currentUser?.id, currentUser?.role, questions])
 
   // Only questions whose lifecycle is still active, scoped to the selected month.
@@ -368,13 +549,6 @@ export default function TrackQuestions({ embedded = false }) {
     return () => clearInterval(interval)
   }, [])
 
-  // Unused "Pay Now, Ask Later" credits plus the ones whose 7-day window has
-  // closed, so the user can see both what they can still use and what expired.
-  const questionCredits = useMemo(
-    () => getQuestionCreditsForUser(purchasedSlots, currentUser).filter((credit) => credit.status !== 'Used'),
-    [purchasedSlots, currentUser],
-  )
-
   // Deep links (?questionId=...) can point at a record outside the current month or
 // filter, so the detail lookup uses the user's own questions, not the filtered
 // list.
@@ -388,7 +562,7 @@ const selectedQuestion = detailsOpen
   const selectedDisputeStatus = selectedQuestion?.dispute?.status || null
   // A dispute can only be raised inside the 7-day window that opens when the
 // answer arrives, which is the same rule the lifecycle card uses.
-const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(selectedQuestion, nowMs)
+  const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(selectedQuestion, nowMs)
   const showViewDispute = selectedDisputeStatus === 'Resolved'
   const ratingMode =
     selectedQuestion?.dispute?.status === 'Resolved'
@@ -465,6 +639,16 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
     setFullContent(null)
   }, [setQuestionPreviewId])
 
+  // Open the inline dispute form. When it is launched from the details modal,
+  // close that modal first so the two overlays never stack.
+  const openRaiseDispute = (questionId) => {
+    setDisputeQuestionId(questionId)
+    if (detailsOpen) closeQuestion()
+  }
+  const disputeQuestion = disputeQuestionId
+    ? myQuestions.find((question) => question.id === disputeQuestionId) || null
+    : null
+
   const confirmDelete = (questionId) => {
     actions.revokeQuestion(questionId)
     setDeleteConfirmId(null)
@@ -506,13 +690,6 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
           actions={<MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />}
         />
       )}
-
-      {/* Paid-but-unwritten questions come first: they still need the user to
-          write the question, so they are not part of the submitted list. */}
-      <AvailableQuestionCredits
-        credits={questionCredits}
-        onAskNow={(credit) => navigate(`${routes.askQuestion}?redeemCreditId=${encodeURIComponent(credit.id)}`)}
-      />
 
 <Section>
         <Card>
@@ -579,7 +756,7 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
                  question={question}
                  nowMs={nowMs}
                  onOpen={() => openQuestion(question.id)}
-                 onRaiseDispute={(id) => navigate(`${routes.raiseDispute}?questionId=${id}`)}
+                  onRaiseDispute={(id) => openRaiseDispute(id)}
                />
              ))}
            </div>
@@ -704,12 +881,12 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
               {selectedQuestion.dispute && (
                 <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
                   <div className="section-title" style={{ marginBottom: 2 }}>Dispute</div>
-                  <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target}</div></div>
+                  <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target || '—'}</div></div>
                   <div><strong>Reason</strong><ContentPreview content={selectedQuestion.dispute.reason} title="Dispute Reason" onViewFull={setFullContent} /></div>
                   {selectedQuestion.dispute.description ? <div><strong>Description</strong><ContentPreview content={selectedQuestion.dispute.description} title="Dispute Description" onViewFull={setFullContent} /></div> : null}
-                  <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || 'Attachment.pdf'}</div></div>
+                  <div><strong>Attachment</strong><div className="muted">{selectedQuestion.dispute.attachment || '—'}</div></div>
                   <div><strong>Dispute Status</strong><StatusBadge label={selectedQuestion.dispute.status || 'Open'} /></div>
-                  <div><strong>Astrologer Response</strong><ContentPreview content={selectedQuestion.dispute.response || 'Waiting for astrologer update.'} title="Astrologer Response" onViewFull={setFullContent} /></div>
+                  <div><strong>{selectedQuestion.dispute.target === 'AstroConnect Platform' ? 'Platform Response' : 'Astrologer Response'}</strong><ContentPreview content={selectedQuestion.dispute.response || (selectedQuestion.dispute.target === 'AstroConnect Platform' ? 'Waiting for platform review.' : 'Waiting for astrologer update.')} title="Dispute Response" onViewFull={setFullContent} /></div>
                 </Card>
               )}
 
@@ -789,7 +966,7 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
                 )
               })()}
               {showRaiseDispute && (
-                <button className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${selectedQuestion.id}`)}>
+                <button className="btn btn-primary" onClick={() => openRaiseDispute(selectedQuestion.id)}>
                   Raise Dispute
                 </button>
               )}
@@ -855,6 +1032,18 @@ const showRaiseDispute = Boolean(selectedQuestion) && isDisputeWindowOpen(select
           </div>
         </div>,
         document.body,
+      )}
+
+      {disputeQuestion && (
+        <RaiseDisputeModal
+          question={disputeQuestion}
+          onClose={() => setDisputeQuestionId(null)}
+          onSubmitted={() => setDisputeSubmitted(true)}
+        />
+      )}
+
+      {disputeSubmitted && (
+        <SuccessAlert variant="user" message="Dispute submitted successfully." onDismiss={() => setDisputeSubmitted(false)} />
       )}
     </div>
   )

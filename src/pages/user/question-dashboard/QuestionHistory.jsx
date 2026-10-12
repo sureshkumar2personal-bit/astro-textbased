@@ -1,49 +1,38 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { CalendarDays, History, Search, X } from 'lucide-react'
+import CampaignCard, { CampaignStatusChip } from '../../../components/campaigns/CampaignCard.jsx'
+import { campaignCardStatusStyle, campaignCardToneStyle } from '../../../components/campaigns/campaignCardTokens.js'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
-import SummaryCard from '../../../components/ui/SummaryCard.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
+import SummaryCard from '../../../components/ui/SummaryCard.jsx'
+import { mockAstrologers } from '../../../data/notificationData.js'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
-import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import { formatAnswerDate, getAnswerSubmittedAtMs, getQuestionReceivedAt, getQuestionTypeLabel, isQuestionAnswered } from '../../../utils/answer.js'
-import { getQuestionSourceLabel } from '../../../utils/questions.js'
-import { isQuestionCompleted } from '../../../utils/questionLifecycle.js'
+import { getMonthLabel, getQuestionMonthKey, getQuestionSourceLabel, isOpenQuestion } from '../../../utils/questions.js'
 import {
+  HISTORY_ALL_MONTHS,
   HISTORY_STATUS_FILTERS,
   countHistoryStatuses,
-  getHistoryWindowLabel,
+  getHistoryMonthOptions,
+  getHistoryStatusLabel,
   getQuestionPaymentSummary,
   getUserQuestionHistory,
+  isHistoryCancelled,
   matchesHistorySearchFilter,
   matchesHistoryStatusFilter,
 } from '../../../utils/questionDashboard.js'
 
-// Same title-card treatment as the dispute buckets and the Text-Based Questions
-// module summary cards.
+// Same title-card treatment as the My Questions and Purchased Questions buckets.
 const STATUS_CARD_META = {
-  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Completed questions' },
-  Answered: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answer delivered' },
-  Disputed: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.24)', hint: 'Disputed outcome' },
-  Resolved: { background: 'var(--amber-100)', color: 'var(--amber-600)', border: 'rgba(245, 158, 11, 0.30)', hint: 'Dispute resolved' },
-  Closed: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.24)', hint: 'Closed or cancelled' },
+  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Every archived question' },
+  Completed: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answered and finished' },
+  Cancelled: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.24)', hint: 'Cancelled or expired' },
 }
 
 const EMPTY_DATE = '—'
-
-function MetaPair({ label, children }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, minWidth: 0 }}>
-      <span className="muted" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', flex: 'none' }}>
-        {label}
-      </span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{children}</span>
-    </span>
-  )
-}
 
 function askedOn(question) {
   return formatAnswerDate(getQuestionReceivedAt(question)) || EMPTY_DATE
@@ -55,13 +44,118 @@ function answeredOn(question) {
   return isQuestionAnswered(question) ? 'Answered' : EMPTY_DATE
 }
 
+// When the record finished: the answer date when one was delivered, otherwise
+// the cancellation / closure timestamp the lifecycle already stores.
+function completedOn(question) {
+  const answeredMs = getAnswerSubmittedAtMs(question)
+  if (answeredMs) return formatAnswerDate(new Date(answeredMs))
+  if (question.cancelledAt) return formatAnswerDate(question.cancelledAt)
+  if (question.closedAt) return formatAnswerDate(question.closedAt)
+  return EMPTY_DATE
+}
+
 function paymentLabel(payment) {
   return `${payment.label} · ₹${payment.paid.toLocaleString('en-IN')}`
 }
 
-function questionSnippet(question) {
-  const text = String(question.question || '').trim()
-  return text.length <= 140 ? text : `${text.slice(0, 140).trimEnd()}...`
+// The refund status already stored on the record ("Refunded" / "Completed" /
+// "None"). A refund is shown on its own row; it is never used to reclassify a
+// completed question as cancelled.
+function refundStatusLabel(question) {
+  const status = String(question.refundStatus || '').trim()
+  if (status && status.toLowerCase() !== 'none') return status
+  return 'Refunded'
+}
+
+function astrologerName(question) {
+  return mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
+}
+
+// Attachments already stored on the record (read-only). Shown only when the
+// existing data actually carries them - nothing is fabricated.
+function attachmentCount(question) {
+  return Array.isArray(question.attachments) ? question.attachments.length : 0
+}
+
+const CHIP_STYLE = { background: 'var(--neutral-bg)', color: 'var(--muted)', border: '1px solid var(--surface-border)' }
+
+// One archived question, using the same CampaignCard design as My Questions. It
+// is deliberately read-only: the only action is View Details, which opens the
+// existing History details modal. No dispute, edit, submit or purchase actions
+// live here - those stay in My Questions.
+function HistoryQuestionCard({ question, nowMs, onOpen }) {
+  const cancelled = isHistoryCancelled(question, nowMs)
+  const tone = cancelled ? 'slate' : 'green'
+  const accentStyle = campaignCardToneStyle(tone) || campaignCardStatusStyle('Active')
+  const answered = isQuestionAnswered(question)
+  const payment = getQuestionPaymentSummary(question)
+  const typeLabel = getQuestionTypeLabel(question)
+  const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
+  const files = attachmentCount(question)
+
+  const footer = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {answered ? (
+        <div className="aq-track-card__answer">
+          <div className="aq-track-card__answer-label">Astrologer&apos;s answer</div>
+          {question.answer || 'No answer text recorded.'}
+        </div>
+      ) : (
+        <div className="aq-track-card__note">This question closed without a delivered answer.</div>
+      )}
+      <div className="btn-row" style={{ marginTop: 4 }}>
+        <button type="button" className="btn btn-outline" onClick={onOpen}>View Details</button>
+      </div>
+    </div>
+  )
+
+  return (
+    <CampaignCard
+      status={getHistoryStatusLabel(question, nowMs)}
+      tone={tone}
+      icon={<History size={22} aria-hidden="true" />}
+      name={question.id}
+      subtitle={`${astrologerName(question)} · ${sourceLabel} · ${typeLabel}`}
+      description={question.question}
+      chips={[
+        <CampaignStatusChip key="type" style={{ background: accentStyle.softBg, color: accentStyle.accent, border: `1px solid ${accentStyle.border}` }}>{typeLabel}</CampaignStatusChip>,
+        <CampaignStatusChip key="source" style={CHIP_STYLE}>{sourceLabel}</CampaignStatusChip>,
+        question.category ? <CampaignStatusChip key="category" style={CHIP_STYLE}>{question.category}</CampaignStatusChip> : null,
+        files > 0 ? <CampaignStatusChip key="attachments" style={CHIP_STYLE}>{`${files} attachment${files === 1 ? '' : 's'}`}</CampaignStatusChip> : null,
+      ].filter(Boolean)}
+      details={[
+        { label: 'Asked', value: askedOn(question) },
+        { label: 'Completed', value: completedOn(question) },
+        { label: 'Payment', value: payment.label },
+        { label: 'Paid', value: `₹${payment.paid.toLocaleString('en-IN')}` },
+        ...(payment.refunded
+          ? [{ label: 'Refund', value: `₹${payment.refund.toLocaleString('en-IN')} · ${refundStatusLabel(question)}` }]
+          : []),
+      ]}
+      footer={footer}
+    />
+  )
+}
+
+// Month selector, consistent with the My Questions selector, plus an All Months
+// option so the whole archive can be reviewed across every available month.
+function HistoryMonthSelector({ monthKey, options, onChange }) {
+  return (
+    <label className="aq-track-month">
+      <CalendarDays size={15} aria-hidden="true" />
+      <select
+        className="select-input"
+        value={monthKey}
+        aria-label="Select month"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value={HISTORY_ALL_MONTHS}>All Months</option>
+        {options.map((key) => (
+          <option key={key} value={key}>{getMonthLabel(key)}</option>
+        ))}
+      </select>
+    </label>
+  )
 }
 
 function HistoryDetailModal({ question, onClose }) {
@@ -140,36 +234,73 @@ function HistoryDetailModal({ question, onClose }) {
 export default function QuestionHistory() {
   const { questions } = useAppData()
   const { currentUser } = useAuth()
-  const navigate = useNavigate()
-  const routes = getRoleRoutes(currentUser?.role)
   const [statusFilter, setStatusFilter] = useState('All')
+  const [monthKey, setMonthKey] = useState(HISTORY_ALL_MONTHS)
   const [search, setSearch] = useState('')
   const [openQuestionId, setOpenQuestionId] = useState(null)
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
-  // Intended scope: completed questions from the last six months. A question only
-  // arrives here once its lifecycle finished, so nothing can be listed in both
-  // Track My Questions and History.
+  // Day-based lifecycle changes (an answer's dispute window closing) move a
+  // question from My Questions into History; this keeps the archive current.
+  useEffect(() => {
+    const interval = setInterval(() => setNowMs(Date.now()), 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Every finished question the user owns, across all months. Read straight from
+  // the existing records - no window, no duplicated or fabricated rows.
   const history = useMemo(
-    () => getUserQuestionHistory(questions, currentUser).filter((question) => isQuestionCompleted(question, Date.now())),
-    [questions, currentUser],
+    () => getUserQuestionHistory(questions, currentUser, { nowMs }),
+    [questions, currentUser, nowMs],
   )
-  const counts = useMemo(() => countHistoryStatuses(history), [history])
+
+  // Months the selector offers: every month that holds an archived record plus
+  // the current month, matching the My Questions selector. All Months stays the
+  // first option and carries no extra text.
+  const monthOptions = useMemo(
+    () => getHistoryMonthOptions(history, { now: new Date(nowMs) }),
+    [history, nowMs],
+  )
+
+  const monthScoped = useMemo(
+    () => (monthKey === HISTORY_ALL_MONTHS
+      ? history
+      : history.filter((question) => getQuestionMonthKey(question, null) === monthKey)),
+    [history, monthKey],
+  )
+
+  // Counts follow the selected month, so a count can never include a record its
+  // month filter then hides.
+  const counts = useMemo(() => countHistoryStatuses(monthScoped, { nowMs }), [monthScoped, nowMs])
 
   const visibleHistory = useMemo(
-    () => history.filter(
-      (question) => matchesHistoryStatusFilter(question, statusFilter) && matchesHistorySearchFilter(question, search),
+    () => monthScoped.filter(
+      (question) => matchesHistoryStatusFilter(question, statusFilter, nowMs) && matchesHistorySearchFilter(question, search),
     ),
-    [history, statusFilter, search],
+    [monthScoped, statusFilter, search, nowMs],
   )
+
   const openQuestion = useMemo(
     () => history.find((question) => question.id === openQuestionId) || null,
     [history, openQuestionId],
   )
 
+  const monthLabelText = monthKey === HISTORY_ALL_MONTHS ? 'All months' : getMonthLabel(monthKey)
+
   return (
     <div>
-      <Section title="History" titleRight={<span className="muted">Completed questions · {getHistoryWindowLabel()}</span>}>
-        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-5" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
+      <div className="aq-track-head">
+        <div>
+          <div className="aq-track-head__title">History</div>
+          <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+            A read-only archive of your past questions — completed and cancelled.
+          </div>
+        </div>
+        <HistoryMonthSelector monthKey={monthKey} options={monthOptions} onChange={setMonthKey} />
+      </div>
+
+      <Section title="History" titleRight={<span className="muted">{monthLabelText} · {history.length} archived</span>}>
+        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-3" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
           {HISTORY_STATUS_FILTERS.map((filter) => {
             const meta = STATUS_CARD_META[filter]
             return (
@@ -190,10 +321,10 @@ export default function QuestionHistory() {
         </div>
       </Section>
 
-      <Section className="!mt-6" title="Completed Questions">
+      <Section className="!mt-6" title="Archived Questions">
         <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 16 }}>
           <span className="muted" style={{ fontSize: 13 }}>
-            Showing {visibleHistory.length} of {history.length} questions
+            Showing {visibleHistory.length} of {monthScoped.length} questions
           </span>
           <div className="search-bar" style={{ maxWidth: 280 }}>
             <input
@@ -212,38 +343,22 @@ export default function QuestionHistory() {
         {visibleHistory.length === 0 ? (
           <Card>
             <div className="muted">
-              {history.length === 0
-                ? 'No question history is available for this period.'
-                : `No questions match the ${statusFilter} filter.`}
+              {monthScoped.length === 0
+                ? (monthKey === HISTORY_ALL_MONTHS
+                  ? 'No past questions are available yet.'
+                  : `No history records for ${getMonthLabel(monthKey)}.`)
+                : `No ${statusFilter.toLowerCase()} questions match the current filters.`}
             </div>
-            {history.length === 0 && (
-              <button type="button" className="btn btn-outline mt-4" onClick={() => navigate(routes.askQuestion)}>Ask a New Question</button>
-            )}
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="track-questions-grid">
             {visibleHistory.map((question) => (
-              <Card key={question.id} className="question-dashboard-row">
-                <div className="question-dashboard-row__head">
-                  <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{question.id}</div>
-                  <StatusBadge label={question.status} />
-                </div>
-                <div className="muted" style={{ fontSize: 13.5 }}>
-                  {getQuestionSourceLabel(question)} · {question.category} · {getQuestionTypeLabel(question)}
-                </div>
-                <div style={{ fontSize: 13.5, color: 'var(--text-secondary)' }}>{questionSnippet(question)}</div>
-                <div className="question-dashboard-row__meta">
-                  <MetaPair label="Asked">{askedOn(question)}</MetaPair>
-                  <MetaPair label="Answered">{answeredOn(question)}</MetaPair>
-                  <MetaPair label="Payment">{paymentLabel(getQuestionPaymentSummary(question))}</MetaPair>
-                </div>
-                <div className="btn-row" style={{ marginTop: 12 }}>
-                  <button type="button" className="btn btn-outline" onClick={() => setOpenQuestionId(question.id)}>View Details</button>
-                  <button type="button" className="btn btn-primary" onClick={() => navigate(`${routes.askQuestion}/my-questions?questionId=${question.id}`)}>
-                    Open in My Questions
-                  </button>
-                </div>
-              </Card>
+              <HistoryQuestionCard
+                key={question.id}
+                question={question}
+                nowMs={nowMs}
+                onOpen={() => setOpenQuestionId(question.id)}
+              />
             ))}
           </div>
         )}

@@ -6,6 +6,8 @@ import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import SummaryCard from '../../../components/ui/SummaryCard.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
+import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
+import RaiseDisputeModal from '../../../components/user/RaiseDisputeModal.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -112,8 +114,8 @@ function DisputeDetailsModal({ entry, onClose }) {
             <div><strong>Raised On</strong><div className="muted">{dispute.raisedAt ? formatAnswerDate(dispute.raisedAt) : '—'}</div></div>
             <div><strong>Status</strong><StatusBadge label={dispute.status || 'Open'} /></div>
             <div>
-              <strong>Astrologer Response</strong>
-              <div className="muted">{dispute.response || 'Waiting for an astrologer response.'}</div>
+              <strong>{dispute.target === 'AstroConnect Platform' ? 'Platform Response' : 'Astrologer Response'}</strong>
+              <div className="muted">{dispute.response || (dispute.target === 'AstroConnect Platform' ? 'Waiting for platform review.' : 'Waiting for an astrologer response.')}</div>
             </div>
             {dispute.resolution ? <div><strong>Resolution</strong><div className="muted">{dispute.resolution}</div></div> : null}
             {dispute.resolvedAt ? <div><strong>Resolved On</strong><div className="muted">{formatAnswerDate(dispute.resolvedAt)}</div></div> : null}
@@ -136,10 +138,17 @@ export default function QuestionDisputes() {
   const routes = getRoleRoutes(currentUser?.role)
   const [stageFilter, setStageFilter] = useState('All')
   const [openDisputeId, setOpenDisputeId] = useState(null)
+  // Raise Dispute opens inline on this screen instead of navigating away.
+  const [raiseDisputeQuestionId, setRaiseDisputeQuestionId] = useState(null)
+  const [disputeSubmitted, setDisputeSubmitted] = useState(false)
 
   const disputes = useMemo(() => getUserDisputes(questions, currentUser), [questions, currentUser])
   const counts = useMemo(() => countDisputeStages(disputes), [disputes])
   const eligibleQuestions = useMemo(() => getDisputeEligibleQuestions(questions, currentUser), [questions, currentUser])
+  const raiseDisputeQuestion = useMemo(
+    () => questions.find((question) => question.id === raiseDisputeQuestionId) || null,
+    [questions, raiseDisputeQuestionId],
+  )
 
   const visibleDisputes = useMemo(
     () => (stageFilter === 'All' ? disputes : disputes.filter((entry) => entry.stage === stageFilter)),
@@ -236,8 +245,8 @@ export default function QuestionDisputes() {
                   <MetaPair label="Answered">{question.answeredAt ? formatAnswerDate(question.answeredAt) : question.raised}</MetaPair>
                 </div>
                 <div className="btn-row" style={{ marginTop: 12 }}>
-                  {/* Raising keeps using the existing Raise Dispute page and its form. */}
-                  <button type="button" className="btn btn-primary" onClick={() => navigate(`${routes.raiseDispute}?questionId=${question.id}`)}>
+                  {/* Raising keeps working on this screen: the shared dispute form opens inline. */}
+                  <button type="button" className="btn btn-primary" onClick={() => setRaiseDisputeQuestionId(question.id)}>
                     Raise Dispute
                   </button>
                   <button type="button" className="btn btn-outline" onClick={() => navigate(`${routes.askQuestion}/my-questions?questionId=${question.id}`)}>
@@ -251,6 +260,18 @@ export default function QuestionDisputes() {
       </Section>
 
       {openDispute && <DisputeDetailsModal entry={openDispute} onClose={() => setOpenDisputeId(null)} />}
+
+      {raiseDisputeQuestion && (
+        <RaiseDisputeModal
+          question={raiseDisputeQuestion}
+          onClose={() => setRaiseDisputeQuestionId(null)}
+          onSubmitted={() => setDisputeSubmitted(true)}
+        />
+      )}
+
+      {disputeSubmitted && (
+        <SuccessAlert variant="user" message="Dispute submitted successfully." onDismiss={() => setDisputeSubmitted(false)} />
+      )}
     </div>
   )
 }

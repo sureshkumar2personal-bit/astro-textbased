@@ -1,23 +1,33 @@
-import { getQuestionReceivedAt, getQuestionTypeLabel } from './answer.js'
-import { getQuestionSourceLabel } from './questions.js'
+import {
+  getQuestionReceivedAt,
+  getQuestionTypeLabel,
+  isQuestionAnswered,
+  isQuestionCancelled,
+  isQuestionDeadlineExceeded,
+} from './answer.js'
+import { getMonthKeyFromDate, getQuestionMonthKey, getQuestionSourceLabel } from './questions.js'
 import { getQuestionPaidAmount, getQuestionRefundAmount } from './sales.js'
+import { isQuestionCompleted } from './questionLifecycle.js'
 
 // The user "Ask a Question" dashboard is a read-only view over the questions
 // that already exist in AppDataContext. Nothing here writes to a record: every
 // helper below is a pure selector so the dashboard can never drift away from
 // the question purchase / dispute logic it reuses.
 
-// History is scoped to the last six months. The window is calculated from the
-// dates already on each record (no new field is stored on a question).
-export const QUESTION_HISTORY_MONTHS = 6
+// History is a read-only, all-time archive of the user's finished questions.
+// It reuses the question lifecycle's own definition of "finished" (Completed)
+// so a question can never appear in both My Questions and History, and it
+// applies no artificial date window.
+export const HISTORY_STATUS_FILTERS = ['All', 'Completed', 'Cancelled']
+
+// Sentinel for the History month selector: no month restriction.
+export const HISTORY_ALL_MONTHS = 'all'
 
 // The stored dispute statuses are Open / Resolved / Closed. "Under Review" is
 // derived for an open dispute the astrologer has already replied to, so the user
 // can tell "waiting for a first reply" apart from "reply received, not settled"
 // without introducing a new dispute status.
 export const DISPUTE_STAGES = ['All', 'Open', 'Under Review', 'Resolved', 'Closed']
-
-export const HISTORY_STATUS_FILTERS = ['All', 'Answered', 'Disputed', 'Resolved', 'Closed']
 
 export function isQuestionOwnedByUser(question = {}, user) {
   if (!user?.id && !user?.email) return false
@@ -37,38 +47,76 @@ export function getUserQuestions(questions = [], user) {
     .sort((a, b) => receivedAtMs(b) - receivedAtMs(a))
 }
 
-export function getHistoryWindowStart(now = new Date(), months = QUESTION_HISTORY_MONTHS) {
-  const start = new Date(now)
-  start.setMonth(start.getMonth() - Number(months || 0))
-  start.setHours(0, 0, 0, 0)
-  return start
+// Every finished question the user owns, newest first, with no date window.
+// "Finished" is the shared lifecycle rule (answered and past its dispute window,
+// resolved, revoked/closed, or auto-cancelled on the 30-day answer deadline),
+// plus a question that was answered and whose dispute has since been resolved -
+// even when an older record never promoted its own status to "Resolved". History
+// and My Questions therefore never contradict each other, and a raised (or
+// resolved) dispute never hides a completed question from History.
+export function getUserQuestionHistory(questions = [], user, { nowMs = Date.now() } = {}) {
+  return getUserQuestions(questions, user).filter(
+    (question) => isHistoryCompleted(question, nowMs) || isHistoryCancelled(question, nowMs),
+  )
 }
 
-export function getHistoryWindowLabel(now = new Date(), months = QUESTION_HISTORY_MONTHS) {
-  const start = getHistoryWindowStart(now, months)
-  const formatted = start.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-  return `Last ${months} months · from ${formatted}`
+// The stored dispute is "Resolved" only when it was actually settled. A refund is
+// DELIBERATELY not treated as proof of resolution, and "Open"/"Closed"/missing
+// disputes are not treated as resolved.
+function isDisputeResolved(question = {}) {
+  return Boolean(question.dispute) && String(question.dispute.status || '').trim().toLowerCase() === 'resolved'
 }
 
-export function isWithinHistoryWindow(question = {}, now = new Date(), months = QUESTION_HISTORY_MONTHS) {
-  const received = receivedAtMs(question)
-  if (!received) return false
-  return received >= getHistoryWindowStart(now, months).getTime()
+// Whether a record is a completed consultation. A cancelled/expired record is
+// never completed; an answered record is completed when the lifecycle says so or
+// when its dispute was resolved.
+export function isHistoryCompleted(question = {}, nowMs = Date.now()) {
+  if (isHistoryCancelled(question, nowMs)) return false
+  if (isQuestionCompleted(question, nowMs)) return true
+  return isQuestionAnswered(question) && isDisputeResolved(question)
 }
 
-export function getUserQuestionHistory(questions = [], user, options = {}) {
-  const now = options.now || new Date()
-  const months = options.months || QUESTION_HISTORY_MONTHS
-  return getUserQuestions(questions, user).filter((question) => isWithinHistoryWindow(question, now, months))
+// A finished record that did not end in a delivered answer: revoked/closed,
+// cancelled, or auto-cancelled by the shared 30-day answer deadline. This is a
+// pure selector over the fields the lifecycle already reads - it introduces no
+// new status and changes no rule.
+export function isHistoryCancelled(question = {}, nowMs = Date.now()) {
+  if (isQuestionCancelled(question)) return true
+  if (String(question.status || '').trim() === 'Closed') return true
+  return !isQuestionAnswered(question) && isQuestionDeadlineExceeded(question, nowMs)
 }
 
-export function matchesHistoryStatusFilter(question = {}, filter = 'All') {
+// Display label for an archived record. An expired record that was never
+// promoted to a stored "Cancelled" status still reads as Cancelled instead of
+// showing its stale "Pending" label. A completed question whose dispute was
+// resolved shows "Resolved" so the archive keeps the existing distinction
+// between a plain completion and one that followed a resolved dispute.
+export function getHistoryStatusLabel(question = {}, nowMs = Date.now()) {
+  const status = String(question.status || '').trim()
+  if (isHistoryCancelled(question, nowMs)) return isQuestionCancelled(question) || status === 'Closed' ? (status || 'Cancelled') : 'Cancelled'
+  if (isDisputeResolved(question)) return 'Resolved'
+  return status || 'Completed'
+}
+
+// Month keys for the History selector: every month that holds an archived record
+// plus the current month, mirroring the My Questions selector so the current
+// month is always selectable. Newest first, and never truncated (History is an
+// all-time archive).
+export function getHistoryMonthOptions(questions = [], { now = new Date() } = {}) {
+  const keys = new Set()
+  const currentKey = getMonthKeyFromDate(now)
+  if (currentKey) keys.add(currentKey)
+  questions.forEach((question) => {
+    const key = getQuestionMonthKey(question, null)
+    if (key) keys.add(key)
+  })
+  return Array.from(keys).sort((a, b) => b.localeCompare(a))
+}
+
+export function matchesHistoryStatusFilter(question = {}, filter = 'All', nowMs = Date.now()) {
   if (filter === 'All') return true
-  const status = String(question.status || '').trim().toLowerCase()
-  if (filter === 'Answered') return status === 'answered'
-  if (filter === 'Disputed') return status === 'disputed'
-  if (filter === 'Resolved') return status === 'resolved'
-  if (filter === 'Closed') return status === 'closed' || status === 'cancelled'
+  if (filter === 'Cancelled') return isHistoryCancelled(question, nowMs)
+  if (filter === 'Completed') return !isHistoryCancelled(question, nowMs)
   return true
 }
 
@@ -87,12 +135,11 @@ export function matchesHistorySearchFilter(question = {}, term = '') {
     .includes(needle)
 }
 
-export function countHistoryStatuses(questions = []) {
-  const counts = { All: questions.length, Answered: 0, Disputed: 0, Resolved: 0, Closed: 0 }
+export function countHistoryStatuses(questions = [], { nowMs = Date.now() } = {}) {
+  const counts = { All: questions.length, Completed: 0, Cancelled: 0 }
   questions.forEach((question) => {
-    HISTORY_STATUS_FILTERS.forEach((filter) => {
-      if (filter !== 'All' && matchesHistoryStatusFilter(question, filter)) counts[filter] += 1
-    })
+    if (isHistoryCancelled(question, nowMs)) counts.Cancelled += 1
+    else counts.Completed += 1
   })
   return counts
 }

@@ -19,6 +19,7 @@ import AskQuestion from './pages/AskQuestion.jsx'
 import AskQuestionDashboard from './pages/user/question-dashboard/AskQuestionDashboard.jsx'
 import QuestionDisputes from './pages/user/question-dashboard/QuestionDisputes.jsx'
 import QuestionHistory from './pages/user/question-dashboard/QuestionHistory.jsx'
+import QuestionPurchased from './pages/user/question-dashboard/QuestionPurchased.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
 import TextBasedQuestionHistory from './pages/TextBasedQuestionHistory.jsx'
 import TrackQuestions from './pages/TrackQuestions.jsx'
@@ -243,10 +244,11 @@ function UserRoutes() {
         <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
         {/* Ask a Question dashboard: the sidebar entry opens the "Ask New" tab and the
-            four sections live inside this one module instead of separate sidebar items. */}
+            sections live inside this one module instead of separate sidebar items. */}
         <Route path="/user/ask-question" element={<AskQuestionDashboard />}>
           <Route index element={<AskQuestion embedded />} />
           <Route path="my-questions" element={<TrackQuestions embedded />} />
+          <Route path="purchased" element={<QuestionPurchased />} />
           <Route path="disputes" element={<QuestionDisputes />} />
           <Route path="history" element={<QuestionHistory />} />
         </Route>

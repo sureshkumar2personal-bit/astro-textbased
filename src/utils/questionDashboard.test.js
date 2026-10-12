@@ -1,17 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import {
   DISPUTE_STAGES,
+  HISTORY_ALL_MONTHS,
   HISTORY_STATUS_FILTERS,
-  QUESTION_HISTORY_MONTHS,
   countDisputeStages,
   countHistoryStatuses,
   getDisputeStage,
-  getHistoryWindowStart,
+  getHistoryMonthOptions,
+  getHistoryStatusLabel,
   getUserDisputes,
   getUserQuestions,
   getUserQuestionHistory,
+  isHistoryCancelled,
+  isHistoryCompleted,
   isQuestionOwnedByUser,
-  isWithinHistoryWindow,
   matchesHistoryStatusFilter,
 } from './questionDashboard.js'
 
@@ -57,51 +59,102 @@ describe('question ownership', () => {
   })
 })
 
-describe('history window', () => {
-  it('starts the window six months back at the start of that day', () => {
-    expect(QUESTION_HISTORY_MONTHS).toBe(6)
-    const start = getHistoryWindowStart(NOW)
-    expect([start.getFullYear(), start.getMonth(), start.getDate(), start.getHours()]).toEqual([2026, 2, 15, 0])
-  })
-
-  it('keeps questions inside the window and drops older ones', () => {
-    expect(isWithinHistoryWindow(makeQuestion({ raisedAt: '2026-04-01T10:00:00.000Z' }), NOW)).toBe(true)
-    expect(isWithinHistoryWindow(makeQuestion({ raisedAt: '2026-03-01T10:00:00.000Z' }), NOW)).toBe(false)
-  })
-
-  it('ignores questions with no usable date', () => {
-    expect(isWithinHistoryWindow(makeQuestion({ raisedAt: '', submittedAt: '', receivedAt: '', raised: '' }), NOW)).toBe(false)
-  })
-
-  it('returns only the user questions inside the window', () => {
+describe('history archive', () => {
+  it('returns every finished question with no date window', () => {
     const questions = [
-      makeQuestion({ id: 'recent', raisedAt: '2026-09-01T10:00:00.000Z' }),
-      makeQuestion({ id: 'ancient', raisedAt: '2025-01-01T10:00:00.000Z' }),
-      makeQuestion({ id: 'someone-else', submittedByUserId: 'user-other', submittedByEmail: 'other@astroconnect.com' }),
+      makeQuestion({ id: 'answered', status: 'Answered', answer: 'A', raisedAt: '2026-09-01T10:00:00.000Z' }),
+      makeQuestion({ id: 'cancelled', status: 'Cancelled', raisedAt: '2026-08-05T10:00:00.000Z' }),
+      makeQuestion({ id: 'answered-old', status: 'Answered', answer: 'A', raisedAt: '2024-01-05T10:00:00.000Z' }),
+      makeQuestion({ id: 'active-pending', status: 'Pending', raisedAt: '2026-09-14T10:00:00.000Z' }),
+      makeQuestion({ id: 'someone-else', submittedByUserId: 'user-other', submittedByEmail: 'other@astroconnect.com', status: 'Answered', answer: 'A' }),
     ]
-    expect(getUserQuestionHistory(questions, USER, { now: NOW }).map((question) => question.id)).toEqual(['recent'])
+    expect(getUserQuestionHistory(questions, USER, { nowMs: NOW }).map((question) => question.id))
+      .toEqual(['answered', 'cancelled', 'answered-old'])
+  })
+
+  it('treats an expired unanswered question as a finished record', () => {
+    const expired = makeQuestion({ status: 'Pending', raisedAt: '2020-01-01T10:00:00.000Z' })
+    expect(getUserQuestionHistory([expired], USER, { nowMs: NOW }).map((question) => question.id)).toEqual([expired.id])
+    expect(isHistoryCancelled(expired, NOW)).toBe(true)
+    expect(getHistoryStatusLabel(expired, NOW)).toBe('Cancelled')
+  })
+
+  it('keeps an answered question with a resolved dispute in Completed history', () => {
+    // Answered by the astrologer, disputed, then resolved - but the older record
+    // never promoted its own status to "Resolved".
+    const resolvedDispute = makeQuestion({
+      id: 'answered-disputed-resolved',
+      status: 'Answered',
+      answer: 'A',
+      refundStatus: 'None',
+      refundAmount: 0,
+      dispute: { status: 'Resolved', response: 'Revised the answer.', resolvedAt: '2026-09-12T10:00:00.000Z' },
+      raisedAt: '2026-09-01T10:00:00.000Z',
+    })
+    expect(isHistoryCompleted(resolvedDispute, NOW)).toBe(true)
+    expect(getUserQuestionHistory([resolvedDispute], USER, { nowMs: NOW }).map((q) => q.id))
+      .toEqual(['answered-disputed-resolved'])
+    expect(matchesHistoryStatusFilter(resolvedDispute, 'Completed', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter(resolvedDispute, 'Cancelled', NOW)).toBe(false)
+    expect(getHistoryStatusLabel(resolvedDispute, NOW)).toBe('Resolved')
+  })
+
+  it('does not treat an open dispute or a refund as completion or cancellation', () => {
+    const openDispute = makeQuestion({
+      status: 'Answered',
+      answer: 'A',
+      dispute: { status: 'Open', response: '' },
+    })
+    expect(isHistoryCompleted(openDispute, NOW)).toBe(false)
+
+    // Refunded but not cancelled: still a completed record, never Cancelled.
+    const refundedCompleted = makeQuestion({
+      id: 'refunded-completed',
+      status: 'Answered',
+      answer: 'A',
+      refundStatus: 'Refunded',
+      refundAmount: 200,
+      raisedAt: '2026-09-01T10:00:00.000Z',
+    })
+    expect(isHistoryCompleted(refundedCompleted, NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter(refundedCompleted, 'Cancelled', NOW)).toBe(false)
+
+    const cancelledRefunded = makeQuestion({ status: 'Cancelled', refundStatus: 'Refunded', refundAmount: 799 })
+    expect(isHistoryCompleted(cancelledRefunded, NOW)).toBe(false)
+    expect(matchesHistoryStatusFilter(cancelledRefunded, 'Cancelled', NOW)).toBe(true)
+  })
+
+  it('offers the current month alongside every archived month', () => {
+    const history = [
+      makeQuestion({ id: 'sep', status: 'Answered', answer: 'A', raisedAt: '2026-09-01T10:00:00.000Z' }),
+      makeQuestion({ id: 'jul', status: 'Answered', answer: 'A', raisedAt: '2026-07-01T10:00:00.000Z' }),
+    ]
+    expect(getHistoryMonthOptions(history, { now: NOW })).toEqual(['2026-09', '2026-07'])
+    expect(getHistoryMonthOptions(history, { now: new Date('2026-10-05T12:00:00.000Z') }))
+      .toEqual(['2026-10', '2026-09', '2026-07'])
   })
 })
 
 describe('history status buckets', () => {
-  it('maps statuses onto the displayed filters', () => {
-    expect(matchesHistoryStatusFilter({ status: 'Answered' }, 'Answered')).toBe(true)
-    expect(matchesHistoryStatusFilter({ status: 'Disputed' }, 'Disputed')).toBe(true)
-    expect(matchesHistoryStatusFilter({ status: 'Resolved' }, 'Resolved')).toBe(true)
-    expect(matchesHistoryStatusFilter({ status: 'Closed' }, 'Closed')).toBe(true)
-    expect(matchesHistoryStatusFilter({ status: 'Cancelled' }, 'Closed')).toBe(true)
-    expect(matchesHistoryStatusFilter({ status: 'Answered' }, 'All')).toBe(true)
+  it('maps finished records onto Completed and Cancelled', () => {
+    expect(matchesHistoryStatusFilter({ status: 'Answered', answer: 'A' }, 'Completed', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter({ status: 'Resolved', answer: 'A' }, 'Completed', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter({ status: 'Closed' }, 'Cancelled', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter({ status: 'Cancelled' }, 'Cancelled', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter({ status: 'Answered', answer: 'A' }, 'Cancelled', NOW)).toBe(false)
+    expect(matchesHistoryStatusFilter({ status: 'Pending', raisedAt: '2020-01-01T00:00:00.000Z' }, 'Cancelled', NOW)).toBe(true)
+    expect(matchesHistoryStatusFilter({ status: 'Answered', answer: 'A' }, 'All', NOW)).toBe(true)
   })
 
-  it('counts every bucket including the all total', () => {
+  it('counts Completed and Cancelled including the all total', () => {
     const questions = [
-      makeQuestion({ status: 'Answered' }),
-      makeQuestion({ status: 'Disputed' }),
-      makeQuestion({ status: 'Resolved' }),
-      makeQuestion({ status: 'Closed' }),
+      makeQuestion({ id: 'completed', status: 'Answered', answer: 'A' }),
+      makeQuestion({ id: 'cancelled', status: 'Cancelled' }),
+      makeQuestion({ id: 'closed', status: 'Closed' }),
     ]
-    expect(countHistoryStatuses(questions)).toEqual({ All: 4, Answered: 1, Disputed: 1, Resolved: 1, Closed: 1 })
-    expect(HISTORY_STATUS_FILTERS).toHaveLength(5)
+    expect(countHistoryStatuses(questions, { nowMs: NOW })).toEqual({ All: 3, Completed: 1, Cancelled: 2 })
+    expect(HISTORY_STATUS_FILTERS).toEqual(['All', 'Completed', 'Cancelled'])
+    expect(HISTORY_ALL_MONTHS).toBe('all')
   })
 })
 
