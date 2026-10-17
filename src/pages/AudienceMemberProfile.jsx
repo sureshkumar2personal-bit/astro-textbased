@@ -8,6 +8,7 @@ import { mockAstrologers } from '../data/notificationData.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { ACTIVITY_TYPES, getMemberCommunicationActivity } from '../utils/memberCommunicationActivity.js'
+import { ASTROLOGER_AUDIENCE } from './astrologer/audience/audienceData.js'
 
 const POSTS = [
   { title: 'A calm start changes everything', body: 'Beginning the day with a quiet intention helps me return to clarity when life feels busy.', time: '2 days ago' },
@@ -57,6 +58,17 @@ export default function AudienceMemberProfile() {
   const audienceLabel = isSubscriber ? 'Subscribers' : 'Followers'
   const astrologer = mockAstrologers.find((profile) => profile.id === currentUser?.id) || mockAstrologers[0]
 
+  const demoFollowers = ASTROLOGER_AUDIENCE.followers.rows.map((entry) => ({
+    ...entry,
+    userId: entry.userId || entry.id,
+    bio: entry.bio || 'Astro Connect member following astrology guidance and live sessions.',
+  }))
+  const demoSubscribers = ASTROLOGER_AUDIENCE.subscribers.rows.map((entry) => ({
+    ...entry,
+    userId: entry.userId || entry.id,
+    bio: entry.bio || 'Astro Connect subscriber following astrology guidance and live sessions.',
+  }))
+
   const subscribers = useMemo(() => {
     const live = subscriptions
       .filter((subscription) => subscription.astrologerId === currentUser?.id || subscription.astrologerId === astrologer.id)
@@ -67,10 +79,10 @@ export default function AudienceMemberProfile() {
         bio: 'Astro Connect subscriber following astrology guidance and live sessions.',
         tier: subscription.tier || 'Silver',
       }))
-    return [...new Map([...PROFILE_SUBSCRIBERS, ...live].map((entry) => [entry.id, entry])).values()]
+    return [...new Map([...PROFILE_SUBSCRIBERS, ...demoSubscribers, ...live].map((entry) => [entry.id, entry])).values()]
   }, [astrologer.id, currentUser?.id, subscriptions])
 
-  const member = (isSubscriber ? subscribers : isFollower ? PROFILE_FOLLOWERS : []).find((entry) => entry.id === memberId)
+  const member = (isSubscriber ? subscribers : isFollower ? [...PROFILE_FOLLOWERS, ...demoFollowers] : []).find((entry) => entry.id === memberId)
     || appointmentCustomers[memberId]
   const communicationActivity = useMemo(() => getMemberCommunicationActivity({
     questions,
@@ -93,7 +105,7 @@ export default function AudienceMemberProfile() {
   }
 
   const blocked = blockedUserIds.includes(member.id)
-  const backTo = '/astrologer'
+  const backTo = '/astrologer/my-account'
   const handleAction = (action) => {
     setMenuOpen(false)
     if (action === 'block') {
@@ -130,7 +142,7 @@ export default function AudienceMemberProfile() {
     <Card className="audience-member-hero">
       <div className="audience-member-hero__cover" />
       <div className="audience-member-hero__body">
-        <div className="audience-member-avatar">{initials(member.name)}</div>
+        <div className="audience-member-avatar">{member.photo ? <img src={member.photo} alt="" /> : initials(member.name)}</div>
         <div className="audience-member-identity">
           <div className="flex flex-wrap items-center gap-2"><h1>{member.name}</h1><span className={`audience-member-status${isSubscriber ? ' audience-member-status--subscriber' : ''}`}>{isSubscriber ? `${member.tier || 'Silver'} Subscriber` : 'Follower'}</span></div>
           <span>@{accountHandle(member)}</span>
