@@ -14,7 +14,9 @@ import { mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { mergeProfile, profileStorageKey } from '../utils/astrologerProfile.js'
 import { DEFAULT_ASSISTANT_PERMISSIONS, EDITOR_PERMISSION_GROUPS } from '../utils/editorAccess.js'
+import { ASTROLOGER_AUDIENCE } from './astrologer/audience/audienceData.js'
 import './editor/editor-management.css'
+import '../css/astrologer/audience-inline.css'
 
 const accountNav = {
   shortcuts: [
@@ -38,21 +40,12 @@ const accountNav = {
 
 const statDetails = {
   followers: {
-    label: 'Followers', value: '8,420', description: 'People who follow your public astrology profile.',
-    rows: [
-      { name: 'Nandini Kapoor', detail: 'Following since 18 Sep 2026', status: 'Active', date: '18 Sep 2026', photo: '/astrologer-photos/reference/nandini-kapoor.png' },
-      { name: 'Priya Sharma', detail: 'Following since 11 Sep 2026', status: 'Active', date: '11 Sep 2026', photo: '/astrologer-photos/reference/priya-sharma.png' },
-      { name: 'Dev Malhotra', detail: 'Following since 05 Sep 2026', status: 'Active', date: '05 Sep 2026', photo: '/astrologer-photos/reference/dev-malhotra.png' },
-      { name: 'Meera Desai', detail: 'Following since 28 Aug 2026', status: 'Active', date: '28 Aug 2026', photo: '/astrologer-photos/dashboard-reference/meera-desai.png' },
-    ],
+    label: 'Followers', value: '4', description: 'People who follow your public astrology profile.',
+    rows: ASTROLOGER_AUDIENCE.followers.rows,
   },
   subscribers: {
     label: 'Subscribers', value: '3', description: 'Users with an active subscription to your guidance.',
-    rows: [
-      { name: 'Aarav Menon', plan: 'Gold', price: '₹999/month', detail: 'Gold plan · ₹999/month', status: 'Active', date: 'Renews 24 Oct 2026', photo: '/astrologer-photos/dashboard-reference/bhavana-j.png' },
-      { name: 'Kavya Iyer', plan: 'Platinum', price: '₹1,499/month', detail: 'Platinum plan · ₹1,499/month', status: 'Active', date: 'Renews 31 Oct 2026', photo: '/astrologer-photos/reference/dr-rani.png' },
-      { name: 'Rohan Verma', plan: 'Silver', price: '₹499/month', detail: 'Silver plan · ₹499/month', status: 'Paused', date: 'Paused 02 Oct 2026', photo: '/astrologer-photos/reference/arjun-sharma.png' },
-    ],
+    rows: ASTROLOGER_AUDIENCE.subscribers.rows,
   },
   consultations: {
     label: 'Consultations', value: '3,850', description: 'Your recent completed and scheduled consultations.',
@@ -107,9 +100,10 @@ function buildAccountProfile(currentUser) {
     profileImage: currentUser?.profileImage || stored.photo || consultation.profileImage || '',
     rating: base.rating || '',
     reviews: base.reviews || '',
-    followers: Number(currentUser?.followers ?? base.followers ?? 0),
-    subscribers: Number(currentUser?.subscribers ?? base.subscribers ?? 0),
-    consultations: Number(currentUser?.consultations ?? base.consultations ?? 3850),
+    // Keep the visible totals aligned with the available demo audience records.
+    followers: ASTROLOGER_AUDIENCE.followers.rows.length,
+    subscribers: ASTROLOGER_AUDIENCE.subscribers.rows.length,
+    consultations: Number(base.consultations ?? 3850),
     email: currentUser?.email || '',
     phone: currentUser?.phone || '',
     accountId: currentUser?.accountId || `AST-${String(userId || '').slice(-8).toUpperCase()}`,
@@ -210,6 +204,7 @@ export default function AstrologerAccountManagement() {
   const [removedDevices, setRemovedDevices] = useState([])
   const [selectedStat, setSelectedStat] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [inlineAudienceType, setInlineAudienceType] = useState(null)
 
   const notify = (message) => { setToast(message); window.setTimeout(() => setToast(''), 3000) }
   const go = (next) => { setScreen(next); window.scrollTo({ top: 0, behavior: 'smooth' }) }
@@ -229,9 +224,19 @@ export default function AstrologerAccountManagement() {
     ...storedInvitations.filter((item) => item.status !== 'accepted').map((item) => ({ ...item, status: item.status === 'pending' ? 'Pending Invitation' : `${item.status || 'pending'}`.charAt(0).toUpperCase() + `${item.status || 'pending'}`.slice(1), last: '—', permissionList: item.permissions || [], permissions: (item.permissions || []).join(' · ') })),
   ], [storedEditors, storedInvitations])
 
+  const handleStatClick = (type) => {
+    if (type === 'followers' || type === 'subscribers') {
+      setSelectedStat(null)
+      setInlineAudienceType((current) => (current === type ? null : type))
+      return
+    }
+    setInlineAudienceType(null)
+    setSelectedStat(type)
+  }
+
 
   const renderScreen = () => {
-    if (screen === 'profile') return <ProfileScreenWithActions profile={profile} setProfile={setProfile} editing={profileEditing} setEditing={setProfileEditing} save={() => { setProfileEditing(false); notify('Profile changes saved successfully.') }} go={go} onStatClick={setSelectedStat} />
+    if (screen === 'profile') return <ProfileScreenWithActions profile={profile} setProfile={setProfile} editing={profileEditing} setEditing={setProfileEditing} save={() => { setProfileEditing(false); notify('Profile changes saved successfully.') }} go={go} onStatClick={handleStatClick} inlineAudienceType={inlineAudienceType} closeAudience={() => setInlineAudienceType(null)} onAudienceCountChange={(type, delta) => setProfile((current) => ({ ...current, [type]: Math.max(0, Number(current[type] || 0) + delta) }))} />
     if (screen === 'editors') return <EditorsScreen editors={editors} onInvite={() => setEditorModal(true)} onManage={setManagingEditor} onPermissions={() => go('permissions')} />
     if (screen === 'permissions') return <PermissionsScreen editors={editors} onSave={(editorId, permissions) => { updateEditorPermissions(editorId, permissions); addAudit('Permissions saved') }} onCancel={() => go('editors')} />
     if (screen === 'security') return <SecurityScreen password={password} setPassword={setPassword} go={go} setModal={setModal} onSave={() => addAudit('Password changed')} />
@@ -259,6 +264,73 @@ export default function AstrologerAccountManagement() {
 function ScreenCard({ title, description, children, actions }) { return <section className="account-panel"><div className="account-panel-heading"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{actions}</div>{children}</section> }
 function ProfileScreenWithActions(props) { return <><ProfileScreen {...props} /><ProfileContentTabs profile={props.profile} /><section className="profile-account-actions-section"><div className="profile-account-section-heading"><div><small>ACCOUNT ACTIONS</small><h2>Protection & closure</h2></div><Shield size={17} /></div><div className="profile-account-action-grid"><button type="button" onClick={() => props.go('emergency')}><span><AlertOctagon size={17} /></span><strong>Emergency Protection<small>Restrict selected account activities</small></strong><ChevronRight size={16} /></button><button type="button" onClick={() => props.go('deactivation')}><span><Trash2 size={17} /></span><strong>Account Deactivation & Closure<small>Pause or permanently close your account</small></strong><ChevronRight size={16} /></button></div></section></> }
 
+function InlineAudiencePanel({ type, count, onClose, onCountChange }) {
+  const navigate = useNavigate()
+  const { actions, blockedUserIds } = useAppData()
+  const audience = ASTROLOGER_AUDIENCE[type]
+  const [query, setQuery] = useState('')
+  const [openMenu, setOpenMenu] = useState(null)
+  const [notice, setNotice] = useState('')
+  const [removedIds, setRemovedIds] = useState([])
+  const [statusOverrides, setStatusOverrides] = useState({})
+  const filtered = useMemo(() => {
+    const normalized = query.trim().toLowerCase()
+    const rows = normalized
+      ? audience.rows.filter((row) => `${row.name} ${row.username || ''}`.toLowerCase().includes(normalized))
+      : audience.rows
+    return rows.filter((row) => !removedIds.includes(row.id))
+  }, [audience.rows, query, removedIds])
+  const total = Number(count || audience.count)
+  const initials = (name) => String(name || 'User').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
+  const actionItems = type === 'followers'
+    ? [['profile', 'View Profile'], ['remove', 'Remove Follower'], ['restrict', 'Restrict User'], ['block', 'Block User']]
+    : [['profile', 'View Profile'], ['subscription', 'View Subscription'], ['suspend', 'Suspend Subscription'], ['restrict', 'Restrict User'], ['block', 'Block User']]
+  const runAction = (action, row) => {
+    setOpenMenu(null)
+    if (action === 'profile') {
+      navigate(`/astrologer/audience/${type === 'subscribers' ? 'subscriber' : 'follower'}/${encodeURIComponent(row.id)}`)
+      return
+    }
+    if (action === 'remove') {
+      setRemovedIds((current) => [...current, row.id])
+      onCountChange(type, -1)
+      setNotice(`${row.name} was removed from your followers.`)
+      return
+    }
+    if (action === 'subscription') {
+      setNotice(`${row.name} has a ${row.plan || 'current'} subscription${row.price ? ` at ${row.price}` : ''}.`)
+      return
+    }
+    if (action === 'suspend') {
+      setStatusOverrides((current) => ({ ...current, [row.id]: 'Suspended' }))
+      setNotice(`${row.name}'s subscription was suspended.`)
+      return
+    }
+    if (action === 'restrict') {
+      setStatusOverrides((current) => ({ ...current, [row.id]: 'Restricted' }))
+      setNotice(`${row.name} was restricted.`)
+      return
+    }
+    if (action === 'block') {
+      actions.toggleUserBlock(row.id, row.name)
+      setStatusOverrides((current) => ({ ...current, [row.id]: blockedUserIds.includes(row.id) ? 'Active' : 'Blocked' }))
+      setNotice(`${row.name} was ${blockedUserIds.includes(row.id) ? 'unblocked' : 'blocked'}.`)
+      return
+    }
+    const label = actionItems.find(([id]) => id === action)?.[1] || 'Action'
+    setNotice(`${label} selected for ${row.name}. This demo action is ready to connect to the existing audience workflow.`)
+  }
+
+  return <section className="audience-inline-panel" aria-labelledby="audience-inline-title">
+    <div className="audience-inline-panel__header">
+      <div><small>YOUR AUDIENCE</small><h2 id="audience-inline-title">{audience.label}</h2><p>{audience.subtitle} · <strong>{total.toLocaleString('en-IN')} total</strong></p></div>
+      <button type="button" className="audience-inline-close" onClick={onClose} aria-label={`Close ${audience.label} list`}><X size={16} /> Close</button>
+    </div>
+    <label className="audience-inline-search"><Search size={16} /><span className="audience-inline-sr-only">Search {audience.label.toLowerCase()}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${audience.label.toLowerCase()}...`} /></label>
+    {notice && <div className="audience-inline-notice" role="status">{notice}<button type="button" aria-label="Dismiss action message" onClick={() => setNotice('')}><X size={14} /></button></div>}
+    {filtered.length ? <><div className="audience-inline-grid">{filtered.map((row) => { const status = statusOverrides[row.id] || (blockedUserIds.includes(row.id) ? 'Blocked' : row.status); return <article className="audience-inline-card" key={row.id}><span className="audience-inline-avatar">{row.photo ? <img src={row.photo} alt="" /> : initials(row.name)}</span><span className="audience-inline-copy"><strong>{row.name}</strong><small>@{row.username || 'astro-connect-user'}</small><span>{row.detail}</span></span><span className="audience-inline-meta"><b className={`audience-inline-status audience-inline-status--${status.toLowerCase()}`}>{status}</b>{type === 'subscribers' && <small>{row.plan}</small>}<small>{row.date}</small></span><div className="audience-inline-actions"><button type="button" className="audience-inline-menu-button" aria-label={`Actions for ${row.name}`} aria-expanded={openMenu === row.id} onClick={() => setOpenMenu(openMenu === row.id ? null : row.id)}><MoreVertical size={17} /></button>{openMenu === row.id && <div className="audience-inline-menu" role="menu">{actionItems.map(([id, label]) => <button type="button" role="menuitem" key={id} onClick={() => runAction(id, row)}>{label}</button>)}</div>}</div></article> })}</div></> : <div className="audience-inline-empty"><Users size={22} /><strong>{query ? 'No matching users' : `No ${type} yet`}</strong><span>{query ? 'Try a different name or username.' : `Users who ${type === 'followers' ? 'follow' : 'subscribe to'} you will appear here.`}</span></div>}
+  </section>
+}
 function ProfileContentTabs({ profile }) {
   const navigate = useNavigate()
   const { currentUser } = useAuth()
@@ -348,7 +420,7 @@ function ProfileContentTabsLegacy() {
   const tabs = [['posts', 'Posts', Grid3X3], ['live', 'Live', Radio], ['saved', 'Saved Posts', Bookmark]]
   return <section className="profile-content-tabs-section"><div className="profile-content-tabs" role="tablist" aria-label="Profile content"><div><small>PROFILE CONTENT</small><h2>Updates and sessions</h2></div><nav>{tabs.map(([id, label, Icon]) => <button type="button" key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}><Icon size={15} /> {label}</button>)}</nav></div>{tab === 'posts' && <div className="profile-content-tab-panel">{ownerPosts.length ? ownerPosts.map((post) => <article className={`profile-content-post profile-content-post--${post.tone || 'violet'}`} key={post.id}><div className="profile-content-post__top"><span><strong>Acharya Meena</strong><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</small></span><span className="profile-content-post__visibility">{post.visibility || 'public'}</span></div><h3>{post.title}</h3><p>{post.body}</p><div className="profile-content-post__actions"><button type="button" onClick={() => actions.togglePostLike(post.id)}><Heart size={14} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button><span><MessageCircle size={14} /> {postComments[post.id]?.length || 0}</span><button type="button" onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={14} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button><button type="button" onClick={() => navigator.share?.({ title: post.title, text: post.body })}><Share2 size={14} /> Share</button></div></article>) : <div className="profile-content-empty">No posts yet. Create an astrology insight to share with your audience.</div>}</div>}{tab === 'live' && <div className="profile-content-tab-panel profile-content-live-grid">{ownerLive.length ? ownerLive.map((session) => <article className="profile-content-post profile-content-post--live" key={session.id}><div className="profile-content-post__top"><span className="profile-content-live-badge"><Radio size={13} /> {session.status === 'live' ? 'LIVE NOW' : session.status}</span><small>{session.visibility || 'public'}</small></div><h3>{session.title}</h3><p>{session.description}</p><small>{session.scheduledStartAt ? new Date(session.scheduledStartAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'Scheduled session'}</small></article>) : <div className="profile-content-empty">No live sessions yet. Your scheduled and past sessions will appear here.</div>}</div>}{tab === 'saved' && <div className="profile-content-tab-panel">{savedPosts.length ? savedPosts.map((post) => <article className="profile-content-post profile-content-post--saved" key={post.id}><div className="profile-content-post__top"><span><strong>{post.title}</strong><small>Saved post</small></span><Bookmark size={16} fill="currentColor" /></div><p>{post.body}</p><button type="button" className="profile-content-unsave" onClick={() => actions.toggleSavedPost(post.id)}>Remove from Saved</button></article>) : <div className="profile-content-empty">No saved posts yet. Posts you save for later will appear here.</div>}</div>}</section>
 }
-function ProfileScreen({ profile, setProfile, editing, setEditing, save, onStatClick }) {
+function ProfileScreen({ profile, setProfile, editing, setEditing, save, onStatClick, inlineAudienceType, closeAudience, onAudienceCountChange }) {
   const { astrologerServices, actions } = useAppData()
   const [openMenu, setOpenMenu] = useState(null)
   const consultationRef = useRef(null)
@@ -371,7 +443,7 @@ function ProfileScreen({ profile, setProfile, editing, setEditing, save, onStatC
   ]
   const dndEnabled = astrologerServices.dndEnabled
   const statusLabel = dndEnabled ? 'Do Not Disturb' : (astrologerServices.available ? 'Available' : 'Unavailable')
-  return <div className="account-screen profile-account-screen"><section className="profile-account-hero"><div className="profile-account-cover" /><div className="profile-account-identity"><div className="profile-account-avatar">{profile.profileImage ? <img src={profile.profileImage} alt={`${profile.display} profile`} /> : profile.display.split(' ').map((part) => part[0]).join('').slice(0, 2)}</div><div className="profile-account-copy"><div className="profile-account-name"><h2>{profile.display}</h2><span className="profile-verified"><Check size={12} /></span></div><span>@{profile.username || profile.name.toLowerCase().replace(/\s+/g, '')}</span><strong>{profile.specializations}</strong><small><Globe2 size={13} /> {profile.location}</small></div><div className="profile-account-actions"><Button onClick={() => setEditing(!editing)}><Pencil size={14} /> {editing ? 'Editing Profile' : 'Edit Profile'}</Button><div className="profile-consultation" ref={consultationRef}><Button variant="outline" className="profile-consultation-trigger" aria-haspopup="dialog" aria-expanded={openMenu === 'consultation'} onClick={() => toggleMenu('consultation')}><MessageCircle size={14} /> Consultation <ChevronDown size={14} /></Button>{openMenu === 'consultation' && <div className="profile-consultation-menu" role="dialog" aria-label="Consultation availability"><span className="profile-consultation-menu__pointer" /><h4>Consultation availability</h4>{consultationServices.map((service) => { const Icon = service.Icon; return <div className="profile-consultation-menu__row" key={service.id}><span className="profile-consultation-menu__icon"><Icon size={15} /></span><span className="profile-consultation-menu__copy"><strong>{service.label}</strong><small>{service.enabled ? 'Enabled' : 'Disabled'}</small></span><button type="button" role="switch" aria-checked={service.enabled} aria-label={`${service.enabled ? 'Disable' : 'Enable'} ${service.label}`} className={`profile-consultation-switch${service.enabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ [service.patch]: !service.enabled })}><i /></button></div> })}</div>}</div><span className="profile-status-wrap" ref={statusRef}><button type="button" className={`profile-account-status${dndEnabled ? ' is-dnd' : ''}`} aria-haspopup="dialog" aria-expanded={openMenu === 'dnd'} onClick={() => toggleMenu('dnd')}><i /> <small>PROFILE STATUS</small><strong>{statusLabel}</strong></button>{openMenu === 'dnd' && <div className="profile-consultation-menu" role="dialog" aria-label="DND Mode"><span className="profile-consultation-menu__pointer" /><h4>DND Mode</h4><p className="profile-consultation-menu__note">Pause new consultation requests temporarily.</p><div className="profile-consultation-menu__row"><span className="profile-consultation-menu__icon"><BellOff size={15} /></span><span className="profile-consultation-menu__copy"><strong>{dndEnabled ? 'On' : 'Off'}</strong></span><button type="button" role="switch" aria-checked={dndEnabled} aria-label={`Turn DND Mode ${dndEnabled ? 'off' : 'on'}`} className={`profile-consultation-switch${dndEnabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ dndEnabled: !dndEnabled })}><i /></button></div></div>}</span></div></div><div className="profile-account-about"><b>About</b><p>{profile.bio}</p><div className="profile-account-meta"><span>{profile.experience} Experience</span><span>{profile.rating}</span><span>{profile.reviews}</span></div></div></section>{editing && <ProfileFormPanel profile={profile} setProfile={setProfile} editing={editing} setEditing={setEditing} save={save} />}<section className="profile-account-stats"><div className="profile-account-section-heading"><div><small>YOUR PERFORMANCE</small><h2>Stats</h2></div><Activity size={17} /></div><div className="profile-account-stat-grid"><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('followers')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('followers') } }}><Users size={16} /><strong>{profile.followers.toLocaleString('en-IN')}</strong><small>Followers</small></div><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('subscribers')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('subscribers') } }}><Check size={16} /><strong>{profile.subscribers.toLocaleString('en-IN')}</strong><small>Subscribers</small></div><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('consultations')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('consultations') } }}><CalendarDays size={16} /><strong>{profile.consultations.toLocaleString('en-IN')}</strong><small>Consultations</small></div></div></section><section className="profile-account-services"><div className="profile-account-section-heading"><div><small>MANAGE YOUR SERVICES</small><h2>Consultation Options</h2></div><Pencil size={17} /></div><div className="profile-account-service-grid">{consultationServices.map((service) => { const Icon = service.Icon; return <div key={service.id}><span><Icon size={16} /></span><strong>{service.label.replace('Instant ', '')}<small><i /> {service.enabled ? `Available · ${service.price}` : `Unavailable · ${service.price}`}</small></strong><button type="button" role="switch" aria-checked={service.enabled} aria-label={`${service.enabled ? 'Disable' : 'Enable'} ${service.label}`} className={`profile-account-toggle${service.enabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ [service.patch]: !service.enabled })} /></div> })}<div><span><CalendarDays size={16} /></span><strong>Book Appointment<small><i /> Available · Manage slots</small></strong></div></div></section><ScreenCard title="Account Information" description="Ownership and identity details are protected and cannot be edited here."><div className="account-info-grid"><Info label="Email" value={profile.email} icon={Mail} /><Info label="Mobile number" value={profile.phone} icon={Smartphone} /><Info label="Account ID" value={profile.accountId} icon={FileKey2} /><Info label="Account created" value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-IN') : 'Current account'} icon={Clock3} /><Info label="Verification status" value="Verified identity" icon={Check} success /></div></ScreenCard></div> }
+  return <div className="account-screen profile-account-screen"><section className="profile-account-hero"><div className="profile-account-cover" /><div className="profile-account-identity"><div className="profile-account-avatar">{profile.profileImage ? <img src={profile.profileImage} alt={`${profile.display} profile`} /> : profile.display.split(' ').map((part) => part[0]).join('').slice(0, 2)}</div><div className="profile-account-copy"><div className="profile-account-name"><h2>{profile.display}</h2><span className="profile-verified"><Check size={12} /></span></div><span>@{profile.username || profile.name.toLowerCase().replace(/\s+/g, '')}</span><strong>{profile.specializations}</strong><small><Globe2 size={13} /> {profile.location}</small></div><div className="profile-account-actions"><Button onClick={() => setEditing(!editing)}><Pencil size={14} /> {editing ? 'Editing Profile' : 'Edit Profile'}</Button><div className="profile-consultation" ref={consultationRef}><Button variant="outline" className="profile-consultation-trigger" aria-haspopup="dialog" aria-expanded={openMenu === 'consultation'} onClick={() => toggleMenu('consultation')}><MessageCircle size={14} /> Consultation <ChevronDown size={14} /></Button>{openMenu === 'consultation' && <div className="profile-consultation-menu" role="dialog" aria-label="Consultation availability"><span className="profile-consultation-menu__pointer" /><h4>Consultation availability</h4>{consultationServices.map((service) => { const Icon = service.Icon; return <div className="profile-consultation-menu__row" key={service.id}><span className="profile-consultation-menu__icon"><Icon size={15} /></span><span className="profile-consultation-menu__copy"><strong>{service.label}</strong><small>{service.enabled ? 'Enabled' : 'Disabled'}</small></span><button type="button" role="switch" aria-checked={service.enabled} aria-label={`${service.enabled ? 'Disable' : 'Enable'} ${service.label}`} className={`profile-consultation-switch${service.enabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ [service.patch]: !service.enabled })}><i /></button></div> })}</div>}</div><span className="profile-status-wrap" ref={statusRef}><button type="button" className={`profile-account-status${dndEnabled ? ' is-dnd' : ''}`} aria-haspopup="dialog" aria-expanded={openMenu === 'dnd'} onClick={() => toggleMenu('dnd')}><i /> <small>PROFILE STATUS</small><strong>{statusLabel}</strong></button>{openMenu === 'dnd' && <div className="profile-consultation-menu" role="dialog" aria-label="DND Mode"><span className="profile-consultation-menu__pointer" /><h4>DND Mode</h4><p className="profile-consultation-menu__note">Pause new consultation requests temporarily.</p><div className="profile-consultation-menu__row"><span className="profile-consultation-menu__icon"><BellOff size={15} /></span><span className="profile-consultation-menu__copy"><strong>{dndEnabled ? 'On' : 'Off'}</strong></span><button type="button" role="switch" aria-checked={dndEnabled} aria-label={`Turn DND Mode ${dndEnabled ? 'off' : 'on'}`} className={`profile-consultation-switch${dndEnabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ dndEnabled: !dndEnabled })}><i /></button></div></div>}</span></div></div><div className="profile-account-about"><b>About</b><p>{profile.bio}</p><div className="profile-account-meta"><span>{profile.experience} Experience</span><span>{profile.rating}</span><span>{profile.reviews}</span></div></div></section>{editing && <ProfileFormPanel profile={profile} setProfile={setProfile} editing={editing} setEditing={setEditing} save={save} />}<section className="profile-account-stats"><div className="profile-account-section-heading"><div><small>YOUR PERFORMANCE</small><h2>Stats</h2></div><Activity size={17} /></div><div className="profile-account-stat-grid"><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('followers')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('followers') } }}><Users size={16} /><strong>{profile.followers.toLocaleString('en-IN')}</strong><small>Followers</small></div><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('subscribers')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('subscribers') } }}><Check size={16} /><strong>{profile.subscribers.toLocaleString('en-IN')}</strong><small>Subscribers</small></div><div className="profile-account-stat-card" role="button" tabIndex="0" onClick={() => onStatClick('consultations')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onStatClick('consultations') } }}><CalendarDays size={16} /><strong>{profile.consultations.toLocaleString('en-IN')}</strong><small>Consultations</small></div></div></section><section className="profile-account-services"><div className="profile-account-section-heading"><div><small>MANAGE YOUR SERVICES</small><h2>Consultation Options</h2></div><Pencil size={17} /></div><div className="profile-account-service-grid">{consultationServices.map((service) => { const Icon = service.Icon; return <div key={service.id}><span><Icon size={16} /></span><strong>{service.label.replace('Instant ', '')}<small><i /> {service.enabled ? `Available · ${service.price}` : `Unavailable · ${service.price}`}</small></strong><button type="button" role="switch" aria-checked={service.enabled} aria-label={`${service.enabled ? 'Disable' : 'Enable'} ${service.label}`} className={`profile-account-toggle${service.enabled ? ' is-on' : ''}`} onClick={() => actions.updateAstrologerServices({ [service.patch]: !service.enabled })} /></div> })}<div><span><CalendarDays size={16} /></span><strong>Book Appointment<small><i /> Available · Manage slots</small></strong></div></div></section>{inlineAudienceType && <InlineAudiencePanel key={inlineAudienceType} type={inlineAudienceType} count={profile[inlineAudienceType]} onClose={closeAudience} onCountChange={onAudienceCountChange} />}<ScreenCard title="Account Information" description="Ownership and identity details are protected and cannot be edited here."><div className="account-info-grid"><Info label="Email" value={profile.email} icon={Mail} /><Info label="Mobile number" value={profile.phone} icon={Smartphone} /><Info label="Account ID" value={profile.accountId} icon={FileKey2} /><Info label="Account created" value={profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-IN') : 'Current account'} icon={Clock3} /><Info label="Verification status" value="Verified identity" icon={Check} success /></div></ScreenCard></div> }
 
 function StatDetailsModal({ type, details, onClose, onNotify, onSelectUser }) {
   const [openMenu, setOpenMenu] = useState(null)
