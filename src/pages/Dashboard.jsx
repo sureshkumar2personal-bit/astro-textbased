@@ -119,9 +119,6 @@ export default function Dashboard() {
           <span className="adash-hero-core"><Sparkles size={26} strokeWidth={1.6} /></span>
         </div>
         <div className="hero-banner-content">
-          <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
-            Astrologer Portal
-          </div>
           <h2>Welcome back, {currentUser?.name || 'Kumar'} 👋</h2>
           <p>Here&apos;s what&apos;s happening with your consultations and campaigns.</p>
         </div>

@@ -50,7 +50,7 @@ import {
 
 const ROLE_CONFIG = {
   [ROLES.ASTROLOGER]: {
-    title: 'Astrologer Workspace',
+    title: 'Astrologer',
     subtitle: 'Campaigns, queue management, and dispute handling',
     navLabel: 'Astrologer',
     nav: [
@@ -74,7 +74,7 @@ const ROLE_CONFIG = {
     ],
   },
   [ROLES.USER]: {
-    title: 'User Portal',
+    title: 'User',
     subtitle: 'Packages, questions, tracking, and disputes',
     navLabel: 'User',
     nav: [
@@ -111,7 +111,7 @@ const ROLE_CONFIG = {
 
 const PAGE_META = {
   [ROLES.ASTROLOGER]: {
-    '/astrologer': { title: 'Dashboard', sub: 'Astrologer workspace overview' },
+    '/astrologer': { title: 'Dashboard', sub: 'Dashboard overview' },
     '/astrologer/wallet': { title: 'Wallet', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
     '/astrologer/wallet/overview': { title: 'Wallet Overview', sub: 'Manage your earnings, pending payments, settlements and withdrawals.' },
     '/astrologer/wallet/earnings': { title: 'Earnings', sub: 'Your earnings breakdown by service category.' },
@@ -154,7 +154,7 @@ const PAGE_META = {
     '/astrologer/purchase-package': { title: 'Purchase Question Package', sub: 'Buy general & individual questions' },
   },
   [ROLES.USER]: {
-    '/user': { title: 'Dashboard', sub: 'User portal overview' },
+    '/user': { title: 'Dashboard', sub: 'Dashboard overview' },
     '/user/wallet': { title: 'Wallet', sub: 'Manage your balance, top-ups, spending and refunds.' },
     '/user/wallet/overview': { title: 'Wallet Overview', sub: 'Manage your balance, top-ups, spending and refunds.' },
     '/user/wallet/transactions': { title: 'Transactions', sub: 'Browse and export your wallet transaction statement.' },
@@ -178,7 +178,7 @@ const PAGE_META = {
     '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
-    '/user/atonements': { title: 'Atonement', sub: 'Track your recommended poojas and remedies' },
+    '/user/atonements': { title: 'Atonement', sub: '' },
     '/user/payment-methods': { title: 'Payment Methods', sub: 'Manage your saved bank accounts, UPI IDs, and cards.' },
     '/user/payment-methods/add': { title: 'Add Payment Method', sub: 'Add a new bank account, UPI ID, or card.' },
     '/user/autopay': { title: 'Autopay', sub: 'Manage automatic payments for subscriptions and top-ups.' },
@@ -412,6 +412,7 @@ export default function Layout() {
     : null
   const dynamicQuestionMeta = role === ROLES.USER ? QUESTION_DASHBOARD_META[location.pathname] || null : null
   const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
+  const isQuestionDashboard = role === ROLES.USER && location.pathname.startsWith('/user/ask-question')
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]
@@ -486,7 +487,6 @@ export default function Layout() {
           </div>
           <div>
             <div className="sidebar-brand-text">Astro Connect</div>
-            <div className="sidebar-brand-sub">{shellConfig.subtitle}</div>
           </div>
         </div>
 
@@ -504,7 +504,7 @@ export default function Layout() {
           {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
           <div className="topbar-heading">
             <div className="topbar-crumb">{meta.title}</div>
-            <div className="topbar-crumb-sub">{meta.sub}</div>
+            {isQuestionDashboard && <div className="topbar-crumb-sub">{meta.sub}</div>}
           </div>
           <div className="topbar-actions" ref={actionRef}>
             {!isAstrologer && <ActiveCallIndicator />}

@@ -239,7 +239,7 @@ function PastLiveCard({ session, onClick }) {
   )
 }
 
-function PastLiveDetailsModal({ session, onClose, onReplay }) {
+function PastLiveDetailsModal({ session, onClose }) {
   const minutes = durationMinutes(session.startedAt, session.endedAt)
   const heldOn = session.endedAt || session.scheduledEndAt
   const startedOn = session.startedAt || session.scheduledStartAt
@@ -306,7 +306,6 @@ function PastLiveDetailsModal({ session, onClose, onReplay }) {
 
         <div className="live-config-footer">
           <button type="button" className="btn btn-ghost" onClick={onClose}>Close</button>
-          <button type="button" className="btn btn-primary" onClick={onReplay}><Play size={15} /> View Replay</button>
         </div>
       </div>
     </div>,
@@ -772,7 +771,6 @@ export function LiveHistory() {
         <PastLiveDetailsModal
           session={detailsSession}
           onClose={() => setDetailsSession(null)}
-          onReplay={() => window.alert('Replay will be available once recording is enabled for past sessions.')}
         />
       )}
     </div>
