@@ -21,7 +21,6 @@ export default function AppointmentsShell() {
       <PageHeader
         eyebrow="Astrologer Workspace"
         title="Appointments"
-        subtitle="Publish availability first, review the calendar after publish, and check appointment history here."
         showBack
       />
 
