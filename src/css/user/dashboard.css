@@ -9,12 +9,63 @@
   min-height: 178px;
   padding: 32px 36px;
   border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   background:
     radial-gradient(circle at 83% 45%, rgba(255, 255, 255, .12) 0 2px, transparent 3px),
     radial-gradient(circle at 90% 25%, rgba(255, 255, 255, .16) 0 1px, transparent 2px),
     radial-gradient(ellipse at 88% 50%, transparent 0 54px, rgba(255, 255, 255, .12) 55px 56px, transparent 57px),
     radial-gradient(ellipse at 88% 50%, transparent 0 94px, rgba(255, 255, 255, .08) 95px 96px, transparent 97px),
     linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--secondary) 100%);
+}
+
+.user-dashboard-page .hero-banner-topbar-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.hero-banner-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill, 9999px);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.hero-banner-actions-wrap .topbar-explore-btn,
+.hero-banner-actions-wrap .icon-btn,
+.hero-banner-actions-wrap .theme-toggle-btn,
+.hero-banner-actions-wrap .avatar-chip {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hero-banner-actions-wrap .avatar-chip span {
+  color: #ffffff;
+}
+
+.hero-banner-actions-wrap .topbar-explore-btn:hover,
+.hero-banner-actions-wrap .icon-btn:hover,
+.hero-banner-actions-wrap .theme-toggle-btn:hover,
+.hero-banner-actions-wrap .avatar-chip:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+}
+
+.hero-banner-actions-wrap .topbar-popover {
+  top: 54px;
 }
 
 .user-dashboard-page .hero-banner-user .page-eyebrow {
