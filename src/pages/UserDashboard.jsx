@@ -17,6 +17,7 @@ import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils
 import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import TopbarActions from '../components/TopbarActions.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
 
 function formatActivityDate(value) {
@@ -94,14 +95,8 @@ export default function UserDashboard() {
           <h2>Welcome back, {currentUser?.name || 'User'} 👋</h2>
           <p>Here's what's happening with your consultations and questions.</p>
         </div>
-        <div className="hero-banner-cta">
-          <button
-            type="button"
-            className="btn btn-primary hero-banner-button"
-            onClick={() => navigate(routes.askQuestion, { state: { from: 'dashboard' } })}
-          >
-            Ask a Question
-          </button>
+        <div className="hero-banner-topbar-actions">
+          <TopbarActions className="hero-banner-actions-wrap" />
         </div>
       </div>
 

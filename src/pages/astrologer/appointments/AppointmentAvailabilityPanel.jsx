@@ -1337,14 +1337,6 @@ function PublishedPeriodModal({
             Unpublished
           </span>
         </div>
-
-        <p className="apt-published-modal__note">
-          Dates marked Unpublished sit outside
-          the current availability period. Use
-          the arrows to scan earlier months for
-          reference — those dates are view only
-          and never editable.
-        </p>
       </div>
     </div>
   )

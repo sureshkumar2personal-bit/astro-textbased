@@ -1591,7 +1591,6 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   width: 100%;
   margin: 0 auto;
   position: relative;
-  z-index: 0;
 }
 
 .page-transition > div {
@@ -13043,6 +13042,12 @@ button.apt-week-day:focus-visible {
   gap: 16px;
   padding: 20px 22px 16px;
   border-bottom: 1px solid var(--surface-border);
+  position: sticky;
+  top: 0;
+  background: var(--surface-overlay, #ffffff);
+  z-index: 10;
+  border-top-left-radius: var(--radius-l);
+  border-top-right-radius: var(--radius-l);
 }
 
 .apt-summary-modal__head span {

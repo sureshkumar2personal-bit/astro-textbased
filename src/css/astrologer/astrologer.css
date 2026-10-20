@@ -1530,7 +1530,6 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   width: 100%;
   margin: 0 auto;
   position: relative;
-  z-index: 0;
 }
 
 .page-transition > div {
