@@ -67,12 +67,12 @@ export default function AuthPage({ mode }) {
             {[
               {
                 icon: UserRound,
-                title: 'User Portal',
+                title: 'User',
                 text: 'Use a .com email to buy packages, ask questions, track answers, and raise disputes.',
               },
               {
                 icon: Shield,
-                title: 'Astrologer Workspace',
+                title: 'Astrologer',
                 text: 'Use an astro@...com email to review question queues, respond to users, and manage dispute resolution.',
               },
             ].map((item) => (

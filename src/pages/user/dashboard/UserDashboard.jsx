@@ -46,9 +46,6 @@ export default function UserDashboard() {
     <div>
       <div className="hero-banner hero-banner-user">
         <div className="hero-banner-content">
-          <div className="page-eyebrow" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
-            User portal
-          </div>
           <h2>Welcome, {currentUser?.name || 'User'} ✨</h2>
           <p>Browse packages, ask questions, and keep track of every update in one place.</p>
         </div>

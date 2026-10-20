@@ -3539,7 +3539,7 @@ if (question) {
         {
           id: crypto.randomUUID(),
           title: 'Question submitted',
-          detail: 'A new question was submitted from the user portal.',
+          detail: 'A new question was submitted from the user account.',
           time: 'just now',
           route: `/user/track-questions?questionId=${nextId}`,
           audience: ROLES.USER,

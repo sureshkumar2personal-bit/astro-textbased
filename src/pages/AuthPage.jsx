@@ -61,13 +61,13 @@ export default function AuthPage({ mode, selectedRole }) {
             </div>
             <div>
               <div className="font-['Space_Grotesk'] text-lg font-bold">Astro Connect</div>
-              <div className="text-sm text-violet-200">Separate portals for every role</div>
+              <div className="text-sm text-violet-200">Separate access for every role</div>
             </div>
           </div>
 
           <div className="max-w-md space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-violet-100">
-              Login Portal
+              Sign in
             </div>
             <h1 className="font-['Space_Grotesk'] text-4xl font-bold leading-tight text-white sm:text-5xl">
               {role === ROLES.USER ? 'User access for purchases, questions, and disputes' : 'Astrologer access for queues, answers, and sales'}
@@ -81,12 +81,12 @@ export default function AuthPage({ mode, selectedRole }) {
             {[
               {
                 icon: UserRound,
-                title: 'User Portal',
+                title: 'User',
                 text: 'Use a .com email to buy packages, ask questions, track answers, and raise disputes.',
               },
               {
                 icon: Shield,
-                title: 'Astrologer Workspace',
+                title: 'Astrologer',
                 text: 'Use an astro@...com email to review question queues, respond to users, and manage dispute resolution.',
               },
             ].map((item) => (

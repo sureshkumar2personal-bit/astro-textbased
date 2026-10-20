@@ -177,8 +177,7 @@ function UserLiveSessionCard({ session, access }) {
     actionLabel = reminderSet ? 'Reminder Set' : 'Set Reminder'
     actionIcon = reminderSet ? <Check size={15} /> : <BellRing size={15} />
   } else {
-    actionLabel = 'View Replay'
-    actionIcon = <Play size={15} />
+    actionLabel = null
   }
 
   const openSession = () => navigate(to)
@@ -242,9 +241,9 @@ function UserLiveSessionCard({ session, access }) {
           >
             {actionIcon} {actionLabel}
           </button>
-        ) : (
+        ) : session.status === 'live' ? (
           <span className={`user-live-card__action${access.allowed ? '' : ' is-locked'}`}>{actionIcon} {actionLabel} <ArrowRight size={14} /></span>
-        )}
+        ) : null}
       </div>
     </div>
   )

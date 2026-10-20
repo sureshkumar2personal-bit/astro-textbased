@@ -31,7 +31,7 @@ export default function Atonements() {
   if (appointmentTarget) return <Navigate to={`/user/atonements/${encodeURIComponent(appointmentTarget.id)}`} replace />
 
   return <div className="user-atonements-page atonements-page">
-    <PageHeader eyebrow="User portal" title="Atonement" subtitle="Track your recommended poojas and remedies" />
+    <PageHeader eyebrow="User portal" title="Atonement" />
     <Section>
       <Card className="atonement-filter-card">
         <div className="atonement-filter-group"><span className="field-label-top">Source</span><div className="chip-grid">{SOURCE_FILTERS.map(([key, label]) => <button type="button" className={`chip${source === key ? ' selected' : ''}`} key={key} onClick={() => setSource(key)}>{label}</button>)}</div></div>
