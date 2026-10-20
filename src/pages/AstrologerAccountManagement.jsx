@@ -292,9 +292,13 @@ function InlineAudiencePanel({ type, count, onClose, onCountChange }) {
   }, [audience.rows, query, removedIds])
   const total = Number(count || audience.count)
   const initials = (name) => String(name || 'User').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
-  const actionItems = type === 'followers'
-    ? [['profile', 'View Profile'], ['remove', 'Remove Follower'], ['restrict', 'Restrict User'], ['block', 'Block User']]
-    : [['profile', 'View Profile'], ['subscription', 'View Subscription'], ['suspend', 'Suspend Subscription'], ['restrict', 'Restrict User'], ['block', 'Block User']]
+  const actionItems = (row) => {
+    const blocked = blockedUserIds.includes(row.id) || statusOverrides[row.id] === 'Blocked'
+    const restricted = statusOverrides[row.id] === 'Restricted'
+    return type === 'followers'
+      ? [['profile', 'View Profile'], ['remove', 'Remove Follower'], ['restrict', restricted ? 'Unrestrict User' : 'Restrict User'], ['block', blocked ? 'Unblock User' : 'Block User']]
+      : [['profile', 'View Profile'], ['subscription', 'View Subscription'], ['suspend', 'Suspend Subscription'], ['restrict', restricted ? 'Unrestrict User' : 'Restrict User'], ['block', blocked ? 'Unblock User' : 'Block User']]
+  }
   const runAction = (action, row) => {
     setOpenMenu(null)
     if (action === 'profile') {
@@ -317,17 +321,19 @@ function InlineAudiencePanel({ type, count, onClose, onCountChange }) {
       return
     }
     if (action === 'restrict') {
-      setStatusOverrides((current) => ({ ...current, [row.id]: 'Restricted' }))
-      setNotice(`${row.name} was restricted.`)
+      const restricted = statusOverrides[row.id] === 'Restricted'
+      setStatusOverrides((current) => ({ ...current, [row.id]: restricted ? row.status : 'Restricted' }))
+      setNotice(`${row.name} was ${restricted ? 'unrestricted' : 'restricted'}.`)
       return
     }
     if (action === 'block') {
+      const blocked = blockedUserIds.includes(row.id) || statusOverrides[row.id] === 'Blocked'
       actions.toggleUserBlock(row.id, row.name)
-      setStatusOverrides((current) => ({ ...current, [row.id]: blockedUserIds.includes(row.id) ? 'Active' : 'Blocked' }))
-      setNotice(`${row.name} was ${blockedUserIds.includes(row.id) ? 'unblocked' : 'blocked'}.`)
+      setStatusOverrides((current) => ({ ...current, [row.id]: blocked ? row.status : 'Blocked' }))
+      setNotice(`${row.name} was ${blocked ? 'unblocked' : 'blocked'}.`)
       return
     }
-    const label = actionItems.find(([id]) => id === action)?.[1] || 'Action'
+    const label = actionItems(row).find(([id]) => id === action)?.[1] || 'Action'
     setNotice(`${label} selected for ${row.name}. This demo action is ready to connect to the existing audience workflow.`)
   }
 
@@ -338,7 +344,7 @@ function InlineAudiencePanel({ type, count, onClose, onCountChange }) {
     </div>
     <label className="audience-inline-search"><Search size={16} /><span className="audience-inline-sr-only">Search {audience.label.toLowerCase()}</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${audience.label.toLowerCase()}...`} /></label>
     {notice && <div className="audience-inline-notice" role="status">{notice}<button type="button" aria-label="Dismiss action message" onClick={() => setNotice('')}><X size={14} /></button></div>}
-    {filtered.length ? <><div className="audience-inline-grid">{filtered.map((row) => { const status = statusOverrides[row.id] || (blockedUserIds.includes(row.id) ? 'Blocked' : row.status); return <article className="audience-inline-card" key={row.id}><span className="audience-inline-avatar">{row.photo ? <img src={row.photo} alt="" /> : initials(row.name)}</span><span className="audience-inline-copy"><strong>{row.name}</strong><small>@{row.username || 'astro-connect-user'}</small><span>{row.detail}</span></span><span className="audience-inline-meta"><b className={`audience-inline-status audience-inline-status--${status.toLowerCase()}`}>{status}</b>{type === 'subscribers' && <small>{row.plan}</small>}<small>{row.date}</small></span><div className="audience-inline-actions"><button type="button" className="audience-inline-menu-button" aria-label={`Actions for ${row.name}`} aria-expanded={openMenu === row.id} onClick={() => setOpenMenu(openMenu === row.id ? null : row.id)}><MoreVertical size={17} /></button>{openMenu === row.id && <div className="audience-inline-menu" role="menu">{actionItems.map(([id, label]) => <button type="button" role="menuitem" key={id} onClick={() => runAction(id, row)}>{label}</button>)}</div>}</div></article> })}</div></> : <div className="audience-inline-empty"><Users size={22} /><strong>{query ? 'No matching users' : `No ${type} yet`}</strong><span>{query ? 'Try a different name or username.' : `Users who ${type === 'followers' ? 'follow' : 'subscribe to'} you will appear here.`}</span></div>}
+    {filtered.length ? <><div className="audience-inline-grid">{filtered.map((row) => { const status = statusOverrides[row.id] || (blockedUserIds.includes(row.id) ? 'Blocked' : row.status); return <article className="audience-inline-card" key={row.id}><span className="audience-inline-avatar">{row.photo ? <img src={row.photo} alt="" /> : initials(row.name)}</span><span className="audience-inline-copy"><strong>{row.name}</strong><small>@{row.username || 'astro-connect-user'}</small><span>{row.detail}</span></span><span className="audience-inline-meta"><b className={`audience-inline-status audience-inline-status--${status.toLowerCase()}`}>{status}</b>{type === 'subscribers' && <small>{row.plan}</small>}<small>{row.date}</small></span><div className="audience-inline-actions"><button type="button" className="audience-inline-menu-button" aria-label={`Actions for ${row.name}`} aria-expanded={openMenu === row.id} onClick={() => setOpenMenu(openMenu === row.id ? null : row.id)}><MoreVertical size={17} /></button>{openMenu === row.id && <div className="audience-inline-menu" role="menu">{actionItems(row).map(([id, label]) => <button type="button" role="menuitem" key={id} onClick={() => runAction(id, row)}>{label}</button>)}</div>}</div></article> })}</div></> : <div className="audience-inline-empty"><Users size={22} /><strong>{query ? 'No matching users' : `No ${type} yet`}</strong><span>{query ? 'Try a different name or username.' : `Users who ${type === 'followers' ? 'follow' : 'subscribe to'} you will appear here.`}</span></div>}
   </section>
 }
 function ProfileContentTabs({ profile }) {
