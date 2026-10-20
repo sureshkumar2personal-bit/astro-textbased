@@ -876,10 +876,6 @@ function DateSummaryModal({
           <div className="apt-summary-slot-head">
             <div>
               <h4>Appointment Slots</h4>
-              <p>
-                Cancelled appointments automatically
-                free their slots.
-              </p>
             </div>
 
             <StatusBadge
@@ -2192,21 +2188,7 @@ export default function AppointmentAvailabilityPanel({
     <>
       <Card className="apt-schedule-card">
         <header className="apt-schedule-header">
-          <div>
-            <div className="apt-slot-panel__eyebrow">
-              Appointments
-            </div>
-
-            <h2>
-              Schedule Appointment
-            </h2>
-
-            <p>
-              Set your appointment availability,
-              working hours, breaks, duration and
-              price.
-            </p>
-          </div>
+          <div />
 
           <div className="apt-schedule-actions">
             <button
@@ -2342,13 +2324,6 @@ export default function AppointmentAvailabilityPanel({
               )}
             </strong>
           </p>
-
-          <p className="apt-policy-note">
-            Buffer gaps are rest time between
-            appointments — separate from Break
-            Hours. They are never slots and never
-            count in Total Slots.
-          </p>
         </section>
 
         <section className="apt-period-card">
@@ -2417,15 +2392,6 @@ export default function AppointmentAvailabilityPanel({
                 }
               />
             </label>
-
-            <p className="apt-period-card__hint">
-              Up to 90 days from today. Start can
-              be today or later; End can be any
-              date from Start through the 90-day
-              boundary. Dates before today, after
-              the boundary, or before the start
-              date are disabled.
-            </p>
           </div>
         </section>
 
@@ -2444,11 +2410,6 @@ export default function AppointmentAvailabilityPanel({
                   ? 'Published Availability'
                   : 'Not published yet'}
               </strong>
-              <p>
-                Users can only book the published
-                availability — saved changes become
-                live after you publish.
-              </p>
             </div>
 
             {hasUnpublished && (
@@ -2514,12 +2475,6 @@ export default function AppointmentAvailabilityPanel({
               <CalendarDays size={15} />
               View Published Availability
             </button>
-
-            <p>
-              View the full published period,
-              including weekly rules, daily
-              overrides and existing bookings.
-            </p>
           </div>
         </section>
 
@@ -2565,13 +2520,6 @@ export default function AppointmentAvailabilityPanel({
             <div className="apt-mode-heading">
               <div>
                 <h3>Weekly Schedule</h3>
-
-                <p>
-                  Your recurring base availability,
-                  shared across all weekdays. Start
-                  with the shared template below,
-                  then fine-tune any single day.
-                </p>
               </div>
             </div>
 
@@ -2580,13 +2528,6 @@ export default function AppointmentAvailabilityPanel({
                 <span className="apt-weekly-quick__label">
                   Quick start
                 </span>
-
-                <p>
-                  Apply the shared weekly template
-                  to several weekdays at once.
-                  You can still edit any day
-                  afterwards.
-                </p>
               </div>
 
               <div className="apt-weekly-quick__buttons">
@@ -2689,27 +2630,12 @@ export default function AppointmentAvailabilityPanel({
               })}
             </div>
 
-            {selectedDayIndex == null && (
-              <p className="apt-weekly-detail-hint">
-                Choose a weekday above to view or
-                fine-tune that day's schedule. No
-                day is open by default.
-              </p>
-            )}
-
             <Card className="apt-weekly-template">
               <div className="apt-weekly-panel__head">
                 <div>
                   <strong>
                     Shared Weekly Template
                   </strong>
-
-                  <span>
-                    The hours and breaks used by{' '}
-                    <em>All Day</em> and{' '}
-                    <em>Except Sunday</em>, and the
-                    default for each weekday.
-                  </span>
                 </div>
               </div>
 
@@ -2771,12 +2697,6 @@ export default function AppointmentAvailabilityPanel({
               {dayFor(selectedDayIndex)
                 .enabled === false ? (
                 <div className="apt-weekly-day-detail__off">
-                  <p>
-                    This weekday is turned off.
-                    Turn it back on to set
-                    working hours and breaks.
-                  </p>
-
                   <button
                     type="button"
                     className="btn btn-outline"
@@ -2862,13 +2782,6 @@ export default function AppointmentAvailabilityPanel({
                   Daily Schedule
                 </h3>
 
-                <p>
-                  Apply a one-time change to{' '}
-                  <strong>one date only</strong> —{' '}
-                  this never changes the weekly
-                  schedule.
-                </p>
-
                 <span
                   className={
                     override
@@ -2933,14 +2846,6 @@ export default function AppointmentAvailabilityPanel({
                       Government Holiday —{' '}
                       {availability.holiday.name}
                     </strong>
-
-                    <span>
-                      This date is unavailable
-                      by default. Enable
-                      availability below if
-                      you want to work on this
-                      holiday.
-                    </span>
                   </div>
                 </div>
               )}
@@ -3031,13 +2936,6 @@ export default function AppointmentAvailabilityPanel({
                 <h3>
                   Monthly Schedule
                 </h3>
-
-                <p>
-                  Total, Booked, Completed and
-                  Remaining slots come from real
-                  data — your published working
-                  hours, breaks and appointments.
-                </p>
               </div>
 
               <div className="apt-month-controls">
