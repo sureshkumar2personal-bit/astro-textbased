@@ -411,8 +411,7 @@ export default function Layout() {
     ? { title: 'Book Appointment', sub: 'Pick an available date, review its open slots and pay from your wallet.' }
     : null
   const dynamicQuestionMeta = role === ROLES.USER ? QUESTION_DASHBOARD_META[location.pathname] || null : null
-  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
-  const isQuestionDashboard = role === ROLES.USER && location.pathname.startsWith('/user/ask-question')
+
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]
@@ -557,10 +556,7 @@ export default function Layout() {
           <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
             {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
             {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
-            <div className="topbar-heading">
-              <div className="topbar-crumb">{meta.title}</div>
-              {isQuestionDashboard && <div className="topbar-crumb-sub">{meta.sub}</div>}
-            </div>
+
             <div className="topbar-actions" ref={actionRef}>
               {!isAstrologer && <ActiveCallIndicator />}
               {!shellIsAstrologer && (
