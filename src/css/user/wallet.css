@@ -938,3 +938,9 @@
   color: var(--text-secondary);
   line-height: 1.5;
 }
+
+.wallet-header-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 12px;
+}

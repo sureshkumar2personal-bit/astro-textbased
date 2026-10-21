@@ -374,25 +374,25 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Wallet"
-            actions={
-              <div className="wallet-header-actions">
-                <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                  <Plus size={16} /> Add Money
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                  <ArrowUpFromLine size={16} /> Withdraw
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={downloadAllTransactionsPdf}
-                  disabled={transactions.length === 0}
-                >
-                  <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
-                </button>
-              </div>
-            }
           />
+          <div className="wallet-header-actions-row">
+            <div className="wallet-header-actions">
+              <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
+                <Plus size={16} /> Add Money
+              </button>
+              <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                <ArrowUpFromLine size={16} /> Withdraw
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={downloadAllTransactionsPdf}
+                disabled={transactions.length === 0}
+              >
+                <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
+              </button>
+            </div>
+          </div>
           <WalletSectionTabs />
 
           {/* Summary Cards */}
