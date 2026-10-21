@@ -30,6 +30,7 @@ import {
 } from '../utils/questions.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { useGlobalHeaderActions } from '../contexts/GlobalHeaderActionsContext.jsx'
 
 // Card look (icon + thumb tint) keyed off the campaign topic; purely presentational.
 const CAMPAIGN_CARD_STYLES = [
@@ -55,6 +56,16 @@ export default function Dashboard() {
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const astrologerId = currentUser?.id || 'astrologer-demo'
+  const globalHeader = useGlobalHeaderActions()
+
+  // The welcome panel hosts the global actions, so the layout must not render
+  // its own fallback topbar on this route.
+  useEffect(() => {
+    if (globalHeader?.setHasPageHeader) {
+      globalHeader.setHasPageHeader(true)
+      return () => globalHeader.setHasPageHeader(false)
+    }
+  }, [globalHeader])
 
   // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
   const showcaseCampaigns = useMemo(() => {
@@ -187,6 +198,11 @@ export default function Dashboard() {
           </div>
           <p>Here&apos;s what&apos;s happening with your consultations and campaigns.</p>
         </div>
+        {globalHeader?.actions && (
+          <div className="adash-hero-topbar-actions">
+            {globalHeader.actions}
+          </div>
+        )}
       </div>
 
       <Section title="Quick Actions" icon={Zap}>

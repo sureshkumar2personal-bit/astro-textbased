@@ -15354,8 +15354,30 @@ button.apt-week-day:focus-visible {
 /* ===== Astrologer dashboard ===== */
 .adash-hero { padding: var(--space-5); min-height: 260px; }
 .adash-hero-content { max-width: 620px; }
-.adash-hero .hero-banner-content { max-width: none; flex: 1 1 auto; min-width: 0; position: relative; z-index: 2; }
+.adash-hero .hero-banner-content { max-width: none; flex: 1 1 auto; min-width: 0; position: relative; z-index: 2; padding-top: 58px; }
 .adash-hero-titlerow { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.adash-hero-titlerow .hero-services-summary { margin-left: auto; }
+.adash-hero-topbar-actions { display: flex; align-items: center; position: absolute; top: var(--space-4); right: var(--space-4); z-index: 3; }
+.adash-hero-topbar-actions .topbar-actions { display: flex; align-items: center; gap: 8px; }
+.adash-hero-topbar-actions .icon-btn,
+.adash-hero-topbar-actions .theme-toggle-btn,
+.adash-hero-topbar-actions .avatar-chip {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.adash-hero-topbar-actions .avatar-chip span { color: #ffffff; }
+.adash-hero-topbar-actions .topbar-service-status { color: rgba(255, 255, 255, 0.86); }
+.adash-hero-topbar-actions .icon-btn:hover,
+.adash-hero-topbar-actions .theme-toggle-btn:hover,
+.adash-hero-topbar-actions .avatar-chip:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+}
+.adash-hero-topbar-actions .topbar-popover { top: 54px; }
 
 .adash-hero-art { position: absolute; right: 32px; bottom: 8px; width: 100px; height: 100px; pointer-events: none; z-index: 0; }
 .adash-hero-ring { position: absolute; top: 50%; left: 50%; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.22); transform: translate(-50%, -50%); }
