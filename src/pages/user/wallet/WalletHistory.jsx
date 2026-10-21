@@ -387,10 +387,10 @@ export default function UserWallet({ section = 'overview' }) {
                 <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
                 <div className="wallet-header-actions" style={{ marginTop: 12 }}>
                   <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                    <Plus size={16} /> Add Money
+                    Add Money
                   </button>
                   <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                    <ArrowUpFromLine size={16} /> Withdraw
+                    Withdraw
                   </button>
                 </div>
               </div>
