@@ -1402,7 +1402,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   -webkit-backdrop-filter: none;
   position: sticky;
   top: var(--space-2);
-  z-index: 50;
+  z-index: 100;
   border-radius: 0;
   box-shadow: none;
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease;
@@ -1441,6 +1441,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   align-items: center;
   gap: 10px;
   position: relative;
+  z-index: 100;
 }
 
 
@@ -1452,9 +1453,9 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   background: var(--surface-overlay);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-m);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.2), var(--shadow-lg);
   padding: var(--space-2);
-  z-index: 20;
+  z-index: 1000;
   backdrop-filter: blur(20px);
   animation: popIn 200ms var(--ease-premium) both;
 }
@@ -1655,6 +1656,8 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   justify-content: space-between;
   gap: var(--space-2);
   flex-wrap: wrap;
+  position: relative;
+  z-index: 100;
 }
 
 .page-header-actions {
@@ -1662,6 +1665,18 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 100;
+}
+
+.page-header-row:has(.topbar-popover),
+.page-header-actions:has(.topbar-popover),
+.topbar-actions:has(.topbar-popover),
+.topbar-header:has(.topbar-popover),
+.hero-banner:has(.topbar-popover),
+.hero-banner-topbar-actions:has(.topbar-popover) {
+  position: relative;
+  z-index: 1000 !important;
 }
 
 /* ---------- Sections & cards ---------- */
@@ -2602,7 +2617,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   color: #fff;
   box-shadow: 0 20px 48px -8px rgba(76, 29, 149, 0.22);
   position: relative;
-  z-index: 10;
+  z-index: 100;
   overflow: visible;
   isolation: isolate;
 }
@@ -5114,7 +5129,7 @@ tbody tr:hover {
 .app-shell--profile .topbar-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
   height: 72px;
   margin: 0;
   padding: 0 32px;
@@ -5675,7 +5690,7 @@ tbody tr:hover {
 
 .wallet-summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -5694,6 +5709,7 @@ tbody tr:hover {
   cursor: pointer;
   color: inherit;
   transition: transform 250ms var(--ease-premium), box-shadow 250ms var(--ease-premium);
+  overflow: hidden;
 }
 
 .wallet-stat-card:hover {
@@ -5704,6 +5720,53 @@ tbody tr:hover {
 .wallet-stat-card--primary {
   background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
   border-color: var(--violet-200);
+  cursor: default;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wallet-stat-card--primary:hover {
+  transform: none;
+  box-shadow: var(--shadow-card);
+}
+
+.wallet-stat-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
+.wallet-stat-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.wallet-stat-card__actions .btn,
+.wallet-header-actions--compact .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.wallet-stat-card--primary .btn-ghost {
+  background: #ffffff;
+  border: 1.5px solid var(--violet-200);
+  color: var(--primary-dark);
+}
+
+.wallet-stat-card--primary .btn-ghost:hover {
+  background: #ffffff;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .wallet-stat-card--highlight {
@@ -6386,7 +6449,7 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .wallet-header-actions .btn {
@@ -6644,8 +6707,8 @@ tbody tr:hover {
 }
 
 /* Responsive */
-@media (max-width: 1200px) {
-  .wallet-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) {
+  .wallet-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {

@@ -380,19 +380,21 @@ export default function UserWallet({ section = 'overview' }) {
           {/* Summary Cards */}
           <div className="wallet-summary-grid section">
             <div className="wallet-stat-card wallet-stat-card--primary">
-              <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Available Balance</div>
-                <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
-                <div className="wallet-header-actions wallet-header-actions--compact" style={{ marginTop: 12 }}>
-                  <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                    Add Money
-                  </button>
-                  <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                    Withdraw
-                  </button>
+              <div className="wallet-stat-card__top">
+                <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
+                <div className="wallet-stat-card__body">
+                  <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
+                  <div className="wallet-stat-card__label">Available Balance</div>
+                  <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
                 </div>
+              </div>
+              <div className="wallet-stat-card__actions wallet-header-actions wallet-header-actions--compact">
+                <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
+                  Add Money
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                  Withdraw
+                </button>
               </div>
             </div>
 
