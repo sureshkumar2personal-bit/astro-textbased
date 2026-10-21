@@ -789,11 +789,13 @@
 
 .wallet-header-actions--compact {
   width: 100%;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
 }
 
 .wallet-header-actions--compact .btn {
-  width: 100%;
+  flex: 1 1 0;
   min-width: 0;
   padding: 6px 8px;
   font-size: 12px;
