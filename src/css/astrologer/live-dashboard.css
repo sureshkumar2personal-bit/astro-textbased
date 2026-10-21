@@ -7,6 +7,9 @@
 /* ---------- header + step navigation ---------- */
 .ld-header { display: grid; gap: 14px; padding: 4px 0 20px; }
 .ld-header__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ld-header__titles { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.ld-header__title { min-width: 0; }
+.ld-header__actions { display: flex; align-items: center; flex: 0 0 auto; position: relative; z-index: 100; }
 .ld-header__titles h1 { margin: 0; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -0.03em; color: var(--ink); }
 .ld-header__titles p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
 
