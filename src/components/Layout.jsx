@@ -478,6 +478,60 @@ export default function Layout() {
     return () => document.removeEventListener('mousedown', handlePointerDown)
   }, [])
 
+  const [headerVisible, setHeaderVisible] = useState(true)
+  const headerVisibleRef = useRef(true)
+  const lastScrollYRef = useRef(0)
+
+  // Reset scroll state on route change
+  useEffect(() => {
+    setHeaderVisible(true)
+    headerVisibleRef.current = true
+    lastScrollYRef.current = window.scrollY || 0
+  }, [location.pathname])
+
+  useEffect(() => {
+    let ticking = false
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || document.documentElement.scrollTop || 0
+          const lastScrollY = lastScrollYRef.current
+          const delta = currentScrollY - lastScrollY
+          const threshold = 80
+
+          if (currentScrollY <= threshold) {
+            // At the top of the page: sticky header is always visible
+            if (!headerVisibleRef.current) {
+              headerVisibleRef.current = true
+              setHeaderVisible(true)
+            }
+          } else if (delta > 8) {
+            // Scrolling down past threshold: hide sticky header
+            if (headerVisibleRef.current) {
+              headerVisibleRef.current = false
+              setHeaderVisible(false)
+              setPanel(null)
+            }
+          } else if (delta < -8) {
+            // Scrolling up: show sticky header
+            if (!headerVisibleRef.current) {
+              headerVisibleRef.current = true
+              setHeaderVisible(true)
+            }
+          }
+
+          lastScrollYRef.current = currentScrollY
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
       <aside className={`sidebar sidebar--${role}`}>
@@ -500,7 +554,7 @@ export default function Layout() {
 
       <div className="main-column">
         {location.pathname !== '/user' && (
-          <header className="topbar-header">
+          <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
             {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
             {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
             <div className="topbar-heading">
