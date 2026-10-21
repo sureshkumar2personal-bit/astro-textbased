@@ -1669,6 +1669,10 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   z-index: 100;
 }
 
+.page-header-back {
+  margin-bottom: 14px;
+}
+
 .page-header-row:has(.topbar-popover),
 .page-header-actions:has(.topbar-popover),
 .topbar-actions:has(.topbar-popover),
@@ -5155,11 +5159,9 @@ tbody tr:hover {
 
 .app-shell--profile .page-content { max-width: 1120px; padding: 28px 24px 64px; }
 .app-shell--profile .page-header-row { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: 28px; }
-.app-shell--profile .page-header-row > div:first-child { padding-top: 60px; }
-.app-shell--profile .page-header-actions { position: static; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 60px; }
-.app-shell--profile .page-header-actions > .inline-flex { position: absolute; top: 0; left: 0; }
-.app-shell--profile .page-header-actions .inline-flex { height: 40px; padding: 0 16px; border: 1px solid #e8dcc8; border-radius: 12px; background: #fffdf9; color: #2c2337; box-shadow: 0 4px 12px rgba(60, 40, 20, .04); }
-.app-shell--profile .page-header-actions .inline-flex:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
+.app-shell--profile .page-header-actions { position: static; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.app-shell--profile .page-header-back .inline-flex { height: 40px; padding: 0 16px; border: 1px solid #e8dcc8; border-radius: 12px; background: #fffdf9; color: #2c2337; box-shadow: 0 4px 12px rgba(60, 40, 20, .04); }
+.app-shell--profile .page-header-back .inline-flex:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
 .app-shell--profile .page-eyebrow { height: 30px; margin-bottom: 10px; padding: 0 12px; border-radius: 999px; background: #f6ebd7; color: #a66a08; font-size: 11px; letter-spacing: .08em; box-shadow: none; }
 .app-shell--profile .page-title { color: #251a38; font-family: Georgia, 'Times New Roman', serif; font-size: 42px; font-weight: 600; line-height: 1.1; letter-spacing: 0; }
 .app-shell--profile .page-header-row .muted { margin: 0; color: #766c80; font-size: 15px; line-height: 24px; }
@@ -5292,7 +5294,7 @@ tbody tr:hover {
   .app-shell--profile .profile-topbar-brand { font-size: 17px; }
   .app-shell--profile .topbar-actions .avatar-chip > span:last-child { display: none; }
   .app-shell--profile .page-content { padding: 16px 16px 48px; }
-  .app-shell--profile .page-header-row { padding-top: 56px; margin-bottom: 24px; }
+  .app-shell--profile .page-header-row { margin-bottom: 24px; }
   .app-shell--profile .page-title { font-size: 32px; }
   .app-shell--profile .user-profile-header { border-radius: 20px; }
   .app-shell--profile .user-profile-header__top { align-items: flex-start; flex-direction: column; padding: 20px; }
@@ -16264,8 +16266,8 @@ html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip,
 html[data-theme='dark'] .app-shell--profile .topbar-actions .theme-toggle { border-color: #334155; background: #1e293b; color: #cbd5e1; }
 html[data-theme='dark'] .app-shell--profile .topbar-actions .icon-btn:hover,
 html[data-theme='dark'] .app-shell--profile .topbar-actions .avatar-chip:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
-html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex { border-color: #475569; background: #1e293b; color: #e2e8f0; box-shadow: 0 4px 12px rgba(2, 6, 23, .24); }
-html[data-theme='dark'] .app-shell--profile .page-header-actions .inline-flex:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
+html[data-theme='dark'] .app-shell--profile .page-header-back .inline-flex { border-color: #475569; background: #1e293b; color: #e2e8f0; box-shadow: 0 4px 12px rgba(2, 6, 23, .24); }
+html[data-theme='dark'] .app-shell--profile .page-header-back .inline-flex:hover { border-color: #8b5cf6; background: #334155; color: #f8fafc; }
 html[data-theme='dark'] .app-shell--profile .page-header-row .muted,
 html[data-theme='dark'] .app-shell--profile .user-profile-header__copy .muted,
 html[data-theme='dark'] .app-shell--profile .user-profile-header__bio,

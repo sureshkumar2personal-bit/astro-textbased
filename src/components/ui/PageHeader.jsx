@@ -15,17 +15,23 @@ export default function PageHeader({ eyebrow, title, subtitle, showBack = false,
   }, [global])
 
   return (
-    <div className={`page-header-row${className ? ` ${className}` : ''}`}>
-      <div>
-        {showEyebrow && <div className="page-eyebrow">{eyebrow}</div>}
-        <h1 className="page-title">{title}</h1>
-        {subtitle && <p className="muted" style={{ marginTop: 8, maxWidth: 640 }}>{subtitle}</p>}
+    <>
+      {showBack && (
+        <div className="page-header-back">
+          <BackButton to={backTo} label={backLabel} icon={backIcon} onBack={backOnClick} />
+        </div>
+      )}
+      <div className={`page-header-row${className ? ` ${className}` : ''}`}>
+        <div className="page-header-title">
+          {showEyebrow && <div className="page-eyebrow">{eyebrow}</div>}
+          <h1 className="page-title">{title}</h1>
+          {subtitle && <p className="muted" style={{ marginTop: 8, maxWidth: 640 }}>{subtitle}</p>}
+        </div>
+        <div className="page-header-actions">
+          {actions}
+          {global?.actions}
+        </div>
       </div>
-      <div className="page-header-actions">
-        {actions}
-        {global?.actions}
-        {showBack && <BackButton to={backTo} label={backLabel} icon={backIcon} onBack={backOnClick} />}
-      </div>
-    </div>
+    </>
   )
 }
