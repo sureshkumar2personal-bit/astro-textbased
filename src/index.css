@@ -12,7 +12,9 @@
 .account-inner-nav button.is-active { font-weight: 700; }
 .account-nav-divider { height: 1px; background: var(--divider); margin: 16px 12px; }
 .account-content { min-width: 0; }
-.account-page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 30px; }
+.account-page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 30px; flex-wrap: wrap; }
+.account-page-header > :first-child { flex: 1 1 360px; min-width: 0; }
+.account-header-actions { display: flex; align-items: center; flex: 0 0 auto; align-self: flex-start; margin-top: 8px; margin-left: auto; position: relative; z-index: 100; }
 .account-page-header h1 { margin: 7px 0 8px; font-size: clamp(27px, 3vw, 38px); letter-spacing: -.04em; }
 .account-page-header p { max-width: 650px; margin: 0; color: var(--muted); font-size: 14px; }
 .account-status-pill { display: flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid var(--surface-border); border-radius: 999px; background: var(--surface); color: var(--body); font-size: 12px; white-space: nowrap; }
@@ -1599,6 +1601,11 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
 .topbar-service-status { display: inline-flex; align-items: center; gap: 5px; margin-left: 2px; color: var(--text-secondary); font-size: 11px; font-weight: 700; }
 .topbar-service-status.is-available { color: var(--green-600); }
 .topbar-service-status.is-unavailable { color: var(--danger); }
+/* In a page header the title competes for the same row, so the chip keeps just
+   the identity and drops the redundant availability text. */
+.page-header-actions .topbar-service-status,
+.account-header-actions .topbar-service-status,
+.ld-header__actions .topbar-service-status { display: none; }
 
 .page-content {
   padding: var(--space-5);
@@ -14692,7 +14699,7 @@ button.apt-week-day:focus-visible {
 /* ---- Header ---- */
 .account-page-header { align-items: center; margin-bottom: 24px; padding: 0 4px; }
 .account-eyebrow { color: #6d28d9; font-size: 11px; font-weight: 800; letter-spacing: .24em; }
-.account-page-header h1 { margin: 8px 0 6px; color: #221a33; font-size: clamp(32px, 3.4vw, 46px); font-weight: 800; letter-spacing: -.055em; }
+.account-page-header h1 { margin: 8px 0 6px; color: #221a33; font-size: clamp(32px, 3.2vw, 44px); font-weight: 800; letter-spacing: -.055em; }
 .account-page-header p { color: #786f8b; font-size: 15px; line-height: 1.55; }
 .account-status-pill { gap: 8px; padding: 10px 15px; border-color: rgba(255, 255, 255, .95); background: rgba(255, 255, 255, .78); color: #4c4560; font-size: 12px; box-shadow: 0 8px 24px rgba(66, 45, 88, .12), inset 0 1px 0 rgba(255, 255, 255, .9); }
 .account-status-pill span { width: 8px; height: 8px; background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 0 0 4px rgba(16, 185, 129, .16); }
@@ -15295,6 +15302,7 @@ button.apt-week-day:focus-visible {
   box-shadow: 0 18px 44px rgba(80, 50, 105, .10), inset 0 1px 0 rgba(255, 255, 255, .95);
 }
 .account-toolbar-nav__pills { display: flex; flex-wrap: wrap; gap: 9px; }
+.account-toolbar-nav__end { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .account-toolbar-shortcut { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 7px 15px; border: 1px solid #e6deef; border-radius: 999px; background: #fbf9fd; color: #5b21b6; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all .18s ease; }
 .account-toolbar-shortcut:hover { border-color: #d3bfe9; background: #fff; box-shadow: 0 6px 16px rgba(80, 50, 105, .10); transform: translateY(-1px); }
 .account-toolbar-shortcut.is-active { border-color: #cfb7ea; background: #efe4fb; box-shadow: inset 0 0 0 1px rgba(109, 40, 217, .07); }

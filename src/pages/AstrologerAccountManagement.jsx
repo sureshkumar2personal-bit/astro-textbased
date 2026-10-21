@@ -10,6 +10,7 @@ import {
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { useEditor } from '../state/EditorContext.jsx'
+import { useGlobalHeaderActions } from '../contexts/GlobalHeaderActionsContext.jsx'
 import { mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { mergeProfile, profileStorageKey } from '../utils/astrologerProfile.js'
@@ -158,18 +159,21 @@ function AccountToolbarNav({ screen, go }) {
           <button type="button" key={id} className={`account-toolbar-shortcut${pillActive(id) ? ' is-active' : ''}`} onClick={() => id === 'profile' ? navigate('/astrologer/profile') : id === 'account' ? navigate('/astrologer/my-account', { replace: true }) : go(id)} aria-current={pillActive(id) ? 'page' : undefined}><Icon size={15} strokeWidth={2} /><span>{label}</span></button>
         ))}
       </div>
-      <div className="account-navmenu" ref={menuRef}>
-        <button type="button" className={`account-navmenu-trigger${hiddenActive ? ' is-active' : ''}`} onClick={() => setMenuOpen((v) => !v)} aria-haspopup="menu" aria-expanded={menuOpen}>
-          <span className="account-navmenu-trigger__icon">{hiddenActive ? <hiddenActive.Icon size={15} strokeWidth={2} /> : <MoreHorizontal size={15} strokeWidth={2} />}</span>
-          <span>{hiddenActive ? hiddenActive.label : 'Others'}</span>
-          <ChevronDown size={15} className="account-navmenu-caret" />
-        </button>
-        {menuOpen && (
-          <div className="account-navmenu-panel" role="menu">
-            <div className="account-navmenu-group"><span className="account-navmenu-label">OTHERS</span>{menuItems(accountNav.settings)}</div>
-            <div className="account-navmenu-group"><span className="account-navmenu-label">ACCOUNT ACTIONS</span>{menuItems(accountNav.actions)}</div>
-          </div>
-        )}
+      <div className="account-toolbar-nav__end">
+        <div className="account-navmenu" ref={menuRef}>
+          <button type="button" className={`account-navmenu-trigger${hiddenActive ? ' is-active' : ''}`} onClick={() => setMenuOpen((v) => !v)} aria-haspopup="menu" aria-expanded={menuOpen}>
+            <span className="account-navmenu-trigger__icon">{hiddenActive ? <hiddenActive.Icon size={15} strokeWidth={2} /> : <MoreHorizontal size={15} strokeWidth={2} />}</span>
+            <span>{hiddenActive ? hiddenActive.label : 'Others'}</span>
+            <ChevronDown size={15} className="account-navmenu-caret" />
+          </button>
+          {menuOpen && (
+            <div className="account-navmenu-panel" role="menu">
+              <div className="account-navmenu-group"><span className="account-navmenu-label">OTHERS</span>{menuItems(accountNav.settings)}</div>
+              <div className="account-navmenu-group"><span className="account-navmenu-label">ACCOUNT ACTIONS</span>{menuItems(accountNav.actions)}</div>
+            </div>
+          )}
+        </div>
+        <div className="account-status-pill"><span /> Active <ChevronRight size={14} /></div>
       </div>
     </nav>
   )
@@ -179,6 +183,7 @@ export default function AstrologerAccountManagement() {
   const navigate = useNavigate()
   const location = useLocation()
   const { currentUser } = useAuth()
+  const global = useGlobalHeaderActions()
   const { editors: storedEditors, invitations: storedInvitations, audit: editorAudit, createInvitation, updateEditor, updateEditorPermissions, revokeEditor } = useEditor()
   // /astrologer/account/editors-assistants is a real, linkable entry point, so
   // open it on the Editors screen instead of always landing on the profile.
@@ -226,6 +231,15 @@ export default function AstrologerAccountManagement() {
   useEffect(() => {
     setProfile(buildAccountProfile(currentUser))
   }, [currentUser])
+
+  // The global controls sit in this page header row, so the layout must not
+  // render its own fallback topbar on this route.
+  useEffect(() => {
+    if (global?.setHasPageHeader) {
+      global.setHasPageHeader(true)
+      return () => global.setHasPageHeader(false)
+    }
+  }, [global])
   const addAudit = (action) => { setAuditRows((rows) => [[ 'Just now', profile.display, 'Primary Astrologer', action, action.toLowerCase().includes('password') ? 'Security' : 'Permissions', 'Completed from My Account', 'Current session' ], ...rows]); notify(`${action} · Added to audit log`) }
   const activityRows = useMemo(() => [...editorAudit.map((entry) => [new Date(entry.occurredAt).toLocaleString(), entry.editorName, 'Editor / Assistant', entry.action, entry.module, entry.details, 'Editor workspace']), ...auditRows], [auditRows, editorAudit])
   const filteredAudit = useMemo(() => activityRows.filter((row) => `${row.join(' ')}`.toLowerCase().includes(activitySearch.toLowerCase()) && (activityFilter === 'All Activity' || row[4] === activityFilter || (activityFilter === 'Editors' && row[2].includes('Editor')))), [activityFilter, activitySearch, activityRows])
@@ -259,7 +273,7 @@ export default function AstrologerAccountManagement() {
   }
 
   return <div className="account-management-page">
-    <div className="account-layout"><main className="account-content"><button type="button" className="account-management-back" onClick={backFromScreen}><ArrowLeft size={16} aria-hidden="true" /> <span>Back</span></button><header className="account-page-header"><div><div className="account-eyebrow">ASTROLOGER WORKSPACE / MY ACCOUNT</div><h1>Account Management</h1><p>Manage your profile, account access, security, preferences, and connected services.</p></div><div className="account-status-pill"><span /> Active <ChevronRight size={14} /></div></header><AccountToolbarNav screen={screen} go={go} />{renderScreen()}</main></div>
+    <div className="account-layout"><main className="account-content"><button type="button" className="account-management-back" onClick={backFromScreen}><ArrowLeft size={16} aria-hidden="true" /> <span>Back</span></button><header className="account-page-header"><div><h1>Account Management</h1><p>Manage your profile, account access, security, preferences, and connected services.</p></div>{global?.actions && <div className="account-header-actions">{global.actions}</div>}</header><AccountToolbarNav screen={screen} go={go} />{renderScreen()}</main></div>
     {editorModal && <InviteModal invitation={invitation} setInvitation={setInvitation} onClose={() => setEditorModal(false)} onSend={() => { try { const created = createInvitation(invitation); setInviteLink(`${window.location.origin}/editor/accept-invitation/${created.id}`); setEditorModal(false); notify('Invitation saved. Share the invitation link with the editor.') } catch (error) { notify(error.message) } }} />}
     {managingEditor && <EditorManageModal editor={managingEditor} onClose={() => setManagingEditor(null)} onPermissions={() => { setManagingEditor(null); go('permissions') }} />}
     {inviteLink && <Modal title="Invitation link ready" onClose={() => setInviteLink('')}><p className="account-modal-copy">Copy this link and send it directly to the invited editor. It is valid for 7 days.</p><input className="account-field-input" readOnly value={inviteLink} onFocus={(event) => event.target.select()} /><div className="account-modal-actions"><Button variant="ghost" onClick={() => setInviteLink('')}>Done</Button><Button onClick={() => { navigator.clipboard?.writeText(inviteLink); notify('Invitation link copied.'); }}>Copy link</Button></div></Modal>}
