@@ -32,6 +32,7 @@ import StatusBadge from '../../../components/StatusBadge.jsx'
 import { audienceAccessDefaults, sessionAudiences, useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../../../utils/roleRoutes.js'
+import { useGlobalHeaderActions } from '../../../contexts/GlobalHeaderActionsContext.jsx'
 import '../../../css/astrologer/live-dashboard.css'
 
 const LIVE_FLOW_STORAGE_KEY = 'astroconnect-live-session-flow'
@@ -639,7 +640,18 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
   const stepNumber = Number(/Step\s*0?(\d)/i.exec(step)?.[1]) || 1
   const navigate = useNavigate()
   const { currentUser } = useAuth()
+  const global = useGlobalHeaderActions()
   const liveBase = getRoleRoutes(currentUser?.role || ROLES.ASTROLOGER).liveSession
+
+  // The global controls live in this header row, so the layout must not render
+  // its own fallback topbar on these routes.
+  useEffect(() => {
+    if (global?.setHasPageHeader) {
+      global.setHasPageHeader(true)
+      return () => global.setHasPageHeader(false)
+    }
+  }, [global])
+
   return (
     <header className="ld-header">
       <div className="ld-header__bar">
@@ -655,8 +667,11 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
         <span className="live-eyebrow">{step}</span>
       </div>
       <div className="ld-header__titles">
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
+        <div className="ld-header__title">
+          <h1>{title}</h1>
+          {subtitle && <p>{subtitle}</p>}
+        </div>
+        {global?.actions && <div className="ld-header__actions">{global.actions}</div>}
       </div>
       <ol className="ld-steps" aria-label="Live setup steps">
         {LIVE_SETUP_STEPS.map(({ label, path }, index) => {
@@ -708,9 +723,6 @@ export function AstrologerLiveSessionSetup() {
       <LivePageHeader
         step={enteredForLive ? 'Scheduled live · Studio check' : 'Step 01 of 04'}
         title={enteredForLive ? 'Broadcast studio setup' : 'Create Live'}
-        subtitle={enteredForLive
-          ? 'Check your camera and microphone, then enter the live room'
-          : 'Check your camera and microphone before you continue'}
         onClose={closeCreateLiveToDashboard}
       />
       <div className="ld-setup-grid">
@@ -730,14 +742,6 @@ export function AstrologerLiveSessionSetup() {
           </button>
         </Card>
         <div className="ld-side">
-          <div className="live-ready-banner">
-            <span className="live-eyebrow">Astrologer broadcast studio</span>
-            <h2>Ready to engage users?</h2>
-            <p>
-              Your guidance can reach viewers looking for clarity right now.
-              {draft.title ? ` Draft title: ${draft.title}` : ''}
-            </p>
-          </div>
           <Card className="live-guidelines-card ld-card">
             <div className="live-section-heading">
               <ShieldCheck size={20} />

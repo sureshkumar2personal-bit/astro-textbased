@@ -715,7 +715,6 @@ export default function RewardsPerks() {
   return (
     <div className="rewards-center">
       <PageHeader
-        eyebrow="Member Rewards"
         title="Perks & Benefits"
       />
 

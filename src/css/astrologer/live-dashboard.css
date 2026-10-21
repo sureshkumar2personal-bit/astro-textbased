@@ -7,6 +7,9 @@
 /* ---------- header + step navigation ---------- */
 .ld-header { display: grid; gap: 14px; padding: 4px 0 20px; }
 .ld-header__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ld-header__titles { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.ld-header__title { min-width: 0; }
+.ld-header__actions { display: flex; align-items: center; flex: 0 0 auto; position: relative; z-index: 100; }
 .ld-header__titles h1 { margin: 0; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -0.03em; color: var(--ink); }
 .ld-header__titles p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
 
@@ -33,9 +36,6 @@
 .ld-card--media .live-test-button { justify-self: center; padding: 8px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
 .ld-card--media .live-test-button:hover { border-color: var(--primary); }
 
-.ld-side .live-ready-banner { width: auto; padding: 20px; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-strong); box-shadow: var(--shadow-xs); text-align: left; }
-.ld-side .live-ready-banner h2 { margin: 6px 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; text-transform: none; color: var(--ink); }
-.ld-side .live-ready-banner p { font-size: 14px; }
 .ld-side .live-guidelines-card { width: auto; }
 
 .ld-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }

@@ -29,7 +29,6 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
-import BackButton from '../../../components/BackButton.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -374,37 +373,29 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Wallet"
-            actions={
-              <div className="wallet-header-actions">
-                <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                  <Plus size={16} /> Add Money
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                  <ArrowUpFromLine size={16} /> Withdraw
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={downloadAllTransactionsPdf}
-                  disabled={transactions.length === 0}
-                >
-                  <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
-                </button>
-              </div>
-            }
           />
           <WalletSectionTabs />
 
           {/* Summary Cards */}
           <div className="wallet-summary-grid section">
-            <button type="button" className="wallet-stat-card wallet-stat-card--primary" onClick={openTopUpModal}>
-              <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Available Balance</div>
-                <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
+            <div className="wallet-stat-card wallet-stat-card--primary">
+              <div className="wallet-stat-card__top">
+                <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
+                <div className="wallet-stat-card__body">
+                  <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
+                  <div className="wallet-stat-card__label">Available Balance</div>
+                  <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
+                </div>
               </div>
-            </button>
+              <div className="wallet-stat-card__actions wallet-header-actions wallet-header-actions--compact">
+                <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
+                  Add Money
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                  Withdraw
+                </button>
+              </div>
+            </div>
 
             <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/topups`)}>
               <div className="wallet-stat-card__icon wallet-stat-card__icon--green"><TrendingUp size={22} /></div>
@@ -431,69 +422,18 @@ export default function UserWallet({ section = 'overview' }) {
             </button>
           </div>
 
-          {/* Spending This Month */}
-          <Section title="Spending This Month" icon={ArrowDownLeft}>
-            <Card className="wallet-earnings-card">
-              <div className="wallet-period-field">
-                <label className="field-label-top" htmlFor="wallet-spending-period">Spending Period</label>
-                <select
-                  id="wallet-spending-period"
-                  className="select-input wallet-period-select"
-                  value={spendPeriod}
-                  onChange={(e) => setSpendPeriod(e.target.value)}
-                >
-                  {SPENDING_PERIOD_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
-                </select>
-              </div>
-
-              {spendPeriod === 'custom' && (
-                <div className="wallet-custom-range">
-                  <div>
-                    <label className="field-label-top">Start Date</label>
-                    <input type="date" className="text-input" value={spendCustomStart} onChange={(e) => setSpendCustomStart(e.target.value)} />
-                  </div>
-                  <span className="wallet-custom-range__arrow">→</span>
-                  <div>
-                    <label className="field-label-top">End Date</label>
-                    <input type="date" className="text-input" value={spendCustomEnd} onChange={(e) => setSpendCustomEnd(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              <div className="wallet-earnings-list">
-                {SPENDING_SOURCE_OPTIONS.map(({ key, icon: Icon, color }) => {
-                  const kind = spendingBreakdown.kinds.find((item) => item.kind === key)
-                  const amount = kind ? kind.amount : 0
-                  const pct = spendingBreakdown.total > 0 ? ((amount / spendingBreakdown.total) * 100).toFixed(1) : '0.0'
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      className="wallet-earnings-row"
-                      onClick={() => setCategoryDetailKind(key)}
-                    >
-                      <div className="wallet-earnings-row__icon" style={{ color }}>{<Icon size={18} />}</div>
-                      <div className="wallet-earnings-row__label">{USER_SPENDING_CATEGORY_LABELS[key]}</div>
-                      <div className="wallet-earnings-row__bar">
-                        <div className="wallet-earnings-row__bar-fill" style={{ width: `${pct}%`, background: color }} />
-                      </div>
-                      <div className="wallet-earnings-row__amount">₹{amount.toLocaleString('en-IN')}</div>
-                      <div className="wallet-earnings-row__pct">{pct}%</div>
-                      <ChevronRight size={16} className="wallet-earnings-row__arrow" />
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="wallet-earnings-total">
-                <span>{dateRange ? dateRange.label : 'Selected period'}</span>
-                <span>Total Spent ₹{spendingBreakdown.total.toLocaleString('en-IN')}</span>
-              </div>
-            </Card>
-          </Section>
 
           {/* Recent Transactions Preview */}
-          <Section title="Recent Transactions" icon={History}>
+          <Section title="Recent Transactions" icon={History} titleRight={
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={downloadAllTransactionsPdf}
+              disabled={transactions.length === 0}
+            >
+              <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
+            </button>
+          }>
             <Card className="wallet-txn-card">
               <div className="wallet-txn-table-wrap">
                 <table className="wallet-txn-table">
@@ -528,7 +468,8 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Transactions"
-            actions={<BackButton to={`${walletPath}/overview`} />}
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
 
@@ -597,9 +538,10 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Top-ups"
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Add Money" icon={Plus}>
             <Card>
@@ -684,9 +626,10 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Refunds"
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Refund History" icon={Receipt}>
             <Card>

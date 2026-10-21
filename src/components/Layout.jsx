@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom'
+import { GlobalHeaderActionsContext } from '../contexts/GlobalHeaderActionsContext.jsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Activity,
@@ -411,8 +412,7 @@ export default function Layout() {
     ? { title: 'Book Appointment', sub: 'Pick an available date, review its open slots and pay from your wallet.' }
     : null
   const dynamicQuestionMeta = role === ROLES.USER ? QUESTION_DASHBOARD_META[location.pathname] || null : null
-  const meta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role][location.pathname] || (location.pathname.startsWith('/user/atonements/') ? { title: 'Atonement Details', sub: 'Your astrologer\'s remedy, day by day' } : null) || { title: config.title, sub: config.subtitle }
-  const isQuestionDashboard = role === ROLES.USER && location.pathname.startsWith('/user/ask-question')
+
   const isAstrologer = role === ROLES.ASTROLOGER
   const shellRole = role
   const shellConfig = ROLE_CONFIG[shellRole]
@@ -479,6 +479,7 @@ export default function Layout() {
   }, [])
 
   const [headerVisible, setHeaderVisible] = useState(true)
+  const [hasPageHeader, setHasPageHeader] = useState(false)
   const headerVisibleRef = useRef(true)
   const lastScrollYRef = useRef(0)
 
@@ -532,8 +533,97 @@ export default function Layout() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const globalActions = (
+    <div className="topbar-actions" ref={actionRef}>
+      {!isAstrologer && <ActiveCallIndicator />}
+      {!shellIsAstrologer && (
+        <button
+          type="button"
+          className="topbar-explore-btn"
+          aria-label="Explore Astrologers"
+          title="Explore Astrologers"
+          onClick={() => navigate(`${basePath}/astrologers`)}
+        >
+          <Search size={18} aria-hidden="true" />
+          <span className="topbar-explore-btn__label">Explore</span>
+        </button>
+      )}
+      <button
+        type="button"
+        className="icon-btn"
+        aria-label="Notifications"
+        onClick={() => setPanel(panel === 'notifications' ? null : 'notifications')}
+      >
+        {shellIsAstrologer ? <TempleBellIcon size={18} /> : <Bell size={18} />}
+        {unreadNotificationCount > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border-[1.5px] border-white bg-[color:var(--red-500)] px-1 text-[10px] font-bold leading-none text-white">
+            {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+          </span>
+        )}
+      </button>
+      <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(shellIsAstrologer ? routes.wallet : routes.walletHistory)}>
+        {shellIsAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
+      </button>
+      <ThemeToggle />
+      <button
+        type="button"
+        className="avatar-chip"
+        onClick={() => {
+          setPanel(null)
+          navigate(shellIsAstrologer ? `${basePath}/my-account` : `${basePath}/profile`)
+        }}
+      >
+        <span className="avatar-circle">
+          {headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
+        </span>
+        <span>{headerName}</span>
+        {shellIsAstrologer && (
+          <span className={`topbar-service-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} title="Astrologer service status">
+            <span className="service-status-dot" />
+            {astrologerServices.dndEnabled ? 'DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        className="icon-btn danger"
+        aria-label="Logout"
+        onClick={() => {
+          if (isAstrologer) actions.setAstrologerPresence(false)
+          logout()
+          navigate('/login')
+        }}
+      >
+        {shellIsAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
+      </button>
+
+      {panel === 'notifications' && (
+        <div className="topbar-popover" style={{ width: 'min(420px, calc(100vw - 40px))' }}>
+          <NotificationsPanel
+            notifications={visibleNotifications}
+            role={role}
+            onMarkAllRead={() => actions.markAllNotificationsRead(role)}
+            onSelect={(item) => {
+              actions.markNotificationRead(item.id)
+              if (item.incomingRequestId) {
+                setActiveChatRequestId(item.incomingRequestId)
+                setPanel(null)
+                return
+              }
+              if (item.route) {
+                navigate(item.route)
+              }
+              setPanel(null)
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
+
   return (
-    <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
+    <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader }}>
+      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
       <aside className={`sidebar sidebar--${role}`}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
@@ -553,100 +643,11 @@ export default function Layout() {
       </aside>
 
       <div className="main-column">
-        {location.pathname !== '/user' && (
+        {!hasPageHeader && location.pathname !== '/user' && (
           <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
             {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
             {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
-            <div className="topbar-heading">
-              <div className="topbar-crumb">{meta.title}</div>
-              {isQuestionDashboard && <div className="topbar-crumb-sub">{meta.sub}</div>}
-            </div>
-            <div className="topbar-actions" ref={actionRef}>
-              {!isAstrologer && <ActiveCallIndicator />}
-              {!shellIsAstrologer && (
-                <button
-                  type="button"
-                  className="topbar-explore-btn"
-                  aria-label="Explore Astrologers"
-                  title="Explore Astrologers"
-                  onClick={() => navigate(`${basePath}/astrologers`)}
-                >
-                  <Search size={18} aria-hidden="true" />
-                  <span className="topbar-explore-btn__label">Explore</span>
-                </button>
-              )}
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Notifications"
-                onClick={() => setPanel(panel === 'notifications' ? null : 'notifications')}
-              >
-                {shellIsAstrologer ? <TempleBellIcon size={18} /> : <Bell size={18} />}
-                {unreadNotificationCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full border-[1.5px] border-white bg-[color:var(--red-500)] px-1 text-[10px] font-bold leading-none text-white">
-                    {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
-                  </span>
-                )}
-              </button>
-              <button type="button" className="icon-btn profile-wallet-action" aria-label="Wallet" onClick={() => navigate(shellIsAstrologer ? routes.wallet : routes.walletHistory)}>
-                {shellIsAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
-              </button>
-              <ThemeToggle />
-              <button
-                type="button"
-                className="avatar-chip"
-                onClick={() => {
-                  setPanel(null)
-                  navigate(shellIsAstrologer ? `${basePath}/my-account` : `${basePath}/profile`)
-                }}
-              >
-                <span className="avatar-circle">
-                  {headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
-                </span>
-                <span>{headerName}</span>
-                {shellIsAstrologer && (
-                  <span className={`topbar-service-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} title="Astrologer service status">
-                    <span className="service-status-dot" />
-                    {astrologerServices.dndEnabled ? 'DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                className="icon-btn danger"
-                aria-label="Logout"
-                onClick={() => {
-                  if (isAstrologer) actions.setAstrologerPresence(false)
-                  logout()
-                  navigate('/login')
-                }}
-              >
-                {shellIsAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
-              </button>
-
-              {panel === 'notifications' && (
-                <div className="topbar-popover" style={{ width: 'min(420px, calc(100vw - 40px))' }}>
-                  <NotificationsPanel
-                    notifications={visibleNotifications}
-                    role={role}
-                    onMarkAllRead={() => actions.markAllNotificationsRead(role)}
-                    onSelect={(item) => {
-                      actions.markNotificationRead(item.id)
-                      if (item.incomingRequestId) {
-                        setActiveChatRequestId(item.incomingRequestId)
-                        setPanel(null)
-                        return
-                      }
-                      if (item.route) {
-                        navigate(item.route)
-                      }
-                      setPanel(null)
-                    }}
-                  />
-                </div>
-              )}
-
-            </div>
+            {globalActions}
           </header>
         )}
 
@@ -675,5 +676,6 @@ export default function Layout() {
         {isAstrologer && <><IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><CallAstrologer /><InstantChatAstrologer /></>}
       </div>
     </div>
+    </GlobalHeaderActionsContext.Provider>
   )
 }

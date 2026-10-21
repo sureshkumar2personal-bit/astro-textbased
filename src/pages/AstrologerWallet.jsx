@@ -31,7 +31,6 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
 import Card from '../components/ui/Card.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
-import BackButton from '../components/BackButton.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -419,7 +418,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Wallet"
-            subtitle="Manage your earnings, balance, payouts, and transactions."
             showBack
             backTo={routes.dashboard}
           />
@@ -531,9 +529,9 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Earnings"
-            subtitle="Your earnings breakdown by service category for the selected period."
+            showBack
+            backTo={`${walletPath}/overview`}
           />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Earnings Breakdown" icon={TrendingUp}>
             <Card className="wallet-earnings-card">
@@ -603,9 +601,9 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Transactions"
-            subtitle="Browse your wallet transactions and download a statement."
+            showBack
+            backTo={`${walletPath}/overview`}
           />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <WalletTabs active="transactions" walletPath={walletPath} onNavigate={navigate} />
 
@@ -645,12 +643,12 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Withdraw Money"
-            subtitle="Request a withdrawal to your preferred payout method."
+            showBack
+            backTo={`${walletPath}/overview`}
           />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
           <WalletTabs active="payouts" walletPath={walletPath} onNavigate={navigate} />
 
-          <Section title="Withdraw Money" icon={ArrowDownToLine}>
+          <Section title="Withdrawal Request" icon={ArrowDownToLine}>
             <Card>
               <div className="wallet-withdraw-info">
                 <div>Available Balance</div>
@@ -750,9 +748,9 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Settlement History"
-            subtitle="Monthly settlements and payout records."
+            showBack
+            backTo={`${walletPath}/overview`}
           />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Monthly Settlements" icon={History}>
             <Card>
@@ -802,9 +800,9 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Payment Methods"
-            subtitle="Manage your bank, UPI and card payout details."
+            showBack
+            backTo={`${walletPath}/overview`}
           />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Payout Methods" icon={CreditCard}>
             <Card className="wallet-payout-card">

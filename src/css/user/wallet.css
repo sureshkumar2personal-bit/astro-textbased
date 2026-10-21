@@ -133,6 +133,7 @@
 .wallet-stat-card--primary {
   background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
   border-color: var(--violet-200);
+  grid-column: span 2;
 }
 
 .wallet-stat-card--highlight {
@@ -777,13 +778,28 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .wallet-header-actions .btn {
   gap: 6px;
   padding: 8px 14px;
   font-size: 13px;
+}
+
+.wallet-header-actions--compact {
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.wallet-header-actions--compact .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  justify-content: center;
 }
 
 .wallet-pdf-label {
@@ -937,4 +953,10 @@
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+.wallet-header-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 12px;
 }

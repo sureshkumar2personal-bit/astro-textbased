@@ -37,7 +37,6 @@ export default function AskQuestionDashboard() {
   return (
     <div className="question-dashboard">
       <PageHeader
-        eyebrow="User portal"
         title="Ask a Question"
         subtitle="Ask a new text-based question and manage your questions, disputes and history from one place."
       />

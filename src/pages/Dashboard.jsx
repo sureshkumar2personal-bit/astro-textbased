@@ -30,6 +30,7 @@ import {
 } from '../utils/questions.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { useGlobalHeaderActions } from '../contexts/GlobalHeaderActionsContext.jsx'
 
 // Card look (icon + thumb tint) keyed off the campaign topic; purely presentational.
 const CAMPAIGN_CARD_STYLES = [
@@ -55,6 +56,16 @@ export default function Dashboard() {
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const astrologerId = currentUser?.id || 'astrologer-demo'
+  const globalHeader = useGlobalHeaderActions()
+
+  // The welcome panel hosts the global actions, so the layout must not render
+  // its own fallback topbar on this route.
+  useEffect(() => {
+    if (globalHeader?.setHasPageHeader) {
+      globalHeader.setHasPageHeader(true)
+      return () => globalHeader.setHasPageHeader(false)
+    }
+  }, [globalHeader])
 
   // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
   const showcaseCampaigns = useMemo(() => {
@@ -119,77 +130,79 @@ export default function Dashboard() {
           <span className="adash-hero-core"><Sparkles size={26} strokeWidth={1.6} /></span>
         </div>
         <div className="hero-banner-content">
-          <h2>Welcome back, {currentUser?.name || 'Kumar'} 👋</h2>
+          <div className="adash-hero-titlerow">
+            <h2>Welcome back, {currentUser?.name || 'Kumar'} 👋</h2>
+            <div
+              className="hero-services-summary"
+              ref={serviceMenuRef}
+              role="button"
+              tabIndex={0}
+              aria-label="Service availability"
+              aria-expanded={serviceMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setServiceMenuOpen((open) => !open)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setServiceMenuOpen((open) => !open)
+                }
+              }}
+            >
+              <span className={`hero-services-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`}>
+                <span className={`service-status-dot${astrologerServices.available ? ' is-available' : ''}`} />
+                {astrologerServices.dndEnabled ? 'Dyan / DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
+              </span>
+              {!astrologerServices.dndEnabled && (
+                <span className="hero-services-modes" aria-label="Enabled service prices">
+                  {astrologerServices.chatAvailable && <span title="Chat"><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
+                  {astrologerServices.callAvailable && <span title="Call"><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
+                </span>
+              )}
+              <span className="hero-services-trigger" aria-hidden="true"><ChevronDown size={14} /></span>
+              {serviceMenuOpen && (
+                <div
+                  className="hero-services-menu"
+                  role="menu"
+                  aria-label="Service availability"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <div className="hero-services-menu__heading">Service availability</div>
+                  <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
+                    <span>
+                      <strong><MessageCircle size={14} /> Chat</strong>
+                      <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.chatEnabled ? 'Enabled' : 'Disabled'}</small>
+                    </span>
+                    <input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} aria-label="Enable chat" />
+                    <span className="toggle-switch" />
+                  </label>
+                  <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
+                    <span>
+                      <strong><PhoneCall size={14} /> Call</strong>
+                      <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.callEnabled ? 'Enabled' : 'Disabled'}</small>
+                    </span>
+                    <input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} aria-label="Enable call" />
+                    <span className="toggle-switch" />
+                  </label>
+                  <label className="hero-service-option hero-service-option--dnd">
+                    <span>
+                      <strong>Dyan / DND</strong>
+                      <small>{astrologerServices.dndEnabled ? 'All services paused' : 'Pause all services'}</small>
+                    </span>
+                    <input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} aria-label="Enable Dyan or DND" />
+                    <span className="toggle-switch" />
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
           <p>Here&apos;s what&apos;s happening with your consultations and campaigns.</p>
         </div>
-        <div className="hero-banner-cta adash-hero-cta">
-          <div
-            className="hero-services-summary"
-            ref={serviceMenuRef}
-            role="button"
-            tabIndex={0}
-            aria-label="Service availability"
-            aria-expanded={serviceMenuOpen}
-            aria-haspopup="menu"
-            onClick={() => setServiceMenuOpen((open) => !open)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                setServiceMenuOpen((open) => !open)
-              }
-            }}
-          >
-            <span className={`hero-services-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`}>
-              <span className={`service-status-dot${astrologerServices.available ? ' is-available' : ''}`} />
-              {astrologerServices.dndEnabled ? 'Dyan / DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
-            </span>
-            {!astrologerServices.dndEnabled && (
-              <span className="hero-services-modes" aria-label="Enabled service prices">
-                {astrologerServices.chatAvailable && <span title="Chat"><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
-                {astrologerServices.callAvailable && <span title="Call"><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
-              </span>
-            )}
-            <span className="hero-services-trigger" aria-hidden="true"><ChevronDown size={14} /></span>
-            {serviceMenuOpen && (
-              <div
-                className="hero-services-menu"
-                role="menu"
-                aria-label="Service availability"
-                onClick={(event) => event.stopPropagation()}
-                onKeyDown={(event) => event.stopPropagation()}
-              >
-                <div className="hero-services-menu__heading">Service availability</div>
-                <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
-                  <span>
-                    <strong><MessageCircle size={14} /> Chat</strong>
-                    <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.chatEnabled ? 'Enabled' : 'Disabled'}</small>
-                  </span>
-                  <input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} aria-label="Enable chat" />
-                  <span className="toggle-switch" />
-                </label>
-                <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
-                  <span>
-                    <strong><PhoneCall size={14} /> Call</strong>
-                    <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.callEnabled ? 'Enabled' : 'Disabled'}</small>
-                  </span>
-                  <input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} aria-label="Enable call" />
-                  <span className="toggle-switch" />
-                </label>
-                <label className="hero-service-option hero-service-option--dnd">
-                  <span>
-                    <strong>Dyan / DND</strong>
-                    <small>{astrologerServices.dndEnabled ? 'All services paused' : 'Pause all services'}</small>
-                  </span>
-                  <input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} aria-label="Enable Dyan or DND" />
-                  <span className="toggle-switch" />
-                </label>
-              </div>
-            )}
+        {globalHeader?.actions && (
+          <div className="adash-hero-topbar-actions">
+            {globalHeader.actions}
           </div>
-          <button type="button" className="btn btn-primary hero-banner-button" onClick={() => navigate(routes.appointmentSchedule)}>
-            Set Availability
-          </button>
-        </div>
+        )}
       </div>
 
       <Section title="Quick Actions" icon={Zap}>

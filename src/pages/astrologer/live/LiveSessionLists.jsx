@@ -454,7 +454,6 @@ function ScheduleLiveModal({ onClose, onCreate }) {
       <form className="live-config-modal" onSubmit={submit} role="dialog" aria-modal="true" aria-label="Schedule live session">
         <div className="live-config-header">
           <div>
-            <span className="live-eyebrow">Schedule a live session</span>
             <h2>Plan your broadcast</h2>
           </div>
           <button type="button" className="icon-btn" aria-label="Close" onClick={onClose}><X size={18} /></button>
@@ -674,7 +673,6 @@ export function ScheduledLive() {
       <PageHeader
         eyebrow="Astrologer portal"
         title="Scheduled Live"
-        subtitle="Plan upcoming live broadcasts and set the details for each session."
         showBack
         backTo={routes.liveSessionSetup}
         actions={

@@ -994,9 +994,6 @@ export default function TextBasedQuestions() {
         backTo={view === 'campaigns' ? routes.textBasedQuestions : routes.dashboard}
         backOnClick={view === 'campaigns' ? goToOverview : undefined}
         backIcon={backIcon}
-        subtitle={view === 'campaigns'
-          ? 'Create, manage, and monitor your topic-based question campaigns.'
-          : 'Manage campaigns, open questions, and incoming customer questions from one place.'}
         actions={view === 'campaigns' ? (
           <button type="button" className="btn btn-primary" onClick={startCreateCampaign}><Plus size={15} /> Create Campaign</button>
         ) : undefined}
@@ -1048,7 +1045,6 @@ export default function TextBasedQuestions() {
           </Section>
 
           <Section title="Manage Text-Based Questions" icon={LayoutGrid} className="!mt-5">
-            <p className="muted" style={{ margin: '0 0 12px' }}>Choose what you want to manage.</p>
             <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2">
               <ManageNavCard
                 icon={Target}
