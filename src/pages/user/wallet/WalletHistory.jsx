@@ -431,66 +431,6 @@ export default function UserWallet({ section = 'overview' }) {
             </button>
           </div>
 
-          {/* Spending This Month */}
-          <Section title="Spending This Month" icon={ArrowDownLeft}>
-            <Card className="wallet-earnings-card">
-              <div className="wallet-period-field">
-                <label className="field-label-top" htmlFor="wallet-spending-period">Spending Period</label>
-                <select
-                  id="wallet-spending-period"
-                  className="select-input wallet-period-select"
-                  value={spendPeriod}
-                  onChange={(e) => setSpendPeriod(e.target.value)}
-                >
-                  {SPENDING_PERIOD_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
-                </select>
-              </div>
-
-              {spendPeriod === 'custom' && (
-                <div className="wallet-custom-range">
-                  <div>
-                    <label className="field-label-top">Start Date</label>
-                    <input type="date" className="text-input" value={spendCustomStart} onChange={(e) => setSpendCustomStart(e.target.value)} />
-                  </div>
-                  <span className="wallet-custom-range__arrow">→</span>
-                  <div>
-                    <label className="field-label-top">End Date</label>
-                    <input type="date" className="text-input" value={spendCustomEnd} onChange={(e) => setSpendCustomEnd(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              <div className="wallet-earnings-list">
-                {SPENDING_SOURCE_OPTIONS.map(({ key, icon: Icon, color }) => {
-                  const kind = spendingBreakdown.kinds.find((item) => item.kind === key)
-                  const amount = kind ? kind.amount : 0
-                  const pct = spendingBreakdown.total > 0 ? ((amount / spendingBreakdown.total) * 100).toFixed(1) : '0.0'
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      className="wallet-earnings-row"
-                      onClick={() => setCategoryDetailKind(key)}
-                    >
-                      <div className="wallet-earnings-row__icon" style={{ color }}>{<Icon size={18} />}</div>
-                      <div className="wallet-earnings-row__label">{USER_SPENDING_CATEGORY_LABELS[key]}</div>
-                      <div className="wallet-earnings-row__bar">
-                        <div className="wallet-earnings-row__bar-fill" style={{ width: `${pct}%`, background: color }} />
-                      </div>
-                      <div className="wallet-earnings-row__amount">₹{amount.toLocaleString('en-IN')}</div>
-                      <div className="wallet-earnings-row__pct">{pct}%</div>
-                      <ChevronRight size={16} className="wallet-earnings-row__arrow" />
-                    </button>
-                  )
-                })}
-              </div>
-
-              <div className="wallet-earnings-total">
-                <span>{dateRange ? dateRange.label : 'Selected period'}</span>
-                <span>Total Spent ₹{spendingBreakdown.total.toLocaleString('en-IN')}</span>
-              </div>
-            </Card>
-          </Section>
 
           {/* Recent Transactions Preview */}
           <Section title="Recent Transactions" icon={History}>
