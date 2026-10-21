@@ -375,36 +375,34 @@ export default function UserWallet({ section = 'overview' }) {
             eyebrow="User portal"
             title="Wallet"
           />
-          <div className="wallet-header-actions-row">
-            <div className="wallet-header-actions">
-              <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                <Plus size={16} /> Add Money
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                <ArrowUpFromLine size={16} /> Withdraw
-              </button>
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={downloadAllTransactionsPdf}
-                disabled={transactions.length === 0}
-              >
-                <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
-              </button>
-            </div>
-          </div>
           <WalletSectionTabs />
 
           {/* Summary Cards */}
           <div className="wallet-summary-grid section">
-            <button type="button" className="wallet-stat-card wallet-stat-card--primary" onClick={openTopUpModal}>
+            <div className="wallet-stat-card wallet-stat-card--primary">
               <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
               <div className="wallet-stat-card__body">
                 <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
                 <div className="wallet-stat-card__label">Available Balance</div>
                 <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
+                <div className="wallet-header-actions" style={{ marginTop: 12 }}>
+                  <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
+                    <Plus size={16} /> Add Money
+                  </button>
+                  <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                    <ArrowUpFromLine size={16} /> Withdraw
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={downloadAllTransactionsPdf}
+                    disabled={transactions.length === 0}
+                  >
+                    <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
+                  </button>
+                </div>
               </div>
-            </button>
+            </div>
 
             <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/topups`)}>
               <div className="wallet-stat-card__icon wallet-stat-card__icon--green"><TrendingUp size={22} /></div>
