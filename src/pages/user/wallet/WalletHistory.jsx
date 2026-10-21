@@ -379,14 +379,22 @@ export default function UserWallet({ section = 'overview' }) {
 
           {/* Summary Cards */}
           <div className="wallet-summary-grid section">
-            <button type="button" className="wallet-stat-card wallet-stat-card--primary" onClick={openTopUpModal}>
+            <div className="wallet-stat-card wallet-stat-card--primary">
               <div className="wallet-stat-card__icon"><Wallet size={22} /></div>
               <div className="wallet-stat-card__body">
                 <div className="wallet-stat-card__value">₹{stats.balance.toLocaleString('en-IN')}</div>
                 <div className="wallet-stat-card__label">Available Balance</div>
                 <div className="wallet-stat-card__meta"><span className="wallet-stat-badge wallet-stat-badge--green">Spendable</span></div>
+                <div className="wallet-header-actions wallet-header-actions--compact" style={{ marginTop: 12 }}>
+                  <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
+                    Add Money
+                  </button>
+                  <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
+                    Withdraw
+                  </button>
+                </div>
               </div>
-            </button>
+            </div>
 
             <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/topups`)}>
               <div className="wallet-stat-card__icon wallet-stat-card__icon--green"><TrendingUp size={22} /></div>
@@ -413,16 +421,6 @@ export default function UserWallet({ section = 'overview' }) {
             </button>
           </div>
 
-          <div className="wallet-header-actions-row">
-            <div className="wallet-header-actions">
-              <button type="button" className="btn btn-primary" onClick={openTopUpModal}>
-                Add Money
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.withdraw)}>
-                Withdraw
-              </button>
-            </div>
-          </div>
 
           {/* Recent Transactions Preview */}
           <Section title="Recent Transactions" icon={History} titleRight={

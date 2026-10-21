@@ -786,6 +786,18 @@
   font-size: 13px;
 }
 
+.wallet-header-actions--compact {
+  width: 100%;
+}
+
+.wallet-header-actions--compact .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  justify-content: center;
+}
+
 .wallet-pdf-label {
   display: inline-flex;
   align-items: center;
