@@ -1335,15 +1335,15 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   height: 80px;
   padding: 0 var(--space-3);
   margin: var(--space-2) var(--space-2) 0;
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   position: sticky;
   top: var(--space-2);
   z-index: 5;
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-md);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .topbar-crumb {
