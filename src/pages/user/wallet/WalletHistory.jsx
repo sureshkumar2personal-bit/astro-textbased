@@ -469,7 +469,8 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Transactions"
-            actions={<BackButton to={`${walletPath}/overview`} />}
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
 

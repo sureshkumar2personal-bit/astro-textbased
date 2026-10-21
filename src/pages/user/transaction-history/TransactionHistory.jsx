@@ -211,14 +211,17 @@ export default function TransactionHistory() {
         subtitle="Complete record of all wallet movements."
         showBack
         backTo={routes.dashboard}
-        actions={
+      />
+
+      <Section
+        title="All Transactions"
+        icon={History}
+        titleRight={
           <button type="button" className="btn btn-ghost" onClick={downloadAllPdf} disabled={filtered.length === 0}>
             <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
           </button>
         }
-      />
-
-      <Section title="All Transactions" icon={History}>
+      >
         <Card className="txn-history-card">
           <div className="txn-toolbar">
             <button type="button" className="icon-btn" onClick={() => setShowFilters(!showFilters)} title="Filters">

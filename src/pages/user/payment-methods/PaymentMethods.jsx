@@ -88,7 +88,13 @@ export default function PaymentMethods() {
         title="Payment Methods"
         showBack
         backTo={routes.dashboard}
-        actions={
+      />
+      <WalletSectionTabs />
+
+      <Section
+        title="Saved Methods"
+        icon={CreditCard}
+        titleRight={
           <div className="wallet-header-actions">
             <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.autopay)}>
               Manage Autopay
@@ -98,10 +104,7 @@ export default function PaymentMethods() {
             </button>
           </div>
         }
-      />
-      <WalletSectionTabs />
-
-      <Section title="Saved Methods" icon={CreditCard}>
+      >
         {sorted.length === 0 ? (
           <Card>
             <div style={{ padding: '40px 20px', textAlign: 'center' }}>
