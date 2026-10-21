@@ -5154,8 +5154,8 @@ tbody tr:hover {
 .app-shell--profile .topbar-actions .theme-toggle { border-color: #e9ddcb; background: #fffdf9; }
 
 .app-shell--profile .page-content { max-width: 1120px; padding: 28px 24px 64px; }
-.app-shell--profile .page-header-row { position: relative; display: block; margin-bottom: 28px; padding-top: 60px; }
-.app-shell--profile .page-header-actions { position: absolute; top: 0; left: 0; }
+.app-shell--profile .page-header-row { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: 28px; }
+.app-shell--profile .page-header-actions { position: static; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .app-shell--profile .page-header-actions .inline-flex { height: 40px; padding: 0 16px; border: 1px solid #e8dcc8; border-radius: 12px; background: #fffdf9; color: #2c2337; box-shadow: 0 4px 12px rgba(60, 40, 20, .04); }
 .app-shell--profile .page-header-actions .inline-flex:hover { border-color: #d5b777; background: #f8f0e3; color: #6728d4; }
 .app-shell--profile .page-eyebrow { height: 30px; margin-bottom: 10px; padding: 0 12px; border-radius: 999px; background: #f6ebd7; color: #a66a08; font-size: 11px; letter-spacing: .08em; box-shadow: none; }
