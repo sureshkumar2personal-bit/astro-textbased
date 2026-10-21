@@ -133,6 +133,7 @@
 .wallet-stat-card--primary {
   background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
   border-color: var(--violet-200);
+  grid-column: span 2;
 }
 
 .wallet-stat-card--highlight {
