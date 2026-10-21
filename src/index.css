@@ -16474,3 +16474,20 @@ html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
   .create-post-schedule-fields { grid-template-columns: 1fr; }
   .account-post-access-panel { top: auto; right: 16px; bottom: 18px; left: 16px; width: auto; transform: none; }
 }
+
+/* Notification popover: hide horizontal scrollbars, keep vertical scroll clean */
+.notifications-tabs-row {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.notifications-tabs-row::-webkit-scrollbar {
+  display: none;
+}
+
+.notifications-list {
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+  overflow-x: hidden;
+  grid-template-columns: minmax(0, 1fr);
+}

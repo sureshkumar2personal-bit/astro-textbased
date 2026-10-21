@@ -704,7 +704,7 @@ export default function Profile() {
       </>)
       : (
         <>
-          <PageHeader eyebrow="PROFILE" title="My Profile" subtitle="Review your details, astrologers, and horoscope information." showBack backTo={routes.myAccount} backLabel="Back to My Account" />
+          <PageHeader title="My Profile" subtitle="Review your details, astrologers, and horoscope information." showBack backTo={routes.myAccount} backLabel="Back to My Account" />
           {saved && <div className="profile-message profile-message--success">Profile updated successfully.</div>}
 
           <div className="section user-profile">

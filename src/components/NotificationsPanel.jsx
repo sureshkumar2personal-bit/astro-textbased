@@ -51,7 +51,7 @@ export default function NotificationsPanel({ notifications, role, onSelect, onMa
         )}
       </div>
 
-      <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'thin' }}>
+      <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1 notifications-tabs-row">
         {tabs.map((tab) => {
           const count = tabCounts[tab.key] || 0
           const isActive = activeTab === tab.key
@@ -83,7 +83,7 @@ export default function NotificationsPanel({ notifications, role, onSelect, onMa
         })}
       </div>
 
-      <div className="grid max-h-[360px] gap-2 overflow-y-auto pr-1">
+      <div className="notifications-list grid max-h-[360px] gap-2 overflow-y-auto overflow-x-hidden pr-1">
         {filtered.length === 0 && (
           <div className="py-6 text-center text-sm text-[color:var(--text-secondary)]">No notifications in this category yet.</div>
         )}
@@ -108,10 +108,10 @@ export default function NotificationsPanel({ notifications, role, onSelect, onMa
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center justify-between gap-2">
-                  <span className={`truncate ${item.read ? 'font-semibold' : 'font-bold'} text-[color:var(--text-primary)]`}>{item.title}</span>
+                  <span className={`min-w-0 flex-1 truncate ${item.read ? 'font-semibold' : 'font-bold'} text-[color:var(--text-primary)]`}>{item.title}</span>
                   {!item.read && <span className="h-2 w-2 shrink-0 rounded-full bg-[color:var(--danger)]" />}
                 </span>
-                <span className="block text-sm text-[color:var(--text-secondary)]">{item.detail}</span>
+                <span className="block truncate text-sm text-[color:var(--text-secondary)]">{item.detail}</span>
                 <span className="mt-1 block text-xs text-[color:var(--text-secondary)]">{item.time}</span>
               </span>
               <ChevronRight size={16} className="mt-1 shrink-0 text-[color:var(--text-secondary)]" />
