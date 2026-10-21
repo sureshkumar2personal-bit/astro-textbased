@@ -36,9 +36,6 @@
 .ld-card--media .live-test-button { justify-self: center; padding: 8px 14px; border: 1px solid var(--surface-border); border-radius: 12px; background: var(--surface-soft); }
 .ld-card--media .live-test-button:hover { border-color: var(--primary); }
 
-.ld-side .live-ready-banner { width: auto; padding: 20px; border: 1px solid var(--surface-border); border-radius: 18px; background: var(--surface-strong); box-shadow: var(--shadow-xs); text-align: left; }
-.ld-side .live-ready-banner h2 { margin: 6px 0 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; text-transform: none; color: var(--ink); }
-.ld-side .live-ready-banner p { font-size: 14px; }
 .ld-side .live-guidelines-card { width: auto; }
 
 .ld-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }

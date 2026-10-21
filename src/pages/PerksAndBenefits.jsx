@@ -1065,11 +1065,6 @@ export default function PerksAndBenefits({ defaultTab }) {
       <PageHeader
         eyebrow="Astrologer Workspace"
         title="Perks & Benefits"
-        subtitle={activeTab === 'settings'
-          ? 'Manage your subscriber program, plans, and benefit visibility.'
-          : activeTab === 'delivery'
-            ? 'Configure the benefits your subscribers receive across your services.'
-            : 'Manage customer benefits, free perks, subscription plans, and monthly commitments.'}
       />
 
       {/* Main Tab Navigation */}

@@ -2536,7 +2536,6 @@ export default function Atonement() {
     <div className="atonement-page">
       <PageHeader
         title="Atonement"
-        subtitle="Create and manage atonement services"
         actions={null}
         showBack={Boolean(returnTo)}
         backTo={returnTo || undefined}

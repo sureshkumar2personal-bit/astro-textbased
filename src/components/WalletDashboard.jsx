@@ -91,7 +91,6 @@ export function WalletBalanceHero({ summary, pendingCount, canWithdraw, onWithdr
       <div className="wd-balance">
         <span className="wd-balance__eyebrow"><Wallet size={16} /> Available Balance</span>
         <div className="wd-balance__amount">{inr(summary.availableBalance)}</div>
-        <p className="wd-balance__hint">Ready to withdraw to your payout method.</p>
         <div className="wd-balance__actions">
           <button type="button" className="wd-btn wd-btn--light" onClick={onWithdraw} disabled={!canWithdraw}>
             <ArrowDownToLine size={16} /> Request Payout

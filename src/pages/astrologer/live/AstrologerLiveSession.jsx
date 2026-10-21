@@ -669,7 +669,7 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
       <div className="ld-header__titles">
         <div className="ld-header__title">
           <h1>{title}</h1>
-          <p>{subtitle}</p>
+          {subtitle && <p>{subtitle}</p>}
         </div>
         {global?.actions && <div className="ld-header__actions">{global.actions}</div>}
       </div>
@@ -723,9 +723,6 @@ export function AstrologerLiveSessionSetup() {
       <LivePageHeader
         step={enteredForLive ? 'Scheduled live · Studio check' : 'Step 01 of 04'}
         title={enteredForLive ? 'Broadcast studio setup' : 'Create Live'}
-        subtitle={enteredForLive
-          ? 'Check your camera and microphone, then enter the live room'
-          : 'Check your camera and microphone before you continue'}
         onClose={closeCreateLiveToDashboard}
       />
       <div className="ld-setup-grid">
@@ -745,14 +742,6 @@ export function AstrologerLiveSessionSetup() {
           </button>
         </Card>
         <div className="ld-side">
-          <div className="live-ready-banner">
-            <span className="live-eyebrow">Astrologer broadcast studio</span>
-            <h2>Ready to engage users?</h2>
-            <p>
-              Your guidance can reach viewers looking for clarity right now.
-              {draft.title ? ` Draft title: ${draft.title}` : ''}
-            </p>
-          </div>
           <Card className="live-guidelines-card ld-card">
             <div className="live-section-heading">
               <ShieldCheck size={20} />

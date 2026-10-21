@@ -418,7 +418,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Wallet"
-            subtitle="Manage your earnings, balance, payouts, and transactions."
             showBack
             backTo={routes.dashboard}
           />
@@ -530,7 +529,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Earnings"
-            subtitle="Your earnings breakdown by service category for the selected period."
             showBack
             backTo={`${walletPath}/overview`}
           />
@@ -603,7 +601,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Transactions"
-            subtitle="Browse your wallet transactions and download a statement."
             showBack
             backTo={`${walletPath}/overview`}
           />
@@ -646,7 +643,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Withdraw Money"
-            subtitle="Request a withdrawal to your preferred payout method."
             showBack
             backTo={`${walletPath}/overview`}
           />
@@ -752,7 +748,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Settlement History"
-            subtitle="Monthly settlements and payout records."
             showBack
             backTo={`${walletPath}/overview`}
           />
@@ -805,7 +800,6 @@ export default function AstrologerWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="Astrologer"
             title="Payment Methods"
-            subtitle="Manage your bank, UPI and card payout details."
             showBack
             backTo={`${walletPath}/overview`}
           />
