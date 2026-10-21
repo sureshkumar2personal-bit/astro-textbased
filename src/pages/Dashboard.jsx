@@ -186,9 +186,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <button type="button" className="btn btn-primary hero-banner-button" onClick={() => navigate(routes.appointmentSchedule)}>
-            Set Availability
-          </button>
         </div>
       </div>
 
