@@ -29,7 +29,6 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import Card from '../../../components/ui/Card.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
-import BackButton from '../../../components/BackButton.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -539,9 +538,10 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Top-ups"
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Add Money" icon={Plus}>
             <Card>
@@ -626,9 +626,10 @@ export default function UserWallet({ section = 'overview' }) {
           <PageHeader
             eyebrow="User portal"
             title="Refunds"
+            showBack
+            backTo={`${walletPath}/overview`}
           />
           <WalletSectionTabs />
-          <div className="wallet-page-back"><BackButton to={`${walletPath}/overview`} /></div>
 
           <Section title="Refund History" icon={Receipt}>
             <Card>
