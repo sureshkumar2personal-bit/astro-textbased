@@ -1399,7 +1399,6 @@ export default function AskQuestion({ embedded = false }) {
     <div>
       {!embedded && (
         <PageHeader
-          eyebrow="User portal"
           title={isEditing ? 'Edit Question' : 'Ask a Question'}
           showBack
           backTo={location.state?.from === 'dashboard' ? routes.dashboard : routes.trackQuestions}
