@@ -152,6 +152,35 @@ function formatTime(value) {
   return `${String(hours % 12 || 12).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${hours >= 12 ? 'PM' : 'AM'}`
 }
 
+const SETTINGS_TABS = [
+  ['about', 'About', UserRound],
+  ['astrology', 'Astrology', Sparkles],
+  ['preferences', 'Preferences', SlidersHorizontal],
+  ['birthchart', 'Birth Chart', CalendarDays],
+  ['family', 'Family', Users],
+  ['activity', 'Activity', Clock3],
+  ['instant', 'Instant Chats', Headphones],
+];
+
+function SettingsTabBar({ tab, onSelect }) {
+  return (
+    <nav className="my-account-tabbar" role="tablist" aria-label="Account sections">
+      {SETTINGS_TABS.map(([id, label, Icon]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={tab === id}
+          className={`my-account-tab${tab === id ? ' is-active' : ''}`}
+          onClick={() => onSelect(id)}
+        >
+          <Icon size={14} /> {label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 function FamilyMemberCard({ member, onEdit, onDelete }) {
   return (
     <Card className="user-profile-family-card">
@@ -542,33 +571,9 @@ export default function MyAccount() {
       </Card>
       <div className="my-account-layout">
       <Card className="my-account-settings-card">
-        <nav className="my-account-tabbar" role="tablist" aria-label="Account sections">
-          {[
-            ['about', 'About', UserRound],
-            ['astrology', 'Astrology', Sparkles],
-            ['preferences', 'Preferences', SlidersHorizontal],
-            ['birthchart', 'Birth Chart', CalendarDays],
-            ['family', 'Family', Users],
-            ['activity', 'Activity', Clock3],
-            ['instant', 'Instant Chats', Headphones],
-          ].map(([id, label, Icon]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={settingsTab === id}
-              className={`my-account-tab${settingsTab === id ? ' is-active' : ''}`}
-              onClick={() => setSettingsTab(id)}
-            >
-              <Icon size={14} /> {label}
-            </button>
-          ))}
-        </nav>
         {settingsTab === 'about' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Personal Information</h2>
-            </div>
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Personal Information" onClick={openPersonalDetailsEditor}><Pencil size={15} /></button>
           </div>
           {editingDetails ? (
@@ -633,11 +638,8 @@ export default function MyAccount() {
           )}
         </section>}
         {settingsTab === 'astrology' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Astrology Details</h2>
-              <p className="muted my-account-settings-desc">Your basic horoscope information.</p>
-            </div>
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Astrology Details" onClick={openHoroscopeEditor}><Pencil size={15} /></button>
           </div>
           <div className="my-account-info-rows">
@@ -653,11 +655,8 @@ export default function MyAccount() {
           </div>
         </section>}
         {settingsTab === 'preferences' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Preferences</h2>
-              <p className="muted my-account-settings-desc">Language and consultation preferences for astrologer matching.</p>
-            </div>
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Preferences" onClick={() => { setPreferencesError(''); setPreferencesOpen(true) }}><SlidersHorizontal size={15} /></button>
           </div>
           <div className="my-account-info-rows">
@@ -665,12 +664,8 @@ export default function MyAccount() {
           </div>
         </section>}
         {settingsTab === 'birthchart' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Birth Chart</h2>
-              <p className="muted my-account-settings-desc">Your birth details and horoscope charts.</p>
-            </div>
-            <Sparkles size={20} className="my-account-management-icon" />
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
           <div className="my-account-info-rows">
             <div className="my-account-info-row">
@@ -717,11 +712,8 @@ export default function MyAccount() {
           </div>
         </section>}
         {settingsTab === 'family' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Family Horoscopes</h2>
-              <p className="muted my-account-settings-desc">Keep birth details for your loved ones together.</p>
-            </div>
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="btn btn-primary btn-sm" onClick={() => openFamilyForm()}>
               <Plus size={15} /> Add Family Member
             </button>
@@ -742,12 +734,8 @@ export default function MyAccount() {
           )}
         </section>}
         {settingsTab === 'activity' && <section className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Activity Summary</h2>
-              <p className="muted my-account-settings-desc">Your questions, consultations, and account activity.</p>
-            </div>
-            <Clock3 size={20} className="my-account-management-icon" />
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
           <div className="user-profile-activity">
             <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
@@ -759,12 +747,8 @@ export default function MyAccount() {
           </div>
         </section>}
         {settingsTab === 'instant' && <section id="user-profile-instant-history" className="my-account-settings-section">
-          <div className="my-account-section-heading">
-            <div>
-              <h2 className="my-account-settings-title">Instant Consultations</h2>
-              <p className="muted my-account-settings-desc">Your recent instant calls and chats with astrologers.</p>
-            </div>
-            <Headphones size={20} className="my-account-management-icon" />
+          <div className="my-account-section-heading my-account-section-heading--tabs">
+            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
           <div className="user-profile-consultation-tabs" role="tablist" aria-label="Instant consultation history">
             {[["all", "All"], ["call", "Instant Calls"], ["chat", "Instant Chats"]].map(([value, label]) => (

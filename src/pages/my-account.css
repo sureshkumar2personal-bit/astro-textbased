@@ -137,9 +137,6 @@ body:has(.my-account-page) {
 }
 
 .my-account-settings-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -189,6 +186,9 @@ body:has(.my-account-page) {
 }
 
 .my-account-section-heading { margin-bottom: 8px; }
+.my-account-section-heading--tabs { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.my-account-section-heading--tabs > .my-account-tabbar { flex: 1 1 0; min-width: 0; margin-bottom: 0; }
+.my-account-section-heading--tabs > button { flex: 0 0 auto; margin: 0; }
 .my-account-settings-title { color: #241a31; font-size: 19px; }
 .my-account-settings-desc { color: #5e536b; font-size: 12px; }
 .my-account-settings-edit { width: 33px; height: 33px; color: #60368d; background: #faf6ff; border-color: #e4d8f1; }
