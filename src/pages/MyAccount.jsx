@@ -540,6 +540,7 @@ export default function MyAccount() {
         <Link className="my-account-summary__tag" to={routes.profile} state={{ from: 'my-account' }}>Profile</Link>
         <button type="button" className="btn btn-primary my-account-summary__edit" onClick={openPersonalDetailsEditor}><Pencil size={15} /> Edit Profile</button>
       </Card>
+      <div className="my-account-layout">
       <Card className="my-account-settings-card">
         <nav className="my-account-tabbar" role="tablist" aria-label="Account sections">
           {[
@@ -827,18 +828,24 @@ export default function MyAccount() {
           )}
         </section>}
       </Card>
-      <Card className="my-account-management-card">
-        <section className="my-account-management-section">
-          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Account &amp; Security</h2><p className="muted my-account-settings-desc">Manage access, privacy, and account status.</p></div><ShieldCheck size={20} className="my-account-management-icon" /></div>
-          <div className="my-account-info-rows">
-            <div className="my-account-info-row"><span><ShieldCheck size={14} />Account Status</span><strong>Active</strong></div>
-            <div className="my-account-info-row"><span><Lock size={14} />Two-Factor Authentication</span><strong>Not enabled</strong></div>
-            <div className="my-account-info-row"><span><Lock size={14} />Password</span><strong>••••••••</strong></div>
-            <div className="my-account-info-row"><span><UsersRound size={14} />Profile Visibility</span><strong>{currentUser?.profileVisibility || 'Private'}</strong></div>
-            <div className="my-account-info-row"><span><ShieldCheck size={14} />Active Sessions</span><strong>1 device</strong></div>
-            <div className="my-account-info-row"><span><UsersRound size={14} />Blocked Users</span><strong>{blockedUserIds?.length || 0}</strong></div>
+      <section className="my-account-settings-section">
+        <div className="my-account-section-heading">
+          <div>
+            <h2 className="my-account-settings-title">Account &amp; Security</h2>
           </div>
-        </section>
+          <ShieldCheck size={20} className="my-account-management-icon" />
+        </div>
+        <div className="my-account-info-rows">
+          <div className="my-account-info-row"><span><ShieldCheck size={14} />Account Status</span><strong>Active</strong></div>
+          <div className="my-account-info-row"><span><Lock size={14} />Two-Factor Authentication</span><strong>Not enabled</strong></div>
+          <div className="my-account-info-row"><span><Lock size={14} />Password</span><strong>••••••••</strong></div>
+          <div className="my-account-info-row"><span><UsersRound size={14} />Profile Visibility</span><strong>{currentUser?.profileVisibility || 'Private'}</strong></div>
+          <div className="my-account-info-row"><span><ShieldCheck size={14} />Active Sessions</span><strong>1 device</strong></div>
+          <div className="my-account-info-row"><span><UsersRound size={14} />Blocked Users</span><strong>{blockedUserIds?.length || 0}</strong></div>
+        </div>
+      </section>
+      </div>
+      <Card className="my-account-management-card">
         <section className="my-account-management-section">
           <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Wallet &amp; Billing</h2><p className="muted my-account-settings-desc">View your balance, payments, and subscriptions.</p></div><WalletCards size={20} className="my-account-management-icon" /></div>
           <div className="my-account-info-rows">
