@@ -223,6 +223,7 @@ export default function MyAccount() {
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [accountActionError, setAccountActionError] = useState('')
+  const [settingsTab, setSettingsTab] = useState('about')
 
   // Family horoscopes state
   const familyMembers = useMemo(() => (familyHoroscopes || []).filter((entry) => entry.userId === currentUser?.id), [familyHoroscopes, currentUser?.id])
@@ -540,7 +541,29 @@ export default function MyAccount() {
         <button type="button" className="btn btn-primary my-account-summary__edit" onClick={openPersonalDetailsEditor}><Pencil size={15} /> Edit Profile</button>
       </Card>
       <Card className="my-account-settings-card">
-        <section className="my-account-settings-section">
+        <nav className="my-account-tabbar" role="tablist" aria-label="Account sections">
+          {[
+            ['about', 'About', UserRound],
+            ['astrology', 'Astrology', Sparkles],
+            ['preferences', 'Preferences', SlidersHorizontal],
+            ['birthchart', 'Birth Chart', CalendarDays],
+            ['family', 'Family', Users],
+            ['activity', 'Activity', Clock3],
+            ['instant', 'Instant Chats', Headphones],
+          ].map(([id, label, Icon]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={settingsTab === id}
+              className={`my-account-tab${settingsTab === id ? ' is-active' : ''}`}
+              onClick={() => setSettingsTab(id)}
+            >
+              <Icon size={14} /> {label}
+            </button>
+          ))}
+        </nav>
+        {settingsTab === 'about' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Personal Information</h2>
@@ -607,8 +630,8 @@ export default function MyAccount() {
               ) : null}
             </div>
           )}
-        </section>
-        <section className="my-account-settings-section">
+        </section>}
+        {settingsTab === 'astrology' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Astrology Details</h2>
@@ -627,8 +650,8 @@ export default function MyAccount() {
               )
             })}
           </div>
-        </section>
-        <section className="my-account-settings-section" style={{ gridColumn: '1 / -1' }}>
+        </section>}
+        {settingsTab === 'preferences' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Preferences</h2>
@@ -639,8 +662,8 @@ export default function MyAccount() {
           <div className="my-account-info-rows">
             {PREFERENCE_ROWS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={preferenceValue(key) ? '' : 'is-empty'}>{preferenceValue(key) || 'Not set'}</strong></div>)}
           </div>
-        </section>
-        <section className="my-account-settings-section" style={{ gridColumn: '1 / -1' }}>
+        </section>}
+        {settingsTab === 'birthchart' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Birth Chart</h2>
@@ -691,8 +714,8 @@ export default function MyAccount() {
               View Full Horoscope <ArrowRight size={14} />
             </Link>
           </div>
-        </section>
-        <section className="my-account-settings-section" style={{ gridColumn: '1 / -1' }}>
+        </section>}
+        {settingsTab === 'family' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Family Horoscopes</h2>
@@ -716,8 +739,8 @@ export default function MyAccount() {
           ) : (
             <p className="muted user-profile-empty">Add family members so their birth details and horoscope information are always at hand.</p>
           )}
-        </section>
-        <section className="my-account-settings-section" style={{ gridColumn: '1 / -1' }}>
+        </section>}
+        {settingsTab === 'activity' && <section className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Activity Summary</h2>
@@ -733,8 +756,8 @@ export default function MyAccount() {
             <div><strong>{savedPostIds?.length || 0}</strong><span><Bookmark size={13} /> Saved content</span></div>
             <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
           </div>
-        </section>
-        <section id="user-profile-instant-history" className="my-account-settings-section" style={{ gridColumn: '1 / -1' }}>
+        </section>}
+        {settingsTab === 'instant' && <section id="user-profile-instant-history" className="my-account-settings-section">
           <div className="my-account-section-heading">
             <div>
               <h2 className="my-account-settings-title">Instant Consultations</h2>
@@ -802,7 +825,7 @@ export default function MyAccount() {
               <p>Your instant call and chat history will appear here.</p>
             </div>
           )}
-        </section>
+        </section>}
       </Card>
       <Card className="my-account-management-card">
         <section className="my-account-management-section">

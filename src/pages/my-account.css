@@ -130,14 +130,44 @@ body:has(.my-account-page) {
 .my-account-summary__edit { position: relative; z-index: 1; min-height: 38px; border: 1px solid rgba(255, 255, 255, .58); color: #5b347e; background: #fff; box-shadow: 0 6px 16px rgba(52, 27, 82, .16); }
 
 .my-account-settings-card {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
+
+.my-account-tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.my-account-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid #e6deef;
+  border-radius: 999px;
+  background: #fbf9fd;
+  color: #5b21b6;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.my-account-tab:hover { border-color: #d3bfe9; background: #fff; box-shadow: 0 6px 16px rgba(80, 50, 105, .10); transform: translateY(-1px); }
+
+.my-account-tab.is-active { border-color: #cfb7ea; background: #efe4fb; box-shadow: inset 0 0 0 1px rgba(109, 40, 217, .07); }
+
+.my-account-tab svg { flex: 0 0 auto; width: 14px; height: 14px; }
 
 .my-account-settings-section {
   display: grid;
@@ -151,8 +181,6 @@ body:has(.my-account-page) {
   box-shadow: 0 10px 24px rgba(70, 45, 93, .07);
 }
 
-.my-account-settings-section + .my-account-settings-section { border-top: 1px solid rgba(226, 216, 237, .9); }
-.my-account-settings-section:nth-child(3) { grid-column: 1 / -1; }
 .my-account-section-heading { margin-bottom: 8px; }
 .my-account-settings-title { color: #241a31; font-size: 19px; }
 .my-account-settings-desc { color: #5e536b; font-size: 12px; }
@@ -385,8 +413,6 @@ body:has(.my-account-page) {
 
 @media (max-width: 720px) {
   .app-shell:has(.my-account-page) .page-content { padding: 24px 16px 44px; }
-  .my-account-settings-card { grid-template-columns: 1fr; }
-  .my-account-settings-section:nth-child(3) { grid-column: auto; }
   .my-account-management-card { grid-template-columns: 1fr; }
 }
 
@@ -422,7 +448,14 @@ html[data-theme='dark'] .my-account-settings-section {
   background: rgba(15, 23, 42, .84);
   box-shadow: 0 10px 24px rgba(2, 6, 23, .24);
 }
-html[data-theme='dark'] .my-account-settings-section + .my-account-settings-section { border-top-color: rgba(148, 163, 184, .18); }
+html[data-theme='dark'] .my-account-tabbar { color: #cbd5e1; }
+html[data-theme='dark'] .my-account-tab {
+  border-color: #334155;
+  background: #1e293b;
+  color: #f8fafc;
+}
+html[data-theme='dark'] .my-account-tab:hover { border-color: #475569; background: rgba(139, 92, 246, .16); box-shadow: 0 6px 16px rgba(2, 6, 23, .24); }
+html[data-theme='dark'] .my-account-tab.is-active { border-color: #8b5cf6; background: rgba(139, 92, 246, .28); box-shadow: inset 0 0 0 1px rgba(167, 139, 250, .18); }
 html[data-theme='dark'] .my-account-management-section { border-color: rgba(148, 163, 184, .18); background: rgba(15, 23, 42, .84); box-shadow: 0 10px 24px rgba(2, 6, 23, .24); }
 html[data-theme='dark'] .my-account-management-icon { color: #c4b5fd; }
 html[data-theme='dark'] .my-account-management-link { border-color: #475569; background: rgba(139, 92, 246, .16); color: #ddd6fe; }
