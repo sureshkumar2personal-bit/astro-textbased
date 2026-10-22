@@ -5189,17 +5189,15 @@ tbody tr:hover {
 .app-shell--profile .user-profile-header__actions .btn-outline:hover { background: #fcf6ea; }
 .app-shell--profile .user-profile-header__actions .btn-primary { border: 0; background: linear-gradient(135deg, #6127c8, #8d39d4); box-shadow: 0 8px 18px rgba(102, 42, 190, .2); }
 .app-shell--profile .user-profile-stats { position: relative; z-index: 1; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 20px 28px 0; padding: 4px 12px 0; border-top: 0; }
-.app-shell--profile .user-profile-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.app-shell--profile .user-profile-stats { display: flex; flex-wrap: wrap; gap: 24px; }
 .app-shell--profile .user-profile-stats > * { position: relative; display: flex; flex-direction: row; align-items: center; gap: 14px; min-height: 44px; padding: 0; border-radius: 0; background: transparent; }
-.app-shell--profile .user-profile-stats > * + * { padding-left: 14px; border-left: 0; }
+.app-shell--profile .user-profile-stats > * + * { padding-left: 24px; border-left: 0; }
 .app-shell--profile .user-profile-stats > * + *::after { position: absolute; top: 50%; left: 0; width: 1px; height: 30px; border-radius: 999px; background: #e8dccb; content: ''; transform: translateY(-50%); }
 .app-shell--profile .user-profile-stats > * { min-width: 0; }
 .app-shell--profile .user-profile-stats span { white-space: nowrap; }
 .app-shell--profile .user-profile-stats > *::before { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; background: #fbf2df; color: #9b6815; font-size: 19px; }
 .app-shell--profile .user-profile-stats > *:nth-child(1)::before { content: '✦'; }
 .app-shell--profile .user-profile-stats > *:nth-child(2)::before { content: '◈'; }
-.app-shell--profile .user-profile-stats > *:nth-child(3)::before { content: '▦'; font-size: 17px; font-weight: 700; }
-.app-shell--profile .user-profile-stats > *:nth-child(4)::before { content: '◉'; font-size: 17px; font-weight: 700; }
 .app-shell--profile .user-profile-stats strong { color: #241a36; font-size: 22px; font-weight: 700; }
 .app-shell--profile .user-profile-stats span { margin-top: 2px; color: #756a7b; font-size: 13px; }
 .app-shell--profile .user-profile-stats-btn span svg { display: none; }
