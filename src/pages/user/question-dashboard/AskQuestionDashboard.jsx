@@ -38,7 +38,6 @@ export default function AskQuestionDashboard() {
     <div className="question-dashboard">
       <PageHeader
         title="Ask a Question"
-        subtitle="Ask a new text-based question and manage your questions, disputes and history from one place."
       />
 
       <nav className="question-dashboard-tabs" aria-label="Ask a Question sections">
