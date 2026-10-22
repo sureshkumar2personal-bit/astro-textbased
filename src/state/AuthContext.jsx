@@ -147,7 +147,8 @@ export function AuthProvider({ children }) {
         throw new Error(`This account is registered as a ${user.role === ROLES.ASTROLOGER ? 'Astrologer' : 'User'}. Choose the correct login portal.`)
       }
       setCurrentUser(user)
-      recordUserActivity({ userId: user.id, type: 'security', title: 'Account sign-in', summary: 'You signed in to Astro Connect.', metadata: user.email })
+      // Signing in is not an activity worth recording: it says nothing about
+      // what the person did in the product and only adds noise to the feed.
       return user
     },
     register(payload) {

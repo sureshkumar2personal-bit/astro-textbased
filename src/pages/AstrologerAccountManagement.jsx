@@ -15,6 +15,7 @@ import { mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { mergeProfile, profileStorageKey } from '../utils/astrologerProfile.js'
 import { DEFAULT_ASSISTANT_PERMISSIONS, EDITOR_PERMISSION_GROUPS } from '../utils/editorAccess.js'
+import { filterOutAuthenticationActivities } from '../utils/authActivityFilter.js'
 import { ASTROLOGER_AUDIENCE } from './astrologer/audience/audienceData.js'
 import './editor/editor-management.css'
 import '../css/astrologer/audience-inline.css'
@@ -241,7 +242,7 @@ export default function AstrologerAccountManagement() {
     }
   }, [global])
   const addAudit = (action) => { setAuditRows((rows) => [[ 'Just now', profile.display, 'Primary Astrologer', action, action.toLowerCase().includes('password') ? 'Security' : 'Permissions', 'Completed from My Account', 'Current session' ], ...rows]); notify(`${action} · Added to audit log`) }
-  const activityRows = useMemo(() => [...editorAudit.map((entry) => [new Date(entry.occurredAt).toLocaleString(), entry.editorName, 'Editor / Assistant', entry.action, entry.module, entry.details, 'Editor workspace']), ...auditRows], [auditRows, editorAudit])
+  const activityRows = useMemo(() => filterOutAuthenticationActivities([...editorAudit.map((entry) => [new Date(entry.occurredAt).toLocaleString(), entry.editorName, 'Editor / Assistant', entry.action, entry.module, entry.details, 'Editor workspace']), ...auditRows]), [auditRows, editorAudit])
   const filteredAudit = useMemo(() => activityRows.filter((row) => `${row.join(' ')}`.toLowerCase().includes(activitySearch.toLowerCase()) && (activityFilter === 'All Activity' || row[4] === activityFilter || (activityFilter === 'Editors' && row[2].includes('Editor')))), [activityFilter, activitySearch, activityRows])
   const editors = useMemo(() => [
     ...storedEditors.map((editor) => ({ ...editor, role: editor.editorRole || editor.role, permissionList: editor.permissions || [], last: editor.lastActiveAt ? new Date(editor.lastActiveAt).toLocaleDateString() : '—', permissions: (editor.permissions || []).map((item) => item.split('-')[0]).filter((item, index, list) => list.indexOf(item) === index).join(' · ') })),
