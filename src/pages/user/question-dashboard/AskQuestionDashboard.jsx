@@ -28,8 +28,8 @@ export default function AskQuestionDashboard() {
   // Purchased Questions / History render read-only views built from the same
   // records. Disputes are managed inside My Questions, so they have no tab here.
   const sections = [
-    { key: 'new', label: 'Ask New', icon: CircleHelp, to: routes.askQuestion, count: 0 },
     { key: 'my-questions', label: 'My Questions', icon: ListChecks, to: `${routes.askQuestion}/my-questions`, count: getUserQuestions(questions, currentUser).length },
+    { key: 'new', label: 'Ask New', icon: CircleHelp, to: `${routes.askQuestion}/new`, count: 0 },
     { key: 'purchased', label: 'Purchased Questions', icon: Package, to: `${routes.askQuestion}/purchased`, count: availablePurchasedCount },
     { key: 'history', label: 'History', icon: History, to: `${routes.askQuestion}/history`, count: 0 },
   ]

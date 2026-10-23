@@ -87,6 +87,7 @@ export function WalletSectionTabs() {
     { to: `${routes.base}/wallet/overview`, label: 'Overview' },
     { to: `${routes.base}/wallet/transactions`, label: 'Activity' },
     { to: routes.paymentMethods, label: 'Payment Settings' },
+    { to: routes.autopay, label: 'Manage Autopay' },
   ]
 
   return (
@@ -97,7 +98,7 @@ export function WalletSectionTabs() {
           to={tab.to}
           className={({ isActive }) => {
             const settingsActive = tab.label === 'Payment Settings'
-              && (location.pathname === routes.paymentMethods || location.pathname === routes.autopay)
+              && location.pathname === routes.paymentMethods
             return `wallet-section-tab${isActive || settingsActive ? ' is-active' : ''}`
           }}
         >
@@ -405,7 +406,7 @@ export default function UserWallet({ section = 'overview' }) {
               onClick={downloadAllTransactionsPdf}
               disabled={transactions.length === 0}
             >
-              <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">PDF</span>
+              <Download size={16} /> <span className="wallet-pdf-label" aria-hidden="true">Statement</span>
             </button>
           }>
             <Card className="wallet-txn-card">

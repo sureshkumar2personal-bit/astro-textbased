@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays, CircleHelp } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays, CircleHelp, ChevronDown, ChevronRight, List, Grid2X2 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
@@ -350,6 +350,49 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
   )
 }
 
+function LifecycleQuestionListRow({ question, nowMs, onOpen, onRaiseDispute }) {
+  const stage = getQuestionLifecycleStage(question, nowMs)
+  const answered = isQuestionAnswered(question)
+  const canRaiseDispute = isDisputeWindowOpen(question, nowMs)
+  const astrologerName = mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
+  const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
+  const typeLabel = getQuestionTypeLabel(question)
+  const openFromKeyboard = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      onOpen()
+    }
+  }
+
+  return (
+    <article className="aq-question-list-row" role="button" tabIndex={0} onClick={onOpen} onKeyDown={openFromKeyboard}>
+      <span className="aq-question-list-row__icon" aria-hidden="true"><CircleHelp size={20} /></span>
+      <div className="aq-question-list-row__body">
+        <div className="aq-question-list-row__top">
+          <strong>{question.id}</strong>
+          <span className="aq-question-list-row__meta">{astrologerName} · {sourceLabel} · {typeLabel}</span>
+        </div>
+        <p>{question.question}</p>
+        <div className="aq-question-list-row__details">
+          <span>{formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '—'}</span>
+          <span>{question.purchaseType || '—'}</span>
+          <span>{typeLabel}</span>
+        </div>
+      </div>
+      <div className="aq-question-list-row__right">
+        <span className={`aq-question-list-row__status aq-question-list-row__status--${stage.toLowerCase().replaceAll(' ', '-')}`}>{stage}</span>
+        <div className="aq-question-list-row__actions">
+          <button type="button" className="btn btn-outline" onClick={(event) => { event.stopPropagation(); onOpen() }}>
+            {answered ? 'View Answer' : 'View Question'}
+          </button>
+          {canRaiseDispute && <button type="button" className="btn aq-track-card__dispute-btn" onClick={(event) => { event.stopPropagation(); onRaiseDispute(question.id) }}><Gavel size={14} /> Raise a Dispute</button>}
+        </div>
+        <ChevronRight className="aq-question-list-row__chevron" size={18} aria-hidden="true" />
+      </div>
+    </article>
+  )
+}
+
 // Month selector. "All" below it means "every active question in this month".
 function MonthSelector({ monthKey, options, onChange }) {
   return (
@@ -365,6 +408,7 @@ function MonthSelector({ monthKey, options, onChange }) {
           <option key={key} value={key}>{getMonthLabel(key)}</option>
         ))}
       </select>
+      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
     </label>
   )
 }
@@ -478,6 +522,7 @@ export default function TrackQuestions({ embedded = false }) {
   const [ratingSaved, setRatingSaved] = useState(false)
   const [fullContent, setFullContent] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const [viewMode, setViewMode] = useState('list')
   // Raise Dispute opens inline on this screen. It is keyed by question id so the
   // same modal serves the lifecycle card button and the details-modal button.
   const [disputeQuestionId, setDisputeQuestionId] = useState(null)
@@ -741,7 +786,29 @@ const selectedQuestion = detailsOpen
 
       <div className="section">
         <Card style={{ marginTop: 0 }}>
-          <div className="section-title">{getMonthLabel(monthKey)} · Active Questions</div>
+          <div className="section-title track-questions-toolbar">
+            <span>{getMonthLabel(monthKey)} · Active Questions</span>
+            <div className="track-questions-view-toggle" role="group" aria-label="Question view">
+              <button
+                type="button"
+                className={`track-questions-view-toggle__button${viewMode === 'list' ? ' is-active' : ''}`}
+                aria-label="List view"
+                aria-pressed={viewMode === 'list'}
+                onClick={() => setViewMode('list')}
+              >
+                <List size={16} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={`track-questions-view-toggle__button${viewMode === 'grid' ? ' is-active' : ''}`}
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
+                onClick={() => setViewMode('grid')}
+              >
+                <Grid2X2 size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
           {visibleQuestions.length === 0 && (
             <div className="mb-4 rounded-[14px] border border-[color:var(--border)] bg-white/90 px-4 py-3 text-sm text-[color:var(--muted)]">
               {lifecycleFilter === 'All'
@@ -749,14 +816,22 @@ const selectedQuestion = detailsOpen
                 : `No ${lifecycleFilter.toLowerCase()} questions in ${getMonthLabel(monthKey)}.`}
             </div>
            )}
-           <div className="track-questions-grid">
-             {visibleQuestions.map((question) => (
+           <div className={`track-questions-grid${viewMode === 'list' ? ' is-list' : ' is-grid'}`}>
+             {visibleQuestions.map((question) => viewMode === 'list' ? (
+               <LifecycleQuestionListRow
+                 key={question.id}
+                 question={question}
+                 nowMs={nowMs}
+                 onOpen={() => openQuestion(question.id)}
+                 onRaiseDispute={(id) => openRaiseDispute(id)}
+               />
+             ) : (
                <LifecycleQuestionCard
                  key={question.id}
                  question={question}
                  nowMs={nowMs}
                  onOpen={() => openQuestion(question.id)}
-                  onRaiseDispute={(id) => openRaiseDispute(id)}
+                 onRaiseDispute={(id) => openRaiseDispute(id)}
                />
              ))}
            </div>

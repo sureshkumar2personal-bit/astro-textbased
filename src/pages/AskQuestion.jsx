@@ -15,6 +15,7 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import { categories } from '../data/mockData.js'
 import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
+import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -87,10 +88,14 @@ function getInitials(name = '') {
   return String(name).split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
 }
 
-function AstrologerAvatar({ name, size = 'h-14 w-14' }) {
+const ASTROLOGER_PHOTOS = new Map(consultationAstrologers.map((astrologer) => [astrologer.id, astrologer.profileImage]))
+
+function AstrologerAvatar({ astrologer, size = 'h-14 w-14' }) {
+  const name = astrologer?.name || ''
+  const photo = astrologer?.photo || astrologer?.profileImage || ASTROLOGER_PHOTOS.get(astrologer?.id)
   return (
-    <div className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white`}>
-      {getInitials(name)}
+    <div className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white`}>
+      {photo ? <img src={photo} alt={`${name} profile`} className="h-full w-full object-cover" /> : getInitials(name)}
     </div>
   )
 }
@@ -457,7 +462,7 @@ function getAstrologerOfferBadge(astrologerId, { campaigns = [], subscriptions =
 
 // One compact chooser card, shared by the subscribed and recommended lists so
 // heights, avatar size and action buttons line up row by row.
-function AstrologerChoiceCard({ astrologer, badges = [], meta, actionLabel, selected = false, onAction, onCardClick, cardAriaLabel }) {
+function AstrologerChoiceCard({ astrologer, badges = [], meta, actionLabel, selected = false, subscribed = false, onAction, onCardClick, cardAriaLabel }) {
   const clickableCard = Boolean(onCardClick)
   const handleCardKeyDown = (event) => {
     if (!clickableCard) return
@@ -468,7 +473,7 @@ function AstrologerChoiceCard({ astrologer, badges = [], meta, actionLabel, sele
   }
   return (
     <article
-      className={`aq-astro-card${selected ? ' is-selected' : ''}${clickableCard ? ' is-clickable' : ''}`}
+      className={`aq-astro-card${selected ? ' is-selected' : ''}${clickableCard ? ' is-clickable' : ''}${subscribed ? ' is-subscribed' : ''}${String(astrologer.availability || '').toLowerCase() === 'offline' ? ' is-offline' : ''}`}
       tabIndex={clickableCard ? 0 : undefined}
       role={clickableCard ? 'button' : undefined}
       aria-label={clickableCard ? cardAriaLabel : undefined}
@@ -476,8 +481,9 @@ function AstrologerChoiceCard({ astrologer, badges = [], meta, actionLabel, sele
       onKeyDown={handleCardKeyDown}
     >
       <span className="aq-astro-card__accent" aria-hidden="true" />
+      {subscribed && <span className="aq-astro-card__ribbon">Subscribed</span>}
       <div className="aq-astro-card__head">
-        <AstrologerAvatar name={astrologer.name} size="h-11 w-11" />
+        <AstrologerAvatar astrologer={astrologer} size="h-11 w-11" />
         <div className="aq-astro-card__ident">
           <h3 className="aq-astro-card__name" title={astrologer.name}>{astrologer.name}</h3>
           <div className="aq-astro-card__spec" title={astrologer.specialization}>{astrologer.specialization}</div>
@@ -1426,6 +1432,7 @@ export default function AskQuestion({ embedded = false }) {
                       <AstrologerChoiceCard
                         key={astrologer.id}
                         astrologer={astrologer}
+                        subscribed
                         cardAriaLabel={`Ask a question with ${astrologer.name} (subscribed)`}
                         onCardClick={() => continueWithAstrologer(astrologer)}
                         badges={[

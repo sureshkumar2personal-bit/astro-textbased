@@ -124,6 +124,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px;
+  overflow: hidden;
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-l);
   background: var(--surface-strong);
@@ -131,10 +132,34 @@
   transition: transform 250ms var(--ease-premium), box-shadow 250ms var(--ease-premium), border-color 250ms var(--ease-premium);
 }
 
+.book-appointment-card__ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 96px;
+  padding: 1px 0;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+  background: var(--green-600);
+  color: #fff;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  line-height: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(5, 150, 105, .24);
+}
+
 .book-appointment-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-float);
   border-color: rgba(109, 40, 217, 0.28);
+}
+
+.book-appointment-card.is-offline {
+  filter: grayscale(.58) saturate(.55);
+  background: var(--surface-soft);
 }
 
 .book-appointment-card__profile {
@@ -184,6 +209,11 @@
   border: 3px solid var(--surface-strong);
   background: var(--success);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+}
+
+.book-appointment-availability-dot.is-offline {
+  background: var(--muted);
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, .16);
 }
 
 .book-appointment-price-badge {
