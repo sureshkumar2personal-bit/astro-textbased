@@ -8577,6 +8577,15 @@ button.apt-week-day:focus-visible {
 .adash-campaign-category { color: #a48fc0; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .adash-campaign-name { margin: 0; color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16.5px; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; }
 .adash-campaign-sold { margin-top: auto; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; }
+.adash-campaign-month-graph { display: grid; grid-template-columns: minmax(74px, .72fr) minmax(0, 1.28fr); align-items: center; gap: 8px; min-height: 82px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, .12); border-radius: 18px; background: #020817; color: #94a3b8; font-size: 10px; font-weight: 600; overflow: hidden; }
+.adash-campaign-month-graph__summary { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adash-campaign-month-graph__summary span { color: #94a3b8; font-size: 10px; white-space: nowrap; }
+.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #22c55e; font-size: 17px; line-height: 1; }
+.adash-campaign-month-graph__summary b { color: #f8fafc; font-size: 15px; line-height: 1.1; }
+.adash-campaign-month-graph > svg { width: 100%; height: 58px; overflow: visible; }
+.adash-campaign-month-graph__summary svg { width: 14px; height: 14px; }
+.adash-campaign-month-graph__area { transition: opacity .8s ease-in-out; }
+.adash-campaign-month-graph__line { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .adash-campaign-track { height: 6px; border-radius: 999px; background: var(--primary-bg); overflow: hidden; }
 .adash-campaign-track > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
 .adash-campaign-actions { display: flex; gap: 8px; margin-top: 4px; }

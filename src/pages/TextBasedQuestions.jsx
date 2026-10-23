@@ -28,6 +28,8 @@ import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import TextBasedQuestionsModuleTabs from '../components/TextBasedQuestionsModuleTabs.jsx'
+import AnswerQuestion from './AnswerQuestion.jsx'
+import TextBasedQuestionHistory from './TextBasedQuestionHistory.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -443,6 +445,7 @@ export default function TextBasedQuestions() {
     const requested = searchParams.get('view')
     return requested === 'campaigns' || requested === 'received' ? requested : 'overview'
   })
+  const [activeModuleTab, setActiveModuleTab] = useState(() => searchParams.get('view') === 'campaigns' ? 'questions' : 'answer')
   const [panelQuestionId, setPanelQuestionId] = useState(null)
   const [statusFilter, setStatusFilter] = useState('All')
   const [campaignStatusFilter, setCampaignStatusFilter] = useState('All')
@@ -984,6 +987,23 @@ export default function TextBasedQuestions() {
     }
   }
 
+  if (view !== 'campaigns' && activeModuleTab !== 'questions') {
+    return (
+      <div className={PAGE_ROOT_CLASS}>
+        <PageHeader
+          className={headerClassCompact}
+          eyebrow="Astrologer"
+          title="Text Based Questions"
+          showBack
+          backTo={routes.dashboard}
+          backIcon={backIcon}
+        />
+        <TextBasedQuestionsModuleTabs activeKey={activeModuleTab} onChange={setActiveModuleTab} />
+        {activeModuleTab === 'answer' ? <AnswerQuestion hidePageHeader /> : <TextBasedQuestionHistory hidePageHeader />}
+      </div>
+    )
+  }
+
   return (
     <div className={PAGE_ROOT_CLASS}>
       <PageHeader
@@ -1001,7 +1021,7 @@ export default function TextBasedQuestions() {
 
       {view !== 'campaigns' && (
         <div>
-          <TextBasedQuestionsModuleTabs />
+          <TextBasedQuestionsModuleTabs activeKey="questions" onChange={setActiveModuleTab} />
         </div>
       )}
 
@@ -1220,10 +1240,10 @@ export default function TextBasedQuestions() {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: '1 1 auto' }}>
                           <span className="stat-icon" style={{ flexShrink: 0, width: 46, height: 46, borderRadius: 14, background: style.softBg, color: style.accent }}><TempleDonationBoxIcon size={22} /></span>
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{campaign.name}</div>
+                          <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+                            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em', lineHeight: 1.3, overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{campaign.name}</div>
                             {campaign.priority && <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>Priority · {campaign.priority}</div>}
                           </div>
                         </div>

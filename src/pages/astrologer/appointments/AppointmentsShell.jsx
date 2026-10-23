@@ -7,8 +7,8 @@ import '../../../css/astrologer/wallet-dashboard.css'
 import '../../../css/astrologer/appointments-dashboard.css'
 
 const TABS = [
+  { key: 'history', icon: History, label: 'Appointment Management' },
   { key: 'schedule', icon: CalendarDays, label: 'Schedule' },
-  { key: 'history', icon: History, label: 'History' },
 ]
 
 export default function AppointmentsShell() {

@@ -344,9 +344,9 @@ export default function AppointmentDetailsDrawer({ appointment, appointments = [
   return (
     <>
       {createPortal(
-        <div className="apt-drawer-overlay" onClick={onClose}>
+        <div className="apt-drawer-overlay apt-appointment-modal-overlay" onClick={onClose}>
           <aside
-            className="apt-drawer"
+            className="apt-drawer apt-appointment-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="apt-drawer-title"

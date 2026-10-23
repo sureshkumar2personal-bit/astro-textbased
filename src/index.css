@@ -15394,6 +15394,15 @@ button.apt-week-day:focus-visible {
 .adash-campaign-category { color: #a48fc0; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .adash-campaign-name { margin: 0; color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16.5px; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; }
 .adash-campaign-sold { margin-top: auto; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; }
+.adash-campaign-month-graph { display: grid; grid-template-columns: minmax(74px, .72fr) minmax(0, 1.28fr); align-items: center; gap: 8px; min-height: 82px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, .12); border-radius: 18px; background: #020817; color: #94a3b8; font-size: 10px; font-weight: 600; overflow: hidden; }
+.adash-campaign-month-graph__summary { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.adash-campaign-month-graph__summary span { color: #94a3b8; font-size: 10px; white-space: nowrap; }
+.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #22c55e; font-size: 17px; line-height: 1; }
+.adash-campaign-month-graph__summary b { color: #f8fafc; font-size: 15px; line-height: 1.1; }
+.adash-campaign-month-graph > svg { width: 100%; height: 58px; overflow: visible; }
+.adash-campaign-month-graph__summary svg { width: 14px; height: 14px; }
+.adash-campaign-month-graph__area { transition: opacity .8s ease-in-out; }
+.adash-campaign-month-graph__line { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .adash-campaign-track { height: 6px; border-radius: 999px; background: var(--primary-bg); overflow: hidden; }
 .adash-campaign-track > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
 .adash-campaign-actions { display: flex; gap: 8px; margin-top: 4px; }
@@ -15409,9 +15418,116 @@ button.apt-week-day:focus-visible {
   .adash-hero-ring--2 { width: 56px; height: 56px; }
   .adash-hero-ring--3 { width: 38px; height: 38px; }
 }
+
+/* Welcome banner layout refinement: left message, right controls/status. */
+.adash-hero-layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 460px);
+  align-items: center;
+  gap: 28px;
+  min-height: 198px;
+}
+
+.adash-hero .hero-banner-content {
+  padding-top: 0;
+}
+
+.adash-hero-controls {
+  display: grid;
+  align-content: center;
+  justify-items: stretch;
+  gap: 13px;
+  min-width: 0;
+  padding-bottom: 64px;
+}
+
+.adash-hero-topbar-actions {
+  position: static;
+  width: 100%;
+  min-width: 0;
+}
+
+.adash-hero-topbar-actions .topbar-actions {
+  width: 100%;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adash-hero-topbar-actions .icon-btn,
+.adash-hero-topbar-actions .theme-toggle-btn {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 13px;
+}
+
+.adash-hero-topbar-actions .avatar-chip {
+  flex: 0 1 auto;
+  min-width: 132px;
+  min-height: 40px;
+  border-radius: 13px;
+}
+
+.adash-hero-service-row {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.adash-hero-service-row .hero-services-summary {
+  max-width: 100%;
+  justify-content: flex-start;
+}
+
+.adash-hero-art {
+  right: 24px;
+  bottom: 14px;
+  z-index: 1;
+}
+
+@media (max-width: 960px) {
+  .adash-hero-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 390px);
+    gap: 20px;
+  }
+
+  .adash-hero-controls { padding-bottom: 58px; }
+  .adash-hero-topbar-actions .avatar-chip { min-width: 112px; }
+}
+
+@media (max-width: 720px) {
+  .adash-hero-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    min-height: 0;
+  }
+
+  .adash-hero-controls {
+    justify-items: start;
+    gap: 12px;
+    padding-bottom: 72px;
+  }
+
+  .adash-hero-topbar-actions .topbar-actions,
+  .adash-hero-service-row { justify-content: flex-start; }
+  .adash-hero-art { right: 12px; bottom: 12px; opacity: .42; }
+}
+
+@media (max-width: 560px) {
+  .adash-hero-layout { gap: 20px; }
+  .adash-hero-controls { padding-bottom: 68px; }
+  .adash-hero-topbar-actions { margin-bottom: 0; }
+  .adash-hero-topbar-actions .topbar-actions { justify-content: flex-start; }
+  .adash-hero-service-row { width: 100%; }
+  .adash-hero-service-row .hero-services-summary { width: fit-content; }
+}
 @media (max-width: 560px) {
   .adash-hero { padding: 26px 20px; min-height: 0; text-align: left; }
-  .adash-hero-art { display: none; }
+  .adash-hero-art { display: block; }
   .adash-hero-titlerow { align-items: flex-start; }
 }
 
@@ -16509,4 +16625,487 @@ html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
   padding-bottom: 4px;
   overflow-x: hidden;
   grid-template-columns: minmax(0, 1fr);
+}
+
+/* Astrologer appointment details: centered presentation for the existing drawer content. */
+.apt-appointment-modal-overlay {
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.apt-appointment-modal {
+  width: min(680px, 100%);
+  max-width: 680px;
+  height: min(84dvh, 780px);
+  max-height: calc(100dvh - 40px);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+  animation: apt-modal-in .22s ease;
+}
+
+@keyframes apt-modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.apt-appointment-modal .apt-drawer-head {
+  padding: 17px 20px;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+}
+
+.apt-appointment-modal .apt-drawer-head h2 { font-size: 20px; letter-spacing: -.02em; }
+.apt-appointment-modal .apt-drawer-body {
+  padding: 18px 20px 22px;
+  background: #fff;
+  scrollbar-gutter: stable;
+}
+.apt-appointment-modal > .apt-drawer-head > .icon-btn {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+}
+
+@media (max-width: 640px) {
+  .apt-appointment-modal-overlay { padding: 12px; }
+  .apt-appointment-modal {
+    width: 100%;
+    max-width: none;
+    height: min(92dvh, 900px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 18px;
+  }
+  .apt-appointment-modal .apt-drawer-head {
+    padding: 16px 17px;
+    border-radius: 18px 18px 0 0;
+  }
+  .apt-appointment-modal .apt-drawer-head h2 { font-size: 18px; }
+  .apt-appointment-modal .apt-drawer-body { padding: 16px; }
+}
+
+/* Astrologer Questions list — scoped to the list section only. */
+.question-table-shell {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-strong, #fff);
+  box-shadow: var(--shadow-card);
+}
+
+.question-list-shell {
+  background: transparent;
+}
+
+.question-list {
+  display: grid;
+  gap: 12px;
+}
+
+.question-card {
+  display: grid;
+  grid-template-columns: minmax(120px, .8fr) minmax(220px, 1.7fr) minmax(180px, 1.2fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface-strong, #fff);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: background .18s ease;
+}
+
+.question-card:hover,
+.question-card:focus-visible { background: var(--primary-bg); outline: none; }
+.question-card:focus-visible { box-shadow: inset 0 0 0 2px var(--primary); }
+
+.question-card__customer strong,
+.question-card__details strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.question-card__customer span,
+.question-card__details > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.question-card__details p {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.question-card__deadline {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.question-card__deadline span,
+.question-card__deadline small { overflow-wrap: anywhere; }
+.question-card__deadline b {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.question-card__deadline small { font-size: 11px; font-weight: 700; }
+.question-card__status { justify-self: start; }
+.question-card__action { justify-self: end; }
+
+@media (max-width: 900px) {
+  .question-card {
+    grid-template-columns: minmax(110px, .8fr) minmax(180px, 1.4fr) minmax(150px, 1fr);
+  }
+  .question-card__status,
+  .question-card__action { justify-self: start; }
+}
+
+@media (max-width: 560px) {
+  .question-list-shell { border-radius: 14px; }
+  .question-card {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+  .question-card__details { grid-column: 1 / -1; grid-row: 1; }
+  .question-card__customer { grid-column: 1; }
+  .question-card__deadline { grid-column: 1 / -1; }
+  .question-card__status { grid-column: 2; grid-row: 3; }
+  .question-card__action { grid-column: 1 / -1; grid-row: 4; justify-self: stretch; }
+  .question-card__action .btn { width: 100%; justify-content: center; }
+}
+
+.question-table-scroll {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.question-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.question-table th {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.question-table th:nth-child(1) { width: 15%; }
+.question-table th:nth-child(2) { width: 31%; }
+.question-table th:nth-child(3) { width: 11%; }
+.question-table th:nth-child(4) { width: 21%; }
+.question-table th:nth-child(5) { width: 12%; }
+.question-table th:nth-child(6) { width: 10%; }
+
+.question-table-cell {
+  padding: 16px;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+  vertical-align: top;
+}
+
+.question-table-row:last-child .question-table-cell { border-bottom: 0; }
+.question-table-row { cursor: pointer; transition: background .18s ease; }
+.question-table-row:hover,
+.question-table-row:focus-visible { background: var(--primary-bg); outline: none; }
+.question-table-row:focus-visible { box-shadow: inset 0 0 0 2px var(--primary); }
+
+.question-table-customer,
+.question-table-details,
+.question-table-deadline { display: table-cell; }
+
+.question-table-customer strong,
+.question-table-details strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.question-table-customer span,
+.question-table-details > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.question-table-details p {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.question-table-deadline {
+  display: grid;
+  gap: 4px;
+}
+
+.question-table-deadline span,
+.question-table-deadline small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.question-table-deadline b {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.question-table-deadline small {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.question-table-status { vertical-align: middle; }
+.question-table-action {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.question-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 66px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--surface-border);
+  background: var(--surface-strong, #fff);
+}
+
+.question-table-pagination__info {
+  flex: 0 1 auto;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.question-table-pagination__controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.question-table-pagination__ellipsis {
+  padding: 0 2px;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .question-table { min-width: 0; }
+  .question-table-cell { padding: 14px 12px; }
+  .question-table-pagination { padding: 13px 12px; }
+}
+
+@media (max-width: 560px) {
+  .question-table-shell { border-radius: 14px; }
+  .question-table { min-width: 0; }
+  .question-table th { padding: 12px; }
+  .question-table-cell { padding: 13px 12px; }
+  .question-table-pagination {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    padding: 13px 12px 14px;
+  }
+  .question-table-pagination__info { white-space: normal; }
+  .question-table-pagination__controls {
+    justify-content: flex-start;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+}
+
+/* Astrologer dashboard welcome banner — intentionally scoped to the banner only. */
+.adash-hero {
+  min-height: 248px;
+  padding: 24px 26px;
+  border: 1px solid rgba(214, 198, 255, .28);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 84% 18%, rgba(126, 211, 255, .28), transparent 30%),
+    radial-gradient(circle at 12% 112%, rgba(177, 112, 255, .28), transparent 38%),
+    linear-gradient(120deg, #27114f 0%, #4b1c91 45%, #335ebd 100%);
+  box-shadow: 0 22px 48px rgba(49, 21, 105, .22), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+
+.adash-hero::before {
+  width: 270px;
+  height: 270px;
+  top: -150px;
+  right: 10%;
+  background: rgba(162, 220, 255, .18);
+  filter: blur(42px);
+}
+
+.adash-hero::after {
+  width: 320px;
+  height: 320px;
+  bottom: -210px;
+  left: 26%;
+  background: rgba(129, 79, 255, .24);
+  filter: blur(55px);
+}
+
+.adash-hero .hero-banner-content {
+  padding-top: 62px;
+}
+
+.adash-hero-titlerow {
+  align-items: flex-end;
+  gap: 14px 22px;
+}
+
+.adash-hero-titlerow h2 {
+  max-width: 680px;
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -.035em;
+  text-shadow: 0 3px 18px rgba(17, 5, 46, .22);
+}
+
+.adash-hero .hero-banner-content > p {
+  max-width: 610px;
+  margin-top: 12px;
+  color: rgba(247, 244, 255, .82);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.adash-hero .hero-services-summary {
+  border-color: rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 8px 22px rgba(22, 8, 57, .12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.adash-hero-topbar-actions {
+  top: 18px;
+  right: 20px;
+}
+
+.adash-hero-topbar-actions .topbar-actions {
+  gap: 7px;
+}
+
+.adash-hero-topbar-actions .icon-btn,
+.adash-hero-topbar-actions .theme-toggle-btn,
+.adash-hero-topbar-actions .avatar-chip {
+  border-color: rgba(255, 255, 255, .24);
+  background: rgba(255, 255, 255, .11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.adash-hero-art {
+  right: 42px;
+  bottom: 18px;
+  width: 118px;
+  height: 118px;
+  opacity: .9;
+}
+
+.adash-hero-ring { border-color: rgba(211, 226, 255, .3); }
+.adash-hero-core {
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, .14);
+  border-color: rgba(255, 255, 255, .34);
+  box-shadow: 0 0 0 9px rgba(184, 219, 255, .08), 0 0 26px rgba(154, 206, 255, .26);
+}
+
+@media (max-width: 820px) {
+  .adash-hero {
+    min-height: 226px;
+    padding: 24px 22px;
+  }
+
+  .adash-hero .hero-banner-content { padding-top: 60px; }
+  .adash-hero-art { right: 22px; bottom: 14px; width: 90px; height: 90px; }
+  .adash-hero-ring--1 { width: 90px; height: 90px; }
+  .adash-hero-ring--2 { width: 66px; height: 66px; }
+  .adash-hero-ring--3 { width: 44px; height: 44px; }
+}
+
+@media (max-width: 560px) {
+  .adash-hero {
+    display: flex;
+    min-height: 0;
+    padding: 18px;
+    border-radius: 23px;
+  }
+
+  .adash-hero-topbar-actions {
+    position: relative;
+    top: auto;
+    right: auto;
+    order: -1;
+    width: 100%;
+    margin-bottom: 22px;
+  }
+
+  .adash-hero-topbar-actions .topbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .adash-hero .hero-banner-content { padding-top: 0; }
+  .adash-hero-titlerow { display: grid; align-items: start; gap: 14px; }
+  .adash-hero-titlerow .hero-services-summary { margin-left: 0; width: fit-content; max-width: 100%; }
+  .adash-hero-titlerow h2 { font-size: 29px; }
+  .adash-hero .hero-banner-content > p { margin-top: 10px; font-size: 14px; }
+  .adash-hero-art { right: 8px; bottom: 10px; width: 78px; height: 78px; opacity: .58; }
+  .adash-hero-ring--1 { width: 78px; height: 78px; }
+  .adash-hero-ring--2 { width: 56px; height: 56px; }
+  .adash-hero-ring--3 { width: 38px; height: 38px; }
 }

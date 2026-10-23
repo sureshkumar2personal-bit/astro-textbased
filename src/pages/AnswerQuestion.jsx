@@ -24,7 +24,6 @@ import {
   getAnswerSummary,
   getQuestionAnswerDeadline,
   getQuestionDueState,
-  getQuestionTypeLabel,
   hasOpenDispute,
   isQuestionAnswered,
   isQuestionCancelled,
@@ -141,44 +140,35 @@ function DeadlinePill({ dueState, label }) {
   )
 }
 
-function TypeBadge({ type }) {
-  const isPersonal = getQuestionTypeLabel({ type }) === 'Personal'
-  return <span className={isPersonal ? 'badge badge-blue' : 'badge badge-violet'}>{getQuestionTypeLabel({ type })}</span>
-}
-
-function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
+function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
   const dueState = getQuestionDueState(question, nowMs)
   const deadline = getAnswerDeadlineLabel(question, nowMs)
-  const typeLabel = getQuestionTypeLabel(question)
   const source = getQuestionSourceLabel(question)
   const openQuestion = source === 'Open Question'
   const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
   const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
   const accent = CARD_TONE[dueState] || CARD_TONE.pending
-  const isPending = DEADLINE_TONE_STATES.includes(dueState)
-  const pillLabel = isPending ? deadline?.label : undefined
   const canEditAnswered = dueState === 'answered' && canEditQuestionAnswer(question, nowMs)
   const isDisputed = dueState === 'disputed'
   const isAnswered = dueState === 'answered'
   const isCancelled = dueState === 'cancelled'
 
-  const remainingLine = isCancelled
-    ? <span style={{ color: accent, fontWeight: 700 }}>{question.cancellationReason || 'Answer deadline exceeded'}</span>
-    : isPending
-      ? <span style={{ color: accent, fontWeight: 700 }}>{deadline?.label}</span>
-      : isAnswered
-        ? <span style={{ color: 'var(--green-600)', fontWeight: 700 }}>Answered {formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || ''}</span>
-        : isDisputed
-          ? <span style={{ color: '#EA580C', fontWeight: 700 }}>Under dispute</span>
-          : <span className="muted">Closed</span>
-
   const actionLabel = isDisputed ? 'View Dispute' : isAnswered ? (canEditAnswered ? 'Edit Answer' : 'View Answer') : isCancelled ? 'View Details' : 'Answer Now'
   const handleOpen = () => (isDisputed ? onViewDispute(question.id) : onAnswer(question.id))
+  const statusLabel = ['In Progress', 'Under Review'].includes(question.status)
+    ? question.status
+    : DUE_PILL_LABEL[dueState] || question.status
+  const deadlineLabel = isCancelled
+    ? question.cancellationReason || 'Answer deadline exceeded'
+    : isAnswered
+      ? `Answered ${formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || '—'}`
+      : isDisputed
+        ? 'Under dispute'
+        : deadline?.label || '—'
 
   return (
-    <div
-      className="card card-hover"
-      role="button"
+    <article
+      className="question-card"
       tabIndex={0}
       onClick={handleOpen}
       onKeyDown={(event) => {
@@ -187,71 +177,28 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
           handleOpen()
         }
       }}
-      style={{
-        background: 'var(--surface-strong, #fff)',
-        border: '1px solid var(--surface-border)',
-        borderTop: `3px solid ${accent}`,
-        borderRadius: 16,
-        padding: 18,
-        boxShadow: 'var(--shadow-card)',
-        cursor: 'pointer',
-        minWidth: 0,
-      }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
-              {question.user}
-            </span>
-            <span className="badge badge-gray">{question.submittedByUserId || 'user-demo'}</span>
-            <TypeBadge type={typeLabel} />
-            {openQuestion && <span className="badge badge-blue">Open Question</span>}
-          </div>
-          <div className="muted" style={{ marginTop: 6, fontSize: 12.5 }}>
-            <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</span> · Source: {source} · {question.category || 'Others'}
-          </div>
-        </div>
-        <div style={{ flex: 'none' }}>
-          <DeadlinePill dueState={dueState} label={pillLabel} />
-        </div>
+      <div className="question-card__customer">
+        <strong>{question.user}</strong>
+        <span>{question.submittedByUserId || question.userId || '—'}</span>
       </div>
-
-      <div
-        style={{
-          color: 'var(--ink)',
-          fontStyle: 'italic',
-          fontSize: 13,
-          marginTop: 12,
-          overflow: 'hidden',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          lineHeight: 1.5,
-        }}
-      >
-        “{question.question}”
+      <div className="question-card__details">
+        <strong>{question.id}</strong>
+        <span>{openQuestion ? 'Open Question' : source} · {question.category || 'Others'}</span>
+        <p>“{question.question}”</p>
       </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 12,
-          flexWrap: 'wrap',
-          marginTop: 14,
-          paddingTop: 12,
-          borderTop: '1px solid var(--surface-border)',
-        }}
-      >
-        <div className="muted" style={{ fontSize: 12, lineHeight: 1.6 }}>
-          <div>Asked: {received || '—'} · Answer by: {deadlineDate || '—'}</div>
-          <div style={{ marginTop: 2 }}>{remainingLine}</div>
-          {isCancelled && Number(question.refundAmount) > 0 && (
-            <div style={{ marginTop: 2 }}>Refund: {question.refundStatus || 'Refunded'} of {Number(question.refundAmount).toLocaleString('en-IN')}</div>
-          )}
-        </div>
+      <div className="question-card__deadline">
+        <span><b>Asked</b> {received || '—'}</span>
+        <span><b>Answer by</b> {deadlineDate || '—'}</span>
+        <small style={{ color: accent }}>{deadlineLabel}</small>
+        {isCancelled && Number(question.refundAmount) > 0 && (
+          <small>Refund: {question.refundStatus || 'Refunded'} · {Number(question.refundAmount).toLocaleString('en-IN')}</small>
+        )}
+      </div>
+      <div className="question-card__status">
+        <DeadlinePill dueState={dueState} label={statusLabel} />
+      </div>
+      <div className="question-card__action">
         <button
           type="button"
           className={isDisputed ? 'btn btn-outline btn-sm' : isAnswered && !canEditAnswered ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm'}
@@ -264,7 +211,7 @@ function QuestionCard({ question, nowMs, onAnswer, onViewDispute }) {
           {actionLabel}
         </button>
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -633,7 +580,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
   )
 }
 
-export default function AnswerQuestion() {
+export default function AnswerQuestion({ hidePageHeader = false } = {}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const { questions, actions } = useAppData()
   const { currentUser } = useAuth()
@@ -767,14 +714,16 @@ export default function AnswerQuestion() {
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Astrologer"
-        title="Question Details"
-        subtitle="Answer received questions within 30 days, oldest first."
-        showBack
-        backTo={routes.textBasedQuestions}
-        backIcon={backIcon}
-      />
+      {!hidePageHeader && (
+        <PageHeader
+          eyebrow="Astrologer"
+          title="Question Details"
+          subtitle="Answer received questions within 30 days, oldest first."
+          showBack
+          backTo={routes.textBasedQuestions}
+          backIcon={backIcon}
+        />
+      )}
 
       <Section className="answer-question-tight-section">
         <Card style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -836,9 +785,9 @@ export default function AnswerQuestion() {
             active={dueFilter === 'Pending' && typeOption === 'Personal'}
           />
           <SummaryCard
-            label="Due Soon"
+            label="Expire Soon"
             value={summary.dueSoon}
-            hint="Within 7 days of deadline"
+            hint="Expires within 7 days"
             background="var(--coral-100)"
             color="var(--coral-600)"
             border="rgba(242, 102, 42, 0.24)"
@@ -856,7 +805,7 @@ export default function AnswerQuestion() {
             active={dueFilter === 'Disputed'}
           />
           <SummaryCard
-            label="Cancelled"
+            label="Expired"
             value={summary.cancelled}
             hint="Answer deadline exceeded"
             background="var(--danger-bg)"
@@ -878,69 +827,72 @@ export default function AnswerQuestion() {
             <div className="muted">No matching questions found. Try a different search term or filter.</div>
           </Card>
         )}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {pagedQuestions.map((question) => (
-            <QuestionCard
-              key={question.id}
-              question={question}
-              nowMs={nowMs}
-              onAnswer={openAnswer}
-              onViewDispute={openDispute}
-            />
-          ))}
-        </div>
-        {totalPages > 1 && (
-          <div
-            className="flex flex-wrap items-center justify-center gap-2"
-            style={{ marginTop: 20 }}
-            role="navigation"
-            aria-label="Questions pagination"
-          >
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-            >
-              <ChevronLeft size={16} />
-              Previous
-            </button>
-            {buildPageTokens(currentPage, totalPages).map((token) => {
-              if (typeof token === 'string') {
-                return (
-                  <span key={token} className="muted" style={{ padding: '0 4px', fontSize: 13 }}>&hellip;</span>
-                )
-              }
-              const isCurrent = token === currentPage
-              return (
-                <button
-                  key={token}
-                  type="button"
-                  className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
-                  aria-current={isCurrent ? 'page' : undefined}
-                  style={{ minWidth: 34, justifyContent: 'center' }}
-                  onClick={() => setPage(token)}
-                >
-                  {token}
-                </button>
-              )
-            })}
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              disabled={currentPage >= totalPages}
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-            >
-              Next
-              <ChevronRight size={16} />
-            </button>
+        {filteredQuestions.length > 0 && <div className="question-list-shell">
+          <div className="question-list">
+            {pagedQuestions.map((question) => (
+              <QuestionTableRow
+                key={question.id}
+                question={question}
+                nowMs={nowMs}
+                onAnswer={openAnswer}
+                onViewDispute={openDispute}
+              />
+            ))}
           </div>
-        )}
-        <div className="muted" style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5 }}>
-          Showing {pagedQuestions.length} of {filteredQuestions.length} questions
-          {' · '}
-          Page {currentPage} of {totalPages}
-        </div>
+          <div className="question-table-pagination">
+            <div className="question-table-pagination__info">
+              Showing {pagedQuestions.length} of {filteredQuestions.length} questions
+              {' · '}
+              Page {currentPage} of {totalPages}
+            </div>
+            {totalPages > 1 && (
+              <div
+                className="question-table-pagination__controls"
+                role="navigation"
+                aria-label="Questions pagination"
+              >
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                {buildPageTokens(currentPage, totalPages).map((token) => {
+                  if (typeof token === 'string') {
+                    return (
+                      <span key={token} className="muted question-table-pagination__ellipsis">&hellip;</span>
+                    )
+                  }
+                  const isCurrent = token === currentPage
+                  return (
+                    <button
+                      key={token}
+                      type="button"
+                      className={`btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'}`}
+                      aria-current={isCurrent ? 'page' : undefined}
+                      style={{ minWidth: 34, justifyContent: 'center' }}
+                      onClick={() => setPage(token)}
+                    >
+                      {token}
+                    </button>
+                  )
+                })}
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>}
       </Section>
 
       {answerQuestion && (

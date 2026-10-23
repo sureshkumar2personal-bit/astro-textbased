@@ -2166,7 +2166,7 @@ function UserProgressTab({ astrologerId, consultations, appointments, atonements
   )
 }
 
-function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod, onCreateManually, savedAtonements, initialView = 'platform', astrologerId, consultations, appointments, atonements }) {
+function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod, savedAtonements, initialView = 'platform', astrologerId, consultations, appointments, atonements }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [viewMode, setViewMode] = useState(initialView)
@@ -2189,17 +2189,14 @@ function ChooseTab({ onAddToMyMethod, onEditPlatformDefault, onRemoveSavedMethod
   return (
     <div className="atonement-choose">
       <div className="atonement-choose-source-tabs">
+        <button type="button" className={`atonement-source-tab${viewMode === 'progress' ? ' active' : ''}`} onClick={() => setViewMode('progress')}>
+          <Users size={15} /> User Progress
+        </button>
         <button type="button" className={`atonement-source-tab${viewMode === 'platform' ? ' active' : ''}`} onClick={() => setViewMode('platform')}>
           <Sparkles size={15} /> Platform Default
         </button>
         <button type="button" className={`atonement-source-tab${viewMode === 'saved' ? ' active' : ''}`} onClick={() => setViewMode('saved')}>
           <Star size={15} /> My Saved Method
-        </button>
-        <button type="button" className={`atonement-source-tab${viewMode === 'create' ? ' active' : ''}`} onClick={onCreateManually}>
-          <Plus size={15} /> Create Manually
-        </button>
-        <button type="button" className={`atonement-source-tab${viewMode === 'progress' ? ' active' : ''}`} onClick={() => setViewMode('progress')}>
-          <Users size={15} /> User Progress
         </button>
       </div>
 
@@ -2524,14 +2521,6 @@ export default function Atonement() {
     success('Saved method removed.')
   }, [atonementRecords, persistRecords, success])
 
-  const handleCreateManually = useCallback(() => {
-    setForm(createDefaultAtonement())
-    setSource('manual')
-    setErrors({})
-    setActiveTab('create')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [setForm])
-
   return (
     <div className="atonement-page">
       <PageHeader
@@ -2577,7 +2566,6 @@ export default function Atonement() {
               onAddToMyMethod={handleAddToMyMethod}
               onEditPlatformDefault={handleEditPlatformDefault}
               onRemoveSavedMethod={handleRemoveSavedMethod}
-              onCreateManually={handleCreateManually}
               savedAtonements={atonementRecords.filter((record) => record.kind === 'saved-method')}
               initialView={chooseView}
               astrologerId={userId}
