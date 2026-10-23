@@ -86,8 +86,8 @@ export default function CampaignCard({
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <span className="stat-icon" style={{ flexShrink: 0, width: 46, height: 46, borderRadius: 14, background: style.softBg, color: style.accent }}>{icon}</span>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+          <div style={{ minWidth: 0, flex: '1 1 auto' }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.01em', lineHeight: 1.3, overflowWrap: 'anywhere', whiteSpace: 'normal' }}>{name}</div>
             {subtitle && <div className="muted" style={{ fontSize: 11, marginTop: 2 }}>{subtitle}</div>}
           </div>
         </div>

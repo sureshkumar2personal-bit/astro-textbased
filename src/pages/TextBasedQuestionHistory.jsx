@@ -646,7 +646,7 @@ function HistoryDetailModal({ question, onClose }) {
   )
 }
 
-export default function TextBasedQuestionHistory() {
+export default function TextBasedQuestionHistory({ hidePageHeader = false } = {}) {
   const { questions } = useAppData()
   const { isDark } = useTheme()
   const { currentUser } = useAuth()
@@ -775,21 +775,23 @@ export default function TextBasedQuestionHistory() {
 
   return (
     <div className="tbh-history-page">
-      <PageHeader
-        eyebrow="Astrologer workspace"
-        title="History"
-        actions={(
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <BackButton to={routes.textBasedQuestions} label="Back" icon={backIcon} />
-            <HistoryPeriodControls
-              monthKey={selectedMonthKey}
-              day={selectedDay}
-              onMonthChange={setSelectedMonthKey}
-              onDayChange={setSelectedDay}
-            />
-          </div>
-        )}
-      />
+      {!hidePageHeader && (
+        <PageHeader
+          eyebrow="Astrologer workspace"
+          title="History"
+          actions={(
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <BackButton to={routes.textBasedQuestions} label="Back" icon={backIcon} />
+              <HistoryPeriodControls
+                monthKey={selectedMonthKey}
+                day={selectedDay}
+                onMonthChange={setSelectedMonthKey}
+                onDayChange={setSelectedDay}
+              />
+            </div>
+          )}
+        />
+      )}
 
       <Section className="!mt-4">
         <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-4" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>

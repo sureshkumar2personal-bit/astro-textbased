@@ -211,7 +211,7 @@ function AstrologerRoutes() {
           <Route path="pricing" element={<ConsultationPricing />} />
         </Route>
         <Route path="/astrologer/appointments" element={<AppointmentsShell />}>
-          <Route index element={<Navigate to="schedule" replace />} />
+          <Route index element={<Navigate to="history" replace />} />
           <Route path="schedule" element={<AppointmentScheduleTab />} />
           <Route path="calendar" element={<AstrologerAppointmentCalendar />} />
           <Route path="history" element={<AppointmentHistoryTab />} />

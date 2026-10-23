@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Clock3, Search, X } from 'lucide-react'
+import { CalendarDays, Search, X } from 'lucide-react'
 import './appointmenthistory.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../../../state/AppDataContext.jsx'
@@ -43,43 +43,6 @@ const STATUS_OPTIONS = [
   { key: APPOINTMENT_STATUS.AUTO_CANCELLED, label: 'Auto-cancelled' },
 ]
 
-const SUMMARY_BUCKETS = [
-  { key: 'total', label: 'Total' },
-  { key: 'booked', label: 'Booked' },
-  { key: 'completed', label: 'Completed' },
-  { key: 'cancelled', label: 'Cancelled' },
-]
-
-function summaryCounts(appointments) {
-  const total = appointments.length
-  const booked = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'booked').length
-  const completed = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'completed').length
-  const cancelled = appointments.filter((appointment) => appointmentStatusBucket(appointment) === 'cancelled').length
-  return { total, booked, completed, cancelled }
-}
-
-function DateSummary({ dayAppointments, active, onFilter }) {
-  const counts = summaryCounts(dayAppointments)
-  const toneByKey = { total: '', booked: 'is-booked', completed: 'is-completed', cancelled: 'is-cancelled' }
-
-  return (
-    <div className="apt-history-summary" role="group" aria-label="Day summary filters">
-      {SUMMARY_BUCKETS.map((bucket) => (
-        <button
-          type="button"
-          key={bucket.key}
-          className={active === bucket.key ? 'is-active' : ''}
-          onClick={() => onFilter(bucket.key)}
-          aria-pressed={active === bucket.key}
-        >
-          <strong className={toneByKey[bucket.key]}>{counts[bucket.key]}</strong>
-          <span>{bucket.label}</span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
 // Day appointments list shown for the selected date.
 function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTitle, emptyHint }) {
   if (!appointments.length) {
@@ -103,7 +66,6 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
     <div className="apt-history-list">
       {appointments.map((appointment) => {
         const meta = callTypeMeta(appointment.callType)
-        const Icon = meta.icon
         const { startMin, endMin } = resolveAppointmentWindow(appointment)
         const isCancelled = isCancelledStatus(appointment.status)
         const isRescheduledOriginal = Boolean(appointment.rescheduledTo)
@@ -140,33 +102,22 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
               }
             }}
           >
-            <div className="apt-history-item__top">
-              <div className="apt-history-item__identity">
-                <span className="apt-history-item__avatar">{avatarInitials}</span>
-                <strong>{customerName}</strong>
-              </div>
-              <span className="apt-history-item__id">#{appointment.orderId || appointment.id}</span>
+            <div className="apt-history-item__time">
+              <strong>{formatTimeRange(startMin, endMin).split(' – ')[0]}</strong>
+              <span>{formatTimeRange(startMin, endMin).split(' – ')[1] || ''}</span>
             </div>
-            <div className="apt-history-item__footer">
-              <span className="apt-history-item__amount">₹{Number(appointment.amount || appointment.price || 0).toLocaleString('en-IN')}</span>
-              <StatusBadge label={displayStatus} />
+            <span className="apt-history-item__avatar">{avatarInitials}</span>
+            <div className="apt-history-item__identity">
+              <strong>{customerName}</strong>
+              <span>{meta.label}{appointment.topic ? ` · ${appointment.topic}` : ''}</span>
+              <small>Order {String(appointment.orderId || appointment.id).startsWith('#') ? (appointment.orderId || appointment.id) : `#${appointment.orderId || appointment.id}`}</small>
             </div>
-            <div className="apt-history-item__info">
-              <span className="apt-history-item__info-item">
-                <Icon size={14} />
-                {meta.label}
-              </span>
-              <span className="apt-history-item__info-item">
-                <Clock3 size={14} />
-                {formatTimeRange(startMin, endMin)}
-              </span>
-            </div>
+            <StatusBadge label={displayStatus} />
+            <button type="button" className="apt-history-item__view" onClick={(event) => { event.stopPropagation(); onSelect(appointment) }}>View</button>
             {rescheduleLabel && (
               <div className="apt-history-item__reschedule">{rescheduleLabel}</div>
             )}
-            <button type="button" className={`apt-history-item__analysis${hasAnalysis ? ' is-saved' : ''}`} onClick={(event) => { event.stopPropagation(); onSelect(appointment) }}>
-              {hasAnalysis ? '✓ Analysis Saved' : 'Analysis'}
-            </button>
+            {hasAnalysis && <span className="apt-history-item__analysis is-saved">✓ Analysis Saved</span>}
           </article>
         )
       })}
@@ -228,7 +179,6 @@ export default function AppointmentHistory() {
   const [filter, setFilter] = useState(searchParams.get('filter') || 'all')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const [search, setSearch] = useState(searchParams.get('search') || '')
-  const [dayFilter, setDayFilter] = useState('total')
 
   // Keep the selected day inside the visible calendar month. The calendar's
   // prev/next arrows move the month without touching the selected date, so this
@@ -287,20 +237,6 @@ export default function AppointmentHistory() {
         .sort((a, b) => resolveAppointmentWindow(a).startMin - resolveAppointmentWindow(b).startMin),
     [filteredAppointments, selectedIso],
   )
-
-  const visibleDayAppointments = useMemo(() => {
-    if (dayFilter === 'total') return dayAppointments
-    if (dayFilter === 'booked') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'booked')
-    }
-    if (dayFilter === 'completed') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'completed')
-    }
-    if (dayFilter === 'cancelled') {
-      return dayAppointments.filter((appointment) => appointmentStatusBucket(appointment) === 'cancelled')
-    }
-    return dayAppointments
-  }, [dayAppointments, dayFilter])
 
   const openDetails = (appointment) => {
     setSelectedAppointmentId(appointment.id)
@@ -428,21 +364,14 @@ export default function AppointmentHistory() {
         <aside className="apt-side-col apt-history-day-col">
           <Card className="apt-side-panel">
             <div className="apt-side-head apt-history-day-head">
-              <span>{formatDisplayDate(selectedIso, true)}</span>
-            </div>
-            <DateSummary dayAppointments={dayAppointments} active={dayFilter} onFilter={setDayFilter} />
-          </Card>
-
-          <Card className="apt-side-panel">
-            <div className="apt-side-head">
-              Appointments
+              <span>Appointments on {formatDisplayDate(selectedIso, true)}</span>
             </div>
             <DayAppointmentsList
-              appointments={visibleDayAppointments}
+              appointments={dayAppointments}
               allHistory={myAppointments}
               onSelect={openDetails}
-              emptyTitle={dayAppointments.length ? `No ${dayFilter === 'cancelled' ? 'cancelled' : dayFilter} appointments` : 'No appointments this day'}
-              emptyHint={dayAppointments.length ? 'Try another category in the summary above.' : 'Select another date to see its appointments.'}
+              emptyTitle="No appointments this day"
+              emptyHint="Select another date to see its appointments."
             />
           </Card>
         </aside>
