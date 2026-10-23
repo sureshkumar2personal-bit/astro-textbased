@@ -3,13 +3,11 @@ import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   Wallet,
-  TrendingUp,
   Plus,
   X,
   Download,
   History,
   ChevronRight,
-  ArrowUpRight,
   ArrowUpFromLine,
   Receipt,
   Search,
@@ -396,30 +394,6 @@ export default function UserWallet({ section = 'overview' }) {
                 </button>
               </div>
             </div>
-
-            <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/topups`)}>
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--green"><TrendingUp size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{stats.toppedUp.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Total Topped Up</div>
-              </div>
-            </button>
-
-            <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/transactions`)}>
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--red"><ArrowUpRight size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{stats.spent.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Total Spent</div>
-              </div>
-            </button>
-
-            <button type="button" className="wallet-stat-card" onClick={() => navigate(`${walletPath}/refunds`)}>
-              <div className="wallet-stat-card__icon wallet-stat-card__icon--sky"><Receipt size={22} /></div>
-              <div className="wallet-stat-card__body">
-                <div className="wallet-stat-card__value">₹{stats.refunded.toLocaleString('en-IN')}</div>
-                <div className="wallet-stat-card__label">Total Refunded</div>
-              </div>
-            </button>
           </div>
 
 

@@ -171,17 +171,11 @@ textarea:focus-visible {
 .appointment-booking-modal--details .modal-card__content { padding:22px 24px 24px; background:var(--surface-soft); }.appointment-booking-modal--details .appointment-details-form { display:grid; gap:16px; }.appointment-booking-modal--details .appointment-details-form > div:first-child { display:grid; gap:5px; }.appointment-booking-modal--details .appointment-details-form > div:first-child p { margin:0; font-size:12px; line-height:1.5; }.appointment-booking-modal--details .appointment-details-form label { display:grid; gap:6px; color:var(--ink); font-size:11px; font-weight:800; }.appointment-booking-modal--details .appointment-details-form .text-input,.appointment-booking-modal--details .appointment-details-form .select-input { width:100%; min-width:0; min-height:40px; }.appointment-booking-modal--details .appointment-details-form textarea { min-height:86px; resize:vertical; }.appointment-booking-modal--details .appointment-form-divider { display:flex; align-items:center; gap:7px; padding-top:14px; }.appointment-booking-modal--details .appointment-form-grid { gap:13px 12px; }.appointment-booking-modal--details .appointment-upload { display:grid; gap:8px; padding:13px; border:1px dashed var(--violet-300); border-radius:11px; background:var(--violet-50); }.appointment-booking-modal--details .appointment-upload input[type=file] { width:100%; min-width:0; font-size:11px; }.appointment-booking-modal--details .appointment-skip-action { justify-self:start; min-height:34px; padding:7px 11px; }.appointment-booking-modal--details .appointment-booking-modal__footer { padding:14px 24px 18px; }
 .appointment-booking-modal--details .appointment-details-form { min-width:0; }
 .appointment-booking-modal--details .appointment-details-content > .appointment-details-form { width:100%; }
-.wallet-summary-grid {
 .wallet-stat-card {
 .wallet-stat-card:hover {
 .wallet-stat-card--primary {
-.wallet-stat-card--highlight {
 .wallet-stat-card__icon {
-.wallet-stat-card__icon--amber { background: var(--warning-bg); color: var(--amber-600); }
-.wallet-stat-card__icon--green { background: var(--success-bg); color: var(--green-600); }
 .wallet-stat-card__icon--violet { background: var(--primary-bg); color: var(--primary); }
-.wallet-stat-card__icon--sky { background: var(--sky-bg); color: var(--sky-600); }
-.wallet-stat-card__icon--red { background: var(--danger-bg); color: var(--red-600); }
 .wallet-stat-card__body {
 .wallet-stat-card__value {
 .wallet-stat-card__label {
@@ -323,8 +317,6 @@ textarea:focus-visible {
 .wallet-earnings-summary > div {
 .wallet-earnings-summary__total {
 .wallet-earnings-summary__total > span:last-child {
-  .wallet-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .wallet-summary-grid { grid-template-columns: 1fr; }
   .wallet-stat-card { flex-direction: column; gap: 10px; }
   .wallet-earnings-row { grid-template-columns: 32px 1fr 80px 40px 16px; }
   .wallet-earnings-row__bar { display: none; }
