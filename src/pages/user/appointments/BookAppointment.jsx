@@ -45,9 +45,11 @@ function ratingScore(rating) {
   return String(rating || '0').split('/')[0].trim() || '0'
 }
 
-function SubscribedAstrologerCard({ astrologer, override, availableSlots, onViewSlots, actionLabel = 'View Slots' }) {
+function SubscribedAstrologerCard({ astrologer, override, availableSlots, onViewSlots, actionLabel = 'View Slots', subscribed = false }) {
+  const offline = String(astrologer.availability || '').toLowerCase() === 'offline'
   return (
-    <article className="book-appointment-card">
+    <article className={`book-appointment-card${subscribed ? ' is-subscribed' : ''}${offline ? ' is-offline' : ''}`}>
+      {subscribed && <span className="book-appointment-card__ribbon">Subscribed</span>}
       <div className="book-appointment-card__profile">
         <div className="book-appointment-avatar-wrap">
           <div className="book-appointment-avatar" aria-hidden="true">
@@ -55,7 +57,7 @@ function SubscribedAstrologerCard({ astrologer, override, availableSlots, onView
               ? <img src={profilePhoto(astrologer)} alt={`${astrologer.name} profile`} />
               : initials(astrologer.name)}
           </div>
-          <span className="book-appointment-availability-dot" title="Available now" />
+          <span className={`book-appointment-availability-dot${offline ? ' is-offline' : ''}`} title={offline ? 'Offline' : 'Available now'} />
         </div>
         <div className="book-appointment-card__body">
           <h3 className="book-appointment-card__name">{astrologer.name}</h3>
@@ -137,6 +139,7 @@ export default function BookAppointment() {
             override={BOOKING_OVERRIDES[astrologer.id] || DEFAULT_OVERRIDE}
             availableSlots={availableSlotsFor(astrologer)}
             onViewSlots={viewSlots}
+            subscribed
           />
         ))}
       </div>

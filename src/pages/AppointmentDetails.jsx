@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Clock3, PhoneCall } from 'lucide-react'
+import { CalendarDays, Clock3, Grid2X2, List, PhoneCall, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './user/appointments/userappointments.css'
 import './user/appointments/appointmenthistory.css'
@@ -14,7 +14,7 @@ import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { ROLES } from '../utils/roleRoutes.js'
-import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, getAppointmentDisplayStatus, resolveAppointmentWindow, toIsoDate, useNow } from '../utils/appointments.js'
+import { addDays, appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, getAppointmentDisplayStatus, resolveAppointmentWindow, startOfWeek, toIsoDate, useNow } from '../utils/appointments.js'
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -24,6 +24,32 @@ const FILTERS = [
   { key: 'rescheduled', label: 'Rescheduled' },
 ]
 const CANCELLABLE_STATUSES = ['Booked', 'Confirmed', 'Pending', 'Rescheduled']
+const LIST_PERIODS = [
+  { key: 'month', label: 'Month' },
+  { key: 'week', label: 'Week' },
+  { key: 'day', label: 'Day' },
+]
+
+function listPeriodRange(period, selectedDate, rangeStart) {
+  const anchor = selectedDate || rangeStart || new Date()
+  if (period === 'day') {
+    const start = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+    return { start, end: addDays(start, 1) }
+  }
+  if (period === 'week') {
+    const start = startOfWeek(anchor, 0)
+    return { start, end: addDays(start, 7) }
+  }
+  const start = new Date(rangeStart?.getFullYear() || anchor.getFullYear(), rangeStart?.getMonth() ?? anchor.getMonth(), 1)
+  return { start, end: new Date(start.getFullYear(), start.getMonth() + 1, 1) }
+}
+
+function listPeriodLabel(period, range) {
+  if (!range) return ''
+  if (period === 'day') return formatDisplayDate(toIsoDate(range.start), true)
+  if (period === 'week') return `${formatDisplayDate(toIsoDate(range.start))} – ${formatDisplayDate(toIsoDate(addDays(range.end, -1)))}`
+  return range.start.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
+}
 
 function initials(name = '') {
   return String(name).split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
@@ -34,6 +60,9 @@ function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onResc
   const bucket = appointmentStatusBucket(appointment)
   const statusLabel = getAppointmentDisplayStatus(appointment)
   const durationLabel = appointment.duration ? String(appointment.duration).replace(/\s*min\b/i, ' Minutes') : `${window.endMin - window.startMin} Minutes`
+  const canManageUpcoming = bucket === 'booked'
+  const canReschedule = canManageUpcoming && ['Booked', 'Confirmed', 'Pending'].includes(appointment.status)
+  const canCancel = canManageUpcoming && CANCELLABLE_STATUSES.includes(appointment.status)
 
   return (
     <article
@@ -69,8 +98,8 @@ function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onResc
       </div>
       <div className="user-appointment-card__actions">
         <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onViewDetails(appointment) }}>View Details</button>
-        {appointment.status === 'Pending' && <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onReschedule(appointment) }}>Reschedule</button>}
-        {CANCELLABLE_STATUSES.includes(appointment.status) && <button type="button" className="btn btn-danger btn-sm" onClick={(event) => { event.stopPropagation(); onCancel(appointment) }}>Cancel Appointment</button>}
+        {canReschedule && <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onReschedule(appointment) }}>Reschedule</button>}
+        {canCancel && <button type="button" className="btn btn-danger btn-sm" onClick={(event) => { event.stopPropagation(); onCancel(appointment) }}>Cancel Appointment</button>}
       </div>
     </article>
   )
@@ -120,6 +149,8 @@ export default function AppointmentDetails() {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [selectedId, setSelectedId] = useState(() => first?.id || null)
   const [filter, setFilter] = useState('all')
+  const [viewMode, setViewMode] = useState('calendar')
+  const [listPeriod, setListPeriod] = useState('month')
   const [notice, setNotice] = useState('')
   const [rescheduleTarget, setRescheduleTarget] = useState(null)
   // Start open when arriving with ?id= (e.g. Back from Atonement Details) so the drawer never flashes in late.
@@ -137,6 +168,19 @@ export default function AppointmentDetails() {
   const selectedIso = toIsoDate(selectedDate)
   const dayAppointments = filteredAppointments.filter((appointment) => appointment.dateIso === selectedIso)
   const selectedAppointment = dayAppointments.find((appointment) => appointment.id === selectedId) || dayAppointments[0] || null
+
+  const listRange = useMemo(
+    () => listPeriodRange(listPeriod, selectedDate, rangeStart),
+    [listPeriod, rangeStart, selectedDate],
+  )
+  const listRangeStartIso = toIsoDate(listRange.start)
+  const listRangeEndIso = toIsoDate(listRange.end)
+  const listAppointments = useMemo(
+    () => filteredAppointments
+      .filter((appointment) => appointment.dateIso >= listRangeStartIso && appointment.dateIso < listRangeEndIso)
+      .sort((a, b) => `${a.dateIso} ${resolveAppointmentWindow(a).startMin}`.localeCompare(`${b.dateIso} ${resolveAppointmentWindow(b).startMin}`)),
+    [filteredAppointments, listRangeEndIso, listRangeStartIso],
+  )
 
   useEffect(() => {
     const firstVisible = filteredAppointments[0]
@@ -199,6 +243,25 @@ export default function AppointmentDetails() {
     navigate(`/user/appointments/book/${encodeURIComponent(appointment.astrologerId)}`)
   }
 
+  const shiftListPeriod = (delta) => {
+    if (listPeriod === 'month') {
+      const next = new Date(rangeStart.getFullYear(), rangeStart.getMonth() + delta, 1)
+      setRangeStart(next)
+      setSelectedDate(next)
+      return
+    }
+    const next = addDays(selectedDate || new Date(), listPeriod === 'week' ? delta * 7 : delta)
+    setSelectedDate(next)
+    setRangeStart(new Date(next.getFullYear(), next.getMonth(), 1))
+  }
+
+  const selectListPeriod = (period) => {
+    setListPeriod(period)
+    if (period === 'month') {
+      setSelectedDate(new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1))
+    }
+  }
+
   return <div className="apt-page user-appointment-history">
     <PageHeader eyebrow="User portal" title="Appointment History" showBack />
     <AppointmentSectionTabs />
@@ -215,23 +278,36 @@ export default function AppointmentDetails() {
       </div>
       <Link className="btn btn-primary appointment-history-recommendation__action" to="/user/appointments/book/acharya-meena">Continue Consultation →</Link>
     </section>
-    <div className="apt-history-toolbar"><div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div></div>
-    <div className="apt-main apt-main--history">
-      <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} variant="user" /></div>
-      <aside className="apt-side-col apt-history-day-col">
-        <div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div>
-        <div className="apt-side-head"><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) : 'Appointments'}</span></div>
-        <div className="user-appointment-list">
-          {dayAppointments.length ? (
-            dayAppointments.map((appointment) => (
-              <AddedCompactAppointmentCard key={appointment.id} appointment={appointment} onSelect={viewDetails} />
-            ))
-          ) : (
-            <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>
-          )}
-        </div>
-      </aside>
+    <div className="apt-history-toolbar">
+      <div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div>
+      <div className="apt-history-view-toggle" role="group" aria-label="Appointment view">
+        <button type="button" className={viewMode === 'calendar' ? 'is-active' : ''} aria-pressed={viewMode === 'calendar'} onClick={() => setViewMode('calendar')}><Grid2X2 size={14} /> Calendar</button>
+        <button type="button" className={viewMode === 'list' ? 'is-active' : ''} aria-pressed={viewMode === 'list'} onClick={() => setViewMode('list')}><List size={14} /> List</button>
+      </div>
     </div>
+    {viewMode === 'calendar' ? (
+      <div className="apt-main apt-main--history">
+        <div className="apt-calendar-col apt-history-calendar-col"><HistoryCalendar appointments={filteredAppointments} rangeStart={rangeStart} onRangeChange={setRangeStart} onSelectDate={selectDate} selectedDate={selectedDate} variant="user" /></div>
+        <aside className="apt-side-col apt-history-day-col">
+          <div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div>
+          <div className="apt-side-head"><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) : 'Appointments'}</span></div>
+          <div className="user-appointment-list">
+            {dayAppointments.length ? dayAppointments.map((appointment) => <AddedCompactAppointmentCard key={appointment.id} appointment={appointment} onSelect={viewDetails} />) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>}
+          </div>
+        </aside>
+      </div>
+    ) : (
+      <section className="apt-history-list-view" aria-label="Appointment list">
+        <div className="apt-history-list-view__toolbar">
+          <div className="apt-history-period-tabs" role="group" aria-label="List date range">{LIST_PERIODS.map((item) => <button type="button" key={item.key} className={listPeriod === item.key ? 'is-active' : ''} onClick={() => selectListPeriod(item.key)}>{item.label}</button>)}</div>
+          <div className="apt-history-list-view__range"><button type="button" className="apt-history-list-view__arrow" aria-label="Previous period" onClick={() => shiftListPeriod(-1)}><ChevronLeft size={16} /></button><strong>{listPeriodLabel(listPeriod, listRange)}</strong><button type="button" className="apt-history-list-view__arrow" aria-label="Next period" onClick={() => shiftListPeriod(1)}><ChevronRight size={16} /></button></div>
+        </div>
+        <div className="apt-history-list-view__count">{listAppointments.length} {listAppointments.length === 1 ? 'appointment' : 'appointments'}</div>
+        <div className="apt-history-list-view__rows">
+          {listAppointments.length ? listAppointments.map((appointment) => <UserAppointmentCard key={appointment.id} appointment={appointment} selected={detailsAppointment?.id === appointment.id} onSelect={(id) => viewDetails(userAppointments.find((item) => item.id === id))} onCancel={cancelAppointment} onReschedule={setRescheduleTarget} onViewDetails={viewDetails} />) : <div className="apt-history-empty"><CalendarDays size={22} /><strong>No appointments in this range</strong><span>Try another day, week, or month.</span></div>}
+        </div>
+      </section>
+    )}
     <UserAppointmentDetailsDrawer
       appointment={detailsAppointment}
       consultation={detailsAppointment && getAppointmentDisplayStatus(detailsAppointment) === 'Completed'

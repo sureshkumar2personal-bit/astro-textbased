@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Sparkles, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BadgeCheck, Bookmark, CalendarDays, CalendarPlus, Camera, ChevronDown, ChevronUp, Clock3, Grid3X3, Headphones, Heart, Info, Languages, Lock, Mail, MapPin, MessageCircle, Phone, PhoneCall, Play, Plus, Pencil, Radio, Settings, Share2, Square, Trash2, UserCircle2, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -10,28 +10,10 @@ import { consultationAstrologers as consultationAstrologersData } from '../data/
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
-import { deriveUsername, getBirthPlaceDetails, isFutureDate } from '../utils/profile.js'
-import { getInstantConsultations, subscribeToInstantConsultations } from '../utils/instantConsultation.js'
+import { deriveUsername, getBirthPlaceDetails } from '../utils/profile.js'
 
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
-}
-
-function consultationAmount(session) {
-  if (session?.amountPaid) return Number(session.amountPaid)
-  if (session?.amount) return Number(session.amount)
-  return (Number(session?.pricePerMinute) || 0) * (session?.durationMinutes || 0)
-}
-
-function consultationPaid(session) {
-  return session?.paymentStatus || (['ended', 'accepted'].includes(String(session?.status || '').toLowerCase()) ? 'Paid' : 'Pending')
-}
-
-function formatDob(value) {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 const VISIBILITY_OPTIONS = [
@@ -88,7 +70,7 @@ export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, updateProfile } = useAuth()
-  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds, questions, familyHoroscopes } = useAppData()
+  const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
   const [editing, setEditing] = useState(false)
@@ -107,28 +89,16 @@ export default function Profile() {
   const [editingContent, setEditingContent] = useState(null)
   const [contentError, setContentError] = useState('')
   const [consultationTab, setConsultationTab] = useState('appointments')
-  const [instantConsultationTab, setInstantConsultationTab] = useState('all')
-  const [instantConsultations, setInstantConsultations] = useState(() => getInstantConsultations())
-  const [selectedInstantConsultation, setSelectedInstantConsultation] = useState(null)
   const [selectedConsultationAstrologerId, setSelectedConsultationAstrologerId] = useState(null)
   const [showEditProfile, setShowEditProfile] = useState(false)
   const [editForm, setEditForm] = useState({ name: currentUser?.name || '', username: currentUser?.username || '', email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
-  const [familyFormOpen, setFamilyFormOpen] = useState(false)
-  const [editingFamilyId, setEditingFamilyId] = useState(null)
-  const [familyForm, setFamilyForm] = useState({ relationship: '', name: '', gender: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '', latitude: '', longitude: '', timezone: '', profileImage: '' })
-  const [handledFamilyMemberId, setHandledFamilyMemberId] = useState(null)
   const [expandedSection, setExpandedSection] = useState(null)
   const [expandedLimit, setExpandedLimit] = useState(6)
-  const [profileTab, setProfileTab] = useState('about')
   const [profilePlaceMenuOpen, setProfilePlaceMenuOpen] = useState(false)
   const profilePlaceMenuRef = useRef(null)
-  const [familyPlaceMenuOpen, setFamilyPlaceMenuOpen] = useState(false)
-  const familyPlaceMenuRef = useRef(null)
   const mediaInputRef = useRef(null)
   const postRecorderRef = useRef(null)
   const postRecordingStreamRef = useRef(null)
-
-  useEffect(() => subscribeToInstantConsultations(setInstantConsultations), [])
 
   const name = currentUser?.name || (isAstrologer ? 'Astrologer' : 'User')
   const username = currentUser?.username || deriveUsername(name)
@@ -160,17 +130,6 @@ export default function Profile() {
     if (ownedSessions.length) return ownedSessions
     return consultationHistory.filter((session) => session.customerId === 'user-demo' || session.customerId === 'customer-priya')
   }, [consultationHistory, currentUser?.id, isAstrologer])
-  const userInstantConsultations = useMemo(() => {
-    if (isAstrologer || !currentUser?.id) return []
-    return instantConsultations
-      .filter((session) => session.userId === currentUser.id)
-      .sort((first, second) => new Date(second.startedAt || second.createdAt).getTime() - new Date(first.startedAt || first.createdAt).getTime())
-  }, [currentUser?.id, instantConsultations, isAstrologer])
-  const visibleInstantConsultations = useMemo(() => {
-    if (instantConsultationTab === 'call') return userInstantConsultations.filter((session) => session.type === 'call')
-    if (instantConsultationTab === 'chat') return userInstantConsultations.filter((session) => session.type === 'chat')
-    return userInstantConsultations
-  }, [instantConsultationTab, userInstantConsultations])
   const filteredConsultationHistory = userConsultationHistory.filter((session) => consultationTab === 'chat' ? session.type === 'Chat' : consultationTab === 'call' ? session.type === 'Audio Call' : false)
   const consultationAstrologers = [...new Map(filteredConsultationHistory.map((session) => [session.astrologerId, session.astrologerId])).values()].map((astrologerId) => {
     const astrologerSessions = filteredConsultationHistory.filter((session) => session.astrologerId === astrologerId)
@@ -196,26 +155,6 @@ export default function Profile() {
       return { ...astro, profileImage: consultation?.profileImage || '', tier: sub.tier || 'Silver' }
     }).filter(Boolean)
   }, [subscriptions, isAstrologer])
-  const familyMembers = familyHoroscopes.filter((entry) => entry.userId === currentUser?.id)
-  const horoscopeBirth = useMemo(() => {
-    let stored = {}
-    if (typeof window !== 'undefined') {
-      try { stored = JSON.parse(window.localStorage.getItem('astroconnect-user-birth-details') || '{}') || {} } catch { stored = {} }
-    }
-    return {
-      name: stored.name || currentUser?.name || '',
-      dateOfBirth: stored.dateOfBirth || stored.dob || currentUser?.dateOfBirth || '',
-      timeOfBirth: stored.timeOfBirth || stored.time || currentUser?.birthTime || '',
-      placeOfBirth: stored.placeOfBirth || stored.place || currentUser?.birthPlace || '',
-    }
-  }, [currentUser?.name, currentUser?.dateOfBirth, currentUser?.birthTime, currentUser?.birthPlace])
-  const activeQuestionCount = questions.filter((question) => question.status !== 'Closed').length
-  const ownedAppointments = appointments.filter((appointment) => appointment.userId === currentUser?.id || appointment.customerId === currentUser?.id)
-  const activitySummary = {
-    questions: questions.filter((question) => question.userId === currentUser?.id || question.customerId === currentUser?.id || (currentUser?.id === 'user-demo' && question.userId === 'user-demo')).length || activeQuestionCount,
-    appointments: (ownedAppointments.length ? ownedAppointments : appointments.filter((appointment) => appointment.status !== 'Cancelled')).length,
-    liveSessions: astrologerLiveSessions.filter((session) => session.status === 'live').length,
-  }
   const openEditProfile = () => {
     setEditForm({ name: currentUser?.name || '', username: currentUser?.username || deriveUsername(currentUser?.name), email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
     setError('')
@@ -234,44 +173,15 @@ export default function Profile() {
     }
   }
   const profilePlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(editForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
-  const familyPlaceSuggestions = BIRTH_PLACE_OPTIONS.filter((option) => option.toLowerCase().includes(String(familyForm.birthPlace || '').trim().toLowerCase())).slice(0, 8)
 
   useEffect(() => {
-    if (!profilePlaceMenuOpen && !familyPlaceMenuOpen) return undefined
+    if (!profilePlaceMenuOpen) return undefined
     const closeOnOutsideClick = (event) => {
       if (!profilePlaceMenuRef.current?.contains(event.target)) setProfilePlaceMenuOpen(false)
-      if (!familyPlaceMenuRef.current?.contains(event.target)) setFamilyPlaceMenuOpen(false)
     }
     document.addEventListener('mousedown', closeOnOutsideClick)
     return () => document.removeEventListener('mousedown', closeOnOutsideClick)
-  }, [profilePlaceMenuOpen, familyPlaceMenuOpen])
-  const openFamilyForm = (member = null) => {
-    setEditingFamilyId(member ? member.id : null)
-    setFamilyForm(member ? { relationship: member.relationship || '', name: member.name || '', gender: member.gender || '', dateOfBirth: member.dateOfBirth || '', timeOfBirth: member.timeOfBirth || '', birthPlace: member.birthPlace || '', latitude: member.latitude || '', longitude: member.longitude || '', timezone: member.timezone || '', profileImage: member.profileImage || '' } : { relationship: '', name: '', gender: '', dateOfBirth: '', timeOfBirth: '', birthPlace: '', latitude: '', longitude: '', timezone: '', profileImage: '' })
-    setError('')
-    setFamilyPlaceMenuOpen(false)
-    setFamilyFormOpen(true)
-  }
-  const saveFamilyMember = () => {
-    if (!familyForm.name.trim() || !familyForm.relationship.trim()) {
-      setError('Add a name and relationship for this family member.')
-      return
-    }
-    if (isFutureDate(familyForm.dateOfBirth)) {
-      setError('Date of birth cannot be in the future.')
-      return
-    }
-    const payload = { ...familyForm, name: familyForm.name.trim(), relationship: familyForm.relationship.trim() }
-    if (editingFamilyId) actions.updateFamilyHoroscope(editingFamilyId, payload)
-    else actions.addFamilyHoroscope(payload)
-    setFamilyFormOpen(false)
-    setEditingFamilyId(null)
-    setFamilyPlaceMenuOpen(false)
-  }
-  const deleteFamilyMember = (member) => {
-    if (!window.confirm(`Remove ${member.name} from family horoscopes?`)) return
-    actions.deleteFamilyHoroscope(member.id)
-  }
+  }, [profilePlaceMenuOpen])
 
   const toggleSection = (section) => {
     window.sessionStorage.removeItem('astroconnect-profile-section')
@@ -305,17 +215,6 @@ export default function Profile() {
       window.sessionStorage.removeItem('astroconnect-profile-section')
     }
   }, [isAstrologer])
-
-  useEffect(() => {
-    if (isAstrologer) return
-    const memberId = location.state?.familyMember
-    if (!memberId || memberId === handledFamilyMemberId) return
-    const member = familyHoroscopes.find((entry) => entry.id === memberId && entry.userId === currentUser?.id)
-    setHandledFamilyMemberId(memberId)
-    setProfileTab('family')
-    if (member) openFamilyForm(member)
-    window.history.replaceState({}, '')
-  }, [isAstrologer, handledFamilyMemberId, location.state?.familyMember, familyHoroscopes, currentUser?.id])
 
   const startEditing = () => {
     setForm({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '', bio: currentUser?.bio || '', languages: currentUser?.languages?.join(', ') || '', profileImage: currentUser?.profileImage || '' })
@@ -623,7 +522,7 @@ export default function Profile() {
 
           {activeTab === 'Posts' && !isAstrologer && <div className="social-profile__posts"><Card className="social-profile__post social-profile__post--violet"><div className="social-profile__post-icon"><Grid3X3 size={20} /></div><h2>Share your first post</h2><p>When you share updates, they will appear on your profile.</p><span className="muted">Profile updates will appear here</span></Card></div>}
           {activeTab === 'Posts' && isAstrologer && <section className="profile-content-section">
-            <div className="profile-content-heading"><div><div className="section-title">Posts</div><p className="muted">Share insights with your audience.</p></div><button type="button" className="btn btn-primary" onClick={() => openPostComposer()}><Plus size={16} /> Create Post</button></div>
+            <div className="profile-content-heading"><div><div className="section-title">Posts</div></div><button type="button" className="btn btn-primary" onClick={() => openPostComposer()}><Plus size={16} /> Create Post</button></div>
             <div className="social-profile__posts">{ownerPosts.length ? ownerPosts.map((post) => <Card key={post.id} className={`social-profile__post social-profile__post--${post.tone || 'violet'}`}><div className="social-profile__post-author"><span className="social-profile__post-avatar">{initials(name)}</span><span><strong>{name}</strong><small>{displayDate(post.createdAt)}</small></span></div><div className="profile-content-card-actions"><span className="profile-visibility-badge">{visibilityLabel(post.visibility)}</span><span className="profile-content-actions"><button type="button" className="icon-btn" aria-label={`Edit ${post.title}`} onClick={() => openPostComposer(post)}><Pencil size={14} /></button><button type="button" className="icon-btn" aria-label={`Delete ${post.title}`} onClick={() => deleteContent('post', post.id)}><Trash2 size={14} /></button></span></div><h2>{post.title}</h2><p>{post.body}</p>{post.media?.length > 0 && <div className="profile-post-media">{post.media.map((item) => item.type.startsWith('video/') ? <video key={item.id} src={item.dataUrl} controls preload="metadata" aria-label={item.name} /> : <img key={item.id} src={item.dataUrl} alt={item.name} />)}</div>}<div className="profile-post-meta"><button type="button" onClick={() => actions.togglePostLike(post.id)}><Heart size={13} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button><button type="button" onClick={() => navigator.share?.({ title: post.title, text: post.body })}><Share2 size={13} /> Share</button><span><MessageCircle size={13} /> {postComments[post.id]?.length || 0} comments</span><button type="button" onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={13} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button></div></Card>) : <Card className="social-profile__panel"><div className="section-title">No posts yet</div><p className="muted">Create your first post to share an astrology insight.</p></Card>}</div>
           </section>}
           {activeTab === 'Live' && !isAstrologer && <div className="social-profile__posts">{liveSessions.length ? liveSessions.map((session) => <Card key={session.id} className="social-profile__post social-profile__post--coral"><div className="social-profile__post-icon"><Radio size={20} /></div><h2>{session.title}</h2><p>{session.status}</p><span className="muted">{session.time}</span></Card>) : <Card className="social-profile__panel"><div className="section-title">No live sessions yet</div><p className="muted">Upcoming live sessions will appear here.</p></Card>}</div>}
@@ -726,9 +625,6 @@ export default function Profile() {
               <div className="user-profile-stats">
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'following' ? ' is-active' : ''}`} onClick={() => toggleSection('following')}><strong>{followedAstrologerIds.length}</strong><span>{expandedSection === 'following' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Following</span></button>
                 <button type="button" className={`user-profile-stats-btn${expandedSection === 'subscriptions' ? ' is-active' : ''}`} onClick={() => toggleSection('subscriptions')}><strong>{subscriptions.length}</strong><span>{expandedSection === 'subscriptions' ? <ChevronUp size={12} /> : <ChevronDown size={12} />} Subscriptions</span></button>
-                <Link to={routes.myAppointments} state={{ from: 'profile' }}><strong>{activitySummary.appointments}</strong><span>Appointments</span></Link>
-                <button type="button" className="user-profile-stats-btn" onClick={() => { setProfileTab('activity'); setInstantConsultationTab('all'); window.setTimeout(() => document.getElementById('user-profile-instant-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0) }}><strong>{userInstantConsultations.length}</strong><span>Consultations</span></button>
-                <Link to={routes.followedAstrologersFull} state={{ from: 'profile' }}><strong>{savedPostIds.length}</strong><span>Saved Astrologers</span></Link>
               </div>
             </Card>
 
@@ -761,85 +657,6 @@ export default function Profile() {
                 )
               })()}
             </Card>}
-
-            <nav className="user-profile-tabs" role="tablist" aria-label="Profile content">
-              <button type="button" role="tab" aria-selected={profileTab === 'about'} className={profileTab === 'about' ? 'is-active' : ''} onClick={() => setProfileTab('about')}><UserCircle2 size={16} /> About</button>
-              <button type="button" role="tab" aria-selected={profileTab === 'birthchart'} className={profileTab === 'birthchart' ? 'is-active' : ''} onClick={() => setProfileTab('birthchart')}><CalendarDays size={16} /> Birth Chart</button>
-              <button type="button" role="tab" aria-selected={profileTab === 'family'} className={profileTab === 'family' ? 'is-active' : ''} onClick={() => setProfileTab('family')}><Users size={16} /> Family</button>
-              <button type="button" role="tab" aria-selected={profileTab === 'activity'} className={profileTab === 'activity' ? 'is-active' : ''} onClick={() => setProfileTab('activity')}><Clock3 size={16} /> Activity</button>
-            </nav>
-
-            <div className="user-profile-content">
-              {profileTab === 'about' && <Card className="user-profile-card">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">ABOUT YOU</span><h2>Personal Details</h2></div><button type="button" className="btn btn-outline btn-sm" onClick={openEditProfile}><Pencil size={14} /> Edit</button></div>
-                <div className="user-profile-detail-rows">
-                  <div><span>Name</span><strong>{currentUser?.name || 'Not added'}</strong></div>
-                  <div><span>Username</span><strong>@{username}</strong></div>
-                  <div><span>Gender</span><strong>{currentUser?.gender || 'Not added'}</strong></div>
-                  <div><span>Languages</span><strong>{currentUser?.languages?.join(', ') || 'Not added'}</strong></div>
-                  <div><span>Interests</span><strong>{currentUser?.astrologerPreferences?.consultationTitles?.join(', ') || 'Not added'}</strong></div>
-                  <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
-                  <div><span>About Me</span><strong>{currentUser?.bio || bio}</strong></div>
-                </div>
-              </Card>}
-
-              {profileTab === 'about' && <Card className="user-profile-card">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">ASTROLOGY IDENTITY</span><h2>Your Astrology Identity</h2></div><Sparkles size={20} className="profile-section-accent" /></div>
-                <div className="user-profile-detail-rows">
-                  <div><span>Rasi / Moon Sign</span><strong>{currentUser?.rasi || 'Rishabam'}</strong></div>
-                  <div><span>Nakshatra</span><strong>{currentUser?.nakshatra || 'Rohini'} · Pada 2</strong></div>
-                  <div><span>Lagna</span><strong>{currentUser?.lagna || 'Vrishabha'}</strong></div>
-                  <div><span>Sun Sign</span><strong>{currentUser?.sunSign || 'Meenam'}</strong></div>
-                </div>
-              </Card>}
-
-              {profileTab === 'birthchart' && <Card className="user-profile-card">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">BIRTH CHART</span><h2>My Birth Details</h2></div></div>
-                <div className="user-profile-detail-rows">
-                  <div><span>Date of Birth</span><strong>{formatDob(horoscopeBirth.dateOfBirth) || 'Not added'}</strong></div>
-                  <div><span>Time of Birth</span><strong>{horoscopeBirth.timeOfBirth || 'Not added'}</strong></div>
-                  <div><span>Place of Birth</span><strong>{horoscopeBirth.placeOfBirth || 'Not added'}</strong></div>
-                </div>
-                <div className="user-profile-chart-grid">
-                  <div><span>Kundli / Birth Chart</span><strong>Available</strong></div>
-                  <div><span>Navamsa Chart</span><strong>Available</strong></div>
-                  <div><span>Planetary Positions</span><strong>View Horoscope</strong></div>
-                  <div><span>Current Dasha</span><strong>Vimshottari Dasha</strong></div>
-                </div>
-                <div className="user-profile-birth-actions">
-                  <Link to={routes.horoscope} state={{ from: 'profile' }} className="btn btn-outline btn-sm">View Full Horoscope <ArrowRight size={14} /></Link>
-                </div>
-              </Card>}
-
-              {profileTab === 'family' && <Card className="user-profile-card user-profile-family">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">FAMILY</span><h2>Family Horoscopes</h2><p className="muted">Keep birth details for your loved ones together.</p></div><button type="button" className="btn btn-primary" onClick={() => openFamilyForm()}><Plus size={15} /> Add Family Member</button></div>
-                {familyMembers.length ? <div className="user-profile-family-grid">{familyMembers.map((member) => <FamilyMemberCard key={member.id} member={member} onEdit={() => openFamilyForm(member)} onDelete={() => deleteFamilyMember(member)} />)}</div> : <p className="muted user-profile-empty">Add family members so their birth details and horoscope information are always at hand.</p>}
-              </Card>}
-
-              {profileTab === 'activity' && <Card className="user-profile-card user-profile-activity-card">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">ACTIVITY</span><h2>Activity Summary</h2></div></div>
-                <div className="user-profile-activity">
-                  <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
-                  <Link to={routes.myAppointments}><strong>{activitySummary.appointments}</strong><span><CalendarDays size={13} /> Appointments</span></Link>
-                  <button type="button" className="user-profile-consultation-tile" onClick={() => { setInstantConsultationTab('all'); document.getElementById('user-profile-instant-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}><strong>{userInstantConsultations.length}</strong><span><Headphones size={13} /> Consultations</span></button>
-                  <div><strong>0</strong><span><Heart size={13} /> Reviews given</span></div>
-                  <div><strong>{savedPostIds.length}</strong><span><Bookmark size={13} /> Saved content</span></div>
-                  <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
-                </div>
-              </Card>}
-              {profileTab === 'activity' && <Card id="user-profile-instant-history" className="user-profile-card user-profile-instant-history-card">
-                <div className="user-profile-card__heading"><div><span className="profile-kicker">INSTANT CONSULTATIONS</span><h2>Call &amp; Chat History</h2><p className="muted">Your recent instant consultations with astrologers.</p></div><Headphones size={20} className="profile-section-accent" /></div>
-                <div className="user-profile-consultation-tabs" role="tablist" aria-label="Instant consultation history">
-                  {[["all", "All"], ["call", "Instant Calls"], ["chat", "Instant Chats"]].map(([value, label]) => <button type="button" role="tab" aria-selected={instantConsultationTab === value} className={instantConsultationTab === value ? 'is-active' : ''} key={value} onClick={() => setInstantConsultationTab(value)}>{label}<span>{value === 'all' ? userInstantConsultations.length : userInstantConsultations.filter((session) => session.type === value).length}</span></button>)}
-                </div>
-                {visibleInstantConsultations.length ? <div className="user-profile-instant-history-list">{visibleInstantConsultations.map((session) => {
-                  const isChat = session.type === 'chat'
-                  const occurredAt = session.startedAt || session.createdAt
-                  return <article className={`user-profile-instant-history-row user-profile-instant-history-row--${session.type}`} key={session.id} role="button" tabIndex={0} aria-label={`View ${isChat ? 'instant chat' : 'instant call'} with ${session.astrologerName || 'astrologer'}`} onClick={() => setSelectedInstantConsultation(session)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedInstantConsultation(session) } }}><span className="user-profile-instant-history-icon">{isChat ? <MessageCircle size={17} /> : <PhoneCall size={17} />}</span><div><strong>{isChat ? 'Instant Chat' : 'Instant Call'} <span className="user-profile-instant-history-separator">·</span> {session.astrologerName || 'Astrologer'}</strong><small>{occurredAt ? new Date(occurredAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date unavailable'} <span className="user-profile-instant-history-separator">·</span> {session.durationMinutes || 0} min</small></div><span className={`user-profile-instant-history-status user-profile-instant-history-status--${String(session.status || '').toLowerCase()}`}>{session.status || 'Unknown'}</span></article>
-                })}</div> : <div className="user-profile-instant-history-empty"><MessageCircle size={22} /><strong>No instant {instantConsultationTab === 'all' ? 'consultations' : `${instantConsultationTab}s`} yet</strong><p>Your instant call and chat history will appear here.</p></div>}
-              </Card>}
-              {selectedInstantConsultation && createPortal(<div className={`user-profile-consultation-modal-backdrop user-profile-consultation-modal-backdrop--${selectedInstantConsultation.type}`} role="presentation" onClick={() => setSelectedInstantConsultation(null)}><section className={`user-profile-consultation-modal user-profile-consultation-modal--${selectedInstantConsultation.type}`} role="dialog" aria-modal="true" aria-labelledby="instant-consultation-summary-title" onClick={(event) => event.stopPropagation()}><header className="user-profile-consultation-modal__topbar"><h2 id="instant-consultation-summary-title">Consultation Details</h2><button type="button" className="user-profile-consultation-modal__close" aria-label="Close consultation summary" onClick={() => setSelectedInstantConsultation(null)}><X size={18} /></button></header><div className="user-profile-consultation-modal__content"><div className="user-profile-consultation-modal__identity-row"><div className="user-profile-consultation-modal__person"><span>{initials(selectedInstantConsultation.astrologerName || 'Astrologer')}</span><div><strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong><small>ASTROLOGER</small></div></div><div className="user-profile-consultation-modal__id"><small>CONSULTATION ID</small><strong>{selectedInstantConsultation.id}</strong></div></div><div className="user-profile-consultation-modal__amount-panel"><span>AMOUNT</span><strong>₹{consultationAmount(selectedInstantConsultation).toLocaleString('en-IN')}</strong><em>{consultationPaid(selectedInstantConsultation)}</em></div><div className="user-profile-consultation-modal__details"><div><span className="user-profile-consultation-modal__detail-icon"><UserCircle2 size={15} /></span><span><small>ASTROLOGER</small><strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} STARTED</small><strong>{selectedInstantConsultation.startedAt ? new Date(selectedInstantConsultation.startedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not started'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} ENDED</small><strong>{selectedInstantConsultation.endedAt ? new Date(selectedInstantConsultation.endedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not ended'}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span><span><small>DURATION</small><strong>{(selectedInstantConsultation.durationMinutes || 0) + (selectedInstantConsultation.extraMinutes || 0)} min</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon">₹</span><span><small>AMOUNT</small><strong>₹{consultationAmount(selectedInstantConsultation).toLocaleString('en-IN')}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span><span><small>PAYMENT</small><strong>{consultationPaid(selectedInstantConsultation)}</strong></span></div><div><span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span><span><small>STATUS</small><strong>{selectedInstantConsultation.status || 'Unknown'}</strong></span></div></div></div><footer className="user-profile-consultation-modal__footer"><button type="button" className="user-profile-consultation-modal__close-action" onClick={() => setSelectedInstantConsultation(null)}>Close</button></footer></section></div>, document.body)}
-            </div>
           </div>
 
           {showEditProfile && createPortal(<div className="modal-overlay user-modal-overlay" onClick={() => setShowEditProfile(false)}>
@@ -861,28 +678,6 @@ export default function Profile() {
                 </div>
                 {error && <div className="profile-message profile-message--error">{error}</div>}
                 <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setShowEditProfile(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveProfile}>Save Changes</button></div>
-              </div>
-            </div>
-          </div>, document.body)}
-
-          {familyFormOpen && createPortal(<div className="modal-overlay user-modal-overlay" onClick={() => setFamilyFormOpen(false)}>
-            <div className="modal-card user-modal-card" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
-              <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4"><div><div className="section-title" style={{ marginBottom: 0 }}>{editingFamilyId ? 'Edit' : 'Add'} Family Horoscope</div><p className="muted">Save the birth details of a family member.</p></div><button type="button" className="icon-btn" aria-label="Close family form" onClick={() => setFamilyFormOpen(false)}><X size={16} /></button></div>
-              <div className="modal-card__content user-modal-card__content">
-                <div className="form-grid">
-                  <label className="field-group"><span className="field-label-top">Relationship</span><input className="text-input" value={familyForm.relationship} onChange={(event) => setFamilyForm({ ...familyForm, relationship: event.target.value })} placeholder="Mother, Father, Partner..." /></label>
-                  <label className="field-group"><span className="field-label-top">Full Name</span><input className="text-input" value={familyForm.name} onChange={(event) => setFamilyForm({ ...familyForm, name: event.target.value })} placeholder="Member's name" /></label>
-                  <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={familyForm.gender} onChange={(event) => setFamilyForm({ ...familyForm, gender: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={familyForm.dateOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, dateOfBirth: event.target.value })} /></label>
-                  <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={familyForm.timeOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, timeOfBirth: event.target.value })} /></label>
-                  <label className="field-group profile-place-field"><span className="field-label-top">Place of Birth</span><div className="profile-place-wrap" ref={familyPlaceMenuRef}><input className="text-input" value={familyForm.birthPlace} onChange={(event) => { setFamilyForm({ ...familyForm, birthPlace: event.target.value, latitude: '', longitude: '', timezone: '' }); setFamilyPlaceMenuOpen(true) }} onFocus={(event) => { event.currentTarget.select(); setFamilyPlaceMenuOpen(true) }} placeholder="Type a city or place" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={familyPlaceMenuOpen} />{familyPlaceMenuOpen && <div className="profile-place-menu" role="listbox">{familyPlaceSuggestions.map((option) => <button type="button" role="option" key={option} onClick={() => { const details = getBirthPlaceDetails(option); setFamilyForm({ ...familyForm, birthPlace: option, ...details }); setFamilyPlaceMenuOpen(false) }}>{option}</button>)}{!familyPlaceSuggestions.length && <span>No matching cities found.</span>}</div>}</div></label>
-                  <label className="field-group"><span className="field-label-top">Latitude</span><input inputMode="decimal" className="text-input" value={familyForm.latitude} onChange={(event) => setFamilyForm({ ...familyForm, latitude: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Longitude</span><input inputMode="decimal" className="text-input" value={familyForm.longitude} onChange={(event) => setFamilyForm({ ...familyForm, longitude: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Timezone</span><input className="text-input" value={familyForm.timezone} onChange={(event) => setFamilyForm({ ...familyForm, timezone: event.target.value })} placeholder="e.g. Asia/Kolkata" /></label>
-                  <label className="field-group"><span className="field-label-top">Profile photo URL</span><input className="text-input" value={familyForm.profileImage} onChange={(event) => setFamilyForm({ ...familyForm, profileImage: event.target.value })} placeholder="https://..." /></label>
-                </div>
-                {error && <div className="profile-message profile-message--error">{error}</div>}
-                <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setFamilyFormOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveFamilyMember}>{editingFamilyId ? 'Save Changes' : 'Add Member'}</button></div>
               </div>
             </div>
           </div>, document.body)}
@@ -909,26 +704,5 @@ function AstrologerRow({ astrologer, onClick, meta }) {
     <button type="button" className="user-profile-astro-row" onClick={onClick}>{content}</button>
   ) : (
     <Link to={`/user/astrologer/${astrologer.id}`} className="user-profile-astro-row">{content}</Link>
-  )
-}
-
-function FamilyMemberCard({ member, onEdit, onDelete }) {
-  return (
-    <Card className="user-profile-family-card">
-      <div className="user-profile-family-card__avatar">{initials(member.name)}</div>
-      <div className="user-profile-family-card__body">
-        <strong>{member.name}</strong>
-        <span className="user-profile-family-card__relation">{member.relationship}</span>
-        <div className="user-profile-family-card__meta">
-          <span><CalendarDays size={12} /> {member.dateOfBirth || 'DOB not added'}</span>
-          <span><Clock3 size={12} /> {member.timeOfBirth || 'Time not added'}</span>
-          <span><MapPin size={12} /> {member.birthPlace || 'Place not added'}</span>
-        </div>
-      </div>
-      <div className="user-profile-family-card__actions">
-        <button type="button" className="icon-btn" aria-label={`Edit ${member.name}`} onClick={onEdit}><Pencil size={14} /></button>
-        <button type="button" className="icon-btn" aria-label={`Remove ${member.name}`} onClick={onDelete}><Trash2 size={14} /></button>
-      </div>
-    </Card>
   )
 }

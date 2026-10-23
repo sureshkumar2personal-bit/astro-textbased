@@ -196,6 +196,13 @@
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
+.aq-astro-card.is-offline {
+  filter: grayscale(.58) saturate(.55);
+  background: linear-gradient(180deg, var(--surface-soft), var(--surface-strong));
+}
+
+.aq-astro-card.is-offline .aq-astro-card__accent { opacity: .45; }
+
 .aq-astro-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -235,6 +242,25 @@
   height: 4px;
   background: linear-gradient(90deg, var(--violet-500), var(--gold-500));
   opacity: 0.9;
+}
+
+.aq-astro-card__ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 96px;
+  padding: 1px 0;
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+  background: var(--green-600);
+  color: #fff;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  line-height: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(5, 150, 105, .24);
 }
 
 .aq-astro-card.is-selected .aq-astro-card__accent {

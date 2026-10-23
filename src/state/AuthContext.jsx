@@ -147,7 +147,8 @@ export function AuthProvider({ children }) {
         throw new Error(`This account is registered as a ${user.role === ROLES.ASTROLOGER ? 'Astrologer' : 'User'}. Choose the correct login portal.`)
       }
       setCurrentUser(user)
-      recordUserActivity({ userId: user.id, type: 'security', title: 'Account sign-in', summary: 'You signed in to Astro Connect.', metadata: user.email })
+      // Signing in is not an activity worth recording: it says nothing about
+      // what the person did in the product and only adds noise to the feed.
       return user
     },
     register(payload) {
@@ -211,6 +212,7 @@ export function AuthProvider({ children }) {
         phone: String(payload.phone ?? currentUser.phone ?? '').trim(),
         phoneVisibility: payload.phoneVisibility || currentUser.phoneVisibility || 'private',
         emailVisibility: payload.emailVisibility || currentUser.emailVisibility || 'private',
+        profileVisibility: payload.profileVisibility || currentUser.profileVisibility || 'private',
         gender: String(payload.gender ?? currentUser.gender ?? '').trim(),
         dateOfBirth: String(payload.dateOfBirth ?? currentUser.dateOfBirth ?? '').trim(),
         birthTime: String(payload.birthTime ?? currentUser.birthTime ?? '').trim(),
@@ -232,7 +234,7 @@ export function AuthProvider({ children }) {
         astrologerPreferencesEnabled: Boolean(payload.astrologerPreferencesEnabled ?? currentUser.astrologerPreferencesEnabled ?? false),
         astrologerPreferences: payload.astrologerPreferences || currentUser.astrologerPreferences || { languages: [], astrologerTypes: [], consultationTitles: [], methods: [], topics: [] },
       }
-      const profileFields = ['name', 'username', 'email', 'phone', 'phoneVisibility', 'emailVisibility', 'bio', 'profileImage']
+      const profileFields = ['name', 'username', 'email', 'phone', 'phoneVisibility', 'emailVisibility', 'profileVisibility', 'bio', 'profileImage']
       const birthFields = ['gender', 'dateOfBirth', 'birthTime', 'birthPlace', 'latitude', 'longitude', 'timezone', 'horoscopeDetails', 'rasi', 'nakshatra', 'lagna']
       const changedProfileFields = profileFields.filter((field) => updatedUser[field] !== currentUser[field])
       const changedBirthFields = birthFields.filter((field) => updatedUser[field] !== currentUser[field])

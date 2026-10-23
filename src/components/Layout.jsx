@@ -92,7 +92,7 @@ const ROLE_CONFIG = {
       },
       {
         label: 'Appointments',
-        to: 'appointments/book',
+        to: 'appointments/my',
         icon: CalendarCheck,
       },
       { to: 'atonements', label: 'Atonement', icon: Sparkles },

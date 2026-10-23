@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card.jsx'
 import { mockAstrologers } from '../../data/notificationData.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { filterOutAuthenticationActivities } from '../../utils/authActivityFilter.js'
 import { getHiddenUserActivityIds, getUserCommunicationActivity, saveHiddenUserActivityIds } from '../../utils/memberCommunicationActivity.js'
 import { getUserActivityLog } from '../../utils/userActivityLog.js'
 import './activity.css'
@@ -118,12 +119,14 @@ export default function Activity() {
     const cutoff = Date.now() - ACTIVITY_WINDOW_MS
     const communicationActivities = getUserCommunicationActivity({ questions, consultationHistory, appointments, walletTransactions: userWallet?.transactions, userId: currentUser?.id })
     const accountActivities = getUserActivityLog(currentUser?.id)
-    return collapseCompositeActivities([...communicationActivities, ...accountActivities])
-      .sort((first, second) => new Date(second.occurredAt).getTime() - new Date(first.occurredAt).getTime())
-      .filter((activity) => {
-        const timestamp = new Date(activity.occurredAt).getTime()
-        return !Number.isNaN(timestamp) && timestamp >= cutoff
-      })
+    return filterOutAuthenticationActivities(
+      collapseCompositeActivities([...communicationActivities, ...accountActivities])
+        .sort((first, second) => new Date(second.occurredAt).getTime() - new Date(first.occurredAt).getTime())
+        .filter((activity) => {
+          const timestamp = new Date(activity.occurredAt).getTime()
+          return !Number.isNaN(timestamp) && timestamp >= cutoff
+        })
+    )
   }, [appointments, consultationHistory, currentUser?.id, questions, userWallet?.transactions])
 
   const visibleActivities = useMemo(

@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom'
 import './appointmenttabs.css'
 
 const TABS = [
-  { to: '/user/appointments/book', label: 'Book an Appointment' },
   { to: '/user/appointments/my', label: 'Appointment History' },
+  { to: '/user/appointments/book', label: 'Book an Appointment' },
 ]
 
 export default function AppointmentSectionTabs() {

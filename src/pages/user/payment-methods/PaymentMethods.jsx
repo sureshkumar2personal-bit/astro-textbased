@@ -96,9 +96,6 @@ export default function PaymentMethods() {
         icon={CreditCard}
         titleRight={
           <div className="wallet-header-actions">
-            <button type="button" className="btn btn-ghost" onClick={() => navigate(routes.autopay)}>
-              Manage Autopay
-            </button>
             <button type="button" className="btn btn-primary" onClick={() => navigate(routes.addPaymentMethod)}>
               <Plus size={16} /> Add New Method
             </button>

@@ -16,8 +16,8 @@ import UserDashboard from './pages/UserDashboard.jsx'
 import TextBasedQuestions from './pages/TextBasedQuestions.jsx'
 import SalesManagement from './pages/SalesManagement.jsx'
 import PurchasePackage from './pages/PurchasePackage.jsx'
-import AskQuestion from './pages/AskQuestion.jsx'
 import AskQuestionDashboard from './pages/user/question-dashboard/AskQuestionDashboard.jsx'
+import AskQuestion from './pages/AskQuestion.jsx'
 import QuestionDisputes from './pages/user/question-dashboard/QuestionDisputes.jsx'
 import QuestionHistory from './pages/user/question-dashboard/QuestionHistory.jsx'
 import QuestionPurchased from './pages/user/question-dashboard/QuestionPurchased.jsx'
@@ -242,10 +242,11 @@ function UserRoutes() {
         <Route path="/user/wallet/topups" element={<UserWalletTopUps />} />
         <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
-        {/* Ask a Question dashboard: the sidebar entry opens the "Ask New" tab and the
+        {/* Ask a Question dashboard: the sidebar entry opens the "My Questions" tab and the
             sections live inside this one module instead of separate sidebar items. */}
         <Route path="/user/ask-question" element={<AskQuestionDashboard />}>
-          <Route index element={<AskQuestion embedded />} />
+          <Route index element={<Navigate to="my-questions" replace />} />
+          <Route path="new" element={<AskQuestion embedded />} />
           <Route path="my-questions" element={<TrackQuestions embedded />} />
           <Route path="purchased" element={<QuestionPurchased />} />
           <Route path="disputes" element={<QuestionDisputes />} />
@@ -271,6 +272,7 @@ function UserRoutes() {
         <Route path="/user/horoscope" element={<FullHoroscope />} />
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/appointment-details" element={<AppointmentDetails />} />
+        <Route path="/user/appointments" element={<Navigate to="/user/appointments/my" replace />} />
         <Route path="/user/appointments/book" element={<BookAppointment />} />
         <Route path="/user/appointments/book/:astrologerId" element={<BookAppointmentSlots />} />
         <Route path="/user/appointments/my" element={<MyAppointments />} />

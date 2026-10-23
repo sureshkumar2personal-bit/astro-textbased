@@ -142,7 +142,6 @@ export default function Autopay() {
       <PageHeader
         eyebrow="User portal"
         title="Autopay"
-        subtitle="Manage automatic payments for subscriptions and wallet top-ups."
         showBack
         backTo={routes.paymentMethods}
       />

@@ -8,6 +8,7 @@ import Section from '../components/ui/Section.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
+import { filterOutAuthenticationActivities } from '../utils/authActivityFilter.js'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { fromIsoDate, parseTimeToMinutes } from '../utils/appointments.js'
 import { buildPageTokens } from '../utils/pagination.js'
@@ -335,7 +336,7 @@ export default function AstrologerActivity() {
   }, [activityLog, astrologerId])
 
   const allItems = useMemo(() => {
-    return [
+    return filterOutAuthenticationActivities([
       ...questionItems,
       ...callItems,
       ...chatItems,
@@ -344,7 +345,7 @@ export default function AstrologerActivity() {
       ...campaignItems,
       ...disputeItems,
       ...activityLogItems,
-    ]
+    ])
   }, [questionItems, callItems, chatItems, walletItems, liveSessionItems, campaignItems, disputeItems, activityLogItems])
 
   // One chronological history across every module, newest first, limited to the last
