@@ -254,6 +254,59 @@ export default function MyAccount() {
   const [accountActionError, setAccountActionError] = useState('')
   const [settingsTab, setSettingsTab] = useState('about')
 
+  const [notificationPrefs, setNotificationPrefs] = useState(() => {
+    let stored = {}
+    if (typeof window !== 'undefined') {
+      try {
+        stored = JSON.parse(window.localStorage.getItem('astroconnect-notification-prefs') || '{}') || {}
+      } catch {
+        stored = {}
+      }
+    }
+    return {
+      consultations: stored.consultations ?? true,
+      messages: stored.messages ?? true,
+      pujaOrders: stored.pujaOrders ?? true,
+      payments: stored.payments ?? true,
+      promotional: stored.promotional ?? false,
+    }
+  })
+  const toggleNotification = (key, value) => {
+    setNotificationPrefs((prev) => {
+      const next = { ...prev, [key]: value }
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem('astroconnect-notification-prefs', JSON.stringify(next))
+        } catch {
+          // ignore
+        }
+      }
+      return next
+    })
+  }
+
+  const [securityOpen, setSecurityOpen] = useState(false)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => {
+    let stored = {}
+    if (typeof window !== 'undefined') {
+      try {
+        stored = JSON.parse(window.localStorage.getItem('astroconnect-security-prefs') || '{}') || {}
+      } catch {
+        stored = {}
+      }
+    }
+    return Boolean(stored.twoFactor ?? false)
+  })
+  const [profileVisibility, setProfileVisibility] = useState(currentUser?.profileVisibility || 'private')
+  const [securityError, setSecurityError] = useState('')
+  const initialSecurityRef = useRef({ twoFactor: false, profileVisibility: 'private' })
+
+  useEffect(() => {
+    if (currentUser?.profileVisibility) {
+      setProfileVisibility(currentUser.profileVisibility)
+    }
+  }, [currentUser?.profileVisibility])
+
   // Family horoscopes state
   const familyMembers = useMemo(() => (familyHoroscopes || []).filter((entry) => entry.userId === currentUser?.id), [familyHoroscopes, currentUser?.id])
   const [familyFormOpen, setFamilyFormOpen] = useState(false)
@@ -556,6 +609,55 @@ export default function MyAccount() {
     deleteAccount()
   }
 
+  const persistSecurityPrefs = (enabled) => {
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.setItem('astroconnect-security-prefs', JSON.stringify({ twoFactor: enabled }))
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const openSecurityEditor = () => {
+    const currentVis = currentUser?.profileVisibility || profileVisibility || 'private'
+    initialSecurityRef.current = { twoFactor: twoFactorEnabled, profileVisibility: currentVis }
+    setProfileVisibility(currentVis)
+    setSecurityError('')
+    setSecurityOpen(true)
+  }
+
+  const closeSecurityEditor = () => {
+    setTwoFactorEnabled(initialSecurityRef.current.twoFactor)
+    setProfileVisibility(initialSecurityRef.current.profileVisibility)
+    persistSecurityPrefs(initialSecurityRef.current.twoFactor)
+    setSecurityOpen(false)
+    setSecurityError('')
+  }
+
+  const handleSecurityTwoFactorToggle = (checked) => {
+    setTwoFactorEnabled(checked)
+    persistSecurityPrefs(checked)
+  }
+
+  const saveSecuritySettings = () => {
+    initialSecurityRef.current = { twoFactor: twoFactorEnabled, profileVisibility }
+    persistSecurityPrefs(twoFactorEnabled)
+    try {
+      updateProfile({
+        name: currentUser?.name,
+        email: currentUser?.email,
+        phone: currentUser?.phone,
+        profileVisibility,
+      })
+      setSecurityOpen(false)
+      setSecurityError('')
+      success('Account and security updated')
+    } catch (err) {
+      setSecurityError(err instanceof Error ? err.message : 'Unable to update security settings.')
+    }
+  }
+
   return (
     <div className="my-account-page">
       <BackButton to={routes.dashboard} label="Back to Dashboard" />
@@ -817,13 +919,15 @@ export default function MyAccount() {
           <div>
             <h2 className="my-account-settings-title">Account &amp; Security</h2>
           </div>
-          <ShieldCheck size={20} className="my-account-management-icon" />
+          <button type="button" className="my-account-settings-edit" aria-label="Edit Account and Security" onClick={openSecurityEditor}>
+            <Pencil size={15} />
+          </button>
         </div>
         <div className="my-account-info-rows">
           <div className="my-account-info-row"><span><ShieldCheck size={14} />Account Status</span><strong>Active</strong></div>
-          <div className="my-account-info-row"><span><Lock size={14} />Two-Factor Authentication</span><strong>Not enabled</strong></div>
+          <div className="my-account-info-row"><span><Lock size={14} />Two-Factor Authentication</span><strong>{twoFactorEnabled ? 'Enabled' : 'Not enabled'}</strong></div>
           <div className="my-account-info-row"><span><Lock size={14} />Password</span><strong>••••••••</strong></div>
-          <div className="my-account-info-row"><span><UsersRound size={14} />Profile Visibility</span><strong>{currentUser?.profileVisibility || 'Private'}</strong></div>
+          <div className="my-account-info-row"><span><UsersRound size={14} />Profile Visibility</span><strong>{profileVisibility === 'private' ? 'Private' : profileVisibility === 'public' ? 'General / Visible' : 'Email Only'}</strong></div>
           <div className="my-account-info-row"><span><ShieldCheck size={14} />Active Sessions</span><strong>1 device</strong></div>
           <div className="my-account-info-row"><span><UsersRound size={14} />Blocked Users</span><strong>{blockedUserIds?.length || 0}</strong></div>
         </div>
@@ -843,11 +947,51 @@ export default function MyAccount() {
         <section className="my-account-management-section">
           <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Notifications</h2><p className="muted my-account-settings-desc">Choose how Astro Connect keeps you informed.</p></div><Mail size={20} className="my-account-management-icon" /></div>
           <div className="my-account-info-rows">
-            <div className="my-account-info-row"><span>Consultation notifications</span><strong>Enabled</strong></div>
-            <div className="my-account-info-row"><span>Messages</span><strong>Enabled</strong></div>
-            <div className="my-account-info-row"><span>Puja &amp; order notifications</span><strong>Enabled</strong></div>
-            <div className="my-account-info-row"><span>Payment notifications</span><strong>Enabled</strong></div>
-            <div className="my-account-info-row"><span>Promotional notifications</span><strong>Off</strong></div>
+            <label className="account-toggle">
+              <span><strong>Consultation notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.consultations}
+                onChange={(event) => toggleNotification('consultations', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Messages</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.messages}
+                onChange={(event) => toggleNotification('messages', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Puja &amp; order notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.pujaOrders}
+                onChange={(event) => toggleNotification('pujaOrders', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Payment notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.payments}
+                onChange={(event) => toggleNotification('payments', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Promotional notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.promotional}
+                onChange={(event) => toggleNotification('promotional', event.target.checked)}
+              />
+              <i />
+            </label>
           </div>
         </section>
         <section className="my-account-management-section my-account-management-section--account-actions">
@@ -859,6 +1003,63 @@ export default function MyAccount() {
           </div>
         </section>
       </Card>
+      {securityOpen && (
+        <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="security-heading">
+          <Card className="preferences-dialog">
+            <div className="preferences-dialog-header">
+              <div>
+                <div className="page-eyebrow">Security</div>
+                <h2 id="security-heading">Account &amp; Security</h2>
+                <p className="muted">Manage your security settings and profile visibility.</p>
+              </div>
+              <button type="button" className="icon-btn" aria-label="Close account and security" onClick={closeSecurityEditor}>
+                <X size={17} />
+              </button>
+            </div>
+            <div className="form-grid">
+              <label className="account-toggle" style={{ gridColumn: '1 / -1' }}>
+                <span><strong>Two-Factor Authentication</strong></span>
+                <input
+                  type="checkbox"
+                  checked={twoFactorEnabled}
+                  onChange={(event) => handleSecurityTwoFactorToggle(event.target.checked)}
+                />
+                <i />
+              </label>
+              <label className="field-group" style={{ gridColumn: '1 / -1' }}>
+                <span className="field-label-top">Profile Visibility</span>
+                <select
+                  className="select-input"
+                  value={profileVisibility}
+                  onChange={(event) => setProfileVisibility(event.target.value)}
+                >
+                  {PRIVACY_OPTIONS.map(([value, optionLabel]) => (
+                    <option key={value} value={value}>{optionLabel}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="field-group" style={{ gridColumn: '1 / -1', marginBottom: 0 }}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={() => {
+                    setSecurityOpen(false)
+                    setAccountActionError('')
+                    setPasswordOpen(true)
+                  }}
+                >
+                  Change Password
+                </button>
+              </div>
+            </div>
+            {securityError && <p className="preferences-error">{securityError}</p>}
+            <div className="preferences-dialog-actions">
+              <button type="button" className="btn btn-ghost" onClick={closeSecurityEditor}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={saveSecuritySettings}>Save</button>
+            </div>
+          </Card>
+        </div>
+      )}
       {passwordOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="password-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Security</div><h2 id="password-heading">Reset Password</h2><p className="muted">Choose a new password for your account.</p></div><button type="button" className="icon-btn" aria-label="Close reset password" onClick={() => setPasswordOpen(false)}><X size={17} /></button></div><div className="form-grid"><label className="field-group"><span className="field-label-top">Current Password</span><input type="password" className="text-input" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, currentPassword: event.target.value }))} autoComplete="current-password" /></label><label className="field-group"><span className="field-label-top">New Password</span><input type="password" className="text-input" value={passwordForm.newPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, newPassword: event.target.value }))} autoComplete="new-password" /></label><label className="field-group"><span className="field-label-top">Confirm New Password</span><input type="password" className="text-input" value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm((form) => ({ ...form, confirmPassword: event.target.value }))} autoComplete="new-password" /></label></div>{accountActionError && <p className="preferences-error">{accountActionError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPasswordOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePassword}>Update Password</button></div></Card></div>}
       {preferencesOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="preferences-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrologer matching</div><h2 id="preferences-heading">Your Preferences</h2><p className="muted">Tell us what kind of guidance you are looking for.</p></div><button type="button" className="icon-btn" aria-label="Close preferences" onClick={() => setPreferencesOpen(false)}><X size={17} /></button></div>{Object.entries({ languages: LANGUAGE_OPTIONS, astrologerTypes: PREFERENCE_OPTIONS.methods, consultationTitles: PREFERENCE_OPTIONS.topics }).map(([group, options]) => <fieldset className="preferences-group" key={group}><legend>{group === 'languages' ? 'Preferred Language' : group === 'astrologerTypes' ? 'Astrology Type' : 'Consultation Interests'} <span>*</span></legend><div className="preferences-options">{options.map((option) => <button type="button" key={option} className={preferences[group].includes(option) ? 'preference-option is-selected' : 'preference-option'} onClick={() => togglePreference(group, option)}>{option}</button>)}</div></fieldset>)}{preferencesError && <p className="preferences-error">{preferencesError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setPreferencesOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePreferences}>Save Preferences</button></div></Card></div>}
       {horoscopeOpen && <div className="preferences-overlay user-shell-overlay" role="dialog" aria-modal="true" aria-labelledby="horoscope-heading"><Card className="preferences-dialog"><div className="preferences-dialog-header"><div><div className="page-eyebrow">Astrology Details</div><h2 id="horoscope-heading">Edit Horoscope</h2><p className="muted">Select your Rasi, Nakshatra, and Lagna / Ascendant.</p></div><button type="button" className="icon-btn" aria-label="Close edit horoscope" onClick={() => setHoroscopeOpen(false)}><X size={17} /></button></div><div className="form-grid"><label className="field-group"><span className="field-label-top">Rasi</span><select className="select-input" value={horoscopeForm.rasi} onChange={(event) => setHoroscopeForm((form) => ({ ...form, rasi: event.target.value }))}><option value="">Select Rasi</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group"><span className="field-label-top">Nakshatra</span><select className="select-input" value={horoscopeForm.nakshatra} onChange={(event) => setHoroscopeForm((form) => ({ ...form, nakshatra: event.target.value }))}><option value="">Select Nakshatra</option>{NAKSHATRA_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label><label className="field-group" style={{ marginBottom: 0 }}><span className="field-label-top">Lagna / Ascendant</span><select className="select-input" value={horoscopeForm.lagna} onChange={(event) => setHoroscopeForm((form) => ({ ...form, lagna: event.target.value }))}><option value="">Select Lagna</option>{RASI_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></div>{horoscopeError && <p className="preferences-error">{horoscopeError}</p>}<div className="preferences-dialog-actions"><button type="button" className="btn btn-ghost" onClick={() => setHoroscopeOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveHoroscopeDetails}>Save Horoscope</button></div></Card></div>}
