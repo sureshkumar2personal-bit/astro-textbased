@@ -571,7 +571,7 @@ export default function MyAccount() {
       </Card>
       <div className="my-account-layout">
       <Card className="my-account-settings-card">
-        {settingsTab === 'about' && <section className="my-account-settings-section">
+        <section className={'my-account-settings-section' + (settingsTab === 'about' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'about'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Personal Information" onClick={openPersonalDetailsEditor}><Pencil size={15} /></button>
@@ -636,8 +636,8 @@ export default function MyAccount() {
               ) : null}
             </div>
           )}
-        </section>}
-        {settingsTab === 'astrology' && <section className="my-account-settings-section">
+        </section>
+        <section className={'my-account-settings-section' + (settingsTab === 'astrology' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'astrology'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Astrology Details" onClick={openHoroscopeEditor}><Pencil size={15} /></button>
@@ -653,8 +653,8 @@ export default function MyAccount() {
               )
             })}
           </div>
-        </section>}
-        {settingsTab === 'preferences' && <section className="my-account-settings-section">
+        </section>
+        <section className={'my-account-settings-section' + (settingsTab === 'preferences' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'preferences'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="my-account-settings-edit" aria-label="Edit Preferences" onClick={() => { setPreferencesError(''); setPreferencesOpen(true) }}><SlidersHorizontal size={15} /></button>
@@ -662,8 +662,8 @@ export default function MyAccount() {
           <div className="my-account-info-rows">
             {PREFERENCE_ROWS.map(([key, label]) => <div className="my-account-info-row" key={key}><span>{label}</span><strong className={preferenceValue(key) ? '' : 'is-empty'}>{preferenceValue(key) || 'Not set'}</strong></div>)}
           </div>
-        </section>}
-        {settingsTab === 'birthchart' && <section className="my-account-settings-section">
+        </section>
+        <section className={'my-account-settings-section' + (settingsTab === 'birthchart' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'birthchart'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
@@ -710,8 +710,8 @@ export default function MyAccount() {
               View Full Horoscope <ArrowRight size={14} />
             </Link>
           </div>
-        </section>}
-        {settingsTab === 'family' && <section className="my-account-settings-section">
+        </section>
+        <section className={'my-account-settings-section' + (settingsTab === 'family' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'family'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
             <button type="button" className="btn btn-primary btn-sm" onClick={() => openFamilyForm()}>
@@ -732,8 +732,8 @@ export default function MyAccount() {
           ) : (
             <p className="muted user-profile-empty">Add family members so their birth details and horoscope information are always at hand.</p>
           )}
-        </section>}
-        {settingsTab === 'activity' && <section className="my-account-settings-section">
+        </section>
+        <section className={'my-account-settings-section' + (settingsTab === 'activity' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'activity'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
@@ -745,8 +745,8 @@ export default function MyAccount() {
             <div><strong>{savedPostIds?.length || 0}</strong><span><Bookmark size={13} /> Saved content</span></div>
             <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
           </div>
-        </section>}
-        {settingsTab === 'instant' && <section id="user-profile-instant-history" className="my-account-settings-section">
+        </section>
+        <section id="user-profile-instant-history" className={'my-account-settings-section' + (settingsTab === 'instant' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'instant'}>
           <div className="my-account-section-heading my-account-section-heading--tabs">
             <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
           </div>
@@ -810,7 +810,7 @@ export default function MyAccount() {
               <p>Your instant call and chat history will appear here.</p>
             </div>
           )}
-        </section>}
+        </section>
       </Card>
       <section className="my-account-settings-section">
         <div className="my-account-section-heading">

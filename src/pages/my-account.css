@@ -137,6 +137,8 @@ body:has(.my-account-page) {
 }
 
 .my-account-settings-card {
+  display: grid;
+  overflow: hidden;
   padding: 0;
   border: 0;
   background: transparent;
@@ -184,6 +186,9 @@ body:has(.my-account-page) {
   background: rgba(255, 255, 255, .9);
   box-shadow: 0 10px 24px rgba(70, 45, 93, .07);
 }
+
+.my-account-settings-card .my-account-settings-section { grid-area: 1 / 1; }
+.my-account-settings-card .my-account-settings-section--hidden { visibility: hidden; pointer-events: none; }
 
 .my-account-section-heading { margin-bottom: 8px; }
 .my-account-section-heading--tabs { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
