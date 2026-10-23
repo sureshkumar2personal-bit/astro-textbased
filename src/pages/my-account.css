@@ -133,7 +133,7 @@ body:has(.my-account-page) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 18px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .my-account-settings-card {
