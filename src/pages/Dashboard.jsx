@@ -231,13 +231,19 @@ export default function Dashboard() {
 
 function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
   return (
-    <button type="button" className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`} aria-pressed={enabled} onClick={onToggle}>
+    <button
+      type="button"
+      className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
+      aria-pressed={enabled}
+      aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
+      onClick={onToggle}
+    >
       <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
       <span className="adash-hero-service-card__copy">
         <strong>{label}</strong>
         <small>{description}</small>
       </span>
-      <span className="adash-hero-service-card__state">{enabled ? 'On' : 'Off'}</span>
+      <span className="adash-hero-service-card__state">{enabled ? 'ON' : 'OFF'}</span>
       <span className="adash-hero-service-card__switch" aria-hidden="true"><span /></span>
     </button>
   )

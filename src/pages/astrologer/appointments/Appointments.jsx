@@ -21,10 +21,11 @@ import {
 } from '../../../utils/appointments.js'
 
 const APPOINTMENT_FILTERS = [
+  { key: 'all', label: 'All' },
   { key: 'upcoming', label: 'Upcoming' },
+  { key: 'rescheduled', label: 'Rescheduled' },
   { key: 'completed', label: 'Completed' },
   { key: 'cancelled', label: 'Cancelled' },
-  { key: 'history', label: 'History' },
 ]
 
 function TodayPanel({ appointments, onSelect }) {
@@ -207,7 +208,7 @@ export default function AppointmentCalendarTab() {
   ] = useState(
     isHistory
       ? 'history'
-      : 'upcoming',
+      : 'all',
   )
 
   const [
@@ -256,7 +257,7 @@ export default function AppointmentCalendarTab() {
     setActiveTab(
       isHistory
         ? 'history'
-        : 'upcoming',
+        : 'all',
     )
 
     const urlSearch =
@@ -444,6 +445,13 @@ export default function AppointmentCalendarTab() {
         'Cancelled',
     )
 
+  const rescheduledApps =
+    filteredAppointments.filter(
+      (appointment) =>
+        appointment.status ===
+        'Rescheduled',
+    )
+
   const calendarAppointments =
     isHistory
       ? activeTab === 'completed'
@@ -466,6 +474,9 @@ export default function AppointmentCalendarTab() {
       : activeTab ===
           'upcoming'
         ? upcomingApps
+        : activeTab ===
+            'rescheduled'
+          ? rescheduledApps
         : activeTab ===
             'completed'
           ? completedApps
@@ -613,20 +624,7 @@ export default function AppointmentCalendarTab() {
         </div>
       ) : (
         <div className="apt-history-tabs">
-          {[
-            {
-              key: 'upcoming',
-              label: 'Upcoming',
-            },
-            {
-              key: 'completed',
-              label: 'Completed',
-            },
-            {
-              key: 'cancelled',
-              label: 'Cancelled',
-            },
-          ].map((tab) => (
+          {APPOINTMENT_FILTERS.map((tab) => (
             <button
               type="button"
               key={tab.key}

@@ -222,9 +222,9 @@
   --accent: #F4B400;
   --accent-dark: #C58E00;
 
-  --text-primary: #1F1F1F;
-  --text-secondary: #6B7280;
-  --border: #E8DCC8;
+  --text-primary: #24180F;
+  --text-secondary: #65584B;
+  --border: #D8C3A5;
 
   --success: #10B981;
   --success-bg: #ECFDF5;
@@ -282,15 +282,15 @@
   --teal-500: #10B981;
   --teal-600: #059669;
 
-  --ink: #1F1F1F;
-  --body: #1F1F1F;
-  --muted: #6B7280;
-  --line: #E8DCC8;
+  --ink: #24180F;
+  --body: #24180F;
+  --muted: #65584B;
+  --line: #D8C3A5;
   --paper: rgba(255, 255, 255, 0.94);
   --surface: rgba(255, 255, 255, 0.94);
   --surface-strong: #FFFFFF;
   --surface-soft: #FFFDF7;
-  --surface-border: rgba(122, 75, 31, 0.18);
+  --surface-border: rgba(107, 74, 37, 0.28);
   --surface-overlay: rgba(255, 255, 255, 0.98);
 
   --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -326,6 +326,8 @@
   --apt-drawer-width: 420px;
 
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --button-bg: #F5E6D2;
+  --text-on-primary: #FFFFFF;
   color-scheme: light;
 }
 
@@ -392,16 +394,16 @@
 html[data-theme='dark'] {
   --bg: #1A1208;
   --bg-solid: #1A1208;
-  --primary: #F4B000;
-  --primary-dark: #C88A00;
+  --primary: #FFC247;
+  --primary-dark: #D99A22;
   --primary-light: #A78BFA;
   --secondary: #6B3E1A;
-  --accent: #F4B000;
-  --accent-dark: #C88A00;
+  --accent: #FFC247;
+  --accent-dark: #D99A22;
 
-  --text-primary: #F8F5EA;
-  --text-secondary: #A8A29E;
-  --border: #6B3E1A;
+  --text-primary: #FFF8E8;
+  --text-secondary: #D6C7B4;
+  --border: #6B4A25;
 
   --success: #34D399;
   --warning: #F59E0B;
@@ -419,8 +421,8 @@ html[data-theme='dark'] {
   --violet-500: #A78BFA;
   --violet-600: #8B5CF6;
   --violet-700: #7C3AED;
-  --gold-500: #F4B000;
-  --gold-600: #C88A00;
+  --gold-500: #FFC247;
+  --gold-600: #D99A22;
   --green-600: #34D399;
   --amber-600: #FBBF24;
   --red-500: #F87171;
@@ -429,15 +431,15 @@ html[data-theme='dark'] {
   --sidebar-from: #1A1208;
   --sidebar-to: #3A2412;
 
-  --ink: #F8F5EA;
-  --body: #F8F5EA;
-  --muted: #A8A29E;
-  --line: #6B3E1A;
+  --ink: #FFF8E8;
+  --body: #FFF8E8;
+  --muted: #B8A995;
+  --line: #6B4A25;
   --paper: rgba(42, 27, 14, 0.94);
   --surface: rgba(42, 27, 14, 0.94);
   --surface-strong: #2A1B0E;
   --surface-soft: #3A2412;
-  --surface-border: rgba(244, 176, 0, 0.2);
+  --surface-border: #6B4A25;
   --surface-overlay: rgba(26, 18, 8, 0.96);
 
   --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.25);
@@ -446,7 +448,9 @@ html[data-theme='dark'] {
   --shadow-lg: 0 24px 56px rgba(2, 6, 23, 0.38);
   --shadow-card: 0 1px 2px rgba(2, 6, 23, 0.18);
   --shadow-float: 0 16px 40px rgba(2, 6, 23, 0.24);
-  --divider: rgba(244, 176, 0, 0.16);
+  --divider: rgba(107, 74, 37, 0.72);
+  --button-bg: #382414;
+  --text-on-primary: #FFFFFF;
   color-scheme: dark;
 }
 
@@ -5031,12 +5035,13 @@ html[data-theme='dark'] .border-white\/90 {
 .adash-hero-service-card__copy { display: grid; gap: 3px; min-width: 0; }
 .adash-hero-service-card__copy strong { font-size: 13px; white-space: nowrap; }
 .adash-hero-service-card__copy small { color: #55463b; font-size: 9px; white-space: nowrap; }
-.adash-hero-service-card__state { position: absolute; right: 14px; bottom: 8px; color: #149447; font-size: 10px; font-weight: 800; }
-.adash-hero-service-card__switch { position: absolute; top: 12px; right: 12px; width: 43px; height: 24px; border-radius: 999px; background: #d9d1c8; transition: background .18s ease; }
+.adash-hero-service-card__state { position: absolute; right: 14px; bottom: 8px; color: #C7B49A; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; transition: color .18s ease; }
+.adash-hero-service-card__switch { position: absolute; top: 12px; right: 12px; width: 43px; height: 24px; border-radius: 999px; background: #3A2618; box-shadow: inset 0 0 0 1px #6B4A25; transition: background .18s ease, box-shadow .18s ease; }
 .adash-hero-service-card__switch span { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .2); transition: transform .18s ease; }
-.adash-hero-service-card.is-enabled .adash-hero-service-card__switch { background: #16a05a; }
+.adash-hero-service-card.is-enabled .adash-hero-service-card__state { color: #FFC533; }
+.adash-hero-service-card.is-enabled .adash-hero-service-card__switch { background: #F5B51B; box-shadow: 0 0 8px rgba(245, 181, 27, .34); }
 .adash-hero-service-card.is-enabled .adash-hero-service-card__switch span { transform: translateX(19px); }
-.adash-hero-service-card:not(.is-enabled) .adash-hero-service-card__state { color: #9a6b3a; }
+.adash-hero-service-card:not(.is-enabled) .adash-hero-service-card__state { color: #C7B49A; }
 .app-shell--astrologer .adash-hero-reference-service .hero-services-summary {
   color: #fff7e2;
   background: rgba(40, 22, 12, .72);
