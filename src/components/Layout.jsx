@@ -65,9 +65,9 @@ const ROLE_CONFIG = {
       // Single Live entry: /live-session redirects to setup and every
       // /live-session/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'live-session', label: 'Live', icon: Radio },
-      // Single Perks & Benefits entry: /perks-benefits redirects to Settings and
+      // Single Benefit Management entry: /perks-benefits redirects to the combined page and
       // every /perks-benefits/* page keeps it highlighted; the sub-pages stay routable.
-      { to: 'perks-benefits', label: 'Perks & Benefits', icon: Gift },
+      { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
       // Single Wallet entry: /wallet redirects to the overview and every
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
@@ -120,8 +120,8 @@ const PAGE_META = {
     '/astrologer/wallet/withdraw': { title: 'Withdraw Money', sub: 'Request a payout to your preferred method.' },
     '/astrologer/wallet/settlements': { title: 'Settlement History', sub: 'Monthly settlements and payout records.' },
     '/astrologer/wallet/payment-methods': { title: 'Payment Methods', sub: 'Manage your payout methods and defaults.' },
-    '/astrologer/perks-benefits/settings': { title: 'Settings', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
-    '/astrologer/perks-benefits/delivery': { title: 'Content Delivery', sub: 'Create and publish content for your committed customer benefits.' },
+    '/astrologer/perks-benefits/settings': { title: 'Benefit Management', sub: 'Manage follower perks, zodiac templates, subscriber plans, prices, discounts, and access.' },
+    '/astrologer/perks-benefits/delivery': { title: 'Benefit Management', sub: 'Manage follower perks, zodiac templates, subscriber plans, prices, discounts, and access.' },
     '/astrologer/perks-benefits/history': { title: 'History', sub: 'Track your monthly fulfillment rate against customer commitments.' },
     '/astrologer/text-based-questions': { title: 'Text-Based Questions', sub: 'Questions, campaigns, and queue overview' },
     '/astrologer/sales-management': { title: 'Sales Management', sub: 'Campaigns, pricing & allocation' },
@@ -131,7 +131,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Question Details', sub: 'Respond to a user question' },
     '/astrologer/text-based-question-history': { title: 'Text-Based Question History', sub: 'Review completed question records and dispute outcomes' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
-    '/astrologer/perks-benefits': { title: 'Perks & Benefits', sub: 'Manage customer benefits, free perks, subscription plans, and monthly commitments.' },
+    '/astrologer/perks-benefits': { title: 'Benefit Management', sub: 'Manage follower perks, zodiac templates, subscriber plans, prices, discounts, and access.' },
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
     '/astrologer/consultation-history': { title: 'Consultation History', sub: 'Instant chat and audio call earnings' },
