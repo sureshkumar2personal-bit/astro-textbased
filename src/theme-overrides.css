@@ -89,3 +89,1841 @@ html[data-theme='dark'] .border-slate-100,
 html[data-theme='dark'] .border-slate-200 {
   border-color: var(--surface-border) !important;
 }
+
+/* Contrast pass: legacy route styles contain a number of light-theme text
+   literals. Keep their hierarchy, but remap the readable foregrounds when a
+   dark surface is active. */
+html[data-theme='dark'] h1,
+html[data-theme='dark'] h2,
+html[data-theme='dark'] h3,
+html[data-theme='dark'] h4,
+html[data-theme='dark'] h5,
+html[data-theme='dark'] h6,
+html[data-theme='dark'] .page-title,
+html[data-theme='dark'] .section-title,
+html[data-theme='dark'] .card-title,
+html[data-theme='dark'] .topbar-crumb,
+html[data-theme='dark'] .field-label-top,
+html[data-theme='dark'] legend {
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] p,
+html[data-theme='dark'] label,
+html[data-theme='dark'] .muted,
+html[data-theme='dark'] .text-muted,
+html[data-theme='dark'] .page-header-row .page-eyebrow,
+html[data-theme='dark'] .page-header-row .muted,
+html[data-theme='dark'] .topbar-crumb-sub,
+html[data-theme='dark'] .step-desc,
+html[data-theme='dark'] small {
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme='dark'] input::placeholder,
+html[data-theme='dark'] textarea::placeholder,
+html[data-theme='dark'] select::placeholder {
+  color: var(--muted) !important;
+  opacity: 1;
+}
+
+html[data-theme='dark'] .btn-primary,
+html[data-theme='dark'] .btn-primary:hover,
+html[data-theme='dark'] .adash-campaign-btn--primary,
+html[data-theme='dark'] .adash-campaign-btn--primary:hover {
+  background: var(--button-bg) !important;
+  border-color: var(--accent) !important;
+  color: var(--text-on-primary) !important;
+}
+
+html[data-theme='dark'] .btn-outline {
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .btn-ghost,
+html[data-theme='dark'] .btn-secondary,
+html[data-theme='dark'] .btn-outline:hover,
+html[data-theme='dark'] .btn-ghost:hover {
+  background: var(--surface-soft) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .btn-danger,
+html[data-theme='dark'] .btn-danger:hover {
+  background: rgba(248, 113, 113, .18) !important;
+  border-color: #F87171 !important;
+  color: #FFD8D2 !important;
+}
+
+/* Astrologer dashboard quick actions and campaign copy. */
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action,
+html[data-theme='dark'] .app-shell--astrologer .action-card,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-body,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-labels,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-message {
+  background: var(--surface-strong) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:hover,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:focus,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:active,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:disabled {
+  background: #382414 !important;
+  border-color: #B88632 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:hover {
+  background: #4A2C18 !important;
+  border-color: var(--accent) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:active {
+  background: #4A2C18 !important;
+  border-color: var(--accent) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action-label,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:hover .adash-quick-action-label,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:focus .adash-quick-action-label,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:active .adash-quick-action-label,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action:disabled .adash-quick-action-label,
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action-arrow,
+html[data-theme='dark'] .app-shell--astrologer .action-card-title,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-name,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaigns-section .adash-campaign-name,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card__copy strong {
+  color: #FFF8E8 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-category,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-sold,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-month-graph,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-month-graph__summary span {
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card__copy small,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:hover .adash-hero-service-card__copy small,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:focus .adash-hero-service-card__copy small,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:active .adash-hero-service-card__copy small,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:disabled .adash-hero-service-card__copy small {
+  color: #C8BBA8 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card__switch,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:not(.is-enabled) .adash-hero-service-card__switch {
+  background: #3A2618 !important;
+  box-shadow: inset 0 0 0 1px #6B4A25 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card.is-enabled .adash-hero-service-card__switch {
+  background: #F5B51B !important;
+  box-shadow: 0 0 8px rgba(245, 181, 27, .34) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card__switch span {
+  background: #FFFFFF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card__state,
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card:not(.is-enabled) .adash-hero-service-card__state {
+  color: #C7B49A !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card.is-enabled .adash-hero-service-card__state {
+  color: #FFC533 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-month-graph {
+  background: var(--surface-soft) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-month-graph__summary strong,
+html[data-theme='dark'] .app-shell--astrologer .adash-campaign-month-graph__summary b {
+  color: var(--accent) !important;
+}
+
+/* Tables, question cards, appointment rows, and account surfaces. */
+html[data-theme='dark'] table td,
+html[data-theme='dark'] table th,
+html[data-theme='dark'] .question-card,
+html[data-theme='dark'] .question-card__customer strong,
+html[data-theme='dark'] .question-card__details strong,
+html[data-theme='dark'] .question-card__details p,
+html[data-theme='dark'] .tbq-question-month__name,
+html[data-theme='dark'] .tbq-question-month__count,
+html[data-theme='dark'] [class*='appointment'] strong,
+html[data-theme='dark'] [class*='appointment'] h2,
+html[data-theme='dark'] [class*='appointment'] h3,
+html[data-theme='dark'] [class*='appointment'] h4,
+html[data-theme='dark'] [class*='appointment'] td,
+html[data-theme='dark'] [class*='appointment'] th,
+html[data-theme='dark'] [class*='wallet'] strong,
+html[data-theme='dark'] [class*='my-account'] strong {
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .question-card__details > span,
+html[data-theme='dark'] .question-card__deadline,
+html[data-theme='dark'] .question-card__deadline b,
+html[data-theme='dark'] .question-table-pagination__info,
+html[data-theme='dark'] [class*='appointment'] p,
+html[data-theme='dark'] [class*='appointment'] small,
+html[data-theme='dark'] [class*='appointment'] .muted,
+html[data-theme='dark'] [class*='wallet'] small,
+html[data-theme='dark'] [class*='my-account'] small,
+html[data-theme='dark'] [class*='my-account'] .muted {
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme='dark'] .tbq-question-month__name {
+  color: var(--accent) !important;
+}
+
+html[data-theme='dark'] .tbq-question-month__heading svg,
+html[data-theme='dark'] .tbq-module-tab.is-active svg,
+html[data-theme='dark'] .section-title svg {
+  color: var(--primary-light) !important;
+}
+
+html[data-theme='dark'] .question-table-pagination {
+  background: var(--surface-strong) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme='dark'] .tbq-module-tabs,
+html[data-theme='dark'] .tbq-module-tab,
+html[data-theme='dark'] .tbq-module-tab:hover {
+  background: var(--button-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .tbq-module-tab.is-active {
+  background: var(--primary-bg) !important;
+  color: var(--primary-light) !important;
+}
+
+html[data-theme='dark'] .status-badge[data-tone='badge-violet'] {
+  background: rgba(167, 139, 250, .18) !important;
+  border-color: var(--primary-light) !important;
+  color: var(--primary-light) !important;
+}
+
+html[data-theme='dark'] .theme-toggle-btn,
+html[data-theme='dark'] .icon-btn,
+html[data-theme='dark'] .avatar-chip {
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav {
+  background: #1A1208 !important;
+  border-color: var(--accent) !important;
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav__item {
+  color: #E8DCC8 !important;
+  border-color: transparent !important;
+  border-radius: 12px;
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav__item:hover {
+  color: #FFD166 !important;
+  background: #4A2C18 !important;
+  border-color: var(--accent) !important;
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav__item.is-active {
+  color: #FFD166 !important;
+  background: #5A3516 !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent), inset 0 0 18px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav__item:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+
+html[data-theme='dark'] ::selection {
+  background: rgba(255, 194, 71, .34);
+  color: var(--text-primary);
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar { width: 10px; height: 10px; }
+html[data-theme='dark'] ::-webkit-scrollbar-track { background: var(--bg-solid); }
+html[data-theme='dark'] ::-webkit-scrollbar-thumb { background: var(--border); border: 2px solid var(--bg-solid); border-radius: 999px; }
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* Astrologer Appointments: scoped dark palette for the existing calendar,
+   filters, appointment cards, and details drawer. */
+html[data-theme='dark'] .app-shell--astrologer .apt-page {
+  --bg: #171006;
+  --bg-solid: #171006;
+  --surface: #281A0D;
+  --surface-strong: #281A0D;
+  --surface-soft: #352310;
+  --surface-overlay: #281A0D;
+  --button-bg: #352310;
+  --primary: #FFBB32;
+  --primary-dark: #A87316;
+  --primary-bg: #352310;
+  --secondary: #352310;
+  --secondary-bg: #352310;
+  --accent: #FFBB32;
+  --accent-dark: #FFBB32;
+  --border: #79531C;
+  --surface-border: #79531C;
+  --divider: rgba(121, 83, 28, .62);
+  --ink: #FFF2D5;
+  --body: #FFF2D5;
+  --text-primary: #FFF2D5;
+  --text-secondary: #C8B79B;
+  --muted: #A9977C;
+  --success: #14B8A6;
+  --success-bg: rgba(20, 184, 166, .18);
+  --warning: #FFBB32;
+  --warning-bg: rgba(255, 187, 50, .18);
+  --danger: #F87171;
+  --danger-bg: rgba(248, 113, 113, .18);
+  --primary-light: #C4B5FD;
+  --violet-500: #A78BFA;
+  --violet-600: #8B5CF6;
+  --violet-700: #7C3AED;
+  --neutral-bg: rgba(200, 183, 155, .14);
+  --green-600: #14B8A6;
+  --amber-600: #FFBB32;
+  --red-600: #F87171;
+  --text-on-primary: #38230B;
+  --appointment-emphasis: #FFE7B5;
+  --appointment-calendar-bg: #211509;
+  --appointment-cell-bg: #30200F;
+  --appointment-cell-border: #64451D;
+  --appointment-button-border: #A87316;
+  --appointment-selected: #FFC13D;
+  background: var(--bg);
+  color: var(--body);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-intro,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-toolbar,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-view,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-panel,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-context-menu,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-card,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer-summary {
+  background-color: #2B1B0D !important;
+  border-color: #80520F !important;
+  color: #FFF4DF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-header,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-week-header,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-week-corner,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-legend {
+  background-color: #382411 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-dropdown,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-calendar,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item {
+  background-color: #2B1B0D !important;
+  border-color: #80520F !important;
+  color: #FFF4DF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button:focus-visible,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event:hover {
+  background-color: #382411 !important;
+  border-color: #FFB91F !important;
+  color: #FFF4DF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button.is-active,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-btn.is-active {
+  background: #FFB91F !important;
+  border-color: #FFB91F !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button:not(.is-active),
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-btn:not(.is-active) {
+  color: #FFF4DF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search svg,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-search-bar,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-search-bar svg {
+  color: #C9B99F !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input::placeholder,
+html[data-theme='dark'] .app-shell--astrologer .apt-page input::placeholder {
+  color: #A8957B !important;
+  opacity: 1;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-title,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-head,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__title,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor__head strong,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-value,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer-head h2 {
+  color: #FFF4DF !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-weekday,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__sub,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__meta,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor__head span,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor__label,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-empty,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-time,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-order,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-label,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-more {
+  color: #C9B99F !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-muted {
+  opacity: 1;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-muted .apt-month-day {
+  color: #A8957B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today {
+  background: #382411 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today .apt-month-day {
+  background: #FFB91F !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--available,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--full,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--override {
+  background: #FFB91F !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--unavailable {
+  background: #A8957B !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--holiday {
+  background: #FFB91F !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-counts .is-avail {
+  background: rgba(20, 184, 166, .2) !important;
+  color: #5EEAD4 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-counts .is-booked {
+  background: rgba(255, 185, 31, .2) !important;
+  color: #FFB91F !important;
+}
+
+/* Appointment status tones remain distinct on the warm dark surface. */
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-upcoming'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-amber'] {
+  background: rgba(255, 185, 31, .18) !important;
+  border-color: #FFB91F !important;
+  color: #FFB91F !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-completed'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-green'] {
+  background: rgba(20, 184, 166, .18) !important;
+  border-color: #14B8A6 !important;
+  color: #5EEAD4 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-cancelled'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-red'] {
+  background: rgba(248, 113, 113, .18) !important;
+  border-color: #F87171 !important;
+  color: #FCA5A5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-rescheduled'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-violet'] {
+  background: rgba(167, 139, 250, .18) !important;
+  border-color: #A78BFA !important;
+  color: #C4B5FD !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-refunded'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-gray'] {
+  background: rgba(199, 180, 154, .14) !important;
+  border-color: #80520F !important;
+  color: #C9B99F !important;
+}
+
+/* Final appointments surfaces: remove legacy white/grey blocks from the
+   calendar, filter rail, inputs, cards, and details surfaces. */
+html[data-theme='dark'] .app-shell--astrologer .page-content:has(.apt-page) {
+  background: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-main,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-col,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-col {
+  background: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-toolbar,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-view,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-panel,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-card,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer-summary,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-context-menu {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-header,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-week-header,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-week-corner,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-legend {
+  background: #352310 !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-dropdown,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-dropdown,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor__field select,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor__window input {
+  background: #211509 !important;
+  border-color: #79531C !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button:focus-visible,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input:focus,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-dropdown:focus {
+  background: #352310 !important;
+  border-color: #D9A52E !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button.is-active {
+  background: #6B4518 !important;
+  border-color: #D9A52E !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-title,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-head,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-value,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer-head h2 {
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-weekday,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-time,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-empty,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-order,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-label,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-more,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__sub,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover__meta {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today {
+  background: #352310 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today .apt-month-day {
+  background: #D9A52E !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--available,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--full,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--override {
+  background: #D9A52E !important;
+  color: #171006 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-counts .is-booked {
+  background: rgba(217, 165, 46, .2) !important;
+  color: #D9A52E !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-cale-legend .sw.is-upcoming,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-cale-legend .sw.is-booked {
+  background: #D9A52E !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .btn-outline,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-action-btn {
+  background: #211509 !important;
+  border-color: #79531C !important;
+  color: #D9A52E !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .btn-outline:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-action-btn:hover {
+  background: #352310 !important;
+  border-color: #D9A52E !important;
+  color: #FFF2D5 !important;
+}
+
+/* Exact screenshot palette for the live Appointments surface. */
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-toolbar {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button.is-active,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-history-tabs button.is-active:hover {
+  background: #FFC13D !important;
+  border-color: #A87316 !important;
+  color: #38230B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-view {
+  background: #211509 !important;
+  border-color: #A87316 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-header,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-legend {
+  background: #352310 !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell {
+  background: #30200F !important;
+  border-color: #64451D !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell:hover {
+  background: #352310 !important;
+  border-color: #A87316 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today:hover {
+  background: #352310 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-today .apt-month-day {
+  background: #FFC13D !important;
+  color: #38230B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-weekday,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day {
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-cell.is-muted .apt-month-day {
+  color: #A9977C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-panel,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-card,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer-summary {
+  background: #352310 !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-item:hover {
+  background: #352310 !important;
+  border-color: #A87316 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-view-dropdown {
+  background: #211509 !important;
+  border-color: #A87316 !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-search input::placeholder,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-time,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-order,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-customer-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-detail-value,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-side-name,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-calendar-title {
+  color: #FFE7B5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-event,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-popover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-day-editor,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-context-menu,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-drawer {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .btn-outline,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-action-btn {
+  background: #211509 !important;
+  border-color: #A87316 !important;
+  color: #FFBB32 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .btn-outline:hover,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-action-btn:hover {
+  background: #352310 !important;
+  border-color: #FFBB32 !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.apt-page) .astrologer-bottom-nav {
+  background: #171006 !important;
+  border-color: #A87316 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.apt-page) .astrologer-bottom-nav__item {
+  color: #E8DCC8 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.apt-page) .astrologer-bottom-nav__item.is-active {
+  background: #6B4518 !important;
+  border-color: #FFBB32 !important;
+  color: #FFBB32 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-upcoming'],
+html[data-theme='dark'] .app-shell--astrologer .apt-page .status-badge[data-tone='badge-amber'] {
+  background: rgba(255, 187, 50, .18) !important;
+  border-color: #FFBB32 !important;
+  color: #FFBB32 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-counts .is-booked,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-cale-legend .sw.is-upcoming,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-cale-legend .sw.is-booked,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--available,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--full,
+html[data-theme='dark'] .app-shell--astrologer .apt-page .apt-month-availability--override {
+  background: #FFBB32 !important;
+  color: #38230B !important;
+}
+
+/* Appointment Details is portaled to document.body, so it needs its own
+   dark-mode scope instead of the page-shell scope used by the calendar. */
+html[data-theme='dark'] .apt-appointment-modal {
+  background: #281A0D !important;
+  border-color: #79531C !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-head,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-body {
+  background: #281A0D !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-head {
+  border-bottom-color: #79531C !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-head h2,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-summary-time,
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-value,
+html[data-theme='dark'] .apt-appointment-modal .apt-customer-name,
+html[data-theme='dark'] .apt-appointment-modal .apt-inline-calltype,
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-card strong,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-head,
+html[data-theme='dark'] .apt-appointment-modal .apt-private-notes-head {
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-summary,
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-card,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation,
+html[data-theme='dark'] .apt-appointment-modal .apt-private-notes,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-note,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-status-callout {
+  background: #352310 !important;
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-summary,
+html[data-theme='dark'] .apt-appointment-modal .apt-customer,
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-card,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation,
+html[data-theme='dark'] .apt-appointment-modal .apt-private-notes {
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-label,
+html[data-theme='dark'] .apt-appointment-modal .apt-customer-order,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-cancel-hint,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-note,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-status-callout,
+html[data-theme='dark'] .apt-appointment-modal .apt-private-notes-private,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-note,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-sent-meta {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-customer,
+html[data-theme='dark'] .apt-appointment-modal .apt-detail-card,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-note,
+html[data-theme='dark'] .apt-appointment-modal .apt-drawer-status-callout,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-notes,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-attach,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-file,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-link-entry input {
+  border-color: #79531C !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-notes,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-attach,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-file,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-link-entry input {
+  background: #281A0D !important;
+  color: #FFF2D5 !important;
+}
+
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-notes::placeholder,
+html[data-theme='dark'] .apt-appointment-modal .apt-consultation-link-entry input::placeholder {
+  color: #C8B79B !important;
+  opacity: 1;
+}
+
+html[data-theme='dark'] .apt-appointment-modal > .apt-drawer-head > .icon-btn {
+  background: #352310 !important;
+  border-color: #79531C !important;
+  color: #FFC13D !important;
+}
+
+/* Perks & Benefits: reference palette, scoped to this page only. */
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page {
+  --perks-page-bg: #1A0F05;
+  --perks-card-bg: #2B1A0D;
+  --perks-surface-bg: #35200F;
+  --perks-gold: #FFC247;
+  --perks-border: #A66A16;
+  --perks-text: #FFF3D6;
+  --perks-secondary: #C7B69B;
+  --perks-teal: #55D6BE;
+  --perks-muted: #9B896F;
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .page-content:has(.perks-benefits-page) {
+  background: #1A0F05 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-tab-navigation,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-section,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-settings-section,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-management-content,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-category-nav,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-program-banner,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-overview,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-section {
+  background: var(--perks-card-bg) !important;
+  border-color: var(--perks-border) !important;
+  color: var(--perks-text) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-tab-navigation {
+  background: var(--perks-surface-bg) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-tab-btn {
+  background: transparent !important;
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-tab-btn:hover {
+  background: var(--perks-surface-bg) !important;
+  color: var(--perks-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-tab-btn.active {
+  background: var(--perks-gold) !important;
+  color: #1A0F05 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-section-heading h2,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card h3,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__price,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__benefits strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow > div > strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-row strong {
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-section-eyebrow,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-heading-mark,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card__icon,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__price,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow > div,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow__arrow,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__icon {
+  color: var(--perks-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-heading-mark,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card__icon,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__icon,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow__result {
+  background: var(--perks-surface-bg) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-section-heading p,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card__label,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__eyebrow,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__price small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__benefits div,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow > div > span,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-row small {
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-metric-card small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__status,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-status,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow__result svg,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefits-flow__result span {
+  color: var(--perks-teal) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__benefits,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-plan-card__benefits div,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-settings-list,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-row,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table td {
+  border-color: var(--perks-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table-wrap,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table thead th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table tbody,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-icon,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-toggle {
+  background: var(--perks-surface-bg) !important;
+  border-color: var(--perks-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table td,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-toggle,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-row small {
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table tbody th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-policy-table td:not(:first-child),
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-row strong {
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-toggle.is-on {
+  background: var(--perks-surface-bg) !important;
+  border-color: var(--perks-gold) !important;
+  color: var(--perks-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-toggle i {
+  background: var(--perks-muted) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .program-setting-toggle.is-on i {
+  background: var(--perks-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-category-nav button,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-panel-heading p,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-program-banner p,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-overview p,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-section p {
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-category-nav button:hover,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-category-nav button.is-active {
+  background: var(--perks-surface-bg) !important;
+  color: var(--perks-gold) !important;
+  box-shadow: inset 3px 0 var(--perks-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-edit-row,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-access-row,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-toggle-row,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-normal-price,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-preview-card,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-content-categories span,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-edit-row input,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-access-row select,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-price-editor input {
+  background: var(--perks-surface-bg) !important;
+  border-color: var(--perks-border) !important;
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-plan-identity small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-toggle-row small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-management-actions,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-preview-heading small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-preview-values span,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-metrics small,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table td > small {
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-plan-identity strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-toggle-row strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-preview-values strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-metrics strong,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table td > strong {
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table-wrap,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-filters select,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-search,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-custom-dates input,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table td {
+  background: var(--perks-surface-bg) !important;
+  border-color: var(--perks-border) !important;
+  color: var(--perks-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-search input,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-filters select,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-custom-dates input {
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table th,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-table td > strong {
+  color: var(--perks-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-history-search input::placeholder {
+  color: var(--perks-muted) !important;
+  opacity: 1;
+}
+
+/* Astrologer Account Management: dark chocolate and gold reference theme. */
+html[data-theme='dark'] .app-shell--astrologer .account-management-page {
+  --account-page-bg: #1A0F05;
+  --account-card-bg: #2B1A0C;
+  --account-surface-bg: #35200F;
+  --account-gold: #FFC247;
+  --account-gold-strong: #E9A817;
+  --account-border: #80551B;
+  --account-text: #FFF3D9;
+  --account-secondary: #C8B79B;
+  --account-muted: #9B896F;
+  background: var(--account-page-bg) !important;
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .page-content:has(.account-management-page) {
+  background: #1A0F05 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-page-header h1,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-section-label,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-panel h2,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-name h2,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-section-heading h2,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-setting-copy strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-panel-heading h2 {
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-page-header p,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-page-header .muted,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-section-label small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-panel-heading p,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-setting-copy small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-copy > span,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-copy > small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-about p,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-meta span {
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-toolbar-nav {
+  background: var(--account-card-bg) !important;
+  border-color: var(--account-border) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .2) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-toolbar-shortcut,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-trigger,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-status-pill {
+  background: var(--account-surface-bg) !important;
+  border-color: var(--account-border) !important;
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-toolbar-shortcut:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-trigger:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-toolbar-shortcut.is-active,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-trigger.is-active {
+  background: var(--account-gold-strong) !important;
+  border-color: var(--account-gold) !important;
+  color: #1A0F05 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-status-pill span {
+  background: var(--account-gold) !important;
+  box-shadow: 0 0 0 4px rgba(255, 194, 71, .18) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-trigger__icon {
+  background: var(--account-card-bg) !important;
+  color: var(--account-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-panel {
+  background: var(--account-card-bg) !important;
+  border-color: var(--account-border) !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .3) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-label,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-item {
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-item:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-navmenu-item.is-active {
+  background: var(--account-surface-bg) !important;
+  color: var(--account-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-hero {
+  background: var(--account-card-bg) !important;
+  border-color: var(--account-border) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .24) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-cover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-hero::before {
+  background: var(--account-surface-bg) !important;
+  opacity: .35 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-avatar {
+  background: var(--account-gold) !important;
+  color: #1A0F05 !important;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .28) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-copy > strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-about b {
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-about {
+  border-top-color: var(--account-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-actions .account-btn--primary {
+  background: var(--account-gold) !important;
+  border-color: var(--account-gold) !important;
+  color: #1A0F05 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-actions .account-btn--outline,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-status {
+  background: var(--account-surface-bg) !important;
+  border-color: var(--account-border) !important;
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-status small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-status strong {
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-status i,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-status.is-dnd i {
+  background: var(--account-gold) !important;
+  box-shadow: 0 0 0 3px rgba(255, 194, 71, .18) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stats,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-services,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-actions-section,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs-section,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-panel,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-setting-card {
+  background: var(--account-card-bg) !important;
+  border-color: var(--account-border) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-section-heading small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-section-heading > svg,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-setting-icon,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-service-grid > div > span {
+  color: var(--account-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stat-grid > div,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-service-grid > div,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-action-grid button,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-info-item,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-setting-icon {
+  background: var(--account-surface-bg) !important;
+  border-color: var(--account-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stat-grid > div + div,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-services,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-actions-section {
+  border-color: var(--account-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stat-grid svg {
+  background: var(--account-gold) !important;
+  color: #1A0F05 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stat-grid strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-service-grid strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-action-grid strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-info-item strong {
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-stat-grid small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-service-grid small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-account-action-grid small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-info-item small {
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-btn--primary {
+  background: var(--account-gold) !important;
+  border-color: var(--account-gold) !important;
+  color: #1A0F05 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-btn--outline,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-btn--ghost {
+  background: var(--account-surface-bg) !important;
+  border-color: var(--account-border) !important;
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-btn--link {
+  color: var(--account-gold) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-field input,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-field textarea,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-field select,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-info-item,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-feature-card,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-integration,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-search,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-audit-toolbar select {
+  background: var(--account-surface-bg) !important;
+  border-color: var(--account-border) !important;
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-field > span,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-feature-card small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-integration small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-empty,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-search {
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-feature-card strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-integration strong {
+  color: var(--account-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .account-status--success {
+  background: rgba(85, 214, 190, .16) !important;
+  color: #55D6BE !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav {
+  background: #1A0F05 !important;
+  border-color: #80551B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item {
+  color: var(--account-secondary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item.is-active {
+  background: #35200F !important;
+  border-color: #FFC247 !important;
+  color: #FFC247 !important;
+}
+
+/* Account Management → Posts: exact dark brown/gold surfaces. */
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs-section {
+  background: #241507 !important;
+  border-color: #80551B !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .18) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs nav {
+  background: #35200F !important;
+  border-color: #80551B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button {
+  background: transparent !important;
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button:hover {
+  background: #2B1A0C !important;
+  color: #FFC247 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button.is-active {
+  background: #FFC247 !important;
+  border-bottom-color: #FFC247 !important;
+  color: #1A0F05 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-heading h2,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__top strong,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post h3,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__actions,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__actions button,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__actions span {
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tab-panel {
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post {
+  background: #2B1A0C !important;
+  border-color: #80551B !important;
+  border-top-color: #FFC247 !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .18) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__top small,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post p,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__actions,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__top-actions {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__visibility {
+  background: #35200F !important;
+  border: 1px solid #80551B !important;
+  color: #FFC247 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__top-actions > button,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__menu > button {
+  background: transparent !important;
+  border-color: #80551B !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__actions button:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__top-actions > button:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__menu > button:hover {
+  color: #FFC247 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__popover {
+  background: #2B1A0C !important;
+  border-color: #80551B !important;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, .3) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__popover button {
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-post__popover button:hover {
+  background: #35200F !important;
+  color: #FFC247 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-empty {
+  background: #2B1A0C !important;
+  border-color: #80551B !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .create-post-backdrop {
+  background: rgba(26, 15, 5, .78) !important;
+}
+
+html[data-theme='dark'] .create-post-modal {
+  background: #241507 !important;
+  color: #FFF3D9 !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .38) !important;
+}
+
+html[data-theme='dark'] .create-post-modal header,
+html[data-theme='dark'] .create-post-media {
+  background: #2B1A0C !important;
+}
+
+html[data-theme='dark'] .create-post-modal header,
+html[data-theme='dark'] .create-post-modal header button,
+html[data-theme='dark'] .create-post-body input,
+html[data-theme='dark'] .create-post-body textarea,
+html[data-theme='dark'] .create-post-body select,
+html[data-theme='dark'] .create-post-media,
+html[data-theme='dark'] .create-post-upload,
+html[data-theme='dark'] .create-post-camera {
+  border-color: #80551B !important;
+}
+
+html[data-theme='dark'] .create-post-modal h2,
+html[data-theme='dark'] .create-post-body > label,
+html[data-theme='dark'] .create-post-media strong {
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .create-post-modal header p,
+html[data-theme='dark'] .create-post-media small,
+html[data-theme='dark'] .create-post-upload span,
+html[data-theme='dark'] .create-post-camera span {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .create-post-modal header button,
+html[data-theme='dark'] .create-post-body input,
+html[data-theme='dark'] .create-post-body textarea,
+html[data-theme='dark'] .create-post-body select {
+  background: #35200F !important;
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='dark'] .create-post-upload,
+html[data-theme='dark'] .create-post-camera {
+  background: #35200F !important;
+  color: #FFC247 !important;
+}
+
+html[data-theme='dark'] .create-post-upload span,
+html[data-theme='dark'] .create-post-camera span,
+html[data-theme='dark'] .create-post-modal input::placeholder,
+html[data-theme='dark'] .create-post-modal textarea::placeholder {
+  color: #A99476 !important;
+  opacity: 1;
+}
+
+/* Account Management: warm cream/gold light-mode palette. Keep this scoped to
+   the account route so the rest of the astrologer dashboard is unchanged. */
+html[data-theme='light'] .app-shell--astrologer .account-management-page {
+  --account-light-bg: #FFF8E8;
+  --account-light-card: #FFFCF5;
+  --account-light-surface: #F8EEDB;
+  --account-light-gold: #FFC943;
+  --account-light-border: #E8B65A;
+  --account-light-text: #3B2112;
+  --account-light-secondary: #8B735E;
+  --account-light-muted: #A99476;
+  background: var(--account-light-bg) !important;
+  color: var(--account-light-text) !important;
+  padding-bottom: 128px !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-content,
+html[data-theme='light'] .app-shell--astrologer .account-management-page h1,
+html[data-theme='light'] .app-shell--astrologer .account-management-page h2,
+html[data-theme='light'] .app-shell--astrologer .account-management-page h3,
+html[data-theme='light'] .app-shell--astrologer .account-management-page h4,
+html[data-theme='light'] .app-shell--astrologer .account-management-page strong,
+html[data-theme='light'] .app-shell--astrologer .account-management-page b {
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-page-header p,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-copy > span,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-copy > small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-about p,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-panel-heading p,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-panel > p,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-field > span,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-info-item small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-stat-grid small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-service-grid small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-action-grid small {
+  color: var(--account-light-secondary) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-eyebrow,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__label,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-section-heading small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-section-heading > svg,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-setting-icon,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-info-item > svg,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-service-grid > div > span,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-stat-grid svg {
+  color: var(--account-light-gold) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__group,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__group--critical,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-hero,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-stats,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-services,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-actions-section,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-panel,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-setting-card {
+  background: var(--account-light-card) !important;
+  border-color: var(--account-light-border) !important;
+  box-shadow: 0 10px 24px rgba(111, 72, 21, .08) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__group,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__group--critical,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-stat-grid > div,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-service-grid > div,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-action-grid button,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-info-item,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-setting-icon {
+  background: var(--account-light-surface) !important;
+  border-color: var(--account-light-border) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-cover {
+  background: linear-gradient(120deg, #F8E7B5, #FFE9A9 55%, #FFF8E8) !important;
+  opacity: .72 !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-avatar {
+  background: var(--account-light-gold) !important;
+  border-color: var(--account-light-card) !important;
+  color: var(--account-light-text) !important;
+  box-shadow: 0 8px 18px rgba(111, 72, 21, .14) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs button,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-btn--outline,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-btn--ghost,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-status {
+  background: var(--account-light-surface) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs button:hover,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs button.is-active,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-action-grid button:hover,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-setting-card:hover {
+  background: var(--account-light-gold) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs button.is-active::after {
+  background: var(--account-light-gold) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-btn--primary {
+  background: var(--account-light-gold) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+  box-shadow: 0 5px 12px rgba(111, 72, 21, .12) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-field input,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-field textarea,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-field select,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-audit-toolbar select,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-search,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .account-confirm-input {
+  background: var(--account-light-surface) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page input::placeholder,
+html[data-theme='light'] .app-shell--astrologer .account-management-page textarea::placeholder {
+  color: var(--account-light-muted) !important;
+  opacity: 1;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs-section {
+  background: #FFF8E8 !important;
+  border-color: var(--account-light-border) !important;
+  box-shadow: 0 10px 24px rgba(111, 72, 21, .08) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs nav {
+  background: var(--account-light-surface) !important;
+  border-color: var(--account-light-border) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button {
+  background: transparent !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button:hover,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs nav button.is-active {
+  background: var(--account-light-gold) !important;
+  border-bottom-color: var(--account-light-gold) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-heading h2,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__top strong,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post h3,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__actions,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__actions button,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__actions span {
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-empty {
+  background: var(--account-light-card) !important;
+  border-color: var(--account-light-border) !important;
+  box-shadow: 0 8px 20px rgba(111, 72, 21, .07) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__top small,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post p,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-empty,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__top-actions {
+  color: var(--account-light-secondary) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__visibility,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-post__menu > button {
+  background: var(--account-light-surface) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-action-grid button > span,
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-stat-grid svg {
+  background: var(--account-light-gold) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav {
+  background: #241406 !important;
+  border-color: var(--account-light-border) !important;
+  box-shadow: 0 8px 22px rgba(44, 22, 10, .34) !important;
+  opacity: 1 !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item {
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item.is-active {
+  background: #5A3516 !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-gold) !important;
+  box-shadow: 0 0 0 1px rgba(232, 182, 90, .22), inset 0 0 18px rgba(232, 182, 90, .08) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item:hover {
+  background: rgba(232, 182, 90, .12) !important;
+  color: #FFF3D9 !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__ornament {
+  opacity: .82 !important;
+}
+
+html[data-theme='light'] .create-post-backdrop {
+  background: rgba(59, 33, 18, .28) !important;
+}
+
+html[data-theme='light'] .create-post-modal {
+  background: var(--account-light-bg) !important;
+  color: var(--account-light-text) !important;
+  border-color: var(--account-light-border) !important;
+}
+
+html[data-theme='light'] .create-post-modal header,
+html[data-theme='light'] .create-post-media,
+html[data-theme='light'] .create-post-body input,
+html[data-theme='light'] .create-post-body textarea,
+html[data-theme='light'] .create-post-body select,
+html[data-theme='light'] .create-post-upload,
+html[data-theme='light'] .create-post-camera {
+  background: var(--account-light-card) !important;
+  border-color: var(--account-light-border) !important;
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .create-post-modal h2,
+html[data-theme='light'] .create-post-body > label,
+html[data-theme='light'] .create-post-media strong {
+  color: var(--account-light-text) !important;
+}
+
+html[data-theme='light'] .create-post-modal header p,
+html[data-theme='light'] .create-post-media small,
+html[data-theme='light'] .create-post-upload span,
+html[data-theme='light'] .create-post-camera span {
+  color: var(--account-light-secondary) !important;
+}
+
+/* Account Management / My Profile header layout. The global action group is
+   rendered inside this page header on the account route; keep it in its own
+   top-right row so it cannot sit over the profile banner. */
+.app-shell--astrologer .account-management-page .account-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 24px;
+  row-gap: 12px;
+}
+
+.app-shell--astrologer .account-management-page .account-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  position: relative;
+  z-index: 4;
+}
+
+.app-shell--astrologer .account-management-page .account-header-actions > .topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: auto;
+  flex-wrap: nowrap;
+}
+
+.app-shell--astrologer .account-management-page .profile-account-hero {
+  clear: both;
+}
+
+@media (max-width: 900px) {
+  .app-shell--astrologer .account-management-page .account-page-header {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell--astrologer .account-management-page .account-header-actions {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .app-shell--astrologer .account-management-page .account-page-header > :first-child {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .app-shell--astrologer .account-management-page .account-header-actions,
+  .app-shell--astrologer .account-management-page .account-header-actions > .topbar-actions {
+    width: 100%;
+  }
+
+  .app-shell--astrologer .account-management-page .account-header-actions > .topbar-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

@@ -61,7 +61,7 @@ const DUE_PILL_STYLE = {
   dueSoon: { background: 'var(--coral-100)', color: 'var(--coral-600)', border: 'rgba(242, 102, 42, 0.32)' },
   overdue: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.30)' },
   answered: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)' },
-  disputed: { background: '#FFF7ED', color: '#EA580C', border: 'rgba(234, 88, 12, 0.32)' },
+  disputed: { background: 'var(--warning-bg)', color: 'var(--warning)', border: 'color-mix(in srgb, var(--warning) 32%, transparent)' },
   inProgress: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.26)' },
   closed: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.25)' },
   cancelled: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.30)' },
@@ -230,7 +230,7 @@ function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
         <button
           type="button"
           className={isDisputed ? 'btn btn-outline btn-sm' : isAnswered && !canEditAnswered ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm'}
-          style={isDisputed ? { color: '#EA580C', borderColor: 'rgba(234, 88, 12, 0.4)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: 'var(--red-600)', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
+          style={isDisputed ? { color: 'var(--warning)', borderColor: 'color-mix(in srgb, var(--warning) 40%, transparent)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: 'var(--red-600)', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
           onClick={(event) => {
             event.stopPropagation()
             handleOpen()
@@ -450,7 +450,7 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
                   marginBottom: 12,
                 }}
               >
-                <div style={{ fontWeight: 700, color: '#C2410C' }}>This question is under dispute</div>
+                <div style={{ fontWeight: 700, color: 'var(--warning)' }}>This question is under dispute</div>
                 <div className="muted" style={{ fontSize: 12.5, marginTop: 4 }}>
                   The customer raised a dispute for this answer. Review the concern and respond via View Dispute.
                 </div>

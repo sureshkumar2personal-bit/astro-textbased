@@ -52,7 +52,7 @@
   padding: 18px;
   border: 1px solid rgba(109, 40, 217, 0.1);
   border-radius: 22px;
-  background: #FFFFFF;
+  background: var(--surface-strong);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 14px 30px rgba(109, 40, 217, 0.06);
 }
 
@@ -90,7 +90,7 @@
   padding: 0 16px;
   border: 1px solid var(--surface-border);
   border-radius: 11px;
-  background: #FFFFFF;
+  background: var(--surface-strong);
   font-weight: 700;
 }
 
@@ -136,12 +136,12 @@
   border: 1px solid rgba(109, 40, 217, 0.12);
   border-right: 1px solid rgba(109, 40, 217, 0.12);
   border-radius: 12px;
-  background: #F5F3FB;
+  background: var(--surface-soft);
 }
 
 .astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-muted {
   border-color: rgba(109, 40, 217, 0.06);
-  background: #FAFAFC;
+  background: var(--surface);
   opacity: 0.55;
 }
 
@@ -166,12 +166,12 @@
 
 .astro-appointment-history .apt-scheduling-calendar--history .apt-history-cell.has-rescheduled {
   border-color: rgba(249, 115, 22, 0.3);
-  background: #FFF7ED;
+  background: var(--warning-bg);
 }
 
 /* Today (not selected): outline only, so it doesn't compete with a status tint */
 .astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell.is-today {
-  background: #F5F3FB;
+  background: var(--surface-soft);
   box-shadow: inset 0 0 0 1.5px var(--primary);
 }
 
@@ -233,7 +233,7 @@
   padding: 16px 20px;
   border: 1px solid rgba(109, 40, 217, .08);
   border-radius: 18px;
-  background: rgba(255, 255, 255, .84);
+  background: var(--surface-strong);
   box-shadow: 0 8px 24px rgba(88, 55, 150, .06);
 }
 .astro-appointment-history > .apt-history-toolbar .apt-history-filters { display: contents; }
@@ -244,7 +244,7 @@
   gap: 4px;
   padding: 3px;
   border-radius: 13px;
-  background: #f6f5fb;
+  background: var(--surface-soft);
 }
 .astro-appointment-history > .apt-history-toolbar .apt-history-tabs button {
   min-height: 38px;
@@ -272,7 +272,7 @@
   min-height: 48px;
   border-radius: 12px;
   font-size: 13px;
-  background: #fff;
+  background: var(--surface-soft);
 }
 .astro-appointment-history .apt-main--history {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -323,7 +323,7 @@
   border: 1px solid var(--surface-border);
   border-right: 3px solid var(--primary);
   border-radius: 24px;
-  background: #FFFFFF;
+  background: var(--surface-strong);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 10px 24px rgba(15, 23, 42, 0.05);
   cursor: pointer;
   transition: box-shadow 160ms ease, transform 160ms ease;
@@ -539,4 +539,51 @@
   .astro-appointment-history .apt-history-item__info {
     justify-content: flex-start;
   }
+}
+
+/* Dark-mode surfaces for the live history composition. These selectors target
+   the original white/grey declarations above and leave the light theme intact. */
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar,
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar .apt-history-tabs {
+  background: #281A0D;
+  border-color: #79531C;
+}
+
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar .apt-history-tabs button {
+  background: #281A0D;
+  color: #FFF2D5;
+}
+
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar .apt-history-tabs button.is-active {
+  background: #FFC13D;
+  color: #38230B;
+}
+
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar .apt-calendar-search input,
+html[data-theme='dark'] .astro-appointment-history > .apt-history-toolbar .apt-history-status-filter {
+  background: #211509;
+  border-color: #79531C;
+  color: #FFF2D5;
+}
+
+html[data-theme='dark'] .astro-appointment-history .apt-scheduling-calendar--history {
+  background: #211509;
+  border-color: #79531C;
+}
+
+html[data-theme='dark'] .astro-appointment-history .apt-scheduling-calendar--history .apt-month-view,
+html[data-theme='dark'] .astro-appointment-history .apt-scheduling-calendar--history .apt-month-header,
+html[data-theme='dark'] .astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell {
+  background: #211509;
+  border-color: #64451D;
+}
+
+html[data-theme='dark'] .astro-appointment-history .apt-scheduling-calendar--history .apt-month-cell {
+  background: #30200F;
+}
+
+html[data-theme='dark'] .astro-appointment-history .apt-history-item {
+  background: #352310;
+  border-color: #79531C;
+  color: #FFF2D5;
 }
