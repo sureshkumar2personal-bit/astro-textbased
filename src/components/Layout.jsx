@@ -480,6 +480,7 @@ export default function Layout() {
 
   const [headerVisible, setHeaderVisible] = useState(true)
   const [hasPageHeader, setHasPageHeader] = useState(false)
+  const [dndConfirmOpen, setDndConfirmOpen] = useState(false)
   const headerVisibleRef = useRef(true)
   const lastScrollYRef = useRef(0)
 
@@ -533,6 +534,14 @@ export default function Layout() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const handleDndToggle = () => {
+    if (astrologerServices.dndEnabled) {
+      actions.updateAstrologerServices({ dndEnabled: false })
+      return
+    }
+    setDndConfirmOpen(true)
+  }
+
   const globalActions = (
     <div className="topbar-actions" ref={actionRef}>
       {!isAstrologer && <ActiveCallIndicator />}
@@ -565,6 +574,16 @@ export default function Layout() {
         {shellIsAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
       </button>
       <ThemeToggle />
+      {shellIsAstrologer && (
+        <button
+          type="button"
+          className={`astrologer-dnd-toggle${astrologerServices.dndEnabled ? ' is-active' : ''}`}
+          aria-pressed={astrologerServices.dndEnabled}
+          onClick={handleDndToggle}
+        >
+          <span className="astrologer-dnd-toggle__dot" /> DND Mode
+        </button>
+      )}
       <button
         type="button"
         className="avatar-chip"
@@ -574,7 +593,7 @@ export default function Layout() {
         }}
       >
         <span className="avatar-circle">
-          {headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
+          {shellIsAstrologer && headerName === 'Dr. Rani' ? <img src="/astrologer-photos/reference/dr-rani.png" alt="" /> : headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
         </span>
         <span>{headerName}</span>
         {shellIsAstrologer && (
@@ -583,6 +602,7 @@ export default function Layout() {
             {astrologerServices.dndEnabled ? 'DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
           </span>
         )}
+        {shellIsAstrologer && <ChevronDown size={14} aria-hidden="true" />}
       </button>
       <button
         type="button"
@@ -623,7 +643,7 @@ export default function Layout() {
 
   return (
     <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader }}>
-      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}`}>
+      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ''}`}>
       <aside className={`sidebar sidebar--${role}`}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
@@ -647,6 +667,7 @@ export default function Layout() {
           <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
             {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
             {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
+            {shellIsAstrologer && <div className="astrologer-topbar-brand"><span className="astrologer-topbar-brand__mark"><img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" /></span><strong>Astro Connect</strong></div>}
             {globalActions}
           </header>
         )}
@@ -675,6 +696,45 @@ export default function Layout() {
         </div>
         {isAstrologer && <><IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><CallAstrologer /><InstantChatAstrologer /></>}
       </div>
+      {dndConfirmOpen && (
+        <div className="modal-overlay astrologer-dnd-confirm-overlay" role="presentation" onClick={() => setDndConfirmOpen(false)}>
+          <section
+            className="modal-card astrologer-dnd-confirm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="astrologer-dnd-confirm-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 id="astrologer-dnd-confirm-title">Enable DND Mode?</h2>
+            <p>Consultation appointments will not be available while DND Mode is enabled.</p>
+            <div className="astrologer-dnd-confirm__actions">
+              <button type="button" className="btn btn-outline" onClick={() => setDndConfirmOpen(false)}>Cancel</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  actions.updateAstrologerServices({ dndEnabled: true })
+                  setDndConfirmOpen(false)
+                }}
+              >
+                Enable DND Mode
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {shellIsAstrologer && (
+        <nav className="astrologer-bottom-nav" aria-label="Astrologer navigation">
+          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
+          {config.nav.map(({ to, label, icon: Icon, end }) => (
+            <NavLink key={label} to={`${basePath}/${to}`.replace(/\/$/, '')} end={end} className={({ isActive }) => `astrologer-bottom-nav__item${isActive ? ' is-active' : ''}`}>
+              <Icon size={17} aria-hidden="true" />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
+        </nav>
+      )}
     </div>
     </GlobalHeaderActionsContext.Provider>
   )

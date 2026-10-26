@@ -54,7 +54,7 @@ export default function StatusBadge({ label, className = '' }) {
   return (
     <span
       className={[
-        'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold',
+        'status-badge inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold',
         tone === 'badge-appointment-upcoming' ? 'border border-[#F59E0B] bg-[#FFFBEB] text-[color:var(--ink)]' : '',
         tone === 'badge-appointment-completed' ? 'border border-[#10B981] bg-[#ECFDF5] text-[color:var(--ink)]' : '',
         tone === 'badge-appointment-cancelled' ? 'border border-[#EF4444] bg-[#FEF2F2] text-[color:var(--ink)]' : '',
@@ -68,9 +68,10 @@ export default function StatusBadge({ label, className = '' }) {
         tone === 'badge-violet' ? 'bg-[color:var(--primary-bg)] text-[color:var(--primary)]' : '',
         className,
       ].join(' ')}
+      data-tone={tone}
     >
       <span className={[
-        'h-[7px] w-[7px] rounded-full',
+        'status-badge__dot h-[7px] w-[7px] rounded-full',
         tone === 'badge-appointment-upcoming' ? 'bg-[#F59E0B]' : '',
         tone === 'badge-appointment-completed' ? 'bg-[#10B981]' : '',
         tone === 'badge-appointment-cancelled' ? 'bg-[#EF4444]' : '',

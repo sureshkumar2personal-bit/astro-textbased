@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
-import { Search, X, Paperclip, ChevronLeft, ChevronRight, Sparkles, FileText, Check } from 'lucide-react'
+import { Search, X, Paperclip, ChevronLeft, ChevronRight, Sparkles, FileText, Check, CalendarDays } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -27,11 +27,11 @@ import {
   hasOpenDispute,
   isQuestionAnswered,
   isQuestionCancelled,
-  sortAnswerQueue,
   ANSWER_CHAR_LIMIT,
   canEditQuestionAnswer,
 } from '../utils/answer.js'
-import { getQuestionSourceLabel } from '../utils/questions.js'
+import { getMonthKeyFromDate, getMonthLabel, getQuestionSourceLabel } from '../utils/questions.js'
+import { parseDisplayDate } from '../utils/date.js'
 import {
   TempleArchIcon,
   TempleLampIcon,
@@ -49,7 +49,7 @@ const DUE_FILTER_KEY = {
   'Cancelled': 'cancelled',
 }
 
-const QUESTIONS_PAGE_SIZE = 8
+const QUESTIONS_PAGE_SIZE = 9
 
 const TYPE_FILTER_KEY = {
   'General Pending': 'generalPending',
@@ -115,6 +115,34 @@ function formatDateTime(value) {
   return `${day} · ${time}`
 }
 
+function getQuestionAskedDate(question = {}) {
+  const value = question.askedAt || question.askedDate || question.askedOn || question.receivedAt || question.raisedAt || question.submittedAt
+  if (value) {
+    const parsed = new Date(value)
+    if (!Number.isNaN(parsed.getTime())) return parsed
+  }
+  if (question.raised) {
+    const parsed = parseDisplayDate(question.raised)
+    if (!Number.isNaN(parsed.getTime())) return parsed
+  }
+  return null
+}
+
+function getQuestionMonthKey(question) {
+  const date = getQuestionAskedDate(question)
+  return date ? getMonthKeyFromDate(date) : 'unknown'
+}
+
+function QuestionMonthHeading({ label, count }) {
+  return (
+    <h3 className="tbq-question-month__heading">
+      <CalendarDays size={22} aria-hidden="true" />
+      <span className="tbq-question-month__name">{label}</span>
+      <span className="tbq-question-month__count">({count})</span>
+    </h3>
+  )
+}
+
 function DeadlinePill({ dueState, label }) {
   const style = DUE_PILL_STYLE[dueState] || DUE_PILL_STYLE.pending
   const text = label || DUE_PILL_LABEL[dueState] || 'Pending'
@@ -145,7 +173,8 @@ function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
   const deadline = getAnswerDeadlineLabel(question, nowMs)
   const source = getQuestionSourceLabel(question)
   const openQuestion = source === 'Open Question'
-  const received = formatDateTime(question.receivedAt || question.raisedAt || question.submittedAt || question.raised)
+  const askedDate = getQuestionAskedDate(question)
+  const received = askedDate ? formatDateTime(askedDate.toISOString()) : ''
   const deadlineDate = formatAnswerDate(getQuestionAnswerDeadline(question))
   const accent = CARD_TONE[dueState] || CARD_TONE.pending
   const canEditAnswered = dueState === 'answered' && canEditQuestionAnswer(question, nowMs)
@@ -180,7 +209,6 @@ function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
     >
       <div className="question-card__customer">
         <strong>{question.user}</strong>
-        <span>{question.submittedByUserId || question.userId || '—'}</span>
       </div>
       <div className="question-card__details">
         <strong>{question.id}</strong>
@@ -314,7 +342,6 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
             <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleArchIcon size={14} />Question Summary</div>
             <div className="astrologer-modal-highlight astrologer-modal-details-grid">
               <div><strong>Customer Name</strong><div className="muted">{question.user}</div></div>
-              <div><strong>User ID</strong><div className="muted">{question.submittedByUserId || question.userId || '—'}</div></div>
               <div><strong>Question ID</strong><div className="muted">{question.id}</div></div>
               <div><strong>Source</strong><div className="muted">{openQuestion ? 'Open Question' : source}</div></div>
               <div><strong>Question Type</strong><div className="muted">{question.type}</div></div>
@@ -622,7 +649,10 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myQuestions])
 
-  const queue = useMemo(() => sortAnswerQueue(myQuestions), [myQuestions])
+  const queue = useMemo(
+    () => [...myQuestions].sort((a, b) => (getQuestionAskedDate(b)?.getTime() || -1) - (getQuestionAskedDate(a)?.getTime() || -1)),
+    [myQuestions],
+  )
 
   const summary = useMemo(() => getAnswerSummary(myQuestions, nowMs), [myQuestions, nowMs])
 
@@ -635,16 +665,36 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
     return filterAnswerQuestions(queue, { due, search: appliedSearch }, nowMs)
   }, [queue, dueFilter, typeOption, appliedSearch, nowMs])
 
-  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / QUESTIONS_PAGE_SIZE))
+  const questionsPageSize = QUESTIONS_PAGE_SIZE
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / questionsPageSize))
   const currentPage = Math.min(page, totalPages)
   const pagedQuestions = filteredQuestions.slice(
-    (currentPage - 1) * QUESTIONS_PAGE_SIZE,
-    currentPage * QUESTIONS_PAGE_SIZE,
+    (currentPage - 1) * questionsPageSize,
+    currentPage * questionsPageSize,
   )
+
+  const groupedQuestions = useMemo(() => {
+    const groups = new Map()
+    pagedQuestions.forEach((question) => {
+      const key = getQuestionMonthKey(question)
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key).push(question)
+    })
+
+    return [...groups.entries()]
+      .map(([key, group]) => ({
+        key,
+        label: key === 'unknown' ? 'Date unavailable' : getMonthLabel(key),
+        sortKey: key === 'unknown' ? -1 : new Date(`${key}-01T00:00:00`).getTime(),
+        count: filteredQuestions.filter((question) => getQuestionMonthKey(question) === key).length,
+        questions: group.sort((a, b) => (getQuestionAskedDate(b)?.getTime() || -1) - (getQuestionAskedDate(a)?.getTime() || -1)),
+      }))
+      .sort((a, b) => b.sortKey - a.sortKey)
+  }, [filteredQuestions, pagedQuestions])
 
   useEffect(() => {
     setPage(1)
-  }, [appliedSearch, dueFilter, typeOption])
+  }, [appliedSearch, dueFilter, typeOption, questionsPageSize])
 
   const answerQuestion = useMemo(
     () => (answerId ? myQuestions.find((question) => question.id === answerId) || null : null),
@@ -713,12 +763,12 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
   }, [actions])
 
   return (
-    <div>
+    <div className="tbq-answer-page">
       {!hidePageHeader && (
         <PageHeader
           eyebrow="Astrologer"
           title="Question Details"
-          subtitle="Answer received questions within 30 days, oldest first."
+          subtitle="Answer received questions within 30 days, newest first."
           showBack
           backTo={routes.textBasedQuestions}
           backIcon={backIcon}
@@ -817,26 +867,29 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
         </div>
       </Section>
 
-      <Section
-        title="Questions"
-        icon={TempleScrollIcon}
-        titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>({filteredQuestions.length} {dueFilter !== 'All' ? ` · ${dueFilter.toLowerCase()}` : 'total'})</span>}
-      >
+      <Section className="tbq-question-list-section">
         {filteredQuestions.length === 0 && (
           <Card>
             <div className="muted">No matching questions found. Try a different search term or filter.</div>
           </Card>
         )}
-        {filteredQuestions.length > 0 && <div className="question-list-shell">
-          <div className="question-list">
-            {pagedQuestions.map((question) => (
-              <QuestionTableRow
-                key={question.id}
-                question={question}
-                nowMs={nowMs}
-                onAnswer={openAnswer}
-                onViewDispute={openDispute}
-              />
+        {filteredQuestions.length > 0 && <div className="question-list-shell tbq-question-months">
+          <div className="tbq-question-groups">
+            {groupedQuestions.map((month) => (
+              <section className="tbq-question-month" key={month.key} aria-label={`${month.label} questions`}>
+                <QuestionMonthHeading label={month.label} count={month.count} />
+                <div className="question-list">
+                  {month.questions.map((question) => (
+                    <QuestionTableRow
+                      key={question.id}
+                      question={question}
+                      nowMs={nowMs}
+                      onAnswer={openAnswer}
+                      onViewDispute={openDispute}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
           <div className="question-table-pagination">
