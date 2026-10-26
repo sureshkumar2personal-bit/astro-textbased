@@ -1,0 +1,718 @@
+/* ==========================================================================
+   Follower Perks & Benefits - Zodiac & Jyotish Panchangam Editor
+   Compact & Refined Design System
+   ========================================================================== */
+
+/* Main Section Container - Full Width */
+.zte {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  padding: 22px 24px;
+  border: 1px solid var(--surface-border, #e7e0f0);
+  border-radius: 18px;
+  background: var(--surface, #fff);
+  box-shadow: 0 10px 28px rgba(54, 38, 92, 0.055);
+  box-sizing: border-box;
+}
+
+/* Header */
+.zte-header {
+  display: grid;
+  gap: 3px;
+}
+
+.zte-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink, #1e293b);
+  letter-spacing: -0.015em;
+}
+
+.zte-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted, #64748b);
+  line-height: 1.4;
+}
+
+/* Top-Level Mode Switcher (Zodiac vs Panchangam) - Compact Segmented Pill */
+.zte-mode-switcher,
+.zte-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  width: fit-content;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #f1ecf7;
+  border: 1px solid #e2d7ed;
+  box-sizing: border-box;
+}
+
+.zte-mode-btn,
+.zte-mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.zte-mode:hover {
+  color: #7c3aed;
+}
+
+.zte-mode-btn-active,
+.zte-mode-active {
+  background: #fff !important;
+  color: #7c3aed !important;
+  border-color: #d8b4fe !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12) !important;
+}
+
+.zte-mode-active:last-child {
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.12) !important;
+}
+
+/* Section Subheading (1 Zodiac Signs / 2 Specializations) */
+.zte-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 0;
+}
+
+.zte-section-heading > span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f3edff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.zte-section-heading h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.zte-section-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 11px;
+}
+
+/* Element Filter Row */
+.zte-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 2px;
+}
+
+.zte-filter-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7c3aed;
+}
+
+.zte-filters {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.zte-filter {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border: 1px solid #e5dcf1;
+  border-radius: 999px;
+  background: #fbfaff;
+  color: #64748b;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zte-filter:hover {
+  border-color: #c4b5fd;
+  color: #7c3aed;
+  background: #f5f0ff;
+}
+
+.zte-filter-active {
+  border-color: #7c3aed;
+  background: #efe5fb;
+  color: #6d28d9;
+  font-weight: 750;
+}
+
+/* 12 Zodiac Signs Grid */
+.zte-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+}
+
+@media (max-width: 800px) {
+  .zte-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .zte-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.zte-sign {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 6px 4px;
+  border: 1.5px solid #ebe5f4;
+  border-radius: 10px;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.16s ease;
+}
+
+.zte-sign:hover {
+  border-color: #c4b5fd;
+  background: #faf8ff;
+  transform: translateY(-1px);
+}
+
+.zte-sign:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 1px;
+}
+
+.zte-sign-selected {
+  border-color: #7c3aed !important;
+  background: linear-gradient(135deg, #fbf7ff 0%, #f4ecff 100%) !important;
+  box-shadow: 0 0 0 1px #7c3aed, 0 4px 12px rgba(124, 58, 237, 0.12) !important;
+}
+
+.zte-symbol {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.zte-name {
+  font-size: 11px;
+  font-weight: 750;
+  color: #1e293b;
+}
+
+.zte-element {
+  font-size: 9px;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #f3edff;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.zte-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #7c3aed;
+}
+
+/* Specializations (Jyotish Panchangam) Grid */
+.zte-special-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1100px) {
+  .zte-special-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .zte-special-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .zte-special-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.zte-special-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 74px;
+  padding: 9px 11px;
+  border: 1.5px solid #ebe5f4;
+  border-radius: 11px;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  transition: all 0.16s ease;
+}
+
+.zte-special-card:hover {
+  border-color: #c4b5fd;
+  background: #faf8ff;
+  transform: translateY(-1px);
+}
+
+.zte-special-card.zte-sign-selected {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fffdfa 0%, #fef8ee 100%) !important;
+  box-shadow: 0 0 0 1px #f59e0b, 0 4px 12px rgba(217, 119, 6, 0.12) !important;
+}
+
+.zte-special-icon {
+  color: #d97706;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.zte-special-card strong {
+  padding-right: 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.25;
+}
+
+.zte-special-card > span:not(.zte-special-icon):not(.zte-check) {
+  color: #7c3aed;
+  background: #f5effe;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: auto;
+}
+
+/* Two-column Workspace (Editor + Live Follower Preview) */
+.zte-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 2px;
+}
+
+@media (max-width: 980px) {
+  .zte-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Editor Panel */
+.zte-panel {
+  display: grid;
+  gap: 11px;
+  padding: 14px 16px;
+  border: 1px solid #eee8f5;
+  border-radius: 13px;
+  background: #faf9fd;
+}
+
+.zte-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee8f5;
+}
+
+.zte-selected-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.zte-sign-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.zte-ruler {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f3edff;
+  color: #7c3aed;
+  font-size: 10.5px;
+  font-weight: 750;
+}
+
+.zte-vedic-meta {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.zte-vedic-meta span {
+  padding: 3px 8px;
+  border: 1px solid #e9d5ff;
+  border-radius: 999px;
+  background: #faf5ff;
+  color: #6b21a8;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Segmented Period / Specialization Tabs */
+.zte-tabs {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #ede6f5;
+  border: none;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+
+.zte-tab {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zte-tab:hover {
+  color: #7c3aed;
+}
+
+.zte-tab-active {
+  background: #fff !important;
+  color: #7c3aed !important;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.12) !important;
+}
+
+/* Textarea Field */
+.zte-field {
+  display: grid;
+  gap: 5px;
+}
+
+.zte-field-label {
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #334155;
+}
+
+.zte-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #dcd1e9;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #1e293b;
+  resize: vertical;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.zte-textarea:focus {
+  outline: 0;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+}
+
+/* Inspiration Chips */
+.zte-inspiration {
+  display: grid;
+  gap: 5px;
+}
+
+.zte-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.zte-chip {
+  padding: 4px 9px;
+  border: 1px solid #ded5e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #5d4c6c;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zte-chip:hover {
+  border-color: #7c3aed;
+  background: #f5effe;
+  color: #6d28d9;
+}
+
+/* Actions */
+.zte-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.zte-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(124, 58, 237, 0.2);
+  transition: all 0.15s ease;
+}
+
+.zte-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.26);
+}
+
+.zte-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border: 1px solid #dcd1e9;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zte-secondary:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+  background: #fbfaff;
+}
+
+.zte-saved {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 750;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: #f0fdf4;
+}
+
+/* Live Follower Mobile Preview Card */
+.zte-preview {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #3b2269;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #241348 0%, #3e1e6f 100%);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(37, 18, 72, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.zte-preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d8b4fe;
+}
+
+.zte-live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 9.5px;
+  font-weight: 750;
+}
+
+.zte-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.zte-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.zte-profile strong {
+  display: block;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 750;
+}
+
+.zte-profile span {
+  display: block;
+  font-size: 10.5px;
+  color: #c4b5fd;
+}
+
+.zte-preview-symbol {
+  margin-left: auto;
+  font-size: 24px !important;
+  color: #fde047 !important;
+}
+
+.zte-blessing {
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: rgba(254, 240, 138, 0.16);
+  border: 1px solid rgba(254, 240, 138, 0.25);
+  color: #fef08a;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.zte-temple-pill {
+  width: fit-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e9d5ff;
+  font-size: 10px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.zte-preview-period {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #e9d5ff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.zte-preview-text {
+  min-height: 70px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #f3e8ff;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zte-lucky-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.zte-lucky-pills span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f5f3ff;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zte-preview-vedic {
+  background: linear-gradient(145deg, #1f0d3d 0%, #35145b 50%, #4a1975 100%) !important;
+  border: 1px solid #5b21b6 !important;
+}

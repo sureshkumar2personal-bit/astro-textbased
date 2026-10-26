@@ -183,7 +183,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
         <Route path="/astrologer/perks-benefits" element={<Navigate to="/astrologer/perks-benefits/settings" replace />} />
         <Route path="/astrologer/perks-benefits/settings" element={<PerksAndBenefits defaultTab="settings" />} />
-        <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="delivery" />} />
+        <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="settings" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />
         <Route path="/astrologer/atonement" element={<Atonement />} />
         <Route path="/astrologer/profile" element={<AstrologerMyProfile />} />
