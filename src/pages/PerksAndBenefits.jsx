@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
   Gift,
   SlidersHorizontal,
@@ -11,34 +11,24 @@ import {
   Clock,
   XCircle,
   Plus,
-  Trash2,
   FileText,
   Mic,
   Video,
   Sparkles,
   Search,
   Check,
-  HelpCircle,
   Calendar,
   CalendarDays,
-  AlertCircle,
-  Info,
-  Layers,
-  Tag,
-  ArrowRight,
-  Filter,
-  DollarSign
+  AlertCircle
 } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import Section from '../components/ui/Section.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
-import { useAppData } from '../state/AppDataContext.jsx'
-import { useAuth } from '../state/AuthContext.jsx'
 import PerksSettings from './astrologer/PerksSettings.jsx'
-import PerksBenefitManagement from './astrologer/PerksBenefitManagement.jsx'
 import PerksBenefitHistory from './astrologer/PerksBenefitHistory.jsx'
+import ZodiacTemplateEditor from './astrologer/ZodiacTemplateEditor.jsx'
 import './astrologer/perksSettings.css'
 
 // Predefined Content Categories as per prompt requirements
@@ -655,17 +645,17 @@ export default function PerksAndBenefits({ defaultTab }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
-  const { questions } = useAppData()
-
-  const computeTab = () => {
+  const computeTab = useCallback(() => {
+    if (defaultTab === 'delivery') return 'settings'
     if (defaultTab) return defaultTab
-    if (location.pathname.endsWith('/delivery')) return 'delivery'
+    if (location.pathname.endsWith('/delivery')) return 'settings'
     if (location.pathname.endsWith('/history')) return 'history'
     if (location.pathname.endsWith('/settings')) return 'settings'
     const qTab = searchParams.get('tab')
-    if (qTab && ['settings', 'delivery', 'history'].includes(qTab)) return qTab
+    if (qTab === 'delivery' || qTab === 'settings') return 'settings'
+    if (qTab === 'history') return 'history'
     return 'settings'
-  }
+  }, [defaultTab, location.pathname, searchParams])
 
   // Main Section Tab state
   const [activeTab, setActiveTab] = useState(computeTab)
@@ -673,7 +663,7 @@ export default function PerksAndBenefits({ defaultTab }) {
 
   useEffect(() => {
     setActiveTab(computeTab())
-  }, [defaultTab, location.pathname, searchParams])
+  }, [computeTab])
 
   // Categories list (Expandable)
   const [categories, setCategories] = useState(INITIAL_CATEGORIES)
@@ -721,6 +711,8 @@ export default function PerksAndBenefits({ defaultTab }) {
   // Modals & Feedback
   const [showSaveSummaryModal, setShowSaveSummaryModal] = useState(false)
   const [saveSuccessAlert, setSaveSuccessAlert] = useState(false)
+  const [visibilitySettings, setVisibilitySettings] = useState({ discounts: true, profile: true, badge: true, savings: true })
+  const [pendingVisibilitySettings, setPendingVisibilitySettings] = useState(null)
   const [pendingTemplate, setPendingTemplate] = useState(null)
 
   // Deliveries & Content Creation State
@@ -870,6 +862,10 @@ export default function PerksAndBenefits({ defaultTab }) {
   // Save Settings Changes Action
   const handleConfirmSave = () => {
     setShowSaveSummaryModal(false)
+    if (pendingVisibilitySettings) {
+      setVisibilitySettings(pendingVisibilitySettings)
+      setPendingVisibilitySettings(null)
+    }
     setSaveSuccessAlert(true)
 
     // Automatically update current month's commitment list in History
@@ -1062,30 +1058,15 @@ export default function PerksAndBenefits({ defaultTab }) {
 
   return (
     <div className="perks-benefits-page">
-      <PageHeader
-        eyebrow="Astrologer Workspace"
-        title="Perks & Benefits"
-      />
+      <PageHeader eyebrow="Astrologer Workspace" title="Benefit Management" />
 
       {/* Main Tab Navigation */}
       <Section className="mt-4">
         <div className="perks-tab-navigation">
-          <button
-            type="button"
-            className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => navigate('/astrologer/perks-benefits/settings')}
-          >
+          <button type="button" className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => navigate('/astrologer/perks-benefits/settings')}>
             <SlidersHorizontal size={18} />
-            <span>1. Settings</span>
-          </button>
-          <button
-            type="button"
-            className={`perks-tab-btn ${activeTab === 'delivery' ? 'active' : ''}`}
-            onClick={() => navigate('/astrologer/perks-benefits/delivery')}
-          >
-            <Send size={18} />
-            <span>2. Benefit Management</span>
-            {deliveries.length > 0 && <span className="tab-pill-count">{activeCommittedCategories.length} Active</span>}
+            <span>Benefit Management</span>
+            <span className="tab-pill-count">Combined</span>
           </button>
           <button
             type="button"
@@ -1226,11 +1207,18 @@ export default function PerksAndBenefits({ defaultTab }) {
       )}
 
       {activeTab === 'settings' && (
-        <PerksSettings
-          tierConfigs={tierConfigs}
-          onSave={() => setShowSaveSummaryModal(true)}
-          onManageBenefits={() => navigate('/astrologer/perks-benefits/delivery')}
-        />
+        <>
+          <div id="follower-perks-benefits" className="mt-6 mb-6"><ZodiacTemplateEditor /></div>
+          <PerksSettings
+            tierConfigs={tierConfigs}
+            onTierSave={(tier, nextConfig) => setTierConfigs((current) => ({ ...current, [tier]: nextConfig }))}
+            onSave={(nextVisibilitySettings) => {
+              setPendingVisibilitySettings(nextVisibilitySettings)
+              setShowSaveSummaryModal(true)
+            }}
+            onManageBenefits={() => document.getElementById('subscriber-benefit-editor')?.scrollIntoView({ behavior: 'smooth' })}
+          />
+        </>
       )}
 
       {activeTab === LEGACY_SETTINGS_TAB && (
@@ -1624,12 +1612,7 @@ export default function PerksAndBenefits({ defaultTab }) {
       {/* ========================================================================= */}
       {/* 2. CONTENT DELIVERY TAB                                                   */}
       {/* ========================================================================= */}
-      {activeTab === 'delivery' && (
-        <PerksBenefitManagement
-          tierConfigs={tierConfigs}
-          onSave={(nextConfig) => setTierConfigs(nextConfig)}
-        />
-      )}
+      {activeTab === 'delivery' && null}
 
       {activeTab === LEGACY_SETTINGS_TAB && (
         <div className="content-delivery-flow">
@@ -1999,6 +1982,10 @@ export default function PerksAndBenefits({ defaultTab }) {
                         ]),
                       ).join(', ')}
                     </strong>
+                  </div>
+                  <div className="summary-row">
+                    <span className="muted">Benefit Visibility:</span>
+                    <strong>{Object.values(pendingVisibilitySettings || visibilitySettings).filter(Boolean).length} of 4 enabled</strong>
                   </div>
                 </div>
 
