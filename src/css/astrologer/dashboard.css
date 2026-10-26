@@ -8603,6 +8603,156 @@ button.apt-week-day:focus-visible {
 .adash-campaign-btn--primary { border-color: var(--primary); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
 .adash-campaign-btn--primary:hover { border-color: var(--primary-dark); color: #fff; box-shadow: 0 6px 14px rgba(109, 40, 217, 0.25); }
 
+/* Your Campaigns motion: a quiet, authored arrival followed by lightweight
+   interaction feedback. Kept scoped so other dashboard cards are unchanged. */
+@keyframes adash-campaign-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes adash-campaign-active-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 193, 37, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(244, 193, 37, .14); }
+}
+
+.adash-campaigns-section .adash-campaign {
+  animation: adash-campaign-enter 520ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.adash-campaigns-section .adash-campaign:nth-child(2) { animation-delay: 70ms; }
+.adash-campaigns-section .adash-campaign:nth-child(3) { animation-delay: 140ms; }
+.adash-campaigns-section .adash-campaign:nth-child(4) { animation-delay: 210ms; }
+
+.adash-campaigns-section .adash-campaign-image {
+  transform-origin: center;
+  transition: transform 520ms cubic-bezier(.16, 1, .3, 1), filter 220ms ease;
+}
+
+.adash-campaigns-section .adash-campaign:hover {
+  transform: translateY(-4px);
+}
+
+.adash-campaigns-section .adash-campaign:hover .adash-campaign-image {
+  transform: scale(1.055);
+  filter: drop-shadow(0 11px 14px rgba(133, 79, 16, .18));
+}
+
+.adash-campaigns-section .adash-campaign-track > span {
+  transition: width 850ms cubic-bezier(.16, 1, .3, 1), background-color 220ms ease;
+}
+
+.adash-campaigns-section .adash-campaign-month-graph__area {
+  transition: opacity 800ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.adash-campaigns-section .adash-campaign-month-graph__line {
+  transition: stroke-dashoffset 800ms cubic-bezier(.16, 1, .3, 1), opacity 220ms ease;
+}
+
+.adash-campaigns-section .adash-campaign-status .status-badge[data-tone='badge-violet'],
+.adash-campaigns-section .adash-campaign-status .status-badge[data-tone='badge-amber'] {
+  animation: adash-campaign-active-pulse 2.8s ease-in-out 900ms 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adash-campaigns-section .adash-campaign,
+  .adash-campaigns-section .adash-campaign-status .status-badge[data-tone='badge-violet'],
+  .adash-campaigns-section .adash-campaign-status .status-badge[data-tone='badge-amber'] {
+    animation: none;
+  }
+
+  .adash-campaigns-section .adash-campaign,
+  .adash-campaigns-section .adash-campaign-image,
+  .adash-campaigns-section .adash-campaign-track > span,
+  .adash-campaigns-section .adash-campaign-month-graph__area,
+  .adash-campaigns-section .adash-campaign-month-graph__line {
+    transition-duration: 1ms;
+  }
+}
+
+/* Your Campaigns only: seamless promotional card carousel. */
+@keyframes adash-campaign-carousel-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.adash-campaigns-section .adash-campaign-carousel {
+  width: 100%;
+  overflow: hidden;
+}
+
+.adash-campaigns-section .adash-campaign-carousel__track {
+  display: flex;
+  width: max-content;
+  animation: adash-campaign-carousel-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.adash-campaigns-section .adash-campaign-carousel:hover .adash-campaign-carousel__track,
+.adash-campaigns-section .adash-campaign-carousel:focus-within .adash-campaign-carousel__track {
+  animation-play-state: paused;
+}
+
+.adash-campaigns-section .adash-campaign-carousel__set {
+  display: flex;
+  flex: none;
+  gap: 20px;
+  padding-right: 20px;
+}
+
+.adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+  flex: 0 0 clamp(220px, 21vw, 310px);
+  width: clamp(220px, 21vw, 310px);
+}
+
+.adash-campaigns-section .adash-campaign--clone {
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .adash-campaigns-section .adash-campaign-carousel__track {
+    animation-duration: 26s;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+    flex-basis: min(78vw, 300px);
+    width: min(78vw, 300px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adash-campaigns-section .adash-campaign-carousel__track {
+    animation: none;
+    width: 100%;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel__set--clone {
+    display: none;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 900px) {
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 820px) {
   .adash-hero { padding: 30px 26px; min-height: 220px; }
   .adash-hero-art { right: 20px; width: 76px; height: 76px; opacity: 0.6; }

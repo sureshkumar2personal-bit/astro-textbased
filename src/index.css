@@ -16806,6 +16806,92 @@ button.apt-week-day:focus-visible {
   .atonement-details-actions .btn { justify-content: center; }
 }
 
+/* Your Campaigns: active route stylesheet for the seamless horizontal carousel. */
+@keyframes adash-campaign-carousel-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.adash-campaigns-section .adash-campaign-carousel {
+  width: 100%;
+  overflow: hidden;
+}
+
+.adash-campaigns-section .adash-campaign-carousel__track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  animation: adash-campaign-carousel-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.adash-campaigns-section .adash-campaign-carousel:hover .adash-campaign-carousel__track,
+.adash-campaigns-section .adash-campaign-carousel:focus-within .adash-campaign-carousel__track {
+  animation-play-state: paused;
+}
+
+.adash-campaigns-section .adash-campaign-carousel__set {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 20px;
+  padding-right: 20px;
+}
+
+.adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+  flex: 0 0 clamp(220px, 21vw, 310px);
+  width: clamp(220px, 21vw, 310px);
+  min-width: 0;
+}
+
+.adash-campaigns-section .adash-campaign--clone {
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .adash-campaigns-section .adash-campaign-carousel__track {
+    animation-duration: 26s;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+    flex-basis: min(78vw, 300px);
+    width: min(78vw, 300px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adash-campaigns-section .adash-campaign-carousel__track {
+    width: 100%;
+    animation: none;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel__set--clone {
+    display: none;
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .adash-campaigns-section .adash-campaign-carousel .adash-campaign {
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 900px) {
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 640px) {
+  .adash-campaigns-section .adash-campaign-carousel__set:not(.adash-campaign-carousel__set--clone) {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Text-Based Questions module tabs ---------- */
 .tbq-module-tabs {
   display: flex;

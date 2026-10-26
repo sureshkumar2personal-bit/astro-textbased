@@ -143,43 +143,49 @@ export default function Dashboard() {
         }
       >
         {!showcaseCampaigns.length && <p className="muted" style={{ margin: 0, fontSize: 14 }}>No campaigns yet. Use Create Campaign to add one.</p>}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {showcaseCampaigns.map((campaign) => {
-            const pct = campaign.target ? Math.min(100, Math.round((campaign.sold / campaign.target) * 100)) : 0
-            return (
-              <article
-                key={campaign.id}
-                className="adash-campaign"
-                role="link"
-                tabIndex={0}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  navigate(routes.textBasedQuestions)
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    navigate(routes.textBasedQuestions)
-                  }
-                }}
-              >
-                <div className={`adash-campaign-thumb ${campaign.thumb}`}>
-                  <img className="adash-campaign-image" src={campaign.image} alt={`${campaign.category}: ${campaign.name} illustration`} />
-                  <span className="adash-campaign-status"><StatusBadge label={campaign.status} /></span>
-                </div>
-                <div className="adash-campaign-body">
-                  <div className="adash-campaign-labels">
-                    <div className="adash-campaign-category">{campaign.category}</div>
-                    <h3 className="adash-campaign-name">{campaign.name}</h3>
-                  </div>
-                  <div className="adash-campaign-sold">{campaign.sold} / {campaign.target} Questions Sold</div>
-                  <CampaignMonthGraph campaignId={campaign.id} sold={campaign.sold} target={campaign.target} />
-                  <div className="adash-campaign-track"><span style={{ width: `${pct}%` }} /></div>
-                </div>
-              </article>
-            )
-          })}
+        <div className="adash-campaign-carousel" aria-label="Your campaigns">
+          <div className="adash-campaign-carousel__track">
+            {[false, true].map((isClone) => (
+              <div className={`adash-campaign-carousel__set${isClone ? ' adash-campaign-carousel__set--clone' : ''}`} key={isClone ? 'campaigns-clone' : 'campaigns'} aria-hidden={isClone || undefined}>
+                {showcaseCampaigns.map((campaign) => {
+                  const pct = campaign.target ? Math.min(100, Math.round((campaign.sold / campaign.target) * 100)) : 0
+                  return (
+                    <article
+                      key={`${isClone ? 'clone-' : ''}${campaign.id}`}
+                      className={`adash-campaign${isClone ? ' adash-campaign--clone' : ''}`}
+                      role={isClone ? undefined : 'link'}
+                      tabIndex={isClone ? -1 : 0}
+                      onClick={isClone ? undefined : (event) => {
+                        event.stopPropagation()
+                        navigate(routes.textBasedQuestions)
+                      }}
+                      onKeyDown={isClone ? undefined : (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          navigate(routes.textBasedQuestions)
+                        }
+                      }}
+                    >
+                      <div className={`adash-campaign-thumb ${campaign.thumb}`}>
+                        <img className="adash-campaign-image" src={campaign.image} alt={isClone ? '' : `${campaign.category}: ${campaign.name} illustration`} />
+                        <span className="adash-campaign-status"><StatusBadge label={campaign.status} /></span>
+                      </div>
+                      <div className="adash-campaign-body">
+                        <div className="adash-campaign-labels">
+                          <div className="adash-campaign-category">{campaign.category}</div>
+                          <h3 className="adash-campaign-name">{campaign.name}</h3>
+                        </div>
+                        <div className="adash-campaign-sold">{campaign.sold} / {campaign.target} Questions Sold</div>
+                        <CampaignMonthGraph campaignId={`${campaign.id}${isClone ? '-clone' : ''}`} sold={campaign.sold} target={campaign.target} />
+                        <div className="adash-campaign-track"><span style={{ width: `${pct}%` }} /></div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
 
