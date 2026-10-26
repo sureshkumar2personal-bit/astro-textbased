@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Megaphone,
@@ -7,15 +7,11 @@ import {
   ArrowUp,
   PhoneCall,
   ChevronDown,
+  ChevronRight,
   CalendarDays,
   Radio,
   Wallet,
   SlidersHorizontal,
-  Sparkles,
-  HeartPulse,
-  HeartHandshake,
-  TrendingUp,
-  Orbit,
   Zap,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
@@ -30,14 +26,14 @@ import {
 } from '../utils/questions.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
-import { useGlobalHeaderActions } from '../contexts/GlobalHeaderActionsContext.jsx'
 
 // Card look (icon + thumb tint) keyed off the campaign topic; purely presentational.
 const CAMPAIGN_CARD_STYLES = [
-  { match: /health|well|medical/i, Icon: HeartPulse, thumb: 'adash-thumb--health' },
-  { match: /love|marriage|relationship|family/i, Icon: HeartHandshake, thumb: 'adash-thumb--love' },
-  { match: /career|finance|business|job|money/i, Icon: TrendingUp, thumb: 'adash-thumb--career' },
-  { match: /./, Icon: Orbit, thumb: 'adash-thumb--planetary' },
+  { match: /love|marriage|relationship|family/i, image: '/campaigns/marriage-rings-reference.png', thumb: 'adash-thumb--love' },
+  { match: /health|well|medical/i, image: '/campaigns/health.png', thumb: 'adash-thumb--health' },
+  { match: /career|finance|business|job|money/i, image: '/campaigns/career.png', thumb: 'adash-thumb--career' },
+  { match: /education|study|school|learning/i, image: '/campaigns/education.png', thumb: 'adash-thumb--education' },
+  { match: /./, image: '/campaigns/education-books.png', thumb: 'adash-thumb--education' },
 ]
 const DASHBOARD_CAMPAIGN_LIMIT = 4
 
@@ -46,17 +42,6 @@ export default function Dashboard() {
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-  const globalHeader = useGlobalHeaderActions()
-
-  // The welcome panel hosts the global actions, so the layout must not render
-  // its own fallback topbar on this route.
-  useEffect(() => {
-    if (globalHeader?.setHasPageHeader) {
-      globalHeader.setHasPageHeader(true)
-      return () => globalHeader.setHasPageHeader(false)
-    }
-  }, [globalHeader])
-
   // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
   const showcaseCampaigns = useMemo(() => {
     const now = new Date()
@@ -70,39 +55,23 @@ export default function Dashboard() {
           id: campaign.id,
           name: campaign.name,
           category: campaign.category || campaign.categories?.[0]?.name || getCampaignQuestionTypes(campaign).join(' · '),
-          status: getCampaignDisplayStatus(campaign, monthKey, now.getTime()),
+          // Dashboard presentation requested: these two showcase cards are active.
+          status: /career|education|study/i.test(label)
+            ? 'Active'
+            : getCampaignDisplayStatus(campaign, monthKey, now.getTime()),
           sold: getCampaignUsed(campaign),
           target: getCampaignAllocation(campaign),
-          Icon: look.Icon,
+          image: look.image,
           thumb: look.thumb,
         }
       })
   }, [campaigns])
-  const [serviceMenuOpen, setServiceMenuOpen] = useState(false)
-  const serviceMenuRef = useRef(null)
-
-  useEffect(() => {
-    if (!serviceMenuOpen) return undefined
-    const closeOnOutsideClick = (event) => {
-      if (!serviceMenuRef.current?.contains(event.target)) setServiceMenuOpen(false)
-    }
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setServiceMenuOpen(false)
-    }
-    document.addEventListener('mousedown', closeOnOutsideClick)
-    document.addEventListener('keydown', closeOnEscape)
-    return () => {
-      document.removeEventListener('mousedown', closeOnOutsideClick)
-      document.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [serviceMenuOpen])
-
   const quickActions = [
-    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.answerQuestion },
-    { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments },
-    { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup },
-    { icon: Wallet, label: 'View Earnings', route: routes.walletManagement },
-    { icon: SlidersHorizontal, label: 'Profile Settings', route: routes.myAccount },
+    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.answerQuestion, accent: 'orange' },
+    { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments, accent: 'red' },
+    { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup, accent: 'rose' },
+    { icon: Wallet, label: 'View Earnings', route: routes.walletManagement, accent: 'amber' },
+    { icon: SlidersHorizontal, label: 'Profile Settings', route: routes.myAccount, accent: 'purple' },
   ]
 
   const upcomingAppointments = useMemo(() => {
@@ -120,106 +89,40 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="hero-banner hero-banner-user adash-hero">
-        <div className="adash-hero-art" aria-hidden="true">
-          <span className="adash-hero-ring adash-hero-ring--1" />
-          <span className="adash-hero-ring adash-hero-ring--2" />
-          <span className="adash-hero-ring adash-hero-ring--3" />
-          <span className="adash-hero-core"><Sparkles size={26} strokeWidth={1.6} /></span>
-        </div>
-        <div className="adash-hero-layout">
-          <div className="hero-banner-content">
-            <div className="adash-hero-titlerow">
-              <h2>Welcome back, {currentUser?.name || 'Kumar'} 👋</h2>
-            </div>
-            <p>Here&apos;s what&apos;s happening with your consultations and campaigns.</p>
-          </div>
-          <div className="adash-hero-controls">
-            {globalHeader?.actions && (
-              <div className="adash-hero-topbar-actions">
-                {globalHeader.actions}
-              </div>
-            )}
-            <div className="adash-hero-service-row">
-              <div
-                className="hero-services-summary"
-                ref={serviceMenuRef}
-                role="button"
-                tabIndex={0}
-                aria-label="Service availability"
-                aria-expanded={serviceMenuOpen}
-                aria-haspopup="menu"
-                onClick={() => setServiceMenuOpen((open) => !open)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setServiceMenuOpen((open) => !open)
-                  }
-                }}
-              >
-                <span className={`hero-services-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`}>
-                  <span className={`service-status-dot${astrologerServices.available ? ' is-available' : ''}`} />
-                  {astrologerServices.dndEnabled ? 'Dyan / DND' : astrologerServices.isOnline ? 'Online' : 'Offline'}
-                </span>
-                {!astrologerServices.dndEnabled && (
-                  <span className="hero-services-modes" aria-label="Enabled service prices">
-                    {astrologerServices.chatAvailable && <span title="Chat"><MessageCircle size={13} /> ₹{astrologerServices.chatPricePerMinute}/min</span>}
-                    {astrologerServices.callAvailable && <span title="Call"><PhoneCall size={13} /> ₹{astrologerServices.callPricePerMinute}/min</span>}
-                  </span>
-                )}
-                <span className="hero-services-trigger" aria-hidden="true"><ChevronDown size={14} /></span>
-                {serviceMenuOpen && (
-                  <div
-                    className="hero-services-menu"
-                    role="menu"
-                    aria-label="Service availability"
-                    onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => event.stopPropagation()}
-                  >
-                    <div className="hero-services-menu__heading">Service availability</div>
-                    <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
-                      <span>
-                        <strong><MessageCircle size={14} /> Chat</strong>
-                        <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.chatEnabled ? 'Enabled' : 'Disabled'}</small>
-                      </span>
-                      <input type="checkbox" checked={astrologerServices.chatEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ chatEnabled: event.target.checked })} aria-label="Enable chat" />
-                      <span className="toggle-switch" />
-                    </label>
-                    <label className={`hero-service-option${astrologerServices.dndEnabled ? ' is-locked' : ''}`}>
-                      <span>
-                        <strong><PhoneCall size={14} /> Call</strong>
-                        <small>{astrologerServices.dndEnabled ? 'Paused' : astrologerServices.callEnabled ? 'Enabled' : 'Disabled'}</small>
-                      </span>
-                      <input type="checkbox" checked={astrologerServices.callEnabled} disabled={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ callEnabled: event.target.checked })} aria-label="Enable call" />
-                      <span className="toggle-switch" />
-                    </label>
-                    <label className="hero-service-option hero-service-option--dnd">
-                      <span>
-                        <strong>Dyan / DND</strong>
-                        <small>{astrologerServices.dndEnabled ? 'All services paused' : 'Pause all services'}</small>
-                      </span>
-                      <input type="checkbox" checked={astrologerServices.dndEnabled} onChange={(event) => actions.updateAstrologerServices({ dndEnabled: event.target.checked })} aria-label="Enable Dyan or DND" />
-                      <span className="toggle-switch" />
-                    </label>
-                  </div>
-                )}
-              </div>
-            </div>
+      <div className="hero-banner hero-banner-user adash-hero adash-hero--reference">
+        <div className="adash-hero-reference-service">
+          <div className="adash-hero-service-cards" aria-label="Instant services">
+            <ServiceToggleCard
+              icon={PhoneCall}
+              label="Instant Call"
+              description="Receive instant calls"
+              enabled={astrologerServices.callEnabled && !astrologerServices.dndEnabled}
+              onToggle={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
+            />
+            <ServiceToggleCard
+              icon={MessageCircle}
+              label="Instant Chat"
+              description="Receive instant chats"
+              enabled={astrologerServices.chatEnabled && !astrologerServices.dndEnabled}
+              onToggle={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
+            />
           </div>
         </div>
       </div>
+      <p className="adash-hero-service-message">Your followers are active—enable instant calls to benefit.</p>
 
       <Section title="Quick Actions" icon={Zap}>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {quickActions.map(({ icon: Icon, label, route, onClick }) => (
+        <div className="adash-quick-actions">
+          {quickActions.map(({ icon: Icon, label, route, onClick, accent }) => (
             <button
               key={label}
               type="button"
-              className="action-card action-card--compact"
+              className={`action-card adash-quick-action adash-quick-action--${accent}`}
               onClick={() => (onClick ? onClick() : route && navigate(route))}
             >
-              <div className="action-card-icon"><Icon size={20} /></div>
-              <div className="action-card-body"><div className="action-card-title">{label}</div></div>
+              <span className="adash-quick-action-icon"><Icon size={20} /></span>
+              <span className="adash-quick-action-label">{label}</span>
+              <ChevronRight className="adash-quick-action-arrow" size={17} aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -228,6 +131,7 @@ export default function Dashboard() {
       <Section
         title="Your Campaigns"
         icon={Megaphone}
+        sectionClassName="adash-campaigns-section"
         onNavigate={() => navigate(`${routes.textBasedQuestions}?view=campaigns`)}
         action={
           <Link
@@ -261,12 +165,14 @@ export default function Dashboard() {
                 }}
               >
                 <div className={`adash-campaign-thumb ${campaign.thumb}`}>
-                  <campaign.Icon size={42} strokeWidth={1.4} />
+                  <img className="adash-campaign-image" src={campaign.image} alt={`${campaign.category}: ${campaign.name} illustration`} />
                   <span className="adash-campaign-status"><StatusBadge label={campaign.status} /></span>
                 </div>
                 <div className="adash-campaign-body">
-                  <div className="adash-campaign-category">{campaign.category}</div>
-                  <h3 className="adash-campaign-name">{campaign.name}</h3>
+                  <div className="adash-campaign-labels">
+                    <div className="adash-campaign-category">{campaign.category}</div>
+                    <h3 className="adash-campaign-name">{campaign.name}</h3>
+                  </div>
                   <div className="adash-campaign-sold">{campaign.sold} / {campaign.target} Questions Sold</div>
                   <CampaignMonthGraph campaignId={campaign.id} sold={campaign.sold} target={campaign.target} />
                   <div className="adash-campaign-track"><span style={{ width: `${pct}%` }} /></div>
@@ -288,7 +194,7 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Customer</th>
+                  <th>Customer Name</th>
                   <th>Type</th>
                   <th>Topic</th>
                   <th>Status</th>
@@ -320,6 +226,20 @@ export default function Dashboard() {
         </div>
       </Section>
     </div>
+  )
+}
+
+function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
+  return (
+    <button type="button" className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`} aria-pressed={enabled} onClick={onToggle}>
+      <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
+      <span className="adash-hero-service-card__copy">
+        <strong>{label}</strong>
+        <small>{description}</small>
+      </span>
+      <span className="adash-hero-service-card__state">{enabled ? 'On' : 'Off'}</span>
+      <span className="adash-hero-service-card__switch" aria-hidden="true"><span /></span>
+    </button>
   )
 }
 
@@ -388,8 +308,8 @@ function CampaignMonthGraph({ campaignId, sold, target }) {
       <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} role="img" aria-label={`One-month sales graph: ${sold} of ${target} questions sold`} preserveAspectRatio="none">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.38" />
-            <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+            <stop offset="0%" stopColor="#f1bf25" stopOpacity="0.34" />
+            <stop offset="100%" stopColor="#f1bf25" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path className="adash-campaign-month-graph__area" ref={areaPathRef} d={areaPath} fill={`url(#${gradientId})`} />
@@ -399,7 +319,7 @@ function CampaignMonthGraph({ campaignId, sold, target }) {
   )
 }
 
-function Section({ title, icon: Icon, subtitle, action, onNavigate, children }) {
+function Section({ title, icon: Icon, subtitle, action, onNavigate, sectionClassName = '', children }) {
   const clickableProps = onNavigate
     ? {
         role: 'link',
@@ -417,7 +337,7 @@ function Section({ title, icon: Icon, subtitle, action, onNavigate, children }) 
       }
     : {}
   return (
-    <div className={`section${onNavigate ? ' adash-section--clickable' : ''}`} {...clickableProps}>
+    <div className={`section${onNavigate ? ' adash-section--clickable' : ''}${sectionClassName ? ` ${sectionClassName}` : ''}`} {...clickableProps}>
       {title && (
         <div className="section-title">
           <span className="flex items-center gap-2.5">

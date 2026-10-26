@@ -7,6 +7,7 @@ import {
   Archive,
   ArrowLeft,
   ArrowRight,
+  CalendarDays,
   CalendarClock,
   Copy,
   Eye,
@@ -73,6 +74,17 @@ import {
 const QUESTION_STATUS_FILTERS = ['All', 'Pending', 'In Progress', 'Under Review', 'Answered', 'Disputed', 'Cancelled', 'Closed']
 const DISCOUNT_CHOICES = [40, 50, 60, 70, 80, 90]
 const DEFAULT_OPEN_SETTINGS = { generalPrice: 200, personalPrice: 500, capacity: 0, generalEnabled: true, personalEnabled: true, offerEnabled: false, discountPercent: 0 }
+
+function QuestionMonthHeading({ label, count, id }) {
+  return (
+    <h3 className="tbq-question-month__heading" id={id}>
+      <CalendarDays size={22} aria-hidden="true" />
+      <span className="tbq-question-month__name">{label}</span>
+      <span className="tbq-question-month__count">({count})</span>
+    </h3>
+  )
+}
+
 function getWordPreview(content) {
   const text = String(content || '').trim()
   const words = text.split(/\s+/).filter(Boolean)
@@ -121,6 +133,48 @@ function toDisplayDate(value) {
     month: 'short',
     year: 'numeric',
   })
+}
+
+function getQuestionAskedDate(question = {}) {
+  const timestamp = question.askedAt || question.askedDate || question.askedOn || question.raisedAt || question.submittedAt
+  if (timestamp) {
+    const parsed = new Date(timestamp)
+    if (!Number.isNaN(parsed.getTime())) return parsed
+  }
+
+  if (question.raised) {
+    const parsed = parseDisplayDate(question.raised)
+    if (parsed.getTime() > 0 && !Number.isNaN(parsed.getTime())) return parsed
+  }
+
+  return null
+}
+
+function getQuestionAnswerStatusMessage(question = {}) {
+  if (question.status === 'Answered') {
+    return `Answered ${formatAnswerDate(question.answeredAt || question.answerDeliveredAt) || '—'}`
+  }
+  if (question.status === 'Cancelled') return question.cancellationReason || 'Answer deadline exceeded'
+  if (question.status === 'Disputed') return 'Under dispute'
+  if (question.status === 'Under Review') return 'Answer under review'
+  return 'Awaiting answer'
+}
+
+function formatQuestionAskedDate(question) {
+  const date = getQuestionAskedDate(question)
+  if (!date) return 'Date unavailable'
+  return date.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function getQuestionMonthGroupKey(question) {
+  const date = getQuestionAskedDate(question)
+  return date ? getMonthKeyFromDate(date) : 'unknown'
 }
 
 function makeCampaignForm(campaign) {
@@ -432,9 +486,9 @@ export default function TextBasedQuestions() {
   const openSettings = { ...DEFAULT_OPEN_SETTINGS, ...(openSettingsRaw || {}) }
 
   const astrologerId = currentUser?.id || 'astrologer-demo'
-  const myQuestions = useMemo(() => questions
+  const myQuestions = useMemo(() => [...questions]
     .filter((question) => (question.astrologerId || 'astrologer-demo') === astrologerId)
-    .sort((a, b) => new Date(b.raisedAt || b.submittedAt || 0) - new Date(a.raisedAt || a.submittedAt || 0)),
+    .sort((a, b) => (getQuestionAskedDate(b)?.getTime() || -1) - (getQuestionAskedDate(a)?.getTime() || -1)),
   [questions, astrologerId])
 
   // Honours an explicit ?view= so other pages (e.g. the Dashboard "Create
@@ -560,6 +614,25 @@ export default function TextBasedQuestions() {
       return searchable.includes(term)
     })
   }, [myQuestions, appliedSearch, statusFilter])
+
+  const groupedQuestions = useMemo(() => {
+    const groups = new Map()
+
+    filteredQuestions.forEach((question) => {
+      const key = getQuestionMonthGroupKey(question)
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key).push(question)
+    })
+
+    return [...groups.entries()]
+      .map(([key, group]) => ({
+        key,
+        label: key === 'unknown' ? 'Date unavailable' : getMonthLabel(key),
+        sortKey: key === 'unknown' ? -1 : new Date(`${key}-01T00:00:00`).getTime(),
+        questions: group.sort((a, b) => (getQuestionAskedDate(b)?.getTime() || -1) - (getQuestionAskedDate(a)?.getTime() || -1)),
+      }))
+      .sort((a, b) => b.sortKey - a.sortKey)
+  }, [filteredQuestions])
 
   const panelQuestion = useMemo(
     () => questions.find((question) => question.id === panelQuestionId) || null,
@@ -1903,42 +1976,62 @@ export default function TextBasedQuestions() {
             </div>
           </Section>
 
-          <Section title="Questions" icon={TempleScrollIcon} titleRight={<span className="muted" style={{ fontSize: 13, fontWeight: 500 }}>{filteredQuestions.length} {statusFilter === 'All' ? 'total' : statusFilter.toLowerCase()}</span>}>
+          <Section>
             {filteredQuestions.length === 0 ? (
-              <Card><div className="muted">No matching questions found{statusFilter !== 'All' ? ` in ${statusFilter}` : ''}. Try a different status or search term.</div></Card>
+              <div className="tbq-question-empty">
+                <QuestionMonthHeading
+                  id="tbq-month-empty"
+                  label={getMonthLabel(getMonthKeyFromDate(new Date()))}
+                  count={0}
+                />
+                <Card><div className="muted">No matching questions found{statusFilter !== 'All' ? ` in ${statusFilter}` : ''}. Try a different status or search term.</div></Card>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {filteredQuestions.map((question) => (
-                  <Card
-                    key={question.id}
-                    hover
-                    onClick={() => openQuestion(question.id)}
-                    style={{ cursor: 'pointer', padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 700, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{question.user}</div>
-                        <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>{question.id}</div>
-                      </div>
-                      <StatusBadge label={question.status} />
+              <div className="tbq-question-months">
+                {groupedQuestions.map((month) => (
+                  <section className="tbq-question-month" key={month.key} aria-labelledby={`tbq-month-${month.key}`}>
+                    <QuestionMonthHeading id={`tbq-month-${month.key}`} label={month.label} count={month.questions.length} />
+                    <div className="tbq-question-month__grid">
+                      {month.questions.map((question) => (
+                        <Card
+                          key={question.id}
+                          as="article"
+                          className="tbq-question-card"
+                          hover
+                          onClick={() => openQuestion(question.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              openQuestion(question.id)
+                            }
+                          }}
+                          tabIndex={0}
+                        >
+                          <div className="tbq-question-card__customer">
+                            <strong>{question.user || question.userName || question.customerName || ''}</strong>
+                          </div>
+                          <div className="tbq-question-card__details">
+                            <strong>{question.id}</strong>
+                            <span>{question.campaignName || 'Open Question'} · {question.category || 'General'} · {question.type || 'Question'}</span>
+                            <p>“{question.question}”</p>
+                          </div>
+                          <div className="tbq-question-card__deadline">
+                            <span><b>Asked</b> {formatQuestionAskedDate(question)}</span>
+                            <span><b>Answer by</b> {formatAnswerDate(getQuestionAnswerDeadline(question)) || '—'}</span>
+                            <small>{getQuestionAnswerStatusMessage(question)}</small>
+                          </div>
+                          <div className="tbq-question-card__status">
+                            <StatusBadge label={question.status} />
+                          </div>
+                          <div className="tbq-question-card__action">
+                            <button type="button" className={`btn btn-sm ${question.status === 'Answered' ? 'btn-outline' : 'btn-primary'}`} onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>
+                              {question.status === 'Answered' ? 'View Answer' : 'Answer Now'}
+                            </button>
+                          </div>
+                        </Card>
+                      ))}
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="badge badge-violet">{question.campaignName || 'Open Question'}</span>
-                      <span className="badge badge-blue">{question.type}</span>
-                      <span className="muted" style={{ fontSize: 12 }}>{question.purchaseType === 'Free' ? 'Free' : `₹${inr(question.purchaseAmount)}`}</span>
-                    </div>
-                    <div style={{ color: 'var(--ink)', fontStyle: 'italic', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      “{question.question}”
-                    </div>
-                    <div className="muted" style={{ fontSize: 12, marginTop: 'auto' }}>Submitted: {question.raised || new Date(question.raisedAt || question.submittedAt || Date.now()).toLocaleString('en-IN')}</div>
-                    <button
-                      className="btn btn-primary"
-                      style={{ width: '100%' }}
-                      onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}
-                    >
-                      {question.status === 'Answered' ? 'View Answer' : 'View & Answer'}
-                    </button>
-                  </Card>
+                  </section>
                 ))}
               </div>
             )}

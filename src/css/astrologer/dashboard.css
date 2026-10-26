@@ -8564,28 +8564,31 @@ button.apt-week-day:focus-visible {
 
 .adash-campaign { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--surface-border); border-radius: 20px; box-shadow: var(--shadow-sm); overflow: hidden; transition: transform 220ms var(--ease-premium), box-shadow 220ms var(--ease-premium), border-color 220ms var(--ease-premium); }
 .adash-campaign:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--primary) 32%, var(--surface-border)); box-shadow: var(--shadow-lg); }
-.adash-campaign-thumb { position: relative; display: flex; align-items: center; justify-content: center; height: 148px; color: rgba(109, 40, 217, 0.55); }
+.adash-campaign-thumb { position: relative; display: flex; align-items: center; justify-content: center; height: 148px; padding: 8px 24px 0; overflow: hidden; }
 .adash-campaign-thumb::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.65), transparent 70%); }
-.adash-campaign-thumb > svg { position: relative; z-index: 1; }
+.adash-campaign-image { position: relative; z-index: 1; display: block; width: min(100%, 220px); height: 132px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(133, 79, 16, .14)); }
 .adash-campaign-status { position: absolute; top: 12px; right: 12px; z-index: 2; }
-.adash-campaign-thumb--health { background: linear-gradient(135deg, #f0e6fb 0%, #e3d2f6 100%); }
-.adash-campaign-thumb--love { background: linear-gradient(135deg, #fceaf0 0%, #f6d9e4 100%); }
-.adash-campaign-thumb--career { background: linear-gradient(135deg, #fff1da 0%, #fbe2b4 100%); }
-.adash-campaign-thumb--planetary { background: linear-gradient(135deg, #e5e9fb 0%, #d5dcf6 100%); }
+.adash-campaign-thumb--health { background: linear-gradient(135deg, #fff8ed 0%, #f8eadc 100%); }
+.adash-campaign-thumb--love { background: linear-gradient(135deg, #fff7ee 0%, #f8e5d3 100%); }
+.adash-campaign-thumb--career { background: linear-gradient(135deg, #fff8e9 0%, #f3dfb7 100%); }
+.adash-campaign-thumb--education { background: linear-gradient(135deg, #fff8e9 0%, #ead7b3 100%); }
 
 .adash-campaign-body { display: flex; flex-direction: column; flex: 1; gap: 9px; padding: 16px 17px 15px; }
+.adash-campaign-labels { display: block !important; flex: 0 0 auto; min-height: 48px; visibility: visible; opacity: 1; }
+.adash-campaigns-section .adash-campaign-category { display: block !important; visibility: visible; opacity: 1; color: #b4692a !important; }
+.adash-campaigns-section .adash-campaign-name { display: block !important; visibility: visible; opacity: 1; color: #2c211c !important; }
 .adash-campaign-category { color: #a48fc0; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .adash-campaign-name { margin: 0; color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16.5px; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; }
 .adash-campaign-sold { margin-top: auto; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; }
-.adash-campaign-month-graph { display: grid; grid-template-columns: minmax(74px, .72fr) minmax(0, 1.28fr); align-items: center; gap: 8px; min-height: 82px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, .12); border-radius: 18px; background: #020817; color: #94a3b8; font-size: 10px; font-weight: 600; overflow: hidden; }
+.adash-campaign-month-graph { display: grid; grid-template-columns: minmax(74px, .72fr) minmax(0, 1.28fr); align-items: center; gap: 8px; min-height: 82px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, .12); border-radius: 18px; background: #1b0d03; color: #f2d8b2; font-size: 10px; font-weight: 600; overflow: hidden; }
 .adash-campaign-month-graph__summary { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.adash-campaign-month-graph__summary span { color: #94a3b8; font-size: 10px; white-space: nowrap; }
-.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #22c55e; font-size: 17px; line-height: 1; }
-.adash-campaign-month-graph__summary b { color: #f8fafc; font-size: 15px; line-height: 1.1; }
+.adash-campaign-month-graph__summary span { color: #d9b98e; font-size: 10px; white-space: nowrap; }
+.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #f4c126; font-size: 17px; line-height: 1; }
+.adash-campaign-month-graph__summary b { color: #fff8ed; font-size: 15px; line-height: 1.1; }
 .adash-campaign-month-graph > svg { width: 100%; height: 58px; overflow: visible; }
 .adash-campaign-month-graph__summary svg { width: 14px; height: 14px; }
 .adash-campaign-month-graph__area { transition: opacity .8s ease-in-out; }
-.adash-campaign-month-graph__line { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.adash-campaign-month-graph__line { fill: none; stroke: #f1bf25; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .adash-campaign-track { height: 6px; border-radius: 999px; background: var(--primary-bg); overflow: hidden; }
 .adash-campaign-track > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
 .adash-campaign-actions { display: flex; gap: 8px; margin-top: 4px; }
@@ -8593,6 +8596,9 @@ button.apt-week-day:focus-visible {
 .adash-section--clickable { cursor: pointer; }
 .adash-section--clickable:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 12px; }
 .adash-section--clickable > .section-title:hover { color: var(--primary); }
+.adash-campaigns-section > .section-title svg { color: #c87513; }
+.adash-campaigns-section > .section-title a { color: #c87513; }
+.adash-campaigns-section > .section-title a:hover { color: #9b5408; }
 .adash-campaign-btn:hover { border-color: var(--primary); color: var(--primary); }
 .adash-campaign-btn--primary { border-color: var(--primary); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; }
 .adash-campaign-btn--primary:hover { border-color: var(--primary-dark); color: #fff; box-shadow: 0 6px 14px rgba(109, 40, 217, 0.25); }

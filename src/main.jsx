@@ -4,6 +4,7 @@ import './index.css'
 import './wallet.css'
 import './css/user/astrologers.css'
 import './css/user/dashboard.css'
+import './theme-overrides.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

@@ -213,18 +213,18 @@
 
 :root {
   /* ---- Brand palette ---- */
-  --bg: #F5F2F9;
-  --bg-solid: #F3EFF9;
-  --primary: #5B21B6;
-  --primary-dark: #3B0764;
+  --bg: #FFF8E8;
+  --bg-solid: #FFF8E8;
+  --primary: #4A2C0F;
+  --primary-dark: #2F1A08;
   --primary-light: #7C3AED;
-  --secondary: #7C3AED;
-  --accent: #FF8A4C;
-  --accent-dark: #F2662A;
+  --secondary: #7A4B1F;
+  --accent: #F4B400;
+  --accent-dark: #C58E00;
 
-  --text-primary: #251B35;
-  --text-secondary: #685F73;
-  --border: #DED6E8;
+  --text-primary: #1F1F1F;
+  --text-secondary: #6B7280;
+  --border: #E8DCC8;
 
   --success: #10B981;
   --success-bg: #ECFDF5;
@@ -233,14 +233,14 @@
   --danger: #EF4444;
   --danger-bg: #FEF2F2;
 
-  --primary-bg: #EEE8F8;
-  --secondary-bg: #E7DDF5;
+  --primary-bg: #F3E8FF;
+  --secondary-bg: #FEF3C7;
   --sky: #0284C7;
   --sky-bg: #EFF6FF;
   --neutral-bg: #EEEAF4;
 
-  --sidebar-from: #281354;
-  --sidebar-to: #472183;
+  --sidebar-from: #4A2C0F;
+  --sidebar-to: #7A4B1F;
 
   /* legacy aliases kept so any missed reference still resolves sensibly */
   --violet-50: #F5F3FF;
@@ -253,10 +253,10 @@
   --violet-700: #5B21B6;
   --violet-900: #281354;
 
-  --gold-100: #FFE9D9;
-  --gold-400: #FFAB73;
-  --gold-500: #FF8A4C;
-  --gold-600: #F2662A;
+  --gold-100: #FEF3C7;
+  --gold-400: #FCD34D;
+  --gold-500: #F4B400;
+  --gold-600: #C58E00;
 
   --sky-100: #EFF6FF;
   --sky-500: #0284C7;
@@ -282,15 +282,15 @@
   --teal-500: #10B981;
   --teal-600: #059669;
 
-  --ink: #111827;
-  --body: #374151;
+  --ink: #1F1F1F;
+  --body: #1F1F1F;
   --muted: #6B7280;
-  --line: #E5E7EB;
-  --paper: rgba(255, 255, 255, 0.9);
-  --surface: rgba(255, 255, 255, 0.88);
+  --line: #E8DCC8;
+  --paper: rgba(255, 255, 255, 0.94);
+  --surface: rgba(255, 255, 255, 0.94);
   --surface-strong: #FFFFFF;
-  --surface-soft: #F9FAFB;
-  --surface-border: rgba(229, 231, 235, 0.72);
+  --surface-soft: #FFFDF7;
+  --surface-border: rgba(122, 75, 31, 0.18);
   --surface-overlay: rgba(255, 255, 255, 0.98);
 
   --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -329,42 +329,116 @@
   color-scheme: light;
 }
 
+/* Reference treatment for the astrologer topbar controls. Keep this scoped to
+   the shell and place it last so dashboard-specific overrides cannot collapse
+   the DND pill or profile control. */
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle {
+  position: relative;
+  min-width: 192px !important;
+  min-height: 42px !important;
+  padding: 0 56px 0 20px !important;
+  justify-content: flex-start;
+  border: 1px solid rgba(232, 184, 62, .78);
+  border-radius: 999px;
+  background: rgba(53, 28, 15, .9);
+  color: #fff8e9;
+  font-size: 13px;
+}
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
+}
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle__dot { display: none !important; }
+
+.astrologer-dnd-confirm-overlay {
+  z-index: 10000;
+}
+.astrologer-dnd-confirm {
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border-color: rgba(232, 184, 62, .55);
+  background: #fffdf8;
+  color: #3a2115;
+}
+.astrologer-dnd-confirm h2 {
+  margin: 0 0 9px;
+  color: #3a2115;
+  font-size: 20px;
+}
+.astrologer-dnd-confirm p {
+  margin: 0;
+  color: #6b5140;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.astrologer-dnd-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+@media (max-width: 520px) {
+  .astrologer-dnd-confirm__actions { flex-direction: column-reverse; }
+  .astrologer-dnd-confirm__actions .btn { width: 100%; justify-content: center; }
+}
+
 html[data-theme='dark'] {
-  --bg: linear-gradient(180deg, #0B1020 0%, #111827 100%);
-  --bg-solid: #111827;
-  --primary: #A78BFA;
-  --primary-dark: #8B5CF6;
-  --primary-light: #C4B5FD;
-  --secondary: #8B5CF6;
-  --accent: #FB923C;
-  --accent-dark: #F97316;
+  --bg: #1A1208;
+  --bg-solid: #1A1208;
+  --primary: #F4B000;
+  --primary-dark: #C88A00;
+  --primary-light: #A78BFA;
+  --secondary: #6B3E1A;
+  --accent: #F4B000;
+  --accent-dark: #C88A00;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --border: #334155;
+  --text-primary: #F8F5EA;
+  --text-secondary: #A8A29E;
+  --border: #6B3E1A;
 
-  --success-bg: rgba(16, 185, 129, 0.14);
+  --success: #34D399;
+  --warning: #F59E0B;
+  --danger: #F87171;
+
+  --success-bg: rgba(52, 211, 153, 0.16);
   --warning-bg: rgba(245, 158, 11, 0.14);
-  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-bg: rgba(248, 113, 113, 0.16);
 
-  --primary-bg: rgba(139, 92, 246, 0.16);
-  --secondary-bg: rgba(168, 85, 247, 0.16);
+  --primary-bg: rgba(167, 139, 250, 0.18);
+  --secondary-bg: rgba(244, 176, 0, 0.16);
   --sky-bg: rgba(14, 165, 233, 0.16);
   --neutral-bg: rgba(148, 163, 184, 0.14);
 
-  --sidebar-from: #0F172A;
-  --sidebar-to: #1E1B4B;
+  --violet-500: #A78BFA;
+  --violet-600: #8B5CF6;
+  --violet-700: #7C3AED;
+  --gold-500: #F4B000;
+  --gold-600: #C88A00;
+  --green-600: #34D399;
+  --amber-600: #FBBF24;
+  --red-500: #F87171;
+  --red-600: #F87171;
 
-  --ink: #F8FAFC;
-  --body: #CBD5E1;
-  --muted: #94A3B8;
-  --line: #334155;
-  --paper: rgba(15, 23, 42, 0.84);
-  --surface: rgba(15, 23, 42, 0.84);
-  --surface-strong: #111827;
-  --surface-soft: #1E293B;
-  --surface-border: rgba(148, 163, 184, 0.18);
-  --surface-overlay: rgba(15, 23, 42, 0.96);
+  --sidebar-from: #1A1208;
+  --sidebar-to: #3A2412;
+
+  --ink: #F8F5EA;
+  --body: #F8F5EA;
+  --muted: #A8A29E;
+  --line: #6B3E1A;
+  --paper: rgba(42, 27, 14, 0.94);
+  --surface: rgba(42, 27, 14, 0.94);
+  --surface-strong: #2A1B0E;
+  --surface-soft: #3A2412;
+  --surface-border: rgba(244, 176, 0, 0.2);
+  --surface-overlay: rgba(26, 18, 8, 0.96);
 
   --shadow-xs: 0 1px 2px rgba(2, 6, 23, 0.25);
   --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.28), 0 6px 16px rgba(2, 6, 23, 0.18);
@@ -372,7 +446,7 @@ html[data-theme='dark'] {
   --shadow-lg: 0 24px 56px rgba(2, 6, 23, 0.38);
   --shadow-card: 0 1px 2px rgba(2, 6, 23, 0.18);
   --shadow-float: 0 16px 40px rgba(2, 6, 23, 0.24);
-  --divider: rgba(148, 163, 184, 0.14);
+  --divider: rgba(244, 176, 0, 0.16);
   color-scheme: dark;
 }
 
@@ -4645,6 +4719,523 @@ tbody tr:hover {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
+}
+
+/* ---------- Global theme contract ----------
+   Shared surfaces use these semantic tokens so a route cannot accidentally
+   fall back to the old purple/navy palette when the theme changes. */
+html, body, #root {
+  background-color: var(--bg-solid);
+  color: var(--body);
+}
+
+.app-shell,
+.main-column,
+.page-content,
+.page-transition,
+.section,
+.card,
+.modal-card,
+.dropdown-menu,
+.popover,
+.search-bar,
+.text-input,
+.select-input,
+.textarea-box,
+table,
+thead,
+tbody,
+th,
+td {
+  border-color: var(--surface-border);
+}
+
+.card,
+.modal-card,
+.dropdown-menu,
+.popover,
+.search-bar,
+.text-input,
+.select-input,
+.textarea-box,
+input,
+select,
+textarea,
+table {
+  background-color: var(--surface-strong);
+  color: var(--body);
+}
+
+.card,
+.modal-card,
+.dropdown-menu,
+.popover {
+  box-shadow: var(--shadow-card);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+.status-badge[data-tone='badge-appointment-upcoming'],
+.status-badge[data-tone='badge-amber'] { border-color: var(--warning); background: var(--warning-bg); color: var(--amber-600); }
+.status-badge[data-tone='badge-appointment-completed'],
+.status-badge[data-tone='badge-green'] { border-color: var(--success); background: var(--success-bg); color: var(--green-600); }
+.status-badge[data-tone='badge-appointment-cancelled'],
+.status-badge[data-tone='badge-red'] { border-color: var(--danger); background: var(--danger-bg); color: var(--red-600); }
+.status-badge[data-tone='badge-appointment-rescheduled'] { border-color: var(--accent); background: var(--secondary-bg); color: var(--accent-dark); }
+.status-badge[data-tone='badge-appointment-refunded'],
+.status-badge[data-tone='badge-gray'] { border-color: var(--border); background: var(--neutral-bg); color: var(--muted); }
+.status-badge[data-tone='badge-blue'] { border-color: var(--sky); background: var(--sky-bg); color: var(--sky-600); }
+.status-badge[data-tone='badge-violet'] { border-color: var(--primary-light); background: var(--primary-bg); color: var(--primary); }
+
+html[data-theme='dark'] .astrologer-dnd-confirm,
+html[data-theme='dark'] .create-post-modal,
+html[data-theme='dark'] .create-post-modal header,
+html[data-theme='dark'] .create-post-media,
+html[data-theme='dark'] .user-modal-card,
+html[data-theme='dark'] .modal-card,
+html[data-theme='dark'] .card,
+html[data-theme='dark'] .dropdown-menu,
+html[data-theme='dark'] .popover,
+html[data-theme='dark'] .search-bar,
+html[data-theme='dark'] .text-input,
+html[data-theme='dark'] .select-input,
+html[data-theme='dark'] .textarea-box,
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] table {
+  background-color: var(--surface-strong) !important;
+  color: var(--body) !important;
+  border-color: var(--surface-border) !important;
+}
+
+html[data-theme='dark'] .astrologer-dnd-confirm h2,
+html[data-theme='dark'] .astrologer-dnd-confirm p,
+html[data-theme='dark'] .create-post-modal h2,
+html[data-theme='dark'] .create-post-body > label,
+html[data-theme='dark'] .section-title,
+html[data-theme='dark'] .card h1,
+html[data-theme='dark'] .card h2,
+html[data-theme='dark'] .card h3,
+html[data-theme='dark'] .card h4,
+html[data-theme='dark'] th {
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .topbar-header,
+html[data-theme='dark'] .astrologer-bottom-nav {
+  background: var(--sidebar-from) !important;
+  border-color: var(--surface-border) !important;
+}
+
+html[data-theme='dark'] .bg-white,
+html[data-theme='dark'] .bg-white\/70,
+html[data-theme='dark'] .bg-white\/85,
+html[data-theme='dark'] .bg-white\/90 {
+  background-color: var(--surface-strong) !important;
+}
+
+html[data-theme='dark'] .border-white,
+html[data-theme='dark'] .border-white\/70,
+html[data-theme='dark'] .border-white\/90 {
+  border-color: var(--surface-border) !important;
+}
+
+/* Approved Astro Connect astrologer shell: scoped so other dashboard roles keep
+   their existing layout and controls. */
+.app-shell--astrologer {
+  --astrologer-brown: var(--primary);
+  --astrologer-brown-soft: var(--secondary);
+  --astrologer-cream: var(--bg);
+  --astrologer-gold: var(--accent);
+  --astrologer-orange: var(--accent-dark);
+  background: var(--astrologer-cream);
+}
+
+.app-shell--astrologer .sidebar { display: none; }
+.app-shell--astrologer .main-column { width: 100%; min-width: 0; }
+.app-shell--astrologer .topbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  min-height: 68px;
+  padding: 12px clamp(18px, 3vw, 42px);
+  background: var(--astrologer-brown);
+  border-bottom: 1px solid rgba(232, 184, 62, .5);
+  box-shadow: 0 5px 18px rgba(44, 22, 10, .18);
+  color: #fff8e9;
+}
+.app-shell--astrologer .topbar-header.is-hidden { transform: translateY(0); opacity: 1; }
+.app-shell--astrologer .topbar-actions { width: 100%; justify-content: flex-end; gap: 10px; }
+.app-shell--astrologer .topbar-actions .icon-btn,
+.app-shell--astrologer .topbar-actions .avatar-chip { color: #fff8e9; }
+.app-shell--astrologer .topbar-actions .icon-btn:hover,
+.app-shell--astrologer .topbar-actions .avatar-chip:hover { background: rgba(232, 184, 62, .16); }
+.app-shell--astrologer .topbar-actions .icon-btn,
+.app-shell--astrologer .topbar-actions .theme-toggle-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(232, 184, 62, .28);
+  border-radius: 50%;
+  background: rgba(53, 28, 15, .78);
+  color: #fff8e9;
+  box-shadow: none;
+}
+.app-shell--astrologer .topbar-actions .icon-btn:hover,
+.app-shell--astrologer .topbar-actions .theme-toggle-btn:hover { border-color: #e8b83e; transform: none; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle {
+  position: relative;
+  min-width: 192px;
+  min-height: 42px;
+  justify-content: flex-start;
+  padding: 0 56px 0 20px;
+  border-color: rgba(232, 184, 62, .78);
+  background: rgba(53, 28, 15, .9);
+  color: #fff8e9;
+  font-size: 13px;
+}
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, .3);
+  transition: transform .18s ease, background .18s ease;
+}
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle.is-active::after { background: #ffcf6b; transform: translateX(-28px); }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle__dot { display: none; }
+.app-shell--astrologer .topbar-actions .avatar-chip { width: 48px; height: 48px; padding: 3px; justify-content: center; border: 1px solid rgba(232, 184, 62, .42); background: #fff8e9; box-shadow: none; }
+.app-shell--astrologer .topbar-actions .avatar-chip > span:not(.avatar-circle),
+.app-shell--astrologer .topbar-actions .avatar-chip > svg { display: none; }
+.app-shell--astrologer .topbar-actions .avatar-circle { width: 40px; height: 40px; overflow: hidden; background: linear-gradient(135deg, #e8b83e, #9b4f21); }
+.app-shell--astrologer .topbar-actions .avatar-circle img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.astrologer-topbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: auto;
+  color: #fff4cf;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  letter-spacing: .01em;
+}
+.astrologer-topbar-brand__mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--astrologer-gold);
+  border-radius: 50%;
+  color: var(--astrologer-gold);
+}
+.astrologer-topbar-brand__mark-img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .35));
+}
+.astrologer-header-search {
+  display: flex;
+  align-items: center;
+  width: min(230px, 22vw);
+  min-width: 150px;
+  gap: 8px;
+  padding: 8px 12px;
+  color: #f6d98b;
+  background: rgba(255, 248, 233, .1);
+  border: 1px solid rgba(232, 184, 62, .55);
+  border-radius: 999px;
+}
+.astrologer-header-search input {
+  width: 100%;
+  min-width: 0;
+  color: #fff8e9;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+.astrologer-header-search input::placeholder { color: #e8cf98; }
+.astrologer-dnd-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  color: #f8e8bd;
+  background: rgba(255, 248, 233, .08);
+  border: 1px solid rgba(232, 184, 62, .48);
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.astrologer-dnd-toggle.is-active { color: #fff; background: #8c3f35; border-color: #d67b5e; }
+.astrologer-dnd-toggle__dot { width: 7px; height: 7px; border-radius: 50%; background: #8ad486; }
+.astrologer-dnd-toggle.is-active .astrologer-dnd-toggle__dot { background: #ffcf6b; }
+.app-shell--astrologer .page-content {
+  min-height: calc(100vh - 68px);
+  /* The navigation is fixed, so leave a real scrollable landing zone beneath
+     the final dashboard section instead of letting the bar cover it. */
+  padding-bottom: 136px;
+  background: var(--astrologer-cream);
+}
+.app-shell--astrologer .page-transition { max-width: 1600px; margin: 0 auto; }
+.app-shell--astrologer .adash-hero--reference {
+  position: relative;
+  min-height: 0;
+  aspect-ratio: 2172 / 360;
+  padding: 0;
+  overflow: hidden;
+  background-color: #211008;
+  background-image: url('/astrologer-temple-banner.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(189, 127, 35, .45);
+  border-radius: 22px;
+  box-shadow: 0 12px 26px rgba(81, 41, 15, .18);
+}
+.app-shell--astrologer .adash-hero--reference::before,
+.app-shell--astrologer .adash-hero--reference::after { display: none; }
+.adash-hero-reference-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  background-color: #211008;
+  transform: scale(1.18);
+  transform-origin: center center;
+}
+.adash-hero-reference-service {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 2;
+}
+.adash-hero-service-message { position: relative; display: flex; align-items: center; width: 100%; min-height: 58px; margin: 18px 0 0; padding: 14px 22px; border: 1px solid #ead6b1; border-radius: 16px; background: #fffdf8; box-shadow: 0 7px 16px rgba(100, 56, 20, .1); color: #6b3b1d; font-size: 15px; font-weight: 700; letter-spacing: .01em; }
+@media (max-width: 600px) {
+  .adash-hero-service-message { min-height: 46px; margin-top: 12px; padding: 10px 14px; font-size: 12px; }
+}
+.adash-hero-service-cards { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 12px; }
+.adash-hero-service-card { position: relative; display: flex; align-items: center; gap: 9px; min-width: 190px; min-height: 68px; padding: 10px 56px 10px 12px; border: 1px solid #ead6b1; border-radius: 12px; background: #fffdf8; color: #33251a; box-shadow: 0 7px 16px rgba(100, 56, 20, .12); text-align: left; cursor: pointer; }
+.adash-hero-service-card:hover { border-color: #d7a541; transform: translateY(-1px); }
+.adash-hero-service-card__icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; color: #cf751b; background: #fff1d9; }
+.adash-hero-service-card__copy { display: grid; gap: 3px; min-width: 0; }
+.adash-hero-service-card__copy strong { font-size: 13px; white-space: nowrap; }
+.adash-hero-service-card__copy small { color: #55463b; font-size: 9px; white-space: nowrap; }
+.adash-hero-service-card__state { position: absolute; right: 14px; bottom: 8px; color: #149447; font-size: 10px; font-weight: 800; }
+.adash-hero-service-card__switch { position: absolute; top: 12px; right: 12px; width: 43px; height: 24px; border-radius: 999px; background: #d9d1c8; transition: background .18s ease; }
+.adash-hero-service-card__switch span { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .2); transition: transform .18s ease; }
+.adash-hero-service-card.is-enabled .adash-hero-service-card__switch { background: #16a05a; }
+.adash-hero-service-card.is-enabled .adash-hero-service-card__switch span { transform: translateX(19px); }
+.adash-hero-service-card:not(.is-enabled) .adash-hero-service-card__state { color: #9a6b3a; }
+.app-shell--astrologer .adash-hero-reference-service .hero-services-summary {
+  color: #fff7e2;
+  background: rgba(40, 22, 12, .72);
+  border-color: rgba(244, 190, 61, .75);
+  box-shadow: 0 7px 18px rgba(28, 11, 3, .25);
+}
+.app-shell--astrologer .section { margin-top: 26px; }
+.app-shell--astrologer .section-title {
+  color: var(--astrologer-orange);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+.app-shell--astrologer .adash-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+.app-shell--astrologer .adash-quick-action {
+  --qa-icon-bg: #fdf0dc;
+  --qa-icon-color: #d98511;
+  --qa-border-hover: #e9bf7c;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 13px 12px;
+  color: #33251a;
+  text-align: left;
+  background: #fffdfa;
+  border: 1px solid #f0e2cd;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(120, 70, 25, .06);
+  transition: transform 180ms var(--ease-premium), box-shadow 180ms var(--ease-premium), border-color 180ms var(--ease-premium);
+}
+.app-shell--astrologer .adash-quick-action:hover {
+  transform: translateY(-2px);
+  background: #fffdfa;
+  border-color: var(--qa-border-hover);
+  box-shadow: 0 9px 20px rgba(120, 70, 25, .13);
+}
+.app-shell--astrologer .adash-quick-action:focus-visible {
+  outline: 2px solid var(--qa-icon-color);
+  outline-offset: 2px;
+}
+.app-shell--astrologer .adash-quick-action-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--qa-icon-color);
+  background: var(--qa-icon-bg);
+  border-radius: 50%;
+}
+.app-shell--astrologer .adash-quick-action-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #33251a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.app-shell--astrologer .adash-quick-action-arrow {
+  flex: 0 0 auto;
+  color: #d3a15d;
+  transition: transform 180ms var(--ease-premium), color 180ms var(--ease-premium);
+}
+.app-shell--astrologer .adash-quick-action:hover .adash-quick-action-arrow {
+  color: var(--qa-icon-color);
+  transform: translateX(3px);
+}
+.app-shell--astrologer .adash-quick-action--orange { --qa-icon-bg: #fcecd5; --qa-icon-color: #d97b0a; --qa-border-hover: #eec084; }
+.app-shell--astrologer .adash-quick-action--red { --qa-icon-bg: #fde3e0; --qa-icon-color: #df4b3f; --qa-border-hover: #efb0a8; }
+.app-shell--astrologer .adash-quick-action--rose { --qa-icon-bg: #fde0e6; --qa-icon-color: #e04a62; --qa-border-hover: #efb1bd; }
+.app-shell--astrologer .adash-quick-action--amber { --qa-icon-bg: #fbeccb; --qa-icon-color: #d38f16; --qa-border-hover: #ebcb8a; }
+.app-shell--astrologer .adash-quick-action--purple { --qa-icon-bg: #e9e1fb; --qa-icon-color: #7c4ddb; --qa-border-hover: #c8b4ef; }
+.app-shell--astrologer .action-card--compact {
+  background: #fffdf8;
+  border-color: #ead6b1;
+  box-shadow: 0 6px 15px rgba(100, 56, 20, .08);
+}
+.app-shell--astrologer .action-card--compact:hover { border-color: #d9a63b; transform: translateY(-2px); }
+.app-shell--astrologer .adash-campaign {
+  overflow: hidden;
+  background: #fffdf8;
+  border-color: #ead6b1;
+  box-shadow: 0 7px 16px rgba(100, 56, 20, .08);
+}
+.app-shell--astrologer .adash-campaign-thumb { background: linear-gradient(135deg, #fff2dc, #f7dfc0); }
+.app-shell--astrologer .adash-campaign-month-graph {
+  background: #211812;
+  border-color: #4e382b;
+}
+.app-shell--astrologer .adash-campaign-month-graph__summary strong { color: #f1bf25; }
+.app-shell--astrologer .adash-campaign-month-graph__line { stroke: #f1bf25; }
+.app-shell--astrologer .adash-campaign-track { background: #eadfce; }
+.app-shell--astrologer .adash-campaign-track > span { background: #8b5cf6; }
+.app-shell--astrologer .adash-questions {
+  overflow-x: auto;
+  background: #fffdf8;
+  border-color: #ead6b1;
+  box-shadow: 0 7px 16px rgba(100, 56, 20, .06);
+}
+.app-shell--astrologer .adash-questions thead { background: #f5e7ca; }
+
+.astrologer-bottom-nav {
+  position: fixed;
+  right: 18px;
+  bottom: 14px;
+  left: 18px;
+  z-index: 40;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  min-height: 80px;
+  padding: 8px 22px;
+  overflow-x: auto;
+  background: var(--astrologer-brown);
+  border: 1px solid rgba(232, 184, 62, .62);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(44, 22, 10, .34);
+  scrollbar-width: none;
+}
+.astrologer-bottom-nav::-webkit-scrollbar { display: none; }
+.astrologer-bottom-nav__item {
+  display: flex;
+  flex: 1 1 132px;
+  min-width: 112px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+  padding: 5px 8px;
+  color: #f3d68b;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.astrologer-bottom-nav__item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+.astrologer-bottom-nav__item:hover { color: #fff8e9; background: rgba(232, 184, 62, .10); }
+.astrologer-bottom-nav__item.is-active {
+  color: #fff8e9;
+  background: rgba(112, 61, 18, .64);
+  border-color: rgba(232, 184, 62, .8);
+  box-shadow: 0 0 0 1px rgba(232, 184, 62, .13), inset 0 0 18px rgba(232, 184, 62, .08);
+}
+.astrologer-bottom-nav__item:focus-visible {
+  outline: 2px solid #ffcf6b;
+  outline-offset: 2px;
+}
+.astrologer-bottom-nav__ornament {
+  flex: 0 0 112px;
+  min-width: 112px;
+  min-height: 62px;
+  overflow: hidden;
+  background-image: url('/astrologer-temple-banner.png');
+  background-repeat: no-repeat;
+  background-size: auto 154px;
+  opacity: .82;
+}
+.astrologer-bottom-nav__ornament:first-child { background-position: right center; }
+.astrologer-bottom-nav__ornament:last-child { background-position: right center; }
+
+.app-shell--astrologer .topbar-header { top: 0; }
+
+@media (max-width: 900px) {
+  .app-shell--astrologer .adash-hero--reference { min-height: 165px; border-radius: 18px; }
+  .app-shell--astrologer .adash-quick-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .app-shell--astrologer .adash-quick-action { padding: 12px 10px; }
+  .astrologer-bottom-nav { right: 8px; bottom: 10px; left: 8px; gap: 2px; padding: 7px 10px; }
+  .astrologer-bottom-nav__item { flex-basis: 118px; }
+  .astrologer-bottom-nav__ornament { flex-basis: 74px; min-width: 74px; background-size: auto 128px; }
+  .astrologer-bottom-nav__ornament { display: none; }
+}
+@media (max-width: 600px) {
+  .adash-hero-service-cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .adash-hero-service-card { min-width: 0; min-height: 68px; }
+  .app-shell--astrologer .topbar-header { padding: 10px 12px; }
+  .astrologer-topbar-brand { font-size: 16px; }
+  .astrologer-header-search { width: 38px; min-width: 38px; padding: 8px; }
+  .astrologer-header-search input { display: none; }
+  .astrologer-dnd-toggle { padding: 8px; font-size: 0; }
+  .astrologer-dnd-toggle__dot { width: 8px; height: 8px; }
+  .app-shell--astrologer .adash-hero--reference { min-height: 140px; border-radius: 16px; }
+  .adash-hero-reference-service { top: 10px; right: 10px; }
+  .app-shell--astrologer .adash-quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-shell--astrologer .page-content { padding-bottom: 122px; }
+  .astrologer-bottom-nav { min-height: 68px; padding: 5px 6px; }
+  .astrologer-bottom-nav__item { min-width: 98px; flex-basis: 98px; font-size: 9px; }
+  .astrologer-bottom-nav__item svg { width: 19px; height: 19px; }
+  .app-shell--astrologer .topbar-header { top: 0; }
 }
 
 .user-modal-overlay {
@@ -15390,19 +15981,22 @@ button.apt-week-day:focus-visible {
 .adash-campaign-thumb--career { background: linear-gradient(135deg, #fff1da 0%, #fbe2b4 100%); }
 .adash-campaign-thumb--planetary { background: linear-gradient(135deg, #e5e9fb 0%, #d5dcf6 100%); }
 
-.adash-campaign-body { display: flex; flex-direction: column; flex: 1; gap: 9px; padding: 16px 17px 15px; }
+.adash-campaign-body { position: relative; z-index: 3; display: flex; flex-direction: column; flex: 1; gap: 9px; padding: 16px 17px 15px; background: #fffdf8; }
+.adash-campaign-labels { position: relative; z-index: 4; display: block !important; flex: 0 0 auto; min-height: 48px; visibility: visible; opacity: 1; background: #fffdf8; }
+.adash-campaigns-section .adash-campaign-category { display: block !important; visibility: visible; opacity: 1; color: #b4692a !important; }
+.adash-campaigns-section .adash-campaign-name { display: block !important; visibility: visible; opacity: 1; color: #2c211c !important; }
 .adash-campaign-category { color: #a48fc0; font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .adash-campaign-name { margin: 0; color: var(--text-primary); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16.5px; font-weight: 750; letter-spacing: -0.015em; line-height: 1.25; }
 .adash-campaign-sold { margin-top: auto; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; }
 .adash-campaign-month-graph { display: grid; grid-template-columns: minmax(74px, .72fr) minmax(0, 1.28fr); align-items: center; gap: 8px; min-height: 82px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, .12); border-radius: 18px; background: #020817; color: #94a3b8; font-size: 10px; font-weight: 600; overflow: hidden; }
 .adash-campaign-month-graph__summary { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .adash-campaign-month-graph__summary span { color: #94a3b8; font-size: 10px; white-space: nowrap; }
-.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #22c55e; font-size: 17px; line-height: 1; }
+.adash-campaign-month-graph__summary strong { display: inline-flex; align-items: center; gap: 3px; color: #a78bfa; font-size: 17px; line-height: 1; }
 .adash-campaign-month-graph__summary b { color: #f8fafc; font-size: 15px; line-height: 1.1; }
 .adash-campaign-month-graph > svg { width: 100%; height: 58px; overflow: visible; }
 .adash-campaign-month-graph__summary svg { width: 14px; height: 14px; }
 .adash-campaign-month-graph__area { transition: opacity .8s ease-in-out; }
-.adash-campaign-month-graph__line { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.adash-campaign-month-graph__line { fill: none; stroke: #8b5cf6; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .adash-campaign-track { height: 6px; border-radius: 999px; background: var(--primary-bg); overflow: hidden; }
 .adash-campaign-track > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
 .adash-campaign-actions { display: flex; gap: 8px; margin-top: 4px; }
@@ -15417,6 +16011,123 @@ button.apt-week-day:focus-visible {
   .adash-hero-ring--1 { width: 76px; height: 76px; }
   .adash-hero-ring--2 { width: 56px; height: 56px; }
   .adash-hero-ring--3 { width: 38px; height: 38px; }
+}
+
+/* Astrologer dashboard compact layout and fixed-nav clearance. */
+.app-shell--astrologer {
+  --astrologer-nav-height: 80px;
+  overflow-x: clip;
+}
+.app-shell--astrologer .page-content,
+.app-shell--astrologer .page-transition {
+  min-width: 0;
+  width: 100%;
+}
+.app-shell--astrologer .topbar-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  margin: 0;
+  transform: none;
+}
+.app-shell--astrologer .topbar-header.is-hidden,
+.app-shell--astrologer .topbar-header.is-visible {
+  transform: none;
+}
+.app-shell--astrologer .adash-hero--reference {
+  z-index: 0;
+  margin-top: 0;
+  transform: none;
+}
+.app-shell--astrologer .page-content {
+  padding-bottom: calc(112px + env(safe-area-inset-bottom));
+}
+.app-shell--astrologer .astrologer-bottom-nav {
+  min-height: var(--astrologer-nav-height);
+  height: var(--astrologer-nav-height);
+  box-sizing: border-box;
+}
+.app-shell--astrologer .adash-hero--reference {
+  aspect-ratio: 2172 / 320;
+  max-height: 166px;
+}
+.app-shell--astrologer .adash-hero-service-message {
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 10px 18px;
+}
+.app-shell--astrologer .section { margin-top: 20px; }
+.app-shell--astrologer .section-title {
+  margin-bottom: 10px;
+  font-size: 22px;
+}
+.app-shell--astrologer .adash-campaigns-section > .grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.app-shell--astrologer .adash-campaign {
+  min-width: 0;
+  border-radius: 16px;
+}
+.app-shell--astrologer .adash-campaign-thumb { height: 116px; }
+.app-shell--astrologer .adash-campaign-status { top: 9px; right: 9px; }
+.app-shell--astrologer .adash-campaign-body {
+  gap: 7px;
+  padding: 12px 13px 11px;
+}
+.app-shell--astrologer .adash-campaign-labels { min-height: 42px; }
+.app-shell--astrologer .adash-campaign-name { font-size: 15px; }
+.app-shell--astrologer .adash-campaign-sold { font-size: 12px; }
+.app-shell--astrologer .adash-campaign-month-graph {
+  min-height: 68px;
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+.app-shell--astrologer .adash-campaign-month-graph > svg { height: 48px; }
+.app-shell--astrologer .adash-campaign-track { height: 5px; }
+.app-shell--astrologer .adash-questions {
+  max-width: 100%;
+  border-radius: 16px;
+}
+.app-shell--astrologer .adash-questions th { padding: 10px 14px; }
+.app-shell--astrologer .adash-questions td { padding: 10px 14px; }
+.app-shell--astrologer .adash-q-more-link { margin: 10px 14px 12px; }
+
+@media (max-width: 1100px) {
+  .app-shell--astrologer .adash-campaigns-section > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .app-shell--astrologer .adash-hero--reference {
+    aspect-ratio: 2172 / 360;
+    max-height: 150px;
+  }
+  .app-shell--astrologer .adash-hero-service-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .app-shell--astrologer .adash-hero-service-card {
+    min-width: 0;
+    padding: 8px 42px 8px 9px;
+  }
+  .app-shell--astrologer .adash-hero-service-card__copy strong,
+  .app-shell--astrologer .adash-hero-service-card__copy small { white-space: normal; }
+  .app-shell--astrologer .adash-hero-service-card__switch { right: 8px; }
+}
+@media (max-width: 600px) {
+  .app-shell--astrologer .page-content {
+    padding-right: 14px;
+    padding-left: 14px;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+  .app-shell--astrologer .section { margin-top: 17px; }
+  .app-shell--astrologer .section-title { font-size: 20px; }
+  .app-shell--astrologer .adash-campaigns-section > .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .app-shell--astrologer .adash-campaign-thumb { height: 126px; }
 }
 
 /* Welcome banner layout refinement: left message, right controls/status. */
@@ -16174,6 +16885,274 @@ button.apt-week-day:focus-visible {
   font-weight: 800;
 }
 .tbq-page .tbq-module-tab:hover { background: #FFFFFF; }
+
+/* The question workspace is a fixed viewport surface. Pagination always owns
+   three records; the month groups scroll inside the available list region. */
+.app-shell--astrologer:has(.tbq-page) {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+.app-shell--astrologer:has(.tbq-page) .main-column,
+.app-shell--astrologer:has(.tbq-page) .page-content,
+.app-shell--astrologer:has(.tbq-page) .page-transition {
+  min-height: 0;
+  overflow: hidden;
+}
+.app-shell--astrologer:has(.tbq-page) .main-column { height: 100dvh; }
+.app-shell--astrologer:has(.tbq-page) .page-content {
+  flex: 1 1 auto;
+  height: 100%;
+  box-sizing: border-box;
+  padding-bottom: calc(var(--astrologer-nav-height, 80px) + 28px + env(safe-area-inset-bottom));
+}
+.app-shell--astrologer:has(.tbq-page) .page-transition {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+.app-shell--astrologer:has(.tbq-page) .page-transition > .tbq-page { display: flex; }
+.tbq-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.tbq-page > .page-header-row,
+.tbq-page > div:has(> .tbq-module-tabs) {
+  flex: 0 0 auto;
+}
+.tbq-page > .tbq-answer-page {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.tbq-page .tbq-answer-page {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.tbq-answer-page > .section { flex: 0 0 auto; margin-top: 10px; }
+.tbq-answer-page > .section:first-child { margin-top: 8px; }
+.tbq-answer-page > .tbq-question-list-section {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.tbq-question-list-section > .question-list-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0;
+  overflow: hidden;
+}
+.tbq-question-list-section .tbq-question-groups {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 20px;
+  align-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 2px 4px 14px 0;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.tbq-question-list-section .tbq-question-month {
+  position: static;
+  display: block;
+  flex: 0 0 auto;
+  min-height: 0;
+  margin: 0;
+}
+.tbq-question-list-section .tbq-question-month__heading {
+  position: static;
+  margin: 0 0 12px;
+  transform: none;
+}
+.tbq-question-list-section .question-list {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.tbq-page .question-card {
+  position: static;
+  min-width: 0;
+  min-height: 0;
+  gap: 12px;
+  padding: 11px 14px;
+}
+.tbq-page .question-table-pagination {
+  flex: 0 0 auto;
+  min-height: 52px;
+  padding: 9px 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.tbq-question-months {
+  display: grid;
+  gap: 28px;
+}
+.tbq-question-month {
+  min-width: 0;
+}
+.tbq-question-month__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
+  color: #c86f2e;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.tbq-question-month__heading svg {
+  flex: 0 0 auto;
+  color: #6d28d9;
+}
+.tbq-question-month__heading .tbq-question-month__name {
+  color: #c86f2e;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+.tbq-question-month__heading .tbq-question-month__count {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.tbq-question-empty {
+  display: grid;
+  gap: 0;
+}
+.tbq-question-month__grid {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.tbq-question-card {
+  display: grid;
+  grid-template-columns: minmax(120px, .8fr) minmax(220px, 1.7fr) minmax(190px, 1.2fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 18px 20px;
+  border: 1px solid #eadfcd;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--muted);
+  box-shadow: 0 7px 18px rgba(100, 56, 20, .07);
+  cursor: pointer;
+}
+.tbq-question-card:hover,
+.tbq-question-card:focus-visible {
+  background: #fffdf8;
+  outline: none;
+}
+.tbq-question-card:focus-visible { box-shadow: inset 0 0 0 2px #6d28d9, 0 7px 18px rgba(100, 56, 20, .07); }
+.tbq-question-card__customer strong,
+.tbq-question-card__details strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.tbq-question-card__details > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.tbq-question-card__details p {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.tbq-question-card__deadline {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.tbq-question-card__deadline span,
+.tbq-question-card__deadline small { overflow-wrap: anywhere; }
+.tbq-question-card__deadline b {
+  margin-right: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.tbq-question-card__deadline small { color: var(--ink); font-size: 11px; font-weight: 700; }
+.tbq-question-card__status { justify-self: start; }
+.tbq-question-card__action { justify-self: end; }
+.tbq-question-card__action .btn { white-space: nowrap; }
+
+.tbq-question-card__dates {
+  display: grid;
+  gap: 4px;
+  margin-top: auto;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.tbq-question-card__dates strong {
+  color: var(--body);
+  font-weight: 800;
+}
+@media (max-width: 640px) {
+  .tbq-question-months { gap: 22px; }
+  .tbq-question-month__heading { font-size: 20px; }
+  .tbq-question-month__heading .tbq-question-month__count { font-size: 12px; }
+}
+@media (max-width: 980px) {
+  .tbq-question-card { grid-template-columns: minmax(110px, .8fr) minmax(180px, 1.4fr) minmax(160px, 1fr); }
+  .tbq-question-card__status,
+  .tbq-question-card__action { justify-self: start; }
+}
+@media (max-width: 620px) {
+  .tbq-question-card { grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px; }
+  .tbq-question-card__details,
+  .tbq-question-card__deadline { grid-column: 1 / -1; }
+  .tbq-question-card__status { grid-column: 1; }
+  .tbq-question-card__action { grid-column: 2; justify-self: end; }
+}
+@media (max-width: 720px) {
+  .app-shell--astrologer:has(.tbq-page) .page-content {
+    padding-right: 12px;
+    padding-left: 12px;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+  .tbq-page .tbq-module-tabs { gap: 4px; padding: 5px; }
+  .tbq-page .tbq-module-tab { min-width: 0; padding: 8px 9px; font-size: 12px; }
+  .tbq-page .tbq-question-month__heading { margin-bottom: 7px; padding: 3px 0; font-size: 19px; }
+  .tbq-page .question-card { padding: 9px 11px; }
+  .tbq-page .question-card__details p { margin-top: 4px; }
+  .tbq-page .question-table-pagination { padding: 7px 9px; }
+  .tbq-question-list-section .tbq-question-groups { gap: 14px; padding-right: 2px; }
+}
 
 /* ---------- Question History page scope ----------
    Tightens the Astrology -> "History" heading gap and lets the month / date

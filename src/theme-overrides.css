@@ -1,0 +1,91 @@
+/* Loaded after route styles so the global theme contract wins over legacy
+   page-level hardcoded surfaces. Components should still prefer the tokens. */
+html, body, #root {
+  background: var(--bg-solid);
+  color: var(--body);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html[data-theme='dark'] .app-shell,
+html[data-theme='dark'] .main-column,
+html[data-theme='dark'] .page-content,
+html[data-theme='dark'] .page-transition,
+html[data-theme='dark'] .section,
+html[data-theme='dark'] .card,
+html[data-theme='dark'] [class*='-card'],
+html[data-theme='dark'] [class*='-modal'],
+html[data-theme='dark'] [class*='-popover'],
+html[data-theme='dark'] [class*='-dropdown'] {
+  color: var(--body);
+}
+
+html[data-theme='dark'] .card,
+html[data-theme='dark'] .modal-card,
+html[data-theme='dark'] .user-modal-card,
+html[data-theme='dark'] [class*='-card'],
+html[data-theme='dark'] [class*='-modal'],
+html[data-theme='dark'] [class*='-popover'],
+html[data-theme='dark'] [class*='-dropdown'] {
+  background-color: var(--surface-strong) !important;
+  border-color: var(--surface-border) !important;
+}
+
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea,
+html[data-theme='dark'] .search-bar,
+html[data-theme='dark'] .text-input,
+html[data-theme='dark'] .select-input,
+html[data-theme='dark'] .textarea-box,
+html[data-theme='dark'] table {
+  background-color: var(--surface-strong) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--surface-border) !important;
+}
+
+html[data-theme='dark'] button:not(.theme-toggle-btn):not(.astrologer-dnd-toggle),
+html[data-theme='dark'] .tab,
+html[data-theme='dark'] [role='tab'] {
+  border-color: var(--surface-border);
+}
+
+html[data-theme='dark'] .astrologer-bottom-nav,
+html[data-theme='dark'] .app-shell--astrologer .topbar-header,
+html[data-theme='dark'] .bottom-nav,
+html[data-theme='dark'] .sidebar {
+  background: var(--sidebar-from) !important;
+  border-color: var(--surface-border) !important;
+}
+
+html[data-theme='dark'] .text-gray-900,
+html[data-theme='dark'] .text-gray-800,
+html[data-theme='dark'] .text-gray-700,
+html[data-theme='dark'] .text-slate-900,
+html[data-theme='dark'] .text-slate-800,
+html[data-theme='dark'] .text-slate-700 {
+  color: var(--text-primary) !important;
+}
+
+html[data-theme='dark'] .text-gray-600,
+html[data-theme='dark'] .text-gray-500,
+html[data-theme='dark'] .text-slate-600,
+html[data-theme='dark'] .text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme='dark'] .bg-gray-50,
+html[data-theme='dark'] .bg-gray-100,
+html[data-theme='dark'] .bg-slate-50,
+html[data-theme='dark'] .bg-slate-100 {
+  background-color: var(--surface-soft) !important;
+}
+
+html[data-theme='dark'] .border-gray-100,
+html[data-theme='dark'] .border-gray-200,
+html[data-theme='dark'] .border-slate-100,
+html[data-theme='dark'] .border-slate-200 {
+  border-color: var(--surface-border) !important;
+}
