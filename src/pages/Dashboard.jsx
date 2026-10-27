@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Megaphone,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
+import FlipButton from '../components/ui/flip-button.jsx'
 import {
   filterCampaignsByStatus,
   getCampaignAllocation,
@@ -89,8 +90,14 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="hero-banner hero-banner-user adash-hero adash-hero--reference">
-        <div className="adash-hero-reference-service">
+      <div className="astrologer-top-hero-image">
+        <img
+          src="/golden-temple-sunset-banner.png"
+          alt="Golden temple at sunset beside a peaceful lake"
+        />
+        <div className="astrologer-top-hero-image__services">
+          <h1>Stay Connected with Your Followers</h1>
+          <p>Enable instant call or chat to be available for real time consultations.</p>
           <div className="adash-hero-service-cards" aria-label="Instant services">
             <ServiceToggleCard
               icon={PhoneCall}
@@ -109,8 +116,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <p className="adash-hero-service-message">Your followers are active—enable instant calls to benefit.</p>
-
       <Section title="Quick Actions" icon={Zap}>
         <div className="adash-quick-actions">
           {quickActions.map(({ icon: Icon, label, route, onClick, accent }) => (
@@ -237,21 +242,36 @@ export default function Dashboard() {
 
 function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
       aria-pressed={enabled}
       aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
       onClick={onToggle}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onToggle()
+        }
+      }}
     >
       <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
       <span className="adash-hero-service-card__copy">
         <strong>{label}</strong>
         <small>{description}</small>
       </span>
-      <span className="adash-hero-service-card__state">{enabled ? 'ON' : 'OFF'}</span>
-      <span className="adash-hero-service-card__switch" aria-hidden="true"><span /></span>
-    </button>
+      <FlipButton
+        key={`${label}-${enabled}`}
+        text1="ON"
+        text2="OFF"
+        initialShow={enabled}
+        className="adash-hero-service-card__flip"
+        aria-label={`${label} ${enabled ? 'ON' : 'OFF'}`}
+        aria-pressed={enabled}
+        onClick={onToggle}
+      />
+    </div>
   )
 }
 
@@ -275,39 +295,56 @@ function generateSmoothPath(values, width, height) {
 function CampaignMonthGraph({ campaignId, sold, target }) {
   const linePathRef = useRef(null)
   const areaPathRef = useRef(null)
+  const [animationPhase, setAnimationPhase] = useState(0)
   const svgWidth = 150
   const svgHeight = 60
   const capacity = Number(target) || 1
   const progress = Math.min(Math.max((Number(sold) / capacity) * 100, 0), 100)
-  const chartData = useMemo(() => [
-    progress * 0.35,
-    progress * 0.62,
-    progress * 0.5,
-    progress * 0.78,
-    progress * 0.68,
-    progress * 0.9,
-    progress,
-  ], [progress])
+  const chartData = useMemo(() => {
+    // Keep the card's actual sales value fixed while gently changing the
+    // intermediate points so the graph has the same live motion as the
+    // supplied stats-widget animation.
+    const shapes = [
+      [0.35, 0.62, 0.5, 0.78, 0.68, 0.9, 1],
+      [0.42, 0.55, 0.66, 0.52, 0.82, 0.74, 1],
+      [0.3, 0.7, 0.58, 0.84, 0.6, 0.88, 1],
+      [0.48, 0.58, 0.44, 0.72, 0.8, 0.66, 1],
+    ]
+    const shape = shapes[animationPhase % shapes.length]
+    return shape.map((value) => progress * value)
+  }, [animationPhase, progress])
   const linePath = useMemo(() => generateSmoothPath(chartData, svgWidth, svgHeight), [chartData])
   const areaPath = useMemo(() => `${linePath} L ${svgWidth} ${svgHeight} L 0 ${svgHeight} Z`, [linePath])
   const gradientId = `campaign-area-${String(campaignId || 'default').replace(/[^a-zA-Z0-9_-]/g, '-')}`
 
   useEffect(() => {
-    const path = linePathRef.current
-    const area = areaPathRef.current
-    if (!path || !area || typeof path.getTotalLength !== 'function') return undefined
-    const length = path.getTotalLength()
-    path.style.transition = 'none'
-    path.style.strokeDasharray = `${length} ${length}`
-    path.style.strokeDashoffset = `${length}`
-    area.style.transition = 'none'
-    area.style.opacity = '0'
-    path.getBoundingClientRect()
-    path.style.transition = 'stroke-dashoffset 0.8s ease-in-out'
-    path.style.strokeDashoffset = '0'
-    area.style.transition = 'opacity 0.8s ease-in-out 0.2s'
-    area.style.opacity = '1'
-    return undefined
+    const phaseInterval = window.setInterval(() => {
+      setAnimationPhase((phase) => phase + 1)
+    }, 3000)
+    return () => window.clearInterval(phaseInterval)
+  }, [])
+
+  useEffect(() => {
+    const animateGraph = () => {
+      const path = linePathRef.current
+      const area = areaPathRef.current
+      if (!path || !area || typeof path.getTotalLength !== 'function') return
+      const length = path.getTotalLength()
+      path.style.transition = 'none'
+      path.style.strokeDasharray = `${length} ${length}`
+      path.style.strokeDashoffset = `${length}`
+      area.style.transition = 'none'
+      area.style.opacity = '0'
+      path.getBoundingClientRect()
+      path.style.transition = 'stroke-dashoffset 0.8s ease-in-out'
+      path.style.strokeDashoffset = '0'
+      area.style.transition = 'opacity 0.8s ease-in-out 0.2s'
+      area.style.opacity = '1'
+    }
+
+    animateGraph()
+    const intervalId = window.setInterval(animateGraph, 3000)
+    return () => window.clearInterval(intervalId)
   }, [linePath])
 
   return (
