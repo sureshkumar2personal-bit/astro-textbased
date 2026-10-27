@@ -37,7 +37,6 @@ function notesFor({ title, topic, startedDate, dueDate, summary, historyDate = s
     instructions: sharedInstructions,
     attachments: [
       { id: 'mock-cosmic-image', name: 'cosmic.jpg', type: 'Image', url: MOCK_IMAGE },
-      { id: 'mock-consultation-pdf', name: 'Appointment_Emergency_Module_Screens.pdf', type: 'PDF', url: '' },
       {
         id: 'mock-career-pariharam',
         name: title || 'Career Obstacle Pariharam',

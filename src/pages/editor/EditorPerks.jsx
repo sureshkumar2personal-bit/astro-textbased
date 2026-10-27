@@ -9,9 +9,9 @@ import '../../pages/astrologer/perksSettings.css'
 import './editor-perks.css'
 
 const INITIAL_CONFIG = {
-  Silver: { price: 199, discounts: { questions: 10, audio: 10, appointments: 10, emergency: 5 }, access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' }, categories: [] },
-  Gold: { price: 399, discounts: { questions: 20, audio: 15, appointments: 15, emergency: 10 }, access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' }, categories: [] },
-  Platinum: { price: 699, discounts: { questions: 30, audio: 20, appointments: 20, emergency: 15 }, access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' }, categories: [] },
+  Silver: { price: 199, discounts: { questions: 10, audio: 10, appointments: 10 }, access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' }, categories: [] },
+  Gold: { price: 399, discounts: { questions: 20, audio: 15, appointments: 15 }, access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' }, categories: [] },
+  Platinum: { price: 699, discounts: { questions: 30, audio: 20, appointments: 20 }, access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' }, categories: [] },
 }
 
 export default function EditorPerks() {
