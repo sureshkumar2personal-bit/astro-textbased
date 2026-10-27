@@ -643,7 +643,7 @@ export default function Layout() {
 
   return (
     <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader }}>
-      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ' app-shell--user'}`}>
+      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ''}`}>
       <aside className={`sidebar sidebar--${role}`}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
