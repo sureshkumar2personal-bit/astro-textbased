@@ -5201,19 +5201,98 @@ html[data-theme='dark'] .border-white\/90 {
   outline-offset: 2px;
 }
 .astrologer-bottom-nav__ornament {
-  flex: 0 0 112px;
-  min-width: 112px;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 62px;
+  width: 62px;
+  min-width: 62px;
+  height: 62px;
   min-height: 62px;
   overflow: hidden;
-  background-image: url('/astrologer-temple-banner.png');
-  background-repeat: no-repeat;
-  background-size: auto 154px;
+  border-radius: 50%;
   opacity: .82;
 }
-.astrologer-bottom-nav__ornament:first-child { background-position: right center; }
-.astrologer-bottom-nav__ornament:last-child { background-position: right center; }
+.astrologer-bottom-nav__ornament:first-child,
+.astrologer-bottom-nav__ornament:last-child { background-position: center; }
+.astrologer-bottom-nav__ornament::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/astrologer-sun.png');
+  background-repeat: no-repeat;
+  background-size: 62px 62px;
+  background-position: center;
+  background-color: transparent;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform-origin: center center;
+  animation: astrologerOrnamentImageSpin 12s linear infinite;
+}
+.astrologer-bottom-nav__ornament:first-child::after { animation-direction: normal; }
+.astrologer-bottom-nav__ornament:last-child::after { animation-direction: reverse; }
+@keyframes astrologerOrnamentImageSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .astrologer-bottom-nav__ornament,
+  .astrologer-bottom-nav__ornament::after {
+    animation: none;
+  }
+}
 
 .app-shell--astrologer .topbar-header { top: 0; }
+
+/* Custom Vel Cursors for User Portal (58x58):
+   - Normal state: Gold Vel facing LEFT (hotspot 6, 2)
+   - Interactive / Pointer state: Red Vel facing LEFT (hotspot 8, 2)
+*/
+.app-shell--user,
+.app-shell--user *,
+.user-dashboard-page,
+.user-dashboard-page * {
+  cursor: url('/vel-cursor.png') 6 2, auto;
+}
+
+.app-shell--user button,
+.app-shell--user button *,
+.app-shell--user a,
+.app-shell--user a *,
+.app-shell--user [role='button'],
+.app-shell--user [role='button'] *,
+.app-shell--user input[type='button'],
+.app-shell--user input[type='submit'],
+.app-shell--user select,
+.app-shell--user .clickable,
+.app-shell--user .cursor-pointer,
+.app-shell--user [style*='cursor: pointer'],
+.app-shell--user [style*='cursor:pointer'],
+.user-dashboard-page button,
+.user-dashboard-page button *,
+.user-dashboard-page a,
+.user-dashboard-page a *,
+.user-dashboard-page [role='button'],
+.user-dashboard-page [role='button'] *,
+.user-dashboard-page .action-card,
+.user-dashboard-page .action-card *,
+.user-dashboard-page .activity-row,
+.user-dashboard-page .activity-row *,
+.user-dashboard-page .cursor-pointer {
+  cursor: url('/vel-cursor-pointer.png') 8 2, pointer;
+}
+
+.app-shell--user input[type='text'],
+.app-shell--user input[type='password'],
+.app-shell--user input[type='email'],
+.app-shell--user input[type='search'],
+.app-shell--user input[type='number'],
+.app-shell--user textarea,
+.user-dashboard-page input[type='text'],
+.user-dashboard-page input[type='password'],
+.user-dashboard-page input[type='email'],
+.user-dashboard-page textarea {
+  cursor: text;
+}
 
 @media (max-width: 900px) {
   .app-shell--astrologer .adash-hero--reference { min-height: 165px; border-radius: 18px; }

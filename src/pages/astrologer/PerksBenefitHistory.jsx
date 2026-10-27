@@ -6,12 +6,11 @@ const BENEFIT_USAGE_HISTORY = [
   { id: 'BEN-2026-0918-01', date: '2026-09-18', time: '10:42 AM', customer: 'Priya V.', customerId: 'cust-2', plan: 'Gold', service: 'Text Question', originalPrice: 399, discountPercent: 20, status: 'Completed', reference: 'QTN-2026-000123' },
   { id: 'BEN-2026-0919-02', date: '2026-09-19', time: '02:15 PM', customer: 'Arjun D.', customerId: 'cust-3', plan: 'Silver', service: 'Appointment', originalPrice: 499, discountPercent: 10, status: 'Completed', reference: 'APT-2026-00482' },
   { id: 'BEN-2026-0920-03', date: '2026-09-20', time: '06:20 PM', customer: 'Meena R.', customerId: 'cust-4', plan: 'Gold', service: 'Audio Call', originalPrice: 600, discountPercent: 15, status: 'Completed', reference: 'CALL-2026-00917' },
-  { id: 'BEN-2026-0917-04', date: '2026-09-17', time: '11:05 AM', customer: 'Kannan S.', customerId: 'cust-5', plan: 'Platinum', service: 'Emergency Consultation', originalPrice: 899, discountPercent: 15, status: 'Completed', reference: 'EMG-2026-00118' },
   { id: 'BEN-2026-0916-05', date: '2026-09-16', time: '08:30 PM', customer: 'Devi K.', customerId: 'cust-6', plan: 'Silver', service: 'Live Session', originalPrice: 299, discountPercent: 0, status: 'Cancelled', reference: 'LIVE-2026-00331' },
   { id: 'BEN-2026-0915-06', date: '2026-09-15', time: '09:10 AM', customer: 'Rajesh Kumar', customerId: 'cust-7', plan: 'Gold', service: 'Content Access', originalPrice: 199, discountPercent: 20, status: 'Completed', reference: 'CNT-2026-00098' },
 ]
 
-const SERVICE_OPTIONS = ['Text Question', 'Audio Call', 'Appointment', 'Emergency Consultation', 'Live Session', 'Content Access']
+const SERVICE_OPTIONS = ['Text Question', 'Audio Call', 'Appointment', 'Live Session', 'Content Access']
 const STATUS_OPTIONS = ['Completed', 'Cancelled', 'Refunded', 'Expired']
 
 function money(value) {
