@@ -5243,57 +5243,6 @@ html[data-theme='dark'] .border-white\/90 {
 
 .app-shell--astrologer .topbar-header { top: 0; }
 
-/* Custom Vel Cursors for User Portal (58x58):
-   - Normal state: Gold Vel facing LEFT (hotspot 6, 2)
-   - Interactive / Pointer state: Red Vel facing LEFT (hotspot 8, 2)
-*/
-.app-shell--user,
-.app-shell--user *,
-.user-dashboard-page,
-.user-dashboard-page * {
-  cursor: url('/vel-cursor.png') 6 2, auto;
-}
-
-.app-shell--user button,
-.app-shell--user button *,
-.app-shell--user a,
-.app-shell--user a *,
-.app-shell--user [role='button'],
-.app-shell--user [role='button'] *,
-.app-shell--user input[type='button'],
-.app-shell--user input[type='submit'],
-.app-shell--user select,
-.app-shell--user .clickable,
-.app-shell--user .cursor-pointer,
-.app-shell--user [style*='cursor: pointer'],
-.app-shell--user [style*='cursor:pointer'],
-.user-dashboard-page button,
-.user-dashboard-page button *,
-.user-dashboard-page a,
-.user-dashboard-page a *,
-.user-dashboard-page [role='button'],
-.user-dashboard-page [role='button'] *,
-.user-dashboard-page .action-card,
-.user-dashboard-page .action-card *,
-.user-dashboard-page .activity-row,
-.user-dashboard-page .activity-row *,
-.user-dashboard-page .cursor-pointer {
-  cursor: url('/vel-cursor-pointer.png') 8 2, pointer;
-}
-
-.app-shell--user input[type='text'],
-.app-shell--user input[type='password'],
-.app-shell--user input[type='email'],
-.app-shell--user input[type='search'],
-.app-shell--user input[type='number'],
-.app-shell--user textarea,
-.user-dashboard-page input[type='text'],
-.user-dashboard-page input[type='password'],
-.user-dashboard-page input[type='email'],
-.user-dashboard-page textarea {
-  cursor: text;
-}
-
 @media (max-width: 900px) {
   .app-shell--astrologer .adash-hero--reference { min-height: 165px; border-radius: 18px; }
   .app-shell--astrologer .adash-quick-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
