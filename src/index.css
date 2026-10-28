@@ -5289,6 +5289,46 @@ html[data-theme='dark'] .border-white\/90 {
   outline: 2px solid #ffcf6b;
   outline-offset: 2px;
 }
+.astrologer-bottom-nav__ornament {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 62px;
+  width: 62px;
+  min-width: 62px;
+  height: 62px;
+  min-height: 62px;
+  overflow: hidden;
+  border-radius: 50%;
+  opacity: .82;
+}
+.astrologer-bottom-nav__ornament:first-child,
+.astrologer-bottom-nav__ornament:last-child { background-position: center; }
+.astrologer-bottom-nav__ornament::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/astrologer-sun.png');
+  background-repeat: no-repeat;
+  background-size: 62px 62px;
+  background-position: center;
+  background-color: transparent;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transform-origin: center center;
+  animation: astrologerOrnamentImageSpin 12s linear infinite;
+}
+.astrologer-bottom-nav__ornament:first-child::after { animation-direction: normal; }
+.astrologer-bottom-nav__ornament:last-child::after { animation-direction: reverse; }
+@keyframes astrologerOrnamentImageSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .astrologer-bottom-nav__ornament,
+  .astrologer-bottom-nav__ornament::after {
+    animation: none;
+  }
+}
 
 .app-shell--astrologer .topbar-header { top: 0; }
 

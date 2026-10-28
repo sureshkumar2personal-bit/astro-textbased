@@ -38,7 +38,6 @@ function PlanCard({ plan, config, onEdit }) {
         <div><span>Text Questions</span><strong>{config.discounts.questions}% OFF</strong></div>
         <div><span>Audio Calls</span><strong>{config.discounts.audio}% OFF</strong></div>
         <div><span>Appointments</span><strong>{config.discounts.appointments}% OFF</strong></div>
-        <div><span>Emergency</span><strong>{config.discounts.emergency}% OFF</strong></div>
         <div><span>Live Access</span><strong>{config.access.live}</strong></div>
       </div>
       <button type="button" className="subscriber-plan-card__edit" onClick={() => onEdit(plan.key)}><Edit2 size={14} /> Edit {plan.key}</button>
