@@ -17,6 +17,7 @@ import {
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import FlipButton from '../components/ui/flip-button.jsx'
+import TiltCard from '../components/ui/tilt-card.tsx'
 import {
   filterCampaignsByStatus,
   getCampaignAllocation,
@@ -242,36 +243,45 @@ export default function Dashboard() {
 
 function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
-      aria-pressed={enabled}
-      aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
-      onClick={onToggle}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          onToggle()
-        }
-      }}
+    <TiltCard
+      className="adash-hero-service-card__tilt"
+      tiltLimit={8}
+      scale={1.015}
+      perspective={1000}
+      effect="evade"
+      spotlight
     >
-      <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
-      <span className="adash-hero-service-card__copy">
-        <strong>{label}</strong>
-        <small>{description}</small>
-      </span>
-      <FlipButton
-        key={`${label}-${enabled}`}
-        text1="ON"
-        text2="OFF"
-        initialShow={enabled}
-        className="adash-hero-service-card__flip"
-        aria-label={`${label} ${enabled ? 'ON' : 'OFF'}`}
+      <div
+        role="button"
+        tabIndex={0}
+        className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
         aria-pressed={enabled}
+        aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
         onClick={onToggle}
-      />
-    </div>
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onToggle()
+          }
+        }}
+      >
+        <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
+        <span className="adash-hero-service-card__copy">
+          <strong>{label}</strong>
+          <small>{description}</small>
+        </span>
+        <FlipButton
+          key={`${label}-${enabled}`}
+          text1="ON"
+          text2="OFF"
+          initialShow={enabled}
+          className="adash-hero-service-card__flip"
+          aria-label={`${label} ${enabled ? 'ON' : 'OFF'}`}
+          aria-pressed={enabled}
+          onClick={onToggle}
+        />
+      </div>
+    </TiltCard>
   )
 }
 
