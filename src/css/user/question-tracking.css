@@ -22,6 +22,10 @@
   margin: 4px 0 20px;
 }
 
+.aq-track-head > .aq-track-month:only-child {
+  margin-left: auto;
+}
+
 .aq-track-head__title {
   color: var(--text-primary);
   font-size: 22px;

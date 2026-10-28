@@ -279,7 +279,7 @@ export default function QuestionPurchased() {
 
   return (
     <div>
-      <Section title="Purchased Questions" titleRight={<span className="muted">{counts.Available} available to write</span>}>
+      <Section>
         <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-4" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
           {PURCHASED_FILTERS.map((key) => {
             const meta = FILTER_META[key]

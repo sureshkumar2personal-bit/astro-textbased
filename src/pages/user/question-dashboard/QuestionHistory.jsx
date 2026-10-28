@@ -290,16 +290,10 @@ export default function QuestionHistory() {
   return (
     <div>
       <div className="aq-track-head">
-        <div>
-          <div className="aq-track-head__title">History</div>
-          <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-            A read-only archive of your past questions — completed and cancelled.
-          </div>
-        </div>
         <HistoryMonthSelector monthKey={monthKey} options={monthOptions} onChange={setMonthKey} />
       </div>
 
-      <Section title="History" titleRight={<span className="muted">{monthLabelText} · {history.length} archived</span>}>
+      <Section>
         <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-3" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
           {HISTORY_STATUS_FILTERS.map((filter) => {
             const meta = STATUS_CARD_META[filter]

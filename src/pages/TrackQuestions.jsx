@@ -723,7 +723,6 @@ const selectedQuestion = detailsOpen
       {/* Month selector. Every record below belongs to the selected month. */}
       {embedded ? (
         <div className="aq-track-head">
-          <div className="aq-track-head__title">Track My Questions</div>
           <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
         </div>
       ) : (
