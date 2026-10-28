@@ -41,6 +41,7 @@ import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
 import NotificationsPanel from './NotificationsPanel.jsx'
 import SidebarItem from './SidebarItem.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
+import BottomNavBar from './ui/bottom-nav-bar.jsx'
 import {
   TempleArchIcon,
   TempleBellIcon,
@@ -724,16 +725,7 @@ export default function Layout() {
         </div>
       )}
       {shellIsAstrologer && (
-        <nav className="astrologer-bottom-nav" aria-label="Astrologer navigation">
-          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
-          {config.nav.map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={label} to={`${basePath}/${to}`.replace(/\/$/, '')} end={end} className={({ isActive }) => `astrologer-bottom-nav__item${isActive ? ' is-active' : ''}`}>
-              <Icon size={17} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
-        </nav>
+        <BottomNavBar items={config.nav} basePath={basePath} />
       )}
     </div>
     </GlobalHeaderActionsContext.Provider>
