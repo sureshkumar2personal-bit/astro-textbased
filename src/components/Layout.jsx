@@ -45,6 +45,7 @@ import {
   TempleArchIcon,
   TempleBellIcon,
   TempleDonationBoxIcon,
+  TempleLampIcon,
   TempleReturnIcon,
   TempleScrollIcon,
 } from './TempleIcons.jsx'
@@ -643,11 +644,11 @@ export default function Layout() {
 
   return (
     <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader }}>
-      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ''}`}>
+      <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ' app-shell--user'}`}>
       <aside className={`sidebar sidebar--${role}`}>
         <div className="sidebar-brand">
           <div className="sidebar-brand-mark">
-            {shellIsAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <Sparkles size={24} color="#fff" />}
+            {shellIsAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <TempleLampIcon size={24} color="#fff" />}
           </div>
           <div>
             <div className="sidebar-brand-text">Astro Connect</div>
