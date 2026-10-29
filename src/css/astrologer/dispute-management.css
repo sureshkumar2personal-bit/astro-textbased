@@ -862,11 +862,36 @@
 }
 .dispute-management-page .complaints-table-wrap { border-color: #f0e9dc; border-radius: 10px; }
 .dispute-management-page .complaints-table { min-width: 1080px; }
-.dispute-management-page .complaints-table-row { grid-template-columns: 42px minmax(135px, 1.2fr) 82px 100px minmax(105px, 1fr) minmax(120px, 1fr) minmax(145px, 1.2fr) 120px 116px; min-height: 55px; gap: 12px; padding: 0 14px; font-size: 12px; }
+.dispute-management-page .complaints-table-row { grid-template-columns: 52px minmax(180px, 1.4fr) minmax(180px, 1.2fr) 140px 132px; min-height: 55px; gap: 12px; padding: 0 14px; font-size: 12px; }
 .dispute-management-page .complaints-table-head { min-height: 42px; background: #fff9ed; color: #3e3127; font-size: 11px; text-transform: none; }
-.dispute-management-page .complaint-id { color: #2d2118; font-size: 12px; }
+.dispute-management-page .complaint-summary { display: grid; gap: 3px; min-width: 0; color: #2d2118; font-size: 12px; }
+.dispute-management-page .complaint-summary strong { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.dispute-management-page .complaint-summary small { overflow: hidden; color: #85786b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .dispute-management-page .complaint-view-button { padding: 7px 11px; border: 1px solid #d8b77d; border-radius: 8px; color: #4c321d; font-size: 11px; }
 .dispute-management-page .complaint-view-button:hover { background: #fff9ed; text-decoration: none; }
+.dispute-management-page .complaint-inline-details { display: grid; grid-column: 1 / -1; gap: 14px; margin: 0 14px; padding: 14px 16px 16px; border-top: 1px solid #eadfcd; border-bottom: 1px solid #eadfcd; background: #fffaf2; color: #4d3929; font-size: 12px; }
+.dispute-management-page .complaint-inline-details__main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 18px; }
+.dispute-management-page .complaint-inline-details__main > div:first-child { min-width: 0; }
+.dispute-management-page .complaint-inline-details__meta { padding-left: 30px; border-left: 1px solid #e6d6bd; }
+.dispute-management-page .complaint-inline-details strong { color: #38271c; font-size: 12px; }
+.dispute-management-page .complaint-inline-details p { margin: 5px 0 0; line-height: 1.5; }
+.dispute-management-page .complaint-inline-details__meta { display: flex; flex-wrap: wrap; align-content: start; gap: 10px 18px; }
+.dispute-management-page .complaint-inline-details__meta span { display: grid; gap: 3px; min-width: 90px; }
+.dispute-management-page .complaint-inline-details__meta b { color: #8a6a43; font-size: 10px; text-transform: uppercase; }
+.dispute-management-page .complaint-inline-details__status { min-width: 112px; }
+.dispute-management-page .complaint-inline-status { display: grid; gap: 4px; width: 112px; padding: 7px 13px 8px; border-radius: 999px; font-style: normal; }
+.dispute-management-page .complaint-inline-status i { display: block; width: 100%; height: 5px; border-radius: 999px; background: currentColor; }
+.dispute-management-page .complaint-inline-status em { color: inherit; font-size: 12px; font-style: normal; font-weight: 800; line-height: 1; }
+.dispute-management-page .complaint-inline-status--open { background: #fff0f1; color: #d71920; }
+.dispute-management-page .complaint-inline-status--under-review { background: #fff8df; color: #b87500; }
+.dispute-management-page .complaint-inline-status--awaiting-response { background: #f1edff; color: #5b35b5; }
+.dispute-management-page .complaint-inline-status--resolved { background: #eafaf2; color: #079669; }
+.dispute-management-page .complaint-inline-status--closed { background: #f0eef2; color: #665a6e; }
+.dispute-management-page .complaint-inline-details__time time { color: #38271c; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.dispute-management-page .complaint-inline-details__evidence { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.dispute-management-page .complaint-inline-details__evidence strong { display: block; }
+.dispute-management-page .complaint-inline-details__evidence span { padding: 5px 9px; border: 1px solid #e4d8c4; border-radius: 6px; background: #fff; }
 
 @media (max-width: 900px) { .dispute-management-page { padding-inline: 16px; } .dispute-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .dispute-management-page { padding-inline: 10px; } .dispute-management-page .page-header-row { align-items: flex-start; flex-direction: column; gap: 10px; } .dispute-management-page .page-header-actions { width: 100%; justify-content: space-between; } .dispute-summary-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .dispute-summary-grid .stat-card { padding: 10px; } }
+@media (max-width: 700px) { .dispute-management-page .complaint-inline-details__main { grid-template-columns: 1fr; } .dispute-management-page .complaint-inline-details__meta { padding-left: 0; border-left: 0; border-top: 1px solid #e6d6bd; padding-top: 12px; } }
