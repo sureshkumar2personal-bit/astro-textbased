@@ -72,7 +72,7 @@ export default function Dashboard() {
       })
   }, [campaigns])
   const quickActions = [
-    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.answerQuestion, accent: 'orange' },
+    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.textBasedQuestions, accent: 'orange' },
     { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments, accent: 'red' },
     { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup, accent: 'rose' },
     { icon: Wallet, label: 'View Earnings', route: routes.walletManagement, accent: 'amber' },

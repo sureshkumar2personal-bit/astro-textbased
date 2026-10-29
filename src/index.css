@@ -17087,62 +17087,67 @@ button.apt-week-day:focus-visible {
 }
 .tbq-page .tbq-module-tab:hover { background: #FFFFFF; }
 
-/* The question workspace is a fixed viewport surface. Pagination always owns
-   three records; the month groups scroll inside the available list region. */
+/* The question workspace grows with its content so the page uses normal document scrolling. */
 .app-shell--astrologer:has(.tbq-page) {
-  height: 100dvh;
-  min-height: 100dvh;
-  overflow: hidden;
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
 }
 .app-shell--astrologer:has(.tbq-page) .main-column,
 .app-shell--astrologer:has(.tbq-page) .page-content,
 .app-shell--astrologer:has(.tbq-page) .page-transition {
-  min-height: 0;
-  overflow: hidden;
+  min-height: auto;
+  overflow: visible;
 }
-.app-shell--astrologer:has(.tbq-page) .main-column { height: 100dvh; }
+.app-shell--astrologer:has(.tbq-page) .main-column { height: auto; }
 .app-shell--astrologer:has(.tbq-page) .page-content {
-  flex: 1 1 auto;
-  height: 100%;
+  flex: 0 1 auto;
+  height: auto;
   box-sizing: border-box;
   padding-bottom: calc(var(--astrologer-nav-height, 80px) + 28px + env(safe-area-inset-bottom));
 }
 .app-shell--astrologer:has(.tbq-page) .page-transition {
   display: flex;
-  height: 100%;
+  height: auto;
   flex-direction: column;
 }
-.app-shell--astrologer:has(.tbq-page) .page-transition > .tbq-page { display: flex; }
+.app-shell--astrologer:has(.tbq-page) .page-transition > .tbq-page { display: flex; height: auto; }
 .tbq-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
 }
 .tbq-page > .page-header-row,
 .tbq-page > div:has(> .tbq-module-tabs) {
   flex: 0 0 auto;
 }
 .tbq-page > .tbq-answer-page {
-  flex: 1 1 auto;
-  min-height: 0;
+  flex: 0 1 auto;
+  min-height: auto;
 }
 .tbq-page .tbq-answer-page {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
+  min-height: auto;
+  overflow: visible;
 }
 .tbq-answer-page > .section { flex: 0 0 auto; margin-top: 10px; }
 .tbq-answer-page > .section:first-child { margin-top: 8px; }
 .tbq-answer-page > .tbq-question-list-section {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
+  min-height: auto;
+  overflow: visible;
+}
+.tbq-page .tbq-question-list-section > .question-list-shell,
+.tbq-page .tbq-question-groups {
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
 }
 .tbq-question-list-section > .question-list-shell {
   display: flex;
