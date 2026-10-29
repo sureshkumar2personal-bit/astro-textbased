@@ -1,12 +1,11 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, History, Search, X } from 'lucide-react'
+import { CalendarDays, ChevronDown, Filter, History, Search, X } from 'lucide-react'
 import CampaignCard, { CampaignStatusChip } from '../../../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../../../components/campaigns/campaignCardTokens.js'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
-import SummaryCard from '../../../components/ui/SummaryCard.jsx'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -137,6 +136,27 @@ function HistoryQuestionCard({ question, nowMs, onOpen }) {
   )
 }
 
+function HistoryStatusSelector({ filter, counts, onChange }) {
+  return (
+    <label className="aq-track-month">
+      <Filter size={15} aria-hidden="true" />
+      <select
+        className="select-input"
+        value={filter}
+        aria-label="Filter by question status"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {HISTORY_STATUS_FILTERS.map((stage) => (
+          <option key={stage} value={stage}>
+            {stage} ({counts[stage] || 0})
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
+    </label>
+  )
+}
+
 // Month selector, consistent with the My Questions selector, plus an All Months
 // option so the whole archive can be reviewed across every available month.
 function HistoryMonthSelector({ monthKey, options, onChange }) {
@@ -154,6 +174,7 @@ function HistoryMonthSelector({ monthKey, options, onChange }) {
           <option key={key} value={key}>{getMonthLabel(key)}</option>
         ))}
       </select>
+      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
     </label>
   )
 }
@@ -289,31 +310,10 @@ export default function QuestionHistory() {
 
   return (
     <div>
-      <div className="aq-track-head">
+      <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <HistoryStatusSelector filter={statusFilter} counts={counts} onChange={setStatusFilter} />
         <HistoryMonthSelector monthKey={monthKey} options={monthOptions} onChange={setMonthKey} />
       </div>
-
-      <Section>
-        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-3" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
-          {HISTORY_STATUS_FILTERS.map((filter) => {
-            const meta = STATUS_CARD_META[filter]
-            return (
-              <div key={filter} className="h-full" style={{ minHeight: 132 }}>
-                <SummaryCard
-                  label={filter}
-                  value={counts[filter] || 0}
-                  hint={meta.hint}
-                  background={meta.background}
-                  color={meta.color}
-                  border={meta.border}
-                  onClick={() => setStatusFilter(statusFilter === filter && filter !== 'All' ? 'All' : filter)}
-                  active={statusFilter === filter}
-                />
-              </div>
-            )
-          })}
-        </div>
-      </Section>
 
       <Section className="!mt-6" title="Archived Questions">
         <div className="flex flex-wrap items-center justify-between gap-3" style={{ marginBottom: 16 }}>

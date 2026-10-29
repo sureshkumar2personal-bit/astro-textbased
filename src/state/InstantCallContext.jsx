@@ -96,8 +96,9 @@ export function InstantCallProvider({ children }) {
   // The popup owns the request while it is ringing (duration, payment, waiting).
   // Once the astrologer accepts, the popup hands over to the floating panel
   // rather than leaving two surfaces on screen.
-  const popupHandled = Boolean(popup && active && active.status === 'accepted' && active.astrologerId === popup.astrologerId && active.type === popup.type)
-  const panel = active && active.status === 'accepted' && !popupHandled && dismissed !== active.id ? active : null
+  const isAccepted = Boolean(active && active.status === 'accepted')
+  const popupHandled = Boolean(popup && isAccepted && active.astrologerId === popup.astrologerId && active.type === popup.type)
+  const panel = isAccepted && dismissed !== active.id ? active : null
 
   return (
     <InstantCallContext.Provider value={value}>

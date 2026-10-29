@@ -720,13 +720,20 @@ export default function AskQuestion({ embedded = false }) {
   // Questions can be selected for asking a question.
   const subscribedTextAstrologers = useMemo(() => {
     const seen = new Set()
-    return mockAstrologers.filter((astrologer) => {
-      if (seen.has(astrologer.id)) return false
-      if (!subscribedAstrologerIds.has(astrologer.id)) return false
-      if (!textQuestionAstrologerIds.has(astrologer.id)) return false
-      seen.add(astrologer.id)
-      return true
-    })
+    return mockAstrologers
+      .filter((astrologer) => {
+        if (seen.has(astrologer.id)) return false
+        if (!subscribedAstrologerIds.has(astrologer.id)) return false
+        if (!textQuestionAstrologerIds.has(astrologer.id)) return false
+        seen.add(astrologer.id)
+        return true
+      })
+      .sort((a, b) => {
+        const aOnline = String(a?.availability || '').trim().toLowerCase() === 'online'
+        const bOnline = String(b?.availability || '').trim().toLowerCase() === 'online'
+        if (aOnline === bOnline) return 0
+        return aOnline ? -1 : 1
+      })
   }, [subscribedAstrologerIds, textQuestionAstrologerIds])
 
   const subscriptionDaysByAstrologerId = useMemo(() => {

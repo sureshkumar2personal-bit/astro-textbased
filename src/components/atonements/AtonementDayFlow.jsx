@@ -59,33 +59,343 @@ function materialText(material) {
 }
 
 function ProofPreview({ proof }) {
-  if (proof.type.startsWith('image/')) return <img src={proof.dataUrl} alt={proof.name} />
-  if (proof.type.startsWith('video/')) return <video src={proof.dataUrl} controls />
-  if (proof.type.startsWith('audio/')) return <audio src={proof.dataUrl} controls />
-  return <Paperclip size={18} />
+  if (proof.type.startsWith('image/')) return <img src={proof.dataUrl} alt={proof.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} />
+  if (proof.type.startsWith('video/')) return <video src={proof.dataUrl} controls style={{ maxWidth: 120, maxHeight: 60 }} />
+  if (proof.type.startsWith('audio/')) return <audio src={proof.dataUrl} controls style={{ maxWidth: 160 }} />
+  return <Paperclip size={18} style={{ color: 'var(--primary, #7346a3)' }} />
 }
 
-function ProofSection({ proof, onSave, onRemove, requirements = [] }) {
+function DayProofItem({ day, dayIndex, onSaveProof }) {
   const inputRef = useRef(null)
+  const proof = day.proof
+
   const pick = async (event) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
-    if (file.size > MAX_PROOF_BYTES) { window.alert('Please choose a file smaller than 2 MB.'); return }
-    onSave({ name: file.name, type: file.type, dataUrl: await readFile(file), addedAt: new Date().toISOString() })
+    if (file.size > MAX_PROOF_BYTES) {
+      window.alert('Please choose a file smaller than 2 MB.')
+      return
+    }
+    const dataUrl = await readFile(file)
+    onSaveProof(dayIndex, {
+      name: file.name,
+      type: file.type,
+      dataUrl,
+      addedAt: new Date().toISOString(),
+    })
   }
-  return <div className="atonement-flow-proof">
-    {requirements.length > 0 && <small className="atonement-flow-proof-required">Astrologer asks for: {requirements.map((r) => `${r.label} (${r.required ? 'required' : 'optional'})`).join(' · ')}</small>}
-    <input ref={inputRef} type="file" accept="image/*,video/*,audio/*" hidden onChange={pick} />
-    {proof ? <>
-      <div className="atonement-flow-proof-file"><div className="atonement-flow-proof-preview"><ProofPreview proof={proof} /></div><div><strong title={proof.name}>{proof.name}</strong>{proof.addedAt && <small>Added {formatStamp(proof.addedAt)}</small>}</div></div>
-      <div className="atonement-flow-proof-actions">
-        <button type="button" className="btn btn-outline btn-sm" onClick={() => openProofInNewTab(proof)}><Eye size={13} /> View Proof</button>
-        <button type="button" className="btn btn-outline btn-sm" onClick={() => inputRef.current?.click()}><RefreshCw size={13} /> Replace Proof</button>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onRemove}><Trash2 size={13} /> Remove</button>
+
+  const god = day.god || day.deity
+
+  return (
+    <div
+      className="am-day-proof-card"
+      style={{
+        border: '1px solid rgba(115, 70, 163, 0.16)',
+        borderRadius: 12,
+        padding: '12px 14px',
+        background: proof ? '#f4fbf6' : '#ffffff',
+        display: 'grid',
+        gap: 8,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: 6,
+              background: proof ? '#16a34a' : 'var(--primary, #7346a3)',
+              color: '#ffffff',
+              fontSize: 11.5,
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Day {dayIndex + 1}
+          </span>
+          <strong style={{ color: '#30263b', fontSize: 13.5 }}>
+            {formatLongDate(day.date)}
+          </strong>
+          {god && (
+            <span
+              style={{
+                fontSize: 11.5,
+                color: '#6d3fa0',
+                background: '#f3ebff',
+                padding: '1px 8px',
+                borderRadius: 999,
+                fontWeight: 600,
+              }}
+            >
+              {god}
+            </span>
+          )}
+        </div>
+
+        {proof ? (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              color: '#15803d',
+              fontSize: 11.5,
+              fontWeight: 700,
+            }}
+          >
+            <Check size={13} /> Proof Attached
+          </span>
+        ) : (
+          <span
+            style={{
+              color: '#d97706',
+              fontSize: 11.5,
+              fontWeight: 700,
+            }}
+          >
+            Pending Proof
+          </span>
+        )}
       </div>
-    </> : <button type="button" className="am-add-proof" onClick={() => inputRef.current?.click()}><Plus size={15} /><span><strong>Add Proof</strong><small>Photo · Video · Audio</small></span></button>}
-  </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,video/*,audio/*"
+        hidden
+        onChange={pick}
+      />
+
+      {proof ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            flexWrap: 'wrap',
+            padding: '8px 12px',
+            borderRadius: 8,
+            background: '#ffffff',
+            border: '1px solid rgba(22, 163, 74, 0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 6,
+                overflow: 'hidden',
+                background: '#f0fdf4',
+                display: 'grid',
+                placeItems: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <ProofPreview proof={proof} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <strong
+                style={{
+                  display: 'block',
+                  fontSize: 13,
+                  color: '#30263b',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: 240,
+                }}
+                title={proof.name}
+              >
+                {proof.name}
+              </strong>
+              {proof.addedAt && (
+                <small style={{ color: '#8b8295', fontSize: 11 }}>
+                  Added {formatStamp(proof.addedAt)}
+                </small>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => openProofInNewTab(proof)}
+            >
+              <Eye size={12} /> View
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => inputRef.current?.click()}
+            >
+              <RefreshCw size={12} /> Replace
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              style={{ color: '#dc2626' }}
+              onClick={() => onSaveProof(dayIndex, null)}
+            >
+              <Trash2 size={12} /> Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="am-add-proof"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '8px 14px',
+            borderRadius: 10,
+            border: '1.5px dashed #7346a3',
+            background: 'rgba(115, 70, 163, 0.04)',
+            color: '#7346a3',
+            cursor: 'pointer',
+            textAlign: 'left',
+            width: 'fit-content',
+          }}
+          onClick={() => inputRef.current?.click()}
+        >
+          <div
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              background: '#f3ebff',
+              display: 'grid',
+              placeItems: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Plus size={16} strokeWidth={2.5} />
+          </div>
+          <span style={{ display: 'grid' }}>
+            <strong style={{ fontSize: 13, color: '#7346a3' }}>
+              + Add Day {dayIndex + 1} Proof
+            </strong>
+            <small style={{ color: '#8b8295', fontSize: 10.5 }}>
+              Photo · Video · Audio (Max 2 MB)
+            </small>
+          </span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+function AllDaysProofSection({ atonement, onSaveProof }) {
+  const days = atonement.days || []
+  const uploadedCount = days.filter((d) => d.proof).length
+  const requirements = atonement.proofRequirements || []
+
+  return (
+    <div
+      className="atonement-all-proofs"
+      style={{
+        marginTop: 16,
+        padding: '18px 20px',
+        borderRadius: 14,
+        background: '#faf8fd',
+        border: '1.5px solid rgba(115, 70, 163, 0.2)',
+        display: 'grid',
+        gap: 14,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 14,
+          flexWrap: 'wrap',
+          borderBottom: '1px solid rgba(115, 70, 163, 0.12)',
+          paddingBottom: 12,
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
+            <Paperclip size={17} style={{ color: 'var(--primary, #7346a3)' }} />
+            <h4
+              style={{
+                margin: 0,
+                fontSize: '1.05rem',
+                fontWeight: 800,
+                color: '#30263b',
+              }}
+            >
+              Day-by-Day Proof Attachments
+            </h4>
+          </div>
+          <p style={{ margin: 0, color: '#6f667b', fontSize: 13 }}>
+            Please add proof attachments for each completed day of your {days.length}-day pooja.
+          </p>
+          {requirements.length > 0 && (
+            <small
+              style={{
+                display: 'block',
+                marginTop: 6,
+                color: 'var(--primary, #7346a3)',
+                fontWeight: 600,
+                fontSize: 12,
+              }}
+            >
+              Astrologer asks for:{' '}
+              {requirements
+                .map((r) => `${r.label} (${r.required ? 'required' : 'optional'})`)
+                .join(' · ')}
+            </small>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '5px 12px',
+            borderRadius: 999,
+            background: uploadedCount === days.length ? '#ecfaf1' : '#f3ebff',
+            color: uploadedCount === days.length ? '#15803d' : 'var(--primary, #7346a3)',
+            fontWeight: 700,
+            fontSize: 12.5,
+          }}
+        >
+          {uploadedCount === days.length ? <Check size={14} /> : <Paperclip size={13} />}
+          <span>
+            {uploadedCount}/{days.length} Proofs Attached
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gap: 10 }}>
+        {days.map((dayItem, dIdx) => (
+          <DayProofItem
+            key={`${atonement.id}-proof-day-${dIdx}`}
+            day={dayItem}
+            dayIndex={dIdx}
+            onSaveProof={onSaveProof}
+          />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }) {
@@ -93,8 +403,9 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
   const method = atonement.method
   const allCompleted = progress.total > 0 && progress.completed === progress.total
   const firstOpen = atonement.days.findIndex((day) => !day.completed)
-  const [selected, setSelected] = useState(firstOpen === -1 ? 0 : firstOpen)
+  const [selected, setSelected] = useState(firstOpen === -1 ? Math.max(0, atonement.days.length - 1) : firstOpen)
   const index = Math.min(selected, atonement.days.length - 1)
+  const isFinalDay = index === atonement.days.length - 1
   const today = localDateIso()
   const isFuture = (item) => !item.completed && Boolean(item.date) && item.date > today
   const day = atonement.days[index]
@@ -170,19 +481,84 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
         <li className={`jr-step jr-final${day.completed ? ' is-completed' : ''}`}>
           <span className="jr-step-node">{day.completed ? <Check size={16} /> : null}</span>
           <div className="jr-step-body">
-            {day.completed ? <>
-              <span className="jr-done-label">Completed</span>
-              <strong>Day {index + 1} completed successfully</strong>
-              {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
-              <ProofSection requirements={atonement.proofRequirements} proof={day.proof} onSave={(proof) => onSaveProof(index, proof)} onRemove={() => onSaveProof(index, null)} />
-            </> : <>
-              <span className="jr-pending-label">Status</span>
-              <strong>Not Completed</strong>
-              <button type="button" className="btn btn-primary jr-mark" disabled={!actionable} onClick={() => onToggleDay(index)}><Check size={15} /> Mark Day as Completed</button>
-              {waiting && <small className="atonement-availability-note">Complete Day {index} first.</small>}
-              {isFuture(day) && <small className="atonement-availability-note">Unlocks on {formatLongDate(day.date)}</small>}
-              <small>You can add proof after marking the day completed.</small>
-            </>}
+            {isFinalDay ? (
+              day.completed ? (
+                <>
+                  <span className="jr-done-label">Completed</span>
+                  <strong>
+                    {atonement.days.length === 1
+                      ? 'Pooja completed successfully'
+                      : `Pooja completed successfully · All ${atonement.days.length} days done`}
+                  </strong>
+                  {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
+                  <AllDaysProofSection atonement={atonement} onSaveProof={onSaveProof} />
+                </>
+              ) : (
+                <>
+                  <span className="jr-pending-label">Last Day Status</span>
+                  <strong>
+                    {atonement.days.length === 1
+                      ? 'Pooja Not Completed'
+                      : `Day ${index + 1} of ${atonement.days.length} (Last Day of Pooja)`}
+                  </strong>
+                  <button
+                    type="button"
+                    className="btn btn-primary jr-mark"
+                    disabled={!actionable}
+                    onClick={() => onToggleDay(index)}
+                  >
+                    <Check size={15} /> Complete Pooja
+                  </button>
+                  {waiting && <small className="atonement-availability-note">Complete Day {index} first.</small>}
+                  {isFuture(day) && <small className="atonement-availability-note">Unlocks on {formatLongDate(day.date)}</small>}
+                  <small style={{ color: '#8b8295', display: 'block', marginTop: 4 }}>
+                    Clicking complete will finalize your pooja and request proof attachments for all {atonement.days.length} days.
+                  </small>
+                </>
+              )
+            ) : (
+              day.completed ? (
+                <>
+                  <span className="jr-done-label">Completed</span>
+                  <strong>Day {index + 1} completed successfully</strong>
+                  {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
+                  {allCompleted ? (
+                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <small style={{ color: '#16a34a', fontWeight: 600 }}>
+                        ✓ Day completed. {day.proof ? 'Proof attached.' : `Proofs are submitted on the last day (Day ${atonement.days.length}).`}
+                      </small>
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-xs"
+                        style={{ fontSize: 11.5, padding: '2px 8px' }}
+                        onClick={() => setSelected(atonement.days.length - 1)}
+                      >
+                        Go to Day {atonement.days.length} Proofs →
+                      </button>
+                    </div>
+                  ) : (
+                    <small style={{ color: '#8b8295', display: 'block', marginTop: 4 }}>
+                      Day completed. Proof attachments will be submitted on the last day of the pooja (Day {atonement.days.length}).
+                    </small>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="jr-pending-label">Status</span>
+                  <strong>Not Completed</strong>
+                  <button
+                    type="button"
+                    className="btn btn-primary jr-mark"
+                    disabled={!actionable}
+                    onClick={() => onToggleDay(index)}
+                  >
+                    <Check size={15} /> Mark Day as Completed
+                  </button>
+                  {waiting && <small className="atonement-availability-note">Complete Day {index} first.</small>}
+                  {isFuture(day) && <small className="atonement-availability-note">Unlocks on {formatLongDate(day.date)}</small>}
+                </>
+              )
+            )}
           </div>
         </li>
       </ol>

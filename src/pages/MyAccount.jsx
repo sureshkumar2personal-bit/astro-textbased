@@ -23,7 +23,6 @@ import {
   Moon,
   Pencil,
   Phone,
-  PhoneCall,
   Plus,
   ShieldCheck,
   SlidersHorizontal,
@@ -61,16 +60,6 @@ const formatBirthDate = (value) => {
 }
 
 const initials = (name = '') => name.split(/\s+/).filter(Boolean).map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'
-
-function consultationAmount(session) {
-  if (session?.amountPaid) return Number(session.amountPaid)
-  if (session?.amount) return Number(session.amount)
-  return (Number(session?.pricePerMinute) || 0) * (session?.durationMinutes || 0)
-}
-
-function consultationPaid(session) {
-  return session?.paymentStatus || (['ended', 'accepted'].includes(String(session?.status || '').toLowerCase()) ? 'Paid' : 'Pending')
-}
 
 const PREFERENCE_OPTIONS = {
   languages: ['English', 'Hindi', 'Tamil', 'Telugu', 'Malayalam', 'Kannada', 'Bengali', 'Marathi', 'Gujarati', 'Punjabi', 'Urdu', 'Odia', 'Assamese', 'Sanskrit', 'French', 'German', 'Spanish', 'Arabic', 'Chinese', 'Japanese', 'Korean', 'Portuguese', 'Russian'],
@@ -159,7 +148,6 @@ const SETTINGS_TABS = [
   ['birthchart', 'Birth Chart', CalendarDays],
   ['family', 'Family', Users],
   ['activity', 'Activity', Clock3],
-  ['instant', 'Instant Chats', Headphones],
 ];
 
 function SettingsTabBar({ tab, onSelect }) {
@@ -264,11 +252,14 @@ export default function MyAccount() {
       }
     }
     return {
+      textbased: stored.textbased ?? true,
+      appointments: stored.appointments ?? true,
       consultations: stored.consultations ?? true,
+      live: stored.live ?? true,
       messages: stored.messages ?? true,
       pujaOrders: stored.pujaOrders ?? true,
       payments: stored.payments ?? true,
-      promotional: stored.promotional ?? false,
+      follow: stored.follow ?? true,
     }
   })
   const toggleNotification = (key, value) => {
@@ -328,10 +319,8 @@ export default function MyAccount() {
   const familyPlaceMenuRef = useRef(null)
   const [handledFamilyMemberId, setHandledFamilyMemberId] = useState(null)
 
-  // Instant Consultations state
-  const [instantConsultationTab, setInstantConsultationTab] = useState('all')
+  // Instant Consultations count for activity tile
   const [instantConsultations, setInstantConsultations] = useState(() => getInstantConsultations())
-  const [selectedInstantConsultation, setSelectedInstantConsultation] = useState(null)
 
   useEffect(() => subscribeToInstantConsultations(setInstantConsultations), [])
 
@@ -339,14 +328,7 @@ export default function MyAccount() {
     if (!currentUser?.id) return []
     return (instantConsultations || [])
       .filter((session) => session.userId === currentUser.id)
-      .sort((first, second) => new Date(second.startedAt || second.createdAt).getTime() - new Date(first.startedAt || first.createdAt).getTime())
   }, [currentUser?.id, instantConsultations])
-
-  const visibleInstantConsultations = useMemo(() => {
-    if (instantConsultationTab === 'call') return userInstantConsultations.filter((session) => session.type === 'call')
-    if (instantConsultationTab === 'chat') return userInstantConsultations.filter((session) => session.type === 'chat')
-    return userInstantConsultations
-  }, [instantConsultationTab, userInstantConsultations])
 
   const horoscopeBirth = useMemo(() => {
     let stored = {}
@@ -673,9 +655,13 @@ export default function MyAccount() {
       </Card>
       <div className="my-account-layout">
       <Card className="my-account-settings-card">
-        <section className={'my-account-settings-section' + (settingsTab === 'about' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'about'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+        <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+        <div className="my-account-settings-panels">
+        <section className={'my-account-settings-section my-account-settings-section--personal' + (settingsTab === 'about' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'about'}>
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Personal Information</h2>
+            </div>
             <button type="button" className="my-account-settings-edit" aria-label="Edit Personal Information" onClick={openPersonalDetailsEditor}><Pencil size={15} /></button>
           </div>
           {editingDetails ? (
@@ -711,7 +697,7 @@ export default function MyAccount() {
                       <strong className={personalValue(key) ? '' : 'is-empty'}>{personalValue(key) || 'Not added'}</strong>
                       {privacyField && (
                         <div className="privacy-control-wrap">
-                          <button type="button" className={`privacy-control${privacyOpen === key ? ' is-open' : ''}`} aria-label={`Change ${label.toLowerCase()} privacy`} aria-expanded={privacyOpen === key} onClick={() => setPrivacyOpen(privacyOpen === key ? null : key)}><Lock size={11} /></button>
+                           <button type="button" className={`privacy-control${privacyOpen === key ? ' is-open' : ''}`} aria-label={`Change ${label.toLowerCase()} privacy`} aria-expanded={privacyOpen === key} onClick={() => setPrivacyOpen(privacyOpen === key ? null : key)}><Lock size={11} /></button>
                           {privacyOpen === key && (
                             <div className="privacy-control-menu" role="menu">
                               {PRIVACY_OPTIONS.map(([value, optionLabel]) => (
@@ -740,8 +726,11 @@ export default function MyAccount() {
           )}
         </section>
         <section className={'my-account-settings-section' + (settingsTab === 'astrology' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'astrology'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Astrology Details</h2>
+              <p className="muted my-account-settings-desc">Your basic horoscope information.</p>
+            </div>
             <button type="button" className="my-account-settings-edit" aria-label="Edit Astrology Details" onClick={openHoroscopeEditor}><Pencil size={15} /></button>
           </div>
           <div className="my-account-info-rows">
@@ -757,8 +746,11 @@ export default function MyAccount() {
           </div>
         </section>
         <section className={'my-account-settings-section' + (settingsTab === 'preferences' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'preferences'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Preferences</h2>
+              <p className="muted my-account-settings-desc">Language and consultation preferences for astrologer matching.</p>
+            </div>
             <button type="button" className="my-account-settings-edit" aria-label="Edit Preferences" onClick={() => { setPreferencesError(''); setPreferencesOpen(true) }}><SlidersHorizontal size={15} /></button>
           </div>
           <div className="my-account-info-rows">
@@ -766,8 +758,12 @@ export default function MyAccount() {
           </div>
         </section>
         <section className={'my-account-settings-section' + (settingsTab === 'birthchart' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'birthchart'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Birth Chart</h2>
+              <p className="muted my-account-settings-desc">Your birth details and horoscope charts.</p>
+            </div>
+            <Sparkles size={20} className="my-account-management-icon" />
           </div>
           <div className="my-account-info-rows">
             <div className="my-account-info-row">
@@ -814,8 +810,11 @@ export default function MyAccount() {
           </div>
         </section>
         <section className={'my-account-settings-section' + (settingsTab === 'family' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'family'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Family Horoscopes</h2>
+              <p className="muted my-account-settings-desc">Keep birth details for your loved ones together.</p>
+            </div>
             <button type="button" className="btn btn-primary btn-sm" onClick={() => openFamilyForm()}>
               <Plus size={15} /> Add Family Member
             </button>
@@ -836,83 +835,23 @@ export default function MyAccount() {
           )}
         </section>
         <section className={'my-account-settings-section' + (settingsTab === 'activity' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'activity'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
+          <div className="my-account-section-heading">
+            <div>
+              <h2 className="my-account-settings-title">Activity Summary</h2>
+              <p className="muted my-account-settings-desc">Your questions, consultations, and account activity.</p>
+            </div>
+            <Clock3 size={20} className="my-account-management-icon" />
           </div>
           <div className="user-profile-activity">
             <Link to={routes.trackQuestions}><strong>{activitySummary.questions}</strong><span><MessageCircle size={13} /> Questions</span></Link>
             <Link to={routes.myAppointments}><strong>{activitySummary.appointments}</strong><span><CalendarDays size={13} /> Appointments</span></Link>
-            <button type="button" className="user-profile-consultation-tile" onClick={() => { setInstantConsultationTab('all'); document.getElementById('user-profile-instant-history')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}><strong>{userInstantConsultations.length}</strong><span><Headphones size={13} /> Consultations</span></button>
+            <Link to={routes.instantConsultation || '/user/instant-consultation'} className="user-profile-consultation-tile"><strong>{userInstantConsultations.length}</strong><span><Headphones size={13} /> Consultations</span></Link>
             <div><strong>0</strong><span><Heart size={13} /> Reviews given</span></div>
             <div><strong>{savedPostIds?.length || 0}</strong><span><Bookmark size={13} /> Saved content</span></div>
             <Link to={routes.poojaDetails}><strong>0</strong><span><Sparkles size={13} /> Puja activity</span></Link>
           </div>
         </section>
-        <section id="user-profile-instant-history" className={'my-account-settings-section' + (settingsTab === 'instant' ? '' : ' my-account-settings-section--hidden')} aria-hidden={settingsTab !== 'instant'}>
-          <div className="my-account-section-heading my-account-section-heading--tabs">
-            <SettingsTabBar tab={settingsTab} onSelect={setSettingsTab} />
-          </div>
-          <div className="user-profile-consultation-tabs" role="tablist" aria-label="Instant consultation history">
-            {[["all", "All"], ["call", "Instant Calls"], ["chat", "Instant Chats"]].map(([value, label]) => (
-              <button
-                type="button"
-                role="tab"
-                aria-selected={instantConsultationTab === value}
-                className={instantConsultationTab === value ? 'is-active' : ''}
-                key={value}
-                onClick={() => setInstantConsultationTab(value)}
-              >
-                {label}
-                <span>{value === 'all' ? userInstantConsultations.length : userInstantConsultations.filter((session) => session.type === value).length}</span>
-              </button>
-            ))}
-          </div>
-          {visibleInstantConsultations.length ? (
-            <div className="user-profile-instant-history-list">
-              {visibleInstantConsultations.map((session) => {
-                const isChat = session.type === 'chat'
-                const occurredAt = session.startedAt || session.createdAt
-                return (
-                  <article
-                    className={`user-profile-instant-history-row user-profile-instant-history-row--${session.type}`}
-                    key={session.id}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`View ${isChat ? 'instant chat' : 'instant call'} with ${session.astrologerName || 'astrologer'}`}
-                    onClick={() => setSelectedInstantConsultation(session)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        setSelectedInstantConsultation(session)
-                      }
-                    }}
-                  >
-                    <span className="user-profile-instant-history-icon">
-                      {isChat ? <MessageCircle size={17} /> : <PhoneCall size={17} />}
-                    </span>
-                    <div>
-                      <strong>
-                        {isChat ? 'Instant Chat' : 'Instant Call'} <span className="user-profile-instant-history-separator">·</span> {session.astrologerName || 'Astrologer'}
-                      </strong>
-                      <small>
-                        {occurredAt ? new Date(occurredAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date unavailable'} <span className="user-profile-instant-history-separator">·</span> {session.durationMinutes || 0} min
-                      </small>
-                    </div>
-                    <span className={`user-profile-instant-history-status user-profile-instant-history-status--${String(session.status || '').toLowerCase()}`}>
-                      {session.status || 'Unknown'}
-                    </span>
-                  </article>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="user-profile-instant-history-empty">
-              <MessageCircle size={22} />
-              <strong>No instant {instantConsultationTab === 'all' ? 'consultations' : `${instantConsultationTab}s`} yet</strong>
-              <p>Your instant call and chat history will appear here.</p>
-            </div>
-          )}
-        </section>
+        </div>
       </Card>
       <section className="my-account-settings-section">
         <div className="my-account-section-heading">
@@ -931,6 +870,13 @@ export default function MyAccount() {
           <div className="my-account-info-row"><span><ShieldCheck size={14} />Active Sessions</span><strong>1 device</strong></div>
           <div className="my-account-info-row"><span><UsersRound size={14} />Blocked Users</span><strong>{blockedUserIds?.length || 0}</strong></div>
         </div>
+        <section className="my-account-management-section my-account-management-section--account-actions">
+          <div className="my-account-account-actions">
+            <button type="button" className="my-account-management-link" onClick={() => { setAccountActionError(''); setPasswordOpen(true) }}><KeyRound size={14} /> Reset Password</button>
+            <button type="button" className="my-account-management-link" onClick={downloadUserData}><Download size={14} /> Download My Data</button>
+            <button type="button" className="my-account-management-link my-account-management-link--danger" onClick={handleDeleteAccount}><Trash2 size={14} /> Delete Account</button>
+          </div>
+        </section>
       </section>
       </div>
       <Card className="my-account-management-card">
@@ -948,11 +894,38 @@ export default function MyAccount() {
           <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Notifications</h2><p className="muted my-account-settings-desc">Choose how Astro Connect keeps you informed.</p></div><Mail size={20} className="my-account-management-icon" /></div>
           <div className="my-account-info-rows">
             <label className="account-toggle">
+              <span><strong>Text-based question notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.textbased}
+                onChange={(event) => toggleNotification('textbased', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Appointment notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.appointments}
+                onChange={(event) => toggleNotification('appointments', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
               <span><strong>Consultation notifications</strong></span>
               <input
                 type="checkbox"
                 checked={notificationPrefs.consultations}
                 onChange={(event) => toggleNotification('consultations', event.target.checked)}
+              />
+              <i />
+            </label>
+            <label className="account-toggle">
+              <span><strong>Live session notifications</strong></span>
+              <input
+                type="checkbox"
+                checked={notificationPrefs.live}
+                onChange={(event) => toggleNotification('live', event.target.checked)}
               />
               <i />
             </label>
@@ -984,22 +957,14 @@ export default function MyAccount() {
               <i />
             </label>
             <label className="account-toggle">
-              <span><strong>Promotional notifications</strong></span>
+              <span><strong>Followed astrologer updates</strong></span>
               <input
                 type="checkbox"
-                checked={notificationPrefs.promotional}
-                onChange={(event) => toggleNotification('promotional', event.target.checked)}
+                checked={notificationPrefs.follow}
+                onChange={(event) => toggleNotification('follow', event.target.checked)}
               />
               <i />
             </label>
-          </div>
-        </section>
-        <section className="my-account-management-section my-account-management-section--account-actions">
-          <div className="my-account-section-heading"><div><h2 className="my-account-settings-title">Account Management</h2><p className="muted my-account-settings-desc">Export or manage your Astro Connect account.</p></div><KeyRound size={20} className="my-account-management-icon" /></div>
-          <div className="my-account-account-actions">
-            <button type="button" className="my-account-management-link" onClick={() => { setAccountActionError(''); setPasswordOpen(true) }}><KeyRound size={14} /> Reset Password</button>
-            <button type="button" className="my-account-management-link" onClick={downloadUserData}><Download size={14} /> Download My Data</button>
-            <button type="button" className="my-account-management-link my-account-management-link--danger" onClick={handleDeleteAccount}><Trash2 size={14} /> Delete Account</button>
           </div>
         </section>
       </Card>
@@ -1078,7 +1043,28 @@ export default function MyAccount() {
               <div className="form-grid">
                 <label className="field-group"><span className="field-label-top">Relationship</span><input className="text-input" value={familyForm.relationship} onChange={(event) => setFamilyForm({ ...familyForm, relationship: event.target.value })} placeholder="Mother, Father, Partner..." /></label>
                 <label className="field-group"><span className="field-label-top">Full Name</span><input className="text-input" value={familyForm.name} onChange={(event) => setFamilyForm({ ...familyForm, name: event.target.value })} placeholder="Member's name" /></label>
-                <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={familyForm.gender} onChange={(event) => setFamilyForm({ ...familyForm, gender: event.target.value })} placeholder="Optional" /></label>
+                <div className="field-group">
+                  <span className="field-label-top">Gender</span>
+                  <div className="my-account-gender-radio-group" role="radiogroup" aria-label="Gender">
+                    {GENDER_OPTIONS.map((option) => (
+                      <label key={option} className={`my-account-gender-radio-label${familyForm.gender === option ? ' is-selected' : ''}`}>
+                        <input
+                          type="radio"
+                          name="family-member-gender"
+                          value={option}
+                          checked={familyForm.gender === option}
+                          onChange={() => setFamilyForm((prev) => ({ ...prev, gender: option }))}
+                          onClick={() => {
+                            if (familyForm.gender === option) {
+                              setFamilyForm((prev) => ({ ...prev, gender: '' }))
+                            }
+                          }}
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={familyForm.dateOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, dateOfBirth: event.target.value })} /></label>
                 <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={familyForm.timeOfBirth} onChange={(event) => setFamilyForm({ ...familyForm, timeOfBirth: event.target.value })} /></label>
                 <label className="field-group profile-place-field">
@@ -1128,71 +1114,6 @@ export default function MyAccount() {
               </div>
             </div>
           </div>
-        </div>,
-        document.body
-      )}
-
-      {selectedInstantConsultation && createPortal(
-        <div className={`user-profile-consultation-modal-backdrop user-profile-consultation-modal-backdrop--${selectedInstantConsultation.type}`} role="presentation" onClick={() => setSelectedInstantConsultation(null)}>
-          <section className={`user-profile-consultation-modal user-profile-consultation-modal--${selectedInstantConsultation.type}`} role="dialog" aria-modal="true" aria-labelledby="instant-consultation-summary-title" onClick={(event) => event.stopPropagation()}>
-            <header className="user-profile-consultation-modal__topbar">
-              <h2 id="instant-consultation-summary-title">Consultation Details</h2>
-              <button type="button" className="user-profile-consultation-modal__close" aria-label="Close consultation summary" onClick={() => setSelectedInstantConsultation(null)}><X size={18} /></button>
-            </header>
-            <div className="user-profile-consultation-modal__content">
-              <div className="user-profile-consultation-modal__identity-row">
-                <div className="user-profile-consultation-modal__person">
-                  <span>{initials(selectedInstantConsultation.astrologerName || 'Astrologer')}</span>
-                  <div>
-                    <strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong>
-                    <small>ASTROLOGER</small>
-                  </div>
-                </div>
-                <div className="user-profile-consultation-modal__id">
-                  <small>CONSULTATION ID</small>
-                  <strong>{selectedInstantConsultation.id}</strong>
-                </div>
-              </div>
-              <div className="user-profile-consultation-modal__amount-panel">
-                <span>AMOUNT</span>
-                <strong>₹{consultationAmount(selectedInstantConsultation).toLocaleString('en-IN')}</strong>
-                <em>{consultationPaid(selectedInstantConsultation)}</em>
-              </div>
-              <div className="user-profile-consultation-modal__details">
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><UserCircle2 size={15} /></span>
-                  <span><small>ASTROLOGER</small><strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span>
-                  <span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} STARTED</small><strong>{selectedInstantConsultation.startedAt ? new Date(selectedInstantConsultation.startedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not started'}</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span>
-                  <span><small>{selectedInstantConsultation.type === 'chat' ? 'CHAT' : 'CALL'} ENDED</small><strong>{selectedInstantConsultation.endedAt ? new Date(selectedInstantConsultation.endedAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Not ended'}</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><Clock3 size={15} /></span>
-                  <span><small>DURATION</small><strong>{(selectedInstantConsultation.durationMinutes || 0) + (selectedInstantConsultation.extraMinutes || 0)} min</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon">₹</span>
-                  <span><small>AMOUNT</small><strong>₹{consultationAmount(selectedInstantConsultation).toLocaleString('en-IN')}</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span>
-                  <span><small>PAYMENT</small><strong>{consultationPaid(selectedInstantConsultation)}</strong></span>
-                </div>
-                <div>
-                  <span className="user-profile-consultation-modal__detail-icon"><BadgeCheck size={15} /></span>
-                  <span><small>STATUS</small><strong>{selectedInstantConsultation.status || 'Unknown'}</strong></span>
-                </div>
-              </div>
-            </div>
-            <footer className="user-profile-consultation-modal__footer">
-              <button type="button" className="user-profile-consultation-modal__close-action" onClick={() => setSelectedInstantConsultation(null)}>Close</button>
-            </footer>
-          </section>
         </div>,
         document.body
       )}

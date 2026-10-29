@@ -248,21 +248,35 @@ export default function TrackQuestions() {
           <div className="search-filter-row">
             <div className="search-filter-row__group">
               <div className="search-filter-row__heading">Search</div>
-              <div className="search-bar">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search Paid / Individual / General"
-                className="text-input search-bar__input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setAppliedSearch(search)
-                  }
-                }}
-              />
-              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
-                <Search size={18} />
-              </button>
+              <div className="search-bar-wrapper">
+                <div className="search-bar-container">
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAppliedSearch(search)
+                      }
+                    }}
+                  />
+                  <button type="button" className="search-btn" aria-label="Search">
+                    <svg
+                      width="28"
+                      height="28"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.34-4.34"></path>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
             <div className="search-filter-row__group search-filter-row__status">

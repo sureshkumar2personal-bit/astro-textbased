@@ -40,6 +40,21 @@ export default function InstantCallUser() {
     return () => window.clearInterval(timer)
   }, [request])
 
+  // Automatically accept the call 3 seconds after ringing begins
+  useEffect(() => {
+    if (!request || request.status !== 'ringing') return undefined
+    const timer = window.setTimeout(() => {
+      const current = getInstantConsultations().find((entry) => entry.id === request.id)
+      if (current && current.status === 'ringing') {
+        updateInstantConsultation(request.id, {
+          status: 'accepted',
+          startedAt: new Date().toISOString(),
+        })
+      }
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [request?.id, request?.status])
+
   const startCall = () => setRequest(createInstantConsultation({ type: 'call', userId: currentUser?.id || 'guest', userName: currentUser?.name, astrologerId: astrologer.id, astrologerName: astrologer.name, durationMinutes: duration, pricePerMinute: rate, userPhone: currentUser?.phone, language: currentUser?.languages?.[0], topic: currentUser?.astrologerPreferences?.topics?.[0] }))
   const endCall = () => request && updateInstantConsultation(request.id, { status: 'ended', endedAt: new Date().toISOString() })
 
@@ -49,7 +64,7 @@ export default function InstantCallUser() {
       <span className={`instant-call-user-status instant-call-user-status--${request?.status || 'idle'}`}><Phone size={14} /> {request?.status === 'accepted' ? 'Connected' : request?.status === 'ringing' ? 'Calling…' : request?.status === 'rejected' ? 'Call declined' : 'Available now'}</span>
       <h1>{astrologer.name}</h1><p>{astrologer.specialization}</p>
       {!request && <><label className="instant-call-user-label" htmlFor="instant-call-duration">Choose duration</label><select id="instant-call-duration" value={duration} onChange={(event) => setDuration(Number(event.target.value))}>{durations.map((value) => <option key={value} value={value}>{value} minutes</option>)}</select><p className="instant-call-user-rate">₹{rate}/min · Total ₹{calculateInstantAmount(duration, rate)}</p><button type="button" className="instant-call-user-primary" onClick={startCall}><Phone size={17} /> Start Instant Call</button></>}
-      {request?.status === 'ringing' && <div className="instant-call-user-waiting"><span className="instant-call-user-pulse" /><strong>Waiting for {astrologer.name}</strong><p>They will see your name and can accept or reject the call.</p><button type="button" className="instant-call-user-secondary" onClick={endCall}><PhoneOff size={16} /> Cancel Request</button></div>}
+      {request?.status === 'ringing' && <div className="instant-call-user-waiting"><span className="instant-call-user-pulse" /><strong>Waiting for response…</strong><p>Connecting with {astrologer.name}…</p><button type="button" className="instant-call-user-secondary" onClick={endCall}><PhoneOff size={16} /> Cancel Request</button></div>}
       {request?.status === 'rejected' && <div className="instant-call-user-result"><PhoneOff size={24} /><strong>Call rejected</strong><p>The astrologer is not available right now.</p><button type="button" className="instant-call-user-secondary" onClick={() => setRequest(null)}>Try Again</button></div>}
       {request?.status === 'accepted' && <div className="instant-call-user-connected"><div className="instant-call-user-session-meta"><span><Clock3 size={15} /> Duration: {request.durationMinutes} min</span><strong>{formatTime(remaining)}</strong></div><p>Voice conversation with {astrologer.name}</p><div className="instant-call-user-controls"><button type="button" className={speaker ? 'is-active' : ''} onClick={() => setSpeaker((value) => !value)}><Volume2 size={17} /> Speaker</button><button type="button" className="instant-call-user-end" onClick={endCall}><PhoneOff size={17} /> End Call</button></div></div>}
       {request?.status === 'ended' && <div className="instant-call-user-result"><Check size={24} /><strong>Call ended</strong><p>Thanks for using instant consultation.</p><button type="button" className="instant-call-user-primary" onClick={() => navigate('/user/call-astrologers')}>Back to Astrologers</button></div>}

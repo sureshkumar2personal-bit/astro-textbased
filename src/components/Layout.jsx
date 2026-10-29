@@ -31,6 +31,7 @@ import {
   Flame,
   Search,
   Headphones,
+  Gavel,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
@@ -96,9 +97,19 @@ const ROLE_CONFIG = {
         to: 'appointments/my',
         icon: CalendarCheck,
       },
+      {
+        label: 'Instant consultation',
+        to: 'instant-consultation',
+        icon: Headphones,
+      },
       { to: 'atonements', label: 'Atonement', icon: Sparkles },
       { to: 'live-session', label: 'Live', icon: Radio },
       { to: 'rewards', label: 'Perks & Benefits', icon: Gift },
+      {
+        label: 'Disputes',
+        to: 'disputes',
+        icon: Gavel,
+      },
       {
         label: 'Wallet',
         to: 'wallet/overview',
@@ -164,6 +175,7 @@ const PAGE_META = {
     '/user/wallet/refunds': { title: 'Refunds', sub: 'Money refunded back to your wallet.' },
     '/user/wallet-history': { title: 'Wallet', sub: 'Manage your balance, top-ups, spending and refunds.' },
     '/user/purchase-package': { title: 'Purchase Question Package', sub: 'Select and buy question packages' },
+    '/user/disputes': { title: 'Disputes', sub: 'Track and manage your disputes across all services.' },
     '/user/ask-question': { title: 'Ask a Question', sub: 'Submit your question to an astrologer' },
     '/user/track-questions': { title: 'Track My Questions', sub: 'Review status and follow up' },
     '/user/raise-dispute': { title: 'Raise a Dispute', sub: 'Flag an issue with an answer' },
@@ -178,6 +190,7 @@ const PAGE_META = {
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/appointments/book': { title: 'Book Appointment', sub: 'Find an astrologer and schedule your appointment' },
     '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
+    '/user/instant-consultation': { title: 'Instant Consultation', sub: 'Your instant call and instant chat consultations with astrologers' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
     '/user/atonements': { title: 'Atonement', sub: '' },
