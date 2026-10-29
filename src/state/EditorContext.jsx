@@ -27,11 +27,30 @@ function normalizeMember(member) {
   return { ...member, status: normalizeStatus(member.status), role: member.role === 'Assistant' || String(member.role).toLowerCase().includes('assistant') ? 'Assistant' : 'Editor' }
 }
 
+function encodeInvitation(invitation) {
+  try { return btoa(encodeURIComponent(JSON.stringify(invitation))) } catch { return '' }
+}
+
+function decodeInvitation(value) {
+  try { return JSON.parse(decodeURIComponent(atob(value))) } catch { return null }
+}
+
+export { encodeInvitation, decodeInvitation }
+
 function readJSON(key, fallback) {
   if (typeof window === 'undefined') return fallback
   try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback } catch { return fallback }
 }
-function writeJSON(key, value) { if (typeof window !== 'undefined') window.localStorage.setItem(key, JSON.stringify(value)) }
+function writeJSON(key, value) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    // Storage is a cache for editor state. A full/private-mode storage area
+    // must not prevent the application from rendering or working in memory.
+    if (error?.name !== 'QuotaExceededError' && error?.code !== 22 && error?.code !== 1014) throw error
+  }
+}
 
 export function invitationStatus(invitation) {
   if (!invitation) return 'expired'
@@ -93,6 +112,7 @@ export function EditorProvider({ children }) {
 
   const value = useMemo(() => ({
     invitations: visibleInvitations.map((item) => ({ ...item, status: invitationStatus(item) })),
+    allInvitations: invitations.map((item) => ({ ...item, status: invitationStatus(item) })),
     editors: visibleEditors.map((editor) => ({ ...editor, permissions: permissionStore[editor.id] || editor.permissions || [] })),
     sessions, permissions: permissionStore, currentEditor,
     drafts: drafts.filter((draft) => !ownerId || draft.astrologerId === ownerId),
@@ -134,14 +154,23 @@ export function EditorProvider({ children }) {
       const invitation = { id: id('inv'), astrologerId: currentUser.id, name: String(payload.name).trim(), email, role: payload.role === 'Assistant' ? 'Assistant' : 'Editor', accessMode: payload.accessMode === 'custom' ? 'custom' : 'default', permissions, status: 'pending', createdAt: now(), expiresAt: expiresAt.toISOString() }
       setInvitations((items) => [invitation, ...items]); recordAudit('Invitation Created', 'Editors & Assistants', `${invitation.name} · ${invitation.email}`, currentUser); return invitation
     },
+    receiveInvitation(invitation) {
+      if (!invitation?.id) return null
+      const normalized = { ...invitation, status: normalizeStatus(invitation.status) }
+      setInvitations((items) => items.some((item) => item.id === normalized.id) ? items : [normalized, ...items])
+      return normalized
+    },
     acceptInvitation(invitationId) {
       const invitation = invitations.find((item) => item.id === invitationId)
       const status = invitationStatus(invitation)
       if (!invitation || status !== 'pending') throw new Error(`This invitation is ${status}.`)
-      const member = { id: id('editor'), astrologerId: invitation.astrologerId, name: invitation.name, email: invitation.email, role: invitation.role, permissions: invitation.permissions, status: 'active', createdAt: now(), acceptedAt: now(), lastActiveAt: now() }
-      setEditors((items) => items.some((item) => item.email === member.email && item.astrologerId === member.astrologerId) ? items : [member, ...items])
+      const existingMember = editors.find((item) => item.email === invitation.email && item.astrologerId === invitation.astrologerId)
+      const member = existingMember
+        ? { ...existingMember, status: 'active', acceptedAt: now(), lastActiveAt: now(), requiresPasswordSetup: !existingMember.password }
+        : { id: id('editor'), astrologerId: invitation.astrologerId, name: invitation.name, email: invitation.email, role: invitation.role, permissions: invitation.permissions, password: '', requiresPasswordSetup: true, status: 'active', createdAt: now(), acceptedAt: now(), lastActiveAt: now() }
+      setEditors((items) => existingMember ? items.map((item) => item.id === member.id ? member : item) : [member, ...items])
       setInvitations((items) => items.map((item) => item.id === invitationId ? { ...item, status: 'accepted', acceptedAt: member.acceptedAt } : item))
-      const session = { editorId: member.id, astrologerId: member.astrologerId, name: member.name, email: member.email, role: member.role, permissions: member.permissions, status: 'active', signedInAt: now(), lastActiveAt: now() }
+      const session = { editorId: member.id, astrologerId: member.astrologerId, name: member.name, email: member.email, role: member.role, permissions: member.permissions, requiresPasswordSetup: Boolean(member.requiresPasswordSetup), status: 'active', signedInAt: now(), lastActiveAt: now() }
       setEditorSession(session); setSessions((items) => [session, ...items.filter((item) => item.editorId !== member.id)]); startEditorSession({ ...member, editorId: member.id }); recordAudit('Invitation Accepted', 'Editors & Assistants', `${member.name} accepted the invitation.`, member); return member
     },
     declineInvitation(invitationId) { const invitation = invitations.find((item) => item.id === invitationId); setInvitations((items) => items.map((item) => item.id === invitationId ? { ...item, status: 'declined', declinedAt: now() } : item)); if (invitation) recordAudit('Invitation Declined', 'Editors & Assistants', invitation.name) },
@@ -151,8 +180,25 @@ export function EditorProvider({ children }) {
     reactivateEditor(editorId) { setEditors((items) => items.map((item) => item.id === editorId ? { ...item, status: 'active', lastActiveAt: now() } : item)); const member = editors.find((item) => item.id === editorId); recordAudit('Member Reactivated', 'Editors & Assistants', member?.name || editorId) },
     revokeEditor(editorId) { setEditors((items) => items.map((item) => item.id === editorId ? { ...item, status: 'revoked', revokedAt: now() } : item)); const member = editors.find((item) => item.id === editorId); closeEditorSession(editorId); recordAudit('Member Revoked', 'Editors & Assistants', member?.name || editorId) },
     cancelInvitation(invitationId) { const invitation = invitations.find((item) => item.id === invitationId); setInvitations((items) => items.map((item) => item.id === invitationId ? { ...item, status: 'cancelled' } : item)); recordAudit('Invitation Cancelled', 'Editors & Assistants', invitation?.name || invitationId) },
-    resendInvitation(invitationId, expiresAt) { const invitation = invitations.find((item) => item.id === invitationId); setInvitations((items) => items.map((item) => item.id === invitationId ? { ...item, status: 'pending', createdAt: now(), expiresAt: expiresAt || new Date(Date.now() + 7 * 86400000).toISOString() } : item)); recordAudit('Invitation Resent', 'Editors & Assistants', invitation?.name || invitationId); return `${window.location.origin}/editor/accept-invitation/${invitationId}` },
-    loginEditor(member) { if (!member || member.status !== 'active') throw new Error(`This account is ${member?.status || 'unavailable'}.`); const session = { editorId: member.id, astrologerId: member.astrologerId, name: member.name, email: member.email, role: member.role, permissions: permissionStore[member.id] || member.permissions || [], status: 'active', signedInAt: now(), lastActiveAt: now() }; setEditorSession(session); setSessions((items) => [session, ...items.filter((item) => item.editorId !== member.id)]); startEditorSession({ ...member, editorId: member.id, permissions: session.permissions }); return session },
+    resendInvitation(invitationId, expiresAt) { const invitation = invitations.find((item) => item.id === invitationId); const updated = invitation ? { ...invitation, status: 'pending', createdAt: now(), expiresAt: expiresAt || new Date(Date.now() + 7 * 86400000).toISOString() } : null; setInvitations((items) => items.map((item) => item.id === invitationId ? { ...item, status: 'pending', createdAt: now(), expiresAt: expiresAt || new Date(Date.now() + 7 * 86400000).toISOString() } : item)); recordAudit('Invitation Resent', 'Editors & Assistants', invitation?.name || invitationId); const linkInvitation = updated || invitation; return `${window.location.origin}/editor/accept-invitation/${invitationId}${linkInvitation ? `?invite=${encodeURIComponent(encodeInvitation(linkInvitation))}` : ''}` },
+    setEditorPassword(editorId, password) {
+      const normalizedPassword = String(password || '')
+      if (normalizedPassword.length < 8) throw new Error('Password must be at least 8 characters.')
+      if (!/[0-9]/.test(normalizedPassword)) throw new Error('Password must include at least one number.')
+      if (!/[^A-Za-z0-9]/.test(normalizedPassword)) throw new Error('Password must include at least one special character.')
+      const member = editors.find((item) => item.id === editorId)
+      if (!member) throw new Error('Editor account could not be found.')
+      const updatedMember = { ...member, password: normalizedPassword, requiresPasswordSetup: false, lastActiveAt: now() }
+      setEditors((items) => items.map((item) => item.id === editorId ? updatedMember : item))
+      return updatedMember
+    },
+    loginEditor(member, password) {
+      if (!member || member.status !== 'active') throw new Error(`This account is ${member?.status || 'unavailable'}.`)
+      if (member.requiresPasswordSetup || !member.password) throw new Error('Set your password before signing in.')
+      if (String(password || '') !== member.password) throw new Error('Invalid email or password.')
+      const session = { editorId: member.id, astrologerId: member.astrologerId, name: member.name, email: member.email, role: member.role, permissions: permissionStore[member.id] || member.permissions || [], requiresPasswordSetup: false, status: 'active', signedInAt: now(), lastActiveAt: now() }
+      setEditorSession(session); setSessions((items) => [session, ...items.filter((item) => item.editorId !== member.id)]); startEditorSession({ ...member, editorId: member.id, permissions: session.permissions, requiresPasswordSetup: false }); return session
+    },
     logoutEditor() { if (editorSession) setSessions((items) => items.filter((item) => item.editorId !== editorSession.editorId)); setEditorSession(null); endEditorSession() },
     isSessionValid(editorId) { const member = editors.find((item) => item.id === editorId); const sessionExists = sessions.some((session) => session.editorId === editorId && (session.status || 'active') === 'active') || (editorSession && (editorSession.editorId === editorId || editorSession.id === editorId) && (editorSession.status || 'active') === 'active'); return Boolean(member && member.status === 'active' && sessionExists) },
   }), [approvals, audit, currentEditor, currentEditorId, currentUser, drafts, editorSession, editors, invitations, ownerId, permissionStore, sessions, visibleEditors, visibleInvitations])

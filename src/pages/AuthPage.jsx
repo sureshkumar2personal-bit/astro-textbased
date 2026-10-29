@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Sparkles, Shield, UserRound } from 'lucide-react'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useEditor } from '../state/EditorContext.jsx'
 import ThemeToggle from '../components/ThemeToggle.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
 
 export default function AuthPage({ mode, selectedRole }) {
   const navigate = useNavigate()
   const { currentUser, login, register } = useAuth()
+  const { editors, loginEditor } = useEditor()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [registering, setRegistering] = useState(false)
@@ -33,10 +35,15 @@ export default function AuthPage({ mode, selectedRole }) {
   const handleSubmit = (event) => {
     event.preventDefault()
     setError('')
+    let invitedEditor = null
 
     try {
       if (isLogin) {
-        login({ email, password, role })
+        invitedEditor = role === ROLES.ASTROLOGER
+          ? editors.find((editor) => editor.email === email.trim().toLowerCase())
+          : null
+        if (invitedEditor) loginEditor(invitedEditor, password)
+        else login({ email, password, role })
       } else {
         if (!name.trim()) throw new Error('Enter your name.')
         if (role === ROLES.USER && (!dateOfBirth || !birthTime || !birthPlace)) throw new Error('Complete your birth details to create a User account.')
@@ -44,7 +51,7 @@ export default function AuthPage({ mode, selectedRole }) {
         register({ role, name, email, password, dateOfBirth, birthTime, birthPlace, horoscopeDetails, specialization, experience, languages: languages.split(',').map((value) => value.trim()).filter(Boolean) })
       }
 
-      navigate(routes.dashboard, { replace: true })
+      navigate(invitedEditor ? '/editor/dashboard' : routes.dashboard, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
     }

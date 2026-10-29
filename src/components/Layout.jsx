@@ -31,6 +31,7 @@ import {
   Flame,
   Search,
   Headphones,
+  Gavel,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
@@ -69,6 +70,7 @@ const ROLE_CONFIG = {
       // Single Benefit Management entry: /perks-benefits redirects to the combined page and
       // every /perks-benefits/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
+      { to: 'dispute-management', label: 'Dispute Management', icon: Gavel },
       // Single Wallet entry: /wallet redirects to the overview and every
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
@@ -132,6 +134,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Question Details', sub: 'Respond to a user question' },
     '/astrologer/text-based-question-history': { title: 'Text-Based Question History', sub: 'Review completed question records and dispute outcomes' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/raise-complaint': { title: 'Raise Complaint', sub: 'Report an issue to the platform team' },
     '/astrologer/perks-benefits': { title: 'Benefit Management', sub: 'Manage follower perks, zodiac templates, subscriber plans, prices, discounts, and access.' },
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
@@ -707,7 +710,7 @@ export default function Layout() {
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="astrologer-dnd-confirm-title">Enable DND Mode?</h2>
-            <p>Consultation appointments will not be available while DND Mode is enabled.</p>
+            <p>DND Mode Activated: All notifications and services are temporarily suspended until DND is turned off.</p>
             <div className="astrologer-dnd-confirm__actions">
               <button type="button" className="btn btn-outline" onClick={() => setDndConfirmOpen(false)}>Cancel</button>
               <button
