@@ -19,6 +19,7 @@
 /* USER-SPECIFIC STYLES */
 @import "./user/user.css";
 @import "./user/dashboard.css";
+@import "./user/user-devotional-theme.css";
 
 /* ASTROLOGER-SPECIFIC STYLES */
 @import "./astrologer/astrologer.css";

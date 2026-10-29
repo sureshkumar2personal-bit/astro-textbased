@@ -1,0 +1,494 @@
+/* ==========================================================================
+   Astro Connect — User-Side Devotional & Spiritual Sanctum Theme
+   Scoped EXCLUSIVELY to .app-shell--user to ensure 0% impact on Astrologer/Editor portals.
+   Inspired by leading Indian temple & devotional platforms (Sri Mandir, VAMA, DevDarshan).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Theme Variables Scoped Exclusively to .app-shell--user
+   -------------------------------------------------------------------------- */
+.app-shell--user {
+  /* Temple Saffron / Kesar */
+  --primary: #C2410C;
+  --primary-dark: #9A3412;
+  --primary-light: #EA580C;
+  --primary-bg: #FFF7ED;
+
+  /* Sacred Sandalwood / Chandan */
+  --secondary: #92400E;
+  --secondary-bg: #FEF3C7;
+
+  /* Sanctum Brass Diya Gold */
+  --accent: #F59E0B;
+  --accent-dark: #D97706;
+  --accent-light: #FCD34D;
+  --gold-400: #FCD34D;
+  --gold-500: #F59E0B;
+  --gold-600: #D97706;
+
+  /* Sacred Marble & Parchment Surfaces */
+  --bg: #FDFBF7;
+  --bg-solid: #FDFBF7;
+  --surface: #FFFFFF;
+  --surface-strong: #FFFFFF;
+  --surface-soft: #FAF4EB;
+  --surface-border: #E8DAC8;
+  --border: #E8DAC8;
+
+  /* Temple Charcoal & Earth Foreground */
+  --text-primary: #291F18;
+  --text-secondary: #6E5D4F;
+  --body: #291F18;
+  --ink: #291F18;
+
+  /* Temple Wood Sidebar */
+  --sidebar-from: #381A05;
+  --sidebar-to: #221003;
+
+  /* Auspicious Specifics */
+  --devo-kumkum: #991B1B;
+  --devo-kesar: #EA580C;
+  --devo-chandan: #FAF5EB;
+  --devo-brass: #D97706;
+  --devo-diya-glow: rgba(245, 158, 11, 0.28);
+  --devo-card-shadow: 0 4px 20px rgba(146, 64, 14, 0.05);
+  --devo-card-hover-shadow: 0 12px 30px rgba(194, 65, 12, 0.14);
+}
+
+/* --------------------------------------------------------------------------
+   2. Dark Mode Scoped to .app-shell--user (Garbhagriha / Inner Sanctum at Night)
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .app-shell--user {
+  /* Glowing Brass Diya & Warm Amber */
+  --primary: #FB923C;
+  --primary-dark: #EA580C;
+  --primary-light: #FDBA74;
+  --primary-bg: #2C1810;
+
+  --secondary: #F59E0B;
+  --secondary-bg: #321F0A;
+
+  --accent: #FBBF24;
+  --accent-dark: #F59E0B;
+  --accent-light: #FDE68A;
+  --gold-400: #FDE68A;
+  --gold-500: #FBBF24;
+  --gold-600: #F59E0B;
+
+  /* Sanctum Granite Stone Surfaces */
+  --bg: #120E0C;
+  --bg-solid: #120E0C;
+  --surface: #1B1512;
+  --surface-strong: #231C18;
+  --surface-soft: #2B231E;
+  --surface-border: #3D3028;
+  --border: #3D3028;
+
+  /* Sacred Ivory & Muted Brass Text */
+  --text-primary: #F7EFE8;
+  --text-secondary: #BCAE9F;
+  --body: #F7EFE8;
+  --ink: #F7EFE8;
+
+  /* Deep Night Sanctum Sidebar */
+  --sidebar-from: #1A120E;
+  --sidebar-to: #0F0A07;
+
+  --devo-kumkum: #EF4444;
+  --devo-kesar: #FB923C;
+  --devo-chandan: #231C18;
+  --devo-brass: #FBBF24;
+  --devo-diya-glow: rgba(251, 146, 60, 0.35);
+  --devo-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --devo-card-hover-shadow: 0 12px 30px rgba(245, 158, 11, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   3. User Sidebar — Sacred Temple Door & Diya Aesthetics
+   -------------------------------------------------------------------------- */
+.app-shell--user .sidebar--user {
+  background:
+    radial-gradient(circle at 10% 8%, rgba(245, 158, 11, 0.16), transparent 48%),
+    radial-gradient(circle at 90% 92%, rgba(194, 65, 12, 0.12), transparent 40%),
+    linear-gradient(180deg, var(--sidebar-from) 0%, var(--sidebar-to) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  box-shadow: 0 20px 50px rgba(32, 14, 2, 0.42);
+}
+
+.app-shell--user .sidebar--user .sidebar-brand {
+  border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.app-shell--user .sidebar--user .sidebar-brand-mark {
+  background: linear-gradient(135deg, #F59E0B 0%, #C2410C 55%, #991B1B 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(254, 243, 199, 0.35);
+  color: #FFFDF9;
+}
+
+.app-shell--user .sidebar--user .sidebar-brand-text {
+  color: #FFFDF9;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.app-shell--user .sidebar--user .sidebar-group-label {
+  color: rgba(252, 211, 77, 0.72);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.app-shell--user .sidebar--user .sidebar-link,
+.app-shell--user .sidebar--user .sidebar-nav-section-title {
+  color: rgba(255, 250, 240, 0.88);
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--radius-s);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-shell--user .sidebar--user .sidebar-link:hover,
+.app-shell--user .sidebar--user .sidebar-nav-section-title:hover {
+  background: rgba(245, 158, 11, 0.14);
+  color: #FFFFFF;
+  transform: translateX(3px);
+}
+
+.app-shell--user .sidebar--user .sidebar-link.active {
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 65%, #9A3412 100%);
+  border-left: 3.5px solid #FCD34D;
+  box-shadow: 0 8px 22px rgba(194, 65, 12, 0.38);
+  color: #FFFFFF;
+  font-weight: 800;
+}
+
+.app-shell--user .sidebar--user .sidebar-active-pill {
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 65%, #9A3412 100%);
+  box-shadow: 0 8px 22px rgba(194, 65, 12, 0.38);
+}
+
+/* --------------------------------------------------------------------------
+   4. User Dashboard Hero Banner — Sanctum Warmth & Auspicious Greeting
+   -------------------------------------------------------------------------- */
+.app-shell--user .user-dashboard-page .hero-banner-user {
+  background:
+    radial-gradient(circle at 86% 40%, rgba(245, 158, 11, 0.28) 0%, transparent 52%),
+    radial-gradient(circle at 14% 85%, rgba(153, 27, 27, 0.22) 0%, transparent 48%),
+    radial-gradient(circle at 50% 10%, rgba(254, 243, 199, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #3A1505 0%, #632205 45%, #8B2C08 100%);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  box-shadow: 0 16px 42px rgba(58, 21, 5, 0.26);
+  border-radius: 24px;
+}
+
+html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user {
+  background:
+    radial-gradient(circle at 86% 40%, rgba(245, 158, 11, 0.22) 0%, transparent 52%),
+    radial-gradient(circle at 14% 85%, rgba(220, 38, 38, 0.18) 0%, transparent 48%),
+    linear-gradient(135deg, #241005 0%, #421805 50%, #5E2008 100%);
+  border-color: rgba(245, 158, 11, 0.22);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45);
+}
+
+.user-devotional-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(254, 243, 199, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  color: #FEF3C7;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  margin-bottom: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.user-devotional-pill .user-devotional-om {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.user-devotional-pill .user-devotional-dot {
+  opacity: 0.55;
+}
+
+.app-shell--user .user-dashboard-page .hero-banner-user h2 {
+  color: #FFFDF9;
+  font-size: clamp(26px, 3.2vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.app-shell--user .user-dashboard-page .hero-banner-user p {
+  color: rgba(255, 245, 230, 0.9);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin-top: 6px;
+}
+
+.app-shell--user .hero-banner-actions-wrap .topbar-explore-btn,
+.app-shell--user .hero-banner-actions-wrap .icon-btn,
+.app-shell--user .hero-banner-actions-wrap .theme-toggle-btn,
+.app-shell--user .hero-banner-actions-wrap .avatar-chip {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(251, 191, 36, 0.32);
+  color: #FFFDF9;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.app-shell--user .hero-banner-actions-wrap .topbar-explore-btn:hover,
+.app-shell--user .hero-banner-actions-wrap .icon-btn:hover,
+.app-shell--user .hero-banner-actions-wrap .theme-toggle-btn:hover,
+.app-shell--user .hero-banner-actions-wrap .avatar-chip:hover {
+  background: rgba(251, 191, 36, 0.24);
+  border-color: rgba(251, 191, 36, 0.65);
+  color: #FFFFFF;
+}
+
+/* --------------------------------------------------------------------------
+   5. Quick Action Cards — Sandalwood Surface with Golden Diya Hover
+   -------------------------------------------------------------------------- */
+.app-shell--user .user-dashboard-page .action-card--compact {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  box-shadow: var(--devo-card-shadow);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-shell--user .user-dashboard-page .action-card--compact:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: var(--devo-card-hover-shadow);
+}
+
+.app-shell--user .user-dashboard-page .action-card--compact .action-card-icon {
+  background: var(--primary-bg);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  color: var(--primary);
+  border-radius: 13px;
+  transition: all 0.24s ease;
+}
+
+.app-shell--user .user-dashboard-page .action-card--compact:hover .action-card-icon {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--devo-diya-glow);
+}
+
+.app-shell--user .user-dashboard-page .action-card-title {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.app-shell--user .user-dashboard-page .action-card-desc {
+  color: #047857;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+html[data-theme='dark'] .app-shell--user .user-dashboard-page .action-card-desc {
+  color: #34D399;
+}
+
+/* --------------------------------------------------------------------------
+   6. Recommended Astrologer Cards — Sacred Daivajna Aura
+   -------------------------------------------------------------------------- */
+.app-shell--user .explore-astrologer-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  box-shadow: var(--devo-card-shadow);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-shell--user .explore-astrologer-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: var(--devo-card-hover-shadow);
+}
+
+.app-shell--user .explore-astrologer-card__price {
+  background: var(--primary-bg);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.app-shell--user .explore-astrologer-card__name {
+  color: var(--text-primary);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.app-shell--user .explore-astrologer-card__specialization {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.app-shell--user .explore-astrologer-card__rating svg {
+  color: #D97706 !important;
+  fill: #D97706;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__rating svg {
+  color: #FBBF24 !important;
+  fill: #FBBF24;
+}
+
+.app-shell--user .explore-astrologer-card__tags--accent span {
+  background: var(--secondary-bg);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  color: var(--secondary);
+  font-weight: 600;
+  border-radius: 7px;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__tags--accent span {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #FDE68A;
+}
+
+.app-shell--user .explore-astrologer-card__action {
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  transition: all 0.18s ease;
+}
+
+.app-shell--user .explore-astrologer-card__action:first-child {
+  color: #047857;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+}
+
+.app-shell--user .explore-astrologer-card__action:first-child:hover:not(:disabled) {
+  background: #047857;
+  color: #FFFFFF;
+}
+
+.app-shell--user .explore-astrologer-card__action:last-child {
+  color: var(--primary);
+  background: var(--primary-bg);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.app-shell--user .explore-astrologer-card__action:last-child:hover:not(:disabled) {
+  background: var(--primary);
+  color: #FFFFFF;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:first-child {
+  background: rgba(4, 120, 87, 0.18);
+  border-color: rgba(4, 120, 87, 0.35);
+  color: #34D399;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:first-child:hover:not(:disabled) {
+  background: #059669;
+  color: #FFFFFF;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-child {
+  background: rgba(251, 146, 60, 0.16);
+  border-color: rgba(251, 146, 60, 0.32);
+  color: #FB923C;
+}
+
+html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-child:hover:not(:disabled) {
+  background: #EA580C;
+  color: #FFFFFF;
+}
+
+/* --------------------------------------------------------------------------
+   7. Appointments & Activity Lists — Serene Sandalwood Rows
+   -------------------------------------------------------------------------- */
+.app-shell--user .activity-row {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(146, 64, 14, 0.03);
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.app-shell--user .activity-row:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+  transform: translateX(3px);
+  box-shadow: 0 4px 16px rgba(194, 65, 12, 0.08);
+}
+
+.app-shell--user .activity-id {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.app-shell--user .activity-meta {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   8. Section Titles & Navigation Links
+   -------------------------------------------------------------------------- */
+.app-shell--user .section-title {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.app-shell--user .section-title svg {
+  color: var(--primary);
+}
+
+.app-shell--user a.text-sm.font-semibold {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.app-shell--user a.text-sm.font-semibold:hover {
+  color: var(--primary-dark);
+}
+
+/* --------------------------------------------------------------------------
+   9. Topbar for Inner User Pages
+   -------------------------------------------------------------------------- */
+.app-shell--user .topbar-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.app-shell--user .topbar-explore-btn {
+  border-color: rgba(245, 158, 11, 0.32);
+  color: var(--primary);
+  background: var(--surface);
+}
+
+.app-shell--user .topbar-explore-btn:hover {
+  background: var(--primary-bg);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
