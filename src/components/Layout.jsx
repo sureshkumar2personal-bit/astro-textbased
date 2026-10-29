@@ -42,6 +42,7 @@ import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
 import NotificationsPanel from './NotificationsPanel.jsx'
 import SidebarItem from './SidebarItem.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
+import BottomNavBar from './ui/bottom-nav-bar.jsx'
 import {
   TempleArchIcon,
   TempleBellIcon,
@@ -70,6 +71,7 @@ const ROLE_CONFIG = {
       // Single Benefit Management entry: /perks-benefits redirects to the combined page and
       // every /perks-benefits/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
+      { to: 'dispute-management', label: 'Dispute Management', icon: Gavel },
       // Single Wallet entry: /wallet redirects to the overview and every
       // /wallet/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'wallet', label: 'Wallet', icon: Wallet },
@@ -143,6 +145,7 @@ const PAGE_META = {
     '/astrologer/answer-question': { title: 'Question Details', sub: 'Respond to a user question' },
     '/astrologer/text-based-question-history': { title: 'Text-Based Question History', sub: 'Review completed question records and dispute outcomes' },
     '/astrologer/dispute-management': { title: 'Dispute Management', sub: 'Review & resolve a dispute' },
+    '/astrologer/raise-complaint': { title: 'Raise Complaint', sub: 'Report an issue to the platform team' },
     '/astrologer/perks-benefits': { title: 'Benefit Management', sub: 'Manage follower perks, zodiac templates, subscriber plans, prices, discounts, and access.' },
     '/astrologer/atonement': { title: 'Atonement', sub: 'Create and manage atonement services' },
     '/astrologer/activity': { title: 'My Activity', sub: 'Recent appointments and consultation updates' },
@@ -720,7 +723,7 @@ export default function Layout() {
             onClick={(event) => event.stopPropagation()}
           >
             <h2 id="astrologer-dnd-confirm-title">Enable DND Mode?</h2>
-            <p>Consultation appointments will not be available while DND Mode is enabled.</p>
+            <p>DND Mode Activated: All notifications and services are temporarily suspended until DND is turned off.</p>
             <div className="astrologer-dnd-confirm__actions">
               <button type="button" className="btn btn-outline" onClick={() => setDndConfirmOpen(false)}>Cancel</button>
               <button
@@ -738,16 +741,7 @@ export default function Layout() {
         </div>
       )}
       {shellIsAstrologer && (
-        <nav className="astrologer-bottom-nav" aria-label="Astrologer navigation">
-          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
-          {config.nav.map(({ to, label, icon: Icon, end }) => (
-            <NavLink key={label} to={`${basePath}/${to}`.replace(/\/$/, '')} end={end} className={({ isActive }) => `astrologer-bottom-nav__item${isActive ? ' is-active' : ''}`}>
-              <Icon size={17} aria-hidden="true" />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-          <span className="astrologer-bottom-nav__ornament" aria-hidden="true">✦</span>
-        </nav>
+        <BottomNavBar items={config.nav} basePath={basePath} />
       )}
     </div>
     </GlobalHeaderActionsContext.Provider>

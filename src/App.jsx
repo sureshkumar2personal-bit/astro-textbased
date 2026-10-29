@@ -25,6 +25,8 @@ import UserDisputes from './pages/user/disputes/UserDisputes.jsx'
 import InstantConsultation from './pages/user/InstantConsultation.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
 import TextBasedQuestionHistory from './pages/TextBasedQuestionHistory.jsx'
+import DisputeManagement from './pages/astrologer/disputes/DisputeManagement.jsx'
+import ComplaintDetails from './pages/astrologer/disputes/ComplaintDetails.jsx'
 import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
@@ -128,6 +130,7 @@ function RequireAuth() {
 function RequireRole({ role }) {
   const { currentUser } = useAuth()
   const { isSessionValid } = useEditor()
+  const location = useLocation()
 
   if (!currentUser) {
     return <Navigate to="/login" replace />
@@ -140,6 +143,14 @@ function RequireRole({ role }) {
         replace
       />
     )
+  }
+
+  if (role === ROLES.ASTROLOGER && currentUser.requiresPasswordSetup && location.pathname !== '/astrologer') {
+    return <Navigate to="/astrologer" replace />
+  }
+
+  if (role === ROLES.EDITOR && currentUser.requiresPasswordSetup && location.pathname !== '/editor/dashboard') {
+    return <Navigate to="/editor/dashboard" replace />
   }
 
   if (role === ROLES.EDITOR && !isSessionValid(currentUser.editorId || currentUser.id)) {
@@ -171,11 +182,6 @@ function NotFoundRedirect() {
   )
 }
 
-function DisputeManagementRedirect() {
-  const location = useLocation()
-  return <Navigate to={`/astrologer/text-based-question-history${location.search}`} replace />
-}
-
 function AstrologerRoutes() {
   return (
     <Route element={<RequireRole role={ROLES.ASTROLOGER} />}>
@@ -203,7 +209,8 @@ function AstrologerRoutes() {
         <Route path="/astrologer/purchase-package" element={<PurchasePackage />} />
         <Route path="/astrologer/answer-question" element={<AnswerQuestion />} />
         <Route path="/astrologer/text-based-question-history" element={<TextBasedQuestionHistory />} />
-        <Route path="/astrologer/dispute-management" element={<DisputeManagementRedirect />} />
+        <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
+        <Route path="/astrologer/dispute-management/complaint/:complaintId" element={<ComplaintDetails />} />
         <Route path="/astrologer/activity" element={<AstrologerActivity />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
         <Route path="/astrologer/consultation" element={<ConsultationShell />}>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Poppins:wght@700&display=swap');
 @import "tailwindcss";
 
 /* Astrologer account management */
@@ -4990,6 +4990,88 @@ html[data-theme='dark'] .border-white\/90 {
   background: var(--astrologer-cream);
 }
 .app-shell--astrologer .page-transition { max-width: 1600px; margin: 0 auto; }
+.app-shell--astrologer .page-content:has(.astrologer-top-hero-image) {
+  max-width: none;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  padding-top: 0 !important;
+}
+.app-shell--astrologer .astrologer-top-hero-image {
+  position: relative;
+  width: 100vw;
+  max-width: none;
+  margin: 0 calc(50% - 50vw) 20px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #211008;
+}
+.app-shell--astrologer .astrologer-top-hero-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1672 / 941;
+  object-fit: contain;
+}
+.app-shell--astrologer .astrologer-top-hero-image__services {
+  position: absolute;
+  top: 50%;
+  right: clamp(24px, 5vw, 86px);
+  width: min(420px, 38vw);
+  transform: translateY(-50%);
+}
+.app-shell--astrologer .astrologer-top-hero-image__services h1 {
+  margin: 0 0 14px;
+  color: #351b10;
+  font-family: Poppins, Inter, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.app-shell--astrologer .astrologer-top-hero-image__services > p {
+  margin: 0 0 28px;
+  color: #8a7468;
+  font-family: Inter, Lato, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+.app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-cards {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card {
+  min-width: 0;
+  min-height: 106px;
+  padding: 16px 20px;
+  border-radius: 20px;
+  background: transparent;
+  box-shadow: 0 9px 22px rgba(117, 76, 31, .12);
+}
+.app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon {
+  width: 64px;
+  height: 64px;
+  flex-basis: 64px;
+}
+.app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy small {
+  white-space: normal;
+  line-height: 1.4;
+}
+@media (max-width: 900px) {
+  .app-shell--astrologer .astrologer-top-hero-image__services { right: 24px; width: min(360px, 42vw); }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card { min-height: 104px; padding: 16px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon { width: 52px; height: 52px; flex-basis: 52px; }
+}
+@media (max-width: 640px) {
+  .app-shell--astrologer .astrologer-top-hero-image__services { right: 14px; width: 48%; }
+  .app-shell--astrologer .astrologer-top-hero-image__services h1 { margin-bottom: 8px; font-size: 17px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services > p { margin-bottom: 12px; font-size: 9px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-cards { gap: 8px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card { min-height: 82px; padding: 10px; gap: 7px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon { width: 38px; height: 38px; flex-basis: 38px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy strong { font-size: 11px; }
+  .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy small { font-size: 8px; }
+}
 .app-shell--astrologer .adash-hero--reference {
   position: relative;
   min-height: 0;
@@ -5024,12 +5106,11 @@ html[data-theme='dark'] .border-white\/90 {
   right: 20px;
   z-index: 2;
 }
-.adash-hero-service-message { position: relative; display: flex; align-items: center; width: 100%; min-height: 58px; margin: 18px 0 0; padding: 14px 22px; border: 1px solid #ead6b1; border-radius: 16px; background: #fffdf8; box-shadow: 0 7px 16px rgba(100, 56, 20, .1); color: #6b3b1d; font-size: 15px; font-weight: 700; letter-spacing: .01em; }
-@media (max-width: 600px) {
-  .adash-hero-service-message { min-height: 46px; margin-top: 12px; padding: 10px 14px; font-size: 12px; }
-}
+
 .adash-hero-service-cards { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 12px; }
 .adash-hero-service-card { position: relative; display: flex; align-items: center; gap: 9px; min-width: 190px; min-height: 68px; padding: 10px 56px 10px 12px; border: 1px solid #ead6b1; border-radius: 12px; background: #fffdf8; color: #33251a; box-shadow: 0 7px 16px rgba(100, 56, 20, .12); text-align: left; cursor: pointer; }
+.flip-button.adash-hero-service-card__flip { position: absolute; top: 12px; right: 12px; display: grid; width: 52px; height: 29px; min-width: 52px; min-height: 29px; place-items: center; padding: 0; border: 0; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .06em; line-height: 1; cursor: pointer; transform-style: preserve-3d; }
+.flip-button.adash-hero-service-card__flip span { display: block; backface-visibility: hidden; }
 .adash-hero-service-card:hover { border-color: #d7a541; transform: translateY(-1px); }
 .adash-hero-service-card__icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; color: #cf751b; background: #fff1d9; }
 .adash-hero-service-card__copy { display: grid; gap: 3px; min-width: 0; }
@@ -5150,45 +5231,53 @@ html[data-theme='dark'] .border-white\/90 {
 
 .astrologer-bottom-nav {
   position: fixed;
-  right: 18px;
-  bottom: 14px;
-  left: 18px;
+  left: 0;
+  bottom: 16px;
+  right: 0;
   z-index: 40;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 80px;
-  padding: 8px 22px;
+  width: fit-content;
+  min-width: 320px;
+  max-width: 95vw;
+  height: 52px;
+  padding: 6px;
   overflow-x: auto;
+  margin-right: auto;
+  margin-left: auto;
   background: var(--astrologer-brown);
   border: 1px solid rgba(232, 184, 62, .62);
-  border-radius: 14px;
+  border-radius: 999px;
   box-shadow: 0 8px 22px rgba(44, 22, 10, .34);
   scrollbar-width: none;
 }
 .astrologer-bottom-nav::-webkit-scrollbar { display: none; }
 .astrologer-bottom-nav__item {
   display: flex;
-  flex: 1 1 132px;
-  min-width: 112px;
-  flex-direction: column;
+  flex: 0 0 auto;
+  min-width: 44px;
+  height: 40px;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 0;
   margin: 0;
-  padding: 5px 8px;
+  padding: 8px 12px;
   color: #f3d68b;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1;
   text-align: center;
   white-space: nowrap;
   transition: color .18s ease, background-color .18s ease, border-color .18s ease, transform .18s ease;
 }
-.astrologer-bottom-nav__item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+.astrologer-bottom-nav__icon { display: grid; place-items: center; width: 22px; height: 22px; flex: 0 0 22px; }
+.astrologer-bottom-nav__label-wrap { display: flex; align-items: center; max-width: 72px; overflow: hidden; }
+.astrologer-bottom-nav__label { overflow: hidden; color: inherit; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .astrologer-bottom-nav__item:hover { color: #fff8e9; background: rgba(232, 184, 62, .10); }
 .astrologer-bottom-nav__item.is-active {
   color: #fff8e9;
@@ -5247,10 +5336,8 @@ html[data-theme='dark'] .border-white\/90 {
   .app-shell--astrologer .adash-hero--reference { min-height: 165px; border-radius: 18px; }
   .app-shell--astrologer .adash-quick-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
   .app-shell--astrologer .adash-quick-action { padding: 12px 10px; }
-  .astrologer-bottom-nav { right: 8px; bottom: 10px; left: 8px; gap: 2px; padding: 7px 10px; }
-  .astrologer-bottom-nav__item { flex-basis: 118px; }
-  .astrologer-bottom-nav__ornament { flex-basis: 74px; min-width: 74px; background-size: auto 128px; }
-  .astrologer-bottom-nav__ornament { display: none; }
+  .astrologer-bottom-nav { bottom: 10px; gap: 2px; padding: 5px; }
+  .astrologer-bottom-nav__item { padding-inline: 8px; }
 }
 @media (max-width: 600px) {
   .adash-hero-service-cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
@@ -5265,9 +5352,9 @@ html[data-theme='dark'] .border-white\/90 {
   .adash-hero-reference-service { top: 10px; right: 10px; }
   .app-shell--astrologer .adash-quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .app-shell--astrologer .page-content { padding-bottom: 122px; }
-  .astrologer-bottom-nav { min-height: 68px; padding: 5px 6px; }
-  .astrologer-bottom-nav__item { min-width: 98px; flex-basis: 98px; font-size: 9px; }
-  .astrologer-bottom-nav__item svg { width: 19px; height: 19px; }
+  .astrologer-bottom-nav { bottom: 8px; min-width: 300px; height: 50px; padding: 4px; }
+  .astrologer-bottom-nav__item { padding-inline: 7px; }
+  .astrologer-bottom-nav__label { font-size: 10px; }
   .app-shell--astrologer .topbar-header { top: 0; }
 }
 
@@ -16048,7 +16135,7 @@ button.apt-week-day:focus-visible {
 
 /* Astrologer dashboard compact layout and fixed-nav clearance. */
 .app-shell--astrologer {
-  --astrologer-nav-height: 80px;
+  --astrologer-nav-height: 52px;
   overflow-x: clip;
 }
 .app-shell--astrologer .page-content,
@@ -16083,11 +16170,6 @@ button.apt-week-day:focus-visible {
 .app-shell--astrologer .adash-hero--reference {
   aspect-ratio: 2172 / 320;
   max-height: 166px;
-}
-.app-shell--astrologer .adash-hero-service-message {
-  min-height: 48px;
-  margin-top: 12px;
-  padding: 10px 18px;
 }
 .app-shell--astrologer .section { margin-top: 20px; }
 .app-shell--astrologer .section-title {

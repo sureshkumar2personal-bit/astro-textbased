@@ -164,8 +164,7 @@ html[data-theme='dark'] .app-shell--astrologer .action-card,
 html[data-theme='dark'] .app-shell--astrologer .adash-campaign,
 html[data-theme='dark'] .app-shell--astrologer .adash-campaign-body,
 html[data-theme='dark'] .app-shell--astrologer .adash-campaign-labels,
-html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card,
-html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-message {
+html[data-theme='dark'] .app-shell--astrologer .adash-hero-service-card {
   background: var(--surface-strong) !important;
   border-color: var(--border) !important;
   color: var(--text-primary) !important;
@@ -1814,10 +1813,10 @@ html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .a
 }
 
 html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item.is-active {
-  background: #5A3516 !important;
-  border-color: var(--account-light-border) !important;
-  color: var(--account-light-gold) !important;
-  box-shadow: 0 0 0 1px rgba(232, 182, 90, .22), inset 0 0 18px rgba(232, 182, 90, .08) !important;
+  background: rgba(112, 61, 18, .64) !important;
+  border-color: rgba(232, 184, 62, .8) !important;
+  color: #fff8e9 !important;
+  box-shadow: 0 0 0 1px rgba(232, 184, 62, .13), inset 0 0 18px rgba(232, 184, 62, .08) !important;
 }
 
 html[data-theme='light'] .app-shell--astrologer:has(.account-management-page) .astrologer-bottom-nav__item:hover {
