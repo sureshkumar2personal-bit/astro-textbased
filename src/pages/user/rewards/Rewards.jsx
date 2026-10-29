@@ -25,6 +25,7 @@ import { useAuth } from '../../../state/AuthContext.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import StatCard from '../../../components/ui/StatCard.jsx'
+import UserZodiacPerks from './UserZodiacPerks.jsx'
 import { getAstrologerById, REWARD_STATUS, APPOINTMENT_REWARDS, CONTENT_REWARDS } from './rewardsData.js'
 
 const DAYS_MS = 24 * 60 * 60 * 1000
@@ -717,6 +718,8 @@ export default function RewardsPerks() {
       <PageHeader
         title="Perks & Benefits"
       />
+
+      <UserZodiacPerks />
 
       <ExpiringBanner items={expiringItems} />
 

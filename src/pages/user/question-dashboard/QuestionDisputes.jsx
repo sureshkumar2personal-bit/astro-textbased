@@ -162,15 +162,14 @@ export default function QuestionDisputes() {
   return (
     <div>
       <Section title="Disputes" titleRight={<span className="muted">Every dispute you raised, with its current status.</span>}>
-        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-5" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           {DISPUTE_STAGES.map((stage) => {
             const meta = STAGE_CARD_META[stage]
             return (
-              <div key={stage} className="h-full" style={{ minHeight: 132 }}>
+              <div key={stage} style={{ width: 105, height: 105, flex: '0 0 105px', maxWidth: '100%' }}>
                 <SummaryCard
                   label={stage}
                   value={counts[stage] || 0}
-                  hint={meta.hint}
                   background={meta.background}
                   color={meta.color}
                   border={meta.border}

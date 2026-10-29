@@ -63,7 +63,7 @@ export function normalizeProofRequirements(value) {
 
 export function setAtonementDayProof(atonement, index, proof) {
   const day = atonement.days?.[index]
-  if (!day || !day.completed) return atonement
+  if (!day) return atonement
   const days = atonement.days.map((item, i) => (i === index ? { ...item, proof: normalizeProof(proof) } : item))
   return { ...atonement, days }
 }

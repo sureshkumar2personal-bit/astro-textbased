@@ -101,6 +101,21 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     return () => window.clearInterval(timer)
   }, [request])
 
+  // Automatically accept the consultation 3 seconds after ringing begins
+  useEffect(() => {
+    if (!request || request.status !== 'ringing') return undefined
+    const timer = window.setTimeout(() => {
+      const current = getInstantConsultations().find((entry) => entry.id === request.id)
+      if (current && current.status === 'ringing') {
+        updateInstantConsultation(request.id, {
+          status: 'accepted',
+          startedAt: new Date().toISOString(),
+        })
+      }
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [request?.id, request?.status])
+
   const startChat = () => {
     if (balance < price) {
       setError(`You need ${money(price - balance)} more to book this consultation.`)
@@ -250,8 +265,8 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
           {request?.status === 'ringing' && (
             <div className="instant-call-waiting">
               <span className="instant-call-pulse" />
-              <strong>Waiting for {astrologer.name}</strong>
-              <p>They will see your name and can accept or reject.</p>
+              <strong>Waiting for response…</strong>
+              <p>Connecting with {astrologer.name}…</p>
               <button type="button" className="instant-call-secondary" onClick={endCall}>
                 <PhoneOff size={16} /> Cancel Request
               </button>
