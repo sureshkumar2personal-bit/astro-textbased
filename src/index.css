@@ -5045,7 +5045,7 @@ html[data-theme='dark'] .border-white\/90 {
   min-height: 106px;
   padding: 16px 20px;
   border-radius: 20px;
-  background: rgba(255, 253, 248, .86);
+  background: transparent;
   box-shadow: 0 9px 22px rgba(117, 76, 31, .12);
 }
 .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon {

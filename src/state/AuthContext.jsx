@@ -101,7 +101,11 @@ function readJSON(key, fallback) {
 
 function writeJSON(key, value) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(key, JSON.stringify(value))
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    if (error?.name !== 'QuotaExceededError' && error?.code !== 22 && error?.code !== 1014) throw error
+  }
 }
 
 function seedUsers() {
@@ -150,6 +154,34 @@ export function AuthProvider({ children }) {
       // Signing in is not an activity worth recording: it says nothing about
       // what the person did in the product and only adds noise to the feed.
       return user
+    },
+    createInvitedAstrologer({ email, name }) {
+      const normalizedEmail = normalizeEmail(email)
+      const existingUser = users.find((entry) => entry.email === normalizedEmail)
+      const invitedUser = normalizeUser(existingUser ? {
+        ...existingUser,
+        role: ROLES.ASTROLOGER,
+        name: name || existingUser.name,
+        requiresPasswordSetup: true,
+      } : {
+        id: crypto.randomUUID(), role: ROLES.ASTROLOGER, name: name || normalizedEmail.split('@')[0], email: normalizedEmail,
+        password: '', specialization: '', experience: '', languages: [], requiresPasswordSetup: true,
+      })
+      setUsers((prev) => existingUser ? prev.map((entry) => (entry.id === existingUser.id ? invitedUser : entry)) : [invitedUser, ...prev])
+      setCurrentUser(invitedUser)
+      return invitedUser
+    },
+    setInvitedAstrologerPassword({ email, name, password }) {
+      const normalizedEmail = normalizeEmail(email)
+      const normalizedPassword = String(password || '')
+      if (normalizedPassword.length < 8) throw new Error('Password must be at least 8 characters.')
+      if (!/[0-9]/.test(normalizedPassword)) throw new Error('Password must include at least one number.')
+      if (!/[^A-Za-z0-9]/.test(normalizedPassword)) throw new Error('Password must include at least one special character.')
+      const existingUser = users.find((entry) => entry.email === normalizedEmail)
+      const updatedUser = normalizeUser({ ...(existingUser || { id: crypto.randomUUID(), role: ROLES.ASTROLOGER, email: normalizedEmail, specialization: '', experience: '', languages: [] }), name: name || existingUser?.name || normalizedEmail.split('@')[0], password: normalizedPassword, requiresPasswordSetup: false, role: ROLES.ASTROLOGER })
+      setUsers((prev) => existingUser ? prev.map((entry) => (entry.id === existingUser.id ? updatedUser : entry)) : [updatedUser, ...prev])
+      setCurrentUser(updatedUser)
+      return updatedUser
     },
     register(payload) {
       const email = normalizeEmail(payload.email)

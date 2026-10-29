@@ -13,6 +13,8 @@ import {
   Wallet,
   SlidersHorizontal,
   Zap,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
@@ -42,6 +44,7 @@ const DASHBOARD_CAMPAIGN_LIMIT = 4
 export default function Dashboard() {
   const { astrologerServices, actions, campaigns, appointments } = useAppData()
   const { currentUser } = useAuth()
+  const [showInvitedPasswordPopup, setShowInvitedPasswordPopup] = useState(Boolean(currentUser?.requiresPasswordSetup))
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
@@ -91,6 +94,7 @@ export default function Dashboard() {
 
   return (
     <div>
+      {showInvitedPasswordPopup && <InvitedPasswordPopup onComplete={() => setShowInvitedPasswordPopup(false)} />}
       <div className="astrologer-top-hero-image">
         <img
           src="/golden-temple-sunset-banner.png"
@@ -239,6 +243,31 @@ export default function Dashboard() {
       </Section>
     </div>
   )
+}
+
+function InvitedPasswordPopup({ onComplete }) {
+  const { currentUser, setInvitedAstrologerPassword } = useAuth()
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = () => {
+    setError('')
+    if (password.length < 8) return setError('Password must be at least 8 characters.')
+    if (!/[0-9]/.test(password)) return setError('Password must include at least one number.')
+    if (!/[^A-Za-z0-9]/.test(password)) return setError('Password must include at least one special character.')
+    if (password !== confirmPassword) return setError('Passwords do not match.')
+    try {
+      setInvitedAstrologerPassword({ email: currentUser.email, name: currentUser.name, password })
+      onComplete()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save your password.')
+    }
+  }
+
+  return <div className="invited-password-overlay" role="dialog" aria-modal="true" aria-labelledby="invited-password-title"><div className="invited-password-modal"><div className="invited-password-modal__eyebrow">SECURE YOUR ACCOUNT</div><h2 id="invited-password-title">Set Your Password</h2><p>Create a password before continuing.</p><label><span>New Password</span><div className="invited-password-input"><input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showPassword ? 'Hide new password' : 'Show new password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label><label><span>Confirm Password</span><div className="invited-password-input"><input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>{error && <p className="invited-password-error">{error}</p>}<button type="button" className="invited-password-button" onClick={handleSubmit}>Set Password</button></div></div>
 }
 
 function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
