@@ -58,3 +58,192 @@
 .subscriber-plan-editor__fields > label:nth-child(n + 6) { display: grid; align-items: start; justify-content: initial; gap: 3px; }.subscriber-plan-editor__fields > label:nth-child(n + 6) select { width: 100%; margin-top: 0; }.subscriber-plan-editor__fields > label:nth-child(8) { font-size: 11px; }
 .subscriber-plan-editor__fields > label:nth-child(n + 6) { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.subscriber-plan-editor__fields > label:nth-child(n + 6) select { width: 150px; margin-top: 0; }
 @media (max-width: 850px) { .subscriber-plan-editor__fields > label:nth-child(n + 6) { grid-column: auto; grid-row: auto; padding: 0; border: 0; background: transparent; }.subscriber-plan-editor__fields > label:nth-child(n + 6) select { margin-top: 0; }.subscriber-plan-editor__fields > label:nth-child(8) { font-size: 11px; }.subscriber-plan-editor__fields > label:nth-child(8)::before { display: none; } }
+
+/* Dark Theme Overrides for Perks & Benefit History Drawer and Sections */
+html[data-theme='dark'] .benefit-history-drawer {
+  background: var(--surface, #2A1B0E);
+  color: var(--text-primary, #FFF8E8);
+  box-shadow: -18px 0 40px rgba(0, 0, 0, 0.5);
+  border-left: 1px solid var(--border, #6B4A25);
+}
+html[data-theme='dark'] .benefit-history-drawer > header,
+html[data-theme='dark'] .benefit-history-drawer__section,
+html[data-theme='dark'] .benefit-history-breakdown .is-total {
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .benefit-history-drawer h2,
+html[data-theme='dark'] .benefit-history-drawer__section > strong,
+html[data-theme='dark'] .benefit-history-detail-grid b,
+html[data-theme='dark'] .benefit-history-breakdown strong {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .benefit-history-drawer header p,
+html[data-theme='dark'] .benefit-history-detail-grid small,
+html[data-theme='dark'] .benefit-history-breakdown div {
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .benefit-history-detail-label {
+  color: var(--primary, #FFC247);
+}
+html[data-theme='dark'] .benefit-history-drawer__saved {
+  background: rgba(45, 138, 97, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+html[data-theme='dark'] .benefit-history-overview,
+html[data-theme='dark'] .benefit-history-section {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .benefit-history-overview h2,
+html[data-theme='dark'] .benefit-history-section h1,
+html[data-theme='dark'] .benefit-history-metrics strong,
+html[data-theme='dark'] .benefit-history-table td > strong {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .benefit-history-overview p,
+html[data-theme='dark'] .benefit-history-section p,
+html[data-theme='dark'] .benefit-history-metrics small,
+html[data-theme='dark'] .benefit-history-table th,
+html[data-theme='dark'] .benefit-history-table td,
+html[data-theme='dark'] .benefit-history-table td > small {
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .benefit-history-metrics .card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .benefit-history-metrics span {
+  color: var(--primary, #FFC247);
+}
+html[data-theme='dark'] .benefit-history-table-wrap {
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .benefit-history-table th {
+  background: rgba(0, 0, 0, 0.2);
+}
+html[data-theme='dark'] .benefit-history-table th,
+html[data-theme='dark'] .benefit-history-table td {
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .benefit-history-table tbody tr:hover,
+html[data-theme='dark'] .benefit-history-table tbody tr:focus {
+  background: rgba(255, 194, 71, 0.08);
+}
+html[data-theme='dark'] .benefit-history-filters select,
+html[data-theme='dark'] .benefit-history-search,
+html[data-theme='dark'] .benefit-history-custom-dates input {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .subscriber-program-section,
+html[data-theme='dark'] .perks-settings-section,
+html[data-theme='dark'] .benefit-management-content,
+html[data-theme='dark'] .benefit-category-nav {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .benefit-program-banner {
+  background: linear-gradient(110deg, rgba(42, 27, 14, 0.95), rgba(58, 36, 18, 0.9));
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .benefit-program-prices > div {
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .subscriber-metric-card,
+html[data-theme='dark'] .subscriber-plan-card,
+html[data-theme='dark'] .subscriber-plan-editor,
+html[data-theme='dark'] .benefits-flow,
+html[data-theme='dark'] .benefit-normal-price,
+html[data-theme='dark'] .benefit-edit-row,
+html[data-theme='dark'] .benefit-access-row,
+html[data-theme='dark'] .benefit-toggle-row,
+html[data-theme='dark'] .benefit-preview-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .subscriber-plan-card__benefits,
+html[data-theme='dark'] .subscriber-plan-card__benefits div,
+html[data-theme='dark'] .program-settings-list,
+html[data-theme='dark'] .program-setting-row,
+html[data-theme='dark'] .benefit-management-actions,
+html[data-theme='dark'] .benefit-toggle-list,
+html[data-theme='dark'] .benefit-content-categories {
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .plan-selector select,
+html[data-theme='dark'] .subscriber-plan-editor__fields input,
+html[data-theme='dark'] .subscriber-plan-editor__fields select,
+html[data-theme='dark'] .benefit-edit-row input,
+html[data-theme='dark'] .benefit-access-row select,
+html[data-theme='dark'] .benefit-price-editor input,
+html[data-theme='dark'] .benefit-selected-controls select {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .benefit-category-nav button {
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .benefit-category-nav button:hover {
+  background: rgba(255, 194, 71, 0.08);
+  color: var(--primary, #FFC247);
+}
+
+html[data-theme='dark'] .benefit-category-nav button.is-active {
+  background: rgba(255, 194, 71, 0.15);
+  color: var(--primary, #FFC247);
+  box-shadow: inset 3px 0 var(--primary, #FFC247);
+}
+
+html[data-theme='dark'] .program-setting-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border, #6B4A25);
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .program-setting-toggle.is-on {
+  background: rgba(255, 194, 71, 0.2);
+  border-color: var(--primary, #FFC247);
+  color: var(--primary, #FFC247);
+}
+
+html[data-theme='dark'] .subscriber-plan-card__edit {
+  background: rgba(255, 194, 71, 0.1);
+  border-color: var(--border, #6B4A25);
+  color: var(--primary, #FFC247);
+}
+
+html[data-theme='dark'] .subscriber-plan-card__edit:hover {
+  background: rgba(255, 194, 71, 0.2);
+}
+
+html[data-theme='dark'] .subscriber-policy-table thead th {
+  background: rgba(0, 0, 0, 0.25);
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .subscriber-policy-table th,
+html[data-theme='dark'] .subscriber-policy-table td {
+  border-color: var(--border, #6B4A25);
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .subscriber-policy-table tbody th {
+  color: var(--text-primary, #FFF8E8);
+}
+
+

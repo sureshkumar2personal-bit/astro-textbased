@@ -895,3 +895,140 @@
 @media (max-width: 900px) { .dispute-management-page { padding-inline: 16px; } .dispute-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .dispute-management-page { padding-inline: 10px; } .dispute-management-page .page-header-row { align-items: flex-start; flex-direction: column; gap: 10px; } .dispute-management-page .page-header-actions { width: 100%; justify-content: space-between; } .dispute-summary-grid { grid-template-columns: 1fr 1fr; gap: 8px; } .dispute-summary-grid .stat-card { padding: 10px; } }
 @media (max-width: 700px) { .dispute-management-page .complaint-inline-details__main { grid-template-columns: 1fr; } .dispute-management-page .complaint-inline-details__meta { padding-left: 0; border-left: 0; border-top: 1px solid #e6d6bd; padding-top: 12px; } }
+
+/* Dark Theme Overrides for Complaint Details & Inline Views */
+html[data-theme='dark'] .complaint-details-page {
+  background: var(--bg, #1A1208);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-details-back {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-details-page > h1 {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-detail-card {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+}
+html[data-theme='dark'] .complaint-detail-summary-head,
+html[data-theme='dark'] .complaint-detail-meta > div + div {
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .complaint-detail-id strong,
+html[data-theme='dark'] .complaint-detail-meta strong,
+html[data-theme='dark'] .complaint-detail-copy h2,
+html[data-theme='dark'] .complaint-detail-evidence h2,
+html[data-theme='dark'] .complaint-detail-timeline h2,
+html[data-theme='dark'] .complaint-timeline-row strong {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-detail-id span,
+html[data-theme='dark'] .complaint-detail-meta span,
+html[data-theme='dark'] .complaint-details-muted,
+html[data-theme='dark'] .complaint-details-empty,
+html[data-theme='dark'] .complaint-timeline-row time {
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .complaint-detail-copy p,
+html[data-theme='dark'] .complaint-timeline-row p {
+  color: #dfd4c8;
+}
+html[data-theme='dark'] .complaint-detail-file {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border, #6B4A25);
+}
+html[data-theme='dark'] .complaint-detail-file strong {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-detail-file button {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .complaint-detail-response {
+  background: rgba(255, 255, 255, 0.05);
+  color: #dfd4c8;
+}
+html[data-theme='dark'] .dispute-management-page .complaint-inline-details {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .dispute-management-page .complaint-inline-details strong,
+html[data-theme='dark'] .dispute-management-page .complaint-inline-details__time time {
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .dispute-hero {
+  background: linear-gradient(160deg, rgba(42, 27, 14, 0.95) 0%, rgba(58, 36, 18, 0.9) 100%);
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .dispute-section__title {
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .dispute-stats-strip {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .dispute-stat {
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .dispute-stat:hover {
+  background: rgba(255, 194, 71, 0.08);
+}
+
+html[data-theme='dark'] .dispute-stat.is-active {
+  background: rgba(255, 194, 71, 0.12);
+}
+
+html[data-theme='dark'] .dispute-stat__value {
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .dispute-stat__label {
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .dispute-table {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .dispute-table__head {
+  border-color: var(--border, #6B4A25);
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .dispute-row {
+  border-color: var(--border, #6B4A25);
+}
+
+html[data-theme='dark'] .dispute-row:hover {
+  background: rgba(255, 194, 71, 0.08);
+}
+
+html[data-theme='dark'] .dispute-row__id {
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .dispute-row__user-main {
+  color: var(--text-primary, #FFF8E8);
+}
+
+html[data-theme='dark'] .dispute-row__user-sub,
+html[data-theme='dark'] .dispute-row__date {
+  color: #c4b3a3;
+}
+
+html[data-theme='dark'] .complaints-search,
+html[data-theme='dark'] .complaints-status-filter {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+
+
