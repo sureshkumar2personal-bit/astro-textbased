@@ -131,19 +131,31 @@ body:has(.my-account-page) {
 
 .my-account-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
 }
 
 .my-account-settings-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   overflow: hidden;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
+
+.my-account-settings-panels {
+  display: grid;
+  flex: 1 1 auto;
+}
+
+.my-account-settings-panels .my-account-settings-section,
+.my-account-settings-card .my-account-settings-section { grid-area: 1 / 1; z-index: 2; }
+.my-account-settings-panels .my-account-settings-section--hidden,
+.my-account-settings-card .my-account-settings-section--hidden { visibility: hidden; pointer-events: none; z-index: 0; }
 
 .my-account-tabbar {
   display: flex;
@@ -187,8 +199,8 @@ body:has(.my-account-page) {
   box-shadow: 0 10px 24px rgba(70, 45, 93, .07);
 }
 
-.my-account-settings-card .my-account-settings-section { grid-area: 1 / 1; }
-.my-account-settings-card .my-account-settings-section--hidden { visibility: hidden; pointer-events: none; }
+.my-account-settings-section--personal { width: 100%; }
+
 
 .my-account-section-heading { margin-bottom: 8px; }
 .my-account-section-heading--tabs { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -350,6 +362,7 @@ body:has(.my-account-page) {
   color: #342841;
 }
 
+
 .my-account-page .text-input,
 .my-account-page .select-input,
 .my-account-page select,
@@ -419,7 +432,8 @@ body:has(.my-account-page) {
 .my-account-management-link { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 8px 12px; border: 1px solid #d8c5ec; border-radius: 10px; background: #faf6ff; color: #60368d; font-size: 11px; font-weight: 750; text-decoration: none; }
 .my-account-management-link:hover { border-color: #a477d8; background: #f2eafd; color: #4f238b; }
 .my-account-management-section--account-actions { grid-column: 1 / -1; }
-.my-account-account-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.my-account-account-actions { display: grid; gap: 10px; }
+.my-account-account-actions > .my-account-management-link { width: 100%; justify-content: center; }
 .my-account-management-link--danger { border-color: #f2b8b5; background: #fff5f5; color: #b42318; }
 .my-account-management-link--danger:hover { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
 
@@ -515,6 +529,36 @@ html[data-theme='dark'] .my-account-place-menu > span,
 html[data-theme='dark'] .my-account-language-option,
 html[data-theme='dark'] .my-account-language-menu small,
 html[data-theme='dark'] .my-account-language-empty { color: #cbd5e1; }
+.my-account-gender-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.my-account-gender-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #332b3e;
+  user-select: none;
+}
+
+.my-account-gender-radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #7c3aed;
+  cursor: pointer;
+}
+
+html[data-theme='dark'] .my-account-gender-radio-label {
+  color: #e2e8f0;
+}
+
 html[data-theme='dark'] .privacy-control-menu button:hover,
 html[data-theme='dark'] .privacy-control-menu button.is-selected,
 html[data-theme='dark'] .my-account-place-menu button:hover,

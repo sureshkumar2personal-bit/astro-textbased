@@ -3,7 +3,63 @@
    Section tabs for Ask New / My Questions / Disputes / History.
    Mirrors the wallet and appointments section tabs so the spacing, radius
    and active treatment stay identical to the rest of the user portal.
+
+   Search bar styles
    ========================================================================= */
+ .search-bar-wrapper {
+   display: flex;
+   flex-direction: column;
+   align-items: stretch;
+   width: 100%;
+ }
+
+ .search-bar-container {
+   display: flex;
+   align-items: center;
+   height: 104px;
+   background: var(--bg);
+   border-radius: var(--radius-pill);
+   overflow: hidden;
+   box-shadow: var(--shadow-float);
+   margin-bottom: var(--space-6);
+   position: relative;
+ }
+
+ .search-bar-container input {
+   flex: 1;
+  height: 100%;
+   padding: 0 var(--space-4);
+   font-size: 34px;
+   color: #555555;
+   background: #FFFFFF;
+   border: none;
+   border-radius: inherit;
+   outline: none;
+   font-family: 'Inter', system-ui, sans-serif;
+ }
+
+ .search-bar-container .search-btn {
+   position: absolute;
+   right: -12px;
+   top: 0;
+   bottom: 0;
+   width: 104px;
+  height: 104px;
+   background: #252222;
+   border: none;
+   border-radius: 999px;
+   cursor: pointer;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 10;
+ }
+
+ .search-bar-container .search-btn svg {
+   width: 28px;
+  height: 28px;
+   color: #FFFFFF;
+ }
 
 .question-dashboard-tabs {
   display: flex;

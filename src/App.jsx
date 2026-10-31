@@ -21,6 +21,8 @@ import AskQuestion from './pages/AskQuestion.jsx'
 import QuestionDisputes from './pages/user/question-dashboard/QuestionDisputes.jsx'
 import QuestionHistory from './pages/user/question-dashboard/QuestionHistory.jsx'
 import QuestionPurchased from './pages/user/question-dashboard/QuestionPurchased.jsx'
+import UserDisputes from './pages/user/disputes/UserDisputes.jsx'
+import InstantConsultation from './pages/user/InstantConsultation.jsx'
 import AnswerQuestion from './pages/AnswerQuestion.jsx'
 import TextBasedQuestionHistory from './pages/TextBasedQuestionHistory.jsx'
 import DisputeManagement from './pages/astrologer/disputes/DisputeManagement.jsx'
@@ -248,6 +250,8 @@ function UserRoutes() {
         <Route path="/user/wallet/transactions" element={<UserWalletTransactions />} />
         <Route path="/user/wallet/topups" element={<UserWalletTopUps />} />
         <Route path="/user/wallet/refunds" element={<UserWalletRefunds />} />
+        <Route path="/user/disputes" element={<UserDisputes />} />
+        <Route path="/user/instant-consultation" element={<InstantConsultation />} />
         <Route path="/user/purchase-package" element={<PurchasePackage />} />
         {/* Ask a Question dashboard: the sidebar entry opens the "My Questions" tab and the
             sections live inside this one module instead of separate sidebar items. */}

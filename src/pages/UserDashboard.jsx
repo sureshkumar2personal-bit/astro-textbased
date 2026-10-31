@@ -92,8 +92,14 @@ export default function UserDashboard() {
     <div className="user-dashboard-page">
       <div className="hero-banner hero-banner-user">
         <div className="hero-banner-content">
-          <h2>Welcome back, {currentUser?.name || 'User'} 👋</h2>
-          <p>Here's what's happening with your consultations and questions.</p>
+          <div className="user-devotional-pill">
+            <span className="user-devotional-om">🕉️</span>
+            <span>Shubh Muhurat</span>
+            <span className="user-devotional-dot">·</span>
+            <span>Daily Divine Guidance</span>
+          </div>
+          <h2>Pranam, {currentUser?.name || 'Devotee'} 🙏</h2>
+          <p>May your day be blessed with peace, divine clarity, and auspicious guidance.</p>
         </div>
         <div className="hero-banner-topbar-actions">
           <TopbarActions className="hero-banner-actions-wrap" />

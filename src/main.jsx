@@ -6,6 +6,7 @@ import './css/user/astrologers.css'
 import './css/user/dashboard.css'
 import App from './App.jsx'
 import './theme-overrides.css'
+import './css/user/user-devotional-theme.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

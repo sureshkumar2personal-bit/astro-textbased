@@ -694,6 +694,10 @@
   margin: 4px 0 20px;
 }
 
+.aq-track-head > .aq-track-month:only-child {
+  margin-left: auto;
+}
+
 .aq-track-head__title {
   font-size: 22px;
   font-weight: 800;

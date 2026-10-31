@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CalendarDays, CircleHelp, ChevronDown, ChevronRight, List, Grid2X2 } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, ChevronRight, List, Grid2X2, Filter } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
@@ -397,7 +397,6 @@ function LifecycleQuestionListRow({ question, nowMs, onOpen, onRaiseDispute }) {
 function MonthSelector({ monthKey, options, onChange }) {
   return (
     <label className="aq-track-month">
-      <CalendarDays size={15} aria-hidden="true" />
       <select
         className="select-input"
         value={monthKey}
@@ -406,6 +405,27 @@ function MonthSelector({ monthKey, options, onChange }) {
       >
         {options.map((key) => (
           <option key={key} value={key}>{getMonthLabel(key)}</option>
+        ))}
+      </select>
+      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
+    </label>
+  )
+}
+
+function StatusSelector({ filter, counts, onChange }) {
+  return (
+    <label className="aq-track-month">
+      <Filter size={15} aria-hidden="true" />
+      <select
+        className="select-input"
+        value={filter}
+        aria-label="Filter by question status"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {LIFECYCLE_FILTERS.map((stage) => (
+          <option key={stage} value={stage}>
+            {stage} ({counts[stage] || 0})
+          </option>
         ))}
       </select>
       <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
@@ -491,6 +511,22 @@ export default function TrackQuestions({ embedded = false }) {
   const routes = getRoleRoutes(currentUser?.role)
   const [search, setSearch] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const searchInputRef = useRef(null)
+  const searchContainerRef = useRef(null)
+
+  useEffect(() => {
+    if (!isSearchOpen) return
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        if (!search.trim()) {
+          setIsSearchOpen(false)
+        }
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isSearchOpen, search])
   // Lifecycle filter. "All" is scoped to the selected month, never all time.
   const [lifecycleFilter, setLifecycleFilter] = useState(() => {
     const requested = searchParams.get('status')
@@ -720,11 +756,119 @@ const selectedQuestion = detailsOpen
 
   return (
     <div>
-      {/* Month selector. Every record below belongs to the selected month. */}
+      {/* Status dropdown on the left, Search & Month selector on the right */}
       {embedded ? (
-        <div className="aq-track-head">
-          <div className="aq-track-head__title">Track My Questions</div>
-          <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
+        <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
+            <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
+              <div className="search-filter-row__heading"></div>
+              <div
+                className="search-bar"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: isSearchOpen ? 6 : 0,
+                  width: isSearchOpen ? 280 : 40,
+                  height: 40,
+                  transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), gap 360ms ease',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  margin: 0,
+                  position: 'relative',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <input
+                  ref={searchInputRef}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search Paid / Individual / General"
+                  className="text-input search-bar__input"
+                  style={{
+                    width: isSearchOpen ? '100%' : 0,
+                    minWidth: 0,
+                    height: 40,
+                    opacity: isSearchOpen ? 1 : 0,
+                    padding: isSearchOpen ? (search ? '0 32px 0 12px' : '0 12px') : 0,
+                    borderWidth: isSearchOpen ? 1 : 0,
+                    pointerEvents: isSearchOpen ? 'auto' : 'none',
+                    transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease, padding 360ms ease, border-width 360ms ease',
+                    margin: 0,
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAppliedSearch(search)
+                    } else if (e.key === 'Escape') {
+                      setIsSearchOpen(false)
+                      setSearch('')
+                      setAppliedSearch('')
+                    }
+                  }}
+                />
+                {isSearchOpen && search && (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSearch('')
+                      setAppliedSearch('')
+                      searchInputRef.current?.focus()
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: 44,
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--muted)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 4,
+                      zIndex: 2,
+                    }}
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="icon-btn"
+                  aria-label={isSearchOpen ? 'Search' : 'Open search'}
+                  style={{
+                    flex: '0 0 40px',
+                    width: 40,
+                    height: 40,
+                    cursor: 'pointer',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: isSearchOpen ? 'var(--primary-bg)' : undefined,
+                    color: isSearchOpen ? 'var(--primary)' : undefined,
+                    transition: 'background 240ms ease, color 240ms ease',
+                  }}
+                  onClick={() => {
+                    if (!isSearchOpen) {
+                      setIsSearchOpen(true)
+                      setTimeout(() => searchInputRef.current?.focus(), 80)
+                    } else {
+                      if (search.trim()) {
+                        setAppliedSearch(search)
+                      } else {
+                        setIsSearchOpen(false)
+                      }
+                    }
+                  }}
+                >
+                  <Search size={18} />
+                </button>
+              </div>
+            </div>
+            <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
+          </div>
         </div>
       ) : (
         <PageHeader
@@ -732,62 +876,35 @@ const selectedQuestion = detailsOpen
           title="Track My Questions"
           showBack
           backTo={routes.askQuestion}
-          actions={<MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />}
+          actions={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
+              <div className="search-bar" style={{ width: 280 }}>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search Paid / Individual / General"
+                  className="text-input search-bar__input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setAppliedSearch(search)
+                    }
+                  }}
+                />
+                <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
+                  <Search size={18} />
+                </button>
+              </div>
+              <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
+            </div>
+          }
         />
       )}
-
-<Section>
-        <Card>
-          <div className="search-filter-row">
-            <div className="search-filter-row__group">
-              <div className="search-filter-row__heading">Search</div>
-              <div className="search-bar">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search Paid / Individual / General"
-                className="text-input search-bar__input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setAppliedSearch(search)
-                  }
-                }}
-              />
-              <button type="button" className="icon-btn" aria-label="Search" onClick={() => setAppliedSearch(search)}>
-                <Search size={18} />
-              </button>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Section>
-
-      <Section className="!mt-6">
-        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-5" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
-          {LIFECYCLE_FILTERS.map((filter) => {
-            const meta = LIFECYCLE_STAGE_META[filter]
-            return (
-              <div key={filter} className="h-full" style={{ minHeight: 132 }}>
-                <SummaryCard
-                  label={filter}
-                  value={lifecycleCounts[filter] || 0}
-                  hint={meta?.hint || ''}
-                  background={meta?.background}
-                  color={meta?.color}
-                  border={meta?.border}
-                  onClick={() => setLifecycleFilter(filter)}
-                  active={lifecycleFilter === filter}
-                />
-              </div>
-            )
-          })}
-        </div>
-      </Section>
 
       <div className="section">
         <Card style={{ marginTop: 0 }}>
           <div className="section-title track-questions-toolbar">
-            <span>{getMonthLabel(monthKey)} · Active Questions</span>
+            <span>{getMonthLabel(monthKey)} · Active Questions ({visibleQuestions.length})</span>
             <div className="track-questions-view-toggle" role="group" aria-label="Question view">
               <button
                 type="button"

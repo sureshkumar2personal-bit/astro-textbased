@@ -1,0 +1,1540 @@
+/* ==========================================================================
+   Celestial Hub - Modern Two-Part Bento & Sacred Remedies Studio
+   Design System: Inspired by 21st.dev Bento Grids & Luxury Astrological UI
+   ========================================================================== */
+
+.celestial-hub {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 28px;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   ASTROLOGER GUIDANCE PICKER BADGE (Nested directly inside celestial-banner)
+   ========================================================================== */
+.celestial-astro-picker-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  color: #1e293b;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+:root[data-theme='dark'] .celestial-astro-picker-badge {
+  background: #1e1338;
+  border-color: rgba(192, 132, 252, 0.35);
+  color: #f8fafc;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.celestial-astro-picker-badge:hover,
+.celestial-astro-picker-badge:focus-within,
+.celestial-astro-picker-badge.is-dropdown-open {
+  border-color: #c084fc;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+  z-index: 50;
+}
+
+
+.celestial-astro-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1.5px solid #d8b4fe;
+}
+
+.celestial-astro-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.celestial-astro-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.celestial-astro-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.celestial-astro-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.celestial-astro-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  color: #1e293b;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  line-height: 1.2;
+}
+
+:root[data-theme='dark'] .celestial-astro-select-trigger {
+  color: #f8fafc;
+}
+
+.celestial-astro-select-trigger:focus-visible {
+  outline: 2px solid #9333ea;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.celestial-astro-select-name {
+  color: inherit;
+}
+
+.celestial-astro-chevron {
+  color: #7c3aed;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.celestial-astro-chevron.is-rotated {
+  transform: rotate(180deg);
+}
+
+:root[data-theme='dark'] .celestial-astro-chevron {
+  color: #c084fc;
+}
+
+/* ==========================================================================
+   PERFECTLY ALIGNED ASTROLOGER DROPDOWN MENU
+   ========================================================================== */
+.celestial-astro-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 330px;
+  max-width: calc(100vw - 32px);
+  max-height: 380px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1.5px solid #e7e0f0;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(36, 19, 72, 0.22);
+  z-index: 1000;
+  box-sizing: border-box;
+  animation: celestialDropdownFadeIn 0.16s ease-out;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-menu {
+  background: #1e1338;
+  border-color: rgba(192, 132, 252, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes celestialDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.celestial-astro-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1ecf7;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  background: #faf8fd;
+  border-radius: 14px 14px 0 0;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-header {
+  background: rgba(255, 255, 255, 0.04);
+  color: #c084fc;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.celestial-astro-dropdown-count {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-count {
+  background: rgba(192, 132, 252, 0.2);
+  color: #d8b4fe;
+}
+
+.celestial-astro-dropdown-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 2px;
+}
+
+.celestial-astro-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  box-sizing: border-box;
+}
+
+.celestial-astro-dropdown-item:hover {
+  background: #f5f0ff;
+  border-color: #e9d5ff;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-item:hover {
+  background: rgba(192, 132, 252, 0.12);
+  border-color: rgba(192, 132, 252, 0.25);
+}
+
+.celestial-astro-dropdown-item.is-selected {
+  background: #f3e8ff;
+  border-color: #d8b4fe;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-item.is-selected {
+  background: rgba(192, 132, 252, 0.2);
+  border-color: #c084fc;
+}
+
+.celestial-astro-dropdown-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1.5px solid #d8b4fe;
+}
+
+.celestial-astro-dropdown-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.celestial-astro-dropdown-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.celestial-astro-dropdown-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.celestial-astro-dropdown-name {
+  font-size: 13.5px;
+  font-weight: 850;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-name {
+  color: #f8fafc;
+}
+
+.celestial-astro-dropdown-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 1px 5px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-rating {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.celestial-astro-dropdown-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-sub-row {
+  color: #cbd5e1;
+}
+
+.celestial-astro-dropdown-spec {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+
+.celestial-astro-dropdown-dot {
+  color: #94a3b8;
+}
+
+.celestial-astro-dropdown-check {
+  display: grid;
+  place-items: center;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+:root[data-theme='dark'] .celestial-astro-dropdown-check {
+  color: #c084fc;
+}
+
+.celestial-rel-pill--sm {
+  font-size: 9.5px;
+  padding: 1.5px 6px;
+}
+
+.celestial-astro-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  border: 1px solid #fde68a;
+  white-space: nowrap;
+}
+
+:root[data-theme='dark'] .celestial-astro-rating {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.celestial-astro-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #64748b;
+  flex-wrap: wrap;
+}
+
+:root[data-theme='dark'] .celestial-astro-sub {
+  color: #cbd5e1;
+}
+
+.celestial-rel-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.celestial-rel-pill.is-sub {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.celestial-rel-pill.is-follow {
+  background: #f1ecf7;
+  color: #6d28d9;
+  border: 1px solid #e2d7ed;
+}
+
+/* ==========================================================================
+   PART CONTAINERS: Part 1 (Zodiac Bento) & Part 2 (Remedies Studio)
+   ========================================================================== */
+.celestial-part {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--surface-border, #e7e0f0);
+  background: var(--surface, #ffffff);
+  box-shadow: 0 10px 30px rgba(54, 38, 92, 0.04);
+  box-sizing: border-box;
+}
+
+.celestial-part--remedies {
+  background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
+  border-color: #fde68a;
+}
+
+/* ==========================================================================
+   PART 1: HERO ASTROLOGICAL BANNER (Zodiac Identity + Mentor + Lead Forecast)
+   ========================================================================== */
+.celestial-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 26px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1e0e38 0%, #34155d 50%, #46187b 100%);
+  color: #ffffff;
+  box-shadow: 0 12px 36px rgba(25, 12, 52, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-sizing: border-box;
+}
+
+.celestial-banner-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.celestial-banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 260px;
+  flex: 1 1 480px;
+}
+
+.celestial-sign-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.celestial-glyph-badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.celestial-glyph {
+  font-size: 34px;
+  line-height: 1;
+  color: #fef08a;
+}
+
+.celestial-sign-details {
+  display: grid;
+  gap: 3px;
+}
+
+.celestial-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #d8b4fe;
+}
+
+.celestial-eyebrow--gold {
+  color: #b45309;
+}
+
+.celestial-sign-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 850;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.celestial-sign-rasi {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fde68a;
+}
+
+.celestial-meta-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.celestial-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+
+.celestial-nakshatra-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #fde68a;
+  background: rgba(253, 230, 138, 0.16);
+  border: 1px solid rgba(253, 230, 138, 0.35);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.celestial-banner-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.celestial-period-tabs {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  align-self: flex-start;
+}
+
+.celestial-period-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #cbd5e1;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.celestial-period-btn:hover {
+  color: #ffffff;
+}
+
+.celestial-period-btn.is-active {
+  background: #ffffff !important;
+  color: #6b21a8 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ==========================================================================
+   HERO FORECAST SECTION (Nested directly inside celestial-banner)
+   ========================================================================== */
+.celestial-banner-forecast {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+}
+
+.celestial-forecast-quote {
+  position: relative;
+  margin: 2px 0 0;
+  padding: 0 0 0 32px;
+  font-size: 15.5px;
+  font-weight: 500;
+  line-height: 1.65;
+  color: #ffffff;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.celestial-forecast-quote-mark {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  font-size: 40px;
+  line-height: 1;
+  font-family: Georgia, serif;
+  color: #fde68a;
+  opacity: 0.9;
+}
+
+.celestial-forecast-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.celestial-forecast-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+  transition: all 0.18s ease;
+}
+
+.celestial-forecast-cta:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+}
+
+.celestial-hub--empty {
+  padding: 32px 24px;
+}
+
+.celestial-empty-card {
+  text-align: center;
+  max-width: 580px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.celestial-empty-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.15));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c084fc;
+}
+
+.celestial-empty-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+:root[data-theme='dark'] .celestial-empty-title {
+  color: #f8fafc;
+}
+
+.celestial-empty-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+:root[data-theme='dark'] .celestial-empty-desc {
+  color: #94a3b8;
+}
+
+.celestial-explore-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #7e22ce, #9333ea);
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(126, 34, 206, 0.3);
+  transition: all 0.2s ease;
+}
+
+.celestial-explore-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(126, 34, 206, 0.4);
+}
+
+/* ==========================================================================
+   PART 1: BENTO GRID OF ASTROLOGICAL INSIGHTS
+   ========================================================================== */
+.celestial-bento-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.celestial-bento-cell {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid #ebdcfc;
+  background: #faf8ff;
+  box-sizing: border-box;
+}
+
+.celestial-bento-cell--pillars {
+  background: #ffffff;
+  border-color: #ede5f7;
+}
+
+.celestial-bento-cell--tokens {
+  background: linear-gradient(135deg, #fefefe 0%, #faf8fd 100%);
+}
+
+.celestial-cell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.celestial-cell-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6d28d9;
+}
+
+.celestial-cell-period-sub {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.celestial-alignment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.celestial-alignment-score {
+  font-size: 13px;
+  font-weight: 850;
+  color: #16a34a;
+}
+
+.celestial-alignment-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #15803d;
+  text-transform: uppercase;
+}
+
+.celestial-lead-quote {
+  position: relative;
+  margin: 6px 0;
+  padding: 12px 16px 12px 32px;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: #1e293b;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border-left: 3px solid #9333ea;
+}
+
+.celestial-quote-mark {
+  position: absolute;
+  top: -4px;
+  left: 8px;
+  font-size: 32px;
+  font-family: serif;
+  color: #c084fc;
+  line-height: 1;
+}
+
+.celestial-hero-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+
+.celestial-verified-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.celestial-primary-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.22);
+  transition: all 0.16s ease;
+}
+
+.celestial-primary-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
+}
+
+/* Four Pillars Grid */
+.celestial-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1080px) {
+  .celestial-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .celestial-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.celestial-pillar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #faf8fd;
+  border: 1px solid #ebdcfc;
+  transition: all 0.15s ease;
+}
+
+.celestial-pillar-card:hover {
+  background: #ffffff;
+  border-color: #d8b4fe;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+  transform: translateY(-1px);
+}
+
+.celestial-pillar-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.celestial-pillar-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.celestial-pillar-icon--career {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.celestial-pillar-icon--love {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.celestial-pillar-icon--wealth {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.celestial-pillar-icon--health {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.celestial-pillar-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.celestial-pillar-status {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 750;
+  color: #6d28d9;
+  background: #f3edff;
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.celestial-pillar-tip {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+/* Lucky Tokens Grid - Aligned horizontally one by one */
+.celestial-tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .celestial-tokens-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .celestial-tokens-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.celestial-token-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #ebdcfc;
+}
+
+.celestial-token-label {
+  font-size: 10.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.celestial-token-val-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.celestial-token-val-row strong {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.celestial-color-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.celestial-number-glyph {
+  font-size: 22px;
+  font-weight: 850;
+  color: #7c3aed;
+  line-height: 1;
+}
+
+.celestial-token-icon {
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.celestial-muhurta-time {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #7c3aed;
+}
+
+/* ==========================================================================
+   PART 2: JYOTISH PANCHANGAM & SACRED PARIHARAMS STUDIO
+   ========================================================================== */
+.celestial-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.celestial-section-title {
+  margin: 3px 0 0;
+  font-size: 21px;
+  font-weight: 850;
+  color: #78350f;
+  letter-spacing: -0.015em;
+}
+
+.celestial-section-subtitle {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: #92400e;
+  line-height: 1.45;
+}
+
+.celestial-om {
+  font-size: 16px;
+  color: #d97706;
+}
+
+.celestial-curator-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 999px;
+  background: #fbf8ff;
+  border: 1px solid #e9d5ff;
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.05);
+}
+
+.celestial-curator-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.celestial-curator-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.celestial-curator-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.celestial-curator-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.celestial-curator-meta strong {
+  color: #6b21a8;
+  font-weight: 800;
+}
+
+/* Master-Detail Split */
+.celestial-remedies-studio {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .celestial-remedies-studio {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left: Specialization Stack */
+.celestial-spec-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.celestial-stack-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #92400e;
+  margin-bottom: 2px;
+}
+
+.celestial-spec-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #fde68a;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+  box-sizing: border-box;
+}
+
+.celestial-spec-card:hover {
+  background: #fffdfa;
+  border-color: #f59e0b;
+  transform: translateX(2px);
+}
+
+.celestial-spec-card.is-selected {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.14) !important;
+}
+
+.celestial-spec-card-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.celestial-spec-card.is-selected .celestial-spec-card-icon {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.celestial-spec-card-body {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+
+.celestial-spec-card-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.celestial-spec-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #92400e;
+}
+
+.celestial-spec-cat-badge {
+  font-size: 9.5px;
+  font-weight: 750;
+  color: #b45309;
+  background: #fef3c7;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.celestial-spec-selected-check {
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+/* Right: Deep-Dive Sacred Remedy Studio */
+.celestial-spec-studio-panel {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1.5px solid #fde68a;
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.08);
+}
+
+.celestial-studio-hero {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #fef3c7;
+}
+
+.celestial-studio-hero-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.celestial-studio-om {
+  font-size: 24px;
+  color: #d97706;
+  line-height: 1;
+}
+
+.celestial-studio-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 850;
+  color: #78350f;
+}
+
+.celestial-studio-summary {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #92400e;
+  line-height: 1.45;
+}
+
+.celestial-studio-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding-top: 4px;
+}
+
+@media (max-width: 680px) {
+  .celestial-studio-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.celestial-studio-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fffdfa;
+  border: 1px solid #fde68a;
+}
+
+.celestial-studio-meta-label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #b45309;
+}
+
+.celestial-studio-meta-item strong {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #451a03;
+}
+
+.celestial-studio-meta-item small {
+  font-size: 10.5px;
+  color: #92400e;
+}
+
+/* Studio Navigation Tabs */
+.celestial-studio-nav {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: #fef3c7;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+
+.celestial-studio-tab {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #92400e;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.celestial-studio-tab:hover {
+  color: #78350f;
+}
+
+.celestial-studio-tab.is-active {
+  background: #ffffff !important;
+  color: #b45309 !important;
+  box-shadow: 0 1px 4px rgba(180, 83, 9, 0.15) !important;
+}
+
+/* Studio Tab Content */
+.celestial-studio-content {
+  display: grid;
+  gap: 12px;
+}
+
+.celestial-content-box {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #fffdfa;
+  border: 1px solid #fde68a;
+}
+
+.celestial-content-box--mantra {
+  background: linear-gradient(135deg, #faf7ff 0%, #f4ecfc 100%);
+  border-color: #d8b4fe;
+}
+
+.celestial-content-box-badge {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #92400e;
+}
+
+.celestial-content-box-badge--gold {
+  color: #b45309;
+}
+
+.celestial-content-box-badge--violet {
+  color: #6b21a8;
+}
+
+.celestial-content-p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #334155;
+}
+
+/* Remedy Checklist */
+.celestial-remedy-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.celestial-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #ffffff;
+  border: 1px solid #fef3c7;
+}
+
+.celestial-step-num {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 850;
+  flex-shrink: 0;
+}
+
+.celestial-step-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.celestial-check-icon {
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+/* Mantra Highlight */
+.celestial-mantra-highlight {
+  position: relative;
+  padding: 14px 18px 14px 34px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #ebdcfc;
+}
+
+.celestial-mantra-quote {
+  position: absolute;
+  top: 0;
+  left: 10px;
+  font-size: 32px;
+  font-family: serif;
+  color: #a855f7;
+  line-height: 1;
+}
+
+.celestial-mantra-text {
+  display: block;
+  font-size: 16px;
+  color: #581c87;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.celestial-mantra-guidelines {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b21a8;
+  flex-wrap: wrap;
+}
+
+.celestial-mantra-guidelines strong {
+  color: #3b0764;
+}
+
+/* Studio Action Footer */
+.celestial-studio-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  border-top: 1px solid #fef3c7;
+}
+
+.celestial-studio-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.celestial-gold-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.22);
+  transition: all 0.16s ease;
+}
+
+.celestial-gold-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3);
+}

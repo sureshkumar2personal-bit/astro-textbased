@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles } from 'lucide-react'
+import { ChevronDown, Filter, Sparkles } from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
-import SummaryCard from '../../../components/ui/SummaryCard.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import PurchasedQuestionCard from '../../../components/user/PurchasedQuestionCard.jsx'
 import QuestionFormModal from '../../../components/user/QuestionFormModal.jsx'
@@ -73,6 +72,30 @@ function questionTypePillLabel(type) {
 // the shared question-entry modal on top of this tab, pre-selecting the
 // package's astrologer and question type, and runs the normal submit flow - no
 // second payment, and the slot is only consumed when the question is created.
+function PurchasedStatusSelector({ filter, counts, onChange }) {
+  return (
+    <label className="aq-track-month">
+      <Filter size={15} aria-hidden="true" />
+      <select
+        className="select-input"
+        value={filter}
+        aria-label="Filter by purchase status"
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {PURCHASED_FILTERS.map((key) => {
+          const meta = FILTER_META[key]
+          return (
+            <option key={key} value={key}>
+              {meta?.label || key} ({counts[key] || 0})
+            </option>
+          )
+        })}
+      </select>
+      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
+    </label>
+  )
+}
+
 export default function QuestionPurchased() {
   const navigate = useNavigate()
   const { campaigns, purchasedSlots, actions } = useAppData()
@@ -279,28 +302,12 @@ export default function QuestionPurchased() {
 
   return (
     <div>
-      <Section title="Purchased Questions" titleRight={<span className="muted">{counts.Available} available to write</span>}>
-        <div className="grid grid-cols-2 items-stretch gap-4 lg:grid-cols-4" style={{ gridAutoRows: 'minmax(132px, 1fr)' }}>
-          {PURCHASED_FILTERS.map((key) => {
-            const meta = FILTER_META[key]
-            return (
-              <div key={key} className="h-full" style={{ minHeight: 132 }}>
-                <SummaryCard
-                  label={meta.label}
-                  value={counts[key] || 0}
-                  hint={meta.hint}
-                  background={meta.background}
-                  color={meta.color}
-                  border={meta.border}
-                  onClick={() => setFilter(filter === key && key !== 'All' ? 'All' : key)}
-                  active={filter === key}
-                />
-              </div>
-            )
-          })}
-        </div>
+      <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <PurchasedStatusSelector filter={filter} counts={counts} onChange={setFilter} />
+      </div>
 
-        <div style={{ marginTop: 28 }}>
+      <Section>
+        <div>
           {counts.All === 0 ? (
             <CampaignEmptyState
               icon={<Sparkles size={24} aria-hidden="true" />}
