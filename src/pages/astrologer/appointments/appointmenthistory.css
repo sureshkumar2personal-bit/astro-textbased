@@ -266,7 +266,17 @@
   font-size: 13px;
   font-weight: 700;
 }
-.astro-appointment-history > .apt-history-toolbar .apt-history-search { width: 100%; min-width: 0; }
+.astro-appointment-history > .apt-history-toolbar .apt-history-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+.astro-appointment-history > .apt-history-toolbar .apt-history-search .apt-calendar-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .astro-appointment-history > .apt-history-toolbar .apt-calendar-search input {
   width: 100%;
   min-height: 48px;
@@ -297,12 +307,249 @@
 }
 .astro-appointment-history .apt-history-item:first-child { border-top: 0; }
 
+.astro-appointment-history .apt-display-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+.astro-appointment-history .apt-display-toggle button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.astro-appointment-history .apt-display-toggle button:hover,
+.astro-appointment-history .apt-display-toggle button:focus-visible {
+  color: var(--ink);
+  background: var(--surface-strong);
+}
+.astro-appointment-history .apt-display-toggle button.is-active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-xs);
+}
+.astro-appointment-history .apt-history-list-view {
+  width: 100%;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 22px;
+  background: var(--surface-strong);
+}
+.astro-appointment-history .apt-list-view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--surface-border);
+}
+.astro-appointment-history .apt-list-view-modes {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+.astro-appointment-history .apt-list-view-modes button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.astro-appointment-history .apt-list-view-modes button.is-active {
+  background: var(--surface-strong);
+  color: var(--primary);
+  box-shadow: var(--shadow-xs);
+}
+.astro-appointment-history .apt-list-view-date-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+}
+.astro-appointment-history .apt-list-view-date-nav strong {
+  min-width: 120px;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: center;
+}
+.astro-appointment-history .apt-main--list {
+  grid-template-columns: minmax(0, 1fr);
+}
+.astro-appointment-history .apt-main--list .apt-calendar-col {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-list {
+  max-height: none;
+  padding: 0;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row {
+  display: grid;
+  gap: 0;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline {
+  gap: 10px;
+}
+.astro-appointment-history .apt-inline-details {
+  display: grid;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.astro-appointment-history .apt-inline-details__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.astro-appointment-history .apt-inline-details__heading > div {
+  display: grid;
+  gap: 4px;
+}
+.astro-appointment-history .apt-inline-details__heading strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+.astro-appointment-history .apt-inline-details__heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.astro-appointment-history .apt-inline-details__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.astro-appointment-history .apt-inline-details__grid > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.astro-appointment-history .apt-inline-details small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.astro-appointment-history .apt-inline-details strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.astro-appointment-history .apt-inline-details__note {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  color: var(--body);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item {
+  display: grid;
+  grid-template-columns: 88px 38px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  padding: 14px;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item__avatar {
+  width: 38px;
+  height: 38px;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item__identity {
+  min-width: 0;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item__identity > small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item__date {
+  color: var(--ink);
+  font-weight: 700;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-item__view {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .astro-appointment-history .apt-history-list-view .apt-history-item {
+    grid-template-columns: 70px 34px minmax(0, 1fr) auto;
+  }
+  .astro-appointment-history .apt-history-list-view .apt-history-item > .status-badge {
+    grid-column: 4;
+    grid-row: 1;
+  }
+  .astro-appointment-history .apt-history-list-view .apt-history-item__view {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .astro-appointment-history .apt-list-view-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .astro-appointment-history .apt-list-view-modes,
+  .astro-appointment-history .apt-list-view-modes button {
+    flex: 1 1 0;
+  }
+  .astro-appointment-history .apt-list-view-date-nav {
+    justify-content: space-between;
+  }
+  .astro-appointment-history .apt-inline-details__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 760px) {
   .astro-appointment-history > .apt-history-toolbar { grid-template-columns: 1fr; }
   .astro-appointment-history > .apt-history-toolbar .apt-history-status-filter,
   .astro-appointment-history > .apt-history-toolbar .apt-history-search { grid-column: 1; }
   .astro-appointment-history > .apt-history-toolbar .apt-history-tabs button { padding-inline: 6px; font-size: 11px; }
   .astro-appointment-history .apt-main--history { grid-template-columns: 1fr; }
+  .astro-appointment-history > .apt-history-toolbar .apt-history-search { align-items: stretch; flex-wrap: wrap; }
+  .astro-appointment-history > .apt-history-toolbar .apt-history-search .apt-calendar-search,
+  .astro-appointment-history .apt-display-toggle { width: 100%; }
+  .astro-appointment-history .apt-display-toggle button { flex: 1 1 0; }
 }
 
 /* ----------------------------------------------------------------------

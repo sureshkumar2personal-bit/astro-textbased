@@ -2526,9 +2526,9 @@ export default function Atonement() {
       <PageHeader
         title="Atonement"
         actions={null}
-        showBack={Boolean(returnTo)}
-        backTo={returnTo || undefined}
-        backLabel="Back to Question"
+        showBack
+        backTo={returnTo || '/astrologer/dashboard'}
+        backLabel={returnTo ? 'Back to Question' : 'Back'}
       />
       {source === 'platform-default' && (
         <div className="atonement-source-banner">
