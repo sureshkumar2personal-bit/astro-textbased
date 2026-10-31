@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSafeBack } from '../../utils/useSafeBack.js'
 import {
-  Award, ArrowLeft, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Sparkles, Star, Trash2, UserRound, X,
+  Award, ArrowLeft, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Star, Trash2, UserRound, X,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
@@ -27,6 +27,9 @@ const SECTION_DESCRIPTIONS = {
   about: 'Introduce yourself and describe how you guide users.',
   availability: 'Control when users can reach you.',
 }
+
+const PROFILE_NAV_SECTIONS = PROFILE_SECTIONS.filter(({ id }) => !['experience', 'languages', 'credentials', 'availability', 'about'].includes(id))
+const SERVICE_TOGGLE_DEFINITIONS = SERVICE_DEFINITIONS.filter(({ key }) => ['chat', 'voice', 'video', 'live', 'question'].includes(key))
 
 function readStored(userId) {
   try {
@@ -330,7 +333,6 @@ export default function MyProfile() {
           </div>
           <div className="account-form-grid">
             <TextField icon={UserRound} label="Name" required value={shown.fullName} error={errors.fullName} onChange={(e) => setField('fullName', e.target.value)} placeholder="Full legal / professional name" />
-            <TextField icon={Sparkles} label="Display Name" required value={shown.displayName} error={errors.displayName} onChange={(e) => setField('displayName', e.target.value)} placeholder="Name shown to users" />
             <TextField icon={Phone} label="Phone Number" type="tel" value={shown.phone} error={errors.phone} onChange={(e) => setField('phone', e.target.value)} />
             <TextField icon={Mail} label="Email" type="email" value={shown.email} error={errors.email} onChange={(e) => setField('email', e.target.value)} />
             <TextField icon={UserRound} label="Gender">
@@ -347,6 +349,43 @@ export default function MyProfile() {
             <TextField icon={MapPin} label="State" value={shown.state} onChange={(e) => setField('state', e.target.value)} />
             <TextField icon={Globe2} label="Country" value={shown.country} onChange={(e) => setField('country', e.target.value)} />
           </div>
+          <h3 className="mp-subtitle">Experience &amp; Expertise</h3>
+          <div className="account-form-grid">
+            <TextField label="Years of Experience" required type="number" min="0" value={shown.yearsOfExperience} error={errors.yearsOfExperience} onChange={(e) => setField('yearsOfExperience', e.target.value)} />
+            <TextField label="Primary Astrology System" required error={errors.primarySystem}>
+              <select value={shown.primarySystem} onChange={(e) => setField('primarySystem', e.target.value)}>
+                <option value="">Select a system</option>
+                {ASTROLOGY_SYSTEMS.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </TextField>
+          </div>
+          <ChipGroup label="Areas of expertise" options={EXPERTISE_OPTIONS} selected={shown.expertise} onToggle={(value) => toggleIn('expertise', value)} />
+          <FieldError message={errors.expertise} />
+          <h3 className="mp-subtitle">Languages</h3>
+          <ChipGroup
+            label="Languages"
+            options={LANGUAGE_OPTIONS}
+            selected={shown.languages}
+            onToggle={(value) => {
+              toggleIn('languages', value)
+              if (shown.primaryLanguage === value) setField('primaryLanguage', '')
+            }}
+          />
+          <FieldError message={errors.languages} />
+          {shown.languages.length > 0 && (
+            <>
+              <h3 className="mp-subtitle">Primary Language</h3>
+              <div className="mp-radios" role="radiogroup" aria-label="Primary language">
+                {shown.languages.map((language) => (
+                  <label key={language} className={`mp-radio${shown.primaryLanguage === language ? ' is-active' : ''}`}>
+                    <input type="radio" name="primaryLanguage" checked={shown.primaryLanguage === language} onChange={() => setField('primaryLanguage', language)} />
+                    {language}
+                  </label>
+                ))}
+              </div>
+              <FieldError message={errors.primaryLanguage} />
+            </>
+          )}
         </>
       )
     }
@@ -402,18 +441,15 @@ export default function MyProfile() {
     if (section === 'services') {
       return (
         <div className="mp-service-list">
-          {SERVICE_DEFINITIONS.map(({ key, label, unit }) => {
+          {SERVICE_TOGGLE_DEFINITIONS.map(({ key, label }) => {
             const service = shown.services[key]
             return (
               <div className="mp-service" key={key}>
                 <label className="account-toggle">
-                  <span><strong>{label}</strong><small>{service.enabled ? (service.price ? `₹${service.price} / ${unit}` : 'Set a price in Pricing') : 'Disabled'}</small></span>
+                  <span><strong>{label}</strong><small>{service.enabled ? 'Enabled' : 'Disabled'}</small></span>
                   <input type="checkbox" checked={Boolean(service.enabled)} onChange={(e) => setService(key, { enabled: e.target.checked })} />
                   <i />
                 </label>
-                {service.enabled && (
-                  <TextField label="Duration (minutes)" type="number" min="1" value={service.duration} error={errors[`${key}.duration`]} onChange={(e) => setService(key, { duration: e.target.value })} placeholder="Optional" />
-                )}
               </div>
             )
           })}
@@ -426,11 +462,8 @@ export default function MyProfile() {
           <p className="mp-note">Pricing changes may require admin approval before becoming publicly visible.</p>
           <div className="account-form-grid">
             {PRICING_FIELDS.map(({ key, label, suffix }) => (
-              ['chat', 'voice'].includes(key)
-                ? <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" value={shown.services[key].price} readOnly disabled title="Managed in Consultation → Pricing" />
-                : <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
+              <TextField key={key} label={`${label} (₹, ${suffix})`} type="number" min="0" value={shown.services[key].price} error={errors[`${key}.price`]} onChange={(e) => setService(key, { price: e.target.value })} />
             ))}
-            <TextField label="Currency" value="INR" readOnly disabled />
           </div>
         </>
       )
@@ -585,7 +618,7 @@ export default function MyProfile() {
 
       <div className="mp-layout">
         <nav className="mp-tabs" aria-label="Profile sections">
-          {PROFILE_SECTIONS.map(({ id, label }) => (
+          {PROFILE_NAV_SECTIONS.map(({ id, label }) => (
             <button type="button" key={id} className={`mp-tabs__item${section === id ? ' is-active' : ''}${incomplete[id] ? ' is-incomplete' : ''}`} aria-current={section === id ? 'page' : undefined} onClick={() => selectSection(id)}>
               {label}
               {incomplete[id] && <span className="mp-sr-only"> (incomplete)</span>}
@@ -593,7 +626,7 @@ export default function MyProfile() {
           ))}
         </nav>
 
-        <section className="account-panel mp-content" aria-labelledby="mp-section-title">
+        <section className={`account-panel mp-content${section === 'pricing' ? ' mp-content--pricing' : ''}`} aria-labelledby="mp-section-title">
           <Mandala className="mp-content__mandala" />
           <div className="account-panel-heading">
             <div>
