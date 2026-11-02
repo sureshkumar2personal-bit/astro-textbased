@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw } from 'lucide-react'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw, Layers, Compass, ShieldCheck, HeartHandshake, Award, Flame, Gem, MessageSquareText, ThumbsUp, CheckCircle2, MessageSquarePlus } from 'lucide-react'
 import { getPublicAstrologer } from '../utils/publicAstrologerProfile.js'
 import { mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
+import { consultationAstrologers } from '../data/consultationAstrologers.js'
 import { NAKSHATRA_OPTIONS, RASHI_OPTIONS } from '../data/astrologyOptions.js'
 import { selectVisiblePosts, useAppData } from '../state/AppDataContext.jsx'
 import { publishedAvailabilityMap } from '../utils/appointments.js'
@@ -12,6 +13,8 @@ import { getRoleRoutes } from '../utils/roleRoutes.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
+import { BOOKING_OVERRIDES } from './user/appointments/bookingAstrologerData.js'
+import '../css/user/astrologer-profile.css'
 
 const APPOINTMENT_TYPE = 'Audio Call'
 const APPOINTMENT_PRICE = 499
@@ -46,6 +49,131 @@ const PROFILE_FOLLOWERS = ['Priya V.', 'Kannan', 'Devi', 'Arun']
 
 const SUBSCRIPTION_PRICE = 499
 const SUBSCRIPTION_PLAN_LABEL = '1-Month Subscription'
+
+const ASTROLOGER_REVIEWS_MOCK = [
+  { id: 'rev-1', name: 'Priya V.', rating: 5, type: 'Audio Consultation', date: '28 Oct 2026', text: 'Acharya Meena explained everything with great patience and clarity. Her remedies for health and family peace were deeply calming and practical.', helpful: 34 },
+  { id: 'rev-2', name: 'Sanjay Krishnan', rating: 5, type: 'Instant Chat', date: '24 Oct 2026', text: 'Very accurate transit analysis! The guidance regarding my career transition was reassuring and well-explained.', helpful: 26 },
+  { id: 'rev-3', name: 'Divya Ramesh', rating: 5, type: 'Instant Call', date: '19 Oct 2026', text: 'Spoke directly via instant call. Within 10 minutes she identified the exact planetary transits affecting my family situation.', helpful: 19 },
+  { id: 'rev-4', name: 'Karthik N.', rating: 4, type: 'Audio Consultation', date: '14 Oct 2026', text: 'Excellent Vedic knowledge and traditional pariharam recommendations. Very polite and supportive.', helpful: 15 },
+  { id: 'rev-5', name: 'Ananya S.', rating: 5, type: 'Instant Chat', date: '08 Oct 2026', text: 'Instant chat was super smooth and fast. Gave clear gemstone advice and simple daily mantras.', helpful: 21 },
+]
+
+const REVIEW_DISTRIBUTION = [
+  ['5 Star', 88],
+  ['4 Star', 9],
+  ['3 Star', 2],
+  ['2 Star', 1],
+  ['1 Star', 0],
+]
+
+function getAstrologerServicesCatalog(astrologer, bookingPrice = 499) {
+  const spec = (astrologer.specialization || '').toLowerCase()
+  const isNumerology = spec.includes('numerolog')
+  const isTarot = spec.includes('tarot')
+
+  return [
+    {
+      id: 'srv-1',
+      title: isNumerology ? 'Life Path & Name Numerology' : isTarot ? 'Tarot Destiny & Card Spread' : 'Janma Kundli & Birth Chart Analysis',
+      badge: 'Popular',
+      badgeType: 'popular',
+      icon: Compass,
+      description: isNumerology
+        ? 'Destiny numbers, lucky name vibrations, favorable business dates and life cycles.'
+        : isTarot
+        ? 'Intuitive spread analysis revealing past influences, current energies, and future paths.'
+        : 'Comprehensive 12-house planetary analysis, Lagna, Navamsha (D9) and Dasha transit forecast.',
+      duration: '30 Mins',
+      price: Math.max(bookingPrice, 499),
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-2',
+      title: 'Health, Wellbeing & Ayur-Astrology',
+      badge: 'Specialized',
+      badgeType: 'special',
+      icon: ShieldCheck,
+      description: 'Planetary root causes for chronic ailments, favorable medical timing, and remedial wellness measures.',
+      duration: '25 Mins',
+      price: Math.round(bookingPrice * 0.9),
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-3',
+      title: 'Family Harmony & Griha Shanti Remedies',
+      badge: 'Remedy',
+      badgeType: 'remedy',
+      icon: HeartHandshake,
+      description: 'Resolving domestic disharmony, ancestral Pitru Dosha remedies, and home peace protocols.',
+      duration: '30 Mins',
+      price: Math.round(bookingPrice * 0.95),
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-4',
+      title: 'Marriage Compatibility & Kundli Milan',
+      badge: 'High Demand',
+      badgeType: 'popular',
+      icon: Heart,
+      description: 'Detailed 36-point Guna Milan, Manglik Dosha, Nadi & Bhakoot compatibility assessment.',
+      duration: '30 Mins',
+      price: bookingPrice,
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-5',
+      title: 'Career, Job Switch & Business Timing',
+      badge: 'Career',
+      badgeType: 'special',
+      icon: Award,
+      description: '10th house karmasthana timing, promotion periods, job change prospects & business partnerships.',
+      duration: '30 Mins',
+      price: bookingPrice,
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-6',
+      title: 'Sacred Pariharams & Vedic Pooja Guidance',
+      badge: 'Sacred',
+      badgeType: 'remedy',
+      icon: Flame,
+      description: 'Customized Navagraha Shanti homam, sacred temple pilgrimage kshetras, and timing protocols.',
+      duration: '35 Mins',
+      price: Math.round(bookingPrice * 1.15),
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-7',
+      title: 'Gemstone & Rudraksha Recommendation',
+      badge: 'Gemstones',
+      badgeType: 'special',
+      icon: Gem,
+      description: 'Authentic astrological gemstone suitability, auspicious metal setting, and energization vidhi.',
+      duration: '15 Mins',
+      price: Math.round(bookingPrice * 0.75),
+      actionType: 'book',
+      actionLabel: 'Book Consultation',
+    },
+    {
+      id: 'srv-8',
+      title: 'Prashna Kundli / Urgent Query',
+      badge: 'Instant',
+      badgeType: 'instant',
+      icon: MessageSquareText,
+      description: 'Immediate horary chart for pressing life decisions, lost items, or urgent specific dilemmas.',
+      duration: '15 Mins',
+      price: Math.round(bookingPrice * 0.65),
+      actionType: 'chat',
+      actionLabel: 'Instant Consult',
+    },
+  ]
+}
 
 function maskMethod(method) {
   if (!method) return 'Wallet'
@@ -183,7 +311,14 @@ export default function AstrologerProfile() {
   const subscription = subscriptions.find(
     (sub) => sub.userId === currentUser?.id && sub.astrologerId === astrologer.id,
   )
-  const subscriptionDaysRemaining = getSubscriptionDaysRemaining(getSubscriptionExpiry(subscription))
+  const subscriptionExpiry = getSubscriptionExpiry(subscription)
+  const subscriptionDaysRemaining = getSubscriptionDaysRemaining(subscriptionExpiry)
+  const subscriptionExpiryFormatted = useMemo(() => {
+    if (!subscriptionExpiry) return ''
+    const d = new Date(subscriptionExpiry)
+    if (isNaN(d.getTime())) return ''
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  }, [subscriptionExpiry])
   const subscribed = Boolean(subscription && subscriptionDaysRemaining > 0)
   const canBookAppointment = subscribed
   const walletBalance = Number(userWallet?.balance || 0)
@@ -235,6 +370,42 @@ export default function AstrologerProfile() {
   const [commentOpen, setCommentOpen] = useState({})
   const [commentDrafts, setCommentDrafts] = useState({})
   const [shareMessage, setShareMessage] = useState('')
+  const [servicesModalOpen, setServicesModalOpen] = useState(false)
+
+  const bookingPrice = BOOKING_OVERRIDES[astrologer.id]?.price || 499
+  const chatRate = astrologer.chatRate || 20
+  const callRate = astrologer.callRate || 24
+  const servicesCatalog = useMemo(() => getAstrologerServicesCatalog(astrologer, bookingPrice), [astrologer, bookingPrice])
+
+  const consultationInfo = useMemo(() => {
+    return consultationAstrologers.find((a) => a.id === astrologer.id) || {}
+  }, [astrologer.id])
+
+  const astrologerPhoto = astrologer.photo || astrologer.profileImage || consultationInfo.profileImage || ''
+
+  const isChatAvailable = useMemo(() => {
+    if (astrologer.chatEnabled === false) return false
+    if (consultationInfo.chatStatus) return consultationInfo.chatStatus === 'Available'
+    return astrologer.availability === 'Online' || astrologer.isOnline
+  }, [astrologer, consultationInfo])
+
+  const isCallAvailable = useMemo(() => {
+    if (astrologer.voiceEnabled === false) return false
+    if (consultationInfo.callStatus) return consultationInfo.callStatus === 'Available'
+    return astrologer.availability === 'Online' || astrologer.isOnline
+  }, [astrologer, consultationInfo])
+
+  const shareProfile = () => {
+    const shareUrl = window.location.href
+    const shareData = { title: `${astrologer.name} - Astrologer Profile`, text: `Consult with ${astrologer.name} on AstroVed`, url: shareUrl }
+    const completeShare = () => {
+      setShareMessage('Profile link copied!')
+      window.setTimeout(() => setShareMessage(''), 2200)
+    }
+    if (navigator.share) navigator.share(shareData).then(completeShare).catch(() => {})
+    else if (navigator.clipboard?.writeText) navigator.clipboard.writeText(shareUrl).then(completeShare).catch(completeShare)
+    else completeShare()
+  }
   const subscriberNames = subscriptions
     .filter((subscription) => subscription.astrologerId === astrologer.id)
     .map((subscription) => subscription.userName || subscription.userId || 'Subscriber')
@@ -513,39 +684,602 @@ export default function AstrologerProfile() {
           {!isOwner && <div className="social-profile__footer-actions"><button type="button" className={`btn btn-outline${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={15} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>}
       </div>
       ) : (
-        <div className="astrologer-profile-compact">
-          <Card className="section astrologer-compact-header">
-            <div className="astrologer-compact-identity">
-              <div className="flex h-[56px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-[18px] font-bold text-white">
-                {astrologer.photo ? <img className="h-full w-full object-cover" src={astrologer.photo} alt={`${astrologer.name} profile`} /> : astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+        <div className="astro-profile-container">
+          {/* 1. Hero Identity Card */}
+          <div className="astro-hero-card">
+            <div className="astro-hero-cover">
+              <div className="astro-hero-cover-pattern" />
+            </div>
+            <div className="astro-hero-content">
+              <div className="astro-hero-top-row">
+                <div className="astro-hero-identity-group">
+                  <div className="astro-hero-avatar-wrapper">
+                    <div className="astro-hero-avatar-inner">
+                      {astrologerPhoto ? (
+                        <img className="astro-hero-avatar-img" src={astrologerPhoto} alt={`${astrologer.name} profile`} />
+                      ) : (
+                        astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+                      )}
+                    </div>
+                    <span className="astro-online-indicator" title="Astrologer Online">
+                      <span className="astro-online-pulse" />
+                    </span>
+                  </div>
+
+                  <div className="astro-hero-titles">
+                    <div className="astro-hero-name-row">
+                      <h1 className="astro-hero-name">{astrologer.name}</h1>
+                      <span className="astro-verified-badge">
+                        <BadgeCheck size={13} /> Verified Astrologer
+                      </span>
+                    </div>
+                    <div className="astro-hero-subtitle">
+                      <span>{astrologer.specialization}</span>
+                      {astrologer.languages?.length > 0 && (
+                        <>
+                          <span>•</span>
+                          <span>{astrologer.languages.join(', ')}</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="astro-hero-meta-row">
+                      <div className="astro-hero-meta-item">
+                        <Award size={14} style={{ color: 'var(--primary, #8f4dff)' }} />
+                        <span><strong>{astrologer.experience}</strong> Experience</span>
+                      </div>
+                      <span className="astro-hero-meta-dot">•</span>
+                      <div className="astro-hero-meta-item">
+                        <Clock3 size={14} style={{ color: '#2563eb' }} />
+                        <span>Avg response: <strong>~2 mins</strong></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="astro-hero-actions">
+                  <div className="astro-sub-btn-col">
+                    <button
+                      type="button"
+                      className="astro-sub-btn astro-sub-btn--primary"
+                      onClick={subscribed ? () => setSubscribeSuccess(true) : handleSubscribe}
+                    >
+                      <BadgeCheck size={16} /> {subscribed ? 'Subscribed' : 'Subscribe'}
+                    </button>
+                    {subscribed && subscriptionExpiryFormatted && (
+                      <span className="astro-sub-expiry-text">
+                        Expired on {subscriptionExpiryFormatted} ({subscriptionDaysRemaining}d)
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="astro-sub-btn astro-sub-btn--outline"
+                    onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}
+                  >
+                    {following ? <UserCheck size={16} /> : <UserPlus size={16} />} {following ? 'Following' : 'Follow'}
+                  </button>
+                  <button
+                    type="button"
+                    className="astro-share-btn"
+                    aria-label="Share profile link"
+                    title="Share profile link"
+                    onClick={shareProfile}
+                  >
+                    <Share2 size={16} />
+                  </button>
+                </div>
               </div>
-              <div className="astrologer-compact-identity-copy">
-                <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>{astrologer.name}</div>
-                <div className="muted">{astrologer.specialization}</div>
-                {!isOwner && <div className="astrologer-preference-chips"><div><small>Astrologer Type</small><div>{astrologerTypes.map((value) => <span key={value}>{value}</span>)}</div></div><div><small>Consultation For</small><div>{consultationAreas.length ? consultationAreas.map((value) => <span key={value}>{value}</span>) : <span>General guidance</span>}</div></div></div>}
-                <div className="astrologer-inline-about"><span>About</span>{astrologer.bio}</div>
-                <div className="astrologer-profile-highlights"><span><strong>{astrologer.experience}</strong> Experience</span><span><Star size={13} /> <strong>{astrologer.rating}</strong><small>{astrologer.reviews}</small></span></div>
+
+              <div className="astro-hero-chips-bar">
+                {astrologerTypes.map((value) => (
+                  <span key={value} className="astro-pill-tag astro-pill-tag--violet">
+                    <Sparkles size={12} /> {value}
+                  </span>
+                ))}
+                {consultationAreas.map((value) => (
+                  <span key={value} className="astro-pill-tag astro-pill-tag--gold">
+                    {value}
+                  </span>
+                ))}
+              </div>
+
+              <div className="astro-hero-bio-snippet">
+                <strong>About:</strong> {astrologer.bio}
               </div>
             </div>
-            <div className="astrologer-compact-actions"><button type="button" className="btn btn-primary" onClick={subscribed ? () => setSubscribeSuccess(true) : handleSubscribe}>
-              <BadgeCheck size={15} /> {subscribed ? 'Subscribed' : 'Subscribe'}
-            </button><button type="button" className="btn btn-outline" onClick={() => actions.toggleFollow(astrologer.id, astrologer.name, following)}>
-              {following ? <UserCheck size={15} /> : <UserPlus size={15} />} {following ? 'Following' : 'Follow'}
-            </button>{subscribed && <div className="subscription-status" role="status"><CalendarClock size={15} /><span><strong>Subscribed</strong><small>Subscription ends {subscriptionDaysRemaining === 1 ? 'tomorrow' : `in ${subscriptionDaysRemaining} days`}</small></span></div>}</div>
-          </Card>
-          <Card className="section astrologer-compact-stats">
-            <div className="section-title">Stats</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><Users size={16} /></div><div><div className="stat-value">{astrologer.followers.toLocaleString('en-IN')}</div><div className="stat-label">followers</div></div></div>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><BadgeCheck size={16} /></div><div><div className="stat-value">{subscriberNames.length.toLocaleString('en-IN')}</div><div className="stat-label">subscribers</div></div></div>
-              <div className="stat-card" style={{ boxShadow: 'none', border: 'none', padding: 0 }}><div className="stat-icon tone-violet"><CalendarPlus size={16} /></div><div><div className="stat-value">3,850</div><div className="stat-label">consultations</div></div></div>
+          </div>
+
+          {/* 2. Quick Stats Bento Row */}
+          <div className="astro-stats-grid">
+            <div className="astro-stat-card">
+              <div className="astro-stat-icon-box astro-stat-icon-box--violet">
+                <Users size={20} />
+              </div>
+              <div className="astro-stat-meta">
+                <span className="astro-stat-value">{astrologer.followers.toLocaleString('en-IN')}</span>
+                <span className="astro-stat-label">Followers</span>
+              </div>
             </div>
-          </Card>
-          <section className="astrologer-consultation"><div className="astrologer-consultation__heading"><span className="profile-kicker">CONSULTATION OPTIONS</span></div><div className="astrologer-quick-actions"><button type="button" className="btn btn-primary" onClick={() => openInstantChat(astrologer.id)}><MessageCircle size={16} /> Chat</button><button type="button" className="btn btn-primary" onClick={() => openInstantCall(astrologer.id)}><PhoneCall size={16} /> Call</button><button type="button" className={`btn btn-primary${!canBookAppointment ? ' appointment-action--locked' : ''}`} aria-disabled={!canBookAppointment} onClick={openBooking}><CalendarPlus size={16} /> Book Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}</button></div>{!canBookAppointment && <p className="appointment-subscription-hint">Subscribe to this astrologer to book an appointment.</p>}</section>
-          <section className="astrologer-content astrologer-footer-content"><div className="astrologer-footer-tabs" role="tablist" aria-label="Astrologer content"><button type="button" className={footerTab === 'Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Posts')}><Grid3X3 size={15} /> Posts</button><button type="button" className={footerTab === 'Live' ? 'is-active' : ''} onClick={() => setFooterTab('Live')}><Radio size={15} /> Live</button><button type="button" className={footerTab === 'Saved Posts' ? 'is-active' : ''} onClick={() => setFooterTab('Saved Posts')}><Bookmark size={15} /> Saved Posts</button></div>
-            {footerTab === 'Live' ? <div className="astrologer-live-groups">{liveGroups.map(([label, sessions]) => <section className="astrologer-live-group" key={label}><h3>{label}</h3>{sessions.length ? <div className="astrologer-live-group__list">{sessions.map((session) => <article className="astrologer-live-card" key={session.id}><span className="astrologer-live-badge"><Radio size={12} /> {session.status}</span><h4>{session.title}</h4><p>{session.time}</p></article>)}</div> : <p className="muted">No {label.toLowerCase()} sessions.</p>}</section>)}</div> : <div className="astrologer-post-list">{visiblePosts.length ? visiblePosts.map((post) => { const access = post.interactionAccess || { like: true, comment: post.commentsEnabled !== false, share: true, save: true }; return <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}><div className="astrologer-content-card__top"><span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span><span><b>{astrologer.name}</b><small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span></div><h3>{post.title}</h3><p>{post.body}</p><div className="astrologer-post-actions">{access.like && <button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}><Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}</button>}{access.share && <button type="button" onClick={() => sharePost(post)}><Share2 size={15} /> Share</button>}{access.comment && <button type="button" onClick={() => toggleComment(post.id)}><MessageCircle size={15} /> {(postComments[post.id] || []).length}</button>}{access.save && <button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}><Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}</button>}</div>{commentOpen[post.id] && <div className="astrologer-comment-section">{(postComments[post.id] || []).map((comment, index) => <div className="astrologer-comment" key={index}><strong>{comment.userName || 'User'}</strong><p>{comment.text}</p></div>)}<div className="astrologer-comment-input"><input type="text" placeholder="Write a comment..." value={commentDrafts[post.id] || ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} /><button type="button" onClick={() => submitComment(post.id)}>Send</button></div></div>}</article> }) : <div className="astrologer-post-empty"><Bookmark size={22} /><h3>{footerTab === 'Saved Posts' ? 'No saved posts yet' : 'No posts yet'}</h3><p>New posts from this astrologer will appear here.</p></div>}</div>}
-            {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
+            <div className="astro-stat-card">
+              <div className="astro-stat-icon-box astro-stat-icon-box--amber">
+                <BadgeCheck size={20} />
+              </div>
+              <div className="astro-stat-meta">
+                <span className="astro-stat-value">{subscriberNames.length.toLocaleString('en-IN')}</span>
+                <span className="astro-stat-label">Subscribers</span>
+              </div>
+            </div>
+            <div className="astro-stat-card">
+              <div className="astro-stat-icon-box astro-stat-icon-box--emerald">
+                <CalendarPlus size={20} />
+              </div>
+              <div className="astro-stat-meta">
+                <span className="astro-stat-value">3,850+</span>
+                <span className="astro-stat-label">Consultations Done</span>
+              </div>
+            </div>
+            <div className="astro-stat-card">
+              <div className="astro-stat-icon-box astro-stat-icon-box--blue">
+                <ThumbsUp size={20} />
+              </div>
+              <div className="astro-stat-meta">
+                <span className="astro-stat-value">98.4%</span>
+                <span className="astro-stat-label">Client Satisfaction</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Consultation Options */}
+          <section className="astrologer-consultation" style={{ border: 'none', boxShadow: 'none' }}>
+            <div className="astrologer-quick-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, width: '100%' }}>
+              <button
+                type="button"
+                className="btn btn-primary astro-consult-action-btn"
+                onClick={() => navigate(`${routes.askQuestion}?astrologerId=${encodeURIComponent(astrologer.id)}`)}
+              >
+                <MessageSquarePlus size={16} /> Ask a question
+              </button>
+              <button
+                type="button"
+                className={`btn btn-primary astro-consult-action-btn${!canBookAppointment ? ' appointment-action--locked' : ''}`}
+                aria-disabled={!canBookAppointment}
+                onClick={openBooking}
+              >
+                <CalendarPlus size={16} /> Appointment {!canBookAppointment && <span aria-hidden="true">🔒</span>}
+              </button>
+              <button
+                type="button"
+                className={`btn astro-consult-action-btn ${isCallAvailable ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'}`}
+                disabled={!isCallAvailable}
+                title={isCallAvailable ? 'Online & Available for Instant Call' : 'Currently Unavailable for Instant Call'}
+                onClick={() => isCallAvailable && openInstantCall(astrologer.id)}
+              >
+                <PhoneCall size={16} /> Instant Call
+              </button>
+              <button
+                type="button"
+                className={`btn astro-consult-action-btn ${isChatAvailable ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'}`}
+                disabled={!isChatAvailable}
+                title={isChatAvailable ? 'Online & Available for Instant Chat' : 'Currently Unavailable for Instant Chat'}
+                onClick={() => isChatAvailable && openInstantChat(astrologer.id)}
+              >
+                <MessageCircle size={16} /> Instant Chat
+              </button>
+            </div>
+            {!canBookAppointment && (
+              <p className="appointment-subscription-hint">Subscribe to this astrologer to book an appointment.</p>
+            )}
           </section>
+
+          {/* 4. 21st.dev Segmented Controls Tabs Bar & Panels */}
+          <div id="astro-content-tabs" className="astro-tabs-wrapper">
+            <div className="astro-segmented-tabs-bar" role="tablist" aria-label="Astrologer profile content">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={footerTab === 'Posts'}
+                className={`astro-tab-pill-btn${footerTab === 'Posts' ? ' is-active' : ''}`}
+                onClick={() => setFooterTab('Posts')}
+              >
+                <Grid3X3 size={15} /> Posts <span className="astro-tab-badge">{visiblePosts.length}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={footerTab === 'Live'}
+                className={`astro-tab-pill-btn${footerTab === 'Live' ? ' is-active' : ''}`}
+                onClick={() => setFooterTab('Live')}
+              >
+                <Radio size={15} /> Live Sessions <span className="astro-tab-badge">{liveSessions.length}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={footerTab === 'About'}
+                className={`astro-tab-pill-btn${footerTab === 'About' ? ' is-active' : ''}`}
+                onClick={() => setFooterTab('About')}
+              >
+                <FileText size={15} /> About & Bio
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={footerTab === 'Reviews'}
+                className={`astro-tab-pill-btn${footerTab === 'Reviews' ? ' is-active' : ''}`}
+                onClick={() => setFooterTab('Reviews')}
+              >
+                <Star size={15} /> Reviews <span className="astro-tab-badge">{astrologer.rating || '4.8'} ★</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={footerTab === 'Saved Posts'}
+                className={`astro-tab-pill-btn${footerTab === 'Saved Posts' ? ' is-active' : ''}`}
+                onClick={() => setFooterTab('Saved Posts')}
+              >
+                <Bookmark size={15} /> Saved <span className="astro-tab-badge">{savedPosts.length}</span>
+              </button>
+            </div>
+
+            {/* TAB PANEL 1: POSTS */}
+            {footerTab === 'Posts' && (
+              <div className="astro-tab-panel">
+                <div className="astrologer-post-list">
+                  {visiblePosts.length ? (
+                    visiblePosts.map((post) => {
+                      const access = post.interactionAccess || { like: true, comment: post.commentsEnabled !== false, share: true, save: true }
+                      return (
+                        <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}>
+                          <div className="astrologer-content-card__top">
+                            <span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span>
+                            <span>
+                              <b>{astrologer.name}</b>
+                              <small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
+                            </span>
+                          </div>
+                          <h3>{post.title}</h3>
+                          <p>{post.body}</p>
+                          <div className="astrologer-post-actions">
+                            {access.like && (
+                              <button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}>
+                                <Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}
+                              </button>
+                            )}
+                            {access.share && (
+                              <button type="button" onClick={() => sharePost(post)}>
+                                <Share2 size={15} /> Share
+                              </button>
+                            )}
+                            {access.comment && (
+                              <button type="button" onClick={() => toggleComment(post.id)}>
+                                <MessageCircle size={15} /> {(postComments[post.id] || []).length}
+                              </button>
+                            )}
+                            {access.save && (
+                              <button type="button" className={savedPostIds.includes(post.id) ? 'is-active' : ''} onClick={() => actions.toggleSavedPost(post.id)}>
+                                <Bookmark size={15} fill={savedPostIds.includes(post.id) ? 'currentColor' : 'none'} /> {savedPostIds.includes(post.id) ? 'Saved' : 'Save'}
+                              </button>
+                            )}
+                          </div>
+                          {commentOpen[post.id] && (
+                            <div className="astrologer-comment-section">
+                              {(postComments[post.id] || []).map((comment, index) => (
+                                <div className="astrologer-comment" key={index}>
+                                  <strong>{comment.userName || 'User'}</strong>
+                                  <p>{comment.text}</p>
+                                </div>
+                              ))}
+                              <div className="astrologer-comment-input">
+                                <input
+                                  type="text"
+                                  placeholder="Write a comment..."
+                                  value={commentDrafts[post.id] || ''}
+                                  onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))}
+                                />
+                                <button type="button" onClick={() => submitComment(post.id)}>Send</button>
+                              </div>
+                            </div>
+                          )}
+                        </article>
+                      )
+                    })
+                  ) : (
+                    <div className="astrologer-post-empty">
+                      <Bookmark size={22} />
+                      <h3>No posts yet</h3>
+                      <p>New posts from this astrologer will appear here.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB PANEL 3: LIVE SESSIONS */}
+            {footerTab === 'Live' && (
+              <div className="astro-tab-panel">
+                <div className="astrologer-live-groups">
+                  {liveGroups.map(([label, sessions]) => (
+                    <section className="astrologer-live-group" key={label}>
+                      <h3>{label}</h3>
+                      {sessions.length ? (
+                        <div className="astrologer-live-group__list">
+                          {sessions.map((session) => (
+                            <article className="astrologer-live-card" key={session.id}>
+                              <span className="astrologer-live-badge">
+                                <Radio size={12} /> {session.status}
+                              </span>
+                              <h4>{session.title}</h4>
+                              <p>{session.time}</p>
+                            </article>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="muted">No {label.toLowerCase()} sessions.</p>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB PANEL 4: ABOUT & CREDENTIALS */}
+            {footerTab === 'About' && (
+              <div className="astro-tab-panel">
+                <div className="astro-about-grid">
+                  <div className="astro-about-card">
+                    <h3><FileText size={18} style={{ color: 'var(--primary, #8f4dff)' }} /> Biography & Vedic Practice</h3>
+                    <p className="astro-about-text">
+                      {astrologer.bio}
+                    </p>
+                    <p className="astro-about-text">
+                      With over {astrologer.experience} of dedicated research and practice, {astrologer.name} integrates classical Parashari Jyotish principles with modern lifestyle guidance. Consultations are focused on actionable remedial measures, gemstone analysis, and timing of auspicious beginnings (Muhurta).
+                    </p>
+                    <div>
+                      <h4 style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, color: 'var(--ink)' }}>Core Guidance Domains</h4>
+                      <div className="astro-hero-chips-bar" style={{ paddingTop: 0 }}>
+                        {consultationAreas.map((area) => (
+                          <span key={area} className="astro-pill-tag astro-pill-tag--violet">
+                            <Check size={12} /> {area}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="astro-about-card">
+                    <h3><Award size={18} style={{ color: '#d97706' }} /> Credentials & Overview</h3>
+                    <div className="astro-about-list">
+                      <div className="astro-about-list-item">
+                        <CheckCircle2 size={16} />
+                        <div>
+                          <strong>Specialization</strong>
+                          <div>{astrologer.specialization}</div>
+                        </div>
+                      </div>
+                      <div className="astro-about-list-item">
+                        <Award size={16} />
+                        <div>
+                          <strong>Experience</strong>
+                          <div>{astrologer.experience} professional practice</div>
+                        </div>
+                      </div>
+                      <div className="astro-about-list-item">
+                        <Languages size={16} />
+                        <div>
+                          <strong>Languages Spoken</strong>
+                          <div>{astrologer.languages?.join(', ') || 'English, Hindi, Tamil'}</div>
+                        </div>
+                      </div>
+                      <div className="astro-about-list-item">
+                        <Star size={16} />
+                        <div>
+                          <strong>Rating & Reviews</strong>
+                          <div>{astrologer.rating || '4.8'} / 5 · {astrologer.reviews || '1,980'} client reviews</div>
+                        </div>
+                      </div>
+                      <div className="astro-about-list-item">
+                        <ShieldCheck size={16} />
+                        <div>
+                          <strong>Platform Verification</strong>
+                          <div>Vetted & certified practitioner on AstroVed</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB PANEL 5: REVIEWS */}
+            {footerTab === 'Reviews' && (
+              <div className="astro-tab-panel">
+                <div className="astro-reviews-summary-card">
+                  <div className="astro-reviews-score-block">
+                    <span className="astro-reviews-score-num">{astrologer.rating || '4.8'}</span>
+                    <div className="astro-reviews-stars-row">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={18} fill="currentColor" />
+                      ))}
+                    </div>
+                    <span className="astro-reviews-total-label">Based on {astrologer.reviews || '1,980 reviews'}</span>
+                  </div>
+
+                  <div className="astro-reviews-bars-list">
+                    {REVIEW_DISTRIBUTION.map(([label, pct]) => (
+                      <div className="astro-review-bar-row" key={label}>
+                        <span className="astro-review-bar-label">{label}</span>
+                        <div className="astro-review-bar-track">
+                          <div className="astro-review-bar-fill" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="astro-review-bar-count">{pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="astro-reviews-cards-list">
+                  {ASTROLOGER_REVIEWS_MOCK.map((review) => (
+                    <div className="astro-review-entry-card" key={review.id}>
+                      <div className="astro-review-entry-head">
+                        <div className="astro-review-entry-user">
+                          <div className="astro-review-user-avatar">
+                            {review.name.slice(0, 1).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span className="astro-review-entry-name">{review.name}</span>
+                              <span className="astro-review-verified-pill">
+                                <CheckCircle2 size={12} /> Verified
+                              </span>
+                            </div>
+                            <span className="astro-pill-tag astro-pill-tag--violet" style={{ fontSize: 10, padding: '2px 7px', marginTop: 2 }}>
+                              {review.type}
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+                          <div style={{ display: 'flex', gap: 2, color: '#f59e0b' }}>
+                            {Array.from({ length: review.rating }).map((_, i) => (
+                              <Star key={i} size={13} fill="currentColor" />
+                            ))}
+                          </div>
+                          <span className="astro-review-date">{review.date}</span>
+                        </div>
+                      </div>
+                      <p className="astro-review-text">{review.text}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          style={{ fontSize: 11, padding: '2px 8px', color: 'var(--muted)' }}
+                        >
+                          <ThumbsUp size={12} style={{ marginRight: 4 }} /> Helpful ({review.helpful})
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB PANEL 6: SAVED POSTS */}
+            {footerTab === 'Saved Posts' && (
+              <div className="astro-tab-panel">
+                <div className="astrologer-post-list">
+                  {savedPosts.length ? (
+                    savedPosts.map((post) => (
+                      <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}>
+                        <div className="astrologer-content-card__top">
+                          <span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span>
+                          <span>
+                            <b>{astrologer.name}</b>
+                            <small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
+                          </span>
+                        </div>
+                        <h3>{post.title}</h3>
+                        <p>{post.body}</p>
+                        <div className="astrologer-post-actions">
+                          <button type="button" className={postLikes[post.id] ? 'is-active' : ''} onClick={() => actions.togglePostLike(post.id)}>
+                            <Heart size={15} fill={postLikes[post.id] ? 'currentColor' : 'none'} /> {(post.likeCount || 0) + (postLikes[post.id] ? 1 : 0)}
+                          </button>
+                          <button type="button" onClick={() => sharePost(post)}>
+                            <Share2 size={15} /> Share
+                          </button>
+                          <button type="button" className="is-active" onClick={() => actions.toggleSavedPost(post.id)}>
+                            <Bookmark size={15} fill="currentColor" /> Saved
+                          </button>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <div className="astrologer-post-empty">
+                      <Bookmark size={22} />
+                      <h3>No saved posts yet</h3>
+                      <p>Saved posts from this astrologer will appear here.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {shareMessage && <div className="astrologer-share-feedback" role="status">{shareMessage}</div>}
+          </div>
+
+          {servicesModalOpen && (
+            <div className="modal-overlay user-modal-overlay" onClick={() => setServicesModalOpen(false)}>
+              <div
+                className="modal-card user-modal-card"
+                style={{ width: 'min(920px, calc(100vw - 32px))', maxHeight: '88vh', overflowY: 'auto' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
+                  <div>
+                    <div className="section-title" style={{ marginBottom: 2 }}>All Services & Consultations</div>
+                    <span className="muted" style={{ fontSize: 13 }}>Specialized Vedic rituals, remedies, and readings by {astrologer.name}</span>
+                  </div>
+                  <button type="button" className="icon-btn" aria-label="Close services modal" onClick={() => setServicesModalOpen(false)}>
+                    <X size={16} />
+                  </button>
+                </div>
+                <div className="modal-card__content user-modal-card__content" style={{ padding: '20px' }}>
+                  <div className="astro-services-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+                    {servicesCatalog.map((service) => {
+                      const ServiceIcon = service.icon || Compass
+                      return (
+                        <div key={service.id} className="astro-service-card">
+                          <div>
+                            <div className="astro-service-card-top">
+                              <span className={`astro-service-badge astro-service-badge--${service.badgeType || 'popular'}`}>
+                                {service.badge}
+                              </span>
+                              <div className="astro-service-icon-wrap">
+                                <ServiceIcon size={20} />
+                              </div>
+                            </div>
+                            <div className="astro-service-card-body">
+                              <h4 className="astro-service-title">{service.title}</h4>
+                              <p className="astro-service-desc">{service.description}</p>
+                            </div>
+                          </div>
+                          <div className="astro-service-card-footer">
+                            <div className="astro-service-pricing">
+                              <span className="astro-service-duration">
+                                <Clock3 size={11} style={{ display: 'inline', marginRight: 3 }} /> {service.duration}
+                              </span>
+                              <span className="astro-service-price-amount">₹{service.price}</span>
+                            </div>
+                            {service.actionType === 'chat' ? (
+                              <button
+                                type="button"
+                                className="astro-service-book-btn"
+                                onClick={() => {
+                                  setServicesModalOpen(false)
+                                  openInstantChat(astrologer.id)
+                                }}
+                              >
+                                <MessageCircle size={13} /> {service.actionLabel}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="astro-service-book-btn"
+                                onClick={() => {
+                                  setServicesModalOpen(false)
+                                  openBooking()
+                                }}
+                              >
+                                <CalendarPlus size={13} /> {service.actionLabel}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
