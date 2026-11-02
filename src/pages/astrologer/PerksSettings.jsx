@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, BadgePercent, Check, Crown, DollarSign, Edit2, Eye, Gem, Save, Settings2, ShieldCheck, Sparkles, Users, X } from 'lucide-react'
+import { ArrowRight, BadgePercent, BarChart3, Check, Crown, DollarSign, Edit2, Eye, Gem, Save, Settings2, ShieldCheck, Users, X } from 'lucide-react'
 import Card from '../../components/ui/Card.jsx'
 
 const PLAN_DEFINITIONS = [
@@ -10,9 +10,9 @@ const PLAN_DEFINITIONS = [
 
 const PROGRAM_METRICS = [
   { label: 'Active Subscribers', value: '81', hint: '+12 this month', icon: Users },
-  { label: 'Silver', value: '41', hint: '50.6% of active base', icon: ShieldCheck },
-  { label: 'Gold', value: '28', hint: '34.6% of active base', icon: Crown },
-  { label: 'Platinum', value: '12', hint: '14.8% of active base', icon: Gem },
+  { label: 'Silver Subscribers', value: '41', hint: '50.6%', icon: ShieldCheck },
+  { label: 'Gold Subscribers', value: '28', hint: '34.6%', icon: Crown },
+  { label: 'Platinum Subscribers', value: '12', hint: '14.8%', icon: Gem },
 ]
 
 const DEFAULT_SETTINGS = [
@@ -33,23 +33,43 @@ function PlanCard({ plan, config, onEdit }) {
         </div>
         <span className="subscriber-plan-card__status"><Check size={13} /> Active</span>
       </div>
-      <div className="subscriber-plan-card__price">₹{config.price} <small>/ month</small></div>
-      <div className="subscriber-plan-card__benefits">
-        <div><span>Text Questions</span><strong>{config.discounts.questions}% OFF</strong></div>
-        <div><span>Audio Calls</span><strong>{config.discounts.audio}% OFF</strong></div>
-        <div><span>Appointments</span><strong>{config.discounts.appointments}% OFF</strong></div>
-        <div><span>Live Access</span><strong>{config.access.live}</strong></div>
-      </div>
-      <button type="button" className="subscriber-plan-card__edit" onClick={() => onEdit(plan.key)}><Edit2 size={14} /> Edit {plan.key}</button>
+        <div className="subscriber-plan-card__price">₹{config.price} <small>/ month</small></div>
+        <div className="subscriber-plan-card__benefits">
+          <div><span>Text Questions</span><strong>{config.discounts.questions}% OFF</strong></div>
+          <div><span>Audio Calls</span><strong>{config.discounts.audio}% OFF</strong></div>
+          <div><span>Appointments</span><strong>{config.discounts.appointments}% OFF</strong></div>
+          <div><span>Live Access</span><strong>{config.access.live}</strong></div>
+        </div>
+        <button type="button" className="subscriber-plan-card__edit" onClick={() => onEdit(plan.key)}><Edit2 size={14} /> Edit {plan.key}</button>
+
     </Card>
   )
 }
 
+function PlanEditModal({ plan, draft, onChange, onDiscountChange, onCancel, onSave }) {
+  if (!plan || !draft) return null
+  return <div className="subscriber-plan-modal-overlay" role="presentation" onClick={onCancel}>
+    <section className="subscriber-plan-modal" role="dialog" aria-modal="true" aria-labelledby="subscriber-plan-modal-title" onClick={(event) => event.stopPropagation()}>
+      <div className="subscriber-plan-modal__heading"><div><span className="perks-section-eyebrow">EDIT SUBSCRIPTION PLAN</span><h2 id="subscriber-plan-modal-title">Edit {plan} Plan</h2><p>Update the plan benefits used throughout the pricing calculation.</p></div><button type="button" className="subscriber-plan-editor__close" onClick={onCancel} aria-label="Close edit plan"><X size={17} /></button></div>
+      <div className="subscriber-plan-modal__fields">
+        <label>Monthly price<input type="number" min="0" step="1" value={draft.price} onChange={(event) => onChange('price', event.target.value)} /></label>
+        {Object.entries({ questions: 'Text questions discount', audio: 'Audio calls discount', appointments: 'Appointments discount' }).map(([key, label]) => <label key={key}>{label}<span className="plan-input-with-suffix"><input type="number" min="0" max="100" step="1" value={draft.discounts[key]} onChange={(event) => onDiscountChange(key, event.target.value)} /><span aria-hidden="true">%</span></span></label>)}
+        <label>Appointment access<select value={draft.access.booking} onChange={(event) => onChange('booking', event.target.value)}><option>Standard</option><option>Priority</option><option>Priority+</option></select></label>
+        <label>Content access<select value={draft.access.content} onChange={(event) => onChange('content', event.target.value)}><option>Standard</option><option>Early Access</option><option>Premium Access</option></select></label>
+        <label>Live access<select value={draft.access.live} onChange={(event) => onChange('live', event.target.value)}><option>Standard Access</option><option>Early Access</option><option>Priority Access</option></select></label>
+      </div>
+      <div className="subscriber-plan-editor__actions"><button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button><button type="button" className="btn btn-primary" onClick={onSave}><Save size={14} /> Save Changes</button></div>
+    </section>
+  </div>
+}
+
 export default function PerksSettings({ tierConfigs, onSave, onTierSave, onManageBenefits }) {
   const [settings, setSettings] = useState(() => Object.fromEntries(DEFAULT_SETTINGS.map(([key, , , enabled]) => [key, enabled])))
-  const [selectedPlan, setSelectedPlan] = useState('Silver')
   const [editingPlan, setEditingPlan] = useState(null)
   const [planDraft, setPlanDraft] = useState(null)
+  const [selectedPlan, setSelectedPlan] = useState('Gold')
+  const [selectedService, setSelectedService] = useState('questions')
+  const [servicePrices, setServicePrices] = useState({ questions: 399, audio: 25, appointments: 799 })
 
   const toggleSetting = (key) => setSettings((current) => ({ ...current, [key]: !current[key] }))
   const startEditing = (plan) => {
@@ -57,28 +77,35 @@ export default function PerksSettings({ tierConfigs, onSave, onTierSave, onManag
     setPlanDraft({ ...tierConfigs[plan], discounts: { ...tierConfigs[plan].discounts }, access: { ...tierConfigs[plan].access } })
   }
   const updatePlanDiscount = (key, value) => setPlanDraft((current) => ({ ...current, discounts: { ...current.discounts, [key]: value === '' ? '' : Math.max(0, Math.min(100, Number(value) || 0)) } }))
+  const updatePlanField = (key, value) => setPlanDraft((current) => ['booking', 'content', 'live'].includes(key) ? ({ ...current, access: { ...current.access, [key]: value } }) : ({ ...current, [key]: value }))
   const savePlan = () => {
     if (!editingPlan || !planDraft) return
     onTierSave?.(editingPlan, { ...planDraft, price: Number(planDraft.price) || 0, discounts: Object.fromEntries(Object.entries(planDraft.discounts).map(([key, value]) => [key, Number(value) || 0])) })
     setEditingPlan(null)
     setPlanDraft(null)
   }
-  const goldQuestionDiscount = Number(tierConfigs.Gold.discounts.questions || 0)
-  const goldQuestionPrice = 399 * (1 - goldQuestionDiscount / 100)
+  const serviceOptions = { questions: { label: 'Text Question', discount: 'questions' }, audio: { label: 'Audio Call', discount: 'audio' }, appointments: { label: 'Appointment', discount: 'appointments' } }
+  const selectedServiceMeta = serviceOptions[selectedService]
+  const originalPrice = Number(servicePrices[selectedService]) || 0
+  const applicableDiscount = Number(tierConfigs[selectedPlan].discounts[selectedServiceMeta.discount] || 0)
+  const discountAmount = originalPrice * applicableDiscount / 100
+  const customerPayable = Math.max(0, originalPrice - discountAmount)
+  const money = (amount) => `₹${amount.toFixed(2)}`
 
   return (
     <div className="perks-settings-redesign">
-      <section className="subscriber-program-section" aria-labelledby="subscriber-program-title">
-        <div className="perks-section-heading"><div><h2 id="subscriber-program-title">Your subscriber program at a glance</h2></div><span className="perks-heading-mark"><Sparkles size={18} /></span></div>
-        <div className="subscriber-metrics-grid">
-          {PROGRAM_METRICS.map(({ label, value, hint, icon: Icon }) => <Card className="subscriber-metric-card" key={label}><span className="subscriber-metric-card__icon"><Icon size={17} /></span><span className="subscriber-metric-card__label">{label}</span><strong>{value}</strong><small>{hint}</small></Card>)}
+      <section className="subscriber-program-section subscriber-program-section--compact" aria-labelledby="subscriber-program-title">
+        <div className="subscriber-program-glance-heading"><span className="subscriber-program-glance-heading__icon"><BarChart3 size={19} /></span><h2 id="subscriber-program-title">Program at a Glance</h2></div>
+        <div className="subscriber-program-metrics">
+          {PROGRAM_METRICS.map(({ label, value, hint, icon: Icon }) => <div className="subscriber-program-stat" key={label}><span className="subscriber-program-stat__icon"><Icon size={16} /></span><div><span className="subscriber-program-stat__label">{label}</span><strong>{value}</strong><small>{hint}</small></div></div>)}
         </div>
       </section>
 
       <section className="perks-settings-section" aria-labelledby="subscription-plans-title">
-        <div className="perks-section-heading perks-section-heading--inline"><div><h2 id="subscription-plans-title">Plans built around paid services</h2><p className="perks-section-description">Choose a subscriber plan to review its price and benefits.</p></div><label className="plan-selector"><span>Subscriber plan</span><select value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value)} aria-label="Subscriber plan"><option value="Silver">Silver</option><option value="Gold">Gold</option><option value="Platinum">Platinum</option></select></label></div>
-        <div className={`subscriber-plan-stage${editingPlan ? ' is-editing' : ''}`}><div className="subscriber-plans-grid">{PLAN_DEFINITIONS.filter((plan) => plan.key === selectedPlan).map((plan) => <PlanCard key={plan.key} plan={plan} config={tierConfigs[plan.key]} onEdit={startEditing} />)}</div>{editingPlan && planDraft && <div className="subscriber-plan-editor" role="dialog" aria-label={`Edit ${editingPlan} plan`}><div className="subscriber-plan-editor__heading"><div><span className="perks-section-eyebrow">EDIT PLAN</span><h3>{editingPlan} subscriber plan</h3></div><button type="button" className="subscriber-plan-editor__close" onClick={() => setEditingPlan(null)} aria-label="Close editor"><X size={16} /></button></div><div className="subscriber-plan-editor__fields"><label>Monthly price<input type="number" min="0" value={planDraft.price} onChange={(event) => setPlanDraft((current) => ({ ...current, price: event.target.value }))} /></label>{[['questions', 'Text questions discount'], ['audio', 'Audio calls discount'], ['appointments', 'Appointments discount'], ['emergency', 'Emergency discount']].map(([key, label]) => <label key={key}>{label}<span className="plan-input-with-suffix"><input type="number" min="0" max="100" value={planDraft.discounts[key]} onChange={(event) => updatePlanDiscount(key, event.target.value)} /><span aria-hidden="true">%</span></span></label>)}<label>Appointment access<select value={planDraft.access.booking} onChange={(event) => setPlanDraft((current) => ({ ...current, access: { ...current.access, booking: event.target.value } }))}><option>Standard</option><option>Priority</option><option>Priority+</option></select></label><label>Content access<select value={planDraft.access.content} onChange={(event) => setPlanDraft((current) => ({ ...current, access: { ...current.access, content: event.target.value } }))}><option>Standard</option><option>Early Access</option><option>Premium Access</option></select></label><label>Live access<select value={planDraft.access.live} onChange={(event) => setPlanDraft((current) => ({ ...current, access: { ...current.access, live: event.target.value } }))}><option>Standard Access</option><option>Early Access</option><option>Priority Access</option></select></label></div><div className="subscriber-plan-editor__actions"><button type="button" className="btn btn-ghost" onClick={() => setEditingPlan(null)}>Cancel</button><button type="button" className="btn btn-primary" onClick={savePlan}><Save size={15} /> Save plan</button></div></div>}</div>
-        <div className="benefits-flow benefits-flow--embedded" aria-labelledby="benefits-flow-title"><div><DollarSign size={17} /><strong id="benefits-flow-title">Normal Price</strong><span>₹399 Question</span></div><ArrowRight className="benefits-flow__arrow" size={18} /><div><Crown size={17} /><strong>Subscriber Plan</strong><span>Gold Subscriber</span></div><ArrowRight className="benefits-flow__arrow" size={18} /><div><BadgePercent size={17} /><strong>Discount Applied</strong><span>{goldQuestionDiscount}% Discount</span></div><ArrowRight className="benefits-flow__arrow" size={18} /><div className="benefits-flow__result"><Check size={17} /><strong>Customer Pays</strong><span>₹{goldQuestionPrice.toFixed(2)}</span></div></div>
+        <div className="perks-section-heading perks-section-heading--inline"><div><h2 id="subscription-plans-title">Plans built around paid services</h2></div></div>
+        <div className="subscriber-plan-stage"><div className="subscriber-plans-grid">{PLAN_DEFINITIONS.map((plan) => <PlanCard key={plan.key} plan={plan} config={tierConfigs[plan.key]} onEdit={startEditing} />)}</div></div>
+        <div className="benefits-flow benefits-flow--embedded" aria-labelledby="benefits-flow-title"><div><DollarSign size={17} /><strong id="benefits-flow-title">Original Price</strong><label className="benefits-flow__price-input"><span className="sr-only">Original {selectedServiceMeta.label} price</span><span>₹</span><input type="number" min="0" step="0.01" value={servicePrices[selectedService]} onChange={(event) => setServicePrices((current) => ({ ...current, [selectedService]: event.target.value }))} /></label></div><ArrowRight className="benefits-flow__arrow" size={18} /><div><Crown size={17} /><strong>Subscriber Plan</strong><select value={selectedPlan} onChange={(event) => setSelectedPlan(event.target.value)}><option>Silver</option><option>Gold</option><option>Platinum</option></select></div><ArrowRight className="benefits-flow__arrow" size={18} /><div><BadgePercent size={17} /><strong>Discount Applied</strong><select value={selectedService} onChange={(event) => setSelectedService(event.target.value)}>{Object.entries(serviceOptions).map(([key, option]) => <option key={key} value={key}>{option.label}</option>)}</select><span>{applicableDiscount}% · {money(discountAmount)} off</span></div><ArrowRight className="benefits-flow__arrow" size={18} /><div className="benefits-flow__result"><Check size={17} /><strong>Final Customer Payable</strong><span>{money(customerPayable)}</span></div></div>
+        <PlanEditModal plan={editingPlan} draft={planDraft} onChange={updatePlanField} onDiscountChange={updatePlanDiscount} onCancel={() => { setEditingPlan(null); setPlanDraft(null) }} onSave={savePlan} />
       </section>
 
       <section className="perks-settings-section program-settings-section" aria-labelledby="program-settings-title">

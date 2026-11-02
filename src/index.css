@@ -885,6 +885,18 @@ textarea:focus-visible {
 .role-selection-brand { display: flex; align-items: center; gap: 11px; color: var(--ink); }.role-selection-brand > span { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; color: var(--primary-dark); background: linear-gradient(135deg,var(--gold-400),var(--coral-500)); }.role-selection-brand strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 18px; }.role-selection-brand small { color: var(--text-secondary); font-size: 11px; }
 .role-selection-copy { margin: 58px 0 26px; text-align: center; }.role-selection-copy h1 { margin: 7px 0 8px; font-family: 'Space Grotesk', sans-serif; font-size: 42px; }.role-selection-copy p { margin: 0; color: var(--text-secondary); font-size: 14px; }
 .role-selection-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }.role-selection-options button { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 13px; padding: 18px; border: 1px solid var(--surface-border); border-radius: 16px; background: #fff; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }.role-selection-options button:hover { border-color: var(--primary); box-shadow: 0 10px 24px rgba(58,42,106,.1); transform: translateY(-2px); }.role-selection-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; color: var(--primary); background: var(--primary-bg); }.role-selection-options strong { display: block; font-size: 15px; }.role-selection-options small { display: block; margin-top: 4px; color: var(--text-secondary); font-size: 11px; line-height: 1.45; }.role-selection-options b { color: var(--primary); font-size: 20px; }
+.role-selection-card { color: #382417; }
+.role-selection-brand strong { color: #382417; }
+.role-selection-copy h1 { color: #382417; }
+.role-selection-brand small, .role-selection-copy p { color: #857567; }
+.role-selection-options button, .role-selection-options strong { color: #382417; }
+.role-selection-options button { background: #FFFDF8; }
+.role-selection-options small { color: #857567; }
+.role-selection-options > button > span > small { color: #6B5A4C !important; }
+.role-selection-options b { color: #6D28D9; }
+html[data-theme='dark'] .role-selection-card { color: #FFF8E8; }
+html[data-theme='dark'] .role-selection-brand strong, html[data-theme='dark'] .role-selection-copy h1 { color: #FFF8E8; }
+html[data-theme='dark'] .role-selection-brand small, html[data-theme='dark'] .role-selection-copy p { color: #D8C8B5; }
 @media (max-width: 640px) { .role-selection-card { padding: 28px 20px; }.role-selection-copy { margin-top: 42px; }.role-selection-copy h1 { font-size: 34px; }.role-selection-options { grid-template-columns: 1fr; } }
 .my-account-profile-card { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .my-account-avatar, .my-account-history-avatar { display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 58px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-size: 18px; font-weight: 800; }
@@ -17115,6 +17127,11 @@ button.apt-week-day:focus-visible {
 .tbq-page {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 16px 20px 24px;
   height: auto;
   min-height: 100%;
   overflow: visible;
@@ -17358,6 +17375,10 @@ button.apt-week-day:focus-visible {
   .tbq-page .question-card__details p { margin-top: 4px; }
   .tbq-page .question-table-pagination { padding: 7px 9px; }
   .tbq-question-list-section .tbq-question-groups { gap: 14px; padding-right: 2px; }
+}
+
+@media (max-width: 768px) {
+  .tbq-page { padding: 14px 14px 20px; }
 }
 
 /* ---------- Question History page scope ----------

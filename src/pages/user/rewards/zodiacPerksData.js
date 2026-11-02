@@ -1,19 +1,20 @@
 // User side Perks & Benefits data for 12 Zodiac Signs and Jyotish Panchangam Specializations
 // Structured Bento-Grid Data with Pillars, Lucky Tokens, and Sacred Remedy Checklists
+import { getZodiacDateRange } from '../../../data/zodiacDateRanges.js'
 
 export const ZODIACS = [
-  { sign: 'Aries', symbol: '♈', en: 'Aries', rasi: 'Mesham', element: 'Fire', dates: 'Mar 21 - Apr 19', ruler: 'Mars', luckyColor: 'Red', luckyHex: '#ef4444', luckyNumber: 9, direction: 'East', muhurta: '08:30 AM - 10:15 AM' },
-  { sign: 'Taurus', symbol: '♉', en: 'Taurus', rasi: 'Rishabam', element: 'Earth', dates: 'Apr 20 - May 20', ruler: 'Venus', luckyColor: 'Emerald Green', luckyHex: '#10b981', luckyNumber: 6, direction: 'North-East', muhurta: '11:15 AM - 01:00 PM' },
-  { sign: 'Gemini', symbol: '♊', en: 'Gemini', rasi: 'Mithunam', element: 'Air', dates: 'May 21 - Jun 20', ruler: 'Mercury', luckyColor: 'Golden Yellow', luckyHex: '#f59e0b', luckyNumber: 5, direction: 'North', muhurta: '09:00 AM - 10:45 AM' },
-  { sign: 'Cancer', symbol: '♋', en: 'Cancer', rasi: 'Kadagam', element: 'Water', dates: 'Jun 21 - Jul 22', ruler: 'Moon', luckyColor: 'Pearl Silver', luckyHex: '#cbd5e1', luckyNumber: 2, direction: 'North-West', muhurta: '07:15 PM - 08:45 PM' },
-  { sign: 'Leo', symbol: '♌', en: 'Leo', rasi: 'Simmam', element: 'Fire', dates: 'Jul 23 - Aug 22', ruler: 'Sun', luckyColor: 'Radiant Gold', luckyHex: '#eab308', luckyNumber: 1, direction: 'East', muhurta: '06:30 AM - 08:00 AM' },
-  { sign: 'Virgo', symbol: '♍', en: 'Virgo', rasi: 'Kanni', element: 'Earth', dates: 'Aug 23 - Sep 22', ruler: 'Mercury', luckyColor: 'Royal Navy', luckyHex: '#1e3a8a', luckyNumber: 5, direction: 'South', muhurta: '10:00 AM - 11:30 AM' },
-  { sign: 'Libra', symbol: '♎', en: 'Libra', rasi: 'Thulam', element: 'Air', dates: 'Sep 23 - Oct 22', ruler: 'Venus', luckyColor: 'Rose Pink', luckyHex: '#ec4899', luckyNumber: 7, direction: 'West', muhurta: '04:00 PM - 05:30 PM' },
-  { sign: 'Scorpio', symbol: '♏', en: 'Scorpio', rasi: 'Viruchigam', element: 'Water', dates: 'Oct 23 - Nov 21', ruler: 'Pluto & Mars', luckyColor: 'Deep Maroon', luckyHex: '#991b1b', luckyNumber: 8, direction: 'North', muhurta: '08:00 PM - 09:30 PM' },
-  { sign: 'Sagittarius', symbol: '♐', en: 'Sagittarius', rasi: 'Dhanusu', element: 'Fire', dates: 'Nov 22 - Dec 21', ruler: 'Jupiter', luckyColor: 'Royal Purple', luckyHex: '#8b5cf6', luckyNumber: 3, direction: 'North-East', muhurta: '10:30 AM - 12:15 PM' },
-  { sign: 'Capricorn', symbol: '♑', en: 'Capricorn', rasi: 'Magaram', element: 'Earth', dates: 'Dec 22 - Jan 19', ruler: 'Saturn', luckyColor: 'Slate Brown', luckyHex: '#78350f', luckyNumber: 4, direction: 'South', muhurta: '02:00 PM - 03:45 PM' },
-  { sign: 'Aquarius', symbol: '♒', en: 'Aquarius', rasi: 'Kumbam', element: 'Air', dates: 'Jan 20 - Feb 18', ruler: 'Saturn & Uranus', luckyColor: 'Electric Cyan', luckyHex: '#06b6d4', luckyNumber: 11, direction: 'West', muhurta: '03:15 PM - 05:00 PM' },
-  { sign: 'Pisces', symbol: '♓', en: 'Pisces', rasi: 'Meenam', element: 'Water', dates: 'Feb 19 - Mar 20', ruler: 'Jupiter & Neptune', luckyColor: 'Sea Green', luckyHex: '#059669', luckyNumber: 7, direction: 'North-East', muhurta: '06:00 AM - 07:30 AM' },
+  { sign: 'Aries', symbol: '♈', en: 'Aries', rasi: 'Mesham', element: 'Fire', dates: getZodiacDateRange('Aries'), ruler: 'Mars', luckyColor: 'Red', luckyHex: '#ef4444', luckyNumber: 9, direction: 'East', muhurta: '08:30 AM - 10:15 AM' },
+  { sign: 'Taurus', symbol: '♉', en: 'Taurus', rasi: 'Rishabam', element: 'Earth', dates: getZodiacDateRange('Taurus'), ruler: 'Venus', luckyColor: 'Emerald Green', luckyHex: '#10b981', luckyNumber: 6, direction: 'North-East', muhurta: '11:15 AM - 01:00 PM' },
+  { sign: 'Gemini', symbol: '♊', en: 'Gemini', rasi: 'Mithunam', element: 'Air', dates: getZodiacDateRange('Gemini'), ruler: 'Mercury', luckyColor: 'Golden Yellow', luckyHex: '#f59e0b', luckyNumber: 5, direction: 'North', muhurta: '09:00 AM - 10:45 AM' },
+  { sign: 'Cancer', symbol: '♋', en: 'Cancer', rasi: 'Kadagam', element: 'Water', dates: getZodiacDateRange('Cancer'), ruler: 'Moon', luckyColor: 'Pearl Silver', luckyHex: '#cbd5e1', luckyNumber: 2, direction: 'North-West', muhurta: '07:15 PM - 08:45 PM' },
+  { sign: 'Leo', symbol: '♌', en: 'Leo', rasi: 'Simmam', element: 'Fire', dates: getZodiacDateRange('Leo'), ruler: 'Sun', luckyColor: 'Radiant Gold', luckyHex: '#eab308', luckyNumber: 1, direction: 'East', muhurta: '06:30 AM - 08:00 AM' },
+  { sign: 'Virgo', symbol: '♍', en: 'Virgo', rasi: 'Kanni', element: 'Earth', dates: getZodiacDateRange('Virgo'), ruler: 'Mercury', luckyColor: 'Royal Navy', luckyHex: '#1e3a8a', luckyNumber: 5, direction: 'South', muhurta: '10:00 AM - 11:30 AM' },
+  { sign: 'Libra', symbol: '♎', en: 'Libra', rasi: 'Thulam', element: 'Air', dates: getZodiacDateRange('Libra'), ruler: 'Venus', luckyColor: 'Rose Pink', luckyHex: '#ec4899', luckyNumber: 7, direction: 'West', muhurta: '04:00 PM - 05:30 PM' },
+  { sign: 'Scorpio', symbol: '♏', en: 'Scorpio', rasi: 'Viruchigam', element: 'Water', dates: getZodiacDateRange('Scorpio'), ruler: 'Pluto & Mars', luckyColor: 'Deep Maroon', luckyHex: '#991b1b', luckyNumber: 8, direction: 'North', muhurta: '08:00 PM - 09:30 PM' },
+  { sign: 'Sagittarius', symbol: '♐', en: 'Sagittarius', rasi: 'Dhanusu', element: 'Fire', dates: getZodiacDateRange('Sagittarius'), ruler: 'Jupiter', luckyColor: 'Royal Purple', luckyHex: '#8b5cf6', luckyNumber: 3, direction: 'North-East', muhurta: '10:30 AM - 12:15 PM' },
+  { sign: 'Capricorn', symbol: '♑', en: 'Capricorn', rasi: 'Magaram', element: 'Earth', dates: getZodiacDateRange('Capricorn'), ruler: 'Saturn', luckyColor: 'Slate Brown', luckyHex: '#78350f', luckyNumber: 4, direction: 'South', muhurta: '02:00 PM - 03:45 PM' },
+  { sign: 'Aquarius', symbol: '♒', en: 'Aquarius', rasi: 'Kumbam', element: 'Air', dates: getZodiacDateRange('Aquarius'), ruler: 'Saturn & Uranus', luckyColor: 'Electric Cyan', luckyHex: '#06b6d4', luckyNumber: 11, direction: 'West', muhurta: '03:15 PM - 05:00 PM' },
+  { sign: 'Pisces', symbol: '♓', en: 'Pisces', rasi: 'Meenam', element: 'Water', dates: getZodiacDateRange('Pisces'), ruler: 'Jupiter & Neptune', luckyColor: 'Sea Green', luckyHex: '#059669', luckyNumber: 7, direction: 'North-East', muhurta: '06:00 AM - 07:30 AM' },
 ]
 
 export const RASI_MAP = {

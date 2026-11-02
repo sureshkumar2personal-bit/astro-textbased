@@ -44,7 +44,6 @@ export const SERVICE_DEFINITIONS = [
 export const PRICING_FIELDS = [
   { key: 'chat', label: 'Chat', suffix: 'per minute' },
   { key: 'voice', label: 'Voice', suffix: 'per minute' },
-  { key: 'video', label: 'Video', suffix: 'per minute' },
   { key: 'question', label: 'Question', suffix: 'fixed price' },
   { key: 'live', label: 'Live Session', suffix: 'session price' },
 ]

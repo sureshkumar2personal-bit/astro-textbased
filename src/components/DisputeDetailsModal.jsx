@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import StatusBadge from './StatusBadge.jsx'
@@ -32,12 +32,13 @@ function ContentPreview({ content, title, onViewFull, quoted = false, className 
   )
 }
 
-export default function DisputeDetailsModal({ question, onClose, onResponded }) {
+export default function DisputeDetailsModal({ question, onClose, onResponded, inline = false }) {
   const { actions } = useAppData()
   const [response, setResponse] = useState(question?.dispute?.response || '')
   const [status, setStatus] = useState(question?.dispute?.status || 'Open')
   const [attachmentOpen, setAttachmentOpen] = useState(false)
   const [fullContent, setFullContent] = useState(null)
+  const inlineRef = useRef(null)
 
   useEffect(() => {
     setResponse(question?.dispute?.response || '')
@@ -48,6 +49,10 @@ export default function DisputeDetailsModal({ question, onClose, onResponded }) 
 
   useEffect(() => {
     if (!questionId) return undefined
+    if (inline) {
+      const frame = window.requestAnimationFrame(() => inlineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+      return () => window.cancelAnimationFrame(frame)
+    }
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const closeOnEscape = (event) => {
@@ -80,11 +85,9 @@ export default function DisputeDetailsModal({ question, onClose, onResponded }) 
     if (onResponded) onResponded()
   }
 
-  return (
-    <>
-      {createPortal(
-        <div className="modal-overlay" onClick={onClose}>
-          <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+  const disputeContent = (
+    <div ref={inlineRef} className={inline ? 'tbq-inline-answer tbq-inline-dispute' : 'modal-overlay'} onClick={inline ? undefined : onClose}>
+          <div className={inline ? 'tbq-inline-answer__card' : 'modal-card modal-card--scroll'} style={inline ? undefined : { width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
             <div className="modal-card__header flex items-center justify-between gap-4">
               <div style={{ flex: '1 1 200px', minWidth: 0 }}>
                 <div className="astrologer-modal-title">Dispute Details</div>
@@ -103,10 +106,14 @@ export default function DisputeDetailsModal({ question, onClose, onResponded }) 
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleShieldIcon size={14} />User Details</div>
                 <div className="astrologer-modal-highlight astrologer-modal-details-grid">
                   <div><strong>Name</strong><div className="muted">{question.user}</div></div>
+                  <div><strong>Dispute ID</strong><div className="muted">DSP-{question.id}</div></div>
                   <div><strong>Question ID</strong><div className="muted">{question.id}</div></div>
                   <div><strong>Question Type</strong><div className="muted">{question.type}</div></div>
-                  <div><strong>Category</strong><div className="muted">{question.category}</div></div>
-                  <div><strong>Raised On</strong><div className="muted">{question.raised}</div></div>
+                  <div><strong>Dispute Category</strong><div className="muted">{question.dispute.category || question.category || 'General'}</div></div>
+                  <div><strong>Raised By</strong><div className="muted">{question.dispute.raisedBy || 'User'}</div></div>
+                  <div><strong>Complaint Against</strong><div className="muted">{question.dispute.target || 'Astrologer'}</div></div>
+                  <div><strong>Date Raised</strong><div className="muted">{question.dispute.raisedAt || question.raised || '—'}</div></div>
+                  <div><strong>Dispute Status</strong><div className="muted">{status}</div></div>
                 </div>
               </div>
 
@@ -127,8 +134,10 @@ export default function DisputeDetailsModal({ question, onClose, onResponded }) 
               <div className="astrologer-modal-section">
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><TempleShieldIcon size={14} />User Dispute Details</div>
                 <div className="astrologer-modal-highlight" style={{ display: 'grid', gap: 12 }}>
-                  <div><strong>Dispute Content</strong><ContentPreview content={[question.dispute.reason, question.dispute.description].filter(Boolean).join('. ')} title="User Dispute Details" className="muted mt-1" onViewFull={setFullContent} /></div>
+                  <div><strong>Complaint Description</strong><ContentPreview content={question.dispute.description || question.dispute.reason} title="Complaint Description" className="muted mt-1" onViewFull={setFullContent} /></div>
                   {question.dispute.attachment && <button className="option-pill" style={{ width: 'fit-content' }} type="button" onClick={() => setAttachmentOpen(true)}><span className="option-mark"><TempleScrollIcon size={14} /></span>Open {question.dispute.attachment}</button>}
+                  {question.dispute.adminRemarks && <div><strong>Admin Remarks</strong><ContentPreview content={question.dispute.adminRemarks} title="Admin Remarks" className="muted mt-1" onViewFull={setFullContent} /></div>}
+                  {question.dispute.resolution && <div><strong>Resolution Details</strong><ContentPreview content={question.dispute.resolution} title="Resolution Details" className="muted mt-1" onViewFull={setFullContent} /></div>}
                 </div>
               </div>
 
@@ -154,9 +163,12 @@ export default function DisputeDetailsModal({ question, onClose, onResponded }) 
               </>}
             </div>
           </div>
-        </div>,
-        document.body,
-      )}
+        </div>
+  )
+
+  return (
+    <>
+      {inline ? disputeContent : createPortal(disputeContent, document.body)}
 
       {fullContent && createPortal(
         <div className="modal-overlay" style={{ zIndex: 70 }} onClick={() => setFullContent(null)}>

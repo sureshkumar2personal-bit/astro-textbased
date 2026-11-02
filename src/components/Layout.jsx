@@ -68,8 +68,8 @@ const ROLE_CONFIG = {
       // Single Live entry: /live-session redirects to setup and every
       // /live-session/* page keeps it highlighted; the sub-pages stay routable.
       { to: 'live-session', label: 'Live', icon: Radio },
-      // Single Benefit Management entry: /perks-benefits redirects to the combined page and
-      // every /perks-benefits/* page keeps it highlighted; the sub-pages stay routable.
+      // Single Benefit Management entry: /perks-benefits opens the landing page and
+      // every /perks-benefits/* page keeps it highlighted; the editor stays at /settings.
       { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
       { to: 'dispute-management', label: 'Dispute Management', icon: Gavel },
       // Single Wallet entry: /wallet redirects to the overview and every
