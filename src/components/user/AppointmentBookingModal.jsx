@@ -2,7 +2,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, CircleAlert, Clock3, Copy, PhoneCall, Sparkles, WalletCards, X } from 'lucide-react'
-import { MOCK_FULL_DATES, MOCK_SEPTEMBER_AVAILABILITY } from '../../pages/user/appointments/bookingAstrologerData.js'
+import { BOOKING_WINDOW_END, MOCK_FULL_DATES, MOCK_SEPTEMBER_AVAILABILITY } from '../../pages/user/appointments/bookingAstrologerData.js'
 
 const PRICE = 499
 const TYPE = 'Audio Call'
@@ -64,7 +64,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
-  const bookingWindowEnd = '2026-09-30'
+  const bookingWindowEnd = BOOKING_WINDOW_END
   const usesConfiguredAvailability = Object.keys(availability || {}).length > 0
   const calendarAvailability = useMemo(() => usesConfiguredAvailability ? availability : MOCK_SEPTEMBER_AVAILABILITY, [availability, usesConfiguredAvailability])
   const firstDate = useMemo(() => Object.keys(calendarAvailability).filter((date) => slotsForDate(calendarAvailability, date, today, bookingWindowEnd).length && !MOCK_FULL_DATES.has(date)).sort()[0] || '', [calendarAvailability, today, bookingWindowEnd])
@@ -134,8 +134,19 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
       setNotice('Insufficient wallet balance. Please add money before paying.')
       return
     }
-    const slotPayloads = selected.map((slot) => ({ astrologerId: astrologer.id, dateIso: slot.date, time: slot.time }))
-    const isLocallyAvailable = (slot) => dateSlots(slot.date).includes(slot.time) && !booked.has(`${slot.date}|${slot.time}`)
+    const slotPayloads = selected.map((slot) => ({
+      astrologerId: astrologer.id,
+      date: slot.date,
+      dateIso: slot.date,
+      time: slot.time,
+    }))
+    const isLocallyAvailable = (slot) => {
+      const slotDate = slot.date || slot.dateIso
+      return (
+        (dateSlots(slotDate).includes(slot.time) || (initialSelectedSlots || []).some((s) => (s.date || s.dateIso) === slotDate && s.time === slot.time)) &&
+        !booked.has(`${slotDate}|${slot.time}`)
+      )
+    }
     const isAvailable = (slot) => publishedAvailability && typeof actions.isAppointmentSlotAvailable === 'function'
       ? actions.isAppointmentSlotAvailable(slot)
       : isLocallyAvailable(slot)
