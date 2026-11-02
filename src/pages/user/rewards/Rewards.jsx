@@ -232,7 +232,6 @@ function AppointmentSection({ rewards, expand, onViewMore, viewMoreLabel }) {
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><CalendarCheck size={20} /> {CATEGORY_META.appointments.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.appointments.description}</p>
       </div>
       <Reveal
         items={rewards}
@@ -289,7 +288,6 @@ function ContentSection({ rewards, openContent, expand, onViewMore, viewMoreLabe
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><Newspaper size={20} /> {CATEGORY_META.content.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.content.description}</p>
       </div>
       <Reveal
         items={rewards}
@@ -334,7 +332,6 @@ function BenefitSection({ rewards, expand, onViewMore }) {
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><Ticket size={20} /> {CATEGORY_META.benefits.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.benefits.description}</p>
       </div>
       <Reveal
         items={rewards}

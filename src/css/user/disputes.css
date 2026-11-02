@@ -1,7 +1,1092 @@
-/* Disputes Page Styles - Raise a dispute and track dispute status
- * Main classes: .dispute*, .raise-dispute*
- * Note: Disputes CSS was not found in src/index.css - this file is a placeholder for future implementation
- * Main functionality: Dispute form submission and dispute status tracking
- */
+/* ==========================================================================
+   User Dispute Management Styles
+   Dedicated boxes, structured tables, timeline, and dispute submission UI
+   ========================================================================== */
 
-/* Placeholder for disputes CSS - to be populated when disputes feature is implemented */
+.user-disputes-page {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 8px 4px 48px;
+  color: var(--ink);
+}
+
+/* Page Header Action */
+.user-disputes-page .raise-complaint-trigger {
+  min-height: 42px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Top Box: Dispute History Stat Cards Grid
+   -------------------------------------------------------------------------- */
+.user-disputes-page .dispute-summary-card {
+  margin-bottom: 20px;
+}
+
+.user-disputes-page .dispute-summary-card .section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.user-disputes-page .dispute-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.user-disputes-page .stat-card-clickable {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 74px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  width: 100%;
+}
+
+.user-disputes-page .stat-card-clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  border-color: var(--primary);
+}
+
+.user-disputes-page .stat-card-clickable.is-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 2px var(--primary-bg);
+}
+
+.user-disputes-page .stat-card-clickable .stat-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.user-disputes-page .stat-card-clickable .stat-icon.tone-violet {
+  background: rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
+}
+
+.user-disputes-page .stat-card-clickable .stat-icon.tone-red {
+  background: rgba(239, 68, 68, 0.14);
+  color: #dc2626;
+}
+
+.user-disputes-page .stat-card-clickable .stat-icon.tone-amber {
+  background: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+}
+
+.user-disputes-page .stat-card-clickable .stat-icon.tone-green {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+}
+
+.user-disputes-page .stat-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-disputes-page .stat-card-body .stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.user-disputes-page .stat-card-body .stat-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Disputes Workspace Box & Toolbar
+   -------------------------------------------------------------------------- */
+.user-disputes-page .disputes-section {
+  padding: 20px 22px;
+  border-radius: 16px;
+  margin-bottom: 28px;
+}
+
+.user-disputes-page .disputes-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.user-disputes-page .disputes-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.user-disputes-page .disputes-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.user-disputes-page .disputes-service-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.user-disputes-page .disputes-service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.user-disputes-page .disputes-service-pill:hover {
+  border-color: var(--primary);
+}
+
+.user-disputes-page .disputes-service-pill.is-active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+.user-disputes-page .disputes-service-pill .pill-count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+}
+
+.user-disputes-page .disputes-service-pill.is-active .pill-count {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.user-disputes-page .disputes-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.user-disputes-page .disputes-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 250px;
+  height: 38px;
+}
+
+.user-disputes-page .disputes-search-box svg {
+  position: absolute;
+  left: 12px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.user-disputes-page .disputes-search-box input {
+  width: 100%;
+  height: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.user-disputes-page .disputes-search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-bg);
+}
+
+.user-disputes-page .disputes-filter-select {
+  height: 40px;
+  padding: 6px 36px 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2365584b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-filter-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23fef3c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.user-disputes-page .disputes-filter-select:focus {
+  border-color: var(--primary);
+}
+
+.user-disputes-page .disputes-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.user-disputes-page .disputes-view-toggle button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.user-disputes-page .disputes-view-toggle button.is-active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Structured Table View
+   -------------------------------------------------------------------------- */
+.user-disputes-page .disputes-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.user-disputes-page .disputes-table {
+  width: 100%;
+  min-width: 1060px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.user-disputes-page .disputes-table-head {
+  display: grid;
+  grid-template-columns: 46px minmax(135px, 1.1fr) 95px minmax(140px, 1.2fr) minmax(115px, 1fr) minmax(110px, 1fr) minmax(115px, 1fr) 110px 125px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.user-disputes-page .disputes-table-row {
+  display: grid;
+  grid-template-columns: 46px minmax(135px, 1.1fr) 95px minmax(140px, 1.2fr) minmax(115px, 1fr) minmax(110px, 1fr) minmax(115px, 1fr) 110px 125px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-primary);
+  transition: background 0.12s ease;
+}
+
+.user-disputes-page .disputes-table-row:last-child {
+  border-bottom: none;
+}
+
+.user-disputes-page .disputes-table-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.user-disputes-page .dispute-serial {
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.user-disputes-page .dispute-id-cell {
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: monospace;
+  font-size: 12.5px;
+}
+
+.user-disputes-page .dispute-against-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.user-disputes-page .dispute-against-astrologer {
+  background: rgba(91, 33, 182, 0.12);
+  color: #7c3aed;
+}
+
+.user-disputes-page .dispute-against-platform {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.user-disputes-page .dispute-service-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-disputes-page .dispute-service-cell svg {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.user-disputes-page .dispute-provider-cell {
+  font-weight: 700;
+}
+
+.user-disputes-page .dispute-ref-cell {
+  font-family: monospace;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.user-disputes-page .dispute-date-cell {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.user-disputes-page .dispute-view-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.user-disputes-page .dispute-view-button:hover,
+.user-disputes-page .dispute-view-button.is-active {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   Extended Row Panel (Inline Expandable Drawer instead of Popup)
+   -------------------------------------------------------------------------- */
+/* Status-specific border and accent colors for extended row */
+.user-disputes-page .disputes-row--under-review.is-expanded,
+.user-disputes-page .disputes-row-expanded-panel--under-review,
+.user-disputes-page .dispute-card-item--under-review.is-expanded {
+  --dispute-status-border: rgba(124, 58, 237, 0.4);
+  --dispute-status-border-light: rgba(124, 58, 237, 0.2);
+  --dispute-accent: #7c3aed;
+  --dispute-accent-bg: #fcfaff;
+}
+
+.user-disputes-page .disputes-row--resolved.is-expanded,
+.user-disputes-page .disputes-row-expanded-panel--resolved,
+.user-disputes-page .dispute-card-item--resolved.is-expanded {
+  --dispute-status-border: rgba(16, 185, 129, 0.45);
+  --dispute-status-border-light: rgba(16, 185, 129, 0.22);
+  --dispute-accent: #10b981;
+  --dispute-accent-bg: #f6fdf9;
+}
+
+.user-disputes-page .disputes-row--open.is-expanded,
+.user-disputes-page .disputes-row--pending.is-expanded,
+.user-disputes-page .disputes-row-expanded-panel--open,
+.user-disputes-page .disputes-row-expanded-panel--pending,
+.user-disputes-page .dispute-card-item--open.is-expanded,
+.user-disputes-page .dispute-card-item--pending.is-expanded {
+  --dispute-status-border: rgba(245, 158, 11, 0.45);
+  --dispute-status-border-light: rgba(245, 158, 11, 0.22);
+  --dispute-accent: #f59e0b;
+  --dispute-accent-bg: #fffdf7;
+}
+
+.user-disputes-page .disputes-row--cancelled.is-expanded,
+.user-disputes-page .disputes-row--rejected.is-expanded,
+.user-disputes-page .disputes-row-expanded-panel--cancelled,
+.user-disputes-page .disputes-row-expanded-panel--rejected,
+.user-disputes-page .dispute-card-item--cancelled.is-expanded,
+.user-disputes-page .dispute-card-item--rejected.is-expanded {
+  --dispute-status-border: rgba(239, 68, 68, 0.45);
+  --dispute-status-border-light: rgba(239, 68, 68, 0.22);
+  --dispute-accent: #ef4444;
+  --dispute-accent-bg: #fffaf9;
+}
+
+.user-disputes-page .disputes-table-row.is-expanded {
+  background: var(--dispute-accent-bg, var(--primary-bg)) !important;
+  border-left: 4px solid var(--dispute-accent, var(--dispute-theme-color, #7c3aed)) !important;
+  border-top: 1.5px solid var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.35))) !important;
+  border-right: 1.5px solid var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.35))) !important;
+  border-bottom: 1px dashed var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.35))) !important;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.user-disputes-page .disputes-row-expanded-panel {
+  display: block;
+  width: 100%;
+  padding: 22px 24px;
+  background: var(--surface, #ffffff);
+  border-left: 4px solid var(--dispute-accent, var(--dispute-theme-color, #7c3aed));
+  border-right: 1.5px solid var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.35)));
+  border-bottom: 2px solid var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.4)));
+  border-top: none;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  animation: disputeRowExpand 0.2s ease-out;
+}
+
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-dossier-card,
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-timeline-card {
+  border: 1.5px solid var(--dispute-status-border-light, rgba(124, 58, 237, 0.2));
+  border-radius: 14px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-service-context {
+  border: 1px solid var(--dispute-status-border-light, rgba(124, 58, 237, 0.18));
+}
+
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-statement-box > div {
+  border: 1px solid var(--dispute-status-border-light, rgba(124, 58, 237, 0.24));
+}
+
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-evidence-file {
+  border: 1px solid var(--dispute-status-border-light, rgba(124, 58, 237, 0.22));
+}
+
+.user-disputes-page .disputes-row-expanded-panel .user-dispute-response-box {
+  border: 1px solid var(--dispute-status-border-light, rgba(124, 58, 237, 0.25));
+}
+
+@keyframes disputeRowExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-disputes-page .disputes-row-expanded-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-disputes-page .disputes-row-expanded-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Card View Expanded Panel */
+.user-disputes-page .dispute-card-item.is-expanded {
+  border: 1.5px solid var(--dispute-status-border, var(--dispute-theme-color, #7c3aed));
+  border-left: 4px solid var(--dispute-accent, var(--dispute-theme-color, #7c3aed));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.user-disputes-page .disputes-card-expanded-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--dispute-status-border, var(--dispute-theme-color, rgba(124, 58, 237, 0.3)));
+  animation: disputeRowExpand 0.2s ease-out;
+}
+
+/* --------------------------------------------------------------------------
+   Cards View Grid
+   -------------------------------------------------------------------------- */
+.user-disputes-page .disputes-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.user-disputes-page .dispute-card-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border-radius: 14px;
+}
+
+.user-disputes-page .dispute-card-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.user-disputes-page .dispute-card-item-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.user-disputes-page .dispute-card-item-reason {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* --------------------------------------------------------------------------
+   Dispute Details Executive Modal / Drawer
+   Two-column dossier with Status Timeline
+   -------------------------------------------------------------------------- */
+.user-dispute-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+
+.user-dispute-modal-card {
+  position: relative;
+  width: min(980px, 100%);
+  max-height: min(880px, calc(100vh - 40px));
+  margin: auto;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-dispute-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.user-dispute-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.user-dispute-details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(330px, 0.95fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.user-dispute-dossier-card {
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.user-dispute-dossier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-dispute-dossier-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-dispute-dossier-id svg {
+  color: var(--primary);
+}
+
+.user-dispute-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 6px 0;
+}
+
+.user-dispute-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.user-dispute-meta-item span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.user-dispute-meta-item strong {
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dispute-service-context {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border);
+}
+
+.user-dispute-service-context .context-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.user-dispute-statement-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-dispute-statement-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.user-dispute-statement-box p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.user-dispute-evidence-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-dispute-evidence-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.user-dispute-evidence-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+  width: fit-content;
+}
+
+.user-dispute-evidence-file svg {
+  color: var(--primary);
+}
+
+/* --------------------------------------------------------------------------
+   Timeline Box (Status Progression)
+   -------------------------------------------------------------------------- */
+.user-dispute-timeline-card {
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.user-dispute-timeline-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.user-dispute-timeline-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.user-dispute-timeline-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 64px;
+  color: var(--text-primary);
+}
+
+.user-dispute-timeline-step:not(:last-child)::after {
+  position: absolute;
+  top: 20px;
+  bottom: -2px;
+  left: 9px;
+  width: 2px;
+  background: var(--border);
+  content: '';
+}
+
+.user-dispute-timeline-step.is-complete:not(:last-child)::after {
+  background: var(--primary);
+}
+
+.user-dispute-timeline-dot {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--border);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.user-dispute-timeline-step.is-complete .user-dispute-timeline-dot {
+  background: var(--primary);
+}
+
+.user-dispute-timeline-step.is-current .user-dispute-timeline-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+.user-dispute-timeline-step strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.user-dispute-timeline-step p {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.user-dispute-timeline-step time {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.user-dispute-response-box {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--primary-bg);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-dispute-response-box strong {
+  font-size: 13px;
+  color: var(--primary);
+}
+
+.user-dispute-response-box p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.user-dispute-resolution-box {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-dispute-resolution-box strong {
+  font-size: 13px;
+  color: #059669;
+}
+
+.user-dispute-resolution-box p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.user-dispute-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Raise Dispute Modal Box
+   -------------------------------------------------------------------------- */
+.raise-dispute-type-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.raise-dispute-type-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.16s ease;
+}
+
+.raise-dispute-type-card:hover {
+  border-color: var(--primary);
+}
+
+.raise-dispute-type-card.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  box-shadow: 0 0 0 2px var(--primary-bg);
+}
+
+.raise-dispute-type-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.raise-dispute-type-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.raise-dispute-type-copy strong {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.raise-dispute-type-copy small {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   Eligible Services Box
+   -------------------------------------------------------------------------- */
+.eligible-services-box {
+  margin-top: 32px;
+}
+
+.eligible-services-box .section-title-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.eligible-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.eligible-service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.eligible-service-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Layout Overrides
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .user-disputes-page .dispute-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .user-dispute-details-layout {
+    grid-template-columns: 1fr;
+  }
+  .user-disputes-page .disputes-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .user-disputes-page .disputes-controls {
+    margin-left: 0;
+    width: 100%;
+  }
+  .user-disputes-page .disputes-search-box {
+    flex: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .user-disputes-page .dispute-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .user-disputes-page .stat-card-clickable {
+    padding: 10px;
+    gap: 10px;
+  }
+  .user-disputes-page .stat-card-body .stat-value {
+    font-size: 20px;
+  }
+  .user-disputes-page .stat-card-body .stat-label {
+    font-size: 11px;
+  }
+  .raise-dispute-type-options {
+    grid-template-columns: 1fr;
+  }
+  .user-dispute-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

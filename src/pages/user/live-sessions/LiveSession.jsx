@@ -9,15 +9,19 @@ import {
   Crown,
   Eye,
   Gift,
+  LayoutGrid,
+  List,
   Lock,
   MicOff,
   Play,
   Radio,
+  RotateCcw,
   Search,
   Send,
   Sparkles,
   Users,
   Video,
+  X,
 } from 'lucide-react'
 import './userlive.css'
 import Card from '../../../components/ui/Card.jsx'
@@ -249,6 +253,118 @@ function UserLiveSessionCard({ session, access }) {
   )
 }
 
+function UserLiveSessionRow({ session, access }) {
+  const { actions, liveReminders } = useAppData()
+  const { toggleLiveReminder } = actions
+  const navigate = useNavigate()
+  const reminderSet = liveReminders.some((reminder) => reminder.sessionId === session.id)
+  const status = statusMeta(session)
+  const audience = audienceMeta(session)
+  const astrologerId = session.astrologerId
+  const to = `/user/live-session?id=${session.id}`
+
+  let actionLabel
+  let actionIcon = null
+  if (session.status === 'live') {
+    actionLabel = access.allowed ? 'Join Live' : 'View Session'
+    actionIcon = access.allowed ? <Play size={14} /> : <Lock size={14} />
+  } else if (session.status === 'upcoming') {
+    actionLabel = reminderSet ? 'Reminder Set' : 'Set Reminder'
+    actionIcon = reminderSet ? <Check size={14} /> : <BellRing size={14} />
+  } else {
+    actionLabel = 'View Details'
+    actionIcon = <ArrowRight size={14} />
+  }
+
+  const openSession = () => navigate(to)
+
+  return (
+    <div
+      className={`user-live-row${access.allowed ? '' : ' is-locked'}`}
+      role="link"
+      tabIndex={0}
+      onClick={(event) => {
+        if (event.target.closest('button')) return
+        openSession()
+      }}
+      onKeyDown={(event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && !event.target.closest('button')) {
+          event.preventDefault()
+          openSession()
+        }
+      }}
+    >
+      <div className="user-live-row__main">
+        <span className="user-live-avatar user-live-row__avatar">
+          {initials(astrologerNameFor(astrologerId))}
+        </span>
+        <div className="user-live-row__content">
+          <div className="user-live-row__badges">
+            <span className={`user-live-status user-live-status--${status.tone}`}>
+              <span /> {status.label}
+            </span>
+            <span className={`user-live-audience user-live-audience--${audience.tone}`}>
+              {audience.tone === 'subscribers' ? <Crown size={11} /> : audience.tone === 'followers' ? <Users size={11} /> : <Radio size={11} />}
+              {audience.label}
+            </span>
+            <span className="user-live-row__category">{session.category}</span>
+          </div>
+          <h3 className="user-live-row__title">{session.title}</h3>
+          <div className="user-live-row__meta">
+            <span className="user-live-row__astro-name">{astrologerNameFor(astrologerId)}</span>
+            <span className="user-live-row__dot">·</span>
+            {session.status === 'live' && session.startedAt ? (
+              <span className="user-live-row__time">
+                <Clock3 size={13} /> Started {startedAgo(session.startedAt)}
+              </span>
+            ) : (
+              <span className="user-live-row__time">
+                <Clock3 size={13} /> {session.status === 'upcoming' ? 'Starts' : 'Held on'} {formatSchedule(session.scheduledStartAt)}
+              </span>
+            )}
+            <span className="user-live-row__dot">·</span>
+            <span className="user-live-row__rate">
+              <Video size={13} /> ₹{session.rate}/min
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="user-live-row__side">
+        {session.description && (
+          <p className="user-live-row__desc" title={session.description}>
+            {session.description}
+          </p>
+        )}
+        {session.status === 'upcoming' ? (
+          <button
+            type="button"
+            className={`btn btn-sm ${reminderSet ? 'btn-outline is-reminder-set' : 'btn-primary'}`}
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              handleLiveReminder(session, reminderSet, toggleLiveReminder)
+            }}
+          >
+            {actionIcon} <span>{actionLabel}</span>
+          </button>
+        ) : session.status === 'live' ? (
+          <button
+            type="button"
+            className={`btn btn-sm ${access.allowed ? 'btn-primary' : 'btn-outline is-locked'}`}
+          >
+            {actionIcon} <span>{actionLabel}</span>
+          </button>
+        ) : (
+          <button type="button" className="btn btn-sm btn-outline">
+            <span>View Details</span> <ArrowRight size={13} />
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function UserLiveRoom({ session, onBack }) {
   const { currentUser } = useAuth()
   const { followedAstrologerIds, subscriptions, actions, liveReminders } = useAppData()
@@ -475,6 +591,7 @@ export default function LiveSession() {
   const [tab, setTab] = useState('all')
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('all')
+  const [viewMode, setViewMode] = useState('cards')
 
   const availableCategories = useMemo(() => {
     const seen = new Set()
@@ -534,10 +651,10 @@ export default function LiveSession() {
       )}
 
       <div className="user-live-controls">
-        <div className="user-live-tabs" role="tablist" aria-label="Filter live sessions">
+        <div className="user-live-segmented" role="tablist" aria-label="Filter live sessions">
           {[
             { key: 'all', label: 'All', count: astrologerLiveSessions.length },
-            { key: 'live', label: 'Live now', count: liveCount },
+            { key: 'live', label: 'Live now', count: liveCount, isLive: true },
             { key: 'upcoming', label: 'Upcoming', count: upcomingCount },
             { key: 'past', label: 'Past', count: pastCount },
           ].map((tabItem) => (
@@ -546,64 +663,119 @@ export default function LiveSession() {
               type="button"
               role="tab"
               aria-selected={tab === tabItem.key}
-              className={`user-live-tab${tab === tabItem.key ? ' is-active' : ''}`}
+              className={`user-live-segmented__tab${tab === tabItem.key ? ' is-active' : ''}`}
               onClick={() => setTab(tabItem.key)}
             >
-              {tabItem.label}
-              {tabItem.count > 0 && <span className="user-live-tab__count">{tabItem.count}</span>}
+              {tabItem.isLive && liveCount > 0 && <span className="user-live-pulse-dot" />}
+              <span>{tabItem.label}</span>
+              {tabItem.count > 0 && (
+                <span className="user-live-segmented__count">{tabItem.count}</span>
+              )}
             </button>
           ))}
         </div>
 
         <div className="user-live-toolbar">
-          <label className="user-live-search">
-            <Search size={16} />
+          {availableCategories.length > 0 && (
+            <div className="user-live-topic-filter">
+              <select
+                className="user-live-category-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                aria-label="Filter by topic"
+              >
+                <option value="all">All topics</option>
+                {availableCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="user-live-search-box">
+            <Search size={16} className="user-live-search-icon" />
             <input
+              type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search live sessions by topic, astrologer, or category..."
+              placeholder="Search live sessions..."
               aria-label="Search live sessions"
             />
             {query && (
-              <button type="button" aria-label="Clear search" onClick={() => setQuery('')}>
-                ×
-              </button>
-            )}
-          </label>
-          {availableCategories.length > 1 && (
-            <div className="user-live-chips" role="group" aria-label="Filter by category">
               <button
                 type="button"
-                className={`user-live-chip${category === 'all' ? ' is-active' : ''}`}
-                onClick={() => setCategory('all')}
+                className="user-live-search-clear"
+                aria-label="Clear search"
+                onClick={() => setQuery('')}
               >
-                All topics
+                <X size={12} />
               </button>
-              {availableCategories.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  className={`user-live-chip${category === name ? ' is-active' : ''}`}
-                  onClick={() => setCategory(category === name ? 'all' : name)}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
+            )}
+          </div>
+
+          {(tab !== 'all' || category !== 'all' || query) && (
+            <button
+              type="button"
+              className="user-live-reset-btn"
+              onClick={() => {
+                setTab('all')
+                setCategory('all')
+                setQuery('')
+              }}
+              title="Reset all filters"
+            >
+              <RotateCcw size={13} />
+              <span>Reset</span>
+            </button>
           )}
+
+          <div className="user-live-view-toggle" role="group" aria-label="View mode">
+            <button
+              type="button"
+              className={`user-live-view-btn${viewMode === 'cards' ? ' is-active' : ''}`}
+              onClick={() => setViewMode('cards')}
+              aria-label="Card view"
+              title="Card view"
+            >
+              <LayoutGrid size={16} />
+            </button>
+            <button
+              type="button"
+              className={`user-live-view-btn${viewMode === 'list' ? ' is-active' : ''}`}
+              onClick={() => setViewMode('list')}
+              aria-label="List view"
+              title="List view"
+            >
+              <List size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
       {visibleSessions.length ? (
-        <div className="user-live-grid">
-          {visibleSessions.map((item) => (
-            <UserLiveSessionCard
-              key={item.id}
-              session={item}
-              access={resolveAccess(item, { userId: currentUser?.id, followedAstrologerIds, subscriptions })}
-            />
-          ))}
-        </div>
+        viewMode === 'cards' ? (
+          <div className="user-live-grid">
+            {visibleSessions.map((item) => (
+              <UserLiveSessionCard
+                key={item.id}
+                session={item}
+                access={resolveAccess(item, { userId: currentUser?.id, followedAstrologerIds, subscriptions })}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="user-live-list">
+            {visibleSessions.map((item) => (
+              <UserLiveSessionRow
+                key={item.id}
+                session={item}
+                access={resolveAccess(item, { userId: currentUser?.id, followedAstrologerIds, subscriptions })}
+              />
+            ))}
+          </div>
+        )
       ) : (
         <Card className="user-live-empty">
           <Search size={22} />

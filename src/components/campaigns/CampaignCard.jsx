@@ -72,7 +72,7 @@ export default function CampaignCard({
   const style = tone ? campaignCardToneStyle(tone) || campaignCardStatusStyle(status) : campaignCardStatusStyle(status)
   return (
     <div
-      className="flex flex-col"
+      className="campaign-card flex flex-col"
       style={{
         padding: 22,
         borderRadius: 22,
@@ -104,6 +104,7 @@ export default function CampaignCard({
 
       {details.length > 0 && (
         <div
+          className="campaign-card-details"
           style={{
             display: 'flex',
             flexWrap: 'wrap',
@@ -111,7 +112,7 @@ export default function CampaignCard({
             padding: '12px 14px',
             borderRadius: 16,
             border: '1px solid var(--surface-border)',
-            background: 'rgba(255, 255, 255, 0.75)',
+            background: 'var(--surface-soft, rgba(255, 255, 255, 0.75))',
           }}
         >
           {details.map((detail) => <CampaignDetail key={detail.label} label={detail.label}>{detail.value}</CampaignDetail>)}

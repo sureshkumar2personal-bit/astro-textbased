@@ -80,6 +80,12 @@ export const mockAstrologerNotesByAppointmentId = {
     startedDate: '2026-09-28T00:00:00',
     dueDate: '2026-10-05T00:00:00',
   }),
+  'apt-user-04': notesFor({
+    title: 'Professional Progress Guidance',
+    topic: 'professional growth',
+    startedDate: '2026-09-28T00:00:00',
+    dueDate: '2026-10-05T00:00:00',
+  }),
   'apt-user-demo-04': notesFor({
     title: 'Professional Progress Guidance',
     topic: 'professional growth',

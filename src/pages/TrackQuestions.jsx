@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, ChevronRight, List, Grid2X2, Filter } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
@@ -78,7 +78,7 @@ const DEMO_QUESTION_BASE = {
   demo: true,
   attachments: [],
   previousQuestions: [],
-  history: ['Presentation-only demo record'],
+  history: ['Question received'],
   dispute: null,
 }
 
@@ -99,7 +99,7 @@ function buildDemoQuestions() {
     // Waiting for Answer
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900001',
+      id: 'QTN-2026-900001',
       userId: 'customer-demo-1',
       user: 'Priya V.',
       category: 'Health',
@@ -109,7 +109,7 @@ function buildDemoQuestions() {
       status: 'Pending',
       campaignId: 'july-premium',
       campaignName: 'Health Campaign',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(1, 9, 15),
       question: 'I have been feeling low on energy for a few weeks. Does my chart show a favourable window for recovery?',
       answer: '',
@@ -118,7 +118,7 @@ function buildDemoQuestions() {
     },
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900002',
+      id: 'QTN-2026-900002',
       userId: 'customer-demo-2',
       user: 'Kannan',
       category: 'Career',
@@ -127,7 +127,7 @@ function buildDemoQuestions() {
       status: 'In Progress',
       campaignId: 'festival-special',
       campaignName: 'Career Campaign',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(3, 13, 5),
       question: 'Is this a good month to negotiate a salary revision with my manager?',
       answer: '',
@@ -137,7 +137,7 @@ function buildDemoQuestions() {
     // Answered (inside the 7-day dispute window)
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900003',
+      id: 'QTN-2026-900003',
       userId: 'customer-demo-3',
       user: 'Meena R.',
       category: 'Marriage',
@@ -145,7 +145,7 @@ function buildDemoQuestions() {
       questionFor: 'Self',
       priority: 'High',
       status: 'Answered',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(2, 11, 20),
       question: 'When is a favourable time for my marriage discussions to move forward?',
       answer: 'The coming weeks favour a calm, well-prepared family conversation. Early mornings on a weekday are the most supportive for this.',
@@ -155,7 +155,7 @@ function buildDemoQuestions() {
     },
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900004',
+      id: 'QTN-2026-900004',
       userId: 'customer-demo-4',
       user: 'Arun',
       category: 'Business',
@@ -164,7 +164,7 @@ function buildDemoQuestions() {
       status: 'Answered',
       campaignId: 'vip-subscribers',
       campaignName: 'VIP Subscribers',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(5, 10, 10),
       question: 'Should I sign the new vendor agreement before the end of this month?',
       answer: 'Yes, the timing is supportive. Read the renewal clauses once more and confirm before the final week of the month.',
@@ -175,7 +175,7 @@ function buildDemoQuestions() {
     // Disputed
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900005',
+      id: 'QTN-2026-900005',
       userId: 'customer-demo-5',
       user: 'Devi',
       category: 'Health',
@@ -185,7 +185,7 @@ function buildDemoQuestions() {
       status: 'Disputed',
       campaignId: 'july-premium',
       campaignName: 'Health Campaign',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(6, 17, 25),
       question: 'Does my chart indicate a long-term recovery path for my health, or should I seek a second opinion?',
       answer: 'Your chart shows gradual improvement. Follow the suggested remedies for at least two months before reassessing.',
@@ -202,7 +202,7 @@ function buildDemoQuestions() {
     },
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900006',
+      id: 'QTN-2026-900006',
       userId: 'customer-demo-6',
       user: 'Arjun D.',
       category: 'Career',
@@ -211,7 +211,7 @@ function buildDemoQuestions() {
       status: 'Disputed',
       campaignId: 'festival-special',
       campaignName: 'Career Campaign',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(7, 14, 45),
       question: 'Is this the right time to accept the new role I was offered?',
       answer: 'The opportunity looks promising, but review the responsibilities carefully before deciding.',
@@ -229,7 +229,7 @@ function buildDemoQuestions() {
     // Resolved
     {
       ...DEMO_QUESTION_BASE,
-      id: 'QTN-DEMO-900007',
+      id: 'QTN-2026-900007',
       userId: 'customer-demo-7',
       user: 'Lakshmi',
       category: 'Career',
@@ -237,7 +237,7 @@ function buildDemoQuestions() {
       questionFor: 'Self',
       priority: 'High',
       status: 'Answered',
-      raised: 'Demo record',
+      raised: '',
       raisedAt: demoQuestionWhen(5, 9, 5),
       question: 'Will my interview next week go well, and how should I prepare?',
       answer: 'The interview window is favourable. Revise your key projects and keep the first half of the week free for preparation.',
@@ -504,6 +504,7 @@ function TimeLimitBadge({ label, timeRemaining, tooltip, isEnabled }) {
 // where the dashboard already shows the page header and the section tabs.
 export default function TrackQuestions({ embedded = false }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const { questions, questionPreviewId, setQuestionPreviewId, actions } = useAppData()
   const { currentUser } = useAuth()
@@ -514,6 +515,14 @@ export default function TrackQuestions({ embedded = false }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const searchInputRef = useRef(null)
   const searchContainerRef = useRef(null)
+  const [submissionAlert, setSubmissionAlert] = useState(Boolean(location.state?.submitted))
+  const submissionMessage = location.state?.successMessage || 'Your question has been submitted successfully.'
+
+  useEffect(() => {
+    if (location.state?.submitted) {
+      setSubmissionAlert(true)
+    }
+  }, [location.state])
 
   useEffect(() => {
     if (!isSearchOpen) return
@@ -1236,6 +1245,14 @@ const selectedQuestion = detailsOpen
 
       {disputeSubmitted && (
         <SuccessAlert variant="user" message="Dispute submitted successfully." onDismiss={() => setDisputeSubmitted(false)} />
+      )}
+
+      {submissionAlert && (
+        <SuccessAlert
+          variant="user"
+          message={submissionMessage}
+          onDismiss={() => setSubmissionAlert(false)}
+        />
       )}
     </div>
   )
