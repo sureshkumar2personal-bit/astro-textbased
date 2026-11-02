@@ -71,7 +71,7 @@ function MonthSelector({ monthKey, onChange }) {
 function SalesStat({ icon: Icon, label, value, hint, background, color, border }) {
   return (
     <div
-      className="flex items-center gap-3"
+      className="sales-stat-card flex items-center gap-3"
       style={{
         flex: '1 1 150px',
         minWidth: 0,
@@ -94,7 +94,7 @@ function SalesStat({ icon: Icon, label, value, hint, background, color, border }
 function BreakdownCard({ icon: Icon, title, subtitle, accent, gradient, border, rows }) {
   return (
     <div
-      className="flex flex-col"
+      className="sales-breakdown-card flex flex-col"
       style={{
         padding: '20px 22px',
         borderRadius: 20,
@@ -286,6 +286,7 @@ export default function SalesManagement() {
         titleRight={<span className="muted" style={{ fontSize: 12.5, fontWeight: 700 }}>{monthLabel}</span>}
       >
         <div
+          className="sales-overview-banner"
           style={{
             padding: 'clamp(20px, 3vw, 28px)',
             borderRadius: 24,
@@ -323,6 +324,7 @@ export default function SalesManagement() {
       {!hasSales && (
         <Section title="Sales & Transactions" icon={Receipt}>
           <div
+            className="sales-empty-banner"
             style={{
               padding: '56px 24px',
               borderRadius: 24,
@@ -414,6 +416,7 @@ export default function SalesManagement() {
 
           <Section title="Subscriber Offer Performance" icon={Percent} titleRight={<span className="muted" style={{ fontSize: 12.5, fontWeight: 700 }}>{monthLabel}</span>}>
             <div
+              className="sales-offer-summary-box"
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',

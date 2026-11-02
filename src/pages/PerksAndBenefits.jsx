@@ -19,7 +19,8 @@ import {
   Check,
   Calendar,
   CalendarDays,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -1058,6 +1059,7 @@ export default function PerksAndBenefits({ defaultTab }) {
 
   return (
     <div className="perks-benefits-page">
+      <button type="button" className="perks-benefits-back" onClick={() => navigate('/astrologer/dashboard')}><ArrowLeft size={16} aria-hidden="true" /> Back</button>
       <PageHeader eyebrow="Astrologer Workspace" title="Benefit Management" />
 
       {/* Main Tab Navigation */}

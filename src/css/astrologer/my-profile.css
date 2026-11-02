@@ -93,7 +93,7 @@
 .mp-preview--small { width: min(460px, 100%); }
 .mp-preview__bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: linear-gradient(120deg, #2b0f4f, #55238f); color: #fff; font-size: 13.5px; font-weight: 600; }
 .mp-preview__bar span { display: inline-flex; align-items: center; gap: 8px; }
-.mp-preview__bar .icon-btn { color: #fff; }
+.mp-preview__bar .icon-btn { color: var(--text-primary, #332b3e); }
 .mp-preview__body { display: grid; gap: 18px; padding: 22px; overflow-y: auto; }
 .mp-preview__head { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .mp-preview__head .mp-photo__avatar { flex: none; width: 88px; height: 88px; }
@@ -135,6 +135,8 @@
 .mp-content .account-field > span:first-child { color: var(--text-primary); font-size: 13px; font-weight: 700; }
 .mp-content .account-field input, .mp-content .account-field select, .mp-content .account-field textarea { min-height: 46px; border: 1px solid var(--mp-line); border-radius: 12px; background: var(--surface); }
 .mp-content .account-field input:focus, .mp-content .account-field select:focus, .mp-content .account-field textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 12%, transparent); outline: none; }
+.mp-content--pricing .account-form-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 220px)); max-width: 720px; }
+.mp-content--pricing .account-field { max-width: 220px; }
 .mp-input { position: relative; display: block; }
 .mp-input > svg { position: absolute; z-index: 1; top: 50%; left: 14px; transform: translateY(-50%); color: var(--mp-gold); pointer-events: none; }
 .mp-input > input, .mp-input > select { width: 100%; padding-left: 42px; }

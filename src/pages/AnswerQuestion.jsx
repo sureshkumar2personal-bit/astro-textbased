@@ -39,6 +39,7 @@ import {
   TempleReturnIcon,
   TempleScrollIcon,
 } from '../components/TempleIcons.jsx'
+import '../css/astrologer/answer-question.css'
 
 const DUE_FILTER_KEY = {
   'Pending': 'pending',

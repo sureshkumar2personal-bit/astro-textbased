@@ -6,3 +6,55 @@
 .instant-chat-astrologer-birth dt{color:#6b7280}
 .instant-chat-astrologer-birth dd{margin:0;font-weight:650;color:#374151;text-align:right}
 .instant-chat-astrologer-timeup{display:flex;align-items:center;gap:6px;margin:0 0 10px;padding:8px 10px;border-radius:9px;background:#fef3c7;color:#92400e;font-size:11px;font-weight:600}
+
+
+/* Dark Theme Overrides for Astrologer Instant Chat Widget */
+html[data-theme='dark'] .instant-chat-astrologer-request,
+html[data-theme='dark'] .instant-chat-astrologer-active {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-request h2 {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-request p {
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .instant-chat-astrologer-messages {
+  background: rgba(0, 0, 0, 0.25);
+}
+html[data-theme='dark'] .instant-chat-astrologer-message {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-message--astrologer {
+  background: rgba(255, 194, 71, 0.15);
+  color: var(--primary, #FFC247);
+}
+html[data-theme='dark'] .instant-chat-astrologer-active form input {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-empty {
+  background: var(--surface, #2A1B0E);
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .instant-chat-astrologer-empty strong {
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-birth-toggle {
+  background: var(--surface, #2A1B0E);
+  border-color: var(--border, #6B4A25);
+  color: var(--text-primary, #FFF8E8);
+}
+html[data-theme='dark'] .instant-chat-astrologer-birth {
+  background: rgba(0, 0, 0, 0.25);
+}
+html[data-theme='dark'] .instant-chat-astrologer-birth dt {
+  color: #c4b3a3;
+}
+html[data-theme='dark'] .instant-chat-astrologer-birth dd {
+  color: var(--text-primary, #FFF8E8);
+}

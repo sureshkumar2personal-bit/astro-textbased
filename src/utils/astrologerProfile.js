@@ -2,7 +2,7 @@ export const PROFILE_SECTIONS = [
   { id: 'basic', label: 'Basic Information' },
   { id: 'experience', label: 'Experience & Expertise' },
   { id: 'languages', label: 'Languages' },
-  { id: 'services', label: 'Consultation Services' },
+  { id: 'services', label: 'Services' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'credentials', label: 'Credentials' },
   { id: 'about', label: 'About & Approach' },

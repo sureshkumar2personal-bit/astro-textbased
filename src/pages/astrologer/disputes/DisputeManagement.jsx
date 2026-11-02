@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Building2, CloudUpload, FileText, History, Megaphone, Search, UserRound, X } from 'lucide-react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -13,12 +13,12 @@ import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import '../../../css/astrologer/dispute-management.css'
 
 const PLATFORM_COMPLAINT_CATEGORIES = [
-  'Payment / Earnings',
   'Wallet Settlement',
-  'Commission',
   'Appointment System',
   'Technical Issue',
   'Account Issue',
+  'Subscription',
+  'Services Issue',
   'Other',
 ]
 const MAX_EVIDENCE_SIZE = 5 * 1024 * 1024
@@ -56,7 +56,6 @@ function getTransactionId(question) {
 }
 
 export default function DisputeManagement() {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { questions, questionPreviewId, appointments = [], consultations = [], appointmentCalls = [], actions } = useAppData()
   const { currentUser } = useAuth()
@@ -67,12 +66,11 @@ export default function DisputeManagement() {
   const [complaintAgainst, setComplaintAgainst] = useState('all')
   const [platformComplaints, setPlatformComplaints] = useState([])
   const [selectedPlatformComplaint, setSelectedPlatformComplaint] = useState(null)
+  const [expandedComplaintId, setExpandedComplaintId] = useState(null)
   const [complaintCategory, setComplaintCategory] = useState('')
+  const [customComplaintCategory, setCustomComplaintCategory] = useState('')
   const [complaintType, setComplaintType] = useState('platform')
   const [complaintUserId, setComplaintUserId] = useState('')
-  const [complaintService, setComplaintService] = useState('')
-  const [complaintRelatedId, setComplaintRelatedId] = useState('')
-  const [complaintTransaction, setComplaintTransaction] = useState('')
   const [complaintDescription, setComplaintDescription] = useState('')
   const [complaintEvidence, setComplaintEvidence] = useState([])
   const [formOpen, setFormOpen] = useState(false)
@@ -87,17 +85,8 @@ export default function DisputeManagement() {
   const [successMessage, setSuccessMessage] = useState('')
   const [fullContent, setFullContent] = useState(null)
 
-  const USER_COMPLAINT_CATEGORIES = ['Payment Issue', 'Misconduct / Inappropriate Behavior', 'No Response', 'Rude Behavior', 'Did Not Join Appointment', 'Call / Chat Issue', 'Refund Request', 'Other']
-  const serviceOptions = ['Question', 'Appointment', 'Call', 'Chat']
+  const USER_COMPLAINT_CATEGORIES = ['Misconduct / Inappropriate Behavior', 'No Response', 'Rude Behavior', 'Call / Chat Issue', 'Other']
   const userOptions = useMemo(() => Array.from(new Map(questions.map((question) => [question.userId || question.user, { id: question.userId || question.user, label: question.user || question.userId }])).values()), [questions])
-  const relatedOptions = useMemo(() => {
-    if (complaintService === 'Question') return questions.map((question) => ({ id: question.id, label: `${question.id} · ${question.category || 'Question'}` }))
-    if (complaintService === 'Appointment') return appointments.map((item) => ({ id: item.id, label: `${item.id} · ${item.customerName || item.userId || 'Appointment'}` }))
-    if (complaintService === 'Call') return [...appointmentCalls, ...consultations.filter((item) => String(item.type || '').toLowerCase().includes('call'))].map((item) => ({ id: item.id, label: `${item.id} · ${item.customerName || item.userId || 'Call'}` }))
-    if (complaintService === 'Chat') return consultations.filter((item) => !String(item.type || '').toLowerCase().includes('call')).map((item) => ({ id: item.id, label: `${item.id} · ${item.customerName || item.userId || 'Chat'}` }))
-    return []
-  }, [appointmentCalls, appointments, complaintService, consultations, questions])
-
   const allDisputedQuestions = useMemo(() => questions.filter((question) => question.dispute), [questions])
   const disputedQuestions = useMemo(() => {
     if (disputeFilter === 'resolved') return allDisputedQuestions.filter((question) => question.dispute?.status === 'Resolved')
@@ -147,17 +136,15 @@ export default function DisputeManagement() {
   const selectedComplaint = selectedPlatformComplaint || allComplaintRows.find((complaint) => complaint.question?.id === selectedQuestion?.id) || null
   const selectedHasReview = Boolean(selectedComplaint && (selectedComplaint.status !== 'Open' || selectedComplaint.question?.history?.some((entry) => /review|viewed|response|awaiting/i.test(entry))))
   const selectedHasResponse = Boolean(selectedComplaint?.response)
-  const hasUnsavedComplaintForm = Boolean(complaintType !== 'platform' || complaintCategory || complaintUserId || complaintService || complaintRelatedId || complaintTransaction || complaintDescription || complaintEvidence.length)
+  const hasUnsavedComplaintForm = Boolean(complaintType !== 'platform' || complaintCategory || customComplaintCategory || complaintUserId || complaintDescription || complaintEvidence.length)
   const closeComplaintForm = useCallback(({ reset = false, confirmUnsaved = true } = {}) => {
     if (confirmUnsaved && hasUnsavedComplaintForm && !window.confirm('Discard your unsaved complaint details?')) return
     setFormOpen(false)
     if (reset) {
       setComplaintCategory('')
+      setCustomComplaintCategory('')
       setComplaintType('platform')
       setComplaintUserId('')
-      setComplaintService('')
-      setComplaintRelatedId('')
-      setComplaintTransaction('')
       setComplaintDescription('')
       setComplaintEvidence([])
       setFormAttempted(false)
@@ -237,26 +224,27 @@ export default function DisputeManagement() {
   }
 
   const selectComplaint = (complaint) => {
-    navigate(`/astrologer/dispute-management/complaint/${encodeURIComponent(complaint.id)}`, { state: { complaint } })
+    setExpandedComplaintId((currentId) => currentId === complaint.id ? null : complaint.id)
   }
 
   const submitPlatformComplaint = (event) => {
     event.preventDefault()
     setFormAttempted(true)
-    const requiredUserFields = complaintType === 'user' && (!complaintUserId || !complaintService || !complaintRelatedId)
-    if (!complaintCategory || !complaintDescription.trim() || requiredUserFields) {
-      setFormError(complaintType === 'user' ? 'Select a user, service, related record, category, and description before submitting.' : 'Select a complaint category and add a description before submitting.')
+    const requiredUserFields = complaintType === 'user' && !complaintUserId
+    const submittedCategory = complaintCategory === 'Other' ? customComplaintCategory.trim() : complaintCategory
+    if (!submittedCategory || !complaintDescription.trim() || requiredUserFields) {
+      setFormError(complaintType === 'user' ? 'Select a user, category, and description before submitting.' : 'Select a complaint category and add a description before submitting.')
       return
     }
     setFormError('')
     const complaint = {
       id: `${complaintType === 'user' ? 'USR' : 'CMP'}-${Date.now().toString().slice(-6)}`,
       against: complaintType === 'user' ? 'User' : 'Platform',
-      relatedTo: complaintType === 'user' ? complaintService : '—',
+      relatedTo: '—',
       userName: complaintType === 'user' ? userOptions.find((user) => user.id === complaintUserId)?.label || '—' : '—',
-      relatedRecord: complaintType === 'user' ? relatedOptions.find((item) => item.id === complaintRelatedId)?.label || complaintRelatedId : '—',
-      category: complaintCategory,
-      transactionId: complaintType === 'platform' ? complaintTransaction.trim() || '—' : '—',
+      relatedRecord: '—',
+      category: submittedCategory,
+      transactionId: '—',
       date: new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
       status: 'Open',
       description: complaintDescription.trim(),
@@ -268,10 +256,9 @@ export default function DisputeManagement() {
     setSelectedPlatformComplaint(complaint)
     setComplaintType('platform')
     setComplaintCategory('')
+    setCustomComplaintCategory('')
     setComplaintUserId('')
-    setComplaintService('')
     setComplaintRelatedId('')
-    setComplaintTransaction('')
     setComplaintDescription('')
     setComplaintEvidence([])
     setFormAttempted(false)
@@ -376,22 +363,31 @@ export default function DisputeManagement() {
           <div className="complaints-table-wrap">
             <div className="complaints-table" role="table" aria-label="All complaints">
               <div className="complaints-table-row complaints-table-head" role="row">
-                {['S.No', 'Complaint ID', 'Against', 'Related To', 'Category', 'Transaction ID', 'Date & Time', 'Status', 'Action'].map((heading) => <span key={heading} role="columnheader">{heading}</span>)}
+                {['S.No', 'Complaint', 'Date & Time', 'Status', 'Action'].map((heading) => <span key={heading} role="columnheader">{heading}</span>)}
               </div>
               {visibleComplaints.map((complaint, index) => {
                 const statusLabel = complaint.status || 'Open'
                 return (
-                  <div className="complaints-table-row" role="row" key={complaint.id}>
+                  <Fragment key={complaint.id}>
+                  <div className="complaints-table-row" role="row">
                     <span role="cell" className="complaint-serial">{index + 1}</span>
-                    <span role="cell" className="complaint-id">{complaint.id}</span>
-                    <span role="cell"><span className={`complaint-against complaint-against-${complaint.against?.toLowerCase()}`}>{complaint.against || '—'}</span></span>
-                    <span role="cell" className="complaint-related">{complaint.relatedTo || '—'}</span>
-                    <span role="cell">{complaint.category || '—'}</span>
-                    <span role="cell" className="complaint-transaction">{complaint.transactionId || '—'}</span>
+                    <span role="cell" className="complaint-summary"><strong>{complaint.category || 'Complaint'}</strong><small>{complaint.id || '—'}</small></span>
                     <span role="cell" className="complaint-date">{complaint.date || '—'}</span>
                     <span role="cell"><StatusBadge label={statusLabel} className={`complaint-status-badge complaint-status-${statusLabel.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')} ${statusLabel.toLowerCase() === 'in review' ? 'complaint-status-under-review' : ''}`} /></span>
-                    <span role="cell" className="complaint-action"><button type="button" className="complaint-view-button" onClick={() => selectComplaint(complaint)}>View Details <span aria-hidden="true">→</span></button></span>
+                    <span role="cell" className="complaint-action"><button type="button" className="complaint-view-button" aria-expanded={expandedComplaintId === complaint.id} onClick={() => selectComplaint(complaint)}>{expandedComplaintId === complaint.id ? 'Hide Details' : 'View Details'} <span aria-hidden="true">{expandedComplaintId === complaint.id ? '↑' : '→'}</span></button></span>
                   </div>
+                  {expandedComplaintId === complaint.id && <div className="complaint-inline-details" role="region" aria-label={`Details for ${complaint.id}`}>
+                    <div className="complaint-inline-details__main">
+                      <div><strong>Complaint</strong><p>{complaint.description || 'No description provided.'}</p></div>
+                      <div className="complaint-inline-details__meta">
+                        <span><b>Category</b>{complaint.category || '—'}</span>
+                        <span className="complaint-inline-details__status"><b>Status</b><span className={`complaint-inline-status complaint-inline-status--${statusLabel.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z-]/g, '')}`}><i aria-hidden="true" /><em>{statusLabel}</em></span></span>
+                        <span className="complaint-inline-details__time"><b>Raised Date &amp; Time</b><time>{complaint.date || '—'}</time></span>
+                      </div>
+                    </div>
+                    {complaint.evidence?.length > 0 && <div className="complaint-inline-details__evidence"><strong>Attached Evidence</strong>{complaint.evidence.map((file, fileIndex) => <span key={`${file.name || file}-${fileIndex}`}>{file.name || file}</span>)}</div>}
+                  </div>}
+                  </Fragment>
                 )
               })}
             </div>
@@ -409,8 +405,8 @@ export default function DisputeManagement() {
         <p className="raise-complaint-intro"><Megaphone size={18} aria-hidden="true" /><span>{complaintType === 'platform' ? 'Raise a complaint regarding platform services, payments, technical issues or other support matters.' : 'Report an issue related to a user or customer and our team will review it.'}</span></p>
         <form className="raise-complaint-form" onSubmit={submitPlatformComplaint} noValidate>
           <div className="complaint-type-options" role="radiogroup" aria-label="Complaint type">
-            <button type="button" className={complaintType === 'platform' ? 'is-selected' : ''} onClick={() => { setComplaintType('platform'); setComplaintCategory(''); setFormError('') }}><span className="complaint-type-icon" aria-hidden="true"><Building2 size={18} /></span><span className="complaint-type-copy"><strong>Against Platform</strong><small>Payments, wallet, technical or account issues</small></span></button>
-            <button type="button" className={complaintType === 'user' ? 'is-selected' : ''} onClick={() => { setComplaintType('user'); setComplaintCategory(''); setFormError('') }}><span className="complaint-type-icon complaint-type-icon--user" aria-hidden="true"><UserRound size={18} /></span><span className="complaint-type-copy"><strong>Against User</strong><small>Report an issue with a customer interaction</small></span></button>
+            <button type="button" className={complaintType === 'platform' ? 'is-selected' : ''} onClick={() => { setComplaintType('platform'); setComplaintCategory(''); setCustomComplaintCategory(''); setFormError('') }}><span className="complaint-type-icon" aria-hidden="true"><Building2 size={18} /></span><span className="complaint-type-copy"><strong>Platform Issues</strong><small>Payments, wallet, technical or account issues</small></span></button>
+            <button type="button" className={complaintType === 'user' ? 'is-selected' : ''} onClick={() => { setComplaintType('user'); setComplaintCategory(''); setCustomComplaintCategory(''); setFormError('') }}><span className="complaint-type-icon complaint-type-icon--user" aria-hidden="true"><UserRound size={18} /></span><span className="complaint-type-copy"><strong>User Issues</strong><small>Report an issue with a customer interaction</small></span></button>
           </div>
           {complaintType === 'user' && <>
           <label className="complaint-form-field">
@@ -420,33 +416,19 @@ export default function DisputeManagement() {
               {userOptions.map((user) => <option key={user.id} value={user.id}>{user.label}</option>)}
             </select>
           </label>
-          <label className="complaint-form-field">
-            <span>Related Service <b aria-hidden="true">*</b></span>
-            <select value={complaintService} onChange={(event) => { setComplaintService(event.target.value); setComplaintRelatedId('') }}>
-              <option value="">Select service</option>
-              {serviceOptions.map((service) => <option key={service} value={service}>{service}</option>)}
-            </select>
-          </label>
-          <label className="complaint-form-field">
-            <span>Related {complaintService || 'Service'} <b aria-hidden="true">*</b></span>
-            <select value={complaintRelatedId} onChange={(event) => setComplaintRelatedId(event.target.value)} disabled={!complaintService}>
-              <option value="">{complaintService ? `Select ${complaintService.toLowerCase()}` : 'Select a service first'}</option>
-              {relatedOptions.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
-          </label>
           </>}
           <label className="complaint-form-field">
             <span>Complaint Category <b aria-hidden="true">*</b></span>
-            <select value={complaintCategory} onChange={(event) => setComplaintCategory(event.target.value)} aria-invalid={formAttempted && !complaintCategory}>
+            <select value={complaintCategory} onChange={(event) => { setComplaintCategory(event.target.value); if (event.target.value !== 'Other') setCustomComplaintCategory('') }} aria-invalid={formAttempted && !complaintCategory}>
               <option value="">Select a category</option>
               {(complaintType === 'platform' ? PLATFORM_COMPLAINT_CATEGORIES : USER_COMPLAINT_CATEGORIES).map((category) => <option key={category} value={category}>{category}</option>)}
             </select>
             {formAttempted && !complaintCategory && <small className="complaint-field-error">Complaint category is required.</small>}
           </label>
-          {complaintType === 'platform' && <label className="complaint-form-field">
-            <span>Related Transaction ID <em>(Optional)</em></span>
-            <input value={complaintTransaction} onChange={(event) => setComplaintTransaction(event.target.value)} placeholder="Enter transaction ID" />
-            <small className="complaint-helper">Enter transaction ID if applicable</small>
+          {complaintCategory === 'Other' && <label className="complaint-form-field">
+            <span>Specify Complaint Category <b aria-hidden="true">*</b></span>
+            <input value={customComplaintCategory} onChange={(event) => setCustomComplaintCategory(event.target.value)} placeholder="Type your complaint category" aria-invalid={formAttempted && !customComplaintCategory.trim()} />
+            {formAttempted && !customComplaintCategory.trim() && <small className="complaint-field-error">Please enter a complaint category.</small>}
           </label>}
           <label className="complaint-form-field">
             <span>Complaint Description <b aria-hidden="true">*</b></span>

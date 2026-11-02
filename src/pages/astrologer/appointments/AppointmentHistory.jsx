@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Search, X } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, List, Search, X } from 'lucide-react'
 import './appointmenthistory.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../../../state/AppDataContext.jsx'
@@ -44,7 +44,36 @@ const STATUS_OPTIONS = [
 ]
 
 // Day appointments list shown for the selected date.
-function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTitle, emptyHint }) {
+function AppointmentInlineDetails({ appointment, consultation }) {
+  const meta = callTypeMeta(appointment.callType)
+  const { startMin, endMin } = resolveAppointmentWindow(appointment)
+  const amount = appointment.amount != null ? `₹${Number(appointment.amount).toLocaleString('en-IN')}` : 'Not available'
+  const displayStatus = getAppointmentDisplayStatus(appointment) === APPOINTMENT_STATUS.REFUNDED
+    ? 'Refund'
+    : getAppointmentDisplayStatus(appointment)
+
+  return (
+    <div className="apt-inline-details" role="region" aria-label={`Details for ${appointment.customerName || 'appointment'}`}>
+      <div className="apt-inline-details__heading">
+        <div>
+          <strong>Appointment Details</strong>
+          <span>{appointment.customerName || 'Customer'} · {appointment.orderId || appointment.id}</span>
+        </div>
+        <StatusBadge label={displayStatus || 'Booked'} />
+      </div>
+      <div className="apt-inline-details__grid">
+        <div><small>Date &amp; time</small><strong>{formatDisplayDate(appointment.dateIso, true)} · {formatTimeRange(startMin, endMin)}</strong></div>
+        <div><small>Appointment type</small><strong>{meta.label}</strong></div>
+        <div><small>Topic</small><strong>{appointment.topic || 'Not available'}</strong></div>
+        <div><small>Payment</small><strong>{appointment.paymentStatus || 'Paid'} · {amount}</strong></div>
+      </div>
+      {appointment.note && <p className="apt-inline-details__note"><small>Note</small>{appointment.note}</p>}
+      {consultation?.summary && <p className="apt-inline-details__note"><small>Consultation summary</small>{consultation.summary}</p>}
+    </div>
+  )
+}
+
+function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTitle, emptyHint, showDate = false, inline = false, expandedId = null, onToggle }) {
   if (!appointments.length) {
     return (
       <div className="apt-history-empty apt-history-empty--day">
@@ -88,20 +117,21 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
         const customerName = appointment.customerName || 'Customer'
         const hasAnalysis = Boolean(String(appointment.preCallAnalysis || '').trim())
         const avatarInitials = customerName.split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
+        const toggle = () => (inline ? onToggle(appointment) : onSelect(appointment))
         return (
-          <article
-            key={appointment.id}
-            className={`apt-history-item${isCancelled ? ' is-cancelled' : ''}${rescheduleLabel ? ' is-rescheduled' : ''}`}
-            role="button"
-            tabIndex={0}
-            onClick={() => onSelect(appointment)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                onSelect(appointment)
-              }
-            }}
-          >
+          <div className={`apt-history-row${inline ? ' is-inline' : ''}`} key={appointment.id}>
+            <article
+              className={`apt-history-item${isCancelled ? ' is-cancelled' : ''}${rescheduleLabel ? ' is-rescheduled' : ''}`}
+              role="button"
+              tabIndex={0}
+              onClick={toggle}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  toggle()
+                }
+              }}
+            >
             <div className="apt-history-item__time">
               <strong>{formatTimeRange(startMin, endMin).split(' – ')[0]}</strong>
               <span>{formatTimeRange(startMin, endMin).split(' – ')[1] || ''}</span>
@@ -110,15 +140,18 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
             <div className="apt-history-item__identity">
               <strong>{customerName}</strong>
               <span>{meta.label}{appointment.topic ? ` · ${appointment.topic}` : ''}</span>
+              {showDate && <small className="apt-history-item__date">{formatDisplayDate(appointment.dateIso, true)}</small>}
               <small>Order {String(appointment.orderId || appointment.id).startsWith('#') ? (appointment.orderId || appointment.id) : `#${appointment.orderId || appointment.id}`}</small>
             </div>
             <StatusBadge label={displayStatus} />
-            <button type="button" className="apt-history-item__view" onClick={(event) => { event.stopPropagation(); onSelect(appointment) }}>View</button>
+            <button type="button" className="apt-history-item__view" onClick={(event) => { event.stopPropagation(); toggle() }}>{inline && expandedId === appointment.id ? 'Hide' : 'View'}</button>
             {rescheduleLabel && (
               <div className="apt-history-item__reschedule">{rescheduleLabel}</div>
             )}
             {hasAnalysis && <span className="apt-history-item__analysis is-saved">✓ Analysis Saved</span>}
-          </article>
+            </article>
+            {inline && expandedId === appointment.id && <AppointmentInlineDetails appointment={appointment} consultation={null} />}
+          </div>
         )
       })}
     </div>
@@ -171,6 +204,7 @@ export default function AppointmentHistory() {
   const [rangeStart, setRangeStart] = useState(() => new Date())
   const [selectedDate, setSelectedDate] = useState(() => new Date())
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null)
+  const [expandedAppointmentId, setExpandedAppointmentId] = useState(null)
   const [callAppointment, setCallAppointment] = useState(null)
   const selectedAppointment = selectedAppointmentId
     ? appointments.find((appointment) => appointment.id === selectedAppointmentId) || null
@@ -179,6 +213,8 @@ export default function AppointmentHistory() {
   const [filter, setFilter] = useState(searchParams.get('filter') || 'all')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'all')
   const [search, setSearch] = useState(searchParams.get('search') || '')
+  const [displayView, setDisplayView] = useState('list')
+  const [listRangeView, setListRangeView] = useState('month')
 
   // Keep the selected day inside the visible calendar month. The calendar's
   // prev/next arrows move the month without touching the selected date, so this
@@ -238,8 +274,59 @@ export default function AppointmentHistory() {
     [filteredAppointments, selectedIso],
   )
 
+  const listAppointments = useMemo(() => {
+    if (listRangeView === 'day') {
+      const dayIso = toIsoDate(selectedDate)
+      return filteredAppointments.filter((appointment) => appointment.dateIso === dayIso)
+    }
+
+    if (listRangeView === 'week') {
+      const weekStart = new Date(rangeStart)
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay())
+      const weekEnd = new Date(weekStart)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+      return filteredAppointments.filter((appointment) => {
+        const date = new Date(`${appointment.dateIso}T00:00:00`)
+        return date >= weekStart && date < weekEnd
+      })
+    }
+
+    return filteredAppointments.filter((appointment) => {
+      const date = new Date(`${appointment.dateIso}T00:00:00`)
+      return date.getFullYear() === rangeStart.getFullYear() && date.getMonth() === rangeStart.getMonth()
+    })
+  }, [filteredAppointments, listRangeView, rangeStart, selectedDate])
+
+  const shiftListRange = (direction) => {
+    if (listRangeView === 'day') {
+      const next = new Date(selectedDate)
+      next.setDate(next.getDate() + direction)
+      setSelectedDate(next)
+      setRangeStart(next)
+      return
+    }
+
+    if (listRangeView === 'week') {
+      setRangeStart((current) => new Date(current.getFullYear(), current.getMonth(), current.getDate() + direction * 7))
+      return
+    }
+
+    setRangeStart((current) => new Date(current.getFullYear(), current.getMonth() + direction, 1))
+  }
+
+  const listRangeLabel = listRangeView === 'day'
+    ? formatDisplayDate(toIsoDate(selectedDate), true)
+    : listRangeView === 'week'
+      ? `Week of ${formatDisplayDate(toIsoDate(new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate() - rangeStart.getDay())), true)}`
+      : rangeStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
   const openDetails = (appointment) => {
     setSelectedAppointmentId(appointment.id)
+    actions.viewAppointment(appointment.id)
+  }
+
+  const toggleInlineDetails = (appointment) => {
+    setExpandedAppointmentId((current) => current === appointment.id ? null : appointment.id)
     actions.viewAppointment(appointment.id)
   }
 
@@ -346,38 +433,104 @@ export default function AppointmentHistory() {
               aria-label="Search appointments"
             />
           </div>
+          <div className="apt-display-toggle" role="group" aria-label="Appointment display">
+            <button
+              type="button"
+              className={displayView === 'calendar' ? 'is-active' : ''}
+              aria-pressed={displayView === 'calendar'}
+              onClick={() => setDisplayView('calendar')}
+            >
+              <CalendarDays size={15} />
+              Calendar
+            </button>
+            <button
+              type="button"
+              className={displayView === 'list' ? 'is-active' : ''}
+              aria-pressed={displayView === 'list'}
+              onClick={() => setDisplayView('list')}
+            >
+              <List size={15} />
+              List
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="apt-main apt-main--history">
+      <div className={`apt-main apt-main--history${displayView === 'list' ? ' apt-main--list' : ''}`}>
         <div className="apt-calendar-col apt-history-calendar-col">
-          <HistoryCalendar
-            appointments={filteredAppointments}
-            rangeStart={rangeStart}
-            onRangeChange={setRangeStart}
-            onSelectDate={setSelectedDate}
-            selectedDate={selectedDate}
-            showMonthArrows
-          />
+          {displayView === 'list' ? (
+            <div className="apt-history-list-view" aria-label="Appointments list">
+              <div className="apt-list-view-toolbar">
+                <div className="apt-list-view-modes" role="tablist" aria-label="List date range">
+                  {['month', 'week', 'day'].map((mode) => (
+                    <button
+                      type="button"
+                      key={mode}
+                      role="tab"
+                      aria-selected={listRangeView === mode}
+                      className={listRangeView === mode ? 'is-active' : ''}
+                      onClick={() => setListRangeView(mode)}
+                    >
+                      {mode[0].toUpperCase() + mode.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                <div className="apt-list-view-date-nav">
+                  <button type="button" className="icon-btn" aria-label={`Previous ${listRangeView}`} onClick={() => shiftListRange(-1)}>
+                    <ChevronLeft size={17} />
+                  </button>
+                  <strong>{listRangeLabel}</strong>
+                  <button type="button" className="icon-btn" aria-label={`Next ${listRangeView}`} onClick={() => shiftListRange(1)}>
+                    <ChevronRight size={17} />
+                  </button>
+                </div>
+              </div>
+              <DayAppointmentsList
+                appointments={listAppointments}
+                allHistory={myAppointments}
+                onSelect={openDetails}
+                emptyTitle="No appointments match your filters"
+                emptyHint="Try changing the status filter or search term."
+                showDate
+                inline
+                expandedId={expandedAppointmentId}
+                onToggle={toggleInlineDetails}
+              />
+            </div>
+          ) : (
+            <HistoryCalendar
+              appointments={filteredAppointments}
+              rangeStart={rangeStart}
+              onRangeChange={setRangeStart}
+              onSelectDate={setSelectedDate}
+              selectedDate={selectedDate}
+              showMonthArrows
+            />
+          )}
         </div>
 
-        <aside className="apt-side-col apt-history-day-col">
-          <Card className="apt-side-panel">
-            <div className="apt-side-head apt-history-day-head">
-              <span>Appointments on {formatDisplayDate(selectedIso, true)}</span>
-            </div>
-            <DayAppointmentsList
-              appointments={dayAppointments}
-              allHistory={myAppointments}
-              onSelect={openDetails}
-              emptyTitle="No appointments this day"
-              emptyHint="Select another date to see its appointments."
-            />
-          </Card>
-        </aside>
+        {displayView === 'calendar' && (
+          <aside className="apt-side-col apt-history-day-col">
+            <Card className="apt-side-panel">
+              <div className="apt-side-head apt-history-day-head">
+                <span>Appointments on {formatDisplayDate(selectedIso, true)}</span>
+              </div>
+              <DayAppointmentsList
+                appointments={dayAppointments}
+                allHistory={myAppointments}
+                onSelect={openDetails}
+                emptyTitle="No appointments this day"
+                emptyHint="Select another date to see its appointments."
+                inline
+                expandedId={expandedAppointmentId}
+                onToggle={toggleInlineDetails}
+              />
+            </Card>
+          </aside>
+        )}
       </div>
 
-      {selectedAppointment && (
+      {selectedAppointment && displayView === 'calendar' && (
         <AppointmentDetailsDrawer
           key={selectedAppointment.id}
           appointment={selectedAppointment}

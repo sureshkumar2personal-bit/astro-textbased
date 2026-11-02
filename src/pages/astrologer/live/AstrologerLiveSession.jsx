@@ -635,7 +635,7 @@ const LIVE_SETUP_STEPS = [
   { label: 'Live History', path: 'history' },
 ]
 
-function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'Back' }) {
+function LivePageHeader({ step, title, subtitle, onClose, onBack, hideClose = false, backLabel = 'Back' }) {
   // Purely presentational: the step number is read from the existing label.
   const stepNumber = Number(/Step\s*0?(\d)/i.exec(step)?.[1]) || 1
   const navigate = useNavigate()
@@ -659,11 +659,11 @@ function LivePageHeader({ step, title, subtitle, onClose, onBack, backLabel = 'B
           <button type="button" className="live-text-button" onClick={onBack}>
             <ChevronLeft size={17} /> {backLabel}
           </button>
-        ) : (
+        ) : !hideClose ? (
           <button type="button" className="live-text-button" onClick={onClose}>
             <X size={17} /> Close
           </button>
-        )}
+        ) : null}
         <span className="live-eyebrow">{step}</span>
       </div>
       <div className="ld-header__titles">
@@ -723,7 +723,8 @@ export function AstrologerLiveSessionSetup() {
       <LivePageHeader
         step={enteredForLive ? 'Scheduled live · Studio check' : 'Step 01 of 04'}
         title={enteredForLive ? 'Broadcast studio setup' : 'Create Live'}
-        onClose={closeCreateLiveToDashboard}
+        onBack={closeCreateLiveToDashboard}
+        backLabel="Back"
       />
       <div className="ld-setup-grid">
         <Card className="ld-card ld-card--media">

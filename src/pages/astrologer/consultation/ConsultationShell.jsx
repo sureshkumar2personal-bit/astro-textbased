@@ -13,7 +13,7 @@ const TABS = [
 export default function ConsultationShell() {
   return (
     <div className="consult-page">
-      <PageHeader eyebrow="Astrologer Workspace" title="Consultation" />
+      <PageHeader eyebrow="Astrologer Workspace" title="Consultation" showBack backTo="/astrologer/dashboard" backLabel="Back" />
       <div className="wd-tabs" role="tablist" aria-label="Consultation sections">
         {TABS.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end role="tab" className={({ isActive }) => `wd-tab${isActive ? ' is-active' : ''}`}>
