@@ -1,1 +1,1430 @@
-/* Astrologer Profile Page Styles */
+/* ==========================================================================
+   21st.dev & Modern Competitor Astrologer Profile Styling (User Portal View)
+   ========================================================================== */
+
+.astro-profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+/* --------------------------------------------------------------------------
+   1. Hero Identity Card
+   -------------------------------------------------------------------------- */
+.astro-hero-card {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.15));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 10px 30px -10px rgba(58, 42, 106, 0.08);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.astro-hero-cover {
+  position: relative;
+  height: 100px;
+  background: linear-gradient(135deg, rgba(143, 77, 255, 0.18) 0%, rgba(245, 158, 11, 0.14) 45%, rgba(16, 185, 129, 0.12) 100%);
+  border-bottom: 1px solid var(--surface-border, rgba(143, 77, 255, 0.1));
+}
+
+.astro-hero-cover-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image: radial-gradient(circle at 20% 50%, var(--primary, #8f4dff) 1px, transparent 1px),
+                    radial-gradient(circle at 80% 30%, #f59e0b 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.astro-hero-content {
+  padding: 0 28px 24px;
+  margin-top: -46px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.astro-hero-top-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.astro-hero-identity-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.astro-hero-avatar-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  padding: 3.5px;
+  background: linear-gradient(135deg, var(--primary, #8f4dff), #f59e0b);
+  box-shadow: 0 8px 24px rgba(143, 77, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.astro-hero-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--surface, #ffffff);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--primary, #8f4dff);
+  border: 2px solid var(--surface, #ffffff);
+}
+
+.astro-hero-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.astro-online-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2.5px solid var(--surface, #ffffff);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
+}
+
+.astro-online-pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: #10b981;
+  opacity: 0.6;
+  animation: astroPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes astroPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.6); opacity: 0; }
+}
+
+.astro-hero-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 4px;
+}
+
+.astro-hero-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.astro-hero-name {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.astro-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(143, 77, 255, 0.1);
+  color: var(--primary, #8f4dff);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(143, 77, 255, 0.2);
+}
+
+.astro-hero-subtitle {
+  font-size: 14px;
+  color: var(--muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.astro-hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted, #64748b);
+  margin-top: 2px;
+}
+
+.astro-hero-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.astro-hero-meta-item strong {
+  color: var(--ink, #1f1b2d);
+  font-weight: 700;
+}
+
+.astro-hero-meta-dot {
+  color: rgba(100, 116, 139, 0.45);
+  font-size: 12px;
+}
+
+.astro-hero-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 72px;
+  padding-bottom: 4px;
+}
+
+.astro-sub-btn-col {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.astro-sub-expiry-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--danger, #dc2626);
+  text-align: center;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .astro-hero-actions {
+    margin-top: 14px;
+    width: 100%;
+  }
+}
+
+.astro-sub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.astro-sub-btn--primary {
+  background: linear-gradient(135deg, var(--primary, #8f4dff), #7c3aed);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(143, 77, 255, 0.35);
+}
+
+.astro-sub-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(143, 77, 255, 0.45);
+}
+
+.astro-sub-btn--outline {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  color: var(--ink, #1f1b2d);
+}
+
+.astro-sub-btn--outline:hover {
+  border-color: var(--primary, #8f4dff);
+  color: var(--primary, #8f4dff);
+  background: rgba(143, 77, 255, 0.04);
+}
+
+.astro-share-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  background: var(--surface, #ffffff);
+  color: var(--muted, #64748b);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.astro-share-btn:hover {
+  border-color: var(--primary, #8f4dff);
+  color: var(--primary, #8f4dff);
+  background: rgba(143, 77, 255, 0.04);
+}
+
+/* Chips and Highlights */
+.astro-hero-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.astro-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  background: var(--surface-soft, #f8fafc);
+  color: var(--ink, #334155);
+}
+
+.astro-pill-tag--gold {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #b45309;
+}
+
+.astro-pill-tag--violet {
+  background: rgba(143, 77, 255, 0.08);
+  border-color: rgba(143, 77, 255, 0.22);
+  color: var(--primary, #8f4dff);
+}
+
+.astro-hero-highlights-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-border, rgba(0, 0, 0, 0.06));
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted, #64748b);
+}
+
+.astro-hero-highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.astro-hero-highlight-item strong {
+  color: var(--ink, #1f1b2d);
+  font-weight: 700;
+}
+
+.astro-hero-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.astro-hero-bio-snippet {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--body, #475569);
+  background: var(--surface-soft, #f8fafc);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+}
+
+.astro-hero-bio-snippet strong {
+  color: var(--primary, #8f4dff);
+  margin-right: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Quick Stats Bento Row
+   -------------------------------------------------------------------------- */
+.astro-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .astro-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.astro-stat-card {
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.12));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 4px 16px -4px rgba(58, 42, 106, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.astro-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary, #8f4dff);
+}
+
+.astro-stat-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.astro-stat-icon-box--violet {
+  background: rgba(143, 77, 255, 0.12);
+  color: var(--primary, #8f4dff);
+}
+
+.astro-stat-icon-box--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.astro-stat-icon-box--emerald {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.astro-stat-icon-box--blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.astro-stat-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.astro-stat-value {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  letter-spacing: -0.02em;
+}
+
+.astro-stat-label {
+  font-size: 11.5px;
+  color: var(--muted, #64748b);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   3. Consultation Options (The Hero Consultation Hub)
+   -------------------------------------------------------------------------- */
+.astro-consultation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.astro-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.astro-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--primary, #8f4dff);
+  text-transform: uppercase;
+}
+
+.astro-section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.astro-section-subtitle {
+  font-size: 13px;
+  color: var(--muted, #64748b);
+  margin: 0;
+}
+
+.astro-consultation-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .astro-consultation-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .astro-consultation-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.astro-consult-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.15));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 6px 24px -4px rgba(58, 42, 106, 0.05);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.astro-consult-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.astro-consult-card--chat::before {
+  background: linear-gradient(90deg, #8f4dff, #c084fc);
+}
+
+.astro-consult-card--call::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.astro-consult-card--appointment::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.astro-consult-card--services::before {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+.astro-consult-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -4px rgba(58, 42, 106, 0.12);
+}
+
+.astro-consult-card--chat:hover {
+  border-color: rgba(143, 77, 255, 0.45);
+}
+
+.astro-consult-card--call:hover {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.astro-consult-card--appointment:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.astro-consult-card--services:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+.astro-consult-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.astro-consult-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.astro-consult-icon-box--chat {
+  background: rgba(143, 77, 255, 0.12);
+  color: var(--primary, #8f4dff);
+}
+
+.astro-consult-icon-box--call {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.astro-consult-icon-box--appointment {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.astro-consult-icon-box--services {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+
+.astro-consult-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.astro-consult-status-badge--online {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.astro-consult-status-badge--ready {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.astro-consult-status-badge--slots {
+  background: rgba(245, 158, 11, 0.1);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.astro-consult-status-badge--services {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.astro-consult-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.astro-consult-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.astro-consult-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  margin: 0;
+}
+
+.astro-consult-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.astro-consult-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  letter-spacing: -0.02em;
+}
+
+.astro-consult-unit {
+  font-size: 13px;
+  color: var(--muted, #64748b);
+  font-weight: 500;
+}
+
+.astro-consult-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted, #64748b);
+  margin: 0;
+}
+
+.astro-consult-features {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.astro-consult-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--body, #475569);
+  font-weight: 500;
+}
+
+.astro-consult-feature-item svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.astro-consult-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.astro-consult-cta-btn--chat {
+  background: linear-gradient(135deg, var(--primary, #8f4dff), #7c3aed);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(143, 77, 255, 0.3);
+}
+
+.astro-consult-cta-btn--chat:hover {
+  box-shadow: 0 6px 18px rgba(143, 77, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.astro-consult-cta-btn--call {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.astro-consult-cta-btn--call:hover {
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+}
+
+.astro-consult-cta-btn--appointment {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+.astro-consult-cta-btn--appointment:hover {
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+}
+
+.astro-consult-cta-btn--services {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+
+.astro-consult-cta-btn--services:hover {
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
+}
+
+.astro-consult-locked-pill {
+  margin-top: 8px;
+  font-size: 11.5px;
+  text-align: center;
+  color: var(--muted, #64748b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------------------
+   4. "All Services" Grid Section
+   -------------------------------------------------------------------------- */
+.astro-services-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.astro-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .astro-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .astro-services-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.astro-service-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.12));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 4px 16px -4px rgba(58, 42, 106, 0.04);
+  transition: all 0.22s ease;
+}
+
+.astro-service-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary, #8f4dff);
+  box-shadow: 0 8px 24px -4px rgba(143, 77, 255, 0.12);
+}
+
+.astro-service-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.astro-service-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.astro-service-badge--popular {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.astro-service-badge--special {
+  background: rgba(143, 77, 255, 0.12);
+  color: var(--primary, #8f4dff);
+}
+
+.astro-service-badge--remedy {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.astro-service-badge--instant {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.astro-service-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--surface-soft, #f8fafc);
+  color: var(--primary, #8f4dff);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.astro-service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.astro-service-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink, #1f1b2d);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.astro-service-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted, #64748b);
+  margin: 0;
+}
+
+.astro-service-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-border, rgba(0, 0, 0, 0.06));
+}
+
+.astro-service-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.astro-service-duration {
+  font-size: 11px;
+  color: var(--muted, #64748b);
+  font-weight: 500;
+}
+
+.astro-service-price-amount {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+}
+
+.astro-service-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9px;
+  background: rgba(143, 77, 255, 0.08);
+  border: 1px solid rgba(143, 77, 255, 0.2);
+  color: var(--primary, #8f4dff);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.astro-service-book-btn:hover {
+  background: var(--primary, #8f4dff);
+  color: #ffffff;
+  border-color: var(--primary, #8f4dff);
+}
+
+/* --------------------------------------------------------------------------
+   5. 21st.dev Segmented Controls Tabs Bar
+   -------------------------------------------------------------------------- */
+.astro-tabs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.astro-segmented-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 16px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.15));
+  box-shadow: 0 4px 16px -4px rgba(58, 42, 106, 0.03);
+  overflow-x: auto;
+}
+
+.astro-tab-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted, #64748b);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.astro-tab-pill-btn:hover {
+  color: var(--ink, #1f1b2d);
+  background: var(--surface-soft, rgba(0, 0, 0, 0.03));
+}
+
+.astro-tab-pill-btn.is-active {
+  background: var(--primary-bg, rgba(143, 77, 255, 0.1));
+  color: var(--primary, #8f4dff);
+  font-weight: 700;
+}
+
+.astro-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(143, 77, 255, 0.16);
+  color: var(--primary, #8f4dff);
+}
+
+.astro-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: astroFadeIn 0.25s ease-out;
+}
+
+@keyframes astroFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   6. About & Credentials Tab Styling
+   -------------------------------------------------------------------------- */
+.astro-about-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 860px) {
+  .astro-about-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.astro-about-card {
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.12));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 4px 16px -4px rgba(58, 42, 106, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.astro-about-card h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.astro-about-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--body, #475569);
+  margin: 0;
+}
+
+.astro-about-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.astro-about-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--body, #475569);
+}
+
+.astro-about-list-item svg {
+  color: var(--primary, #8f4dff);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   7. Reviews & Ratings Tab Styling
+   -------------------------------------------------------------------------- */
+.astro-reviews-summary-card {
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid var(--surface-border, rgba(143, 77, 255, 0.12));
+  background: var(--surface, #ffffff);
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  .astro-reviews-summary-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.astro-reviews-score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+}
+
+.astro-reviews-score-num {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--ink, #1f1b2d);
+  line-height: 1;
+}
+
+.astro-reviews-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #f59e0b;
+}
+
+.astro-reviews-total-label {
+  font-size: 12px;
+  color: var(--muted, #64748b);
+  font-weight: 500;
+}
+
+.astro-reviews-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.astro-review-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted, #64748b);
+}
+
+.astro-review-bar-label {
+  width: 44px;
+  font-weight: 600;
+}
+
+.astro-review-bar-track {
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--surface-soft, #e2e8f0);
+  overflow: hidden;
+}
+
+.astro-review-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.astro-review-bar-count {
+  width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--ink, #1f1b2d);
+}
+
+.astro-reviews-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.astro-review-entry-card {
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  background: var(--surface, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.astro-review-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.astro-review-entry-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.astro-review-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(143, 77, 255, 0.2), rgba(245, 158, 11, 0.2));
+  color: var(--primary, #8f4dff);
+  font-weight: 800;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+
+.astro-review-entry-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink, #1f1b2d);
+}
+
+.astro-review-verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  color: #059669;
+  font-weight: 600;
+}
+
+.astro-review-date {
+  font-size: 11.5px;
+  color: var(--muted, #64748b);
+}
+
+.astro-review-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--body, #475569);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. Dark Mode Refinements
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .astro-hero-card,
+html[data-theme='dark'] .astro-stat-card,
+html[data-theme='dark'] .astro-consult-card,
+html[data-theme='dark'] .astro-service-card,
+html[data-theme='dark'] .astro-about-card,
+html[data-theme='dark'] .astro-reviews-summary-card,
+html[data-theme='dark'] .astro-review-entry-card,
+html[data-theme='dark'] .astro-segmented-tabs-bar {
+  background: var(--surface, #181326);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme='dark'] .astro-hero-cover {
+  background: linear-gradient(135deg, rgba(143, 77, 255, 0.25) 0%, rgba(245, 158, 11, 0.15) 50%, rgba(16, 185, 129, 0.15) 100%);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme='dark'] .astro-hero-avatar-inner {
+  background: #181326;
+  border-color: #181326;
+}
+
+html[data-theme='dark'] .astro-hero-name,
+html[data-theme='dark'] .astro-stat-value,
+html[data-theme='dark'] .astro-section-title,
+html[data-theme='dark'] .astro-consult-title,
+html[data-theme='dark'] .astro-consult-price,
+html[data-theme='dark'] .astro-service-title,
+html[data-theme='dark'] .astro-service-price-amount,
+html[data-theme='dark'] .astro-about-card h3,
+html[data-theme='dark'] .astro-reviews-score-num,
+html[data-theme='dark'] .astro-review-entry-name,
+html[data-theme='dark'] .astro-review-bar-count {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .astro-service-icon-wrap,
+html[data-theme='dark'] .astro-reviews-score-block {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme='dark'] .astro-hero-bio-snippet {
+  background: rgba(255, 255, 255, 0.04);
+  border: none;
+}
+
+html[data-theme='dark'] .astro-hero-bio-snippet,
+html[data-theme='dark'] .astro-consult-desc,
+html[data-theme='dark'] .astro-service-desc,
+html[data-theme='dark'] .astro-about-text,
+html[data-theme='dark'] .astro-review-text {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .astro-pill-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+html[data-theme='dark'] .astro-sub-btn--outline,
+html[data-theme='dark'] .astro-share-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+/* --------------------------------------------------------------------------
+   9. Consultation Quick Action Buttons (Space-between & Shining Border)
+   -------------------------------------------------------------------------- */
+.astro-profile-container .astrologer-consultation {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.astrologer-consultation .astrologer-quick-actions {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center;
+  gap: 14px !important;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.astro-consult-action-btn {
+  flex: 1 1 0;
+  min-width: 160px;
+  min-height: 44px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  white-space: nowrap;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  text-decoration: none;
+}
+
+.astro-consult-action-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* Shining animated border for online/available buttons */
+.astro-btn-shining-border {
+  position: relative !important;
+  background: linear-gradient(135deg, var(--primary, #8f4dff), #6d28d9) padding-box,
+              linear-gradient(90deg, #ec4899, #f59e0b, #10b981, #6366f1, #ec4899) border-box !important;
+  border: 2px solid transparent !important;
+  background-size: 100% 100%, 300% 300% !important;
+  animation: astroShineBorder 3.5s linear infinite;
+  box-shadow: 0 4px 16px rgba(143, 77, 255, 0.35);
+  overflow: hidden;
+}
+
+.astro-btn-shining-border::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  animation: astroShineGleam 2.8s infinite;
+  pointer-events: none;
+}
+
+@keyframes astroShineBorder {
+  0% { background-position: 0% 0%, 0% 50%; }
+  50% { background-position: 0% 0%, 100% 50%; }
+  100% { background-position: 0% 0%, 0% 50%; }
+}
+
+@keyframes astroShineGleam {
+  0% { left: -100%; }
+  35% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.astro-btn-shining-border:hover {
+  box-shadow: 0 6px 24px rgba(143, 77, 255, 0.55);
+}
+
+/* Grayed out disabled buttons */
+.astro-btn-grayed,
+.astro-btn-grayed:disabled {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  filter: grayscale(1);
+  transform: none !important;
+  pointer-events: auto !important;
+}
+
+.astro-btn-grayed:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .astro-btn-grayed,
+html[data-theme='dark'] .astro-btn-grayed:disabled {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #64748b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+@media (max-width: 768px) {
+  .astro-consult-action-btn {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 520px) {
+  .astro-consult-action-btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
