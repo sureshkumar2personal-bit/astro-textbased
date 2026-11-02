@@ -619,7 +619,7 @@ export const mockAppointmentHistory = [
         ...record,
         horoscope: makeHoroscope(
           { name: record.customerName || 'Priya' },
-          'DEMO',
+          'Kundli',
         ),
       }
     : record,

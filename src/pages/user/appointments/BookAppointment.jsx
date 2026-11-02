@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CalendarDays, Star } from 'lucide-react'
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
 import { consultationAstrologers } from '../../../data/consultationAstrologers.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE, buildCalendarAvailability, countAvailableSlots } from './bookingAstrologerData.js'
@@ -84,6 +84,18 @@ function SubscribedAstrologerCard({ astrologer, override, availableSlots, onView
   )
 }
 
+function sortOnlineFirst(list) {
+  return [...list].sort((a, b) => {
+    const aOnline = String(a.availability || '').toLowerCase() === 'online'
+    const bOnline = String(b.availability || '').toLowerCase() === 'online'
+    if (aOnline === bOnline) return 0
+    return aOnline ? -1 : 1
+  })
+}
+
+const SUBSCRIBED_INCREMENT = 3
+const SUGGESTED_PAGE_SIZE = 3
+
 export default function BookAppointment() {
   const { currentUser } = useAuth()
   const { subscriptions, appointments, appointmentAvailabilityTemplates } = useAppData()
@@ -91,18 +103,38 @@ export default function BookAppointment() {
   const location = useLocation()
   const routes = getRoleRoutes(currentUser?.role)
   const fromDashboard = location.state?.from === 'dashboard'
-  const subscribedAstrologersList = useMemo(() => {
+
+  const [subscribedVisibleCount, setSubscribedVisibleCount] = useState(SUBSCRIBED_INCREMENT)
+  const [suggestedPage, setSuggestedPage] = useState(0)
+
+  const sortedSubscribedList = useMemo(() => {
     const subscriptionIds = subscriptions
       .filter((subscription) => subscription.userId === currentUser?.id)
       .map((subscription) => subscription.astrologerId)
-    if (!subscriptionIds.length) return subscribedAstrologers
-    return mockAstrologers.filter((astrologer) => subscriptionIds.includes(astrologer.id))
+    const baseList = !subscriptionIds.length
+      ? subscribedAstrologers
+      : mockAstrologers.filter((astrologer) => subscriptionIds.includes(astrologer.id))
+    return sortOnlineFirst(baseList)
   }, [subscriptions, currentUser?.id])
 
-  const suggestedAstrologersList = useMemo(() => {
-    const subscribedIds = new Set(subscribedAstrologersList.map((astrologer) => astrologer.id))
-    return mockAstrologers.filter((astrologer) => !subscribedIds.has(astrologer.id)).slice(0, 6)
-  }, [subscribedAstrologersList])
+  const sortedSuggestedList = useMemo(() => {
+    const subscribedIds = new Set(sortedSubscribedList.map((astrologer) => astrologer.id))
+    const baseList = mockAstrologers.filter((astrologer) => !subscribedIds.has(astrologer.id))
+    return sortOnlineFirst(baseList)
+  }, [sortedSubscribedList])
+
+  const visibleSubscribed = useMemo(
+    () => sortedSubscribedList.slice(0, subscribedVisibleCount),
+    [sortedSubscribedList, subscribedVisibleCount]
+  )
+  const hasMoreSubscribed = subscribedVisibleCount < sortedSubscribedList.length
+  const remainingSubscribed = Math.max(0, sortedSubscribedList.length - subscribedVisibleCount)
+
+  const totalSuggestedPages = Math.ceil(sortedSuggestedList.length / SUGGESTED_PAGE_SIZE)
+  const visibleSuggested = useMemo(
+    () => sortedSuggestedList.slice(suggestedPage * SUGGESTED_PAGE_SIZE, (suggestedPage + 1) * SUGGESTED_PAGE_SIZE),
+    [sortedSuggestedList, suggestedPage]
+  )
 
   const availableSlotsFor = (astrologer) => {
     const hasSchedule = appointmentAvailabilityTemplates.some((template) =>
@@ -128,11 +160,12 @@ export default function BookAppointment() {
 
       <AppointmentSectionTabs />
 
+      {/* Subscribed Astrologers Section */}
       <div className="book-appointment-section-head">
         <h2 className="section-title">Subscribed Astrologers</h2>
       </div>
       <div className="book-appointment-grid">
-        {subscribedAstrologersList.map((astrologer) => (
+        {visibleSubscribed.map((astrologer) => (
           <SubscribedAstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
@@ -143,13 +176,35 @@ export default function BookAppointment() {
           />
         ))}
       </div>
+      {sortedSubscribedList.length > SUBSCRIBED_INCREMENT && (
+        <div className="book-appointment-bottom-actions">
+          {hasMoreSubscribed ? (
+            <button
+              type="button"
+              className="book-appointment-more-btn"
+              onClick={() => setSubscribedVisibleCount((prev) => prev + SUBSCRIBED_INCREMENT)}
+            >
+              More (+{Math.min(SUBSCRIBED_INCREMENT, remainingSubscribed)}) <ChevronDown size={15} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="book-appointment-more-btn"
+              onClick={() => setSubscribedVisibleCount(SUBSCRIBED_INCREMENT)}
+            >
+              Show Less <ChevronUp size={15} />
+            </button>
+          )}
+        </div>
+      )}
 
+      {/* Suggested Astrologers Section */}
       <div className="book-appointment-section-head book-appointment-section-head--suggestions">
         <h2 className="section-title">Suggested Astrologers</h2>
         <p className="book-appointment-suggestion-note">Subscribe to your astrologer to book an appointment.</p>
       </div>
       <div className="book-appointment-grid">
-        {suggestedAstrologersList.map((astrologer) => (
+        {visibleSuggested.map((astrologer) => (
           <SubscribedAstrologerCard
             key={astrologer.id}
             astrologer={astrologer}
@@ -160,6 +215,31 @@ export default function BookAppointment() {
           />
         ))}
       </div>
+      {totalSuggestedPages > 1 && (
+        <div className="book-appointment-pagination">
+          <button
+            type="button"
+            className="book-appointment-page-btn"
+            onClick={() => setSuggestedPage((prev) => Math.max(0, prev - 1))}
+            disabled={suggestedPage === 0}
+            aria-label="Previous suggested astrologers"
+          >
+            <ChevronLeft size={16} aria-hidden="true" /> Previous
+          </button>
+          <span className="book-appointment-page-indicator">
+            Page {suggestedPage + 1} of {totalSuggestedPages}
+          </span>
+          <button
+            type="button"
+            className="book-appointment-page-btn"
+            onClick={() => setSuggestedPage((prev) => Math.min(totalSuggestedPages - 1, prev + 1))}
+            disabled={suggestedPage >= totalSuggestedPages - 1}
+            aria-label="Next suggested astrologers"
+          >
+            Next <ChevronRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

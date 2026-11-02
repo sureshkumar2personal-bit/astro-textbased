@@ -5,13 +5,13 @@
    ========================================================================= */
 
 /* Step rail for the shortened flow:
-   1 Choose Astrologer -> 2 Campaign & Type -> 3 Question */
+   1 Step 1 -> 2 Step 2 -> 3 Step 3 */
 .aq-flow-steps {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 4px 0 20px;
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
 }

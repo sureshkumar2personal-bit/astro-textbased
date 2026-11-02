@@ -561,3 +561,5 @@ export default function UserAppointmentDetailsDrawer({ appointment, consultation
     document.body,
   )
 }
+
+export { UserHoroscopeSection, ConsultationNotesContent, mapConsultationForUser, AttachmentViewer }

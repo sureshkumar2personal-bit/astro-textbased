@@ -341,11 +341,6 @@ export default function QuestionPurchased() {
                           <CampaignStatusChip key="type" style={{ background: cardStyle.softBg, color: cardStyle.accent, border: `1px solid ${cardStyle.border}` }}>
                             {questionTypePillLabel(card.type)}
                           </CampaignStatusChip>,
-                          ...(card.demo ? [
-                            <CampaignStatusChip key="demo" style={{ background: '#fdf6e3', color: '#8a6d1a', border: '1px solid #ead9a6' }}>
-                              Sample data
-                            </CampaignStatusChip>,
-                          ] : []),
                         ]}
                         details={[
                           { label: 'Purchased', value: `${card.purchased} slots` },

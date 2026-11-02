@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom'
 import { GlobalHeaderActionsContext } from '../contexts/GlobalHeaderActionsContext.jsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -437,6 +437,8 @@ export default function Layout() {
   const shellIsAstrologer = shellRole === ROLES.ASTROLOGER
   const headerName = currentUser?.name || 'Dashboard'
   const isOwnerProfile = location.pathname === '/user/profile'
+  const isSidebarHidden = isOwnerProfile || location.pathname === '/user/my-account'
+  const pageMeta = audienceMeta || dynamicAstrologerMeta || dynamicBookingMeta || dynamicQuestionMeta || PAGE_META[role]?.[location.pathname] || { title: config.title, sub: config.subtitle }
   const rewardStatus = role === ROLES.USER ? actions.getDiscountStatus(currentUser?.id) : null
   const showRewardBadge = rewardStatus?.state === 'available'
   const rewardCount = role === ROLES.USER ? actions.getAvailableDiscountQuestions(currentUser?.id).length : 0
@@ -659,60 +661,128 @@ export default function Layout() {
   )
 
   return (
-    <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader }}>
+    <GlobalHeaderActionsContext.Provider value={{ actions: globalActions, hasPageHeader, setHasPageHeader, isAstrologer: shellIsAstrologer }}>
       <div className={`app-shell${isOwnerProfile ? ' app-shell--profile' : ''}${shellIsAstrologer ? ' app-shell--astrologer' : ' app-shell--user'}`}>
-      <aside className={`sidebar sidebar--${role}`}>
-        <div className="sidebar-brand">
-          <div className="sidebar-brand-mark">
-            {shellIsAstrologer ? <TempleArchIcon size={24} color="#fff" /> : <TempleLampIcon size={24} color="#fff" />}
-          </div>
-          <div>
-            <div className="sidebar-brand-text">Astro Connect</div>
-          </div>
-        </div>
-
-        <div className="sidebar-group-label">{shellConfig.navLabel}</div>
-        {isAstrologer ? (
-          <AstrologerNav links={config.nav} basePath={basePath} />
-        ) : (
-          <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
-        )}
-      </aside>
-
-      <div className="main-column">
-        {!hasPageHeader && location.pathname !== '/user' && (
+        {!shellIsAstrologer && (
           <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
-            {isOwnerProfile && <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}><span aria-hidden="true">‹</span></button>}
-            {isOwnerProfile && <div className="profile-topbar-brand"><span className="profile-topbar-mark"><Sparkles size={17} /></span><strong>Astro Connect</strong></div>}
-            {shellIsAstrologer && <div className="astrologer-topbar-brand"><span className="astrologer-topbar-brand__mark"><img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" /></span><strong>Astro Connect</strong></div>}
+            <div className="topbar-brand-and-heading">
+              <Link to={basePath} className={`user-topbar-brand${isSidebarHidden ? ' is-hidden' : ''}`} aria-label="Astro Connect Home">
+                <span className="user-topbar-brand__mark">
+                  <TempleLampIcon size={20} color="var(--primary)" />
+                </span>
+                <strong className="user-topbar-brand__text">Astro Connect</strong>
+              </Link>
+
+              <div className={`topbar-page-heading-group${isSidebarHidden ? ' is-visible' : ''}`}>
+                {location.pathname !== '/user' && (
+                  isOwnerProfile ? (
+                    <button type="button" className="profile-home-btn" aria-label="Back to My Account" onClick={() => navigate(`${basePath}/my-account`)}>
+                      <span aria-hidden="true">‹</span>
+                    </button>
+                  ) : (
+                    <button type="button" className="profile-home-btn" aria-label="Back to Dashboard" onClick={() => navigate(basePath)}>
+                      <span aria-hidden="true">‹</span>
+                    </button>
+                  )
+                )}
+                <div className="topbar-heading">
+                  <div className="topbar-crumb">{location.pathname === '/user/my-account' ? 'My Account' : (pageMeta.title || 'Profile')}</div>
+                </div>
+              </div>
+            </div>
             {globalActions}
           </header>
         )}
 
-        {consultationDetailsId && <UserConsultationDetails
-          consultation={consultations.find((item) => item.id === consultationDetailsId)}
-          history={consultations.filter((item) => item.userId === currentUser?.id && item.sent)}
-          onSelect={setConsultationDetailsId}
-          onComplete={actions.completeAtonement}
-          onClose={() => setConsultationDetailsId(null)}
-        />}
+        {shellIsAstrologer ? (
+          <>
+            <aside className={`sidebar sidebar--${role}`}>
+              <div className="sidebar-brand">
+                <div className="sidebar-brand-mark">
+                  <TempleArchIcon size={24} color="#fff" />
+                </div>
+                <div>
+                  <div className="sidebar-brand-text">Astro Connect</div>
+                </div>
+              </div>
 
-        <div className="page-content">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              className="page-transition"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {outlet}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        {isAstrologer && <><IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} /><CallAstrologer /><InstantChatAstrologer /></>}
-      </div>
+              <div className="sidebar-group-label">{shellConfig.navLabel}</div>
+              <AstrologerNav links={config.nav} basePath={basePath} />
+            </aside>
+
+            <div className="main-column">
+              {!hasPageHeader && location.pathname !== '/user' && (
+                <header className={`topbar-header ${headerVisible ? 'is-visible' : 'is-hidden'}`}>
+                  <div className="astrologer-topbar-brand">
+                    <span className="astrologer-topbar-brand__mark">
+                      <img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" />
+                    </span>
+                    <strong>Astro Connect</strong>
+                  </div>
+                  {globalActions}
+                </header>
+              )}
+
+              {consultationDetailsId && <UserConsultationDetails
+                consultation={consultations.find((item) => item.id === consultationDetailsId)}
+                history={consultations.filter((item) => item.userId === currentUser?.id && item.sent)}
+                onSelect={setConsultationDetailsId}
+                onComplete={actions.completeAtonement}
+                onClose={() => setConsultationDetailsId(null)}
+              />}
+
+              <div className="page-content">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    className="page-transition"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {outlet}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+              <IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} />
+              <CallAstrologer />
+              <InstantChatAstrologer />
+            </div>
+          </>
+        ) : (
+          <div className="app-shell-body">
+            <aside className={`sidebar sidebar--${role}`}>
+              <div className="sidebar-group-label">{shellConfig.navLabel}</div>
+              <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+            </aside>
+
+            <div className="main-column">
+              {consultationDetailsId && <UserConsultationDetails
+                consultation={consultations.find((item) => item.id === consultationDetailsId)}
+                history={consultations.filter((item) => item.userId === currentUser?.id && item.sent)}
+                onSelect={setConsultationDetailsId}
+                onComplete={actions.completeAtonement}
+                onClose={() => setConsultationDetailsId(null)}
+              />}
+
+              <div className="page-content">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    className="page-transition"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {outlet}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        )}
       {dndConfirmOpen && (
         <div className="modal-overlay astrologer-dnd-confirm-overlay" role="presentation" onClick={() => setDndConfirmOpen(false)}>
           <section

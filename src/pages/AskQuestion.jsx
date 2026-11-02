@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
+import FlowSteps, { FLOW_STEPS } from '../components/user/FlowSteps.jsx'
 import { X, Clock, AlertTriangle, Languages, Layers, Sparkles, Star, Check, ChevronDown, ChevronUp, UserRound, CheckCircle2, Heart, GraduationCap, Briefcase, Activity, Home, Sun, Baby, Package } from 'lucide-react'
 import Card from '../components/ui/Card.jsx'
 import QuestionFormModal from '../components/user/QuestionFormModal.jsx'
@@ -104,7 +105,6 @@ const QUESTION_TYPE_LABELS = { General: 'General Question', Personal: 'Personal 
 
 // The compact chooser offers the question type on the campaign card itself, so
 // the label only has to say which type it is - General or Personal.
-const FLOW_STEPS = ['Choose Astrologer', 'Campaign & Type', 'Question']
 const questionTypePillLabel = (type) => (type === 'General' ? 'General' : 'Personal')
 // Concise helper text that keeps the two question types meaningful. A campaign
 // is the topic (Marriage, Career, Health...); General vs Personal only describes
@@ -439,7 +439,7 @@ function getAstrologerOfferBadge(astrologerId, { campaigns = [], subscriptions =
       tone: 'first',
       hint: offer
         ? `First-question offer · live on ${offer.name}`
-        : `${offerPercent}% off your first question with this astrologer · demo offer, presentation only`,
+        : `${offerPercent}% off your first question with this astrologer`,
       demo: offer ? undefined : true,
     }
   }
@@ -455,7 +455,7 @@ function getAstrologerOfferBadge(astrologerId, { campaigns = [], subscriptions =
   return {
     label,
     tone: 'demo',
-    hint: `${offerPercent}% off your first question with this astrologer · demo offer, presentation only`,
+    hint: `${offerPercent}% off your first question with this astrologer`,
     demo: true,
   }
 }
@@ -518,25 +518,6 @@ function AstrologerChoiceCard({ astrologer, badges = [], meta, actionLabel, sele
         </button>
       ) : null}
     </article>
-  )
-}
-
-// The shortened flow is: astrologer -> campaign + question type -> form. The
-// step rail makes that explicit so the removed intermediate step stays removed.
-function FlowSteps({ current }) {
-  return (
-    <ol className="aq-flow-steps" aria-label="Ask a Question steps">
-      {FLOW_STEPS.map((label, index) => {
-        const step = index + 1
-        const state = step === current ? ' is-active' : step < current ? ' is-done' : ''
-        return (
-          <li key={label} className={`aq-flow-step${state}`} aria-current={step === current ? 'step' : undefined}>
-            <span className="aq-flow-step__num" aria-hidden="true">{step}</span>
-            {label}
-          </li>
-        )
-      })}
-    </ol>
   )
 }
 
@@ -1285,7 +1266,14 @@ export default function AskQuestion({ embedded = false }) {
           : editingQuestion.attachments || [],
         purchaseType: questionType.startsWith('General') ? 'Free' : 'Paid',
       })
-      setSuccessMessage('Your question has been updated successfully.')
+      setShowQuestionForm(false)
+      navigate(`${routes.askQuestion}/my-questions`, {
+        state: {
+          submitted: true,
+          successMessage: 'Your question has been updated successfully.',
+        },
+      })
+      return
     } else {
       const applyingDiscount = discountActive && Boolean(discountPrice)
       // A purchased slot only applies when the user actually has a remaining
@@ -1297,14 +1285,15 @@ export default function AskQuestion({ embedded = false }) {
       const applyingPurchasedSlot = !applyingDiscount && (isPaidByCredit || isPaidBySlot)
       const purchaseType = applyingDiscount ? 'Paid' : applyingPurchasedSlot ? 'Purchased Slot' : (questionType.startsWith('General') ? 'Free' : 'Paid')
       const purchaseAmount = applyingPurchasedSlot ? 0 : (selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price)
+      const submitSuccessMessage = applyingDiscount
+        ? 'Your Discount Question was used. The question was submitted at the discounted price.'
+        : isPaidByCredit
+          ? 'Your question has been submitted using your purchased question.'
+          : 'Your question has been submitted successfully.'
       if (applyingDiscount) {
         actions.useDiscountQuestion(currentUser?.id, discountQuestionId)
-        setSuccessMessage('Your Discount Question was used. The question was submitted at the discounted price.')
-      } else if (isPaidByCredit) {
-        setSuccessMessage('Your question has been submitted using your purchased question.')
-      } else {
-        setSuccessMessage('Your question has been submitted successfully.')
       }
+      setSuccessMessage(submitSuccessMessage)
       actions.createQuestion({
         userName: currentUser?.name,
         userId: currentUser?.id,
@@ -1334,9 +1323,14 @@ export default function AskQuestion({ embedded = false }) {
         creditCampaignId: selectedCampaign?.id || null,
       })
       if (isPaidByCredit) setSearchParams({}, { replace: true })
+      setShowQuestionForm(false)
+      navigate(`${routes.askQuestion}/my-questions`, {
+        state: {
+          submitted: true,
+          successMessage: submitSuccessMessage,
+        },
+      })
     }
-    setSubmitted(true)
-    setShowQuestionForm(false)
   }
 
   // "Ask This Question" entry point: opens the demo Review & Payment screen for
@@ -1406,7 +1400,35 @@ export default function AskQuestion({ embedded = false }) {
     navigate(routes.trackQuestions)
   }
 
+  const outlet = useOutletContext()
   const showAstrologerChooser = showAstrologerStep && !isEditing && !isViewing && !discountActive
+  const computedFlowStep = showAstrologerChooser ? 1 : isQuestionFormOpen ? 3 : 2
+
+  useEffect(() => {
+    if (outlet?.setAskStep) {
+      outlet.setAskStep(computedFlowStep)
+    }
+  }, [computedFlowStep, outlet])
+
+  useEffect(() => {
+    if (outlet?.stepActionsRef) {
+      outlet.stepActionsRef.current = {
+        goToStep: (targetStep) => {
+          if (targetStep === 1) {
+            changeAstrologer()
+            closeQuestionForm()
+          } else if (targetStep === 2) {
+            closeQuestionForm()
+          }
+        },
+      }
+      return () => {
+        if (outlet.stepActionsRef) {
+          outlet.stepActionsRef.current = null
+        }
+      }
+    }
+  }, [outlet])
 
   return (
     <div>
@@ -1416,11 +1438,11 @@ export default function AskQuestion({ embedded = false }) {
           showBack
           backTo={location.state?.from === 'dashboard' ? routes.dashboard : routes.trackQuestions}
           backLabel={location.state?.from === 'dashboard' ? 'Back to Dashboard' : 'Back'}
-        />
-      )}
-
-      {!isEditing && !discountActive && !isViewing && (
-        <FlowSteps current={showAstrologerChooser ? 1 : isQuestionFormOpen ? 3 : 2} />
+        >
+          {!isEditing && !discountActive && !isViewing && (
+            <FlowSteps current={computedFlowStep} />
+          )}
+        </PageHeader>
       )}
 
       {showAstrologerChooser && (
@@ -1662,7 +1684,7 @@ export default function AskQuestion({ embedded = false }) {
           <div className="aq-packages">
             <div className="aq-packages__label">
               Available Question Packages
-              <span className="aq-packages__note">Demo offers · buy through the existing purchase flow</span>
+              <span className="aq-packages__note">Buy through the existing purchase flow</span>
             </div>
             <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {DEMO_QUESTION_PACKAGES.map((pkg) => {
@@ -1831,16 +1853,16 @@ export default function AskQuestion({ embedded = false }) {
             style={{ width: 'min(560px, calc(100vw - 32px))' }}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="demo-payment-review-title"
+            aria-labelledby="payment-review-title"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="user-modal-card__header aq-review-modal__header">
               <div>
-                <div id="demo-payment-review-title" className="section-title" style={{ marginBottom: 0 }}>Review &amp; Payment</div>
+                <div id="payment-review-title" className="section-title" style={{ marginBottom: 0 }}>Review &amp; Payment</div>
                 <div className="muted" style={{ marginTop: 4 }}>
                   {demoPaymentIntent === 'later'
-                    ? 'Confirm this purchase and demo payment to save it for later.'
-                    : 'Confirm your question and demo payment to continue.'}
+                    ? 'Confirm this purchase to save it for later.'
+                    : 'Confirm your question to continue.'}
                 </div>
               </div>
               <button type="button" className="icon-btn" aria-label="Close review and payment" onClick={closeDemoPayment}>
@@ -1888,21 +1910,21 @@ export default function AskQuestion({ embedded = false }) {
                     <strong>₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}</strong>
                   </div>
                 </div>
-                <p className="aq-review-modal__note">Demo checkout · no real payment is charged and no card details are collected.</p>
+                <p className="aq-review-modal__note">Secure checkout · instant confirmation.</p>
               </section>
             </div>
 
             <div className="user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={closeDemoPayment}>Back</button>
               <button type="button" className="btn btn-primary" onClick={confirmDemoPayment}>
-                Pay ₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price} (Demo)
+                Pay ₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}
               </button>
             </div>
           </div>
         </div>
       ), document.body)}
 
-      {/* Demo Payment Successful confirmation. "Enter Your Question" opens the
+      {/* Payment Successful confirmation. "Enter Your Question" opens the
           question form via openQuestionFormAfterDemoPayment; nothing is
           submitted until the user fills the form and presses Submit Question.
           Closing returns to the campaign selection via closeDemoPayment, with
@@ -1914,7 +1936,7 @@ export default function AskQuestion({ embedded = false }) {
             style={{ width: 'min(480px, calc(100vw - 32px))' }}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="demo-payment-success-title"
+            aria-labelledby="payment-success-title"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="user-modal-card__content aq-success-modal__body">
@@ -1922,15 +1944,14 @@ export default function AskQuestion({ embedded = false }) {
                 <CheckCircle2 size={30} aria-hidden="true" />
               </span>
               <div className="aq-success-modal__heading">
-                <span className="aq-success-modal__demo-tag">Demo</span>
-                <h2 id="demo-payment-success-title" className="section-title aq-success-modal__title">
-                  {demoPaymentIntent === 'later' ? 'Demo Payment Successful' : 'Payment Successful'}
+                <h2 id="payment-success-title" className="section-title aq-success-modal__title">
+                  Payment Successful
                 </h2>
               </div>
               <p className="aq-success-modal__message">
                 {demoPaymentIntent === 'later'
-                  ? `Your paid question is saved. This is a demo checkout — no real money was charged and no card details were collected. Write the question from Purchased Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.`
-                  : 'This is a demo checkout — no real money was charged and no card details were collected.'}
+                  ? `Your paid question is saved. Write the question from Purchased Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.`
+                  : 'Your question payment has been confirmed successfully.'}
               </p>
 
               <div className="aq-summary aq-success-modal__summary">
@@ -1939,7 +1960,7 @@ export default function AskQuestion({ embedded = false }) {
                 <div className="aq-summary-row"><span>Question Type</span><strong>{selectedQuestionSummary.typeLabel}</strong></div>
                 <div className="aq-summary-rule" />
                 <div className="aq-summary-row aq-summary-row--total">
-                  <span>Paid (Demo)</span>
+                  <span>Amount Paid</span>
                   <strong>₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}</strong>
                 </div>
               </div>

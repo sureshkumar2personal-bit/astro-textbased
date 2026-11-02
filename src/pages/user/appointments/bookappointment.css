@@ -27,6 +27,97 @@
   margin: 0;
 }
 
+.book-appointment-bottom-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.book-appointment-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.book-appointment-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--border, #e2ddee);
+  background: var(--surface, #fff);
+  color: var(--primary, #6d28d9);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.book-appointment-page-btn:hover:not(:disabled) {
+  background: var(--primary-bg, rgba(109, 40, 217, 0.08));
+  border-color: var(--primary, #6d28d9);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(109, 40, 217, 0.12);
+}
+
+.book-appointment-page-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.book-appointment-page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: var(--surface-soft, rgba(0, 0, 0, 0.02));
+  border-color: var(--border, #e2ddee);
+  color: var(--muted, #8e7f74);
+  box-shadow: none;
+}
+
+.book-appointment-page-indicator {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #695e56);
+  user-select: none;
+}
+
+.book-appointment-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 18px;
+  border-radius: 9999px;
+  border: 1px solid var(--border, #e2ddee);
+  background: var(--surface, #fff);
+  color: var(--primary, #6d28d9);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.book-appointment-more-btn:hover {
+  background: var(--primary-bg, rgba(109, 40, 217, 0.08));
+  border-color: var(--primary, #6d28d9);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(109, 40, 217, 0.12);
+}
+
+.book-appointment-more-btn:active {
+  transform: translateY(0);
+}
+
 .book-appointment-inner-tabs {
   display: inline-flex;
   align-items: center;

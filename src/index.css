@@ -14936,6 +14936,11 @@ button.apt-week-day:focus-visible {
 
 /* --- Section head --- */
 .reward-section-head { display: grid; gap: 6px; margin-bottom: 16px; }
+.reward-results > .reward-section-head:first-child .reward-section-title,
+.reward-results > .reward-section-head:first-of-type .reward-section-title,
+div.reward-section-head:nth-of-type(1) > h2.reward-section-title {
+  margin-top: 28px;
+}
 .reward-section-title {
   display: flex; align-items: center; gap: 10px; color: var(--text-primary);
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 600;
@@ -15173,7 +15178,7 @@ button.apt-week-day:focus-visible {
   justify-content: center;
 }
 .apt-scheduling-calendar--history {
-  width: min(100%, 660px);
+  width: min(100%, 780px);
 }
 .apt-scheduling-calendar--history .apt-month-weekday {
   padding: 5px 3px;
@@ -15268,7 +15273,7 @@ button.apt-week-day:focus-visible {
 }
 @media (min-width: 1121px) {
   .user-appointment-history .apt-main--history {
-    grid-template-columns: minmax(0, 1fr) minmax(250px, 290px);
+    grid-template-columns: minmax(580px, 1.45fr) minmax(360px, 450px);
     gap: 24px;
   }
 }

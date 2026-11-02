@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Clock3, Grid2X2, List, PhoneCall, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { CalendarDays, Clock3, Grid2X2, List, PhoneCall, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import './user/appointments/userappointments.css'
 import './user/appointments/appointmenthistory.css'
@@ -7,7 +7,7 @@ import Card from '../components/ui/Card.jsx'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
-import UserAppointmentDetailsDrawer from '../components/user/UserAppointmentDetailsDrawer.jsx'
+import UserAppointmentExpandedDetails from '../components/user/UserAppointmentExpandedDetails.jsx'
 import AppointmentSectionTabs from './user/appointments/AppointmentSectionTabs.jsx'
 import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
@@ -55,7 +55,18 @@ function initials(name = '') {
   return String(name).split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
 }
 
-function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onReschedule, onViewDetails }) {
+function UserAppointmentCard({
+  appointment,
+  selected,
+  isExpanded,
+  onToggleExpand,
+  onCancel,
+  onReschedule,
+  consultation,
+  currentUser,
+  onBookAgain,
+  onUpdatePariharamProgress,
+}) {
   const window = resolveAppointmentWindow(appointment)
   const bucket = appointmentStatusBucket(appointment)
   const statusLabel = getAppointmentDisplayStatus(appointment)
@@ -66,14 +77,14 @@ function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onResc
 
   return (
     <article
-      className={`apt-history-item user-appointment-card${selected ? ' is-active' : ''}${bucket === 'cancelled' ? ' is-cancelled' : ''}`}
+      className={`apt-history-item user-appointment-card${isExpanded ? ' is-expanded' : ''}${selected ? ' is-active' : ''}${bucket === 'cancelled' ? ' is-cancelled' : ''}`}
       role="button"
       tabIndex={0}
-      onClick={() => onSelect(appointment.id)}
+      onClick={() => onToggleExpand(appointment.id)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
-          onSelect(appointment.id)
+          onToggleExpand(appointment.id)
         }
       }}
     >
@@ -97,24 +108,69 @@ function UserAppointmentCard({ appointment, selected, onSelect, onCancel, onResc
         <span>Booking ID: {appointment.orderId || appointment.id}</span>
       </div>
       <div className="user-appointment-card__actions">
-        <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onViewDetails(appointment) }}>View Details</button>
+        <button
+          type="button"
+          className="btn btn-outline btn-sm"
+          onClick={(event) => { event.stopPropagation(); onToggleExpand(appointment.id) }}
+          aria-expanded={isExpanded}
+        >
+          {isExpanded ? <>Hide Details <ChevronUp size={13} /></> : <>View Details <ChevronDown size={13} /></>}
+        </button>
         {canReschedule && <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onReschedule(appointment) }}>Reschedule</button>}
         {canCancel && <button type="button" className="btn btn-danger btn-sm" onClick={(event) => { event.stopPropagation(); onCancel(appointment) }}>Cancel Appointment</button>}
       </div>
+
+      {isExpanded && (
+        <div className="user-appointment-card__extended" onClick={(event) => event.stopPropagation()}>
+          <UserAppointmentExpandedDetails
+            appointment={appointment}
+            consultation={consultation}
+            currentUser={currentUser}
+            onBookAgain={onBookAgain}
+            onUpdatePariharamProgress={onUpdatePariharamProgress}
+          />
+        </div>
+      )}
     </article>
   )
 }
 
-function AddedCompactAppointmentCard({ appointment, onSelect }) {
+function AddedCompactAppointmentCard({
+  appointment,
+  isExpanded,
+  onToggleExpand,
+  consultation,
+  currentUser,
+  onBookAgain,
+  onUpdatePariharamProgress,
+}) {
   if (!appointment) return null
   const window = resolveAppointmentWindow(appointment)
   const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
   const statusLabel = getAppointmentDisplayStatus(appointment)
   const bucket = appointmentStatusBucket(appointment)
+  const cardRef = useRef(null)
+  const extendedRef = useRef(null)
+
+  useEffect(() => {
+    if (isExpanded && extendedRef.current) {
+      extendedRef.current.scrollTop = 0
+    }
+  }, [isExpanded])
 
   return (
     <Card
-      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}`}
+      ref={cardRef}
+      className={`apt-side-panel added-compact-appointment-card added-compact-appointment-card--${bucket}${isExpanded ? ' is-expanded' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onToggleExpand(appointment.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onToggleExpand(appointment.id)
+        }
+      }}
     >
       <div className="added-compact-appointment-card__top">
         <div className="added-compact-appointment-card__profile">
@@ -129,8 +185,31 @@ function AddedCompactAppointmentCard({ appointment, onSelect }) {
         <span><CalendarDays size={13} /><small>Astrology</small><strong>{appointment.specialization || 'Vedic Astrology'}</strong></span>
       </div>
       <div className="added-compact-appointment-card__actions">
-        <button type="button" className="btn btn-outline btn-sm" onClick={(event) => { event.stopPropagation(); onSelect?.(appointment) }}>View Details</button>
+        <button
+          type="button"
+          className="btn btn-outline btn-sm"
+          onClick={(event) => { event.stopPropagation(); onToggleExpand(appointment.id) }}
+          aria-expanded={isExpanded}
+        >
+          {isExpanded ? <>Hide Details <ChevronUp size={13} /></> : <>View Details <ChevronDown size={13} /></>}
+        </button>
       </div>
+
+      {isExpanded && (
+        <div
+          ref={extendedRef}
+          className="added-compact-appointment-card__extended"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <UserAppointmentExpandedDetails
+            appointment={appointment}
+            consultation={consultation}
+            currentUser={currentUser}
+            onBookAgain={onBookAgain}
+            onUpdatePariharamProgress={onUpdatePariharamProgress}
+          />
+        </div>
+      )}
     </Card>
   )
 }
@@ -149,12 +228,11 @@ export default function AppointmentDetails() {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [selectedId, setSelectedId] = useState(() => first?.id || null)
   const [filter, setFilter] = useState('all')
-  const [viewMode, setViewMode] = useState('calendar')
+  const [viewMode, setViewMode] = useState(() => searchParams.get('view') || 'list')
   const [listPeriod, setListPeriod] = useState('month')
   const [notice, setNotice] = useState('')
   const [rescheduleTarget, setRescheduleTarget] = useState(null)
-  // Start open when arriving with ?id= (e.g. Back from Atonement Details) so the drawer never flashes in late.
-  const [detailsAppointment, setDetailsAppointment] = useState(() => requested || null)
+  const [expandedId, setExpandedId] = useState(() => requested?.id || null)
 
   const filteredAppointments = useMemo(() => userAppointments.filter((appointment) => {
     const bucket = appointmentStatusBucket(appointment, now)
@@ -198,7 +276,7 @@ export default function AppointmentDetails() {
 
   useEffect(() => {
     if (!requested) return
-    setDetailsAppointment(requested)
+    setExpandedId(requested.id)
     setSelectedId(requested.id)
     if (requested.dateIso) {
       const date = fromIsoDate(requested.dateIso)
@@ -223,9 +301,9 @@ export default function AppointmentDetails() {
     }
   }
 
-  const viewDetails = (appointment) => {
-    selectAppointment(appointment.id)
-    setDetailsAppointment(appointment)
+  const toggleExpand = (id) => {
+    setExpandedId((prev) => (prev === id ? null : id))
+    selectAppointment(id)
   }
 
   const cancelAppointment = (appointment) => {
@@ -233,12 +311,7 @@ export default function AppointmentDetails() {
     setNotice('Appointment cancelled successfully.')
   }
 
-  const closeDetailsDrawer = (appointment) => {
-    setDetailsAppointment(null)
-  }
-
   const bookAgain = (appointment) => {
-    setDetailsAppointment(null)
     if (!appointment?.astrologerId) return
     navigate(`/user/appointments/book/${encodeURIComponent(appointment.astrologerId)}`)
   }
@@ -265,19 +338,6 @@ export default function AppointmentDetails() {
   return <div className="apt-page user-appointment-history">
     <PageHeader eyebrow="User portal" title="Appointment History" showBack />
     <AppointmentSectionTabs />
-    <section className="appointment-history-recommendation" aria-label="Continue your journey">
-      <div className="appointment-history-recommendation__ornament" aria-hidden="true">✦</div>
-      <div className="appointment-history-recommendation__copy">
-        <span>CONTINUE YOUR JOURNEY</span>
-        <p>Your last consultation was about Career.</p>
-        <small>Explore another consultation with</small>
-      </div>
-      <div className="appointment-history-recommendation__astrologer">
-        <strong>Acharya Meena</strong>
-        <span>Vedic Astrology</span>
-      </div>
-      <Link className="btn btn-primary appointment-history-recommendation__action" to="/user/appointments/book/acharya-meena">Continue Consultation →</Link>
-    </section>
     <div className="apt-history-toolbar">
       <div className="apt-history-filters"><div className="apt-history-tabs">{FILTERS.map((item) => <button type="button" key={item.key} className={filter === item.key ? 'is-active' : ''} onClick={() => setFilter(item.key)}>{item.label}</button>)}</div></div>
       <div className="apt-history-view-toggle" role="group" aria-label="Appointment view">
@@ -292,7 +352,20 @@ export default function AppointmentDetails() {
           <div className="apt-history-search"><select className="apt-history-status-filter" value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter appointments by status"><option value="all">Filter by status</option>{FILTERS.filter((item) => item.key !== 'all').map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}</select></div>
           <div className="apt-side-head"><span>{selectedDate ? new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' }) : 'Appointments'}</span></div>
           <div className="user-appointment-list">
-            {dayAppointments.length ? dayAppointments.map((appointment) => <AddedCompactAppointmentCard key={appointment.id} appointment={appointment} onSelect={viewDetails} />) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>}
+            {dayAppointments.length ? dayAppointments.map((appointment) => (
+              <AddedCompactAppointmentCard
+                key={appointment.id}
+                appointment={appointment}
+                isExpanded={expandedId === appointment.id}
+                onToggleExpand={toggleExpand}
+                consultation={getAppointmentDisplayStatus(appointment) === 'Completed'
+                  ? consultations.find((item) => String(item.appointmentId) === String(appointment.id))
+                  : null}
+                currentUser={currentUser}
+                onBookAgain={bookAgain}
+                onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
+              />
+            )) : <div className="apt-history-empty apt-history-empty--day"><CalendarDays size={20} /><strong>No appointments this day</strong><span>Select another date to see its appointments.</span></div>}
           </div>
         </aside>
       </div>
@@ -304,20 +377,26 @@ export default function AppointmentDetails() {
         </div>
         <div className="apt-history-list-view__count">{listAppointments.length} {listAppointments.length === 1 ? 'appointment' : 'appointments'}</div>
         <div className="apt-history-list-view__rows">
-          {listAppointments.length ? listAppointments.map((appointment) => <UserAppointmentCard key={appointment.id} appointment={appointment} selected={detailsAppointment?.id === appointment.id} onSelect={(id) => viewDetails(userAppointments.find((item) => item.id === id))} onCancel={cancelAppointment} onReschedule={setRescheduleTarget} onViewDetails={viewDetails} />) : <div className="apt-history-empty"><CalendarDays size={22} /><strong>No appointments in this range</strong><span>Try another day, week, or month.</span></div>}
+          {listAppointments.length ? listAppointments.map((appointment) => (
+            <UserAppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              selected={selectedId === appointment.id}
+              isExpanded={expandedId === appointment.id}
+              onToggleExpand={toggleExpand}
+              onCancel={cancelAppointment}
+              onReschedule={setRescheduleTarget}
+              consultation={getAppointmentDisplayStatus(appointment) === 'Completed'
+                ? consultations.find((item) => String(item.appointmentId) === String(appointment.id))
+                : null}
+              currentUser={currentUser}
+              onBookAgain={bookAgain}
+              onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
+            />
+          )) : <div className="apt-history-empty"><CalendarDays size={22} /><strong>No appointments in this range</strong><span>Try another day, week, or month.</span></div>}
         </div>
       </section>
     )}
-    <UserAppointmentDetailsDrawer
-      appointment={detailsAppointment}
-      consultation={detailsAppointment && getAppointmentDisplayStatus(detailsAppointment) === 'Completed'
-        ? consultations.find((item) => String(item.appointmentId) === String(detailsAppointment.id))
-        : null}
-      currentUser={currentUser}
-      onClose={() => closeDetailsDrawer(detailsAppointment)}
-      onBookAgain={bookAgain}
-      onUpdatePariharamProgress={(appointmentId, pariharamId, dayId, date, dayNumber, completed) => actions.savePariharamProgress(appointmentId, pariharamId, dayId, date, dayNumber, completed)}
-    />
     {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>

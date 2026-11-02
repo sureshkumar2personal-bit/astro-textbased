@@ -17,7 +17,6 @@ import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils
 import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
-import TopbarActions from '../components/TopbarActions.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
 
 function formatActivityDate(value) {
@@ -92,17 +91,11 @@ export default function UserDashboard() {
     <div className="user-dashboard-page">
       <div className="hero-banner hero-banner-user">
         <div className="hero-banner-content">
-          <div className="user-devotional-pill">
-            <span className="user-devotional-om">🕉️</span>
-            <span>Shubh Muhurat</span>
-            <span className="user-devotional-dot">·</span>
-            <span>Daily Divine Guidance</span>
-          </div>
-          <h2>Pranam, {currentUser?.name || 'Devotee'} 🙏</h2>
+          <h2>Welcome, {currentUser?.name || 'Devotee'} 🙏</h2>
           <p>May your day be blessed with peace, divine clarity, and auspicious guidance.</p>
         </div>
-        <div className="hero-banner-topbar-actions">
-          <TopbarActions className="hero-banner-actions-wrap" />
+        <div className="hero-banner-deepam" aria-hidden="true">
+          <span>🪔</span>
         </div>
       </div>
 

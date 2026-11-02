@@ -111,6 +111,7 @@ function DayProofItem({ day, dayIndex, onSaveProof }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span
+            className="am-day-badge"
             style={{
               padding: '2px 8px',
               borderRadius: 6,
@@ -365,6 +366,7 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
         </div>
 
         <div
+          className="am-proof-count-badge"
           style={{
             display: 'flex',
             alignItems: 'center',
