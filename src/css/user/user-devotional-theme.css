@@ -1,158 +1,116 @@
 /* ==========================================================================
-   Astro Connect — User-Side Cozy Sepia & Vintage Brown Theme
+   Astro Connect — User-Side Devotional & Spiritual Sanctum Theme
    Scoped EXCLUSIVELY to .app-shell--user to ensure 0% impact on Astrologer/Editor portals.
-   Minimalist, warm monochromatic background texture with cozy sepia, muted dark brown
-   backdrop, hazy low-contrast overlay, soft vignette edges, and warm amber color grade.
+   Inspired by leading Indian temple & devotional platforms (Sri Mandir, VAMA, DevDarshan).
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Theme Variables Scoped Exclusively to .app-shell--user (Default & Light)
-   -------------------------------------------------------------------------- */
-.app-shell--user,
-html[data-theme='light'] .app-shell--user {
-  /* Warm Sepia Terracotta / Cinnamon Earth */
-  --primary: #B86F38;
-  --primary-dark: #945322;
-  --primary-light: #CB824B;
-  --primary-bg: rgba(184, 111, 56, 0.14);
-
-  /* Deep Vintage Umber / Sandalwood */
-  --secondary: #9E693B;
-  --secondary-bg: rgba(158, 105, 59, 0.14);
-
-  /* Warm Amber Candle Glow & Antique Brass */
-  --accent: #D48F3B;
-  --accent-dark: #B07024;
-  --accent-light: #E5A85A;
-  --gold-400: #E5A85A;
-  --gold-500: #D48F3B;
-  --gold-600: #B07024;
-
-  /* Solid Muted Dark Brown & Matte Earth Surfaces */
-  --bg: #1B120C;
-  --bg-solid: #1B120C;
-  --surface: #231811;
-  --surface-strong: #2A1F17;
-  --surface-soft: #1E150F;
-  --surface-border: #3E2E22;
-  --border: #3E2E22;
-  --border-subtle: rgba(196, 146, 104, 0.14);
-
-  /* Deeply Desaturated Warm-Tinted Ivory & Sepia Taupe */
-  --text-primary: #ECE2D6;
-  --text-secondary: #A79888;
-  --body: #ECE2D6;
-  --ink: #ECE2D6;
-  --muted: #8B7B6C;
-
-  /* Vintage Dark Wood Sidebar */
-  --sidebar-from: #19100A;
-  --sidebar-to: #110A06;
-
-  /* Auspicious Specifics — Earth-toned */
-  --devo-kumkum: #A84B3D;
-  --devo-kesar: #B86F38;
-  --devo-chandan: #231811;
-  --devo-brass: #D4A366;
-  --devo-diya-glow: rgba(212, 143, 59, 0.28);
-  --devo-card-shadow: 0 6px 24px rgba(10, 6, 4, 0.45);
-  --devo-card-hover-shadow: 0 14px 38px rgba(8, 5, 3, 0.65), 0 0 20px rgba(212, 143, 59, 0.12);
-}
-
-/* --------------------------------------------------------------------------
-   2. Dark Mode Scoped Exclusively to .app-shell--user
-   -------------------------------------------------------------------------- */
-html[data-theme='dark'] .app-shell--user {
-  /* Warm Sepia Terracotta / Cinnamon Earth */
-  --primary: #C47942;
-  --primary-dark: #9F5826;
-  --primary-light: #D98E53;
-  --primary-bg: rgba(196, 121, 66, 0.16);
-
-  --secondary: #A87140;
-  --secondary-bg: rgba(168, 113, 64, 0.15);
-
-  --accent: #E09845;
-  --accent-dark: #B97628;
-  --accent-light: #EBB26B;
-  --gold-400: #EBB26B;
-  --gold-500: #E09845;
-  --gold-600: #B97628;
-
-  /* Solid Muted Dark Brown & Deep Earth Surfaces */
-  --bg: #160F0A;
-  --bg-solid: #160F0A;
-  --surface: #201610;
-  --surface-strong: #271C14;
-  --surface-soft: #1B120C;
-  --surface-border: #3A2B20;
-  --border: #3A2B20;
-  --border-subtle: rgba(196, 146, 104, 0.16);
-
-  /* Sacred Ivory & Sepia Taupe Text */
-  --text-primary: #EFE6DC;
-  --text-secondary: #B0A192;
-  --body: #EFE6DC;
-  --ink: #EFE6DC;
-  --muted: #8F8071;
-
-  /* Deep Night Sanctum Sidebar */
-  --sidebar-from: #150E09;
-  --sidebar-to: #0D0704;
-
-  --devo-kumkum: #C25345;
-  --devo-kesar: #C47942;
-  --devo-chandan: #271C14;
-  --devo-brass: #D4A366;
-  --devo-diya-glow: rgba(224, 152, 69, 0.32);
-  --devo-card-shadow: 0 6px 26px rgba(0, 0, 0, 0.55);
-  --devo-card-hover-shadow: 0 14px 40px rgba(0, 0, 0, 0.72), 0 0 22px rgba(224, 152, 69, 0.14);
-}
-
-/* --------------------------------------------------------------------------
-   3. User Shell Layout, Backdrop Texture & Cinematic Vignette
+   1. Theme Variables Scoped Exclusively to .app-shell--user
    -------------------------------------------------------------------------- */
 .app-shell--user {
-  position: relative;
+  /* Temple Saffron / Kesar */
+  --primary: #C2410C;
+  --primary-dark: #9A3412;
+  --primary-light: #EA580C;
+  --primary-bg: #FFF7ED;
+
+  /* Sacred Sandalwood / Chandan */
+  --secondary: #92400E;
+  --secondary-bg: #FEF3C7;
+
+  /* Sanctum Brass Diya Gold */
+  --accent: #F59E0B;
+  --accent-dark: #D97706;
+  --accent-light: #FCD34D;
+  --gold-400: #FCD34D;
+  --gold-500: #F59E0B;
+  --gold-600: #D97706;
+
+  /* Sacred Marble & Parchment Surfaces */
+  --bg: #FDFBF7;
+  --bg-solid: #FDFBF7;
+  --surface: #FFFFFF;
+  --surface-strong: #FFFFFF;
+  --surface-soft: #FAF4EB;
+  --surface-border: #E8DAC8;
+  --border: #E8DAC8;
+
+  /* Temple Charcoal & Earth Foreground */
+  --text-primary: #291F18;
+  --text-secondary: #6E5D4F;
+  --body: #291F18;
+  --ink: #291F18;
+
+  /* Temple Wood Sidebar */
+  --sidebar-from: #381A05;
+  --sidebar-to: #221003;
+
+  /* Auspicious Specifics */
+  --devo-kumkum: #991B1B;
+  --devo-kesar: #EA580C;
+  --devo-chandan: #FAF5EB;
+  --devo-brass: #D97706;
+  --devo-diya-glow: rgba(245, 158, 11, 0.28);
+  --devo-card-shadow: 0 4px 20px rgba(146, 64, 14, 0.05);
+  --devo-card-hover-shadow: 0 12px 30px rgba(194, 65, 12, 0.14);
+}
+
+/* --------------------------------------------------------------------------
+   2. Dark Mode Scoped to .app-shell--user (Garbhagriha / Inner Sanctum at Night)
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .app-shell--user {
+  /* Glowing Brass Diya & Warm Amber */
+  --primary: #FB923C;
+  --primary-dark: #EA580C;
+  --primary-light: #FDBA74;
+  --primary-bg: #2C1810;
+
+  --secondary: #F59E0B;
+  --secondary-bg: #321F0A;
+
+  --accent: #FBBF24;
+  --accent-dark: #F59E0B;
+  --accent-light: #FDE68A;
+  --gold-400: #FDE68A;
+  --gold-500: #FBBF24;
+  --gold-600: #F59E0B;
+
+  /* Sanctum Granite Stone Surfaces */
+  --bg: #120E0C;
+  --bg-solid: #120E0C;
+  --surface: #1B1512;
+  --surface-strong: #231C18;
+  --surface-soft: #2B231E;
+  --surface-border: #3D3028;
+  --border: #3D3028;
+
+  /* Sacred Ivory & Muted Brass Text */
+  --text-primary: #F7EFE8;
+  --text-secondary: #BCAE9F;
+  --body: #F7EFE8;
+  --ink: #F7EFE8;
+
+  /* Deep Night Sanctum Sidebar */
+  --sidebar-from: #1A120E;
+  --sidebar-to: #0F0A07;
+
+  --devo-kumkum: #EF4444;
+  --devo-kesar: #FB923C;
+  --devo-chandan: #231C18;
+  --devo-brass: #FBBF24;
+  --devo-diya-glow: rgba(251, 146, 60, 0.35);
+  --devo-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --devo-card-hover-shadow: 0 12px 30px rgba(245, 158, 11, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   3. User Sidebar — Sacred Temple Door & Diya Aesthetics
+   -------------------------------------------------------------------------- */
+.app-shell--user {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #1B120C;
-  background-image:
-    /* Layer 1: Hazy, low-contrast warm amber color grade overlay */
-    radial-gradient(circle at 50% 14%, rgba(212, 143, 59, 0.08) 0%, rgba(184, 111, 56, 0.035) 42%, transparent 68%),
-    radial-gradient(circle at 82% 62%, rgba(196, 118, 48, 0.045) 0%, transparent 48%),
-    radial-gradient(circle at 18% 82%, rgba(158, 105, 59, 0.04) 0%, transparent 46%),
-    /* Layer 2: Smooth, soft-focus matte noise texture */
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='sepiaNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0.33 0.33 0.33 0 0  0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sepiaNoise)'/%3E%3C/svg%3E"),
-    /* Layer 3: Soft vignette edges darkening outward into moody umber */
-    radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(14, 9, 6, 0.48) 80%, rgba(8, 5, 3, 0.82) 100%),
-    /* Layer 4: Solid muted dark brown backdrop */
-    linear-gradient(180deg, #1C130D 0%, #17100B 45%, #110B07 100%);
-  background-attachment: fixed;
-  background-size: cover;
-  color: var(--text-primary);
-}
-
-/* Atmospheric fixed vignette overlay for continuous cinematic edges & amber grade */
-.app-shell--user::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background:
-    radial-gradient(ellipse at 50% 16%, rgba(212, 143, 59, 0.055) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(12, 8, 5, 0.38) 84%, rgba(6, 4, 2, 0.68) 100%);
-}
-
-.app-shell--user .app-shell-body,
-.app-shell--user .main-column,
-.app-shell--user .page-content,
-.app-shell--user .user-dashboard-page,
-.app-shell--user .astro-profile-container {
-  position: relative;
-  z-index: 2;
+  background: var(--bg);
 }
 
 .app-shell--user .app-shell-body {
@@ -171,12 +129,12 @@ html[data-theme='dark'] .app-shell--user {
   border-top: none !important;
   border-bottom: none !important;
   border-left: none !important;
-  border-right: 1px solid rgba(196, 146, 104, 0.16) !important;
+  border-right: 1px solid rgba(245, 158, 11, 0.2) !important;
   background:
-    radial-gradient(circle at 10% 8%, rgba(212, 143, 59, 0.1) 0%, transparent 48%),
-    radial-gradient(circle at 90% 92%, rgba(184, 111, 56, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 10% 8%, rgba(245, 158, 11, 0.16), transparent 48%),
+    radial-gradient(circle at 90% 92%, rgba(194, 65, 12, 0.12), transparent 40%),
     linear-gradient(180deg, var(--sidebar-from) 0%, var(--sidebar-to) 100%);
-  box-shadow: 4px 0 24px rgba(10, 6, 4, 0.5);
+  box-shadow: 4px 0 24px rgba(32, 14, 2, 0.25);
   padding: 16px 12px;
   z-index: 100;
 }
@@ -189,25 +147,25 @@ html[data-theme='dark'] .app-shell--user {
 }
 
 .app-shell--user .sidebar--user .sidebar-brand {
-  border-bottom: 1px solid rgba(196, 146, 104, 0.16);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.18);
 }
 
 .app-shell--user .sidebar--user .sidebar-brand-mark {
-  background: linear-gradient(135deg, #D48F3B 0%, #B86F38 55%, #8F4C20 100%);
-  box-shadow: 0 4px 16px rgba(212, 143, 59, 0.35);
-  border: 1px solid rgba(236, 226, 214, 0.25);
+  background: linear-gradient(135deg, #F59E0B 0%, #C2410C 55%, #991B1B 100%);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(254, 243, 199, 0.35);
   color: #FFFDF9;
 }
 
 .app-shell--user .sidebar--user .sidebar-brand-text {
-  color: #ECE2D6;
+  color: #FFFDF9;
   font-weight: 800;
   letter-spacing: -0.015em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .app-shell--user .sidebar--user .sidebar-group-label {
-  color: rgba(229, 168, 90, 0.75);
+  color: rgba(252, 211, 77, 0.72);
   font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -215,7 +173,7 @@ html[data-theme='dark'] .app-shell--user {
 
 .app-shell--user .sidebar--user .sidebar-link,
 .app-shell--user .sidebar--user .sidebar-nav-section-title {
-  color: rgba(236, 226, 214, 0.85);
+  color: rgba(255, 250, 240, 0.88);
   font-size: 14px;
   font-weight: 700;
   border-radius: var(--radius-s);
@@ -224,26 +182,26 @@ html[data-theme='dark'] .app-shell--user {
 
 .app-shell--user .sidebar--user .sidebar-link:hover,
 .app-shell--user .sidebar--user .sidebar-nav-section-title:hover {
-  background: rgba(212, 143, 59, 0.12);
+  background: rgba(245, 158, 11, 0.14);
   color: #FFFFFF;
   transform: translateX(3px);
 }
 
 .app-shell--user .sidebar--user .sidebar-link.active {
-  background: linear-gradient(135deg, #B86F38 0%, #945322 70%, #763F17 100%);
-  border-left: 3.5px solid #D4A366;
-  box-shadow: 0 6px 20px rgba(184, 111, 56, 0.35);
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 65%, #9A3412 100%);
+  border-left: 3.5px solid #FCD34D;
+  box-shadow: 0 8px 22px rgba(194, 65, 12, 0.38);
   color: #FFFFFF;
   font-weight: 800;
 }
 
 .app-shell--user .sidebar--user .sidebar-active-pill {
-  background: linear-gradient(135deg, #B86F38 0%, #945322 70%, #763F17 100%);
-  box-shadow: 0 6px 20px rgba(184, 111, 56, 0.35);
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 65%, #9A3412 100%);
+  box-shadow: 0 8px 22px rgba(194, 65, 12, 0.38);
 }
 
 /* --------------------------------------------------------------------------
-   4. User Dashboard Hero Banner — Sepia & Vintage Brown Sanctum
+   4. User Dashboard Hero Banner — Sanctum Warmth & Auspicious Greeting
    -------------------------------------------------------------------------- */
 .app-shell--user .user-dashboard-page .hero-banner-user {
   display: flex;
@@ -251,12 +209,12 @@ html[data-theme='dark'] .app-shell--user {
   justify-content: space-between;
   gap: 20px;
   background:
-    radial-gradient(circle at 86% 40%, rgba(212, 143, 59, 0.22) 0%, transparent 52%),
-    radial-gradient(circle at 14% 85%, rgba(148, 75, 32, 0.16) 0%, transparent 48%),
-    radial-gradient(circle at 50% 10%, rgba(236, 226, 214, 0.05) 0%, transparent 50%),
-    linear-gradient(135deg, #261A12 0%, #342419 45%, #23160F 100%);
-  border: 1px solid rgba(196, 146, 104, 0.22);
-  box-shadow: 0 16px 42px rgba(10, 6, 4, 0.5);
+    radial-gradient(circle at 86% 40%, rgba(245, 158, 11, 0.28) 0%, transparent 52%),
+    radial-gradient(circle at 14% 85%, rgba(153, 27, 27, 0.22) 0%, transparent 48%),
+    radial-gradient(circle at 50% 10%, rgba(254, 243, 199, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #3A1505 0%, #632205 45%, #8B2C08 100%);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  box-shadow: 0 16px 42px rgba(58, 21, 5, 0.26);
   border-radius: 24px;
 }
 
@@ -269,17 +227,17 @@ html[data-theme='dark'] .app-shell--user {
   font-size: clamp(52px, 5.5vw, 76px);
   line-height: 1;
   padding: 8px 18px 8px 8px;
-  filter: drop-shadow(0 0 16px rgba(224, 152, 69, 0.6)) drop-shadow(0 0 32px rgba(212, 143, 59, 0.4));
+  filter: drop-shadow(0 0 16px rgba(251, 191, 36, 0.65)) drop-shadow(0 0 32px rgba(245, 158, 11, 0.45));
   user-select: none;
 }
 
 html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user {
   background:
-    radial-gradient(circle at 86% 40%, rgba(212, 143, 59, 0.18) 0%, transparent 52%),
-    radial-gradient(circle at 14% 85%, rgba(164, 82, 38, 0.14) 0%, transparent 48%),
-    linear-gradient(135deg, #1F150F 0%, #2A1D15 50%, #1A110B 100%);
-  border-color: rgba(196, 146, 104, 0.2);
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.6);
+    radial-gradient(circle at 86% 40%, rgba(245, 158, 11, 0.22) 0%, transparent 52%),
+    radial-gradient(circle at 14% 85%, rgba(220, 38, 38, 0.18) 0%, transparent 48%),
+    linear-gradient(135deg, #241005 0%, #421805 50%, #5E2008 100%);
+  border-color: rgba(245, 158, 11, 0.22);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45);
 }
 
 .user-devotional-pill {
@@ -288,9 +246,9 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
   gap: 7px;
   padding: 5px 14px;
   border-radius: 999px;
-  background: rgba(212, 143, 59, 0.12);
-  border: 1px solid rgba(212, 143, 59, 0.32);
-  color: #E5A85A;
+  background: rgba(254, 243, 199, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  color: #FEF3C7;
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.025em;
@@ -309,15 +267,15 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
 }
 
 .app-shell--user .user-dashboard-page .hero-banner-user h2 {
-  color: #ECE2D6;
+  color: #FFFDF9;
   font-size: clamp(26px, 3.2vw, 34px);
   font-weight: 800;
   letter-spacing: -0.025em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .app-shell--user .user-dashboard-page .hero-banner-user p {
-  color: rgba(236, 226, 214, 0.88);
+  color: rgba(255, 245, 230, 0.9);
   font-size: 14.5px;
   line-height: 1.55;
   margin-top: 6px;
@@ -327,9 +285,9 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
 .app-shell--user .hero-banner-actions-wrap .icon-btn,
 .app-shell--user .hero-banner-actions-wrap .theme-toggle-btn,
 .app-shell--user .hero-banner-actions-wrap .avatar-chip {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(196, 146, 104, 0.28);
-  color: #ECE2D6;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(251, 191, 36, 0.32);
+  color: #FFFDF9;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -338,13 +296,13 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
 .app-shell--user .hero-banner-actions-wrap .icon-btn:hover,
 .app-shell--user .hero-banner-actions-wrap .theme-toggle-btn:hover,
 .app-shell--user .hero-banner-actions-wrap .avatar-chip:hover {
-  background: rgba(212, 143, 59, 0.2);
-  border-color: rgba(212, 143, 59, 0.55);
+  background: rgba(251, 191, 36, 0.24);
+  border-color: rgba(251, 191, 36, 0.65);
   color: #FFFFFF;
 }
 
 /* --------------------------------------------------------------------------
-   5. Quick Action Cards — Matte Vintage Brown Surface with Amber Glow
+   5. Quick Action Cards — Sandalwood Surface with Golden Diya Hover
    -------------------------------------------------------------------------- */
 .app-shell--user .user-dashboard-page .action-card--compact {
   background: var(--surface);
@@ -358,13 +316,13 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
 
 .app-shell--user .user-dashboard-page .action-card--compact:hover {
   transform: translateY(-3px);
-  border-color: rgba(212, 143, 59, 0.45);
+  border-color: var(--accent);
   box-shadow: var(--devo-card-hover-shadow);
 }
 
 .app-shell--user .user-dashboard-page .action-card--compact .action-card-icon {
   background: var(--primary-bg);
-  border: 1px solid rgba(196, 146, 104, 0.22);
+  border: 1px solid rgba(245, 158, 11, 0.24);
   color: var(--primary);
   border-radius: 13px;
   transition: all 0.24s ease;
@@ -384,17 +342,17 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .hero-banner-user 
 }
 
 .app-shell--user .user-dashboard-page .action-card-desc {
-  color: #629875;
+  color: #047857;
   font-weight: 700;
   font-size: 11px;
 }
 
 html[data-theme='dark'] .app-shell--user .user-dashboard-page .action-card-desc {
-  color: #629875;
+  color: #34D399;
 }
 
 /* --------------------------------------------------------------------------
-   6. Recommended Astrologer Cards — Earth-Toned Daivajna Aura
+   6. Recommended Astrologer Cards — Sacred Daivajna Aura
    -------------------------------------------------------------------------- */
 .app-shell--user .explore-astrologer-card {
   background: var(--surface);
@@ -408,13 +366,13 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .action-card-desc 
 
 .app-shell--user .explore-astrologer-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(212, 143, 59, 0.45);
+  border-color: var(--accent);
   box-shadow: var(--devo-card-hover-shadow);
 }
 
 .app-shell--user .explore-astrologer-card__price {
   background: var(--primary-bg);
-  border: 1px solid rgba(196, 146, 104, 0.24);
+  border: 1px solid rgba(245, 158, 11, 0.28);
   color: var(--primary);
   font-weight: 800;
   font-size: 12px;
@@ -435,27 +393,27 @@ html[data-theme='dark'] .app-shell--user .user-dashboard-page .action-card-desc 
 }
 
 .app-shell--user .explore-astrologer-card__rating svg {
-  color: #D48F3B !important;
-  fill: #D48F3B;
+  color: #D97706 !important;
+  fill: #D97706;
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__rating svg {
-  color: #E5A85A !important;
-  fill: #E5A85A;
+  color: #FBBF24 !important;
+  fill: #FBBF24;
 }
 
 .app-shell--user .explore-astrologer-card__tags--accent span {
   background: var(--secondary-bg);
-  border: 1px solid rgba(196, 146, 104, 0.2);
+  border: 1px solid rgba(217, 119, 6, 0.2);
   color: var(--secondary);
   font-weight: 600;
   border-radius: 7px;
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__tags--accent span {
-  background: rgba(212, 143, 59, 0.14);
-  border-color: rgba(212, 143, 59, 0.28);
-  color: #E5A85A;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #FDE68A;
 }
 
 .app-shell--user .explore-astrologer-card__action {
@@ -466,20 +424,20 @@ html[data-theme='dark'] .app-shell--user .explore-astrologer-card__tags--accent 
 }
 
 .app-shell--user .explore-astrologer-card__action:first-child {
-  color: #558B69;
-  background: rgba(78, 135, 100, 0.14);
-  border: 1px solid rgba(78, 135, 100, 0.3);
+  color: #047857;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
 }
 
 .app-shell--user .explore-astrologer-card__action:first-child:hover:not(:disabled) {
-  background: #4E8764;
+  background: #047857;
   color: #FFFFFF;
 }
 
 .app-shell--user .explore-astrologer-card__action:last-child {
   color: var(--primary);
   background: var(--primary-bg);
-  border: 1px solid rgba(196, 146, 104, 0.24);
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .app-shell--user .explore-astrologer-card__action:last-child:hover:not(:disabled) {
@@ -488,193 +446,45 @@ html[data-theme='dark'] .app-shell--user .explore-astrologer-card__tags--accent 
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:first-child {
-  background: rgba(78, 135, 100, 0.18);
-  border-color: rgba(78, 135, 100, 0.35);
-  color: #6FA986;
+  background: rgba(4, 120, 87, 0.18);
+  border-color: rgba(4, 120, 87, 0.35);
+  color: #34D399;
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:first-child:hover:not(:disabled) {
-  background: #4E8764;
+  background: #059669;
   color: #FFFFFF;
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-child {
-  background: rgba(196, 121, 66, 0.16);
-  border-color: rgba(196, 121, 66, 0.32);
-  color: #D98E53;
+  background: rgba(251, 146, 60, 0.16);
+  border-color: rgba(251, 146, 60, 0.32);
+  color: #FB923C;
 }
 
 html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-child:hover:not(:disabled) {
-  background: #C47942;
+  background: #EA580C;
   color: #FFFFFF;
 }
 
 /* --------------------------------------------------------------------------
-   6B. Astrologer Profile View — Cozy Sepia & Vintage Brown Theme
-   -------------------------------------------------------------------------- */
-.app-shell--user .astro-hero-card {
-  background: var(--surface) !important;
-  border: 1px solid var(--surface-border) !important;
-  box-shadow: 0 10px 30px rgba(10, 6, 4, 0.45) !important;
-}
-
-.app-shell--user .astro-hero-cover {
-  background:
-    radial-gradient(ellipse at 50% 20%, rgba(212, 143, 59, 0.15) 0%, transparent 70%),
-    linear-gradient(135deg, #2A1D15 0%, #342419 50%, #20150E 100%) !important;
-  border-bottom: 1px solid var(--surface-border) !important;
-}
-
-.app-shell--user .astro-hero-avatar-wrapper {
-  background: linear-gradient(135deg, #D48F3B, #B86F38) !important;
-  box-shadow: 0 8px 24px rgba(10, 6, 4, 0.5) !important;
-}
-
-.app-shell--user .astro-hero-avatar-inner {
-  background: var(--surface-strong) !important;
-  border: 2px solid var(--surface) !important;
-  color: var(--primary) !important;
-}
-
-.app-shell--user .astro-hero-name {
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .astro-verified-badge {
-  background: rgba(212, 143, 59, 0.14) !important;
-  border-color: rgba(212, 143, 59, 0.35) !important;
-  color: #E5A85A !important;
-}
-
-.app-shell--user .astro-hero-subtitle,
-.app-shell--user .astro-hero-meta-row,
-.app-shell--user .astro-hero-meta-item {
-  color: var(--text-secondary) !important;
-}
-
-.app-shell--user .astro-hero-meta-item strong {
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .astro-sub-btn--primary {
-  background: linear-gradient(135deg, #B86F38 0%, #945322 100%) !important;
-  color: #FFFFFF !important;
-  border: 1px solid rgba(229, 168, 90, 0.25) !important;
-  box-shadow: 0 4px 16px rgba(184, 111, 56, 0.35) !important;
-}
-
-.app-shell--user .astro-sub-btn--primary:hover {
-  background: linear-gradient(135deg, #CB824B 0%, #A35C28 100%) !important;
-  box-shadow: 0 6px 20px rgba(184, 111, 56, 0.45) !important;
-}
-
-.app-shell--user .astro-sub-btn--secondary {
-  background: rgba(212, 143, 59, 0.12) !important;
-  color: var(--text-primary) !important;
-  border: 1px solid rgba(196, 146, 104, 0.25) !important;
-}
-
-.app-shell--user .astro-sub-btn--secondary:hover {
-  background: rgba(212, 143, 59, 0.22) !important;
-  border-color: rgba(212, 143, 59, 0.45) !important;
-}
-
-.app-shell--user .astro-profile-tab-btn {
-  color: var(--text-secondary) !important;
-  background: transparent !important;
-}
-
-.app-shell--user .astro-profile-tab-btn:hover {
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .astro-profile-tab-btn.is-active {
-  color: #E5A85A !important;
-  border-bottom-color: #D48F3B !important;
-}
-
-.app-shell--user .astro-about-card,
-.app-shell--user .astro-services-card,
-.app-shell--user .astro-reviews-card,
-.app-shell--user .astro-booking-card,
-.app-shell--user .astro-stat-card {
-  background: var(--surface) !important;
-  border: 1px solid var(--surface-border) !important;
-  box-shadow: var(--devo-card-shadow) !important;
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .astro-service-item {
-  background: var(--surface-soft) !important;
-  border: 1px solid var(--surface-border) !important;
-}
-
-.app-shell--user .astro-service-item:hover {
-  border-color: rgba(212, 143, 59, 0.4) !important;
-  background: var(--surface-strong) !important;
-}
-
-.app-shell--user .astro-slot-chip {
-  background: var(--surface-soft) !important;
-  border: 1px solid var(--surface-border) !important;
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .astro-slot-chip:hover {
-  border-color: #D48F3B !important;
-  background: rgba(212, 143, 59, 0.15) !important;
-}
-
-.app-shell--user .astro-slot-chip.is-selected {
-  background: linear-gradient(135deg, #B86F38, #945322) !important;
-  border-color: #D4A366 !important;
-  color: #FFFFFF !important;
-}
-
-/* Explore Astrologers Filters & Search Controls */
-.app-shell--user .user-astrologers-filter-bar,
-.app-shell--user .explore-astrologers-search-box,
-.app-shell--user .explore-astrologers-search-input {
-  background: var(--surface) !important;
-  border-color: var(--surface-border) !important;
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .explore-filter-tab {
-  background: transparent !important;
-  color: var(--text-secondary) !important;
-  border-color: var(--surface-border) !important;
-}
-
-.app-shell--user .explore-filter-tab:hover {
-  background: rgba(212, 143, 59, 0.12) !important;
-  color: var(--text-primary) !important;
-}
-
-.app-shell--user .explore-filter-tab.is-active {
-  background: linear-gradient(135deg, #B86F38, #945322) !important;
-  border-color: #D4A366 !important;
-  color: #FFFFFF !important;
-}
-
-/* --------------------------------------------------------------------------
-   7. Appointments & Activity Lists — Serene Sepia Rows
+   7. Appointments & Activity Lists — Serene Sandalwood Rows
    -------------------------------------------------------------------------- */
 .app-shell--user .activity-row {
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: 14px;
-  box-shadow: 0 2px 10px rgba(10, 6, 4, 0.35);
+  box-shadow: 0 2px 10px rgba(146, 64, 14, 0.03);
   padding: 14px 18px;
   margin-bottom: 8px;
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .app-shell--user .activity-row:hover {
-  border-color: rgba(212, 143, 59, 0.45);
-  background: var(--surface-strong);
+  border-color: var(--accent);
+  background: var(--surface-soft);
   transform: translateX(3px);
-  box-shadow: 0 4px 16px rgba(10, 6, 4, 0.5);
+  box-shadow: 0 4px 16px rgba(194, 65, 12, 0.08);
 }
 
 .app-shell--user .activity-id {
@@ -723,12 +533,10 @@ html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-c
   height: 68px;
   margin: 0 !important;
   padding: 12px clamp(18px, 3vw, 42px);
-  background: linear-gradient(180deg, rgba(26, 18, 12, 0.96) 0%, rgba(20, 14, 9, 0.96) 100%) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(196, 146, 104, 0.18) !important;
-  box-shadow: 0 4px 20px rgba(10, 6, 4, 0.5) !important;
-  color: #ECE2D6 !important;
+  background: linear-gradient(90deg, #381A05 0%, #2A1203 100%);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 5px 18px rgba(44, 22, 10, 0.22);
+  color: #FFFDF9;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -737,9 +545,9 @@ html[data-theme='dark'] .app-shell--user .explore-astrologer-card__action:last-c
 }
 
 html[data-theme='dark'] .app-shell--user > .topbar-header {
-  background: linear-gradient(180deg, rgba(21, 14, 9, 0.98) 0%, rgba(16, 10, 6, 0.98) 100%) !important;
-  border-bottom-color: rgba(196, 146, 104, 0.16) !important;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6) !important;
+  background: linear-gradient(90deg, #1A120E 0%, #0F0A07 100%);
+  border-bottom-color: rgba(245, 158, 11, 0.24);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.45);
 }
 
 .app-shell--user .topbar-header.is-hidden,
@@ -760,7 +568,7 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #ECE2D6;
+  color: #FFFDF9;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 20px;
   letter-spacing: .01em;
@@ -772,7 +580,7 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
 .user-topbar-brand strong {
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #ECE2D6;
+  color: #FFFDF9;
 }
 
 .user-topbar-brand__mark {
@@ -780,11 +588,11 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid rgba(212, 143, 59, 0.55);
+  border: 1px solid rgba(245, 158, 11, 0.65);
   border-radius: 50%;
-  color: #E5A85A;
-  background: rgba(212, 143, 59, 0.15);
-  box-shadow: 0 2px 8px rgba(212, 143, 59, 0.25);
+  color: #FBBF24;
+  background: rgba(245, 158, 11, 0.18);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.28);
 }
 
 .app-shell--user .user-topbar-brand.is-hidden {
@@ -809,7 +617,7 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 21px;
   font-weight: 700;
-  color: #ECE2D6;
+  color: #FFFDF9;
   letter-spacing: -0.01em;
 }
 
@@ -820,9 +628,9 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid rgba(196, 146, 104, 0.35);
-  background: rgba(212, 143, 59, 0.14);
-  color: #E5A85A;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.15);
+  color: #FBBF24;
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -831,8 +639,8 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
 }
 
 .app-shell--user .profile-home-btn:hover {
-  background: rgba(212, 143, 59, 0.25);
-  border-color: #E5A85A;
+  background: rgba(245, 158, 11, 0.3);
+  border-color: #FBBF24;
   color: #FFFFFF;
 }
 
@@ -848,9 +656,9 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 1px solid rgba(196, 146, 104, 0.26);
-  background: rgba(255, 255, 255, 0.06);
-  color: #ECE2D6;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFDF9;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -860,8 +668,8 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
 
 .app-shell--user .topbar-actions .icon-btn:hover,
 .app-shell--user .topbar-actions .theme-toggle-btn:hover {
-  background: rgba(212, 143, 59, 0.18);
-  border-color: rgba(212, 143, 59, 0.55);
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.65);
   color: #FFFFFF;
 }
 
@@ -869,9 +677,9 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   height: 42px;
   padding: 3px 14px 3px 4px;
   border-radius: 999px;
-  border: 1px solid rgba(196, 146, 104, 0.26);
-  background: rgba(255, 255, 255, 0.06);
-  color: #ECE2D6;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFDF9;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -881,8 +689,8 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
 }
 
 .app-shell--user .topbar-actions .avatar-chip:hover {
-  background: rgba(212, 143, 59, 0.18);
-  border-color: rgba(212, 143, 59, 0.55);
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.65);
   color: #FFFFFF;
 }
 
@@ -890,23 +698,23 @@ html[data-theme='dark'] .app-shell--user > .topbar-header {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #D48F3B, #B86F38);
+  background: linear-gradient(135deg, #F59E0B, #C2410C);
   color: #fff;
   font-weight: 700;
   font-size: 13px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(236, 226, 214, 0.25);
+  border: 1px solid rgba(254, 243, 199, 0.35);
 }
 
 .app-shell--user .topbar-explore-btn {
-  border-color: rgba(196, 146, 104, 0.35);
-  color: #ECE2D6;
-  background: rgba(212, 143, 59, 0.14);
+  border-color: rgba(245, 158, 11, 0.42);
+  color: #FFFDF9;
+  background: rgba(245, 158, 11, 0.15);
 }
 
 .app-shell--user .topbar-explore-btn:hover {
-  background: rgba(212, 143, 59, 0.25);
+  background: rgba(245, 158, 11, 0.3);
   border-color: var(--primary);
   color: #FFFFFF;
 }
@@ -971,27 +779,27 @@ html[data-theme='dark'] .app-shell--user {
 }
 
 html[data-theme='dark'] .app-shell--user .btn-primary {
-  background-color: #B86F38 !important;
-  background-image: linear-gradient(135deg, #B86F38, #945322) !important;
+  background-color: #C2410C !important;
+  background-image: linear-gradient(135deg, #C2410C, #9A3412) !important;
   color: #FFFFFF !important;
-  border-color: #CB824B !important;
+  border-color: #EA580C !important;
 }
 
 html[data-theme='dark'] .app-shell--user .btn-primary:hover {
-  background-color: #CB824B !important;
-  background-image: linear-gradient(135deg, #CB824B, #B86F38) !important;
+  background-color: #EA580C !important;
+  background-image: linear-gradient(135deg, #EA580C, #C2410C) !important;
   color: #FFFFFF !important;
 }
 
 /* Appointment History Calendar in Dark Mode */
 html[data-theme='dark'] .user-appointment-history .apt-scheduling-calendar--history {
   background: #1F1610 !important;
-  border-color: rgba(212, 143, 59, 0.25) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-history-tabs button.is-active {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFFFF !important;
 }
 
@@ -1005,7 +813,7 @@ html[data-theme='dark'] .user-appointment-history .apt-history-cell.has-complete
 html[data-theme='dark'] .user-appointment-history .apt-history-cell.has-cancelled,
 html[data-theme='dark'] .user-appointment-history .apt-history-cell.has-rescheduled {
   background: #2A1D15 !important;
-  border-color: rgba(212, 143, 59, 0.28) !important;
+  border-color: rgba(245, 158, 11, 0.28) !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-history-cell.has-completed {
@@ -1039,20 +847,20 @@ html[data-theme='dark'] .user-appointment-history .apt-month-cell.is-muted .apt-
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-month-cell:hover {
-  background: rgba(212, 143, 59, 0.12) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-month-cell.is-today {
-  box-shadow: inset 0 0 0 1.5px #D48F3B !important;
+  box-shadow: inset 0 0 0 1.5px #F59E0B !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-month-cell.is-today .apt-month-day {
-  color: #D48F3B !important;
+  color: #F59E0B !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-history-cell.is-selected {
-  background: #B86F38 !important;
-  box-shadow: 0 4px 14px rgba(184, 111, 56, 0.4) !important;
+  background: #C2410C !important;
+  box-shadow: 0 4px 14px rgba(194, 65, 12, 0.4) !important;
 }
 
 html[data-theme='dark'] .user-appointment-history .apt-history-cell.is-selected .apt-month-day {
@@ -1299,18 +1107,18 @@ html[data-theme='dark'] .app-shell--user .jr-day-state.is-done {
 }
 
 html[data-theme='dark'] .app-shell--user .am-day-badge {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .app-shell--user .am-proof-count-badge {
-  background: rgba(212, 143, 59, 0.16) !important;
-  color: #E5A85A !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .jr-step-node {
-  background: rgba(212, 143, 59, 0.18) !important;
-  color: #E5A85A !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #FBBF24 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .jr-step-body > strong {
@@ -1328,19 +1136,19 @@ html[data-theme='dark'] .app-shell--user .jr-step-body p {
 
 html[data-theme='dark'] .app-shell--user .jr-step-body blockquote {
   background: #2A1D15 !important;
-  border-left-color: #D48F3B !important;
+  border-left-color: #F59E0B !important;
   color: #FFFDF9 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .jr-chips span {
   background: #2A1D15 !important;
-  border-color: rgba(212, 143, 59, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
   color: #E5D5C0 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .atonement-all-proofs {
   background: #2A1D15 !important;
-  border-color: rgba(212, 143, 59, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .atonement-all-proofs h4 {
@@ -1353,7 +1161,7 @@ html[data-theme='dark'] .app-shell--user .atonement-all-proofs p {
 
 html[data-theme='dark'] .app-shell--user .am-day-proof-card {
   background: #1F1610 !important;
-  border-color: rgba(212, 143, 59, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .am-day-proof-card strong {
@@ -1361,13 +1169,13 @@ html[data-theme='dark'] .app-shell--user .am-day-proof-card strong {
 }
 
 html[data-theme='dark'] .app-shell--user .am-add-proof {
-  background: rgba(212, 143, 59, 0.12) !important;
-  border-color: rgba(212, 143, 59, 0.45) !important;
-  color: #E5A85A !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  color: #FBBF24 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .am-add-proof strong {
-  color: #E5A85A !important;
+  color: #FBBF24 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .am-add-proof small {
@@ -1376,20 +1184,20 @@ html[data-theme='dark'] .app-shell--user .am-add-proof small {
 
 /* Question Tracking Badges & Rows */
 html[data-theme='dark'] .dispute-stage-filter-btn.is-active {
-  background: #B86F38 !important;
-  border-color: #CB824B !important;
+  background: #C2410C !important;
+  border-color: #EA580C !important;
   color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .app-shell--user .campaign-card {
   background: #1F1610 !important;
-  border-color: rgba(212, 143, 59, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .campaign-card-details {
   background: #2A1D15 !important;
-  border-color: rgba(212, 143, 59, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .campaign-card-details .muted {
@@ -1401,8 +1209,8 @@ html[data-theme='dark'] .app-shell--user .campaign-card-details div {
 }
 
 html[data-theme='dark'] .question-dashboard-tab.is-active {
-  background: #B86F38 !important;
-  border-color: #CB824B !important;
+  background: #C2410C !important;
+  border-color: #EA580C !important;
   color: #FFFFFF !important;
 }
 
@@ -1694,7 +1502,7 @@ html[data-theme='dark'] .app-shell--user .celestial-studio-tab {
 }
 
 html[data-theme='dark'] .app-shell--user .celestial-studio-tab.is-active {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFFFF !important;
 }
 
@@ -1793,7 +1601,7 @@ html[data-theme='dark'] .app-shell--user .reward-expiring-item-days {
 }
 
 html[data-theme='dark'] .app-shell--user .reward-astrologer-action {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFFFF !important;
 }
 
@@ -1805,7 +1613,7 @@ html[data-theme='dark'] .app-shell--user .reward-astrologer-action {
 /* Zodiac Period Selector & Astrologer Dropdown (No white buttons / dropdowns) */
 html[data-theme='dark'] .app-shell--user .celestial-period-selector {
   background: #18120E !important;
-  border-color: rgba(212, 143, 59, 0.25) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .celestial-period-btn {
@@ -1818,10 +1626,10 @@ html[data-theme='dark'] .app-shell--user .celestial-period-btn:hover {
 }
 
 html[data-theme='dark'] .app-shell--user .celestial-period-btn.is-active {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFDF9 !important;
-  border: 1px solid #D48F3B !important;
-  box-shadow: 0 2px 8px rgba(184, 111, 56, 0.4) !important;
+  border: 1px solid #F59E0B !important;
+  box-shadow: 0 2px 8px rgba(194, 65, 12, 0.4) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .celestial-astro-picker-badge {
@@ -1945,25 +1753,25 @@ html[data-theme='dark'] .app-shell--user .appointment-history-filters button {
 }
 
 html[data-theme='dark'] .app-shell--user .appointment-history-filters button.is-active {
-  background: #B86F38 !important;
-  border-color: #D48F3B !important;
+  background: #C2410C !important;
+  border-color: #F59E0B !important;
   color: #FFFDF9 !important;
 }
 
 /* Appointment List View & Appointment Cards (No white 1160x1440 container) */
 html[data-theme='dark'] .app-shell--user .apt-history-list-view {
   background: #18110D !important;
-  border-color: rgba(212, 143, 59, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.22) !important;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-list-view__toolbar {
-  border-bottom-color: rgba(212, 143, 59, 0.18) !important;
+  border-bottom-color: rgba(245, 158, 11, 0.18) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-period-tabs {
   background: #2A1D15 !important;
-  border: 1px solid rgba(212, 143, 59, 0.2) !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-period-tabs button {
@@ -1976,9 +1784,9 @@ html[data-theme='dark'] .app-shell--user .apt-history-period-tabs button:hover {
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-period-tabs button.is-active {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFDF9 !important;
-  border: 1px solid #D48F3B !important;
+  border: 1px solid #F59E0B !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-list-view__range {
@@ -2078,8 +1886,8 @@ html[data-theme='dark'] .app-shell--user .user-activity-filters button {
 }
 
 html[data-theme='dark'] .app-shell--user .user-activity-filters button.is-active {
-  background: #B86F38 !important;
-  border-color: #D48F3B !important;
+  background: #C2410C !important;
+  border-color: #F59E0B !important;
   color: #FFFDF9 !important;
 }
 
@@ -2324,13 +2132,13 @@ html[data-theme='dark'] .app-shell--user .wallet-stat-card--primary .btn-ghost:h
 }
 
 html[data-theme='dark'] .app-shell--user .wallet-stat-card--primary .btn-primary {
-  background: #B86F38 !important;
-  border: 1px solid #D48F3B !important;
+  background: #C2410C !important;
+  border: 1px solid #F59E0B !important;
   color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .app-shell--user .wallet-stat-card--primary .btn-primary:hover {
-  background: #945322 !important;
+  background: #9A3412 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .wallet-stat-badge--green {
@@ -2417,7 +2225,7 @@ html[data-theme='dark'] .app-shell--user .user-live-segmented__count {
 }
 
 html[data-theme='dark'] .app-shell--user .user-live-segmented__tab.is-active .user-live-segmented__count {
-  background: #B86F38 !important;
+  background: #C2410C !important;
   color: #FFFFFF !important;
 }
 
@@ -2455,64 +2263,12 @@ html[data-theme='dark'] .app-shell--user .user-live-row {
 }
 
 html[data-theme='dark'] .app-shell--user .user-live-row:hover {
-  border-color: #D48F3B !important;
+  border-color: #F59E0B !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .user-live-row__category {
-  background: rgba(212, 143, 59, 0.14) !important;
-  color: #E5A85A !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #FBBF24 !important;
 }
-
-/* --------------------------------------------------------------------------
-   User-Side Portaled Modals & Overlays (Strictly User-Facing)
-   -------------------------------------------------------------------------- */
-.user-modal-overlay,
-.user-dispute-modal-overlay {
-  background: rgba(14, 9, 6, 0.75) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
-.user-modal-card,
-.user-dispute-modal-card {
-  background: #231811 !important;
-  border: 1px solid #3E2E22 !important;
-  box-shadow: 0 20px 50px rgba(8, 5, 3, 0.7), 0 0 24px rgba(212, 143, 59, 0.12) !important;
-  color: #ECE2D6 !important;
-}
-
-.user-modal-card__header,
-.user-dispute-modal-header {
-  border-bottom: 1px solid #3E2E22 !important;
-  color: #ECE2D6 !important;
-}
-
-.user-modal-card__footer,
-.user-dispute-modal-footer {
-  border-top: 1px solid #3E2E22 !important;
-  background: #1E150F !important;
-}
-
-.user-modal-card input,
-.user-modal-card textarea,
-.user-modal-card select,
-.user-dispute-modal-card input,
-.user-dispute-modal-card textarea,
-.user-dispute-modal-card select {
-  background: #1B120C !important;
-  border-color: #3E2E22 !important;
-  color: #ECE2D6 !important;
-}
-
-.user-modal-card input:focus,
-.user-modal-card textarea:focus,
-.user-modal-card select:focus,
-.user-dispute-modal-card input:focus,
-.user-dispute-modal-card textarea:focus,
-.user-dispute-modal-card select:focus {
-  border-color: #D48F3B !important;
-  box-shadow: 0 0 0 3px rgba(212, 143, 59, 0.2) !important;
-}
-
 
