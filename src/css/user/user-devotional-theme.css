@@ -1791,8 +1791,19 @@ html[data-theme='dark'] .question-dashboard-tab.is-active .question-dashboard-ta
 }
 
 html[data-theme='dark'] .aq-question-list-row {
-  background: #1F1610 !important;
-  border-color: rgba(245, 158, 11, 0.22) !important;
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row:hover,
+html[data-theme='dark'] .aq-question-list-row:focus-visible {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row__icon {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
 }
 
 html[data-theme='dark'] .aq-question-list-row__top strong {
@@ -1804,24 +1815,57 @@ html[data-theme='dark'] .aq-question-list-row p {
   color: #C8B79B !important;
 }
 
+html[data-theme='dark'] .aq-question-list-row__details {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row__details span + span::before {
+  color: #5C4A3E !important;
+}
+
 html[data-theme='dark'] .aq-question-list-row__status--waiting-for-answer {
   background: rgba(14, 165, 233, 0.22) !important;
   color: #38BDF8 !important;
+  border-color: rgba(14, 165, 233, 0.35) !important;
 }
 
 html[data-theme='dark'] .aq-question-list-row__status--answered {
   background: rgba(16, 185, 129, 0.22) !important;
   color: #34D399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
 html[data-theme='dark'] .aq-question-list-row__status--disputed {
   background: rgba(239, 68, 68, 0.22) !important;
   color: #F87171 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
 }
 
 html[data-theme='dark'] .aq-question-list-row__status--resolved {
   background: rgba(245, 158, 11, 0.22) !important;
   color: #FBBF24 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row__actions .btn-outline {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.32) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row__actions .btn-outline:hover {
+  background: rgba(245, 158, 11, 0.24) !important;
+  border-color: #FBBF24 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row__chevron {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .aq-question-list-row:hover .aq-question-list-row__chevron {
+  color: #FBBF24 !important;
+  transform: translateX(3px);
 }
 
 /* Horoscope Page Dark Mode (.app-shell--user) */
@@ -3458,6 +3502,140 @@ html[data-theme='dark'] .app-shell--user .user-live-row__category {
   background: #FFEDD5 !important;
   border-color: #EA580C !important;
   color: #9A3412 !important;
+}
+
+/* --------------------------------------------------------------------------
+   11b. User Modals Dark Mode Harmonization
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .user-modal-overlay,
+html[data-theme='dark'] .user-dispute-modal-overlay,
+html[data-theme='dark'] .instant-call-overlay,
+html[data-theme='dark'] .appointment-slots-overlay {
+  background: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+html[data-theme='dark'] .user-modal-card,
+html[data-theme='dark'] .user-dispute-modal-card,
+html[data-theme='dark'] .raise-dispute-modal,
+html[data-theme='dark'] .appointment-booking-modal,
+html[data-theme='dark'] .question-form-modal,
+html[data-theme='dark'] .instant-call-modal,
+html[data-theme='dark'] .user-modal {
+  background: #1B1512 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7), 0 0 24px rgba(245, 158, 11, 0.08) !important;
+}
+
+html[data-theme='dark'] .user-modal-card__header,
+html[data-theme='dark'] .user-modal__header,
+html[data-theme='dark'] .appointment-booking-modal__header,
+html[data-theme='dark'] .aq-review-modal__header {
+  background: #231C18 !important;
+  border-bottom: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-modal-card__header .section-title,
+html[data-theme='dark'] .user-modal-card__header h3,
+html[data-theme='dark'] .user-modal-card__header h4,
+html[data-theme='dark'] .user-modal-card__header strong,
+html[data-theme='dark'] .user-modal-card__header span,
+html[data-theme='dark'] .user-modal__header h3,
+html[data-theme='dark'] .user-modal__header strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-modal-card__content,
+html[data-theme='dark'] .user-modal__body,
+html[data-theme='dark'] .appointment-booking-modal .modal-card__content {
+  background: #1B1512 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-modal-card__footer,
+html[data-theme='dark'] .user-modal__footer,
+html[data-theme='dark'] .appointment-booking-modal__footer {
+  background: #231C18 !important;
+  border-top: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-modal-card input,
+html[data-theme='dark'] .user-modal-card textarea,
+html[data-theme='dark'] .user-modal-card select,
+html[data-theme='dark'] .raise-dispute-modal input,
+html[data-theme='dark'] .raise-dispute-modal textarea,
+html[data-theme='dark'] .raise-dispute-modal select,
+html[data-theme='dark'] .question-form-modal input,
+html[data-theme='dark'] .question-form-modal textarea,
+html[data-theme='dark'] .question-form-modal select,
+html[data-theme='dark'] .appointment-booking-modal input,
+html[data-theme='dark'] .appointment-booking-modal textarea,
+html[data-theme='dark'] .appointment-booking-modal select {
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-modal-card input:focus,
+html[data-theme='dark'] .user-modal-card textarea:focus,
+html[data-theme='dark'] .user-modal-card select:focus,
+html[data-theme='dark'] .raise-dispute-modal input:focus,
+html[data-theme='dark'] .raise-dispute-modal textarea:focus,
+html[data-theme='dark'] .raise-dispute-modal select:focus,
+html[data-theme='dark'] .appointment-booking-modal input:focus,
+html[data-theme='dark'] .appointment-booking-modal textarea:focus,
+html[data-theme='dark'] .appointment-booking-modal select:focus {
+  border-color: #FBBF24 !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22) !important;
+  outline: none !important;
+}
+
+html[data-theme='dark'] .user-modal-card label,
+html[data-theme='dark'] .user-modal-card .field-label,
+html[data-theme='dark'] .user-modal-card .field-label-top,
+html[data-theme='dark'] .user-modal-card p,
+html[data-theme='dark'] .user-modal-card span.muted,
+html[data-theme='dark'] .user-modal-card .muted,
+html[data-theme='dark'] .raise-dispute-modal label,
+html[data-theme='dark'] .question-form-modal label,
+html[data-theme='dark'] .appointment-booking-modal label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-modal-card .btn-ghost {
+  background: #2B231E !important;
+  border: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-modal-card .btn-ghost:hover {
+  background: #352A23 !important;
+  color: #FFFDF9 !important;
+  border-color: #5C4A3E !important;
+}
+
+html[data-theme='dark'] .user-modal-card .btn-secondary,
+html[data-theme='dark'] .user-modal-card .btn-default,
+html[data-theme='dark'] .raise-dispute-modal .btn-secondary,
+html[data-theme='dark'] .raise-dispute-modal .btn-default,
+html[data-theme='dark'] .question-form-modal .btn-secondary,
+html[data-theme='dark'] .appointment-booking-modal .btn-secondary {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.32) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-modal-card .btn-secondary:hover,
+html[data-theme='dark'] .user-modal-card .btn-default:hover,
+html[data-theme='dark'] .raise-dispute-modal .btn-secondary:hover,
+html[data-theme='dark'] .question-form-modal .btn-secondary:hover,
+html[data-theme='dark'] .appointment-booking-modal .btn-secondary:hover {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: #FBBF24 !important;
+  color: #FFFDF9 !important;
 }
 
 /* User Card and Containers in Light Mode */
