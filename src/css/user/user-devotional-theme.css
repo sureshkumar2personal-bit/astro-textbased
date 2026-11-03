@@ -1459,9 +1459,20 @@ html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-status.
 }
 
 /* User Atonements Filters */
+.app-shell--user .user-atonements-page .card.atonement-filter-card,
+.app-shell--user .user-atonements-page .atonement-filter-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .card.atonement-filter-card,
 html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-filter-card {
-  background: #231C18 !important;
-  border: 1px solid rgba(245, 158, 11, 0.16) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 html[data-theme='dark'] .app-shell--user .user-atonements-page .field-label-top {
@@ -1584,9 +1595,11 @@ html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-button
   color: #FFFFFF !important;
 }
 
+html[data-theme='light'] .app-shell--user .user-atonements-page .card.atonement-filter-card,
 html[data-theme='light'] .app-shell--user .user-atonements-page .atonement-filter-card {
-  background: #FFFFFF !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 html[data-theme='light'] .app-shell--user .user-atonements-page .field-label-top {
