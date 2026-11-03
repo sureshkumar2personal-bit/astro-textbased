@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Instant Consultation History - User Side
+   Instant Consultation History & Details Modal - User Devotional Portal
+   Strictly scoped to User Side. Supports Light & Dark Devotional Themes.
    ========================================================================== */
 
 .instant-consult-page {
@@ -24,57 +25,77 @@
   flex-wrap: wrap;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--surface-border, #e7e0f0);
+  border-bottom: 1px solid var(--surface-border, #EFE7DA);
 }
 
 .instant-consult-tabs {
   display: inline-flex;
   gap: 6px;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--surface-soft, #f8f6fc);
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-soft, #FAF7F2);
+  border: 1px solid var(--surface-border, #EFE7DA);
 }
 
 .instant-consult-tab {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   background: transparent;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary, #5C5564);
   font: inherit;
   font-size: 12.5px;
   font-weight: 750;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .instant-consult-tab:hover {
-  color: #7c3aed;
+  color: var(--primary, #EA580C);
 }
 
 .instant-consult-tab.is-active {
-  background: var(--surface, #ffffff);
-  color: #6d28d9;
-  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.12);
+  background: var(--surface, #FFFFFF);
+  color: var(--primary, #EA580C);
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.14);
 }
 
-:root[data-theme='dark'] .instant-consult-tab.is-active {
-  background: #2e1065;
-  color: #d8b4fe;
+html[data-theme='dark'] .instant-consult-tabs {
+  background: #1B1512;
+  border-color: #3D3028;
+}
+
+html[data-theme='dark'] .instant-consult-tab {
+  color: var(--text-secondary, #BCAE9F);
+}
+
+html[data-theme='dark'] .instant-consult-tab:hover {
+  color: var(--primary-light, #FDBA74);
+}
+
+html[data-theme='dark'] .instant-consult-tab.is-active {
+  background: #2C1810;
+  color: var(--primary-light, #FDBA74);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
 }
 
 .instant-consult-tab-badge {
   display: inline-grid;
   place-items: center;
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
-  background: rgba(109, 40, 217, 0.1);
+  background: rgba(234, 88, 12, 0.12);
   color: inherit;
+}
+
+html[data-theme='dark'] .instant-consult-tab-badge {
+  background: rgba(245, 158, 11, 0.18);
 }
 
 .instant-consult-filters {
@@ -92,26 +113,38 @@
 
 .instant-consult-search-icon {
   position: absolute;
-  left: 10px;
-  color: var(--muted, #94a3b8);
+  left: 11px;
+  color: var(--muted, #8A8192);
   pointer-events: none;
 }
 
 .instant-consult-search-input {
-  padding: 7px 12px 7px 32px;
-  border-radius: 9px;
-  border: 1px solid var(--surface-border, #e2d7ed);
-  background: var(--surface, #ffffff);
-  color: var(--ink, #1e293b);
+  padding: 8px 14px 8px 34px;
+  border-radius: 10px;
+  border: 1px solid var(--surface-border, #EFE7DA);
+  background: var(--surface, #FFFFFF);
+  color: var(--ink, #1E1B24);
   font: inherit;
   font-size: 12.5px;
   outline: none;
   min-width: 240px;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .instant-consult-search-input:focus {
-  border-color: #7c3aed;
+  border-color: var(--primary, #EA580C);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.14);
+}
+
+html[data-theme='dark'] .instant-consult-search-input {
+  background: #1B1512;
+  border-color: #3D3028;
+  color: #F7EFE8;
+}
+
+html[data-theme='dark'] .instant-consult-search-input:focus {
+  border-color: #FBBF24;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.22);
 }
 
 /* History List and Rows */
@@ -127,12 +160,14 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 18px;
-  border-radius: 14px;
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--surface-border, #e7e0f0);
-  box-shadow: 0 2px 8px rgba(54, 38, 92, 0.02);
+  border-radius: 15px;
+  background: var(--surface, #FFFFFF);
+  border: 1px solid var(--surface-border, #EFE7DA);
+  box-shadow: 0 2px 8px rgba(180, 135, 75, 0.04);
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
   font: inherit;
   width: 100%;
@@ -140,9 +175,21 @@
 }
 
 .instant-consult-history-row:hover {
-  border-color: #c084fc;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.08);
-  transform: translateY(-1px);
+  border-color: rgba(217, 119, 6, 0.38);
+  box-shadow: 0 6px 20px rgba(180, 135, 75, 0.10);
+  transform: translateY(-1.5px);
+}
+
+html[data-theme='dark'] .instant-consult-history-row {
+  background: #1B1512;
+  border-color: #3D3028;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme='dark'] .instant-consult-history-row:hover {
+  background: #231C18;
+  border-color: rgba(245, 158, 11, 0.38);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .instant-consult-row-left {
@@ -156,17 +203,31 @@
 .instant-consult-row-icon {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
   flex-shrink: 0;
-  background: #f3edff;
-  color: #7c3aed;
+  background: #FFF7ED;
+  color: var(--primary, #EA580C);
+  border: 1px solid rgba(245, 158, 11, 0.24);
 }
 
 .instant-consult-row-icon--call {
-  background: #ecfdf5;
+  background: #ECFDF5;
   color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+
+html[data-theme='dark'] .instant-consult-row-icon {
+  background: rgba(245, 158, 11, 0.14);
+  color: #FBBF24;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html[data-theme='dark'] .instant-consult-row-icon--call {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.25);
 }
 
 .instant-consult-row-main {
@@ -182,16 +243,24 @@
   gap: 8px;
   font-size: 13.5px;
   font-weight: 800;
-  color: var(--ink, #1e293b);
+  color: var(--ink, #1E1B24);
+}
+
+html[data-theme='dark'] .instant-consult-row-title {
+  color: #F7EFE8;
 }
 
 .instant-consult-row-sep {
-  color: var(--muted, #94a3b8);
+  color: var(--muted, #8A8192);
   font-weight: 400;
 }
 
 .instant-consult-row-astrologer {
-  color: #6d28d9;
+  color: var(--primary, #EA580C);
+}
+
+html[data-theme='dark'] .instant-consult-row-astrologer {
+  color: #FDBA74;
 }
 
 .instant-consult-row-meta {
@@ -199,8 +268,12 @@
   align-items: center;
   gap: 8px;
   font-size: 11.5px;
-  color: var(--muted, #64748b);
+  color: var(--muted, #5C5564);
   flex-wrap: wrap;
+}
+
+html[data-theme='dark'] .instant-consult-row-meta {
+  color: #BCAE9F;
 }
 
 .instant-consult-row-right {
@@ -218,9 +291,13 @@
 }
 
 .instant-consult-row-amount strong {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 850;
-  color: var(--ink, #1e293b);
+  color: var(--ink, #1E1B24);
+}
+
+html[data-theme='dark'] .instant-consult-row-amount strong {
+  color: #F7EFE8;
 }
 
 .instant-consult-row-amount small {
@@ -228,6 +305,10 @@
   font-weight: 750;
   color: #059669;
   text-transform: uppercase;
+}
+
+html[data-theme='dark'] .instant-consult-row-amount small {
+  color: #34D399;
 }
 
 .instant-consult-row-status {
@@ -244,61 +325,524 @@
 .instant-consult-row-status--ended,
 .instant-consult-row-status--completed,
 .instant-consult-row-status--accepted {
-  background: #ecfdf5;
+  background: #ECFDF5;
   color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.24);
+}
+
+html[data-theme='dark'] .instant-consult-row-status--ended,
+html[data-theme='dark'] .instant-consult-row-status--completed,
+html[data-theme='dark'] .instant-consult-row-status--accepted {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.32);
 }
 
 .instant-consult-row-status--active,
 .instant-consult-row-status--ringing {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid rgba(37, 99, 235, 0.24);
+}
+
+html[data-theme='dark'] .instant-consult-row-status--active,
+html[data-theme='dark'] .instant-consult-row-status--ringing {
+  background: rgba(59, 130, 246, 0.16);
+  color: #60A5FA;
+  border-color: rgba(59, 130, 246, 0.32);
 }
 
 .instant-consult-row-status--cancelled,
 .instant-consult-row-status--rejected {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid rgba(220, 38, 38, 0.24);
+}
+
+html[data-theme='dark'] .instant-consult-row-status--cancelled,
+html[data-theme='dark'] .instant-consult-row-status--rejected {
+  background: rgba(239, 68, 68, 0.16);
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.32);
 }
 
 .instant-consult-row-chevron {
-  color: var(--muted, #94a3b8);
-  transition: transform 0.15s ease;
+  color: var(--muted, #8A8192);
+  transition: transform 0.15s ease, color 0.15s ease;
 }
 
 .instant-consult-history-row:hover .instant-consult-row-chevron {
-  transform: translateX(2px);
-  color: #7c3aed;
+  transform: translateX(3px);
+  color: var(--primary, #EA580C);
+}
+
+html[data-theme='dark'] .instant-consult-history-row:hover .instant-consult-row-chevron {
+  color: #FBBF24;
 }
 
 /* Empty State */
 .instant-consult-empty {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding: 48px 16px;
-  color: var(--text-secondary, #64748b);
+  gap: 10px;
+  padding: 56px 16px;
+  color: var(--text-secondary, #5C5564);
   text-align: center;
 }
 
 .instant-consult-empty-icon {
   display: grid;
   place-items: center;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  background: #f3edff;
-  color: #7c3aed;
+  background: #FFF7ED;
+  color: var(--primary, #EA580C);
+  border: 1px solid rgba(245, 158, 11, 0.24);
   margin-bottom: 4px;
 }
 
+html[data-theme='dark'] .instant-consult-empty-icon {
+  background: #2C1810;
+  color: #FBBF24;
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
 .instant-consult-empty strong {
-  color: var(--ink, #1e293b);
-  font-size: 15px;
+  color: var(--ink, #1E1B24);
+  font-size: 16px;
+}
+
+html[data-theme='dark'] .instant-consult-empty strong {
+  color: #F7EFE8;
 }
 
 .instant-consult-empty p {
   margin: 0;
-  font-size: 12.5px;
-  color: var(--muted, #64748b);
-  max-width: 380px;
+  font-size: 13px;
+  color: var(--muted, #8A8192);
+  max-width: 420px;
+  line-height: 1.5;
 }
+
+html[data-theme='dark'] .instant-consult-empty p {
+  color: #BCAE9F;
+}
+
+/* ==========================================================================
+   Consultation Details Modal / Receipt
+   Harmonized with Devotional Theme in both Light and Dark modes.
+   ========================================================================== */
+
+.user-profile-consultation-modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(30, 27, 36, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  animation: fadeInModalBackdrop 0.18s ease-out;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal-backdrop {
+  background: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.user-profile-consultation-modal {
+  width: min(460px, 100%) !important;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #EFE7DA !important;
+  border-radius: 22px !important;
+  background: #FFFFFF !important;
+  color: #1E1B24 !important;
+  box-shadow: 0 24px 70px rgba(70, 50, 25, 0.18), 0 0 24px rgba(245, 158, 11, 0.08) !important;
+  animation: scaleInModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal {
+  background: #1B1512 !important;
+  border: 1px solid #3D3028 !important;
+  color: #F7EFE8 !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7), 0 0 24px rgba(245, 158, 11, 0.08) !important;
+}
+
+.user-profile-consultation-modal__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px !important;
+  border-bottom: 1px solid #EFE7DA !important;
+  background: #FAF7F2 !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__topbar {
+  background: #231C18 !important;
+  border-bottom: 1px solid #3D3028 !important;
+}
+
+.user-profile-consultation-modal__topbar h2 {
+  margin: 0;
+  color: #1E1B24 !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__topbar h2 {
+  color: #F7EFE8 !important;
+}
+
+.user-profile-consultation-modal__close {
+  display: grid;
+  place-items: center;
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid #EFE7DA !important;
+  border-radius: 50% !important;
+  background: #FFFFFF !important;
+  color: #5C5564 !important;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.user-profile-consultation-modal__close:hover,
+.user-profile-consultation-modal__close:focus-visible {
+  border-color: #EA580C !important;
+  color: #EA580C !important;
+  background: #FFF7ED !important;
+  outline: none;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__close {
+  background: #2B231E !important;
+  border-color: #3D3028 !important;
+  color: #BCAE9F !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__close:hover,
+html[data-theme='dark'] .user-profile-consultation-modal__close:focus-visible {
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+  background: #352A23 !important;
+}
+
+.user-profile-consultation-modal__content {
+  padding: 20px 22px !important;
+}
+
+.user-profile-consultation-modal__identity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #EFE7DA !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__identity-row {
+  border-bottom: 1px solid #3D3028 !important;
+}
+
+.user-profile-consultation-modal__person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.user-profile-consultation-modal__person > span {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+  font-size: 14.5px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25) !important;
+}
+
+.user-profile-consultation-modal__person div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-profile-consultation-modal__person strong {
+  overflow: hidden;
+  color: #1E1B24 !important;
+  font-size: 15px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__person strong {
+  color: #F7EFE8 !important;
+}
+
+.user-profile-consultation-modal__person small {
+  color: #D97706 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__person small {
+  color: #FBBF24 !important;
+}
+
+.user-profile-consultation-modal__id {
+  display: grid;
+  flex: 0 1 185px;
+  gap: 3px;
+  min-width: 0;
+  text-align: right;
+}
+
+.user-profile-consultation-modal__id small {
+  color: #8A8192 !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__id small {
+  color: #A89B8C !important;
+}
+
+.user-profile-consultation-modal__id strong {
+  overflow: hidden;
+  color: #1E1B24 !important;
+  font-size: 11.5px !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__id strong {
+  color: #F7EFE8 !important;
+}
+
+.user-profile-consultation-modal__amount-panel {
+  display: grid;
+  position: relative;
+  gap: 3px;
+  min-height: 76px;
+  margin-bottom: 16px;
+  padding: 14px 18px !important;
+  border: 1px solid rgba(217, 119, 6, 0.24) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(135deg, #FFFDF8 0%, #FDF4E6 60%, #FCEACF 100%) !important;
+  box-shadow: 0 2px 10px rgba(180, 135, 75, 0.06) !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__amount-panel {
+  background: linear-gradient(135deg, #2B1D14 0%, #20150F 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+}
+
+.user-profile-consultation-modal__amount-panel > span {
+  color: #B45309 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__amount-panel > span {
+  color: #FBBF24 !important;
+}
+
+.user-profile-consultation-modal__amount-panel > strong {
+  color: #C2410C !important;
+  font-size: 26px !important;
+  font-weight: 850 !important;
+  line-height: 1.1;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__amount-panel > strong {
+  color: #FDBA74 !important;
+}
+
+.user-profile-consultation-modal__amount-panel > em {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  padding: 4px 10px !important;
+  border: 1px solid rgba(16, 185, 129, 0.26) !important;
+  border-radius: 999px !important;
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+  font-size: 10.5px !important;
+  font-style: normal !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__amount-panel > em {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #34D399 !important;
+}
+
+.user-profile-consultation-modal__details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px 16px !important;
+  padding: 16px 18px !important;
+  border: 1px solid #EFE7DA !important;
+  border-radius: 15px !important;
+  background: #FAF7F2 !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__details {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+}
+
+.user-profile-consultation-modal__details > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  min-height: 38px;
+}
+
+.user-profile-consultation-modal__detail-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #FFF7ED !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #EA580C !important;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__detail-icon {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+  color: #FBBF24 !important;
+}
+
+.user-profile-consultation-modal__details > div > span:last-child {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.user-profile-consultation-modal__details small {
+  color: #8A8192 !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__details small {
+  color: #A89B8C !important;
+}
+
+.user-profile-consultation-modal__details strong {
+  overflow: hidden;
+  color: #1E1B24 !important;
+  font-size: 12.5px !important;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__details strong {
+  color: #F7EFE8 !important;
+}
+
+.user-profile-consultation-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 22px !important;
+  border-top: 1px solid #EFE7DA !important;
+  background: #FAF7F2 !important;
+}
+
+html[data-theme='dark'] .user-profile-consultation-modal__footer {
+  background: #231C18 !important;
+  border-top: 1px solid #3D3028 !important;
+}
+
+.user-profile-consultation-modal__close-action {
+  min-width: 90px;
+  padding: 10px 22px !important;
+  border: 0;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+  font: inherit;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28) !important;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.user-profile-consultation-modal__close-action:hover,
+.user-profile-consultation-modal__close-action:focus-visible {
+  background: linear-gradient(135deg, #FBBF24 0%, #EA580C 100%) !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.36) !important;
+  outline: none;
+}
+
+/* Modal animation keyframes */
+@keyframes fadeInModalBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleInModal {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .instant-consult-history-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .instant-consult-row-right {
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 10px;
+    border-top: 1px dashed var(--surface-border, #EFE7DA);
+  }
+
+  .instant-consult-row-amount {
+    align-items: flex-start;
+  }
+
+  .user-profile-consultation-modal__details {
+    grid-template-columns: 1fr !important;
+  }
+}
+
