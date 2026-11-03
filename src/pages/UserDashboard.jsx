@@ -15,6 +15,7 @@ import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 import { getHiddenUserActivityIds, getUserCommunicationActivity } from '../utils/memberCommunicationActivity.js'
 import { getPublicAstrologers } from '../utils/publicAstrologerProfile.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import AstrologerCard from '../components/AstrologerCard.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
@@ -164,7 +165,10 @@ export default function UserDashboard() {
           <div className="section-title"><CalendarDays size={20} />Upcoming Appointments</div>
           {upcomingAppointments.length > 0 ? (
             <div className="activity-list">
-              {upcomingAppointments.slice(0, 3).map((apt) => (
+              {upcomingAppointments.slice(0, 3).map((apt) => {
+                const photo = apt.profileImage || getAstrologerPhoto(apt.astrologerId || apt.astrologer)
+                const initials = (apt.astrologer || 'A').split(' ').map((p) => p[0]).slice(0, 2).join('')
+                return (
                 <div
                   key={apt.id}
                   className="activity-row"
@@ -180,13 +184,18 @@ export default function UserDashboard() {
                     }
                   }}
                 >
-                  <div>
-                    <div className="activity-id">{apt.astrologer}</div>
-                    <div className="activity-meta">{apt.type} · {apt.date} · {apt.time}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white text-xs">
+                      {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : initials}
+                    </div>
+                    <div>
+                      <div className="activity-id">{apt.astrologer}</div>
+                      <div className="activity-meta">{apt.type} · {apt.date} · {apt.time}</div>
+                    </div>
                   </div>
                   <StatusBadge label={apt.status} />
                 </div>
-              ))}
+              )})}
             </div>
           ) : (
             <p className="muted" style={{ padding: '16px 0' }}>No upcoming appointments.</p>

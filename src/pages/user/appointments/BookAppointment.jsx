@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Star } from 'lucide-react'
 import { mockAstrologers, subscribedAstrologers } from '../../../data/notificationData.js'
 import { consultationAstrologers } from '../../../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../../../data/astrologerPhotos.js'
 import { BOOKING_OVERRIDES, DEFAULT_OVERRIDE, buildCalendarAvailability, countAvailableSlots } from './bookingAstrologerData.js'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
@@ -38,7 +39,7 @@ const ASTROLOGER_PHOTOS = {
 const CONSULTATION_PHOTOS = new Map(consultationAstrologers.map((astrologer) => [astrologer.id, astrologer.profileImage]))
 
 function profilePhoto(astrologer) {
-  return ASTROLOGER_PHOTOS[astrologer.name] || CONSULTATION_PHOTOS.get(astrologer.id) || astrologer.profileImage || ''
+  return astrologer?.photo || ASTROLOGER_PHOTOS[astrologer?.name] || CONSULTATION_PHOTOS.get(astrologer?.id) || astrologer?.profileImage || getAstrologerPhoto(astrologer) || ''
 }
 
 function ratingScore(rating) {

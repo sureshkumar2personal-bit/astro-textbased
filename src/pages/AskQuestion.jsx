@@ -17,6 +17,7 @@ import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import { categories } from '../data/mockData.js'
 import { getSuggestedAstrologers, mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
@@ -93,7 +94,7 @@ const ASTROLOGER_PHOTOS = new Map(consultationAstrologers.map((astrologer) => [a
 
 function AstrologerAvatar({ astrologer, size = 'h-14 w-14' }) {
   const name = astrologer?.name || ''
-  const photo = astrologer?.photo || astrologer?.profileImage || ASTROLOGER_PHOTOS.get(astrologer?.id)
+  const photo = astrologer?.photo || astrologer?.profileImage || ASTROLOGER_PHOTOS.get(astrologer?.id) || getAstrologerPhoto(astrologer)
   return (
     <div className={`flex ${size} shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white`}>
       {photo ? <img src={photo} alt={`${name} profile`} className="h-full w-full object-cover" /> : getInitials(name)}

@@ -14,6 +14,7 @@ import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { ROLES } from '../utils/roleRoutes.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { addDays, appointmentStatusBucket, formatDisplayDate, formatTimeRange, fromIsoDate, getAppointmentDisplayStatus, resolveAppointmentWindow, startOfWeek, toIsoDate, useNow } from '../utils/appointments.js'
 
 const FILTERS = [
@@ -71,6 +72,7 @@ function UserAppointmentCard({
   const bucket = appointmentStatusBucket(appointment)
   const statusLabel = getAppointmentDisplayStatus(appointment)
   const durationLabel = appointment.duration ? String(appointment.duration).replace(/\s*min\b/i, ' Minutes') : `${window.endMin - window.startMin} Minutes`
+  const photo = appointment.profileImage || appointment.avatar || appointment.astrologerImage || getAstrologerPhoto(appointment.astrologerId || appointment.astrologer)
   const canManageUpcoming = bucket === 'booked'
   const canReschedule = canManageUpcoming && ['Booked', 'Confirmed', 'Pending'].includes(appointment.status)
   const canCancel = canManageUpcoming && CANCELLABLE_STATUSES.includes(appointment.status)
@@ -90,7 +92,9 @@ function UserAppointmentCard({
     >
       <div className="user-appointment-card__top">
         <div className="user-appointment-identity">
-          <span className="user-appointment-avatar">{initials(appointment.astrologer)}</span>
+          <span className="user-appointment-avatar">
+            {photo ? <img src={photo} alt="" /> : initials(appointment.astrologer)}
+          </span>
           <div>
             <strong>{appointment.astrologer || 'Astrologer'}</strong>
             <span>{appointment.specialization || 'Vedic Astrology'}</span>
@@ -146,7 +150,7 @@ function AddedCompactAppointmentCard({
 }) {
   if (!appointment) return null
   const window = resolveAppointmentWindow(appointment)
-  const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage
+  const avatar = appointment.profileImage || appointment.avatar || appointment.astrologerImage || getAstrologerPhoto(appointment.astrologerId || appointment.astrologer)
   const statusLabel = getAppointmentDisplayStatus(appointment)
   const bucket = appointmentStatusBucket(appointment)
   const cardRef = useRef(null)

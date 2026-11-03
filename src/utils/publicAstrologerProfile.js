@@ -1,6 +1,9 @@
 import { mockAstrologers } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { SERVICE_DEFINITIONS, effectiveVisibility } from './astrologerProfile.js'
+
+export { getAstrologerPhoto }
 
 // One public record per astrologer, generated from the private profile whenever it changes.
 // Both the astrologer's "Preview Public Profile" and every user-facing astrologer view read this
@@ -71,10 +74,11 @@ const fallbackRates = (id) => consultationAstrologers.find((item) => item.id ===
 export function applyPublicProfile(base, published) {
   const rates = fallbackRates(base.id)
   const years = parseInt(base.experience, 10)
+  const photo = published?.photo || base.photo || rates.profileImage || rates.photo || getAstrologerPhoto(base)
   const merged = {
     ...base,
-    photo: '',
-    profileImage: rates.profileImage || '',
+    photo,
+    profileImage: photo,
     expertise: String(base.type || '').split(',').map((item) => item.trim()).filter(Boolean),
     consultationStyle: [],
     guidanceAreas: [],
@@ -96,7 +100,10 @@ export function applyPublicProfile(base, published) {
   if (!published) return merged
   merged.visible = published.visibility === 'Visible'
   if (filled(published.name)) merged.name = published.name
-  if (published.photo) merged.photo = published.photo
+  if (published.photo) {
+    merged.photo = published.photo
+    merged.profileImage = published.photo
+  }
   if (filled(published.primarySystem)) merged.specialization = published.primarySystem
   if (filled(published.yearsOfExperience)) {
     merged.yearsOfExperience = String(published.yearsOfExperience)

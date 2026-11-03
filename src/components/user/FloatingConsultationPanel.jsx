@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { consultationAstrologers } from '../../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import {
   addConsultationMinutes,
@@ -131,7 +132,13 @@ export default function FloatingConsultationPanel({ session, onDismiss, onEnded 
             </header>
 
             <div className="floating-consult-person">
-              <div className="floating-consult-avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div>
+              <div className="floating-consult-avatar">
+                {getAstrologerPhoto(astrologer) ? (
+                  <img src={getAstrologerPhoto(astrologer)} alt={`${astrologer.name} profile`} />
+                ) : (
+                  astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+                )}
+              </div>
               <div>
                 <h2>{astrologer.name}</h2>
                 <p>{isCall ? 'Voice' : 'Text'} consultation · {getConsultationTotalMinutes(request)} min</p>
