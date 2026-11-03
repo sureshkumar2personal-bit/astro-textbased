@@ -2233,6 +2233,45 @@ html[data-theme='dark'] .app-shell--user .user-appointment-identity span {
   color: #C8B79B !important;
 }
 
+/* Appointment Section Navigation Tabs (No bottom border on the section) */
+.app-shell--user .appointment-section-tabs {
+  border-bottom: none !important;
+}
+
+html[data-theme='dark'] .app-shell--user .appointment-section-tabs {
+  border-bottom: none !important;
+}
+
+html[data-theme='dark'] .app-shell--user .appointment-section-tab {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .appointment-section-tab:hover {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .appointment-section-tab.is-active {
+  color: #FBBF24 !important;
+  border-bottom-color: #F59E0B !important;
+}
+
+html[data-theme='light'] .app-shell--user .appointment-section-tabs {
+  border-bottom: none !important;
+}
+
+html[data-theme='light'] .app-shell--user .appointment-section-tab {
+  color: #5C4B40 !important;
+}
+
+html[data-theme='light'] .app-shell--user .appointment-section-tab:hover {
+  color: #C2410C !important;
+}
+
+html[data-theme='light'] .app-shell--user .appointment-section-tab.is-active {
+  color: #C2410C !important;
+  border-bottom-color: #C2410C !important;
+}
+
 /* User Appointment Card Meta (All 5 items in same row with space-between) */
 .app-shell--user .user-appointment-card__meta,
 .app-shell--user .user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta {
