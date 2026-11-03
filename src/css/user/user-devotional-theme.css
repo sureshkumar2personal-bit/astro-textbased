@@ -1383,6 +1383,216 @@ html[data-theme='dark'] .consultation-preview__head strong {
 }
 
 /* User Atonements & Ritual Flow Dark Mode */
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card {
+  background: #231C18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card:hover,
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card.is-selected {
+  border-color: rgba(245, 158, 11, 0.42) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-astrologer {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-category {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-duration {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-progress small {
+  color: #A89A85 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-progress strong {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-button {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #FBBF24 !important;
+  transition: all 0.18s ease !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-button:hover {
+  background: rgba(245, 158, 11, 0.24) !important;
+  border-color: #F59E0B !important;
+  color: #FFFDF9 !important;
+  transform: translateX(3px) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-status.is-pending {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-status.is-completed {
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .at-marker {
+  background: #1A120B !important;
+  border: 2px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .at-marker.is-done {
+  background: #10B981 !important;
+  border-color: #10B981 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .rem-card-status.is-pending .at-marker {
+  border-color: #F59E0B !important;
+}
+
+/* User Atonements Filters */
+html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-filter-card {
+  background: #231C18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.16) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .field-label-top {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-status-select {
+  background: #1A120B url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23F59E0B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-status-select:hover {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-status-select option {
+  background: #231C18 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-atonements-page .chip.selected {
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* User Atonements Progress Bar & Journey Connector in Dark Mode */
+html[data-theme='dark'] .app-shell--user .jr-progress {
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .jr-progress span {
+  background: linear-gradient(90deg, #F59E0B, #FBBF24) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .jr-node:not(:last-child)::after {
+  background: rgba(245, 158, 11, 0.2) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .jr-node.completed:not(:last-child)::after {
+  background: #10B981 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .jr-step:not(:last-child)::before {
+  background: rgba(245, 158, 11, 0.18) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-back {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-back:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-empty {
+  background: #231C18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-empty h2 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-empty p {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .atonement-empty svg {
+  color: #F59E0B !important;
+}
+
+/* User Atonements Page & Cards – Light Devotional Theme */
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  box-shadow: 0 4px 16px rgba(194, 65, 12, 0.06) !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card:hover {
+  border-color: rgba(217, 119, 6, 0.38) !important;
+  box-shadow: 0 8px 24px rgba(194, 65, 12, 0.12) !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-astrologer {
+  color: #1A120B !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-category {
+  background: rgba(217, 119, 6, 0.1) !important;
+  border: 1px solid rgba(217, 119, 6, 0.2) !important;
+  color: #B45309 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-duration {
+  color: #786C5E !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-title {
+  color: #1A120B !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-progress small {
+  color: #786C5E !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-progress strong {
+  color: #B45309 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-button {
+  background: rgba(217, 119, 6, 0.08) !important;
+  border: 1px solid rgba(217, 119, 6, 0.3) !important;
+  color: #C2410C !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .rem-card-button:hover {
+  background: #C2410C !important;
+  border-color: #C2410C !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .atonement-filter-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-atonements-page .field-label-top {
+  color: #5C4B40 !important;
+}
+
 html[data-theme='dark'] .app-shell--user .jr-page {
   background: #1F1610 !important;
   border-color: rgba(245, 158, 11, 0.22) !important;
@@ -2899,8 +3109,7 @@ html[data-theme='dark'] .app-shell--user .instant-call-user-session-meta {
 
 /* User Atonements & Floating Consultation (No white background chips/panels) */
 html[data-theme='dark'] .app-shell--user .jr-chips span,
-html[data-theme='dark'] .app-shell--user .jr-step-node:empty,
-html[data-theme='dark'] .app-shell--user .user-atonements-page .atonement-status-select {
+html[data-theme='dark'] .app-shell--user .jr-step-node:empty {
   background: #2A1D15 !important;
   border-color: rgba(245, 158, 11, 0.2) !important;
   color: #FFFDF9 !important;
