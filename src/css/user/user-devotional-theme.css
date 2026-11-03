@@ -4041,4 +4041,633 @@ html[data-theme='dark'] .textarea-box.is-invalid {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
 }
 
+/* ==========================================================================
+   USER RESCHEDULE MODAL (.user-reschedule)
+   Devotional theme integration for rescheduling appointments on user side
+   ========================================================================== */
+.user-reschedule {
+  background: #FFFFFF !important;
+  border: 1px solid #EFE7DA !important;
+  box-shadow: 0 24px 60px rgba(70, 50, 25, 0.16), 0 0 20px rgba(245, 158, 11, 0.08) !important;
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-head {
+  background: #FAF7F2 !important;
+  border-bottom: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-head h2 {
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-head span {
+  color: #5C5564 !important;
+}
+
+.user-reschedule .apt-reschedule-calendar {
+  background: #FFFFFF !important;
+}
+
+.user-reschedule .apt-reschedule-month strong {
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-weekdays span {
+  color: #6B7280 !important;
+}
+
+.user-reschedule .apt-reschedule-grid button {
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-grid button:disabled {
+  color: #A8A196 !important;
+  opacity: 0.45 !important;
+}
+
+.user-reschedule .apt-reschedule-grid button.is-outside {
+  opacity: 0.35 !important;
+}
+
+.user-reschedule .apt-reschedule-grid button.is-available {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+.user-reschedule .apt-reschedule-grid button.is-available:hover {
+  border-color: #EA580C !important;
+  background: #FFF7ED !important;
+}
+
+.user-reschedule .apt-reschedule-grid button.is-selected {
+  background: #FFF7ED !important;
+  border-color: #EA580C !important;
+  color: #EA580C !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.18) !important;
+}
+
+.user-reschedule .apt-reschedule-grid button small {
+  color: #EA580C !important;
+}
+
+.user-reschedule .apt-reschedule-body {
+  background: #FFFFFF !important;
+}
+
+.user-reschedule .apt-reschedule-label {
+  color: #5C5564 !important;
+}
+
+.user-reschedule .apt-reschedule-slot {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+  transition: all 0.18s ease !important;
+}
+
+.user-reschedule .apt-reschedule-slot:hover {
+  background: #FFF7ED !important;
+  border-color: #EA580C !important;
+  color: #EA580C !important;
+}
+
+.user-reschedule .apt-reschedule-empty {
+  color: #5C5564 !important;
+}
+
+.user-reschedule .apt-reschedule-foot {
+  background: #FAF7F2 !important;
+  border-top: 1px solid #EFE7DA !important;
+}
+
+.user-reschedule .apt-reschedule-foot span {
+  color: #5C5564 !important;
+}
+
+/* User Reschedule Dark Theme */
+html[data-theme='dark'] .user-reschedule {
+  background: #1B1512 !important;
+  border: 1px solid #3D3028 !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.7), 0 0 24px rgba(245, 158, 11, 0.08) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-head {
+  background: #231C18 !important;
+  border-bottom: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-head h2 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-head span {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-calendar {
+  background: #1B1512 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-month strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-weekdays span {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button:disabled {
+  color: #5C4A3E !important;
+  opacity: 0.4 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button.is-outside {
+  opacity: 0.3 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button.is-available {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button.is-available:hover {
+  border-color: #FBBF24 !important;
+  background: #2D231E !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button.is-selected {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25) !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-grid button small {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-body {
+  background: #1B1512 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-slot {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-slot:hover {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-empty {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-notice {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-foot {
+  background: #231C18 !important;
+  border-top: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-reschedule .apt-reschedule-foot span {
+  color: #C8B79B !important;
+}
+
+/* ==========================================================================
+   USER WALLET, TRANSACTIONS, AUTOPAY & MODAL INTERACTIONS
+   ========================================================================== */
+
+/* Light Theme Overrides */
+.app-shell--user .wallet-withdraw-info {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #5C5564 !important;
+}
+
+.app-shell--user .wallet-withdraw-info strong {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-quick-amount {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-quick-amount:hover {
+  border-color: #EA580C !important;
+}
+
+.app-shell--user .wallet-quick-amount.is-active {
+  background: #FFF7ED !important;
+  border-color: #EA580C !important;
+  color: #EA580C !important;
+}
+
+.app-shell--user .withdraw-method-option {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .withdraw-method-option.is-selected {
+  background: #FFF7ED !important;
+  border-color: #EA580C !important;
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .withdraw-method-check.is-visible {
+  background: #EA580C !important;
+  border-color: #EA580C !important;
+  color: #FFFFFF !important;
+}
+
+.app-shell--user .wallet-withdraw-summary {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #5C5564 !important;
+}
+
+.app-shell--user .wallet-withdraw-summary > div strong {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-withdraw-summary__total {
+  border-top-color: #EFE7DA !important;
+}
+
+.app-shell--user .wallet-withdraw-summary__total strong {
+  color: #EA580C !important;
+}
+
+.app-shell--user .withdraw-review-row {
+  color: #5C5564 !important;
+}
+
+.app-shell--user .withdraw-review-row strong {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .withdraw-review-total strong {
+  color: #EA580C !important;
+}
+
+.app-shell--user .wallet-earning-row {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-earning-row:hover {
+  background: #FDF9F3 !important;
+  border-color: #EA580C !important;
+}
+
+.app-shell--user .wallet-earning-row__title {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-earning-row__meta {
+  color: #5C5564 !important;
+}
+
+.app-shell--user .wallet-detail-grid span {
+  color: #6B7280 !important;
+}
+
+.app-shell--user .wallet-detail-grid strong {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-earnings-summary {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  border-radius: 10px !important;
+}
+
+.app-shell--user .wallet-earnings-summary span:first-child {
+  color: #5C5564 !important;
+}
+
+.app-shell--user .wallet-earnings-summary span:last-child {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .wallet-txn-row:hover {
+  background: rgba(245, 158, 11, 0.05) !important;
+  cursor: pointer !important;
+}
+
+.app-shell--user .txn-row:hover {
+  background: rgba(245, 158, 11, 0.05) !important;
+  cursor: pointer !important;
+}
+
+.app-shell--user .txn-detail-grid {
+  border-bottom: 1px solid #EFE7DA !important;
+}
+
+.app-shell--user .txn-detail-row {
+  border-bottom: 1px solid #EFE7DA !important;
+  color: #5C5564 !important;
+}
+
+.app-shell--user .txn-detail-row strong {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .txn-detail-amount {
+  border-bottom: 1px solid #EFE7DA !important;
+}
+
+.app-shell--user .txn-detail-desc span:first-child {
+  color: #5C5564 !important;
+}
+
+.app-shell--user .txn-detail-desc span:last-child {
+  color: #1E1B24 !important;
+}
+
+.app-shell--user .autopay-icon-badge {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+}
+
+.app-shell--user .subscription-plan-summary {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  color: #1E1B24 !important;
+}
+
+/* Dark Theme Overrides */
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-info,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-info {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-info strong,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-info strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-quick-amount,
+html[data-theme='dark'] .user-modal-card .wallet-quick-amount {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-quick-amount:hover,
+html[data-theme='dark'] .user-modal-card .wallet-quick-amount:hover {
+  border-color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-quick-amount.is-active,
+html[data-theme='dark'] .user-modal-card .wallet-quick-amount.is-active {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-method-option,
+html[data-theme='dark'] .user-modal-card .withdraw-method-option {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-method-option:hover,
+html[data-theme='dark'] .user-modal-card .withdraw-method-option:hover {
+  border-color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-method-option.is-selected,
+html[data-theme='dark'] .user-modal-card .withdraw-method-option.is-selected {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: #FBBF24 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-method-left strong,
+html[data-theme='dark'] .app-shell--user .withdraw-method-left div,
+html[data-theme='dark'] .user-modal-card .withdraw-method-left strong,
+html[data-theme='dark'] .user-modal-card .withdraw-method-left div {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-method-check.is-visible,
+html[data-theme='dark'] .user-modal-card .withdraw-method-check.is-visible {
+  background: #F59E0B !important;
+  border-color: #F59E0B !important;
+  color: #1B1512 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-summary,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-summary {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-summary > div strong,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-summary > div strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-summary__total,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-summary__total {
+  border-top-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-withdraw-summary__total strong,
+html[data-theme='dark'] .user-modal-card .wallet-withdraw-summary__total strong {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-review-row,
+html[data-theme='dark'] .user-modal-card .withdraw-review-row {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-review-row strong,
+html[data-theme='dark'] .user-modal-card .withdraw-review-row strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-review-total,
+html[data-theme='dark'] .user-modal-card .withdraw-review-total {
+  border-top-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .withdraw-review-total strong,
+html[data-theme='dark'] .user-modal-card .withdraw-review-total strong {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row:hover,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row:hover {
+  background: #2A211B !important;
+  border-color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row__title,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row__title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row__meta,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row__meta {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row__amount,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row__amount {
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earning-row__arrow,
+html[data-theme='dark'] .user-modal-card .wallet-earning-row__arrow {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-detail-grid span,
+html[data-theme='dark'] .user-modal-card .wallet-detail-grid span {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-detail-grid strong,
+html[data-theme='dark'] .user-modal-card .wallet-detail-grid strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earnings-summary,
+html[data-theme='dark'] .user-modal-card .wallet-earnings-summary {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  border-radius: 10px !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earnings-summary span:first-child,
+html[data-theme='dark'] .user-modal-card .wallet-earnings-summary span:first-child {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-earnings-summary span:last-child,
+html[data-theme='dark'] .user-modal-card .wallet-earnings-summary span:last-child {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .wallet-txn-row:hover {
+  background: rgba(245, 158, 11, 0.10) !important;
+  cursor: pointer !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-row:hover {
+  background: rgba(245, 158, 11, 0.10) !important;
+  cursor: pointer !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-grid,
+html[data-theme='dark'] .user-modal-card .txn-detail-grid {
+  border-bottom: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-row,
+html[data-theme='dark'] .user-modal-card .txn-detail-row {
+  border-bottom: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-row strong,
+html[data-theme='dark'] .user-modal-card .txn-detail-row strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-amount,
+html[data-theme='dark'] .user-modal-card .txn-detail-amount {
+  border-bottom: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-desc span:first-child,
+html[data-theme='dark'] .user-modal-card .txn-detail-desc span:first-child {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .txn-detail-desc span:last-child,
+html[data-theme='dark'] .user-modal-card .txn-detail-desc span:last-child {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .autopay-card {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .autopay-card__type {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .autopay-card__detail span {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .autopay-card__detail strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .autopay-icon-badge {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .subscription-plan-summary {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .subscription-plan-summary__name {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .subscription-plan-summary__meta {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .subscription-plan-summary__price {
+  color: #FBBF24 !important;
+}
+
+
 

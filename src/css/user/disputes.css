@@ -1008,6 +1008,35 @@ html[data-theme='dark'] .user-disputes-page .disputes-filter-select {
   line-height: 1.35;
 }
 
+html[data-theme='dark'] .raise-dispute-type-card {
+  background: #231C18;
+  border-color: #3D3028;
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .raise-dispute-type-card:hover {
+  border-color: #FBBF24;
+}
+
+html[data-theme='dark'] .raise-dispute-type-card.is-selected {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: #FBBF24;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.22);
+}
+
+html[data-theme='dark'] .raise-dispute-type-icon {
+  background: rgba(255, 255, 255, 0.06);
+  color: #FBBF24;
+}
+
+html[data-theme='dark'] .raise-dispute-type-copy strong {
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .raise-dispute-type-copy small {
+  color: #C8B79B;
+}
+
 /* --------------------------------------------------------------------------
    Eligible Services Box
    -------------------------------------------------------------------------- */

@@ -399,7 +399,7 @@ export default function AppointmentDetails() {
         </div>
       </section>
     )}
-    {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
+    {rescheduleTarget && <RescheduleModal variant="user" appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>
 }

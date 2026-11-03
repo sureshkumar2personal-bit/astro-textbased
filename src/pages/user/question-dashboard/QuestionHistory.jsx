@@ -221,14 +221,14 @@ function HistoryDetailModal({ question, onClose }) {
         <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
             <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
-            <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>
+            <div className="qd-full-content-box">
               {question.question || EMPTY_DATE}
             </div>
           </div>
 
           <div>
             <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer&apos;s Answer</div>
-            <div style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>
+            <div className="qd-full-content-box">
               {question.answer || 'No answer was provided for this question.'}
             </div>
           </div>

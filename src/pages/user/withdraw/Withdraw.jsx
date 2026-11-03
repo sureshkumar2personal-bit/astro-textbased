@@ -228,12 +228,12 @@ export default function Withdraw() {
       {/* Review Modal */}
       {showReview && createPortal(
         <div className="modal-overlay user-modal-overlay" onClick={() => setShowReview(false)}>
-          <div className="modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(460px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><ArrowDownToLine size={20} /> Review Withdrawal</div>
               <button type="button" className="icon-btn" onClick={() => setShowReview(false)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <div className="withdraw-review">
                 <div className="withdraw-review-row">
                   <span>Amount</span>
@@ -253,7 +253,7 @@ export default function Withdraw() {
                 </div>
               </div>
             </div>
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setShowReview(false)}>Edit</button>
               <button type="button" className="btn btn-primary" disabled={processing} onClick={handleWithdraw}>
                 {processing ? 'Processing...' : 'Confirm & Send'}

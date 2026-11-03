@@ -88,6 +88,8 @@ export default function RescheduleModal({
   appointments = [],
   astrologerId,
   onClose,
+  variant,
+  className = '',
 }) {
   const { appointmentAvailabilityTemplates, actions } =
     useAppData()
@@ -189,11 +191,11 @@ export default function RescheduleModal({
 
   return createPortal(
     <div
-      className="apt-drawer-overlay apt-reschedule-overlay"
+      className={`apt-drawer-overlay apt-reschedule-overlay${variant === 'user' ? ' user-modal-overlay' : ''} ${className}`.trim()}
       onClick={onClose}
     >
       <div
-        className="apt-reschedule"
+        className={`apt-reschedule${variant === 'user' ? ' user-reschedule' : ''}`}
         role="dialog"
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}

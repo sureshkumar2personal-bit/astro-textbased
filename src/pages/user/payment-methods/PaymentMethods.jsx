@@ -175,14 +175,14 @@ export default function PaymentMethods() {
       {/* Delete Confirmation Modal */}
       {confirmDelete && createPortal(
         <div className="modal-overlay user-modal-overlay" onClick={() => setConfirmDelete(null)}>
-          <div className="modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 <Trash2 size={20} /> Remove Method
               </div>
               <button type="button" className="icon-btn" onClick={() => setConfirmDelete(null)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
                 Are you sure you want to remove <strong>{maskMethodDetail(confirmDelete)}</strong>?
                 {confirmDelete.isDefault && (
@@ -192,7 +192,7 @@ export default function PaymentMethods() {
                 )}
               </p>
             </div>
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setConfirmDelete(null)}>Cancel</button>
               <button type="button" className="btn btn-primary" style={{ background: 'var(--danger, #b91c1c)' }} onClick={() => handleDelete(confirmDelete.id)}>
                 <Trash2 size={16} /> Remove
