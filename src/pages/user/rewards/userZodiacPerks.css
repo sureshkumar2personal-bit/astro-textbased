@@ -1513,6 +1513,9 @@
   gap: 20px;
   width: 100%;
   box-sizing: border-box;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .astrotalk-section-head {

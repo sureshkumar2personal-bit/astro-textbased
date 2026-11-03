@@ -1662,7 +1662,6 @@ html[data-theme='dark'] .app-shell--user .sidebar-badge-count {
 }
 
 /* User Rewards & Celestial Zodiac Perks Dark Mode */
-html[data-theme='dark'] .app-shell--user .celestial-hub,
 html[data-theme='dark'] .app-shell--user .celestial-cell,
 html[data-theme='dark'] .app-shell--user .celestial-part,
 html[data-theme='dark'] .app-shell--user .celestial-part--remedies,
@@ -2828,16 +2827,21 @@ html[data-theme='dark'] .app-shell--user .horoscope-notes-card p {
 }
 
 /* Astrotalk Zodiac Section must be transparent in all themes to eliminate unwanted white space */
+.app-shell--user .celestial-hub,
+html[data-theme='light'] .app-shell--user .celestial-hub,
+html[data-theme='dark'] .app-shell--user .celestial-hub,
 .app-shell--user .astrotalk-zodiac-section,
 html[data-theme='light'] .app-shell--user .astrotalk-zodiac-section,
-html[data-theme='dark'] .app-shell--user .astrotalk-zodiac-section {
+html[data-theme='dark'] .app-shell--user .astrotalk-zodiac-section,
+.app-shell--user section.astrotalk-zodiac-section {
   background: transparent !important;
   border: none !important;
+  outline: none !important;
   box-shadow: none !important;
+  padding: 0 !important;
 }
 
 /* Celestial Hub & Zodiac Bento Grids (Light Theme Only) */
-html[data-theme='light'] .app-shell--user .celestial-hub,
 html[data-theme='light'] .app-shell--user .celestial-bento-cell,
 html[data-theme='light'] .app-shell--user .celestial-studio-card,
 html[data-theme='light'] .app-shell--user .celestial-spec-studio-panel {
@@ -2942,7 +2946,6 @@ html[data-theme='light'] .app-shell--user .celestial-spec-card.is-selected {
 }
 
 /* Celestial Hub & Zodiac Bento Grids (Dark Theme Overrides — No White Spaces) */
-html[data-theme='dark'] .app-shell--user .celestial-hub,
 html[data-theme='dark'] .app-shell--user .celestial-bento-cell,
 html[data-theme='dark'] .app-shell--user .celestial-studio-card,
 html[data-theme='dark'] .app-shell--user .celestial-spec-studio-panel {
