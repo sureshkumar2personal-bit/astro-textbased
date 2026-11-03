@@ -2246,8 +2246,12 @@ html[data-theme='dark'] .app-shell--user .user-appointment-card__time {
   font-weight: 700 !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__footer {
-  border-top: 1px solid rgba(245, 158, 11, 0.18) !important;
+/* User Appointment Card Footer (both spans above the horizontal line) */
+.app-shell--user .user-appointment-card__footer,
+.user-appointment-history .user-appointment-card__footer {
+  border-top: none !important;
+  padding-top: 2px !important;
+  padding-bottom: 8px !important;
 }
 
 html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:first-child {
@@ -2259,31 +2263,126 @@ html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:las
   color: #C8B79B !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline {
+/* User Appointment Card Action Options (Border removed from buttons, horizontal line above actions, options centered) */
+.app-shell--user .user-appointment-card__actions,
+.app-shell--user .user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions,
+.app-shell--user .added-compact-appointment-card__actions {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 8px 0 2px !important;
+  border-top: 1px solid rgba(217, 119, 6, 0.16) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions,
+html[data-theme='dark'] .app-shell--user .user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions {
+  border-top: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+
+.app-shell--user .user-appointment-card__actions .btn,
+.app-shell--user .user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions .btn,
+.app-shell--user .added-compact-appointment-card__actions .btn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: auto !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   background: transparent !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn,
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn-outline {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: #FBBF24 !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline:hover {
-  background: rgba(245, 158, 11, 0.15) !important;
-  border-color: #F59E0B !important;
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn:hover,
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline:hover,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn:hover,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn-outline:hover {
+  background: rgba(245, 158, 11, 0.14) !important;
   color: #FFFDF9 !important;
+  border: none !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger {
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn-danger {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: #F87171 !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger:hover {
-  background: rgba(239, 68, 68, 0.22) !important;
-  border-color: #EF4444 !important;
-  color: #FFFFFF !important;
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger:hover,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__actions .btn-danger:hover {
+  background: rgba(239, 68, 68, 0.14) !important;
+  color: #FCA5A5 !important;
+  border: none !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn,
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn-outline,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn-outline {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #C2410C !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn:hover,
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn-outline:hover,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn:hover,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn-outline:hover {
+  background: rgba(217, 119, 6, 0.1) !important;
+  color: #9A3412 !important;
+  border: none !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn-danger,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn-danger {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  color: #DC2626 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__actions .btn-danger:hover,
+html[data-theme='light'] .app-shell--user .added-compact-appointment-card__actions .btn-danger:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #B91C1C !important;
+  border: none !important;
 }
 
 /* User Appointment Expanded Details in Dark Mode */
+html[data-theme='dark'] .app-shell--user .user-appointment-card__extended,
+html[data-theme='dark'] .app-shell--user .added-compact-appointment-card__extended {
+  border-top-color: rgba(245, 158, 11, 0.18) !important;
+}
+
 html[data-theme='dark'] .app-shell--user .user-appointment-expanded__grid {
   background: #1A120B !important;
   border: 1px solid rgba(245, 158, 11, 0.18) !important;
