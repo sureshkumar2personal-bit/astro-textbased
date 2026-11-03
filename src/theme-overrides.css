@@ -25,10 +25,10 @@ html[data-theme='dark'] [class*='-dropdown'] {
 html[data-theme='dark'] .card,
 html[data-theme='dark'] .modal-card,
 html[data-theme='dark'] .user-modal-card,
-html[data-theme='dark'] [class*='-card'],
-html[data-theme='dark'] [class*='-modal'],
-html[data-theme='dark'] [class*='-popover'],
-html[data-theme='dark'] [class*='-dropdown'] {
+html[data-theme='dark'] [class*='-card']:not([class*='-card-']):not([class*='-card_']):not([class*='-card__']),
+html[data-theme='dark'] [class*='-modal']:not([class*='-modal-']):not([class*='-modal_']):not([class*='-modal__']),
+html[data-theme='dark'] [class*='-popover']:not([class*='-popover-']):not([class*='-popover_']),
+html[data-theme='dark'] [class*='-dropdown']:not([class*='-dropdown-']):not([class*='-dropdown_']) {
   background-color: var(--surface-strong) !important;
   border-color: var(--surface-border) !important;
 }

@@ -2034,6 +2034,39 @@ html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-name {
   color: #FFFDF9 !important;
 }
 
+/* Celestial Astro Dropdown Inner Elements must be transparent */
+.app-shell--user .celestial-astro-dropdown-list,
+.app-shell--user .celestial-astro-dropdown-main,
+.app-shell--user .celestial-astro-dropdown-name-row,
+.app-shell--user .celestial-astro-dropdown-name,
+.app-shell--user .celestial-astro-dropdown-rating,
+.app-shell--user .celestial-astro-dropdown-sub-row,
+.app-shell--user .celestial-astro-dropdown-spec,
+.app-shell--user .celestial-astro-dropdown-dot,
+.app-shell--user .celestial-astro-dropdown-check,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-list,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-main,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-name-row,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-name,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-rating,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-sub-row,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-spec,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-dot,
+html[data-theme='dark'] .app-shell--user .celestial-astro-dropdown-check,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-list,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-main,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-name-row,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-name,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-rating,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-sub-row,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-spec,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-dot,
+html[data-theme='light'] .app-shell--user .celestial-astro-dropdown-check {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
 html[data-theme='dark'] .app-shell--user .celestial-pillar-card:hover {
   background: #2A1D15 !important;
   border-color: rgba(245, 158, 11, 0.45) !important;
@@ -2839,6 +2872,29 @@ html[data-theme='dark'] .app-shell--user .astrotalk-zodiac-section,
   outline: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+}
+
+/* Card internal components must have transparent background */
+.app-shell--user .astrotalk-card-top,
+.app-shell--user .astrotalk-card-heading,
+.app-shell--user .astrotalk-card-meta,
+.app-shell--user .astrotalk-card-snippet,
+.app-shell--user .astrotalk-card-footer,
+.app-shell--user .celestial-spec-card-body,
+html[data-theme='dark'] .app-shell--user .astrotalk-card-top,
+html[data-theme='dark'] .app-shell--user .astrotalk-card-heading,
+html[data-theme='dark'] .app-shell--user .astrotalk-card-meta,
+html[data-theme='dark'] .app-shell--user .astrotalk-card-snippet,
+html[data-theme='dark'] .app-shell--user .astrotalk-card-footer,
+html[data-theme='dark'] .app-shell--user .celestial-spec-card-body,
+html[data-theme='light'] .app-shell--user .astrotalk-card-top,
+html[data-theme='light'] .app-shell--user .astrotalk-card-heading,
+html[data-theme='light'] .app-shell--user .astrotalk-card-meta,
+html[data-theme='light'] .app-shell--user .astrotalk-card-snippet,
+html[data-theme='light'] .app-shell--user .astrotalk-card-footer,
+html[data-theme='light'] .app-shell--user .celestial-spec-card-body {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Celestial Hub & Zodiac Bento Grids (Light Theme Only) */
