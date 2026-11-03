@@ -437,7 +437,8 @@
 .user-live-card__astro strong { font-size: 13px; }
 .user-live-card__astro small { color: var(--muted); font-size: 11px; }
 
-.user-live-avatar { display: inline-grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #8b5cf6); color: #fff; font-size: 12px; font-weight: 800; }
+.user-live-avatar { display: inline-grid; width: 38px; height: 38px; flex: 0 0 auto; place-items: center; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--primary), #8b5cf6); color: #fff; font-size: 12px; font-weight: 800; }
+.user-live-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .user-live-card__meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; color: var(--text-secondary); font-size: 11px; }
 .user-live-card__meta span { display: inline-flex; align-items: center; gap: 5px; }
@@ -459,7 +460,8 @@
 .user-live-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 0; border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; font-weight: 700; font-size: 13px; }
 .user-live-back:hover { color: var(--primary); }
 .user-live-room__identity { display: flex; align-items: center; gap: 10px; }
-.user-live-room__avatar { display: inline-grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #8b5cf6); color: #fff; font-size: 13px; font-weight: 800; }
+.user-live-room__avatar { display: inline-grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--primary), #8b5cf6); color: #fff; font-size: 13px; font-weight: 800; }
+.user-live-room__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .user-live-room__identity div { display: grid; gap: 2px; }
 .user-live-room__identity strong { font-size: 14px; }
 .user-live-room__identity small { color: var(--muted); font-size: 11px; }

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 
 import { useNavigate } from 'react-router-dom'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 
 
 const subscribedAstrologers = [
@@ -141,6 +142,7 @@ function SubscriptionCard({
   onClick,
 }) {
 
+  const photo = astrologer.image || astrologer.photo || getAstrologerPhoto(astrologer.name) || getAstrologerPhoto(astrologer.id)
   const initials = astrologer.name
     .replace('Dr. ', '')
     .split(' ')
@@ -163,10 +165,10 @@ function SubscriptionCard({
 
         <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] text-xl font-bold text-white">
 
-          {astrologer.image ? (
+          {photo ? (
 
             <img
-              src={astrologer.image}
+              src={photo}
               alt={astrologer.name}
               className="h-full w-full object-cover"
             />

@@ -27,6 +27,7 @@ import './userlive.css'
 import Card from '../../../components/ui/Card.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import { mockAstrologers } from '../../../data/notificationData.js'
+import { getAstrologerPhoto } from '../../../data/astrologerPhotos.js'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { sessionAudiences } from '../../../state/AppDataContext.jsx'
@@ -213,7 +214,13 @@ function UserLiveSessionCard({ session, access }) {
       <h3 className="user-live-card__title">{session.title}</h3>
 
       <div className="user-live-card__astro">
-        <span className="user-live-avatar">{initials(astrologerNameFor(astrologerId))}</span>
+        <span className="user-live-avatar">
+          {getAstrologerPhoto(astrologerId || astrologerNameFor(astrologerId)) ? (
+            <img src={getAstrologerPhoto(astrologerId || astrologerNameFor(astrologerId))} alt="" />
+          ) : (
+            initials(astrologerNameFor(astrologerId))
+          )}
+        </span>
         <span>
           <strong>{astrologerNameFor(astrologerId)}</strong>
           <small>{session.category}</small>
@@ -296,7 +303,11 @@ function UserLiveSessionRow({ session, access }) {
     >
       <div className="user-live-row__main">
         <span className="user-live-avatar user-live-row__avatar">
-          {initials(astrologerNameFor(astrologerId))}
+          {getAstrologerPhoto(astrologerId || astrologerNameFor(astrologerId)) ? (
+            <img src={getAstrologerPhoto(astrologerId || astrologerNameFor(astrologerId))} alt="" />
+          ) : (
+            initials(astrologerNameFor(astrologerId))
+          )}
         </span>
         <div className="user-live-row__content">
           <div className="user-live-row__badges">
@@ -419,7 +430,13 @@ function UserLiveRoom({ session, onBack }) {
           <ChevronLeft size={16} /> Live Sessions
         </button>
         <div className="user-live-room__identity">
-          <span className="user-live-room__avatar">{initials(astrologerName)}</span>
+          <span className="user-live-room__avatar">
+            {getAstrologerPhoto(session?.astrologerId || astrologerName) ? (
+              <img src={getAstrologerPhoto(session?.astrologerId || astrologerName)} alt="" />
+            ) : (
+              initials(astrologerName)
+            )}
+          </span>
           <div>
             <strong>{astrologerName}</strong>
             <small>{session.category}</small>

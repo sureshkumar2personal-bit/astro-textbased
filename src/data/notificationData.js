@@ -1,3 +1,5 @@
+import { getAstrologerPhoto } from './astrologerPhotos.js'
+
 export const NOTIFICATION_TABS = [
   { key: 'all', label: 'All' },
   { key: 'unread', label: 'Unread' },
@@ -46,7 +48,11 @@ const suggestedAstrologerProfiles = [
   { id: 'astrologer-24', name: 'Gautam Reddy', specialization: 'Vedic Astrology', type: 'Finance, Property, Business', experience: '16 years', availability: 'Online', languages: ['English', 'Telugu', 'Hindi'], rating: '4.9 / 5', reviews: '4,120 reviews', bio: 'Gautam offers experienced Vedic astrology guidance for finance, property, and business questions.', followers: 6080, subscribers: 410 },
   { id: 'astrologer-25', name: 'Neha Sood', specialization: 'Tarot Reading', type: 'Self Discovery, Love, Career', experience: '8 years', availability: 'Offline', languages: ['English', 'Hindi'], rating: '4.7 / 5', reviews: '1,520 reviews', bio: 'Neha uses tarot to create a calm space for self-discovery, love, and career conversations.', followers: 2270, subscribers: 150 },
   { id: 'astrologer-26', name: 'Suresh Pillai', specialization: 'Astro Remedies', type: 'Remedies, Health, Peace of Mind', experience: '18 years', availability: 'Online', languages: ['English', 'Tamil', 'Malayalam'], rating: '4.9 / 5', reviews: '4,680 reviews', bio: 'Suresh recommends traditional astro remedies to support health, balance, and peace of mind.', followers: 7020, subscribers: 460 },
-]
+].map((astrologer) => ({
+  ...astrologer,
+  photo: getAstrologerPhoto(astrologer),
+  profileImage: getAstrologerPhoto(astrologer),
+}))
 
 export const mockAstrologers = [
   {
@@ -264,7 +270,11 @@ export const mockAstrologers = [
     subscribers: 190,
   },
   ...suggestedAstrologerProfiles,
-]
+].map((astrologer) => ({
+  ...astrologer,
+  photo: getAstrologerPhoto(astrologer),
+  profileImage: getAstrologerPhoto(astrologer),
+}))
 
 // The subscribed list is intentionally separate from the user's followed IDs.
 // Additional catalog entries can be followed without appearing in this list.
@@ -643,7 +653,10 @@ export const mockAppointments = [
     topic: 'Marriage',
     status: 'Pending',
   }),
-]
+].map((apt) => ({
+  ...apt,
+  profileImage: apt.profileImage || getAstrologerPhoto(apt.astrologerId || apt.astrologer),
+}))
 
 // ---- Historical appointment records --------------------------------------
 // These records are independent of the Schedule calendar. They represent

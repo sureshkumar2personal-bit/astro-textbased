@@ -15,6 +15,7 @@ import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { getInstantConsultations, subscribeToInstantConsultations } from '../../utils/instantConsultation.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import './instantConsultation.css'
 
 const initials = (name = '') =>
@@ -248,7 +249,17 @@ export default function InstantConsultation() {
               <div className="user-profile-consultation-modal__content">
                 <div className="user-profile-consultation-modal__identity-row">
                   <div className="user-profile-consultation-modal__person">
-                    <span>{initials(selectedInstantConsultation.astrologerName || 'Astrologer')}</span>
+                    <span style={{ overflow: 'hidden' }}>
+                      {getAstrologerPhoto(selectedInstantConsultation.astrologerId || selectedInstantConsultation.astrologerName) ? (
+                        <img
+                          src={getAstrologerPhoto(selectedInstantConsultation.astrologerId || selectedInstantConsultation.astrologerName)}
+                          alt=""
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                      ) : (
+                        initials(selectedInstantConsultation.astrologerName || 'Astrologer')
+                      )}
+                    </span>
                     <div>
                       <strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong>
                       <small>ASTROLOGER</small>

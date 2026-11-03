@@ -624,7 +624,13 @@ export default function AstrologerProfile() {
         <Card className="social-profile__header">
           <div className="social-profile__cover" />
           <div className="social-profile__identity">
-            <div className="social-profile__avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div>
+            <div className="social-profile__avatar">
+              {astrologerPhoto ? (
+                <img src={astrologerPhoto} alt={`${astrologer.name} profile`} />
+              ) : (
+                astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+              )}
+            </div>
             <div className="social-profile__identity-copy">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="social-profile__name">{astrologer.name}</h1>
@@ -931,7 +937,13 @@ export default function AstrologerProfile() {
                       return (
                         <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}>
                           <div className="astrologer-content-card__top">
-                            <span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span>
+                            <span className="astrologer-content-card__avatar">
+                              {astrologerPhoto ? (
+                                <img src={astrologerPhoto} alt="" />
+                              ) : (
+                                astrologer.name.slice(0, 1)
+                              )}
+                            </span>
                             <span>
                               <b>{astrologer.name}</b>
                               <small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
@@ -1170,7 +1182,13 @@ export default function AstrologerProfile() {
                     savedPosts.map((post) => (
                       <article className={`astrologer-post-card astrologer-post-card--${post.tone}`} key={post.id}>
                         <div className="astrologer-content-card__top">
-                          <span className="astrologer-content-card__avatar">{astrologer.name.slice(0, 1)}</span>
+                          <span className="astrologer-content-card__avatar">
+                            {astrologerPhoto ? (
+                              <img src={astrologerPhoto} alt="" />
+                            ) : (
+                              astrologer.name.slice(0, 1)
+                            )}
+                          </span>
                           <span>
                             <b>{astrologer.name}</b>
                             <small>{new Date(post.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small>
@@ -1305,7 +1323,20 @@ export default function AstrologerProfile() {
         <div className="modal-overlay user-modal-overlay" onClick={() => setBookingOpen(false)}>
           <div className={`modal-card user-modal-card appointment-booking-modal${bookingStep === 'details' ? ' appointment-booking-modal--details' : ''}${bookingStep === 'review' ? ' appointment-booking-modal--review' : ''}${bookingStep === 'payment' ? ' appointment-booking-modal--payment' : ''}${bookingStep === 'success' ? ' appointment-booking-modal--success' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="modal-card__header user-modal-card__header appointment-booking-modal__header flex items-start justify-between gap-4">
-              <div className="appointment-booking-heading"><div className="appointment-booking-avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><div><div className="section-title" style={{ marginBottom: 3 }}>{bookingStep === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div><strong>{astrologer.name}</strong><span>{astrologer.specialization} · {APPOINTMENT_TYPE}</span></div></div>
+              <div className="appointment-booking-heading">
+                <div className="appointment-booking-avatar">
+                  {astrologerPhoto ? (
+                    <img src={astrologerPhoto} alt={`${astrologer.name} profile`} />
+                  ) : (
+                    astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+                  )}
+                </div>
+                <div>
+                  <div className="section-title" style={{ marginBottom: 3 }}>{bookingStep === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div>
+                  <strong>{astrologer.name}</strong>
+                  <span>{astrologer.specialization} · {APPOINTMENT_TYPE}</span>
+                </div>
+              </div>
               <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={() => setBookingOpen(false)}>
                 <X size={16} />
               </button>

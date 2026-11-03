@@ -1,4 +1,7 @@
 import { mockAstrologers } from './notificationData.js'
+import { REFERENCE_PROFILE_PHOTOS, getAstrologerPhoto } from './astrologerPhotos.js'
+
+export { REFERENCE_PROFILE_PHOTOS, getAstrologerPhoto }
 
 const CONSULTATION_OVERRIDES = {
   'astrologer-demo': {
@@ -286,15 +289,6 @@ const ASTROLOGER_PROFILE_PHOTOS = {
   'astrologer-26': 'https://randomuser.me/api/portraits/men/45.jpg',
 }
 
-const REFERENCE_PROFILE_PHOTOS = {
-  'Dr. Rani': '/astrologer-photos/reference/dr-rani.png',
-  'Acharya Meena': '/astrologer-photos/reference/acharya-meena.png',
-  'Arjun Sharma': '/astrologer-photos/reference/arjun-sharma.png',
-  'Nandini Kapoor': '/astrologer-photos/reference/nandini-kapoor.png',
-  'Dev Malhotra': '/astrologer-photos/reference/dev-malhotra.png',
-  'Priya Sharma': '/astrologer-photos/reference/priya-sharma.png',
-}
-
 export const consultationAstrologers = mockAstrologers.map((astrologer, index) => {
   const override = CONSULTATION_OVERRIDES[astrologer.id] || {}
   const palette = resolvePalette(hashString(astrologer.id || index))
@@ -304,6 +298,11 @@ export const consultationAstrologers = mockAstrologers.map((astrologer, index) =
   const callRate = override.callRate ?? Math.max(chatRate + 4, 22)
   const ratingValue = Number(String(astrologer.rating || '4.7').split('/')[0].trim()) || 4.7
   const reviewCount = Number(String(astrologer.reviews || '0').replace(/[^0-9]/g, '')) || 0
+  const photo = getAstrologerPhoto(astrologer)
+    || (astrologer.name === 'Rohit Bansal'
+      ? 'https://randomuser.me/api/portraits/men/34.jpg'
+      : ASTROLOGER_PROFILE_PHOTOS[astrologer.id])
+    || avatarDataUri(astrologer.name, palette[0], palette[1])
 
   return {
     ...astrologer,
@@ -315,11 +314,8 @@ export const consultationAstrologers = mockAstrologers.map((astrologer, index) =
     tagline: override.tagline || astrologer.bio,
     ratingValue,
     reviewCount,
-    profileImage: REFERENCE_PROFILE_PHOTOS[astrologer.name]
-      || (astrologer.name === 'Rohit Bansal'
-        ? 'https://randomuser.me/api/portraits/men/34.jpg'
-        : ASTROLOGER_PROFILE_PHOTOS[astrologer.id])
-      || avatarDataUri(astrologer.name, palette[0], palette[1]),
+    photo,
+    profileImage: photo,
     horoscopeAttachment: astrologer.horoscopeAttachment || astrologer.horoscope || null,
   }
 })

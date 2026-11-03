@@ -7,6 +7,7 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import { PROFILE_FOLLOWERS, PROFILE_SUBSCRIBERS, accountHandle } from '../data/audienceMembers.js'
 import { mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { consultationAstrologers as consultationAstrologersData } from '../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
@@ -481,7 +482,7 @@ export default function Profile() {
               </Card>)}</div>
             </> : <>
               <div className="profile-consultation-history__heading"><div><span className="profile-kicker">{consultationTab === 'chat' ? 'CHAT HISTORY' : 'AUDIO CALL HISTORY'}</span><h2>{consultationTab === 'chat' ? 'Your Chats' : 'Your Calls'}</h2></div>{consultationTab === 'chat' ? <MessageCircle size={20} /> : <Headphones size={20} />}</div>
-              {consultationAstrologers.length ? <div className="profile-astrologer-history-list">{consultationAstrologers.map((entry) => <button type="button" className="profile-astrologer-history-row" key={entry.id} onClick={() => setSelectedConsultationAstrologerId(entry.id)}><span className="profile-astrologer-history-avatar">{initials(entry.name)}</span><span><strong>{entry.name}</strong><small>{entry.sessions.length} {consultationTab === 'chat' ? 'chat' : 'audio call'} session{entry.sessions.length === 1 ? '' : 's'} · Last session {new Date(entry.latest).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span><ArrowLeft size={16} className="profile-history-chevron" /></button>)}</div> : <Card className="profile-appointment-empty">{consultationTab === 'chat' ? <MessageCircle size={22} /> : <Headphones size={22} />}<h3>No {consultationTab === 'chat' ? 'chat' : 'call'} history yet</h3><p>Your astrologer {consultationTab === 'chat' ? 'chat' : 'call'} history will appear here.</p></Card>}
+              {consultationAstrologers.length ? <div className="profile-astrologer-history-list">{consultationAstrologers.map((entry) => <button type="button" className="profile-astrologer-history-row" key={entry.id} onClick={() => setSelectedConsultationAstrologerId(entry.id)}><span className="profile-astrologer-history-avatar">{getAstrologerPhoto(entry) ? <img src={getAstrologerPhoto(entry)} alt="" /> : initials(entry.name)}</span><span><strong>{entry.name}</strong><small>{entry.sessions.length} {consultationTab === 'chat' ? 'chat' : 'audio call'} session{entry.sessions.length === 1 ? '' : 's'} · Last session {new Date(entry.latest).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</small></span><ArrowLeft size={16} className="profile-history-chevron" /></button>)}</div> : <Card className="profile-appointment-empty">{consultationTab === 'chat' ? <MessageCircle size={22} /> : <Headphones size={22} />}<h3>No {consultationTab === 'chat' ? 'chat' : 'call'} history yet</h3><p>Your astrologer {consultationTab === 'chat' ? 'chat' : 'call'} history will appear here.</p></Card>}
             </>}
           </section>}
 

@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useSafeBack } from '../../../utils/useSafeBack.js'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { mockAstrologers } from '../../../data/notificationData.js'
+import { getAstrologerPhoto } from '../../../data/astrologerPhotos.js'
 import {
   APPOINTMENT_CONFIG,
   BOOKING_WINDOW_END,
@@ -170,7 +171,13 @@ export default function BookAppointmentSlots() {
       <section className="book-slots-astrologer">
         <div className="book-slots-astrologer__main">
           <div className="book-slots-avatar-wrap">
-            <div className="book-slots-avatar" aria-hidden="true">{initials(astrologer.name)}</div>
+            <div className="book-slots-avatar" aria-hidden="true">
+              {getAstrologerPhoto(astrologer) ? (
+                <img src={getAstrologerPhoto(astrologer)} alt={`${astrologer.name} profile`} />
+              ) : (
+                initials(astrologer.name)
+              )}
+            </div>
             <span className="book-slots-availability-dot" title="Available now" />
           </div>
           <div className="book-slots-astrologer__copy">

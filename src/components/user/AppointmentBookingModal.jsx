@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, CircleAlert, Clock3, Copy, PhoneCall, Sparkles, WalletCards, X } from 'lucide-react'
 import { BOOKING_WINDOW_END, MOCK_FULL_DATES, MOCK_SEPTEMBER_AVAILABILITY } from '../../pages/user/appointments/bookingAstrologerData.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 
 const PRICE = 499
 const TYPE = 'Audio Call'
@@ -199,7 +200,20 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
     <div className="modal-overlay user-modal-overlay" onClick={onClose}>
       <div className={`modal-card user-modal-card appointment-booking-modal appointment-booking-modal--${step}`} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header user-modal-card__header appointment-booking-modal__header flex items-start justify-between gap-4">
-          <div className="appointment-booking-heading"><div className="appointment-booking-avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><div><div className="section-title" style={{ marginBottom: 3 }}>{step === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div><strong>{astrologer.name}</strong><span>{astrologer.specialization} · {TYPE}</span></div></div>
+          <div className="appointment-booking-heading">
+            <div className="appointment-booking-avatar">
+              {getAstrologerPhoto(astrologer) ? (
+                <img src={getAstrologerPhoto(astrologer)} alt={`${astrologer.name} profile`} />
+              ) : (
+                astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+              )}
+            </div>
+            <div>
+              <div className="section-title" style={{ marginBottom: 3 }}>{step === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div>
+              <strong>{astrologer.name}</strong>
+              <span>{astrologer.specialization} · {TYPE}</span>
+            </div>
+          </div>
           <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-card__content user-modal-card__content">
