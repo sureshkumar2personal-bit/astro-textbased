@@ -3577,7 +3577,7 @@ html[data-theme='light'] .app-shell--user .celestial-spec-studio-panel {
 
 html[data-theme='light'] .app-shell--user .astrotalk-zodiac-card {
   background: #FFFFFF !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  border: 1.5px solid #EFE7DA !important;
   box-shadow: 0 4px 18px rgba(180, 135, 75, 0.08) !important;
   color: #1E1B24 !important;
 }
@@ -3592,7 +3592,7 @@ html[data-theme='light'] .app-shell--user .celestial-pillar-card,
 html[data-theme='light'] .app-shell--user .celestial-token-card,
 html[data-theme='light'] .app-shell--user .celestial-content-box {
   background: #FAF7F2 !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  border: 1px solid #EFE7DA !important;
   color: #1E1B24 !important;
 }
 
@@ -3800,13 +3800,13 @@ html[data-theme='dark'] .app-shell--user .celestial-spec-card {
 
 html[data-theme='light'] .app-shell--user .user-appointment-history .appointment-history-recommendation {
   background: linear-gradient(105deg, #FFFDF8 0%, #FDF4E6 60%, #FCEACF 100%) !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  border: 1px solid rgba(217, 119, 6, 0.28) !important;
   box-shadow: 0 4px 20px rgba(180, 135, 75, 0.08) !important;
 }
 
 html[data-theme='light'] .app-shell--user .user-appointment-history .apt-scheduling-calendar--history {
   background: #FFFFFF !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  border: 1px solid #EFE7DA !important;
   box-shadow: 0 4px 20px rgba(180, 135, 75, 0.08) !important;
 }
 
@@ -3819,13 +3819,13 @@ html[data-theme='light'] .app-shell--user .user-appointment-history .apt-history
 /* User Wallet Overview Cards Light Overrides */
 html[data-theme='light'] .app-shell--user .wallet-stat-card--primary {
   background: linear-gradient(135deg, #FFFDF8 0%, #FDF4E6 60%, #FCEACF 100%) !important;
-  border: 1px solid rgba(217, 119, 6, 0.22) !important;
+  border-color: rgba(217, 119, 6, 0.3) !important;
   box-shadow: 0 4px 18px rgba(180, 135, 75, 0.08) !important;
 }
 
 html[data-theme='light'] .app-shell--user .wallet-stat-card {
   background: #FFFFFF !important;
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
+  border: 1px solid #EFE7DA !important;
   box-shadow: 0 4px 18px rgba(180, 135, 75, 0.07) !important;
 }
 
@@ -3862,137 +3862,5 @@ html[data-theme='dark'] .textarea-box.is-invalid {
   background-color: rgba(239, 68, 68, 0.12) !important;
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
 }
-
-/* ==========================================================================
-   User Portal — Light Theme Lean Card Borders (1px solid light color, without thin)
-   Strictly isolated to html[data-theme='light'] .app-shell--user.
-   0% regression to Astrologer or Editor portals.
-   ========================================================================== */
-
-/* Universal Card Borders in Light Theme: 1px solid radiant sandalwood tint */
-html[data-theme='light'] .app-shell--user .card:not(.atonement-filter-card):not(.section):not(.card-container):not(.card-grid):not(.track-questions-grid),
-html[data-theme='light'] .app-shell--user .card-hover,
-html[data-theme='light'] .app-shell--user .user-modal-card,
-html[data-theme='light'] .app-shell--user .action-card,
-html[data-theme='light'] .app-shell--user .action-card--compact,
-html[data-theme='light'] .app-shell--user .explore-astrologer-card,
-html[data-theme='light'] .app-shell--user .book-appointment-card,
-html[data-theme='light'] .app-shell--user .user-appointment-card,
-html[data-theme='light'] .app-shell--user .added-compact-appointment-card,
-html[data-theme='light'] .app-shell--user .apt-history-item,
-html[data-theme='light'] .app-shell--user .instant-consult-history-row,
-html[data-theme='light'] .app-shell--user .rem-card,
-html[data-theme='light'] .app-shell--user .user-live-card,
-html[data-theme='light'] .app-shell--user .astrotalk-zodiac-card,
-html[data-theme='light'] .app-shell--user .reward-astrologer-card,
-html[data-theme='light'] .app-shell--user .reward-appointment-card,
-html[data-theme='light'] .app-shell--user .reward-content-card,
-html[data-theme='light'] .app-shell--user .reward-benefit-card,
-html[data-theme='light'] .app-shell--user .eligible-service-card,
-html[data-theme='light'] .app-shell--user .dispute-card-item,
-html[data-theme='light'] .app-shell--user .autopay-card,
-html[data-theme='light'] .app-shell--user .wallet-stat-card,
-html[data-theme='light'] .app-shell--user .stat-card,
-html[data-theme='light'] .app-shell--user .user-activity-card,
-html[data-theme='light'] .app-shell--user .txn-history-card,
-html[data-theme='light'] .app-shell--user .wallet-txn-card,
-html[data-theme='light'] .app-shell--user .pm-card,
-html[data-theme='light'] .app-shell--user .pm-form-card,
-html[data-theme='light'] .app-shell--user .user-incoming-card,
-html[data-theme='light'] .app-shell--user .horoscope-selector-card,
-html[data-theme='light'] .app-shell--user .horoscope-birth-card,
-html[data-theme='light'] .app-shell--user .horoscope-star-card,
-html[data-theme='light'] .app-shell--user .horoscope-planets-card,
-html[data-theme='light'] .app-shell--user .horoscope-notes-card,
-html[data-theme='light'] .app-shell--user .appointment-history-recommendation,
-html[data-theme='light'] .app-shell--user .apt-scheduling-calendar--history,
-html[data-theme='light'] .app-shell--user .celestial-bento-cell,
-html[data-theme='light'] .app-shell--user .celestial-studio-card,
-html[data-theme='light'] .app-shell--user .celestial-spec-card,
-html[data-theme='light'] .app-shell--user .celestial-pillar-card,
-html[data-theme='light'] .app-shell--user .celestial-token-card,
-html[data-theme='light'] .app-shell--user .celestial-content-box,
-html[data-theme='light'] .app-shell--user .astro-about-card,
-html[data-theme='light'] .app-shell--user .astro-services-card,
-html[data-theme='light'] .app-shell--user .astro-reviews-card,
-html[data-theme='light'] .app-shell--user .astro-booking-card,
-html[data-theme='light'] .app-shell--user .astro-stat-card,
-html[data-theme='light'] .app-shell--user .astro-hero-card,
-html[data-theme='light'] .app-shell--user [class*='-card']:not([class*='-card-']):not([class*='-card_']):not([class*='-card__']):not(.atonement-filter-card):not(.section):not([class*='-icon']):not([class*='-title']):not([class*='-desc']):not([class*='-body']):not([class*='-ribbon']):not([class*='-slots']):not([class*='-profile']):not([class*='-name']):not([class*='-spec']):not([class*='-rating']):not([class*='-action']):not([class*='-badge']):not([class*='-meta']):not([class*='-footer']):not([class*='-top']):not([class*='-detail']):not([class*='-details']):not([class*='-grid']):not([class*='-list']):not([class*='-heading']):not([class*='-copy']):not([class*='-header']):not([class*='-table']) {
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
-  box-shadow: 0 4px 16px rgba(180, 135, 75, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-}
-
-/* Card Hover Elevation in Light Devotional Theme */
-html[data-theme='light'] .app-shell--user .action-card--compact:hover,
-html[data-theme='light'] .app-shell--user .explore-astrologer-card:hover,
-html[data-theme='light'] .app-shell--user .book-appointment-card:hover,
-html[data-theme='light'] .app-shell--user .user-appointment-card:hover,
-html[data-theme='light'] .app-shell--user .apt-history-item:hover,
-html[data-theme='light'] .app-shell--user .instant-consult-history-row:hover,
-html[data-theme='light'] .app-shell--user .rem-card:hover,
-html[data-theme='light'] .app-shell--user .user-live-card:hover,
-html[data-theme='light'] .app-shell--user .astrotalk-zodiac-card:hover,
-html[data-theme='light'] .app-shell--user .reward-astrologer-card:hover,
-html[data-theme='light'] .app-shell--user .reward-appointment-card:hover,
-html[data-theme='light'] .app-shell--user .reward-content-card:hover,
-html[data-theme='light'] .app-shell--user .reward-benefit-card:hover,
-html[data-theme='light'] .app-shell--user .eligible-service-card:hover,
-html[data-theme='light'] .app-shell--user .dispute-card-item:hover,
-html[data-theme='light'] .app-shell--user .autopay-card:hover,
-html[data-theme='light'] .app-shell--user .card-hover:hover {
-  border-color: rgba(217, 119, 6, 0.38) !important;
-  box-shadow: 0 8px 24px rgba(194, 65, 12, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Specific Selected and Highlight States */
-html[data-theme='light'] .app-shell--user .astrotalk-zodiac-card.is-user-sign {
-  border: 1px solid #F59E0B !important;
-  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.18) !important;
-}
-
-html[data-theme='light'] .app-shell--user .user-appointment-card.is-active,
-html[data-theme='light'] .app-shell--user .apt-history-item.is-active {
-  border: 1px solid #EA580C !important;
-}
-
-/* User Question Dashboard Tabs Container */
-html[data-theme='light'] .app-shell--user .question-dashboard-tabs {
-  border: 1px solid rgba(217, 119, 6, 0.16) !important;
-  background: #FAF7F2 !important;
-}
-
-/* User Question Dashboard List Row Border */
-html[data-theme='light'] .app-shell--user .aq-question-list-row {
-  border-top: 1px solid rgba(217, 119, 6, 0.16) !important;
-}
-
-html[data-theme='light'] .app-shell--user .aq-question-list-row:first-child {
-  border-top: 0 !important;
-}
-
-/* Form Input Elements Selected by User */
-html[data-theme='light'] .app-shell--user select.select-input,
-html[data-theme='light'] .app-shell--user input.text-input,
-html[data-theme='light'] .app-shell--user textarea.textarea-box,
-html[data-theme='light'] .app-shell--user .aq-track-month .select-input {
-  border: 1px solid rgba(217, 119, 6, 0.20) !important;
-}
-
-html[data-theme='light'] .app-shell--user select.select-input:focus,
-html[data-theme='light'] .app-shell--user input.text-input:focus,
-html[data-theme='light'] .app-shell--user textarea.textarea-box:focus {
-  border-color: #EA580C !important;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15) !important;
-}
-
-/* Ensure Atonement Filter Card Retains Its Borderless Clean Design */
-html[data-theme='light'] .app-shell--user .user-atonements-page .card.atonement-filter-card,
-html[data-theme='light'] .app-shell--user .user-atonements-page .atonement-filter-card {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
 
 
