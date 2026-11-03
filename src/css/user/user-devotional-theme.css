@@ -2233,6 +2233,26 @@ html[data-theme='dark'] .app-shell--user .user-appointment-identity span {
   color: #C8B79B !important;
 }
 
+/* User Appointment Card Meta (All 5 items in same row with space-between) */
+.app-shell--user .user-appointment-card__meta,
+.app-shell--user .user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px 16px !important;
+  width: 100% !important;
+  margin: 4px 0 8px 0 !important;
+}
+
+.app-shell--user .user-appointment-card__meta span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+}
+
 html[data-theme='dark'] .app-shell--user .user-appointment-card__meta span {
   color: #C8B79B !important;
 }
@@ -2241,26 +2261,32 @@ html[data-theme='dark'] .app-shell--user .user-appointment-card__meta svg {
   color: #F59E0B !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__time {
-  color: #FBBF24 !important;
-  font-weight: 700 !important;
-}
-
-/* User Appointment Card Footer (both spans above the horizontal line) */
-.app-shell--user .user-appointment-card__footer,
-.user-appointment-history .user-appointment-card__footer {
-  border-top: none !important;
-  padding-top: 2px !important;
-  padding-bottom: 8px !important;
-}
-
-html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:first-child {
+html[data-theme='dark'] .app-shell--user .user-appointment-card__meta .user-appointment-card__amount {
   color: #FBBF24 !important;
   font-weight: 800 !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:last-child {
-  color: #C8B79B !important;
+html[data-theme='dark'] .app-shell--user .user-appointment-card__meta .user-appointment-card__time {
+  color: #FBBF24 !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__meta span {
+  color: #5C4B40 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__meta svg {
+  color: #C2410C !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__meta .user-appointment-card__amount {
+  color: #B45309 !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme='light'] .app-shell--user .user-appointment-card__meta .user-appointment-card__time {
+  color: #1A120B !important;
+  font-weight: 700 !important;
 }
 
 /* User Appointment Card Action Options (Border removed from buttons, horizontal line above actions, options centered) */

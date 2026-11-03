@@ -103,13 +103,11 @@ function UserAppointmentCard({
         <StatusBadge label={statusLabel} />
       </div>
       <div className="user-appointment-card__meta">
-        <span><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
-        <span><CalendarDays size={13} /> {formatDisplayDate(appointment.dateIso, true)}</span>
+        <span className="user-appointment-card__id">Booking ID: {appointment.orderId || appointment.id}</span>
+        <span className="user-appointment-card__amount">₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span>
+        <span className="user-appointment-card__type"><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
+        <span className="user-appointment-card__date"><CalendarDays size={13} /> {formatDisplayDate(appointment.dateIso, true)}</span>
         <span className="user-appointment-card__time"><Clock3 size={13} /> {formatTimeRange(window.startMin, window.endMin)} · {durationLabel}</span>
-      </div>
-      <div className="user-appointment-card__footer">
-        <span>₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span>
-        <span>Booking ID: {appointment.orderId || appointment.id}</span>
       </div>
       <div className="user-appointment-card__actions">
         <button

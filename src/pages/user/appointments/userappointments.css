@@ -13,9 +13,29 @@
 .user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; overflow:hidden; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
 .user-appointment-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .user-appointment-avatar--large { width:40px; height:40px; font-size:12px; }
-.user-appointment-card__meta { display:grid; gap:6px; color:var(--muted); font-size:10px; }
-.user-appointment-card__meta span { display:flex; align-items:center; gap:5px; }
-.user-appointment-card__time { justify-content:flex-end; color:var(--ink); font-weight:700; }
+.user-appointment-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.user-appointment-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.user-appointment-card__amount {
+  color: var(--ink);
+  font-weight: 800;
+}
+.user-appointment-card__time {
+  color: var(--ink);
+  font-weight: 700;
+}
 .user-appointment-card__footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:2px; padding-bottom:8px; border-top:none; color:var(--muted); font-size:10px; }
 .user-appointment-card__footer span:first-child { color:var(--ink); font-weight:800; }
 .user-appointment-card__actions {
@@ -334,9 +354,13 @@
 .user-appointment-history .apt-history-list-view__rows { display: grid; gap: 10px; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card { gap: 7px; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 14px; background: var(--surface-strong); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-avatar { width: 30px; height: 30px; font-size: 9px; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta { gap: 4px; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta { display: flex; flex-wrap: wrap; align-items: center; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__time { justify-content: flex-start; }
+.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card__footer { padding-top: 2px; padding-bottom: 6px; border-top: none; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions { margin-top: 0; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card:hover,
