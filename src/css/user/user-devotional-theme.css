@@ -2138,11 +2138,17 @@ html[data-theme='dark'] .app-shell--user .appointment-history-filters button.is-
   color: #FFFDF9 !important;
 }
 
-/* Appointment List View & Appointment Cards (No white 1160x1440 container) */
-html[data-theme='dark'] .app-shell--user .apt-history-list-view {
-  background: #18110D !important;
-  border-color: rgba(245, 158, 11, 0.22) !important;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45) !important;
+/* Appointment List View (Remove outer border & container box across themes) */
+.app-shell--user .user-appointment-history .apt-history-list-view,
+.app-shell--user section.apt-history-list-view,
+html[data-theme='dark'] .app-shell--user .apt-history-list-view,
+html[data-theme='light'] .app-shell--user .apt-history-list-view {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-list-view__toolbar {
