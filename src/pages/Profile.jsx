@@ -11,7 +11,7 @@ import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes, ROLES } from '../utils/roleRoutes.js'
-import { deriveUsername, getBirthPlaceDetails } from '../utils/profile.js'
+import { deriveUsername, getBirthPlaceDetails, BIRTH_PLACE_OPTIONS, GENDER_OPTIONS, validateProfileFieldErrors } from '../utils/profile.js'
 
 function initials(name) {
   return name?.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'U'
@@ -23,14 +23,6 @@ const VISIBILITY_OPTIONS = [
   ['subscribers', 'Subscribers'],
   ['private', 'Private'],
 ]
-const BIRTH_PLACE_OPTIONS = [
-  'Ahmedabad, Gujarat, India', 'Bengaluru, Karnataka, India', 'Chennai, Tamil Nadu, India',
-  'Chengalpattu, Tamil Nadu, India', 'Chidambaram, Tamil Nadu, India', 'Coimbatore, Tamil Nadu, India',
-  'Cuddalore, Tamil Nadu, India', 'Delhi, India', 'Hyderabad, Telangana, India', 'Kochi, Kerala, India',
-  'Kolkata, West Bengal, India', 'Madurai, Tamil Nadu, India', 'Mumbai, Maharashtra, India',
-  'Pune, Maharashtra, India', 'Theni, Tamil Nadu, India', 'Tiruchirappalli, Tamil Nadu, India',
-  'Tirunelveli, Tamil Nadu, India', 'Visakhapatnam, Andhra Pradesh, India',
-].sort((first, second) => first.localeCompare(second))
 
 const POST_INTERACTION_OPTIONS = [
   ['like', 'Likes', 'Allow users to like this post.'],
@@ -70,7 +62,7 @@ function displayDate(value) {
 export default function Profile() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { currentUser, updateProfile } = useAuth()
+  const { currentUser, users, updateProfile } = useAuth()
   const { subscriptions, appointments, consultationHistory, actions, astrologerServices, astrologerPosts, astrologerLiveSessions, postComments, postLikes, savedPostIds, followedAstrologerIds } = useAppData()
   const isAstrologer = currentUser?.role === ROLES.ASTROLOGER
   const routes = getRoleRoutes(currentUser?.role)
@@ -81,6 +73,9 @@ export default function Profile() {
   const [form, setForm] = useState({ name: currentUser?.name || '', email: currentUser?.email || '', phone: currentUser?.phone || '', specialization: currentUser?.specialization || '', experience: currentUser?.experience || '', bio: currentUser?.bio || '', languages: currentUser?.languages?.join(', ') || '', profileImage: currentUser?.profileImage || '' })
   const [servicesForm, setServicesForm] = useState(astrologerServices)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
+  const [isCustomPlace, setIsCustomPlace] = useState(false)
+  const [avatarFailed, setAvatarFailed] = useState(false)
   const [saved, setSaved] = useState(false)
   const [composer, setComposer] = useState(null)
   const [postForm, setPostForm] = useState({ title: '', body: '', visibility: 'public', interactionAccess: { like: true, comment: true, share: true, save: true }, media: [] })
@@ -156,18 +151,45 @@ export default function Profile() {
       return { ...astro, profileImage: consultation?.profileImage || '', tier: sub.tier || 'Silver' }
     }).filter(Boolean)
   }, [subscriptions, isAstrologer])
+  useEffect(() => {
+    setAvatarFailed(false)
+  }, [currentUser?.profileImage])
+
   const openEditProfile = () => {
-    setEditForm({ name: currentUser?.name || '', username: currentUser?.username || deriveUsername(currentUser?.name), email: currentUser?.email || '', phone: currentUser?.phone || '', gender: currentUser?.gender || '', dateOfBirth: currentUser?.dateOfBirth || '', birthTime: currentUser?.birthTime || '', birthPlace: currentUser?.birthPlace || '', latitude: currentUser?.latitude || '', longitude: currentUser?.longitude || '', timezone: currentUser?.timezone || '', bio: currentUser?.bio || '', profileImage: currentUser?.profileImage || '' })
+    const place = currentUser?.birthPlace || ''
+    const isCustom = Boolean(place && !BIRTH_PLACE_OPTIONS.includes(place))
+    setIsCustomPlace(isCustom)
+    setFieldErrors({})
+    setEditForm({
+      name: currentUser?.name || '',
+      username: currentUser?.username || deriveUsername(currentUser?.name),
+      email: currentUser?.email || '',
+      phone: currentUser?.phone || '',
+      gender: currentUser?.gender || '',
+      dateOfBirth: currentUser?.dateOfBirth || '',
+      birthTime: currentUser?.birthTime || '',
+      birthPlace: place,
+      latitude: currentUser?.latitude || '',
+      longitude: currentUser?.longitude || '',
+      timezone: currentUser?.timezone || '',
+      bio: currentUser?.bio || '',
+      profileImage: currentUser?.profileImage || '',
+    })
     setError('')
     setSaved(false)
-    setProfilePlaceMenuOpen(false)
     setShowEditProfile(true)
   }
   const saveProfile = () => {
+    const errors = validateProfileFieldErrors(editForm, users, currentUser?.id)
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setError(Object.values(errors)[0])
+      return
+    }
+    setFieldErrors({})
     try {
       updateProfile(editForm)
       setShowEditProfile(false)
-      setProfilePlaceMenuOpen(false)
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update your profile.')
@@ -611,7 +633,7 @@ export default function Profile() {
             <Card className="user-profile-header">
               <div className="user-profile-header__top">
                 <div className="user-profile-header__identity">
-                  <div className="user-profile-header__avatar">{currentUser?.profileImage ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} /> : initials(name)}</div>
+                  <div className="user-profile-header__avatar">{currentUser?.profileImage && !avatarFailed ? <img src={currentUser.profileImage} alt={`${name}'s avatar`} onError={() => setAvatarFailed(true)} /> : initials(name)}</div>
                   <div className="user-profile-header__copy">
                     <h1>{name}</h1>
                     <p className="muted">@{username}</p>
@@ -665,17 +687,211 @@ export default function Profile() {
               <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4"><div><div className="section-title" style={{ marginBottom: 0 }}>Edit Profile</div><p className="muted">Update the details shown on your profile.</p></div><button type="button" className="icon-btn" aria-label="Close edit profile" onClick={() => setShowEditProfile(false)}><X size={16} /></button></div>
               <div className="modal-card__content user-modal-card__content">
                 <div className="form-grid">
-                  <label className="field-group"><span className="field-label-top">Name</span><input className="text-input" value={editForm.name} onChange={(event) => setEditForm({ ...editForm, name: event.target.value })} /></label>
-                  <label className="field-group"><span className="field-label-top">Username</span><input className="text-input" value={editForm.username} onChange={(event) => setEditForm({ ...editForm, username: event.target.value })} placeholder="your-username" /></label>
-                  <label className="field-group"><span className="field-label-top">Profile photo URL</span><input className="text-input" value={editForm.profileImage} onChange={(event) => setEditForm({ ...editForm, profileImage: event.target.value })} placeholder="https://..." /></label>
-                  <label className="field-group"><span className="field-label-top">Gender</span><input className="text-input" value={editForm.gender} onChange={(event) => setEditForm({ ...editForm, gender: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Date of Birth</span><input type="date" className="text-input" value={editForm.dateOfBirth} onChange={(event) => setEditForm({ ...editForm, dateOfBirth: event.target.value })} /></label>
-                  <label className="field-group"><span className="field-label-top">Time of Birth</span><input type="time" className="text-input" value={editForm.birthTime} onChange={(event) => setEditForm({ ...editForm, birthTime: event.target.value })} /></label>
-                  <label className="field-group profile-place-field"><span className="field-label-top">Place of Birth</span><div className="profile-place-wrap" ref={profilePlaceMenuRef}><input className="text-input" value={editForm.birthPlace} onChange={(event) => { setEditForm({ ...editForm, birthPlace: event.target.value, latitude: '', longitude: '', timezone: '' }); setProfilePlaceMenuOpen(true) }} onFocus={(event) => { event.currentTarget.select(); setProfilePlaceMenuOpen(true) }} placeholder="Type a city or place" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={profilePlaceMenuOpen} />{profilePlaceMenuOpen && <div className="profile-place-menu" role="listbox">{profilePlaceSuggestions.map((option) => <button type="button" role="option" key={option} onClick={() => { const details = getBirthPlaceDetails(option); setEditForm({ ...editForm, birthPlace: option, ...details }); setProfilePlaceMenuOpen(false) }}>{option}</button>)}{!profilePlaceSuggestions.length && <span>No matching cities found.</span>}</div>}</div></label>
-                  <label className="field-group"><span className="field-label-top">Latitude</span><input inputMode="decimal" className="text-input" value={editForm.latitude} onChange={(event) => setEditForm({ ...editForm, latitude: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Longitude</span><input inputMode="decimal" className="text-input" value={editForm.longitude} onChange={(event) => setEditForm({ ...editForm, longitude: event.target.value })} placeholder="Optional" /></label>
-                  <label className="field-group"><span className="field-label-top">Timezone</span><input className="text-input" value={editForm.timezone} onChange={(event) => setEditForm({ ...editForm, timezone: event.target.value })} placeholder="e.g. Asia/Kolkata" /></label>
-                  <label className="field-group"><span className="field-label-top">About / Bio</span><textarea className="textarea-box" rows="3" value={editForm.bio} onChange={(event) => setEditForm({ ...editForm, bio: event.target.value })} /></label>
+                  <label className="field-group">
+                    <span className="field-label-top">Name <span className="text-red-500">*</span></span>
+                    <input
+                      className={`text-input${fieldErrors.name ? ' is-invalid' : ''}`}
+                      value={editForm.name}
+                      onChange={(event) => {
+                        setEditForm({ ...editForm, name: event.target.value })
+                        if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }))
+                      }}
+                      placeholder="Your full name"
+                    />
+                    {fieldErrors.name && <span className="profile-field-error">{fieldErrors.name}</span>}
+                  </label>
+
+                  <label className="field-group">
+                    <span className="field-label-top">Username <span className="text-red-500">*</span></span>
+                    <input
+                      className={`text-input${fieldErrors.username ? ' is-invalid' : ''}`}
+                      value={editForm.username}
+                      onChange={(event) => {
+                        setEditForm({ ...editForm, username: event.target.value })
+                        if (fieldErrors.username) setFieldErrors((prev) => ({ ...prev, username: '' }))
+                      }}
+                      placeholder="your-username"
+                    />
+                    {fieldErrors.username && <span className="profile-field-error">{fieldErrors.username}</span>}
+                  </label>
+
+                  <label className="field-group">
+                    <div className="flex items-center justify-between">
+                      <span className="field-label-top">Profile photo URL</span>
+                      {editForm.profileImage && (
+                        <button
+                          type="button"
+                          className="text-xs text-amber-600 hover:underline cursor-pointer"
+                          onClick={() => {
+                            setEditForm({ ...editForm, profileImage: '' })
+                            if (fieldErrors.profileImage) setFieldErrors((prev) => ({ ...prev, profileImage: '' }))
+                          }}
+                        >
+                          Clear photo
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      className={`text-input${fieldErrors.profileImage ? ' is-invalid' : ''}`}
+                      value={editForm.profileImage}
+                      onChange={(event) => {
+                        setEditForm({ ...editForm, profileImage: event.target.value })
+                        if (fieldErrors.profileImage) setFieldErrors((prev) => ({ ...prev, profileImage: '' }))
+                      }}
+                      placeholder="https://... (or leave blank for initials)"
+                    />
+                    {fieldErrors.profileImage && <span className="profile-field-error">{fieldErrors.profileImage}</span>}
+                  </label>
+
+                  <label className="field-group">
+                    <span className="field-label-top">Gender</span>
+                    <select
+                      className={`select-input${fieldErrors.gender ? ' is-invalid' : ''}`}
+                      value={editForm.gender}
+                      onChange={(event) => {
+                        setEditForm({ ...editForm, gender: event.target.value })
+                        if (fieldErrors.gender) setFieldErrors((prev) => ({ ...prev, gender: '' }))
+                      }}
+                    >
+                      <option value="">Select gender</option>
+                      {GENDER_OPTIONS.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                    {fieldErrors.gender && <span className="profile-field-error">{fieldErrors.gender}</span>}
+                  </label>
+
+                  <label className="field-group">
+                    <span className="field-label-top">Date of Birth</span>
+                    <input
+                      type="date"
+                      max={new Date().toISOString().split('T')[0]}
+                      className={`text-input${fieldErrors.dateOfBirth ? ' is-invalid' : ''}`}
+                      value={editForm.dateOfBirth}
+                      onChange={(event) => {
+                        setEditForm({ ...editForm, dateOfBirth: event.target.value })
+                        if (fieldErrors.dateOfBirth) setFieldErrors((prev) => ({ ...prev, dateOfBirth: '' }))
+                      }}
+                    />
+                    {fieldErrors.dateOfBirth && <span className="profile-field-error">{fieldErrors.dateOfBirth}</span>}
+                  </label>
+
+                  <label className="field-group">
+                    <span className="field-label-top">Time of Birth</span>
+                    <input
+                      type="time"
+                      className="text-input"
+                      value={editForm.birthTime}
+                      onChange={(event) => setEditForm({ ...editForm, birthTime: event.target.value })}
+                    />
+                  </label>
+
+                  <label className="field-group profile-place-field">
+                    <span className="field-label-top">Place of Birth</span>
+                    <select
+                      className={`select-input${fieldErrors.birthPlace ? ' is-invalid' : ''}`}
+                      value={
+                        BIRTH_PLACE_OPTIONS.includes(editForm.birthPlace)
+                          ? editForm.birthPlace
+                          : editForm.birthPlace
+                          ? '__custom__'
+                          : ''
+                      }
+                      onChange={(event) => {
+                        const value = event.target.value
+                        if (value === '__custom__') {
+                          setIsCustomPlace(true)
+                        } else if (value) {
+                          setIsCustomPlace(false)
+                          const details = getBirthPlaceDetails(value) || {}
+                          setEditForm({
+                            ...editForm,
+                            birthPlace: value,
+                            latitude: details.latitude || '',
+                            longitude: details.longitude || '',
+                            timezone: details.timezone || 'Asia/Kolkata',
+                          })
+                        } else {
+                          setIsCustomPlace(false)
+                          setEditForm({ ...editForm, birthPlace: '', latitude: '', longitude: '', timezone: '' })
+                        }
+                        if (fieldErrors.birthPlace) setFieldErrors((prev) => ({ ...prev, birthPlace: '' }))
+                      }}
+                    >
+                      <option value="">Select city or place of birth</option>
+                      {BIRTH_PLACE_OPTIONS.map((place) => (
+                        <option key={place} value={place}>{place}</option>
+                      ))}
+                      <option value="__custom__">Other / Custom place...</option>
+                    </select>
+                    {fieldErrors.birthPlace && <span className="profile-field-error">{fieldErrors.birthPlace}</span>}
+                  </label>
+
+                  {isCustomPlace && (
+                    <label className="field-group">
+                      <span className="field-label-top">Custom Place Name</span>
+                      <input
+                        className="text-input"
+                        value={editForm.birthPlace}
+                        onChange={(event) => {
+                          setEditForm({ ...editForm, birthPlace: event.target.value })
+                          if (fieldErrors.birthPlace) setFieldErrors((prev) => ({ ...prev, birthPlace: '' }))
+                        }}
+                        placeholder="Enter city, state, country"
+                      />
+                    </label>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="field-group">
+                      <span className="field-label-top">Latitude</span>
+                      <input
+                        inputMode="decimal"
+                        className={`text-input${fieldErrors.latitude ? ' is-invalid' : ''}`}
+                        value={editForm.latitude}
+                        onChange={(event) => {
+                          setEditForm({ ...editForm, latitude: event.target.value })
+                          if (fieldErrors.latitude) setFieldErrors((prev) => ({ ...prev, latitude: '' }))
+                        }}
+                        placeholder="Auto-filled"
+                      />
+                      {fieldErrors.latitude && <span className="profile-field-error">{fieldErrors.latitude}</span>}
+                    </label>
+                    <label className="field-group">
+                      <span className="field-label-top">Longitude</span>
+                      <input
+                        inputMode="decimal"
+                        className={`text-input${fieldErrors.longitude ? ' is-invalid' : ''}`}
+                        value={editForm.longitude}
+                        onChange={(event) => {
+                          setEditForm({ ...editForm, longitude: event.target.value })
+                          if (fieldErrors.longitude) setFieldErrors((prev) => ({ ...prev, longitude: '' }))
+                        }}
+                        placeholder="Auto-filled"
+                      />
+                      {fieldErrors.longitude && <span className="profile-field-error">{fieldErrors.longitude}</span>}
+                    </label>
+                  </div>
+
+                  <label className="field-group">
+                    <span className="field-label-top">Timezone</span>
+                    <input
+                      className="text-input"
+                      value={editForm.timezone}
+                      onChange={(event) => setEditForm({ ...editForm, timezone: event.target.value })}
+                      placeholder="e.g. Asia/Kolkata (auto-filled)"
+                    />
+                  </label>
+
+                  <label className="field-group">
+                    <span className="field-label-top">About / Bio</span>
+                    <textarea
+                      className="textarea-box"
+                      rows="3"
+                      value={editForm.bio}
+                      onChange={(event) => setEditForm({ ...editForm, bio: event.target.value })}
+                    />
+                  </label>
                 </div>
                 {error && <div className="profile-message profile-message--error">{error}</div>}
                 <div className="profile-edit-actions"><button type="button" className="btn btn-ghost" onClick={() => setShowEditProfile(false)}>Cancel</button><button type="button" className="btn btn-primary" onClick={saveProfile}>Save Changes</button></div>
