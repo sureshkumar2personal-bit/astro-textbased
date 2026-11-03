@@ -1090,3 +1090,463 @@ html[data-theme='dark'] .user-disputes-page .disputes-filter-select {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Light Mode Quote & Block Helpers
+   ========================================================================== */
+.user-dispute-reason-quote {
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: var(--primary-bg, #FFF7ED);
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--text-primary, #1E1B24);
+  border: 1px solid var(--dispute-status-border-light, rgba(245, 158, 11, 0.25));
+}
+
+.user-dispute-section-title {
+  color: var(--text-primary, #1E1B24);
+}
+
+.user-dispute-question-quote {
+  color: var(--text-secondary, #5C5564);
+}
+
+.user-dispute-answer-block {
+  border-top: 1px solid var(--border, #EFE7DA);
+}
+
+.user-dispute-answer-quote {
+  color: var(--text-secondary, #5C5564);
+}
+
+.user-dispute-desc-text {
+  color: var(--text-secondary, #5C5564);
+}
+
+/* ==========================================================================
+   Dark Mode Harmonization for User Disputes Page & Extended Rows
+   ========================================================================== */
+html[data-theme='dark'] .user-disputes-page {
+  color: #FFFDF9;
+}
+
+/* Status-specific variables in Dark Mode */
+html[data-theme='dark'] .user-disputes-page .disputes-row--under-review.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--under-review,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--under-review.is-expanded {
+  --dispute-status-border: rgba(168, 85, 247, 0.45);
+  --dispute-status-border-light: rgba(168, 85, 247, 0.25);
+  --dispute-accent: #c084fc;
+  --dispute-accent-bg: rgba(147, 51, 234, 0.14);
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row--resolved.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--resolved,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--resolved.is-expanded {
+  --dispute-status-border: rgba(52, 211, 153, 0.45);
+  --dispute-status-border-light: rgba(52, 211, 153, 0.25);
+  --dispute-accent: #34d399;
+  --dispute-accent-bg: rgba(16, 185, 129, 0.14);
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row--open.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row--pending.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--open,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--pending,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--open.is-expanded,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--pending.is-expanded {
+  --dispute-status-border: rgba(251, 191, 36, 0.45);
+  --dispute-status-border-light: rgba(251, 191, 36, 0.25);
+  --dispute-accent: #fbbf24;
+  --dispute-accent-bg: rgba(245, 158, 11, 0.14);
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row--cancelled.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row--rejected.is-expanded,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--cancelled,
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel--rejected,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--cancelled.is-expanded,
+html[data-theme='dark'] .user-disputes-page .dispute-card-item--rejected.is-expanded {
+  --dispute-status-border: rgba(248, 113, 113, 0.45);
+  --dispute-status-border-light: rgba(248, 113, 113, 0.25);
+  --dispute-accent: #f87171;
+  --dispute-accent-bg: rgba(239, 68, 68, 0.14);
+}
+
+/* Stat cards in Dark Mode */
+html[data-theme='dark'] .user-disputes-page .stat-card-clickable {
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .stat-card-clickable:hover {
+  background: #231C18 !important;
+  border-color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .stat-card-clickable.is-active {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border-color: #FBBF24 !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .stat-card-body .stat-value {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .stat-card-body .stat-label {
+  color: #C8B79B !important;
+}
+
+/* Section and toolbar in Dark Mode */
+html[data-theme='dark'] .user-disputes-page .disputes-section {
+  background: #1F1610 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-section-title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-service-pill {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-service-pill:hover {
+  background: #2B231E !important;
+  color: #FFFDF9 !important;
+  border-color: #5C4A3E !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-service-pill.is-active {
+  background: linear-gradient(135deg, #F59E0B, #EA580C) !important;
+  color: #FFFFFF !important;
+  border-color: #EA580C !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-filter-select {
+  background-color: #231C18 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-view-toggle {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-view-toggle button {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-view-toggle button:hover {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-view-toggle button.is-active {
+  background: linear-gradient(135deg, #F59E0B, #EA580C) !important;
+  color: #FFFFFF !important;
+}
+
+/* Table wrap & headers in Dark Mode */
+html[data-theme='dark'] .user-disputes-page .disputes-table-wrap {
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-table-head {
+  background: #231C18 !important;
+  border-bottom: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-table-row {
+  background: #1B1512;
+  border-bottom: 1px solid #3D3028;
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-table-row:hover {
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-serial {
+  color: #9E9182;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-id-cell {
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-provider-cell {
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-service-cell {
+  color: #FFFDF9;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-service-cell svg {
+  color: #FBBF24;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-ref-cell {
+  color: #9E9182;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-date-cell {
+  color: #C8B79B;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-against-astrologer {
+  background: rgba(147, 51, 234, 0.22);
+  color: #C084FC;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-against-platform {
+  background: rgba(2, 132, 199, 0.22);
+  color: #38BDF8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-view-button {
+  border-color: #3D3028;
+  background: #231C18;
+  color: #C8B79B;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-view-button:hover,
+html[data-theme='dark'] .user-disputes-page .dispute-view-button.is-active {
+  border-color: #FBBF24;
+  background: rgba(245, 158, 11, 0.18);
+  color: #FBBF24;
+}
+
+/* ==========================================================================
+   EXTENDED ROW PANEL IN DARK MODE
+   ========================================================================== */
+html[data-theme='dark'] .user-disputes-page .disputes-table-row.is-expanded {
+  background: var(--dispute-accent-bg, rgba(245, 158, 11, 0.12)) !important;
+  border-left: 4px solid var(--dispute-accent, #FBBF24) !important;
+  border-top: 1.5px solid var(--dispute-status-border, #3D3028) !important;
+  border-right: 1.5px solid var(--dispute-status-border, #3D3028) !important;
+  border-bottom: 1px dashed var(--dispute-status-border, #3D3028) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-panel {
+  background: #1B1512 !important;
+  border-left: 4px solid var(--dispute-accent, #FBBF24) !important;
+  border-right: 1.5px solid var(--dispute-status-border, #3D3028) !important;
+  border-bottom: 2px solid var(--dispute-status-border, #3D3028) !important;
+  border-top: none !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-head {
+  border-bottom: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-head strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-dossier-card,
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-card {
+  border: 1px solid #3D3028 !important;
+  background: #231C18 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-service-context {
+  background: #1B1512 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-service-context .context-label {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-section-title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-question-quote {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-answer-block {
+  border-top: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-answer-quote {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-statement-box h3 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-reason-quote {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-desc-text {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-box h3 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file {
+  background: #1B1512 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file small {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file svg {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file button.icon-btn {
+  background: #2B231E !important;
+  border: 1px solid #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-evidence-file button.icon-btn:hover {
+  background: #352A23 !important;
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-title svg {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step:not(:last-child)::after {
+  background: #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step.is-complete:not(:last-child)::after {
+  background: #EA580C !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-dot {
+  background: #3D3028 !important;
+  box-shadow: 0 0 0 2px #231C18 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step.is-complete .user-dispute-timeline-dot {
+  background: #EA580C !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step.is-current .user-dispute-timeline-dot {
+  background: #FBBF24 !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step p {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-timeline-step time {
+  color: #9E9182 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-response-box {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-response-box strong {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-response-box p {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-resolution-box {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.32) !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-resolution-box strong {
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-resolution-box p {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .user-dispute-resolution-box small {
+  color: #A7F3D0 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-footer {
+  border-top: 1px solid #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-footer .btn-outline {
+  background: rgba(245, 158, 11, 0.14) !important;
+  border: 1px solid rgba(245, 158, 11, 0.32) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-row-expanded-footer .btn-outline:hover {
+  background: rgba(245, 158, 11, 0.24) !important;
+  border-color: #FBBF24 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .disputes-card-expanded-panel {
+  border-top-color: #3D3028 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-card-item {
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-card-item-title {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .user-disputes-page .dispute-card-item-reason {
+  background: #231C18 !important;
+  color: #FFFDF9 !important;
+}
