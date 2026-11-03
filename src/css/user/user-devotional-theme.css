@@ -2192,17 +2192,25 @@ html[data-theme='dark'] .app-shell--user .apt-history-list-view__count {
 html[data-theme='dark'] .app-shell--user .apt-history-list-view__rows .user-appointment-card,
 html[data-theme='dark'] .app-shell--user .user-appointment-card,
 html[data-theme='dark'] .app-shell--user .added-compact-appointment-card {
-  background: #1F1610 !important;
+  background: #231C18 !important;
   border: 1px solid rgba(245, 158, 11, 0.22) !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
   color: #FFFDF9 !important;
 }
 
 html[data-theme='dark'] .app-shell--user .apt-history-list-view__rows .user-appointment-card:hover,
 html[data-theme='dark'] .app-shell--user .user-appointment-card:hover,
 html[data-theme='dark'] .app-shell--user .added-compact-appointment-card:hover {
-  background: #251B14 !important;
+  background: #2A1F18 !important;
   border-color: rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card.is-active,
+html[data-theme='dark'] .app-shell--user .user-appointment-card.is-expanded {
+  background: #231C18 !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55) !important;
 }
 
 html[data-theme='dark'] .app-shell--user .user-appointment-avatar {
@@ -2223,15 +2231,283 @@ html[data-theme='dark'] .app-shell--user .user-appointment-card__meta span {
   color: #C8B79B !important;
 }
 
-html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span {
+html[data-theme='dark'] .app-shell--user .user-appointment-card__meta svg {
+  color: #F59E0B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__time {
+  color: #FBBF24 !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__footer {
+  border-top: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:first-child {
+  color: #FBBF24 !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__footer span:last-child {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline {
+  background: transparent !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-outline:hover {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border-color: #F59E0B !important;
   color: #FFFDF9 !important;
 }
 
-html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes,
-html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer {
-  background: #1F1610 !important;
-  border-color: rgba(245, 158, 11, 0.25) !important;
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #F87171 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-card__actions .btn-danger:hover {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+/* User Appointment Expanded Details in Dark Mode */
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__grid {
+  background: #1A120B !important;
+  border: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__label svg {
+  color: #F59E0B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__value {
   color: #FFFDF9 !important;
+}
+
+/* Horoscope Card */
+html[data-theme='dark'] .app-shell--user .apt-horoscope-section,
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded .apt-detail-card {
+  background: #1A120B !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-horoscope-section .apt-detail-label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-horoscope-section .apt-detail-label svg {
+  color: #F59E0B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-horoscope-section .apt-detail-value {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-horoscope-empty {
+  color: #9E8E7E !important;
+}
+
+/* Astrologer Consultation Notes Toggle Button */
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option {
+  background: #231C18 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.28) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option:hover,
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option:focus-visible {
+  background: #2A1F18 !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option-icon {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option-copy strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option-copy small {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-option-arrow {
+  color: #F59E0B !important;
+}
+
+/* Astrologer Notes Card Content */
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes {
+  background: #1A120B !important;
+  border: 1px solid rgba(245, 158, 11, 0.22) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-private-notes-head {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-private-notes-private {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-consultation-header {
+  background: linear-gradient(135deg, #2A170A 0%, #3D2210 100%) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-consultation-header strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-consultation-header span {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-consultation-header small {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-group--summary p {
+  color: #EDE4D8 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-content strong {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-progress-head span {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-progress-bar {
+  background: #2A1F18 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-progress-bar span {
+  background: linear-gradient(90deg, #F59E0B, #EA580C) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task {
+  background: #231C18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task small {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task.is-locked {
+  background: #1F1712 !important;
+  border-color: rgba(245, 158, 11, 0.12) !important;
+  opacity: 0.65;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task.is-completed {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task.is-completed strong,
+html[data-theme='dark'] .app-shell--user .apt-user-pariharam-task.is-completed small {
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-attachment + .apt-user-astrologer-notes-attachment {
+  border-top: 1px solid rgba(245, 158, 11, 0.15) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-attachment-icon {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-attachment strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-attachment small {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-history-row {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-history-row.is-current {
+  background: #2A1F18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-astrologer-notes-history-row small {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__actions .btn-primary {
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(254, 243, 199, 0.45) !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__alert--cancelled {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #FCA5A5 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .user-appointment-expanded__alert--rescheduled {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #FDE68A !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer {
+  background: #231C18 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer-head {
+  border-bottom: 1px solid rgba(245, 158, 11, 0.18) !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer-head span {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer-head h2 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer-body {
+  color: #EDE4D8 !important;
+}
+
+html[data-theme='dark'] .app-shell--user .apt-user-attachment-viewer-footer {
+  border-top: 1px solid rgba(245, 158, 11, 0.18) !important;
+  color: #C8B79B !important;
 }
 
 /* User Activity Page (No pale/white intro cards or badge spaces) */
