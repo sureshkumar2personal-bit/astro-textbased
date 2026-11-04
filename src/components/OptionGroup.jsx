@@ -7,20 +7,20 @@ export function RadioGroup({ options, value, onChange, name }) {
           <label
             key={opt}
             className={[
-              'flex cursor-pointer items-center gap-3 rounded-[12px] border border-[color:var(--line)] bg-white/90 px-4 py-3 text-sm font-medium text-[color:var(--body)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-300)] hover:bg-[color:var(--violet-50)]',
-              selected ? 'border-[color:var(--violet-500)] bg-[color:var(--violet-50)] font-bold text-[color:var(--violet-700)]' : '',
+              'option-group-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-[color:var(--line)] bg-white/90 px-4 py-3 text-sm font-medium text-[color:var(--body)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-300)] hover:bg-[color:var(--violet-50)]',
+              selected ? 'is-selected border-[color:var(--violet-500)] bg-[color:var(--violet-50)] font-bold text-[color:var(--violet-700)]' : '',
             ].join(' ')}
           >
             <input type="radio" name={name} checked={selected} onChange={() => onChange(opt)} className="sr-only" />
             <span
               className={[
-                'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[color:var(--line)] transition duration-200',
+                'option-group-dot flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-[color:var(--line)] transition duration-200',
                 selected ? 'border-[color:var(--violet-600)] bg-[color:var(--violet-600)] text-white' : '',
               ].join(' ')}
             >
               {selected && '●'}
             </span>
-            {opt}
+            <span className="option-group-text">{opt}</span>
           </label>
         )
       })}
@@ -37,20 +37,20 @@ export function CheckGroup({ options, value, onChange }) {
           <label
             key={opt}
             className={[
-              'flex cursor-pointer items-center gap-3 rounded-[12px] border border-[color:var(--line)] bg-white/90 px-4 py-3 text-sm font-medium text-[color:var(--body)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-300)] hover:bg-[color:var(--violet-50)]',
-              selected ? 'border-[color:var(--violet-500)] bg-[color:var(--violet-50)] font-bold text-[color:var(--violet-700)]' : '',
+              'option-group-card flex cursor-pointer items-center gap-3 rounded-[12px] border border-[color:var(--line)] bg-white/90 px-4 py-3 text-sm font-medium text-[color:var(--body)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-300)] hover:bg-[color:var(--violet-50)]',
+              selected ? 'is-selected border-[color:var(--violet-500)] bg-[color:var(--violet-50)] font-bold text-[color:var(--violet-700)]' : '',
             ].join(' ')}
           >
             <input type="checkbox" checked={selected} onChange={() => onChange(opt)} className="sr-only" />
             <span
               className={[
-                'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] border-2 border-[color:var(--line)] transition duration-200',
+                'option-group-dot flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] border-2 border-[color:var(--line)] transition duration-200',
                 selected ? 'border-[color:var(--violet-600)] bg-[color:var(--violet-600)] text-white' : '',
               ].join(' ')}
             >
               {selected && '✓'}
             </span>
-            {opt}
+            <span className="option-group-text">{opt}</span>
           </label>
         )
       })}

@@ -30,7 +30,7 @@ function getWordPreview(content) {
   }
 }
 
-function ContentPreview({ content, title, onViewFull, quoted = false, className = 'muted' }) {
+function ContentPreview({ content, title, onViewFull, quoted = false, className = '' }) {
   const { preview, isTruncated } = getWordPreview(content)
 
   return (
@@ -193,12 +193,11 @@ export default function RaiseDispute() {
               <div>
                 <div className="field-label-top" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Question Details</div>
                 <div
+                  className="raise-dispute-meta-grid"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))',
                     gap: 14,
-                    background: 'var(--violet-50)',
-                    borderRadius: 'var(--radius-s)',
                     padding: 14,
                     fontSize: 14,
                   }}
@@ -214,15 +213,15 @@ export default function RaiseDispute() {
 
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
-                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  <ContentPreview content={selectedQuestion.question} title="Your Question" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
+                <div className="qd-full-content-box" style={{ fontSize: 15, fontStyle: 'italic' }}>
+                  <ContentPreview content={selectedQuestion.question} title="Your Question" quoted onViewFull={setFullContent} />
                 </div>
               </div>
 
               <div>
                 <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
-                <div style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14 }}>
-                  <ContentPreview content={selectedQuestion.answer || 'No answer available.'} title="Astrologer's Answer" quoted className="text-[color:var(--ink)]" onViewFull={setFullContent} />
+                <div className="qd-full-content-box" style={{ fontSize: 15, fontStyle: 'italic' }}>
+                  <ContentPreview content={selectedQuestion.answer || 'No answer available.'} title="Astrologer's Answer" quoted onViewFull={setFullContent} />
                 </div>
               </div>
 
@@ -297,7 +296,7 @@ export default function RaiseDispute() {
               <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)}><X size={16} /></button>
             </div>
             <div className="modal-card__content user-modal-card__content">
-              <div style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+              <div className="qd-full-content-box">{fullContent.content}</div>
             </div>
             <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>

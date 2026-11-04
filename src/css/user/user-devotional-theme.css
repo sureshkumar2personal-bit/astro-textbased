@@ -4669,5 +4669,162 @@ html[data-theme='dark'] .app-shell--user .subscription-plan-summary__price {
   color: #FBBF24 !important;
 }
 
+/* ==========================================================================
+   DISPUTE MODAL & QUESTION TRACKING ENHANCEMENTS
+   ========================================================================== */
+
+/* Raise Dispute Meta Grid */
+.raise-dispute-meta-grid {
+  background: #FAF7F2 !important;
+  border: 1px solid #EFE7DA !important;
+  border-radius: 12px !important;
+  color: #1E1B24 !important;
+}
+
+.raise-dispute-meta-grid strong {
+  color: #1E1B24 !important;
+}
+
+.raise-dispute-meta-grid .muted {
+  color: #5C5564 !important;
+}
+
+html[data-theme='dark'] .raise-dispute-meta-grid {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .raise-dispute-meta-grid strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .raise-dispute-meta-grid .muted {
+  color: #C8B79B !important;
+}
+
+/* Option Group Cards (Radio & Checkbox Groups) */
+.option-group-card {
+  background: #FAF7F2 !important;
+  border-color: #EFE7DA !important;
+  color: #1E1B24 !important;
+  box-shadow: 0 1px 3px rgba(70, 50, 25, 0.06) !important;
+}
+
+.option-group-card:hover {
+  border-color: #EA580C !important;
+  background: #FFF7ED !important;
+}
+
+.option-group-card.is-selected {
+  border-color: #EA580C !important;
+  background: #FFF7ED !important;
+  color: #EA580C !important;
+}
+
+.option-group-card .option-group-dot {
+  border-color: #D9CEBE !important;
+  background: transparent !important;
+}
+
+.option-group-card.is-selected .option-group-dot {
+  border-color: #EA580C !important;
+  background: #EA580C !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme='dark'] .option-group-card {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .option-group-card:hover {
+  border-color: #FBBF24 !important;
+  background: #2D231E !important;
+}
+
+html[data-theme='dark'] .option-group-card.is-selected {
+  border-color: #FBBF24 !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .option-group-card .option-group-text {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .option-group-card.is-selected .option-group-text {
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .option-group-card .option-group-dot {
+  border-color: #5C4A3E !important;
+  background: transparent !important;
+  color: transparent !important;
+}
+
+html[data-theme='dark'] .option-group-card.is-selected .option-group-dot {
+  border-color: #FBBF24 !important;
+  background: #FBBF24 !important;
+  color: #1B1512 !important;
+}
+
+/* UploadField Dropzone */
+.upload-field-box {
+  background: #FAF7F2 !important;
+  border: 1.5px dashed #D9CEBE !important;
+  color: #5C5564 !important;
+  box-shadow: none !important;
+}
+
+.upload-field-box svg {
+  color: #EA580C !important;
+  margin: 0 auto;
+}
+
+.upload-field-box:hover {
+  border-color: #EA580C !important;
+  background: #FFF7ED !important;
+}
+
+html[data-theme='dark'] .upload-field-box {
+  background: #231C18 !important;
+  border: 1.5px dashed #5C4A3E !important;
+  color: #C8B79B !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .upload-field-box svg {
+  color: #FBBF24 !important;
+  margin: 0 auto;
+}
+
+html[data-theme='dark'] .upload-field-box:hover {
+  border-color: #FBBF24 !important;
+  background: #2D231E !important;
+}
+
+/* Dispute Window Note & Raise Dispute Action in Question Tracking */
+html[data-theme='dark'] .aq-track-card__dispute-btn {
+  background: rgba(239, 68, 68, 0.16) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #F87171 !important;
+}
+
+html[data-theme='dark'] .aq-track-card__dispute-btn:hover {
+  background: #EF4444 !important;
+  border-color: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme='dark'] .aq-track-card__window {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.28) !important;
+  color: #FBBF24 !important;
+}
+
+
 
 

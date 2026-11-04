@@ -1064,14 +1064,30 @@ html[data-theme='dark'] .raise-dispute-type-copy small {
   gap: 10px;
   padding: 16px 18px;
   border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid #EFE7DA;
+  background: #FFFFFF;
+  box-shadow: 0 4px 18px rgba(180, 135, 75, 0.06);
 }
 
 .eligible-service-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.eligible-service-card-top strong {
+  color: #1E1B24;
+}
+
+html[data-theme='dark'] .eligible-service-card {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .eligible-service-card-top strong {
+  color: #FFFDF9 !important;
 }
 
 /* --------------------------------------------------------------------------
