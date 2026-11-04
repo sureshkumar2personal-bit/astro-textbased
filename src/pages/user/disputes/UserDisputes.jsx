@@ -170,15 +170,15 @@ function DisputeDossierExpanded({ disputeItem, onCollapse, onNavigateQuestion, o
             {isQuestion && question ? (
               <>
                 <div style={{ fontSize: 13, lineHeight: 1.55 }}>
-                  <strong style={{ color: 'var(--text-primary)' }}>Original Question:</strong>
-                  <p style={{ margin: '4px 0 0', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                  <strong className="user-dispute-section-title">Original Question:</strong>
+                  <p className="user-dispute-question-quote" style={{ margin: '4px 0 0', fontStyle: 'italic' }}>
                     “{question.question || '—'}”
                   </p>
                 </div>
                 {question.answer && (
-                  <div style={{ fontSize: 13, lineHeight: 1.55, paddingTop: 8, borderTop: '1px solid var(--border)' }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>Astrologer’s Answer:</strong>
-                    <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)' }}>
+                  <div className="user-dispute-answer-block" style={{ fontSize: 13, lineHeight: 1.55, paddingTop: 8 }}>
+                    <strong className="user-dispute-section-title">Astrologer’s Answer:</strong>
+                    <p className="user-dispute-answer-quote" style={{ margin: '4px 0 0' }}>
                       {question.answer}
                     </p>
                   </div>
@@ -195,11 +195,11 @@ function DisputeDossierExpanded({ disputeItem, onCollapse, onNavigateQuestion, o
           {/* Dispute Reason & Statement */}
           <div className="user-dispute-statement-box">
             <h3><Gavel size={16} /> Dispute Reason & Statement</h3>
-            <div style={{ padding: '10px 14px', borderRadius: 9, background: 'var(--primary-bg)', fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)' }}>
+            <div className="user-dispute-reason-quote">
               “{dispute.reason || '—'}”
             </div>
             {dispute.description && (
-              <p>{dispute.description}</p>
+              <p className="user-dispute-desc-text">{dispute.description}</p>
             )}
           </div>
 

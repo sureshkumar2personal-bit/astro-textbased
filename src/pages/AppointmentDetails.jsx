@@ -9,7 +9,7 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import UserAppointmentExpandedDetails from '../components/user/UserAppointmentExpandedDetails.jsx'
 import AppointmentSectionTabs from './user/appointments/AppointmentSectionTabs.jsx'
-import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
+import UserRescheduleModal from './user/appointments/UserRescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -103,13 +103,11 @@ function UserAppointmentCard({
         <StatusBadge label={statusLabel} />
       </div>
       <div className="user-appointment-card__meta">
-        <span><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
-        <span><CalendarDays size={13} /> {formatDisplayDate(appointment.dateIso, true)}</span>
+        <span className="user-appointment-card__id">Booking ID: {appointment.orderId || appointment.id}</span>
+        <span className="user-appointment-card__amount">₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span>
+        <span className="user-appointment-card__type"><PhoneCall size={13} /> {appointment.type || 'Audio Call'}</span>
+        <span className="user-appointment-card__date"><CalendarDays size={13} /> {formatDisplayDate(appointment.dateIso, true)}</span>
         <span className="user-appointment-card__time"><Clock3 size={13} /> {formatTimeRange(window.startMin, window.endMin)} · {durationLabel}</span>
-      </div>
-      <div className="user-appointment-card__footer">
-        <span>₹{Number(appointment.price || appointment.amount || 0).toLocaleString('en-IN')} paid</span>
-        <span>Booking ID: {appointment.orderId || appointment.id}</span>
       </div>
       <div className="user-appointment-card__actions">
         <button
@@ -401,7 +399,7 @@ export default function AppointmentDetails() {
         </div>
       </section>
     )}
-    {rescheduleTarget && <RescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
+    {rescheduleTarget && <UserRescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>
 }

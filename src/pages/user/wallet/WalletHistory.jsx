@@ -633,14 +633,14 @@ export default function UserWallet({ section = 'overview' }) {
       {/* Top Up Modal */}
       {topUpOpen && createPortal((
         <div className="modal-overlay user-modal-overlay" onClick={() => setTopUpOpen(false)}>
-          <div className="modal-card modal-card--scroll wallet-topup-modal" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card modal-card--scroll wallet-topup-modal" style={{ width: 'min(480px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 <Wallet size={20} /> Add Money
               </div>
               <button type="button" className="icon-btn" aria-label="Close" onClick={() => setTopUpOpen(false)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <div className="wallet-withdraw-info">
                 <div>Available Balance</div>
                 <strong>₹{stats.balance.toLocaleString('en-IN')}</strong>
@@ -680,7 +680,7 @@ export default function UserWallet({ section = 'overview' }) {
                 <div className="wallet-withdraw-summary__total"><span>Will be added</span><strong>₹{Number(topUpAmount || 0).toLocaleString('en-IN')}</strong></div>
               </div>
             </div>
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setTopUpOpen(false)}>Cancel</button>
               <button
                 type="button"
@@ -698,14 +698,14 @@ export default function UserWallet({ section = 'overview' }) {
       {/* Top Up Confirm Modal */}
       {topUpConfirmOpen && createPortal((
         <div className="modal-overlay user-modal-overlay" onClick={() => setTopUpConfirmOpen(false)}>
-          <div className="modal-card" style={{ width: 'min(440px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(440px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 <Wallet size={20} /> Confirm Top-Up
               </div>
               <button type="button" className="icon-btn" aria-label="Close" onClick={() => setTopUpConfirmOpen(false)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <div className="withdraw-review">
                 <div className="withdraw-review-row">
                   <span>Amount to add</span>
@@ -725,7 +725,7 @@ export default function UserWallet({ section = 'overview' }) {
                 </div>
               </div>
             </div>
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setTopUpConfirmOpen(false)}>Back</button>
               <button
                 type="button"
@@ -743,15 +743,15 @@ export default function UserWallet({ section = 'overview' }) {
       {/* Spending Category Detail Modal */}
       {categoryDetailKind && createPortal((
         <div className="modal-overlay user-modal-overlay" onClick={() => setCategoryDetailKind(null)}>
-          <div className="modal-card modal-card--scroll" style={{ width: 'min(760px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card modal-card--scroll" style={{ width: 'min(760px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 {USER_SPENDING_CATEGORY_LABELS[categoryDetailKind]} — {dateRange ? dateRange.label : 'Selected period'}
                 <span className="wallet-modal-count">{categoryEarnings.rows.length} records · ₹{categoryEarnings.total.toLocaleString('en-IN')}</span>
               </div>
               <button type="button" className="icon-btn" aria-label="Close" onClick={() => setCategoryDetailKind(null)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               {categoryEarnings.rows.length === 0 ? (
                 <div className="muted" style={{ padding: '24px 0', textAlign: 'center' }}>No spending in this category this month.</div>
               ) : (
@@ -788,14 +788,14 @@ export default function UserWallet({ section = 'overview' }) {
       {/* Transaction Detail Modal */}
       {selectedTxn && createPortal((
         <div className="modal-overlay user-modal-overlay" onClick={() => setSelectedTxn(null)}>
-          <div className="modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}>
                 <History size={20} /> Transaction Details
               </div>
               <button type="button" className="icon-btn" aria-label="Close" onClick={() => setSelectedTxn(null)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <div className="wallet-detail-grid">
                 <div><span>Transaction ID</span><strong>{selectedTxn.id}</strong></div>
                 <div><span>Date</span><strong>{fmtDate(selectedTxn.date)}</strong></div>

@@ -1054,7 +1054,7 @@ const selectedQuestion = detailsOpen
 
               {selectedQuestion.status === 'Pending' && selectedQuestion.submittedAt && (
                 <div>
-                  <div className="field-label-top" style={{ marginBottom: 8 }}>Time Limits</div>
+                  <div className="field-label-top qd-section-label">Time Limits</div>
                   <div className="flex flex-wrap gap-3">
                     {(() => {
                       const { editTimeRemaining, deleteTimeRemaining, isEditEnabled, isDeleteEnabled } = getQuestionTimeLimits(selectedQuestion)
@@ -1080,7 +1080,7 @@ const selectedQuestion = detailsOpen
               )}
 
               {selectedQuestion.dispute && (
-                <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
+                <Card className="qd-dispute-card">
                   <div className="section-title" style={{ marginBottom: 2 }}>Dispute</div>
                   <div><strong>Target</strong><div className="muted">{selectedQuestion.dispute.target || '—'}</div></div>
                   <div><strong>Reason</strong><ContentPreview content={selectedQuestion.dispute.reason} title="Dispute Reason" onViewFull={setFullContent} /></div>
@@ -1225,7 +1225,7 @@ const selectedQuestion = detailsOpen
               <button type="button" className="icon-btn" aria-label="Close full content" onClick={() => setFullContent(null)}><X size={16} /></button>
             </div>
             <div className="modal-card__content user-modal-card__content">
-              <div style={{ fontSize: 15, lineHeight: 1.55, color: 'var(--ink)', background: 'var(--violet-50)', borderRadius: 'var(--radius-s)', padding: 14, whiteSpace: 'pre-wrap' }}>{fullContent.content}</div>
+              <div className="qd-full-content-box">{fullContent.content}</div>
             </div>
             <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-primary" onClick={() => setFullContent(null)}>Close</button>
