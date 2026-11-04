@@ -9,7 +9,7 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import UserAppointmentExpandedDetails from '../components/user/UserAppointmentExpandedDetails.jsx'
 import AppointmentSectionTabs from './user/appointments/AppointmentSectionTabs.jsx'
-import RescheduleModal from './astrologer/appointments/RescheduleModal.jsx'
+import UserRescheduleModal from './user/appointments/UserRescheduleModal.jsx'
 import HistoryCalendar from './astrologer/appointments/HistoryCalendar.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
@@ -399,7 +399,7 @@ export default function AppointmentDetails() {
         </div>
       </section>
     )}
-    {rescheduleTarget && <RescheduleModal variant="user" appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
+    {rescheduleTarget && <UserRescheduleModal appointment={rescheduleTarget} appointments={userAppointments} astrologerId={rescheduleTarget.astrologerId} onClose={() => setRescheduleTarget(null)} />}
     {notice && <SuccessAlert variant="user" message={notice} onDismiss={() => setNotice('')} />}
   </div>
 }
