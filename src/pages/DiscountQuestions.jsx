@@ -8,6 +8,7 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import { mockAstrologers } from '../data/notificationData.js'
+import { getAstrologerPhoto } from '../data/astrologerPhotos.js'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
 
 function getRemainingDays(validUntil) {
@@ -91,12 +92,17 @@ export default function DiscountQuestions() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {subscribedAstrologers.map((question) => {
               const astrologer = getAstrologer(question.astrologerId)
+              const photo = getAstrologerPhoto(astrologer || question.astrologerId || question.astrologerName)
               return (
                 <Card key={question.astrologerId} hover>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white">
-                        {question.astrologerName.split(' ').map((part) => part[0]).slice(0, 2).join('')}
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white">
+                        {photo ? (
+                          <img src={photo} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          question.astrologerName.split(' ').map((part) => part[0]).slice(0, 2).join('')
+                        )}
                       </div>
                       <div>
                         <h2 className="text-lg font-bold">{question.astrologerName}</h2>

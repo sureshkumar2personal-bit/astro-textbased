@@ -150,7 +150,7 @@ export default function Autopay() {
       {userPaymentMethods.length === 0 ? (
         <Card>
           <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 14, background: 'var(--violet-50)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+            <div className="autopay-icon-badge" style={{ width: 56, height: 56, borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
               <RefreshCw size={26} style={{ color: 'var(--primary)' }} />
             </div>
             <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 6 }}>Add a payment method first</div>
@@ -191,19 +191,19 @@ export default function Autopay() {
 
       {confirmRevoke && createPortal(
         <div className="modal-overlay user-modal-overlay" onClick={() => setConfirmRevoke(null)}>
-          <div className="modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(420px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><AlertTriangle size={20} /> Revoke Autopay?</div>
               <button type="button" className="icon-btn" onClick={() => setConfirmRevoke(null)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: 0 }}>
                 {confirmRevoke.type === 'subscription'
                   ? 'Your subscription renewal will stop. You will need to renew manually before expiry.'
                   : 'Your automatic wallet top-up will stop. Your balance may run low without auto top-up.'}
               </p>
             </div>
-            <div className="modal-card__footer">
+            <div className="modal-card__footer user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setConfirmRevoke(null)}>Keep</button>
               <button type="button" className="btn btn-primary" style={{ background: 'var(--danger, #b91c1c)' }} onClick={() => handleRevoke(confirmRevoke.id)}>
                 Yes, Revoke

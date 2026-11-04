@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import BackButton from '../BackButton.jsx'
 import { useGlobalHeaderActions } from '../../contexts/GlobalHeaderActionsContext.jsx'
 
-export default function PageHeader({ eyebrow, title, subtitle, showBack = false, backTo, backIcon, backLabel, backOnClick, actions, className = '', style }) {
+export default function PageHeader({ eyebrow, title, subtitle, showBack = false, backTo, backIcon, backLabel, backOnClick, actions, className = '', style, children }) {
   const global = useGlobalHeaderActions()
   const isGenericPortalEyebrow = ['User portal', 'USER PORTAL', 'Astrologer', 'Astrologer portal', 'ASTROLOGER PORTAL', 'Astrologer workspace', 'Astrologer Workspace'].includes(eyebrow)
   const showEyebrow = eyebrow && (!isGenericPortalEyebrow || title === 'Ask a Question' || title === 'Edit Question')
@@ -26,10 +26,11 @@ export default function PageHeader({ eyebrow, title, subtitle, showBack = false,
           {showEyebrow && <div className="page-eyebrow">{eyebrow}</div>}
           <h1 className="page-title">{title}</h1>
           {subtitle && <p className="muted" style={{ marginTop: 8, maxWidth: 640 }}>{subtitle}</p>}
+          {children}
         </div>
         <div className="page-header-actions">
           {actions}
-          {global?.actions}
+          {global?.isAstrologer && global?.actions}
         </div>
       </div>
     </>

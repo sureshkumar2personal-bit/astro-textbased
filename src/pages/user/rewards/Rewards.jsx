@@ -27,6 +27,7 @@ import PageHeader from '../../../components/ui/PageHeader.jsx'
 import StatCard from '../../../components/ui/StatCard.jsx'
 import UserZodiacPerks from './UserZodiacPerks.jsx'
 import { getAstrologerById, REWARD_STATUS, APPOINTMENT_REWARDS, CONTENT_REWARDS } from './rewardsData.js'
+import { getAstrologerPhoto } from '../../../data/astrologerPhotos.js'
 
 const DAYS_MS = 24 * 60 * 60 * 1000
 
@@ -77,9 +78,10 @@ function initialsFor(name) {
 }
 
 function Avatar({ astrologer, name }) {
+  const photo = astrologer?.photo || astrologer?.profileImage || getAstrologerPhoto(astrologer || name)
   return (
     <span className="reward-avatar" aria-hidden="true">
-      {astrologer?.initials || initialsFor(name || astrologer?.name)}
+      {photo ? <img src={photo} alt="" /> : (astrologer?.initials || initialsFor(name || astrologer?.name))}
     </span>
   )
 }
@@ -232,7 +234,6 @@ function AppointmentSection({ rewards, expand, onViewMore, viewMoreLabel }) {
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><CalendarCheck size={20} /> {CATEGORY_META.appointments.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.appointments.description}</p>
       </div>
       <Reveal
         items={rewards}
@@ -289,7 +290,6 @@ function ContentSection({ rewards, openContent, expand, onViewMore, viewMoreLabe
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><Newspaper size={20} /> {CATEGORY_META.content.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.content.description}</p>
       </div>
       <Reveal
         items={rewards}
@@ -334,7 +334,6 @@ function BenefitSection({ rewards, expand, onViewMore }) {
     <>
       <div className="reward-section-head">
         <h2 className="reward-section-title"><Ticket size={20} /> {CATEGORY_META.benefits.label}</h2>
-        <p className="reward-section-desc">{CATEGORY_META.benefits.description}</p>
       </div>
       <Reveal
         items={rewards}

@@ -20,7 +20,7 @@ export function getRoleRoutes(role) {
     purchasePackage: `${base}/purchase-package`,
     disputes: `${base}/disputes`,
     askQuestion: `${base}/ask-question`,
-    trackQuestions: `${base}/track-questions`,
+    trackQuestions: role === ROLES.USER ? `${base}/ask-question/my-questions` : `${base}/track-questions`,
     raiseDispute: `${base}/raise-dispute`,
     textBasedQuestions: `${base}/text-based-questions`,
     salesManagement: `${base}/sales-management`,

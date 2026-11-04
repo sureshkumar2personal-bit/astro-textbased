@@ -1,6 +1,7 @@
 import { MessageCircle, Phone } from 'lucide-react'
 import Card from '../ui/Card.jsx'
 import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 
 function formatCount(count) {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
@@ -16,6 +17,7 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
   const astrologer = withSavedRates(baseAstrologer)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
+  const photo = astrologer.photo || astrologer.profileImage || getAstrologerPhoto(astrologer)
 
   return (
     <Card hover className="astrologer-card consultation-directory-astrologer-card">
@@ -25,8 +27,12 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
 
       <div className="astrologer-card__content">
         <div className="astrologer-card__avatar-wrap">
-          <div className="flex h-14 w-14 overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] shadow-lg">
-            <img className="h-full w-full object-cover" src={astrologer.profileImage} alt={`${astrologer.name} profile`} />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,var(--violet-500),var(--violet-700))] font-bold text-white shadow-lg">
+            {photo ? (
+              <img className="h-full w-full object-cover" src={photo} alt={`${astrologer.name} profile`} />
+            ) : (
+              astrologer.name.split(' ').map((p) => p[0]).slice(0, 2).join('')
+            )}
           </div>
           <span
             className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white ${

@@ -167,15 +167,15 @@ export default function PurchasePackage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
                   <div>
                     <div className="field-label-top">General Questions Available</div>
-                    <div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700 }}>{selectedCampaign.generalLimit}</div>
+                    <div className="text-input" style={{ fontWeight: 700 }}>{selectedCampaign.generalLimit}</div>
                   </div>
                   <div>
                     <div className="field-label-top">Individual Questions Available</div>
-                    <div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700 }}>{selectedCampaign.personalLimit}</div>
+                    <div className="text-input" style={{ fontWeight: 700 }}>{selectedCampaign.personalLimit}</div>
                   </div>
                   <div>
                     <div className="field-label-top">Total Package Questions</div>
-                    <div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700 }}>{selectedCampaign.totalLimit}</div>
+                    <div className="text-input" style={{ fontWeight: 700 }}>{selectedCampaign.totalLimit}</div>
                   </div>
                 </div>
               </Card>
@@ -293,9 +293,9 @@ export default function PurchasePackage() {
                 <Card>
                   <div className="section-title" style={{ fontSize: 15 }}>Package Details</div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, alignItems: 'stretch' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>General Questions Available</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.generalLimit}</div></div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Individual Questions Available</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.personalLimit}</div></div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Total Package Questions</div><div className="text-input" style={{ background: 'var(--violet-50)', fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.totalLimit}</div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>General Questions Available</div><div className="text-input" style={{ fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.generalLimit}</div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Individual Questions Available</div><div className="text-input" style={{ fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.personalLimit}</div></div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}><div className="field-label-top" style={{ minHeight: 32, margin: 0 }}>Total Package Questions</div><div className="text-input" style={{ fontWeight: 700, textAlign: 'center' }}>{selectedCampaign.totalLimit}</div></div>
                   </div>
                 </Card>
 

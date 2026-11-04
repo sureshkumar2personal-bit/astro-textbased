@@ -2,7 +2,8 @@ import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, CircleAlert, Clock3, Copy, PhoneCall, Sparkles, WalletCards, X } from 'lucide-react'
-import { MOCK_FULL_DATES, MOCK_SEPTEMBER_AVAILABILITY } from '../../pages/user/appointments/bookingAstrologerData.js'
+import { BOOKING_WINDOW_END, MOCK_FULL_DATES, MOCK_SEPTEMBER_AVAILABILITY } from '../../pages/user/appointments/bookingAstrologerData.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 
 const PRICE = 499
 const TYPE = 'Audio Call'
@@ -64,7 +65,7 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
   const navigate = useNavigate()
   const todayDate = new Date()
   const today = keyFor(todayDate)
-  const bookingWindowEnd = '2026-09-30'
+  const bookingWindowEnd = BOOKING_WINDOW_END
   const usesConfiguredAvailability = Object.keys(availability || {}).length > 0
   const calendarAvailability = useMemo(() => usesConfiguredAvailability ? availability : MOCK_SEPTEMBER_AVAILABILITY, [availability, usesConfiguredAvailability])
   const firstDate = useMemo(() => Object.keys(calendarAvailability).filter((date) => slotsForDate(calendarAvailability, date, today, bookingWindowEnd).length && !MOCK_FULL_DATES.has(date)).sort()[0] || '', [calendarAvailability, today, bookingWindowEnd])
@@ -134,8 +135,19 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
       setNotice('Insufficient wallet balance. Please add money before paying.')
       return
     }
-    const slotPayloads = selected.map((slot) => ({ astrologerId: astrologer.id, dateIso: slot.date, time: slot.time }))
-    const isLocallyAvailable = (slot) => dateSlots(slot.date).includes(slot.time) && !booked.has(`${slot.date}|${slot.time}`)
+    const slotPayloads = selected.map((slot) => ({
+      astrologerId: astrologer.id,
+      date: slot.date,
+      dateIso: slot.date,
+      time: slot.time,
+    }))
+    const isLocallyAvailable = (slot) => {
+      const slotDate = slot.date || slot.dateIso
+      return (
+        (dateSlots(slotDate).includes(slot.time) || (initialSelectedSlots || []).some((s) => (s.date || s.dateIso) === slotDate && s.time === slot.time)) &&
+        !booked.has(`${slotDate}|${slot.time}`)
+      )
+    }
     const isAvailable = (slot) => publishedAvailability && typeof actions.isAppointmentSlotAvailable === 'function'
       ? actions.isAppointmentSlotAvailable(slot)
       : isLocallyAvailable(slot)
@@ -188,7 +200,20 @@ export default function AppointmentBookingModal({ astrologer, availability = {},
     <div className="modal-overlay user-modal-overlay" onClick={onClose}>
       <div className={`modal-card user-modal-card appointment-booking-modal appointment-booking-modal--${step}`} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header user-modal-card__header appointment-booking-modal__header flex items-start justify-between gap-4">
-          <div className="appointment-booking-heading"><div className="appointment-booking-avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div><div><div className="section-title" style={{ marginBottom: 3 }}>{step === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div><strong>{astrologer.name}</strong><span>{astrologer.specialization} · {TYPE}</span></div></div>
+          <div className="appointment-booking-heading">
+            <div className="appointment-booking-avatar">
+              {getAstrologerPhoto(astrologer) ? (
+                <img src={getAstrologerPhoto(astrologer)} alt={`${astrologer.name} profile`} />
+              ) : (
+                astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+              )}
+            </div>
+            <div>
+              <div className="section-title" style={{ marginBottom: 3 }}>{step === 'success' ? 'Appointment Confirmed' : 'Book Appointment'}</div>
+              <strong>{astrologer.name}</strong>
+              <span>{astrologer.specialization} · {TYPE}</span>
+            </div>
+          </div>
           <button type="button" className="icon-btn" aria-label="Close booking popup" onClick={onClose}><X size={16} /></button>
         </div>
         <div className="modal-card__content user-modal-card__content">

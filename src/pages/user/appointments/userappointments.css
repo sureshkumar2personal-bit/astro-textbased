@@ -10,31 +10,82 @@
 .user-appointment-identity > div { display:grid; gap:2px; min-width:0; }
 .user-appointment-identity strong { color:var(--ink); font-size:13px; font-weight:800; }
 .user-appointment-identity div span { color:var(--muted); font-size:10px; }
-.user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
+.user-appointment-avatar { display:grid; place-items:center; width:32px; height:32px; flex:none; border-radius:50%; overflow:hidden; background:linear-gradient(135deg,var(--violet-500),var(--violet-700)); color:#fff; font-size:10px; font-weight:800; }
+.user-appointment-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
 .user-appointment-avatar--large { width:40px; height:40px; font-size:12px; }
-.user-appointment-card__meta { display:grid; gap:6px; color:var(--muted); font-size:10px; }
-.user-appointment-card__meta span { display:flex; align-items:center; gap:5px; }
-.user-appointment-card__time { justify-content:flex-end; color:var(--ink); font-weight:700; }
-.user-appointment-card__footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:9px; border-top:1px solid var(--surface-border); color:var(--muted); font-size:10px; }
+.user-appointment-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.user-appointment-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.user-appointment-card__amount {
+  color: var(--ink);
+  font-weight: 800;
+}
+.user-appointment-card__time {
+  color: var(--ink);
+  font-weight: 700;
+}
+.user-appointment-card__footer { display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:2px; padding-bottom:8px; border-top:none; color:var(--muted); font-size:10px; }
 .user-appointment-card__footer span:first-child { color:var(--ink); font-weight:800; }
-.user-appointment-card__actions { display:flex; gap:8px; margin-top:1px; }
-.user-appointment-card__actions .btn { flex:1 1 0; min-width:0; }
-.user-appointment-card__actions .btn-danger {
-  flex: 1.3 1 0;
-  box-sizing: border-box;
-  border: 1px solid #dc2626;
-  border-radius: var(--radius-s);
-  background: #dc2626;
-  color: #fff;
+.user-appointment-card__actions {
+  display: flex;
   justify-content: center;
-  padding: 0 10px;
-  font-size: 12px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 0;
+  padding: 8px 0 2px;
+  border-top: 1px solid var(--surface-border);
+}
+.user-appointment-card__actions .btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: auto;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.user-appointment-card__actions .btn-danger {
+  flex: 0 0 auto;
+  width: auto;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #dc2626;
+  justify-content: center;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
   letter-spacing: normal;
   white-space: nowrap;
 }
 .user-appointment-card__actions .btn-danger:hover {
-  border-color: #b91c1c;
-  background: #b91c1c;
+  border: none;
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
 }
 .apt-user-astrologer-notes-content {
   padding: 8px 0 0;
@@ -147,7 +198,12 @@
 .user-appointment-detail-heading > div { display:grid; gap:2px; }
 .user-appointment-detail-heading strong { color:var(--ink); font-size:15px; }
 .user-appointment-detail-heading p { margin:0; color:var(--muted); font-size:11px; }
-@media (max-width:600px) { .user-appointment-card__top { flex-direction:column; }.user-appointment-card__actions .btn { flex:1 1 130px; }.user-appointment-card__actions .btn-danger { flex:1.3 1 130px; } }
+@media (max-width:600px) {
+  .user-appointment-card__top { flex-direction:column; }
+  .user-appointment-card__actions { flex-wrap: wrap; justify-content: center; }
+  .user-appointment-card__actions .btn { flex: 0 0 auto; width: auto; }
+  .user-appointment-card__actions .btn-danger { flex: 0 0 auto; width: auto; }
+}
 
 /* Keep the user history calendar visually aligned with the booking calendar. */
 .user-appointment-history .apt-scheduling-calendar--history {
@@ -275,11 +331,11 @@
   display: grid;
   gap: 14px;
   margin: 8px 0;
-  padding: 18px;
-  border: 1px solid rgba(109, 40, 217, .12);
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, .03), 0 14px 30px rgba(109, 40, 217, .06);
+  padding: 18px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .user-appointment-history .apt-history-list-view__toolbar {
   display: flex;
@@ -298,14 +354,18 @@
 .user-appointment-history .apt-history-list-view__rows { display: grid; gap: 10px; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card { gap: 7px; padding: 10px 12px; border: 1px solid var(--surface-border); border-radius: 14px; background: var(--surface-strong); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-avatar { width: 30px; height: 30px; font-size: 9px; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta { gap: 4px; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta { display: flex; flex-wrap: wrap; align-items: center; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__time { justify-content: flex-start; }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__footer { padding-top: 6px; }
+.user-appointment-history .apt-history-list-view__rows .user-appointment-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.user-appointment-history .apt-history-list-view__rows .user-appointment-card__footer { padding-top: 2px; padding-bottom: 6px; border-top: none; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions { margin-top: 0; }
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card:hover,
 .user-appointment-history .apt-history-list-view__rows .user-appointment-card.is-active { border-color: var(--primary-border); box-shadow: 0 8px 20px rgba(109, 40, 217, .08); transform: translateY(-1px); }
-.user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions { justify-content: flex-end; }
+.user-appointment-history .apt-history-list-view__rows .user-appointment-card__actions { justify-content: center; }
 
 @media (max-width: 760px) {
   .user-appointment-history .apt-history-toolbar { align-items: stretch; flex-direction: column; }
@@ -317,6 +377,8 @@
 .user-appointment-history .apt-history-day-col > .apt-history-search {
   position: static;
   width: 100%;
+  flex: 0 0 auto;
+  height: auto;
   margin: 0 0 0 0;
 }
 .user-appointment-history .apt-history-day-col > .apt-side-head { position: static; width: 100%; margin: 5px 0 0 !important; padding: 0 0 5px; }
@@ -335,13 +397,37 @@
 }
 
 /* User appointment history alignment: keep the calendar and its right-side
-   filter/date/cards column in one stable two-column flow. */
+   filter/date/cards column in a balanced, spacious two-column flow. */
 @media (min-width: 761px) {
   .user-appointment-history .apt-main--history {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(250px, 290px);
+    grid-template-columns: minmax(460px, 1.35fr) minmax(320px, 420px);
     align-items: start;
     gap: 24px;
+  }
+}
+
+@media (min-width: 1121px) {
+  .user-appointment-history .apt-main--history {
+    display: grid;
+    grid-template-columns: minmax(580px, 1.45fr) minmax(360px, 450px);
+    align-items: start;
+    gap: 24px;
+  }
+}
+
+/* When an appointment card is expanded in Calendar view, keep the calendar wide and give side panel comfortable space */
+@media (min-width: 900px) {
+  .user-appointment-history:has(.added-compact-appointment-card.is-expanded) .apt-main--history,
+  .user-appointment-history .apt-main--history:has(.is-expanded) {
+    grid-template-columns: minmax(500px, 1.3fr) minmax(360px, 440px);
+  }
+}
+
+@media (min-width: 1121px) {
+  .user-appointment-history:has(.added-compact-appointment-card.is-expanded) .apt-main--history,
+  .user-appointment-history .apt-main--history:has(.is-expanded) {
+    grid-template-columns: minmax(600px, 1.4fr) minmax(380px, 460px);
   }
 }
 
@@ -349,6 +435,7 @@
   display: flex;
   flex-direction: column;
   align-self: start;
+  position: static;
   width: 100%;
   min-width: 0;
   height: auto;
@@ -359,7 +446,10 @@
   position: static;
   width: 100%;
   min-width: 0;
-  margin: 0 0 -250px !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  max-height: 42px;
+  margin: 0 0 8px 0 !important;
 }
 
 .user-appointment-history .apt-history-day-col > .apt-history-search select {
@@ -370,7 +460,7 @@
 .user-appointment-history .apt-history-day-col > .apt-side-head {
   position: static;
   width: 100%;
-  margin: 5px 0 0 !important;
+  margin: 0 0 10px 0 !important;
   padding: 0 0 6px;
 }
 
@@ -379,7 +469,7 @@
   width: 100%;
   min-width: 0;
   gap: 12px;
-  margin: 10px 0 0;
+  margin: 0;
 }
 
 .user-appointment-history .added-compact-appointment-card {
@@ -395,3 +485,184 @@
     gap: 14px;
   }
 }
+
+/* Inline Extended Row Panel for User Appointment Cards (List & Calendar) */
+.user-appointment-card.is-expanded {
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 20px rgba(109, 40, 217, 0.08);
+}
+
+.added-compact-appointment-card.is-expanded {
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 20px rgba(109, 40, 217, 0.08);
+}
+
+.user-appointment-card__extended {
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(124, 58, 237, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: default;
+  animation: userAptRowExpand 180ms ease-out;
+}
+
+.added-compact-appointment-card__extended {
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(124, 58, 237, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: default;
+  animation: userAptRowExpand 180ms ease-out;
+  max-height: min(65vh, 520px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(109, 40, 217, 0.3) transparent;
+  overscroll-behavior: contain;
+}
+
+.added-compact-appointment-card__extended::-webkit-scrollbar {
+  width: 5px;
+}
+
+.added-compact-appointment-card__extended::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.added-compact-appointment-card__extended::-webkit-scrollbar-thumb {
+  background: rgba(109, 40, 217, 0.28);
+  border-radius: 999px;
+}
+
+.added-compact-appointment-card__extended::-webkit-scrollbar-thumb:hover {
+  background: rgba(109, 40, 217, 0.45);
+}
+
+@keyframes userAptRowExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-appointment-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-appointment-expanded__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-soft, #fbf9ff);
+  border: 1px solid rgba(124, 58, 237, 0.12);
+}
+
+.user-appointment-expanded__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-appointment-expanded__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted, #7c708a);
+}
+
+.user-appointment-expanded__value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink, #291f18);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-appointment-expanded__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.user-appointment-expanded__alert--cancelled {
+  background: #fef2f2;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #991b1b;
+}
+
+.user-appointment-expanded__alert--cancelled strong,
+.user-appointment-expanded__alert--rescheduled strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.user-appointment-expanded__alert--rescheduled {
+  background: #fff7ed;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  color: #9a3412;
+}
+
+.user-appointment-expanded .apt-detail-card {
+  margin-bottom: 0;
+  background: #fff;
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 12px;
+}
+
+.added-compact-appointment-card__extended .apt-detail-card {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  border: 1.5px solid rgba(124, 58, 237, 0.16);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(109, 40, 217, 0.04);
+}
+
+.added-compact-appointment-card__extended .user-appointment-expanded__grid {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px 14px;
+  padding: 12px 14px;
+  background: #fbf9ff;
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  border-radius: 12px;
+}
+
+.user-appointment-expanded__notes-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-appointment-expanded__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+

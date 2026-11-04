@@ -264,7 +264,7 @@ function UserRoutes() {
           <Route path="disputes" element={<QuestionDisputes />} />
           <Route path="history" element={<QuestionHistory />} />
         </Route>
-        <Route path="/user/track-questions" element={<TrackQuestions />} />
+        <Route path="/user/track-questions" element={<Navigate to="/user/ask-question/my-questions" replace />} />
         <Route path="/user/raise-dispute" element={<RaiseDispute />} />
         <Route path="/user/chat-astrologers" element={<ChatAstrologers />} />
         <Route path="/user/astrologer/:astrologerId" element={<AstrologerProfile />} />

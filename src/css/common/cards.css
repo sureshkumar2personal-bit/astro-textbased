@@ -1152,10 +1152,17 @@
   width:28px;
   height:28px;
   border-radius:50%;
+  overflow:hidden;
   color:#fff;
   background:var(--primary);
   font-size:12px;
   font-weight:800;
+}
+.astrologer-content-card__avatar img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
 .astrologer-content-card__top b {
   font-size:11px;

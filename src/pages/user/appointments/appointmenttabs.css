@@ -4,7 +4,7 @@
   gap: 32px;
   width: 100%;
   margin: 4px 0 2px;
-  border-bottom: 1px solid rgba(226, 221, 238, .95);
+  border-bottom: none;
 }
 
 .appointment-section-tab {
@@ -15,7 +15,7 @@
   padding: 8px 2px 11px;
   border: 0;
   border-bottom: 3px solid transparent;
-  color: #697083;
+  color: var(--muted, #697083);
   background: transparent;
   font-size: 18px;
   font-weight: 700;
@@ -32,6 +32,19 @@
 .appointment-section-tab.is-active {
   color: var(--primary, #6d28d9);
   border-bottom-color: var(--primary, #6d28d9);
+}
+
+html[data-theme='dark'] .appointment-section-tab {
+  color: #C8B79B;
+}
+
+html[data-theme='dark'] .appointment-section-tab:hover {
+  color: #FBBF24;
+}
+
+html[data-theme='dark'] .appointment-section-tab.is-active {
+  color: #FBBF24;
+  border-bottom-color: #F59E0B;
 }
 
 @media (max-width: 520px) {

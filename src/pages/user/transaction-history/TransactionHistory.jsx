@@ -312,12 +312,12 @@ export default function TransactionHistory() {
       {/* Transaction Detail Modal */}
       {selectedTxn && createPortal(
         <div className="modal-overlay user-modal-overlay" onClick={() => setSelectedTxn(null)}>
-          <div className="modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-card__header flex items-center justify-between gap-4">
+          <div className="modal-card user-modal-card" style={{ width: 'min(520px, calc(100vw - 32px))' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div className="section-title" style={{ marginBottom: 0 }}><History size={20} /> Transaction Details</div>
               <button type="button" className="icon-btn" onClick={() => setSelectedTxn(null)}><X size={16} /></button>
             </div>
-            <div className="modal-card__content">
+            <div className="modal-card__content user-modal-card__content">
               <div className="txn-detail-grid">
                 <div className="txn-detail-row"><span>Transaction ID</span><strong>{selectedTxn.id}</strong></div>
                 <div className="txn-detail-row"><span>Date</span><strong>{fmtDate(selectedTxn.date)}</strong></div>

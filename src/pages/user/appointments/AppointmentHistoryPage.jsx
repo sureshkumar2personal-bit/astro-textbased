@@ -6,6 +6,7 @@ import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { consultationAstrologers } from '../../../data/consultationAstrologers.js'
 import { mockAstrologers } from '../../../data/notificationData.js'
+import { getAstrologerPhoto } from '../../../data/astrologerPhotos.js'
 import { appointmentStatusBucket, formatDisplayDate, formatTimeRange, getAppointmentDisplayStatus, resolveAppointmentWindow } from '../../../utils/appointments.js'
 import AppointmentSectionTabs from './AppointmentSectionTabs.jsx'
 import './appointmenthistory.css'
@@ -56,7 +57,7 @@ function profileFor(appointment) {
   const profile = consultationAstrologers.find((item) => item.id === appointment.astrologerId)
   const source = mockAstrologers.find((item) => item.id === appointment.astrologerId)
   return {
-    image: profile?.profileImage || appointment.profileImage || '',
+    image: profile?.profileImage || appointment.profileImage || getAstrologerPhoto(appointment.astrologerId || appointment.astrologer) || '',
     specialization: appointment.specialization || source?.specialization || profile?.specialization || 'Vedic Astrology',
   }
 }

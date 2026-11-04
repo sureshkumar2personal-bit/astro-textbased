@@ -93,9 +93,11 @@
 }
 
 .user-appointment-history .apt-history-day-col {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0;
-  align-content: start;
+  align-self: start;
+  position: static;
 }
 
 .user-appointment-history .apt-history-day-col > * {
@@ -231,12 +233,17 @@
 .user-appointment-history .user-appointment-list {
   display: grid;
   gap: 14px;
-  max-height: min(64vh, 520px);
+  max-height: min(85vh, 850px);
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 6px;
   scrollbar-width: thin;
   scrollbar-color: rgba(109, 40, 217, 0.28) transparent;
+}
+
+.user-appointment-history .user-appointment-list:has(.is-expanded) {
+  max-height: none;
+  overflow: visible;
 }
 
 .user-appointment-history .user-appointment-list::-webkit-scrollbar {

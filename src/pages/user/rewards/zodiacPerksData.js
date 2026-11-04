@@ -17,6 +17,92 @@ export const ZODIACS = [
   { sign: 'Pisces', symbol: '♓', en: 'Pisces', rasi: 'Meenam', element: 'Water', dates: getZodiacDateRange('Pisces'), ruler: 'Jupiter & Neptune', luckyColor: 'Sea Green', luckyHex: '#059669', luckyNumber: 7, direction: 'North-East', muhurta: '06:00 AM - 07:30 AM' },
 ]
 
+export const ZODIAC_DAILY_PREDICTIONS = {
+  Aries: 'The Gemini Moon keeps you feeling cheerful and positive throughout the day. If your eyes or ears feel strained, take a break...',
+  Taurus: 'A small act of kindness towards a stranger could bring unexpected happiness today. Keep eating well and add some light stretching to your routine...',
+  Gemini: "Don't let tomorrow's workload ruin your weekend mood today. Be a little careful with what you eat around dinner, as an upset stomach...",
+  Cancer: "You may feel calmer and more emotionally settled today. Take care of your skin and make sure you're drinking enough water...",
+  Leo: "A quick call or chat with close friends could instantly improve your mood today. Your overall health looks stable, but don't ignore any small signals...",
+  Virgo: "Go for a brisk walk or jog today. Getting some movement in could clear your head and leave you feeling refreshed. In love, don't let small doubts linger...",
+  Libra: 'Your mind may be jumping from one idea to another today, so write things down before you forget them. Your health looks fine overall...',
+  Scorpio: 'The Gemini Moon may leave your thoughts scattered today, making some quiet time alone especially helpful. Single Scorpios find clarity...',
+  Sagittarius: 'Put your phone away for a few hours today and give yourself some proper time offline. Your energy levels look strong. Venus brings warm social energy...',
+  Capricorn: 'Focus on organizing your goals and taking measured steps. Trust your inner stamina to handle complex tasks with ease today...',
+  Aquarius: 'Creative inspiration strikes during unexpected conversations. Stay open to fresh perspectives while maintaining your calm center...',
+  Pisces: 'A gentle rhythm carries you through the day. Practice quiet reflection and listen to what your intuition whispers during evening hours...',
+}
+
+export const ZODIAC_WEEKLY_PREDICTIONS = {
+  Aries: 'Mars brings dynamic opportunities in professional projects this week. Collaboration with trusted partners leads to positive momentum...',
+  Taurus: 'Venus fosters emotional grounding and steady financial gains this week. Thursday is exceptionally auspicious for key negotiations...',
+  Gemini: 'Mercury expands networking circles and sparks clever ideas. Mid-week brings clarity to any lingering career queries...',
+  Cancer: 'The lunar transit enhances emotional intelligence and domestic tranquility. Focus on self-care and peaceful family conversations...',
+  Leo: 'Solar vitality shines on leadership decisions. Present your long-term goals with confidence; superiors take notice by mid-week...',
+  Virgo: 'Meticulous planning pays handsome dividends this week. Streamline schedules to allow restful evenings and mindful rejuvenation...',
+  Libra: 'Diplomatic charm helps negotiate agreements and smooth over friction. Weekend brings joyful social gatherings and aesthetic harmony...',
+  Scorpio: 'Penetrating insights uncover promising opportunities. Guard sensitive plans until Thursday when favorable transits peak...',
+  Sagittarius: 'Jupiter opens auspicious pathways for higher learning and strategic planning. A digital detox over the weekend restores vigor...',
+  Capricorn: 'Steady Saturnian discipline ensures continuous upward climb. Financial discipline creates enduring peace of mind this week...',
+  Aquarius: 'Innovative solutions break stubborn logjams. Share your forward-looking perspectives with receptive colleagues on Wednesday...',
+  Pisces: 'Intuitive empathy deepens soulful bonds. Evening contemplation and creative pursuits yield profound inner satisfaction...',
+}
+
+export const ZODIAC_MONTHLY_PREDICTIONS = {
+  Aries: 'A transformative month of bold strides and breakthrough achievements. Channel your passion into structured milestones for maximum success...',
+  Taurus: 'Venusian grace highlights prosperity, property investments, and enduring relational harmony throughout this auspicious month...',
+  Gemini: 'An intellectually vibrant month filled with diverse opportunities. Organize your schedule to balance exciting projects with restorative rest...',
+  Cancer: 'Nurturing family ties and strengthening emotional security define this month. Auspicious muhurtas favor domestic renewals...',
+  Leo: 'Executive authority and creative expression reach yearly peaks. Step up to lead key initiatives with generous confidence...',
+  Virgo: 'Consistent analytical focus delivers tangible career advancement. Financial prudence ensures long-term wealth compounding...',
+  Libra: 'A harmonious month for partnerships, legal clarity, and celebratory milestones. Aesthetic endeavors receive exceptional planetary support...',
+  Scorpio: 'Strategic depth and personal transformation culminate in profound clarity. Release outdated habits to embrace expansive growth...',
+  Sagittarius: 'Expansive horizons beckon with educational and spiritual fulfillment. Auspicious period for long-term vision roadmaps...',
+  Capricorn: 'Durable foundations are cemented as Saturn rewards past perseverance. Career stability and family trust reach new heights...',
+  Aquarius: 'Humanitarian goals and modern collaborations take center stage. Community connections open unexpected avenues of prosperity...',
+  Pisces: 'A deeply intuitive and creatively inspired month. Spiritual practices and charitable acts attract profound karmic blessings...',
+}
+
+export function getZodiacPredictionSnippet(sign, period = 'Daily') {
+  if (period === 'Weekly') return ZODIAC_WEEKLY_PREDICTIONS[sign] || ZODIAC_DAILY_PREDICTIONS[sign]
+  if (period === 'Monthly') return ZODIAC_MONTHLY_PREDICTIONS[sign] || ZODIAC_DAILY_PREDICTIONS[sign]
+  return ZODIAC_DAILY_PREDICTIONS[sign] || ''
+}
+
+export function formatPeriodDateLabel(period, baseDate = new Date()) {
+  const d = baseDate instanceof Date && !isNaN(baseDate.getTime()) ? baseDate : new Date()
+
+  if (period === 'Daily') {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  if (period === 'Weekly') {
+    const day = d.getDay()
+    const diffToMonday = day === 0 ? -6 : 1 - day
+    const mon = new Date(d)
+    mon.setDate(d.getDate() + diffToMonday)
+    const sun = new Date(mon)
+    sun.setDate(mon.getDate() + 6)
+
+    const monMonth = mon.toLocaleDateString('en-US', { month: 'short' })
+    const sunMonth = sun.toLocaleDateString('en-US', { month: 'short' })
+    const monYear = mon.getFullYear()
+    const sunYear = sun.getFullYear()
+
+    if (monMonth === sunMonth && monYear === sunYear) {
+      return `${monMonth} ${mon.getDate()} - ${sun.getDate()}, ${sunYear}`
+    } else if (monYear === sunYear) {
+      return `${monMonth} ${mon.getDate()} - ${sunMonth} ${sun.getDate()}, ${sunYear}`
+    }
+    return `${monMonth} ${mon.getDate()}, ${monYear} - ${sunMonth} ${sun.getDate()}, ${sunYear}`
+  }
+
+  if (period === 'Monthly') {
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  }
+
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 export const RASI_MAP = {
   mesham: 'Aries', mesha: 'Aries', aries: 'Aries',
   rishabam: 'Taurus', vrishabha: 'Taurus', taurus: 'Taurus',
@@ -247,7 +333,7 @@ export const SPECIALIZATIONS = [
 ]
 
 export const PERIODS = ['Daily', 'Weekly', 'Monthly']
-export const SPECIALIZATION_TABS = ['Transit & Event Impact', 'Remedies & Pariharam', 'Mantra & Ritual Timings']
+export const SPECIALIZATION_TABS = ['Remedies & Pariharam', 'Mantra & Sacred Timings']
 
 // Astrologer definitions catalog
 export const ASTROLOGERS_CATALOG = [
@@ -478,8 +564,87 @@ export const ASTROLOGERS_CATALOG = [
   },
 ]
 
-// Fallback generic pillars for other signs
+// Specific pillars for all 12 signs
+const ALL_SIGN_PILLARS = {
+  Aries: {
+    career: { status: 'High Momentum', tip: 'Mars infuses courage into ambitious ventures. Tackle demanding negotiations early in the day.' },
+    love: { status: 'Passionate', tip: 'Direct, sincere affirmations spark warmth. Avoid impulsive reactions in domestic matters.' },
+    wealth: { status: 'Bold Gains', tip: 'Calculated initiatives bring dividends. Review speculative outlays before finalizing.' },
+    health: { status: 'High Energy', tip: 'Channel excess fire into morning workouts or jogging; stay properly hydrated.' },
+  },
+  Taurus: {
+    career: { status: 'High Momentum', tip: 'Venus stimulates diplomatic negotiations. Ideal for presenting creative or financial proposals.' },
+    love: { status: 'Harmonious', tip: 'Gentle conversations deepen affection. An ideal evening for a serene family dinner.' },
+    wealth: { status: 'Favorable', tip: 'Prudent asset allocations yield lasting security. Avoid impulse luxury splurges.' },
+    health: { status: 'Rejuvenating', tip: 'Vitality is high; incorporate mindful breathing and evening chamomile tea.' },
+  },
+  Gemini: {
+    career: { status: 'Dynamic Ideas', tip: 'Mercury sharpens quick thinking and cross-functional communications. Great day for pitch meetings.' },
+    love: { status: 'Playful Spark', tip: 'Witty conversations and shared laughs brighten relationships. Keep plans flexible.' },
+    wealth: { status: 'Diverse Channels', tip: 'Explore collaborative ventures or creative freelancing avenues with measured optimism.' },
+    health: { status: 'Mental Agility', tip: 'Give your eyes and ears periodic screen breaks; practice grounding evening meditation.' },
+  },
+  Cancer: {
+    career: { status: 'Intuitive Depth', tip: 'Trust emotional intelligence when assessing colleagues. A calm demeanor commands respect.' },
+    love: { status: 'Deep Nurturing', tip: 'Heart-to-heart connections flourish. Spend comforting time cooking or relaxing at home.' },
+    wealth: { status: 'Secure Shield', tip: 'Focus on strengthening domestic emergency funds and family-focused investments.' },
+    health: { status: 'Hydrated & Centered', tip: 'Drink plenty of water and prioritize quality sleep to keep emotions beautifully aligned.' },
+  },
+  Leo: {
+    career: { status: 'Commanding Lead', tip: 'Solar vitality highlights your executive leadership. Present your ideas with radiant conviction.' },
+    love: { status: 'Generous Heart', tip: 'Lavish affection and appreciative compliments on your loved ones; warmth is returned tenfold.' },
+    wealth: { status: 'Golden Opportunities', tip: 'Auspicious timing for authoritative contracts and high-value project approvals.' },
+    health: { status: 'Radiant Stamina', tip: 'Bask in morning sunlight; keep your cardiovascular system active and vibrant.' },
+  },
+  Virgo: {
+    career: { status: 'Meticulous Focus', tip: 'Sharp analytical attention spots hidden efficiencies. Complete complex tasks methodically.' },
+    love: { status: 'Thoughtful Service', tip: 'Practical gestures of care and helping out speak much louder than grandiose words.' },
+    wealth: { status: 'Prudent Auditing', tip: 'Reconcile accounts and streamline unnecessary recurring subscriptions for neat savings.' },
+    health: { status: 'Mindful Movement', tip: 'A brisk nature walk clears mental clutter; enjoy wholesome gut-friendly meals.' },
+  },
+  Libra: {
+    career: { status: 'Diplomatic Bridge', tip: 'Venusian tact helps mediate disputes and win partners over to balanced compromises.' },
+    love: { status: 'Romantic Grace', tip: 'Aesthetic surroundings and thoughtful dinner dates nurture long-lasting romantic harmony.' },
+    wealth: { status: 'Balanced Flow', tip: 'Financial decisions benefit from second opinions and structured joint budgets.' },
+    health: { status: 'Serene Balance', tip: 'Yoga, gentle stretching, and soothing music restore energetic equilibrium.' },
+  },
+  Scorpio: {
+    career: { status: 'Strategic Vision', tip: 'Penetrating focus helps solve enigmatic challenges. Guard sensitive plans until finalized.' },
+    love: { status: 'Magnetic Depth', tip: 'Vulnerability builds unbreakable intimacy with trusted partners. Release old grudges.' },
+    wealth: { status: 'Hidden Value', tip: 'In-depth research uncovers lucrative long-term opportunities or tax optimization.' },
+    health: { status: 'Transformative Reset', tip: 'Spend quiet time in contemplative silence or near natural water bodies to recharge.' },
+  },
+  Sagittarius: {
+    career: { status: 'Expansive Horizon', tip: 'Jupiter opens doors to international outreach, higher learning, and visionary roadmaps.' },
+    love: { status: 'Joyful Adventure', tip: 'Spontaneous outings and uplifting discussions deepen spiritual and emotional companionship.' },
+    wealth: { status: 'Abundance Inflow', tip: 'Fortunate outlook for educational investments, mentorships, and entrepreneurial endeavors.' },
+    health: { status: 'Outdoor Rejuvenation', tip: 'Step outdoors into expansive spaces; take a digital detox for mental clarity.' },
+  },
+  Capricorn: {
+    career: { status: 'Steadfast Climb', tip: 'Saturnian discipline ensures steady progress up the organizational ladder. Tenacity wins.' },
+    love: { status: 'Enduring Loyalty', tip: 'Consistent presence and honoring commitments build profound respect and security.' },
+    wealth: { status: 'Compounding Roots', tip: 'Long-term fixed deposits and durable assets provide rock-solid foundation for the future.' },
+    health: { status: 'Skeletal & Joint Care', tip: 'Maintain ergonomic posture; include calcium-rich nourishment and warm herbal oils.' },
+  },
+  Aquarius: {
+    career: { status: 'Innovative Shift', tip: 'Unconventional solutions and community networks spark breakthrough progress on modern projects.' },
+    love: { status: 'Intellectual Affinity', tip: 'Stimulating discussions on shared humanitarian ideals forge magnetic emotional bonds.' },
+    wealth: { status: 'Modern Assets', tip: 'Explore tech-forward savings tools while keeping a prudent conservative anchor.' },
+    health: { status: 'Circulation & Breath', tip: 'Breathing exercises (Pranayama) and ankle flexibility movements boost daily vitality.' },
+  },
+  Pisces: {
+    career: { status: 'Creative Intuition', tip: 'Imaginative vision and empathy elevate your craft. Trust subtle hunches in creative work.' },
+    love: { status: 'Soulful Kinship', tip: 'Compassionate listening dissolves emotional distances. Unconditional warmth abounds.' },
+    wealth: { status: 'Karmic Flow', tip: 'Charitable giving (Daana) brings unexpected karmic blessings and peace of mind.' },
+    health: { status: 'Dream & Rest', tip: 'Prioritize restful sleep and gentle evening foot massage with warm sesame oil.' },
+  },
+}
+
+// Fallback sign pillars
 export function getSignPillars(sign, period) {
+  if (sign && ALL_SIGN_PILLARS[sign]) {
+    return ALL_SIGN_PILLARS[sign]
+  }
   return {
     career: { status: 'Favorable', tip: 'Planetary alignments favor focused work and collaborative discussions.' },
     love: { status: 'Harmonious', tip: 'Honest communication nurtures warmth and mutual understanding.' },

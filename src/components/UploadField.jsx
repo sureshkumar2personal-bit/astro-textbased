@@ -20,7 +20,7 @@ export default function UploadField({ label, accept, onFileSelect, fileName: con
   return (
     <div>
       <div
-        className="cursor-pointer rounded-[18px] border-2 border-dashed border-[color:var(--violet-200)] bg-[linear-gradient(180deg,rgba(244,239,255,0.95),rgba(255,255,255,0.9))] px-6 py-7 text-center text-sm font-semibold text-[color:var(--violet-700)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-500)] hover:bg-[color:var(--violet-100)] hover:shadow-[0_8px_24px_rgba(76,29,149,0.11)]"
+        className="upload-field-box cursor-pointer rounded-[18px] border-2 border-dashed border-[color:var(--violet-200)] bg-[linear-gradient(180deg,rgba(244,239,255,0.95),rgba(255,255,255,0.9))] px-6 py-7 text-center text-sm font-semibold text-[color:var(--violet-700)] shadow-[0_1px_2px_rgba(27,20,54,0.06),0_8px_18px_rgba(91,57,192,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--violet-500)] hover:bg-[color:var(--violet-100)] hover:shadow-[0_8px_24px_rgba(76,29,149,0.11)]"
         onClick={() => inputRef.current?.click()}
         role="button"
         tabIndex={0}

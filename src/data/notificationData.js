@@ -1,3 +1,5 @@
+import { getAstrologerPhoto } from './astrologerPhotos.js'
+
 export const NOTIFICATION_TABS = [
   { key: 'all', label: 'All' },
   { key: 'unread', label: 'Unread' },
@@ -46,7 +48,11 @@ const suggestedAstrologerProfiles = [
   { id: 'astrologer-24', name: 'Gautam Reddy', specialization: 'Vedic Astrology', type: 'Finance, Property, Business', experience: '16 years', availability: 'Online', languages: ['English', 'Telugu', 'Hindi'], rating: '4.9 / 5', reviews: '4,120 reviews', bio: 'Gautam offers experienced Vedic astrology guidance for finance, property, and business questions.', followers: 6080, subscribers: 410 },
   { id: 'astrologer-25', name: 'Neha Sood', specialization: 'Tarot Reading', type: 'Self Discovery, Love, Career', experience: '8 years', availability: 'Offline', languages: ['English', 'Hindi'], rating: '4.7 / 5', reviews: '1,520 reviews', bio: 'Neha uses tarot to create a calm space for self-discovery, love, and career conversations.', followers: 2270, subscribers: 150 },
   { id: 'astrologer-26', name: 'Suresh Pillai', specialization: 'Astro Remedies', type: 'Remedies, Health, Peace of Mind', experience: '18 years', availability: 'Online', languages: ['English', 'Tamil', 'Malayalam'], rating: '4.9 / 5', reviews: '4,680 reviews', bio: 'Suresh recommends traditional astro remedies to support health, balance, and peace of mind.', followers: 7020, subscribers: 460 },
-]
+].map((astrologer) => ({
+  ...astrologer,
+  photo: getAstrologerPhoto(astrologer),
+  profileImage: getAstrologerPhoto(astrologer),
+}))
 
 export const mockAstrologers = [
   {
@@ -264,7 +270,11 @@ export const mockAstrologers = [
     subscribers: 190,
   },
   ...suggestedAstrologerProfiles,
-]
+].map((astrologer) => ({
+  ...astrologer,
+  photo: getAstrologerPhoto(astrologer),
+  profileImage: getAstrologerPhoto(astrologer),
+}))
 
 // The subscribed list is intentionally separate from the user's followed IDs.
 // Additional catalog entries can be followed without appearing in this list.
@@ -441,7 +451,7 @@ export const mockAppointments = [
     status: 'Completed',
   },
   {
-    id: 'apt-cancelled-demo',
+    id: 'apt-cancelled-01',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo-3',
     astrologer: 'Arjun Sharma',
@@ -462,14 +472,14 @@ export const mockAppointments = [
     status: 'Cancelled',
   },
   {
-    id: 'apt-user-demo-02',
+    id: 'apt-user-02',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo',
     astrologer: 'Dr. Rani',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-02',
+    orderId: 'apt-2026-0002',
     amount: 699,
     duration: '30 min',
     date: '11 Sep 2026',
@@ -480,14 +490,14 @@ export const mockAppointments = [
     status: 'Pending',
   },
   {
-    id: 'apt-user-demo-03',
+    id: 'apt-user-03',
     userId: 'user-demo',
     astrologerId: 'acharya-meena',
     astrologer: 'Acharya Meena',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-03',
+    orderId: 'apt-2026-0003',
     amount: 799,
     duration: '45 min',
     date: '12 Sep 2026',
@@ -498,14 +508,14 @@ export const mockAppointments = [
     status: 'Booked',
   },
   {
-    id: 'apt-user-demo-04',
+    id: 'apt-user-04',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo-3',
     astrologer: 'Arjun Sharma',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-04',
+    orderId: 'apt-2026-0004',
     amount: 599,
     duration: '30 min',
     date: '14 Sep 2026',
@@ -516,14 +526,14 @@ export const mockAppointments = [
     status: 'Completed',
   },
   {
-    id: 'apt-user-demo-05',
+    id: 'apt-user-05',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo',
     astrologer: 'Dr. Rani',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-05',
+    orderId: 'apt-2026-0005',
     amount: 499,
     duration: '30 min',
     date: '16 Sep 2026',
@@ -534,14 +544,14 @@ export const mockAppointments = [
     status: 'Rescheduled',
   },
   {
-    id: 'apt-user-demo-06',
+    id: 'apt-user-06',
     userId: 'user-demo',
     astrologerId: 'acharya-meena',
     astrologer: 'Acharya Meena',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-06',
+    orderId: 'apt-2026-0006',
     amount: 899,
     duration: '40 min',
     date: '18 Sep 2026',
@@ -552,14 +562,14 @@ export const mockAppointments = [
     status: 'Booked',
   },
   {
-    id: 'apt-user-demo-07',
+    id: 'apt-user-07',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo-3',
     astrologer: 'Arjun Sharma',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-07',
+    orderId: 'apt-2026-0007',
     amount: 699,
     duration: '30 min',
     date: '21 Sep 2026',
@@ -570,14 +580,14 @@ export const mockAppointments = [
     status: 'Cancelled',
   },
   {
-    id: 'apt-user-demo-08',
+    id: 'apt-user-08',
     userId: 'user-demo',
     astrologerId: 'astrologer-demo',
     astrologer: 'Dr. Rani',
     type: 'Audio Call',
     callType: 'Audio',
     customerName: 'Priya V.',
-    orderId: 'apt-demo-08',
+    orderId: 'apt-2026-0008',
     amount: 799,
     duration: '30 min',
     date: '24 Sep 2026',
@@ -643,7 +653,10 @@ export const mockAppointments = [
     topic: 'Marriage',
     status: 'Pending',
   }),
-]
+].map((apt) => ({
+  ...apt,
+  profileImage: apt.profileImage || getAstrologerPhoto(apt.astrologerId || apt.astrologer),
+}))
 
 // ---- Historical appointment records --------------------------------------
 // These records are independent of the Schedule calendar. They represent

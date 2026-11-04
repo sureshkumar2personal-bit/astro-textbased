@@ -30,11 +30,11 @@ function demoConsultations() {
     }
   }
   return [
-    session('instant-demo-call-001', 'call', 'Dr. Rani', 15, 1),
-    session('instant-demo-chat-001', 'chat', 'Dr. Rani', 20, 2, [{ id: 'instant-demo-chat-001-message', sender: 'astrologer', text: 'Your chart shows a positive period for steady career progress.', sentAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString() }]),
-    session('instant-demo-call-002', 'call', 'Dr. Rani', 10, 3),
-    session('instant-demo-chat-002', 'chat', 'Dr. Rani', 30, 4, [{ id: 'instant-demo-chat-002-message', sender: 'user', text: 'I would like guidance about my next step.', sentAt: new Date(now - 4 * 24 * 60 * 60 * 1000).toISOString() }]),
-    session('instant-demo-chat-003', 'chat', 'Dr. Rani', 15, 5, [{ id: 'instant-demo-chat-003-message', sender: 'astrologer', text: 'Focus on consistency and give this decision time to develop.', sentAt: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString() }]),
+    session('instant-call-2026-001', 'call', 'Dr. Rani', 15, 1),
+    session('instant-chat-2026-001', 'chat', 'Dr. Rani', 20, 2, [{ id: 'instant-chat-2026-001-message', sender: 'astrologer', text: 'Your chart shows a positive period for steady career progress.', sentAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString() }]),
+    session('instant-call-2026-002', 'call', 'Dr. Rani', 10, 3),
+    session('instant-chat-2026-002', 'chat', 'Dr. Rani', 30, 4, [{ id: 'instant-chat-2026-002-message', sender: 'user', text: 'I would like guidance about my next step.', sentAt: new Date(now - 4 * 24 * 60 * 60 * 1000).toISOString() }]),
+    session('instant-chat-2026-003', 'chat', 'Dr. Rani', 15, 5, [{ id: 'instant-chat-2026-003-message', sender: 'astrologer', text: 'Focus on consistency and give this decision time to develop.', sentAt: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString() }]),
   ]
 }
 
@@ -55,11 +55,12 @@ function writeAll(requests) {
 }
 
 export function getInstantConsultations() {
-  const stored = readAll()
+  const rawStored = readAll()
+  const stored = rawStored.filter((entry) => !entry.id?.startsWith('instant-demo-'))
   const demo = demoConsultations()
   if (typeof window === 'undefined') return stored
   const missingDemo = demo.filter((item) => !stored.some((entry) => entry.id === item.id))
-  if (!missingDemo.length) return stored
+  if (!missingDemo.length && stored.length === rawStored.length) return stored
   const merged = [...stored, ...missingDemo]
   writeAll(merged)
   return merged

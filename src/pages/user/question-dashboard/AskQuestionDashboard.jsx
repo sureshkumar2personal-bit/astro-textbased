@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CircleHelp, History, ListChecks, Package } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
@@ -7,6 +7,8 @@ import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import { getUserQuestions } from '../../../utils/questionDashboard.js'
 import { QUESTION_CREDIT_AVAILABLE, getQuestionCreditsForUser } from '../../../utils/questionCredits.js'
+import FlowSteps from '../../../components/user/FlowSteps.jsx'
+import '../../askquestion-astrologers.css'
 import './questiondashboard.css'
 
 export default function AskQuestionDashboard() {
@@ -14,6 +16,10 @@ export default function AskQuestionDashboard() {
   const { questions, purchasedSlots } = useAppData()
   const { pathname } = useLocation()
   const routes = getRoleRoutes(currentUser?.role)
+  const [askStep, setAskStep] = useState(1)
+  const stepActionsRef = useRef(null)
+
+  const isAskNew = pathname === `${routes.askQuestion}/new` || pathname.endsWith('/ask-question/new') || pathname.endsWith('/user/ask-question/new')
 
   // Paid-but-unwritten "Pay Now & Ask Later" questions still need the user to
   // write the question, so they are counted on the Purchased Questions tab.
@@ -34,11 +40,19 @@ export default function AskQuestionDashboard() {
     { key: 'history', label: 'History', icon: History, to: `${routes.askQuestion}/history`, count: 0 },
   ]
 
+  const handleStepClick = useCallback((targetStep) => {
+    if (stepActionsRef.current?.goToStep) {
+      stepActionsRef.current.goToStep(targetStep)
+    }
+  }, [])
+
   return (
     <div className="question-dashboard">
-      <PageHeader
-        title="Ask a Question"
-      />
+      <PageHeader title="Ask a Question">
+        {isAskNew && (
+          <FlowSteps current={askStep} onStepClick={handleStepClick} />
+        )}
+      </PageHeader>
 
       <nav className="question-dashboard-tabs" aria-label="Ask a Question sections">
         {sections.map((section) => {
@@ -61,7 +75,7 @@ export default function AskQuestionDashboard() {
         })}
       </nav>
 
-      <Outlet />
+      <Outlet context={{ askStep, setAskStep, stepActionsRef }} />
     </div>
   )
 }

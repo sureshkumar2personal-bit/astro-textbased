@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { consultationAstrologers } from '../../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
 import ChatBirthDetailsStep from './ChatBirthDetailsStep.jsx'
@@ -167,7 +168,13 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
         onClick={(event) => event.stopPropagation()}
       >
         <header className="instant-call-modal__header">
-          <div className="instant-call-card__avatar">{astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</div>
+          <div className="instant-call-card__avatar">
+            {getAstrologerPhoto(astrologer) ? (
+              <img src={getAstrologerPhoto(astrologer)} alt={`${astrologer.name} profile`} />
+            ) : (
+              astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
+            )}
+          </div>
           <div className="instant-call-modal__identity">
             <span className={`instant-call-status instant-call-status--${request?.status || 'idle'}`}>
               {isCall ? <Phone size={13} /> : <MessageCircle size={13} />}

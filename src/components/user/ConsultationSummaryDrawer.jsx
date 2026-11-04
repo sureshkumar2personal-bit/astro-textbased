@@ -2,6 +2,7 @@ import { createPortal } from 'react-dom'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, CircleAlert, Eye, FileText, Image as ImageIcon, Paperclip, Upload, WalletCards, X } from 'lucide-react'
 import { consultationAstrologers } from '../../data/consultationAstrologers.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import { APPOINTMENT_CONFIG, parseKey } from '../../pages/user/appointments/bookingAstrologerData.js'
 
 function shortDayDate(value) {
@@ -47,7 +48,7 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
   const sufficient = balance >= amount
   const mode = slot.type || APPOINTMENT_CONFIG.mode
   const consultationProfile = consultationAstrologers.find((item) => item.id === astrologer.id)
-  const profileImage = astrologer.profileImage || consultationProfile?.profileImage || ''
+  const profileImage = astrologer.photo || astrologer.profileImage || consultationProfile?.profileImage || getAstrologerPhoto(astrologer) || ''
   const horoscopeAttachment = uploadedHoroscope || attachmentFor(astrologer, consultationProfile)
   const attachmentUrl = horoscopeAttachment?.dataUrl || horoscopeAttachment?.url || ''
   const attachmentIsImage = isImageAttachment(horoscopeAttachment)

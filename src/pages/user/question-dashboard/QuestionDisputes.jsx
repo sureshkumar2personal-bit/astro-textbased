@@ -95,13 +95,13 @@ function DisputeDetailsModal({ entry, onClose }) {
         <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
             <div className="field-label-top" style={{ marginBottom: 8 }}>Question</div>
-            <div style={QUOTE_BOX_STYLE}>{question.question || '—'}</div>
+            <div className="qd-full-content-box">{question.question || '—'}</div>
           </div>
 
           {question.answer ? (
             <div>
               <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer's Answer</div>
-              <div style={QUOTE_BOX_STYLE}>{question.answer}</div>
+              <div className="qd-full-content-box">{question.answer}</div>
             </div>
           ) : null}
 

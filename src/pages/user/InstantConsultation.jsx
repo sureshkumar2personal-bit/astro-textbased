@@ -10,11 +10,13 @@ import {
   Clock3,
   ChevronRight,
   Headphones,
+  Compass,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { getInstantConsultations, subscribeToInstantConsultations } from '../../utils/instantConsultation.js'
+import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import './instantConsultation.css'
 
 const initials = (name = '') =>
@@ -51,9 +53,9 @@ export default function InstantConsultation() {
   const userConsultations = useMemo(() => {
     if (!currentUser?.id) return []
     return (instantConsultations || [])
-      .filter((session) => session.userId === currentUser.id)
+      .filter((session) => session.userId === currentUser.id || (currentUser?.role === 'user' && session.userId === 'user-demo'))
       .sort((a, b) => new Date(b.startedAt || b.createdAt).getTime() - new Date(a.startedAt || a.createdAt).getTime())
-  }, [currentUser?.id, instantConsultations])
+  }, [currentUser?.id, currentUser?.role, instantConsultations])
 
   // Filtered consultations list
   const filteredConsultations = useMemo(() => {
@@ -248,7 +250,17 @@ export default function InstantConsultation() {
               <div className="user-profile-consultation-modal__content">
                 <div className="user-profile-consultation-modal__identity-row">
                   <div className="user-profile-consultation-modal__person">
-                    <span>{initials(selectedInstantConsultation.astrologerName || 'Astrologer')}</span>
+                    <span style={{ overflow: 'hidden' }}>
+                      {getAstrologerPhoto(selectedInstantConsultation.astrologerId || selectedInstantConsultation.astrologerName) ? (
+                        <img
+                          src={getAstrologerPhoto(selectedInstantConsultation.astrologerId || selectedInstantConsultation.astrologerName)}
+                          alt=""
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                      ) : (
+                        initials(selectedInstantConsultation.astrologerName || 'Astrologer')
+                      )}
+                    </span>
                     <div>
                       <strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong>
                       <small>ASTROLOGER</small>
@@ -274,6 +286,15 @@ export default function InstantConsultation() {
                     <span>
                       <small>ASTROLOGER</small>
                       <strong>{selectedInstantConsultation.astrologerName || 'Astrologer'}</strong>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="user-profile-consultation-modal__detail-icon">
+                      {selectedInstantConsultation.type === 'chat' ? <MessageCircle size={15} /> : <PhoneCall size={15} />}
+                    </span>
+                    <span>
+                      <small>CONSULTATION TYPE</small>
+                      <strong>{selectedInstantConsultation.type === 'chat' ? 'Instant Chat' : 'Instant Call'}</strong>
                     </span>
                   </div>
                   <div>
@@ -322,6 +343,15 @@ export default function InstantConsultation() {
                     </span>
                   </div>
                   <div>
+                    <span className="user-profile-consultation-modal__detail-icon">
+                      <Compass size={15} />
+                    </span>
+                    <span>
+                      <small>TOPIC</small>
+                      <strong>{selectedInstantConsultation.topic || 'General Astrology'}</strong>
+                    </span>
+                  </div>
+                  <div>
                     <span className="user-profile-consultation-modal__detail-icon">₹</span>
                     <span>
                       <small>AMOUNT</small>
@@ -333,17 +363,8 @@ export default function InstantConsultation() {
                       <BadgeCheck size={15} />
                     </span>
                     <span>
-                      <small>PAYMENT</small>
-                      <strong>{consultationPaid(selectedInstantConsultation)}</strong>
-                    </span>
-                  </div>
-                  <div>
-                    <span className="user-profile-consultation-modal__detail-icon">
-                      <BadgeCheck size={15} />
-                    </span>
-                    <span>
-                      <small>STATUS</small>
-                      <strong>{selectedInstantConsultation.status || 'Unknown'}</strong>
+                      <small>PAYMENT STATUS</small>
+                      <strong>{consultationPaid(selectedInstantConsultation)} · {selectedInstantConsultation.status || 'Ended'}</strong>
                     </span>
                   </div>
                 </div>
