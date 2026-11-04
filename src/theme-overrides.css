@@ -2145,29 +2145,84 @@ html[data-theme='light'] .create-post-camera span {
   }
 }
 
-/* Keep Program at a Glance on the light card surface in every theme. */
+/* Program at a Glance — Harmonized Dark Mode without background */
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-section.subscriber-program-section--compact {
-  background: #FFFDF8 !important;
-  border-color: #E8D9C8 !important;
-  color: #382417 !important;
-  box-shadow: 0 10px 28px rgba(67, 43, 25, .055) !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--perks-text, #FFF3D6) !important;
+  box-shadow: none !important;
 }
 
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-glance-heading h2,
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat strong {
-  color: #382417 !important;
+  color: var(--perks-text, #FFF3D6) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat__label,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat__label {
+  color: var(--perks-secondary, #C7B69B) !important;
+}
+
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat small {
-  color: #857567 !important;
+  color: var(--perks-gold, #FFC247) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat {
+  border-left-color: rgba(166, 106, 22, 0.4) !important;
 }
 
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-glance-heading__icon,
 html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat__icon {
-  border-color: #E8D9C8 !important;
-  color: #7C3AED !important;
-  background: #F3EDFF !important;
+  border-color: var(--perks-border, #A66A16) !important;
+  color: var(--perks-gold, #FFC247) !important;
+  background: var(--perks-surface-bg, #35200F) !important;
+}
+
+/* Subscriber Plan Card Internal Editor Dark Mode */
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card.is-editing {
+  border-color: var(--perks-gold, #FFC247) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__status--editing {
+  color: #FFC247 !important;
+  background: rgba(255, 194, 71, 0.15) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__benefits--editing > div {
+  border-bottom-color: rgba(166, 106, 22, 0.25) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__row-input input,
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__row-select,
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__price--editing input {
+  background: var(--perks-surface-bg, #35200F) !important;
+  border-color: var(--perks-border, #A66A16) !important;
+  color: var(--perks-text, #FFF3D6) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__row-input strong,
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__price--editing span,
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__price--editing small {
+  color: var(--perks-text, #FFF3D6) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__btn-cancel {
+  border-color: var(--perks-border, #A66A16) !important;
+  color: var(--perks-secondary, #C7B69B) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__btn-cancel:hover {
+  background: var(--perks-surface-bg, #35200F) !important;
+  color: var(--perks-gold, #FFC247) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__btn-save {
+  background: var(--perks-gold, #FFC247) !important;
+  color: #1A0F05 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .subscriber-plan-card__btn-save:hover {
+  background: #ffcf6b !important;
 }
 
 /* ==========================================================================

@@ -1,77 +1,533 @@
-.benefit-landing { display: grid; gap: 22px; margin-top: 24px; }
-.benefit-landing-hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 28px; border: 1px solid rgba(220, 209, 233, .9); border-radius: 16px; background: linear-gradient(120deg, rgba(255, 250, 243, .98), rgba(248, 243, 255, .95)); box-shadow: 0 10px 28px rgba(79, 47, 111, .07); }
-.benefit-landing-eyebrow { display: block; color: var(--violet-700, #6d28d9); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.benefit-landing-hero h2, .benefit-landing-section-heading h2 { margin: 5px 0 4px; color: var(--ink, #24180f); font-size: 22px; line-height: 1.2; }
-.benefit-landing-hero p, .benefit-landing-section-heading p { margin: 0; color: var(--muted, #786b62); font-size: 13px; }
-.benefit-landing-create { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 11px 16px; border: 0; border-radius: 10px; background: var(--violet-700, #6d28d9); color: #fff; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 7px 16px rgba(109, 40, 217, .18); }
-.benefit-landing-create:hover { background: var(--violet-800, #5b21b6); }
-.benefit-landing-composer, .benefit-landing-recent { padding: 22px; border: 1px solid var(--line, #e6d9c8); border-radius: 15px; background: var(--surface, #fff); box-shadow: 0 8px 22px rgba(67, 43, 25, .055); }
-.benefit-landing-composer-row { display: flex; align-items: center; gap: 13px; min-height: 52px; cursor: pointer; }
-.benefit-landing-composer-row:focus-visible { outline: 3px solid rgba(109, 40, 217, .2); outline-offset: 4px; border-radius: 10px; }
-.benefit-landing-avatar { width: 44px; height: 44px; flex: 0 0 44px; border: 2px solid #f2c66d; border-radius: 50%; object-fit: cover; }
-.benefit-landing-prompt { flex: 1; padding: 13px 16px; border: 1px solid #eadfd3; border-radius: 24px; color: #8a7d75; font-size: 14px; background: #fffdfb; }
-.benefit-landing-prompt-arrow { color: var(--violet-700, #6d28d9); }
-.benefit-landing-composer-divider { height: 1px; margin: 18px 0 12px; background: #f0e9e1; }
-.benefit-landing-tools { display: flex; flex-wrap: wrap; gap: 8px; }
-.benefit-landing-tool { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 7px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #66594f; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
-.benefit-landing-tool:hover { border-color: #eadfd3; background: #fff9f1; color: var(--violet-700, #6d28d9); }
-.benefit-landing-tool svg { color: #986b16; }
-.benefit-landing-tool.is-specialization { color: var(--violet-700, #6d28d9); }
-.benefit-landing-tool.is-specialization svg { color: var(--violet-700, #6d28d9); }
-.benefit-landing-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-.benefit-landing-count { color: var(--muted, #786b62); font-size: 12px; font-weight: 700; }
-.benefit-landing-list { display: grid; gap: 10px; }
-.benefit-landing-card { position: relative; display: flex; align-items: flex-start; gap: 14px; padding: 16px; border: 1px solid #eee5dc; border-radius: 12px; background: #fffdfa; }
-.benefit-landing-card:hover { border-color: #d9c7ed; box-shadow: 0 6px 16px rgba(79, 47, 111, .06); }
-.benefit-landing-card-icon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border-radius: 11px; background: #f6edff; color: var(--violet-700, #6d28d9); }
-.benefit-landing-card-body { min-width: 0; flex: 1; }
-.benefit-landing-card-title-row { display: flex; align-items: center; gap: 10px; padding-right: 30px; }
-.benefit-landing-card-title-row h3 { overflow: hidden; margin: 0; color: var(--ink, #24180f); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
-.benefit-landing-card-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 6px; color: var(--muted, #786b62); font-size: 11px; }
-.benefit-landing-card-meta span { display: inline-flex; align-items: center; gap: 4px; }
-.benefit-landing-meta-separator { color: #c2b1a1; }
-.benefit-landing-format { padding: 3px 7px; border-radius: 999px; background: #f8f1e7; color: #76582d; font-weight: 700; }
-.benefit-landing-card-body p { overflow: hidden; margin: 8px 0 0; color: #756a62; font-size: 12px; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
-.benefit-landing-status { display: inline-flex; flex: 0 0 auto; padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
-.benefit-landing-status--published { background: #e8f7ec; color: #22733b; }
-.benefit-landing-status--draft { background: #f4eee8; color: #80624a; }
-.benefit-landing-status--scheduled { background: #fff3d9; color: #956714; }
-.benefit-landing-actions { position: relative; flex: 0 0 auto; }
-.benefit-landing-more { display: grid; width: 30px; height: 30px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #786b62; cursor: pointer; }
-.benefit-landing-more:hover, .benefit-landing-more[aria-expanded='true'] { background: #f7f0e9; color: var(--violet-700, #6d28d9); }
-.benefit-landing-menu { position: absolute; z-index: 3; top: 34px; right: 0; display: grid; min-width: 130px; padding: 5px; border: 1px solid #e8ddd3; border-radius: 10px; background: #fff; box-shadow: 0 12px 24px rgba(67, 43, 25, .14); }
-.benefit-landing-menu button { display: flex; align-items: center; gap: 8px; padding: 8px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--ink, #24180f); font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
-.benefit-landing-menu button:hover { background: #f8f1e7; color: var(--violet-700, #6d28d9); }
-.benefit-landing-menu button.is-danger { color: #ad3e37; }
-.benefit-landing-empty { display: grid; justify-items: center; gap: 8px; padding: 38px 20px; border: 1px dashed #ddcfbf; border-radius: 12px; color: var(--muted, #786b62); text-align: center; }
-.benefit-landing-empty svg { color: #986b16; }
-.benefit-landing-empty strong { color: var(--ink, #24180f); font-size: 14px; }
-.benefit-landing-empty span { font-size: 12px; }
-.benefit-landing-empty .btn { margin-top: 5px; }
-.benefit-delete-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(36, 24, 15, .34); backdrop-filter: blur(5px); }
-.benefit-delete-dialog { display: grid; grid-template-columns: auto 1fr; gap: 16px; width: min(440px, 100%); padding: 24px; border: 1px solid #eadfd3; border-radius: 18px; background: #fffdfa; box-shadow: 0 24px 70px rgba(67, 43, 25, .2); }
-.benefit-delete-dialog__icon { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid #f2d2bd; border-radius: 13px; color: #c15c35; background: #fff1e9; }
-.benefit-delete-dialog__content { min-width: 0; }
-.benefit-delete-dialog__eyebrow { display: block; margin-bottom: 5px; color: #a46b4d; font-size: 10px; font-weight: 850; letter-spacing: .13em; }
-.benefit-delete-dialog h2 { margin: 0; color: #382417; font-size: 19px; line-height: 1.25; }
-.benefit-delete-dialog p { margin: 7px 0 0; color: #786b62; font-size: 12px; line-height: 1.5; }
-.benefit-delete-dialog__actions { display: flex; grid-column: 1 / -1; justify-content: flex-end; gap: 9px; padding-top: 4px; }
-.benefit-delete-dialog__actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 8px 13px; border-radius: 9px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
-.benefit-delete-dialog__cancel { border: 1px solid #e1d4c8; color: #66594f; background: #fff; }
-.benefit-delete-dialog__cancel:hover { background: #faf5ef; }
-.benefit-delete-dialog__confirm { border: 1px solid #b84e2e; color: #fff; background: #b84e2e; box-shadow: 0 5px 12px rgba(184, 78, 46, .18); }
-.benefit-delete-dialog__confirm:hover { border-color: #9f4026; background: #9f4026; }
-@media (max-width: 640px) {
-  .benefit-landing-hero { align-items: flex-start; flex-direction: column; padding: 20px; }
-  .benefit-landing-create { width: 100%; justify-content: center; }
-  .benefit-landing-composer, .benefit-landing-recent { padding: 16px; }
-  .benefit-landing-prompt { font-size: 12px; }
-  .benefit-landing-card { gap: 10px; padding: 13px; }
-  .benefit-landing-card-title-row { align-items: flex-start; flex-direction: column; gap: 5px; }
-  .benefit-landing-card-title-row h3 { padding-right: 0; white-space: normal; }
-  .benefit-landing-card-body p { white-space: normal; }
-  .benefit-landing-section-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
-  .benefit-delete-dialog { padding: 20px; }
-  .benefit-delete-dialog__actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .benefit-delete-dialog__actions button { width: 100%; }
+/* ============================================================
+   Astrologer Style Theme - Perks, Analytics & Content Engine
+   Harmonized with .app-shell--astrologer .perks-benefits-page
+   ============================================================ */
+
+.benefit-landing {
+  --bl-ink: var(--ink, #24180f);
+  --bl-muted: var(--muted, #786b62);
+  --bl-line: var(--line, #e6d9c8);
+  --bl-surface: var(--surface, #ffffff);
+  --bl-surface-card: #fffdfa;
+  --bl-surface-soft: #fcf9f5;
+  --bl-primary: var(--primary, #7c3aed);
+  --bl-primary-dark: #6d28d9;
+  --bl-primary-bg: #f6edff;
+  --bl-gold: #f2c66d;
+  --bl-gold-text: #986b16;
+  --bl-gold-bg: #fff8eb;
+  --bl-shadow: 0 8px 22px rgba(67, 43, 25, 0.055);
+  --bl-shadow-hover: 0 12px 28px rgba(79, 47, 111, 0.08);
+
+  display: grid;
+  gap: 20px;
+  color: var(--bl-ink);
+  font-family: inherit;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .benefit-landing {
+  --bl-ink: var(--perks-text, #FFF3D6);
+  --bl-muted: var(--perks-secondary, #C7B69B);
+  --bl-line: var(--perks-border, #A66A16);
+  --bl-surface: var(--perks-card-bg, #2B1A0D);
+  --bl-surface-card: var(--perks-card-bg, #2B1A0D);
+  --bl-surface-soft: var(--perks-surface-bg, #35200F);
+  --bl-primary: var(--perks-gold, #FFC247);
+  --bl-primary-dark: #FFB319;
+  --bl-primary-bg: rgba(255, 194, 71, 0.14);
+  --bl-gold: var(--perks-gold, #FFC247);
+  --bl-gold-text: var(--perks-gold, #FFC247);
+  --bl-gold-bg: rgba(255, 194, 71, 0.12);
+  --bl-shadow: none;
+  --bl-shadow-hover: 0 0 20px rgba(255, 194, 71, 0.12);
+  color: var(--bl-ink);
+}
+
+/* ============================================================
+   Composer Bar (Astrologer Create Quick Bar)
+   ============================================================ */
+
+.benefit-landing-composer {
+  padding: 16px 20px;
+  border: 1px solid var(--bl-line);
+  border-radius: 16px;
+  background: var(--bl-surface-card);
+  box-shadow: var(--bl-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.benefit-landing-composer-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.benefit-landing-composer-row:focus-visible {
+  outline: 2px solid var(--bl-primary);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.benefit-landing-avatar {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 2px solid var(--bl-gold);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.benefit-landing-prompt {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--bl-line);
+  border-radius: 24px;
+  color: var(--bl-muted);
+  font-size: 13px;
+  background: var(--bl-surface);
+  transition: border-color 0.18s ease;
+}
+
+.benefit-landing-composer-row:hover .benefit-landing-prompt {
+  border-color: var(--bl-primary);
+}
+
+.benefit-landing-prompt-arrow {
+  color: var(--bl-primary);
+}
+
+.benefit-landing-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--bl-line);
+}
+
+.benefit-landing-tools-left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.benefit-landing-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--bl-line);
+  border-radius: 8px;
+  background: var(--bl-surface);
+  color: var(--bl-muted);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.benefit-landing-tool:hover {
+  border-color: var(--bl-primary);
+  color: var(--bl-primary);
+  background: var(--bl-primary-bg);
+}
+
+.benefit-landing-tool.is-specialization {
+  color: var(--bl-primary);
+  border-color: rgba(124, 58, 237, 0.25);
+  background: var(--bl-primary-bg);
+}
+
+/* ============================================================
+   Navigation Tabs & Header Subbar
+   ============================================================ */
+
+.perks-engine-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+
+.perks-engine-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 13px;
+  background: var(--bl-surface-soft);
+  border: 0;
+  overflow-x: auto;
+  margin: 4px 0 8px;
+}
+
+.perks-engine-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  border: 0;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  color: var(--bl-muted);
+  background: transparent;
+}
+
+.perks-engine-tab-btn:hover {
+  color: var(--bl-primary);
+  background: var(--bl-primary-bg);
+}
+
+.perks-engine-tab-btn.is-active {
+  background: var(--bl-surface);
+  color: var(--bl-primary);
+  border: 0;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12);
+  font-weight: 750;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-engine-tab-btn.is-active {
+  background: var(--perks-surface-bg, #35200F) !important;
+  color: var(--perks-gold, #FFC247) !important;
+  border-color: var(--perks-gold, #FFC247) !important;
+  box-shadow: 0 0 12px rgba(255, 194, 71, 0.18) !important;
+}
+
+/* ============================================================
+   Card Foundations
+   ============================================================ */
+
+.perks-engine-card {
+  background: var(--bl-surface);
+  border: 1px solid var(--bl-line);
+  border-radius: 16px;
+  padding: 22px;
+  color: var(--bl-ink);
+  box-shadow: var(--bl-shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perks-engine-card:hover {
+  box-shadow: var(--bl-shadow-hover);
+}
+
+.perks-engine-card--active {
+  background: var(--bl-surface-card);
+  border: 1px solid var(--bl-primary);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.08);
+}
+
+/* Service Item Cards */
+.perks-service-item {
+  background: var(--bl-surface-card);
+  border: 1px solid var(--bl-line);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.2s ease;
+}
+
+.perks-service-item:hover {
+  border-color: var(--bl-primary);
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.08);
+}
+
+/* KPI Summary Cards */
+.perks-kpi-card {
+  background: var(--bl-surface-card);
+  border: 1px solid var(--bl-line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--bl-shadow);
+}
+
+.perks-kpi-card--indigo { border-left: 4px solid var(--bl-primary); }
+.perks-kpi-card--amber { border-left: 4px solid #d97706; }
+.perks-kpi-card--emerald { border-left: 4px solid #059669; }
+.perks-kpi-card--purple { border-left: 4px solid #9333ea; }
+
+/* Range Slider */
+.perks-range-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 6px;
+  appearance: none;
+  background: var(--bl-line);
+  accent-color: var(--bl-primary);
+  cursor: pointer;
+}
+
+/* Form Controls */
+.perks-engine-input,
+.perks-engine-select,
+.perks-engine-textarea {
+  width: 100%;
+  background: var(--bl-surface);
+  border: 1px solid var(--bl-line);
+  color: var(--bl-ink);
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perks-engine-input:focus,
+.perks-engine-select:focus,
+.perks-engine-textarea:focus {
+  border-color: var(--bl-primary);
+  box-shadow: 0 0 0 3px var(--bl-primary-bg);
+}
+
+/* 12 Rasis Selector Grid */
+.perks-rasi-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 12px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--bl-line);
+  background: var(--bl-surface);
+  color: var(--bl-ink);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  text-align: center;
+}
+
+.perks-rasi-btn:hover {
+  border-color: var(--bl-primary);
+  background: var(--bl-primary-bg);
+  color: var(--bl-primary);
+  transform: translateY(-1px);
+}
+
+.perks-rasi-btn.is-active {
+  border-color: var(--bl-primary);
+  background: var(--bl-primary-bg);
+  color: var(--bl-primary);
+  font-weight: 750;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.16);
+}
+
+/* Workflow Step Box */
+.perks-workflow-step {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bl-line);
+  background: var(--bl-surface-soft);
+  transition: all 0.18s ease;
+}
+
+.perks-workflow-step:hover {
+  border-color: var(--bl-primary);
+}
+
+/* Action Buttons */
+.perks-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 0;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  background: var(--bl-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.2);
+  transition: all 0.18s ease;
+}
+
+.perks-btn-primary:hover {
+  background: var(--bl-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.28);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-btn-primary {
+  background: var(--perks-gold, #FFC247) !important;
+  color: #1A0F05 !important;
+  box-shadow: none !important;
+}
+
+.perks-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--bl-line);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  background: var(--bl-surface);
+  color: var(--bl-ink);
+  transition: all 0.18s ease;
+}
+
+.perks-btn-secondary:hover {
+  background: var(--bl-surface-soft);
+  border-color: var(--bl-primary);
+  color: var(--bl-primary);
+}
+
+/* ============================================================
+   Tables
+   ============================================================ */
+
+.perks-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--bl-line);
+  border-radius: 12px;
+}
+
+.perks-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.perks-table th {
+  padding: 12px 14px;
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bl-muted);
+  background: var(--bl-surface-soft);
+  border-bottom: 1px solid var(--bl-line);
+}
+
+.perks-table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--bl-ink);
+  border-bottom: 1px solid var(--bl-line);
+}
+
+.perks-table tbody tr:hover {
+  background: var(--bl-surface-soft);
+}
+
+.perks-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ============================================================
+   Mobile App Simulator Modal
+   ============================================================ */
+
+.simulator-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(36, 24, 15, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.simulator-phone-frame {
+  width: 100%;
+  max-width: 385px;
+  height: min(85vh, 760px);
+  border-radius: 36px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bl-surface);
+  border: 3px solid var(--bl-line);
+  box-shadow: 0 24px 60px rgba(67, 43, 25, 0.25);
+  color: var(--bl-ink);
+}
+
+.simulator-phone-header {
+  padding: 16px;
+  background: var(--bl-surface-card);
+  border-bottom: 1px solid var(--bl-line);
+  flex-shrink: 0;
+}
+
+.simulator-phone-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.simulator-phone-footer {
+  padding: 12px;
+  background: var(--bl-surface-soft);
+  border-top: 1px solid var(--bl-line);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.simulator-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bl-surface-card);
+  border: 1px solid var(--bl-line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ============================================================
+   Toast Floating Alert
+   ============================================================ */
+
+.platform-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--bl-primary);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.35);
+  animation: slideToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .platform-toast {
+  background: var(--perks-gold, #FFC247) !important;
+  color: #1A0F05 !important;
+}
+
+@keyframes slideToastIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
