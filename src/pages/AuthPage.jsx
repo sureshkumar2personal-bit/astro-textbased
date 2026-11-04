@@ -109,15 +109,9 @@ export default function AuthPage({ mode, selectedRole }) {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
             <div>
-              <div className={`text-sm font-bold uppercase tracking-[0.08em] ${role === ROLES.USER ? 'text-amber-600 dark:text-amber-400' : 'text-[color:var(--violet-700)]'}`}>
-                {role === ROLES.USER ? 'User Login' : 'Astrologer Login'}
-              </div>
-              <h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-[color:var(--ink)]">
+              <h2 className="font-['Space_Grotesk'] text-3xl font-bold text-[color:var(--ink)]">
                 Welcome back
               </h2>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">
-                Sign in to your {role === ROLES.USER ? 'user' : 'astrologer'} portal.
-              </p>
             </div>
 
             <div className="auth-form-card rounded-[24px] border border-[color:var(--border)] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
@@ -132,9 +126,6 @@ export default function AuthPage({ mode, selectedRole }) {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                   />
-                  <div className="text-xs text-[color:var(--muted)]">
-                    Use your email and password to sign in.
-                  </div>
                 </label>
 
                 {!isLogin && role === ROLES.USER && <><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Date of Birth<input required type="date" className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={dateOfBirth} onChange={(event) => setDateOfBirth(event.target.value)} /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Time of Birth<input required type="time" className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={birthTime} onChange={(event) => setBirthTime(event.target.value)} /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Place of Birth<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={birthPlace} onChange={(event) => setBirthPlace(event.target.value)} placeholder="City, Country" /></label><label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Horoscope / Kundli Details<textarea className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={horoscopeDetails} onChange={(event) => setHoroscopeDetails(event.target.value)} rows="2" /></label></>}
@@ -173,7 +164,9 @@ export default function AuthPage({ mode, selectedRole }) {
                   type="submit"
                   className={`auth-submit-btn auth-submit-btn--${role} mt-5 inline-flex w-full items-center justify-center rounded-[14px] px-4 py-3.5 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5`}
                 >
-                {isLogin ? 'Login' : 'Create Account'}
+                  {isLogin
+                    ? (role === ROLES.USER ? 'Login as a user' : 'Login as an astrologer')
+                    : (role === ROLES.USER ? 'Create a user account' : 'Create an astrologer account')}
                 </button>
             </div>
             <button type="button" className={`block w-full text-center text-sm font-semibold ${role === ROLES.USER ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300' : 'text-[color:var(--primary)]'}`} onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
