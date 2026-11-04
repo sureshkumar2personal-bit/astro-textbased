@@ -29,7 +29,7 @@ const SECTION_DESCRIPTIONS = {
 }
 
 const PROFILE_NAV_SECTIONS = PROFILE_SECTIONS.filter(({ id }) => !['experience', 'languages', 'credentials', 'availability', 'about'].includes(id))
-const SERVICE_TOGGLE_DEFINITIONS = SERVICE_DEFINITIONS.filter(({ key }) => ['chat', 'voice', 'video', 'live', 'question'].includes(key))
+const SERVICE_TOGGLE_DEFINITIONS = SERVICE_DEFINITIONS.filter(({ key }) => ['chat', 'voice', 'live', 'question'].includes(key))
 
 function readStored(userId) {
   try {
