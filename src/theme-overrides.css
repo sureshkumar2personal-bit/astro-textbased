@@ -2248,41 +2248,60 @@ html[data-theme='dark'] .role-selection-options b {
 }
 
 /* ==========================================================================
-   Login Button — Navy Blue Only
+   Login Button — Harmonized with Website Theme
    ========================================================================== */
 .auth-submit-btn,
-.auth-submit-btn--user,
-.auth-submit-btn--astrologer {
-  background: #1E3A8A !important;
+.auth-submit-btn--user {
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 10px 24px rgba(30, 58, 138, 0.28) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(254, 243, 199, 0.45) !important;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.28) !important;
   font-weight: 700 !important;
 }
 
 .auth-submit-btn:hover,
-.auth-submit-btn--user:hover,
-.auth-submit-btn--astrologer:hover {
-  background: #1D4ED8 !important;
-  box-shadow: 0 14px 30px rgba(30, 58, 138, 0.38) !important;
-  transform: translateY(-1px) !important;
+.auth-submit-btn--user:hover {
+  background: linear-gradient(135deg, #FBBF24 0%, #EA580C 100%) !important;
+  border-color: #FCD34D !important;
+  box-shadow: 0 14px 30px rgba(234, 88, 12, 0.38) !important;
+  transform: translateY(-1.5px) !important;
+  color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .auth-submit-btn,
-html[data-theme='dark'] .auth-submit-btn--user,
-html[data-theme='dark'] .auth-submit-btn--astrologer {
-  background: #1E3A8A !important;
+html[data-theme='dark'] .auth-submit-btn--user {
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(30, 58, 138, 0.3) !important;
-  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+  border: 1px solid rgba(254, 243, 199, 0.45) !important;
+  box-shadow: 0 10px 26px rgba(234, 88, 12, 0.38), 0 0 18px rgba(245, 158, 11, 0.18) !important;
 }
 
 html[data-theme='dark'] .auth-submit-btn:hover,
-html[data-theme='dark'] .auth-submit-btn--user:hover,
-html[data-theme='dark'] .auth-submit-btn--astrologer:hover {
-  background: #2563EB !important;
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(37, 99, 235, 0.4) !important;
-  border-color: rgba(96, 165, 250, 0.5) !important;
+html[data-theme='dark'] .auth-submit-btn--user:hover {
+  background: linear-gradient(135deg, #FBBF24 0%, #EA580C 100%) !important;
+  border-color: #FCD34D !important;
+  box-shadow: 0 14px 32px rgba(234, 88, 12, 0.48), 0 0 24px rgba(245, 158, 11, 0.28) !important;
+}
+
+.auth-submit-btn--astrologer {
+  background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 24px rgba(109, 40, 217, 0.28) !important;
+  font-weight: 700 !important;
+}
+
+.auth-submit-btn--astrologer:hover {
+  background: linear-gradient(135deg, #8B5CF6 0%, #5B21B6 100%) !important;
+  box-shadow: 0 14px 30px rgba(109, 40, 217, 0.38) !important;
+  transform: translateY(-1.5px) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme='dark'] .auth-submit-btn--astrologer {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 26px rgba(109, 40, 217, 0.4) !important;
 }
 
 /* User Auth Form Card & Inputs in Dark Mode */
