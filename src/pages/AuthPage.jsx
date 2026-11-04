@@ -114,7 +114,7 @@ export default function AuthPage({ mode, selectedRole }) {
               </h2>
             </div>
 
-            <div className="auth-form-card rounded-[24px] border border-[color:var(--border)] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+            <div className="auth-form-card rounded-[24px] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
               <div className="grid gap-4">
                 <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">
                   {!isLogin && <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Name<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={name} onChange={(event) => setName(event.target.value)} placeholder={role === ROLES.USER ? 'Your name' : 'Your professional name'} /></label>}
@@ -169,8 +169,8 @@ export default function AuthPage({ mode, selectedRole }) {
                     : (role === ROLES.USER ? 'Create a user account' : 'Create an astrologer account')}
                 </button>
             </div>
-            <button type="button" className={`block w-full text-center text-sm font-semibold ${role === ROLES.USER ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300' : 'text-[color:var(--primary)]'}`} onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
-            <Link to="/" className={`block text-center text-sm font-semibold ${role === ROLES.USER ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300' : 'text-[color:var(--primary)]'}`}>← Choose a different role</Link>
+            <button type="button" className="auth-switch-link block w-full text-center text-sm font-semibold" onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
+            <Link to="/" className="auth-switch-role block text-center text-sm font-semibold">← Choose a different role</Link>
           </form>
         </div>
       </div>
