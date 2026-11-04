@@ -58,7 +58,7 @@ export default function AuthPage({ mode, selectedRole }) {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_8%_6%,rgba(139,92,246,0.08),transparent_42%),radial-gradient(circle_at_92%_90%,rgba(255,138,76,0.07),transparent_44%),linear-gradient(180deg,var(--surface-strong)_0%,var(--primary-bg)_100%)] px-5 py-8 text-[color:var(--body)] sm:px-8">
+    <div className={`auth-page auth-page--${role} min-h-screen bg-[radial-gradient(circle_at_8%_6%,rgba(139,92,246,0.08),transparent_42%),radial-gradient(circle_at_92%_90%,rgba(255,138,76,0.07),transparent_44%),linear-gradient(180deg,var(--surface-strong)_0%,var(--primary-bg)_100%)] px-5 py-8 text-[color:var(--body)] sm:px-8`}>
       <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-[32px] border border-white/70 bg-white/70 shadow-[0_30px_80px_rgba(15,23,42,0.16)] backdrop-blur-[18px] lg:grid-cols-[1.05fr_0.95fr]">
         <ThemeToggle className="absolute right-5 top-5 z-10" />
         <div className="flex flex-col justify-between bg-[linear-gradient(180deg,var(--sidebar-from)_0%,var(--sidebar-to)_100%)] p-8 text-white sm:p-10">
@@ -109,7 +109,7 @@ export default function AuthPage({ mode, selectedRole }) {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
             <div>
-              <div className="text-sm font-bold uppercase tracking-[0.08em] text-[color:var(--violet-700)]">
+              <div className={`text-sm font-bold uppercase tracking-[0.08em] ${role === ROLES.USER ? 'text-amber-600 dark:text-amber-400' : 'text-[color:var(--violet-700)]'}`}>
                 {role === ROLES.USER ? 'User Login' : 'Astrologer Login'}
               </div>
               <h2 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold text-[color:var(--ink)]">
@@ -120,7 +120,7 @@ export default function AuthPage({ mode, selectedRole }) {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-[color:var(--border)] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+            <div className="auth-form-card rounded-[24px] border border-[color:var(--border)] bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
               <div className="grid gap-4">
                 <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">
                   {!isLogin && <label className="grid gap-2 text-sm font-medium text-[color:var(--ink)]">Name<input required className="w-full rounded-[12px] border border-[color:var(--line)] bg-white px-4 py-3 text-[color:var(--ink)]" value={name} onChange={(event) => setName(event.target.value)} placeholder={role === ROLES.USER ? 'Your name' : 'Your professional name'} /></label>}
@@ -171,13 +171,13 @@ export default function AuthPage({ mode, selectedRole }) {
 
                 <button
                   type="submit"
-                  className="mt-5 inline-flex w-full items-center justify-center rounded-[14px] bg-[linear-gradient(135deg,var(--primary),var(--primary-light))] px-4 py-3.5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(109,40,217,0.24)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_34px_rgba(109,40,217,0.28)]"
+                  className={`auth-submit-btn auth-submit-btn--${role} mt-5 inline-flex w-full items-center justify-center rounded-[14px] px-4 py-3.5 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5`}
                 >
                 {isLogin ? 'Login' : 'Create Account'}
                 </button>
             </div>
-            <button type="button" className="block w-full text-center text-sm font-semibold text-[color:var(--primary)]" onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
-            <Link to="/" className="block text-center text-sm font-semibold text-[color:var(--primary)]">← Choose a different role</Link>
+            <button type="button" className={`block w-full text-center text-sm font-semibold ${role === ROLES.USER ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300' : 'text-[color:var(--primary)]'}`} onClick={() => { setRegistering((value) => !value); setError('') }}>{isLogin ? 'Create a new account' : 'Already have an account? Login'}</button>
+            <Link to="/" className={`block text-center text-sm font-semibold ${role === ROLES.USER ? 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300' : 'text-[color:var(--primary)]'}`}>← Choose a different role</Link>
           </form>
         </div>
       </div>
