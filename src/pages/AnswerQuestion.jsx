@@ -231,7 +231,7 @@ function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
         <button
           type="button"
           className={isDisputed ? 'btn btn-outline btn-sm' : isAnswered && !canEditAnswered ? 'btn btn-outline btn-sm' : 'btn btn-primary btn-sm'}
-          style={isDisputed ? { color: 'var(--warning)', borderColor: 'color-mix(in srgb, var(--warning) 40%, transparent)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: 'var(--red-600)', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
+          style={isDisputed ? { color: 'var(--warning)', borderColor: 'color-mix(in srgb, var(--warning) 40%, transparent)' } : isAnswered && !canEditAnswered ? { color: 'var(--green-600)', borderColor: 'rgba(16, 185, 129, 0.4)' } : isCancelled ? { color: '#fff', borderColor: 'rgba(239, 68, 68, 0.4)' } : undefined}
           onClick={(event) => {
             event.stopPropagation()
             handleOpen()
@@ -244,7 +244,7 @@ function QuestionTableRow({ question, nowMs, onAnswer, onViewDispute }) {
   )
 }
 
-function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCorrection, onViewHoroscope }) {
+function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCorrection, onViewHoroscope, inline = false }) {
   const { currentUser: astrologerUser } = useAuth()
   const { atonements } = useAppData()
   const savedContent = useMemo(() => readSavedAtonementContent(astrologerUser?.id), [astrologerUser?.id])
@@ -283,8 +283,13 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
   const [text, setText] = useState(question?.draftAnswer || question?.answer || '')
   const [attachments, setAttachments] = useState(() => (answered ? question?.answerAttachments || [] : question?.draftAttachments || []))
   const [links, setLinks] = useState(() => (answered ? question?.referenceLinks || [] : question?.draftReferenceLinks || []))
+  const inlineRef = useRef(null)
 
   useEffect(() => {
+    if (inline) {
+      const frame = window.requestAnimationFrame(() => inlineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+      return () => window.cancelAnimationFrame(frame)
+    }
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const closeOnEscape = (event) => {
@@ -321,9 +326,9 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
     if (saved) setEditing(false)
   }
 
-  return createPortal(
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card modal-card--scroll" style={{ width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
+  const answerContent = (
+    <div ref={inlineRef} className={inline ? 'tbq-inline-answer' : 'modal-overlay'} onClick={inline ? undefined : onClose}>
+      <div className={inline ? 'tbq-inline-answer__card' : 'modal-card modal-card--scroll'} style={inline ? undefined : { width: 'min(820px, calc(100vw - 32px))' }} onClick={(event) => event.stopPropagation()}>
         <div className="modal-card__header flex items-center justify-between gap-4">
           <div style={{ flex: '1 1 200px', minWidth: 0 }}>
             <div className="astrologer-modal-title">Question Details</div>
@@ -603,9 +608,10 @@ function AnswerModal({ question, nowMs, onClose, onSaveDraft, onSubmit, onSaveCo
           {answered && canEdit && editing && <button className="btn btn-primary" disabled={!text.trim()} onClick={saveCorrection}>Save Updated Answer</button>}
         </div>
       </div>
-    </div>,
-    document.body,
+    </div>
   )
+
+  return inline ? answerContent : createPortal(answerContent, document.body)
 }
 
 export default function AnswerQuestion({ hidePageHeader = false } = {}) {
@@ -724,27 +730,35 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
     })
   }, [setSearchParams])
 
-  const openAnswer = useCallback((id) => {
-    setAnswerId(id)
-    setDisputeId(null)
-    setQuestionParam(id)
-  }, [setQuestionParam])
-
   const closeAnswer = useCallback(() => {
     setAnswerId(null)
     clearQuestionParam()
   }, [clearQuestionParam])
 
-  const openDispute = useCallback((id) => {
-    setDisputeId(id)
-    setAnswerId(null)
+  const openAnswer = useCallback((id) => {
+    if (answerId === id) {
+      closeAnswer()
+      return
+    }
+    setAnswerId(id)
+    setDisputeId(null)
     setQuestionParam(id)
-  }, [setQuestionParam])
+  }, [answerId, closeAnswer, setQuestionParam])
 
   const closeDispute = useCallback(() => {
     setDisputeId(null)
     clearQuestionParam()
   }, [clearQuestionParam])
+
+  const openDispute = useCallback((id) => {
+    if (disputeId === id) {
+      closeDispute()
+      return
+    }
+    setDisputeId(id)
+    setAnswerId(null)
+    setQuestionParam(id)
+  }, [closeDispute, disputeId, setQuestionParam])
 
   const handleSaveDraft = useCallback((id, draft, attachments = [], referenceLinks = [], recommendation = null) => {
     actions.saveQuestionDraft(id, draft, attachments, referenceLinks, recommendation)
@@ -881,13 +895,36 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
                 <QuestionMonthHeading label={month.label} count={month.count} />
                 <div className="question-list">
                   {month.questions.map((question) => (
-                    <QuestionTableRow
-                      key={question.id}
-                      question={question}
-                      nowMs={nowMs}
-                      onAnswer={openAnswer}
-                      onViewDispute={openDispute}
-                    />
+                    <div className={`tbq-question-row${answerQuestion?.id === question.id ? ' is-expanded' : ''}`} key={question.id}>
+                      <QuestionTableRow
+                        question={question}
+                        nowMs={nowMs}
+                        onAnswer={openAnswer}
+                        onViewDispute={openDispute}
+                      />
+                      {answerQuestion?.id === question.id && (
+                        <AnswerModal
+                          key={`inline-${answerQuestion.id}`}
+                          question={answerQuestion}
+                          nowMs={nowMs}
+                          inline
+                          onClose={closeAnswer}
+                          onSaveDraft={handleSaveDraft}
+                          onSubmit={handleSubmit}
+                          onSaveCorrection={handleSaveCorrection}
+                          onViewHoroscope={setFullContent}
+                        />
+                      )}
+                      {disputeQuestion?.id === question.id && (
+                        <DisputeDetailsModal
+                          key={`inline-dispute-${disputeQuestion.id}`}
+                          question={disputeQuestion}
+                          inline
+                          onClose={closeDispute}
+                          onResponded={() => setAlert('Response submitted successfully.')}
+                        />
+                      )}
+                    </div>
                   ))}
                 </div>
               </section>
@@ -948,27 +985,6 @@ export default function AnswerQuestion({ hidePageHeader = false } = {}) {
           </div>
         </div>}
       </Section>
-
-      {answerQuestion && (
-        <AnswerModal
-          key={answerQuestion.id}
-          question={answerQuestion}
-          nowMs={nowMs}
-          onClose={closeAnswer}
-          onSaveDraft={handleSaveDraft}
-          onSubmit={handleSubmit}
-          onSaveCorrection={handleSaveCorrection}
-          onViewHoroscope={setFullContent}
-        />
-      )}
-
-      {disputeQuestion && (
-        <DisputeDetailsModal
-          question={disputeQuestion}
-          onClose={closeDispute}
-          onResponded={() => setAlert('Response submitted successfully.')}
-        />
-      )}
 
       {alert && (
         <SuccessAlert message={alert} onDismiss={() => setAlert(null)} />

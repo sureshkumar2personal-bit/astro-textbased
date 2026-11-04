@@ -45,6 +45,84 @@ const INITIAL_CATEGORIES = [
   'Customized Event',
 ]
 
+const DELIVERY_STORAGE_KEY = 'astroconnect-perks-deliveries'
+const MONTH_INDEX = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 }
+
+function parseStoredDate(value) {
+  if (value instanceof Date) return value
+  const normalized = String(value || '').trim()
+  if (!normalized) return null
+
+  const isoDate = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (isoDate) return new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]))
+
+  const displayDate = normalized.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/)
+  if (displayDate) {
+    const month = MONTH_INDEX[displayDate[2].toLowerCase()]
+    if (month != null) return new Date(Number(displayDate[3]), month, Number(displayDate[1]))
+  }
+
+  const parsed = new Date(normalized)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function formatCreatedDate(value) {
+  const date = parseStoredDate(value)
+  if (!date) return 'Date unavailable'
+  return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function legacyCreatedAt(publishDate) {
+  const date = parseStoredDate(publishDate)
+  return date && !Number.isNaN(date.getTime()) ? date.toISOString() : new Date().toISOString()
+}
+
+function normalizeDelivery(item) {
+  return { ...item, createdAt: item.createdAt || legacyCreatedAt(item.publishDate) }
+}
+
+function readStoredDeliveries() {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(DELIVERY_STORAGE_KEY) || 'null')
+    return Array.isArray(stored) ? stored.map(normalizeDelivery) : null
+  } catch {
+    return null
+  }
+}
+
+export const INITIAL_TIER_CONFIGS = {
+  Followers: {
+    freeQuestions: 0,
+    formats: ['Text'],
+    categories: ['Daily Prediction'],
+    price: 0,
+  },
+  Silver: {
+    freeQuestions: 2,
+    formats: ['Text', 'Audio'],
+    categories: ['Weekly Prediction', 'Monthly Prediction'],
+    price: 199,
+    discounts: { questions: 10, audio: 10, appointments: 10 },
+    access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' },
+  },
+  Gold: {
+    freeQuestions: 5,
+    formats: ['Text', 'Audio', 'Video'],
+    categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
+    price: 399,
+    discounts: { questions: 20, audio: 15, appointments: 15 },
+    access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' },
+  },
+  Platinum: {
+    freeQuestions: 0,
+    formats: ['Text', 'Audio', 'Video'],
+    categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
+    price: 699,
+    discounts: { questions: 30, audio: 20, appointments: 20 },
+    access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' },
+  },
+}
+
 const LEGACY_SETTINGS_TAB = '__legacy-settings-disabled__'
 
 const BENEFIT_TEMPLATES = [
@@ -171,7 +249,7 @@ const INITIAL_CUSTOMERS = [
 ]
 
 // Initial Content Delivery Deliveries
-const INITIAL_DELIVERIES = [
+export const INITIAL_DELIVERIES = [
   {
     id: 'CNT-2026-089',
     title: 'Weekly Vedic Guidance - Sep Week 1',
@@ -657,6 +735,9 @@ export default function PerksAndBenefits({ defaultTab }) {
     if (qTab === 'history') return 'history'
     return 'settings'
   }, [defaultTab, location.pathname, searchParams])
+  const editorBackPath = defaultTab === 'settings' || location.pathname.endsWith('/settings')
+    ? '/astrologer/perks-benefits'
+    : '/astrologer/dashboard'
 
   // Main Section Tab state
   const [activeTab, setActiveTab] = useState(computeTab)
@@ -672,38 +753,7 @@ export default function PerksAndBenefits({ defaultTab }) {
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false)
 
   // Tier Benefit Configurations State
-  const [tierConfigs, setTierConfigs] = useState({
-    Followers: {
-      freeQuestions: 0,
-      formats: ['Text'],
-      categories: ['Daily Prediction'],
-      price: 0,
-    },
-    Silver: {
-      freeQuestions: 2,
-      formats: ['Text', 'Audio'],
-      categories: ['Weekly Prediction', 'Monthly Prediction'],
-      price: 199,
-      discounts: { questions: 10, audio: 10, appointments: 10 },
-      access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' },
-    },
-    Gold: {
-      freeQuestions: 5,
-      formats: ['Text', 'Audio', 'Video'],
-      categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
-      price: 399,
-      discounts: { questions: 20, audio: 15, appointments: 15 },
-      access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' },
-    },
-    Platinum: {
-      freeQuestions: 0,
-      formats: ['Text', 'Audio', 'Video'],
-      categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
-      price: 699,
-      discounts: { questions: 30, audio: 20, appointments: 20 },
-      access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' },
-    },
-  })
+  const [tierConfigs, setTierConfigs] = useState(INITIAL_TIER_CONFIGS)
 
   // Customer Overview State
   const [customerFilter, setCustomerFilter] = useState('All')
@@ -717,7 +767,7 @@ export default function PerksAndBenefits({ defaultTab }) {
   const [pendingTemplate, setPendingTemplate] = useState(null)
 
   // Deliveries & Content Creation State
-  const [deliveries, setDeliveries] = useState(INITIAL_DELIVERIES)
+  const [deliveries, setDeliveries] = useState(() => readStoredDeliveries() || INITIAL_DELIVERIES.map(normalizeDelivery))
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [creatingCategory, setCreatingCategory] = useState('')
   const [contentForm, setContentForm] = useState({
@@ -729,6 +779,10 @@ export default function PerksAndBenefits({ defaultTab }) {
     content: '',
     status: 'Published',
   })
+
+  useEffect(() => {
+    window.localStorage.setItem(DELIVERY_STORAGE_KEY, JSON.stringify(deliveries))
+  }, [deliveries])
 
   // History State
   const [historyMonths, setHistoryMonths] = useState(HISTORICAL_MONTHS)
@@ -992,6 +1046,7 @@ export default function PerksAndBenefits({ defaultTab }) {
     const newId = `CNT-2026-${String(Math.floor(Math.random() * 900) + 100)}`
     const newDeliveryItem = {
       id: newId,
+      createdAt: new Date().toISOString(),
       title: contentForm.title.trim(),
       format: contentForm.format,
       category: contentForm.category || creatingCategory,
@@ -1059,16 +1114,15 @@ export default function PerksAndBenefits({ defaultTab }) {
 
   return (
     <div className="perks-benefits-page">
-      <button type="button" className="perks-benefits-back" onClick={() => navigate('/astrologer/dashboard')}><ArrowLeft size={16} aria-hidden="true" /> Back</button>
+      <button type="button" className="perks-benefits-back" onClick={() => navigate(editorBackPath)}><ArrowLeft size={16} aria-hidden="true" /> Back</button>
       <PageHeader eyebrow="Astrologer Workspace" title="Benefit Management" />
 
       {/* Main Tab Navigation */}
       <Section className="mt-4">
         <div className="perks-tab-navigation">
-          <button type="button" className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => navigate('/astrologer/perks-benefits/settings')}>
+          <button type="button" className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => navigate('/astrologer/perks-benefits')}>
             <SlidersHorizontal size={18} />
             <span>Benefit Management</span>
-            <span className="tab-pill-count">Combined</span>
           </button>
           <button
             type="button"
@@ -1077,7 +1131,6 @@ export default function PerksAndBenefits({ defaultTab }) {
           >
             <History size={18} />
             <span>3. History</span>
-            <span className="tab-pill-badge">{currentSelectedMonth?.percentage}% Fulfilled</span>
           </button>
         </div>
       </Section>
@@ -1210,7 +1263,7 @@ export default function PerksAndBenefits({ defaultTab }) {
 
       {activeTab === 'settings' && (
         <>
-          <div id="follower-perks-benefits" className="mt-6 mb-6"><ZodiacTemplateEditor /></div>
+          <div id="follower-perks-benefits" className="mt-6 mb-6"><ZodiacTemplateEditor initialMode={searchParams.get('template') === 'zodiac' ? '12 Zodiac Signs' : 'Specializations (Jyotish Panchangam)'} /></div>
           <PerksSettings
             tierConfigs={tierConfigs}
             onTierSave={(tier, nextConfig) => setTierConfigs((current) => ({ ...current, [tier]: nextConfig }))}
@@ -1732,7 +1785,7 @@ export default function PerksAndBenefits({ defaultTab }) {
 
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 muted" style={{ fontSize: 12 }}>
                         <span>Target: {Array.isArray(item.targetTiers) ? item.targetTiers.join(', ') : item.targetTiers}</span>
-                        <span>Published: {item.publishDate}</span>
+                        <span>Created: {formatCreatedDate(item.createdAt)}</span>
                       </div>
                     </div>
                   ))}

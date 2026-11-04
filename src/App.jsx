@@ -31,6 +31,7 @@ import TrackQuestions from './pages/TrackQuestions.jsx'
 import RaiseDispute from './pages/RaiseDispute.jsx'
 import AstrologerActivity from './pages/AstrologerActivity.jsx'
 import PerksAndBenefits from './pages/PerksAndBenefits.jsx'
+import BenefitManagementLandingPage from './pages/BenefitManagementLandingPage.jsx'
 import Atonement from './pages/Atonement.jsx'
 import WalletHistory from './pages/WalletHistory.jsx'
 import {
@@ -189,7 +190,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer" element={<Dashboard />} />
         <Route path="/astrologer/text-based-questions" element={<TextBasedQuestions />} />
         <Route path="/astrologer/sales-management" element={<SalesManagement />} />
-        <Route path="/astrologer/perks-benefits" element={<Navigate to="/astrologer/perks-benefits/settings" replace />} />
+        <Route path="/astrologer/perks-benefits" element={<BenefitManagementLandingPage />} />
         <Route path="/astrologer/perks-benefits/settings" element={<PerksAndBenefits defaultTab="settings" />} />
         <Route path="/astrologer/perks-benefits/delivery" element={<PerksAndBenefits defaultTab="settings" />} />
         <Route path="/astrologer/perks-benefits/history" element={<PerksAndBenefits defaultTab="history" />} />

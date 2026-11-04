@@ -94,7 +94,7 @@
 .zte-section-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   margin: 2px 0 0;
 }
 
@@ -109,7 +109,7 @@
   font-size: 11px;
   font-weight: 800;
 }
-.zte-section-heading .zte-add-button { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 5px 8px; border: 1px solid #d8b4fe; border-radius: 7px; background: #fff; color: #6d28d9; font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
+.zte-section-heading .zte-add-button { display: inline-flex; align-items: center; gap: 4px; margin: 0 0 8px auto; padding: 5px 8px; border: 1px solid #d8b4fe; border-radius: 7px; background: #fff; color: #6d28d9; font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
 .zte-section-heading .zte-add-button:hover { background: #f5effe; border-color: #7c3aed; }
 
 .zte-section-heading h3 {
@@ -378,6 +378,13 @@
   color: #64748b;
   font-weight: 500;
 }
+.zte-created-date {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 10.5px;
+  font-weight: 600;
+}
 .zte-selected-nakshatras { display: block; max-width: 460px; margin-top: 5px; color: #64748b; font-size: 10.5px; line-height: 1.45; }
 
 .zte-ruler {
@@ -481,13 +488,26 @@
 .zte-rich-editor { overflow: hidden; border: 1px solid #dcd1e9; border-radius: 9px; background: #fff; }
 .zte-rich-editor .zte-textarea { border: 0; border-radius: 0; }
 .zte-rich-editor .zte-textarea:focus { box-shadow: none; }
+.zte-contenteditable { min-height: 151px; max-height: 320px; overflow-y: auto; white-space: pre-wrap; outline: 0; }
+.zte-contenteditable[data-placeholder]:empty::before { content: attr(data-placeholder); color: #94a3b8; pointer-events: none; }
+.zte-contenteditable strong { font-weight: 800; }
+.zte-contenteditable ul, .zte-contenteditable ol { margin: 6px 0; padding-left: 22px; }
+.zte-contenteditable a { color: #6d28d9; text-decoration: underline; }
 .zte-editor-toolbar { display: flex; align-items: center; gap: 3px; padding: 5px 8px; border-bottom: 1px solid #eee8f5; background: #fff; }
 .zte-editor-toolbar button { display: inline-grid; place-items: center; width: 27px; height: 27px; border: 0; border-radius: 5px; background: transparent; color: #334155; cursor: pointer; }
 .zte-editor-toolbar button:hover:not(:disabled) { background: #f1ecf7; color: #7c3aed; }
 .zte-editor-toolbar button:disabled { cursor: not-allowed; opacity: 0.45; }
+.zte-editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; border-top: 1px solid #eee8f5; color: #64748b; font-size: 10px; }
+.zte-voice-note { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border: 1px solid #d8b4fe; border-radius: 7px; background: #fff; color: #6d28d9; font: inherit; font-size: 10px; font-weight: 750; cursor: pointer; }
+.zte-voice-note:hover:not(:disabled), .zte-voice-note.is-listening { background: #f5effe; border-color: #7c3aed; }
+.zte-voice-note:disabled { cursor: not-allowed; opacity: 0.45; }
 .zte-nakshatra-notes { display: grid; gap: 10px; padding: 12px; border: 1px solid #e5dcf0; border-radius: 11px; background: linear-gradient(135deg, #fbf9ff, #f5effe); }
+.zte-nakshatra-notes--compact { gap: 8px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.zte-notes-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .zte-notes-heading h3 { margin: 0; color: #4c1d95; font-size: 13px; }
 .zte-notes-heading p { margin: 3px 0 0; color: #64748b; font-size: 10.5px; }
+.zte-note-filter { display: grid; gap: 3px; color: #64748b; font-size: 9.5px; font-weight: 700; }
+.zte-note-filter select { min-height: 28px; min-width: 145px; padding: 4px 7px; border: 1px solid #dcd1e9; border-radius: 7px; background: #fff; color: #475569; font: inherit; font-size: 10px; }
 .zte-notes-list { display: grid; gap: 7px; }
 .zte-note-row { display: grid; grid-template-columns: minmax(105px, 0.42fr) minmax(0, 1fr); align-items: center; gap: 8px; }
 .zte-note-row strong { color: #334155; font-size: 10.5px; }
@@ -598,6 +618,10 @@
   display: grid;
   gap: 10px;
   padding: 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid #3b2269;
   border-radius: 14px;
   background: linear-gradient(145deg, #241348 0%, #3e1e6f 100%);
@@ -605,6 +629,27 @@
   box-shadow: 0 10px 24px rgba(37, 18, 72, 0.2);
   position: relative;
   overflow: hidden;
+}
+
+/* Keep live-preview content inside its cards, including long unbroken text. */
+.zte-preview * {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.zte-preview-heading,
+.zte-profile,
+.zte-preview-nakshatras,
+.zte-preview-notes,
+.zte-preview-sections,
+.zte-blessing,
+.zte-temple-pill,
+.zte-preview-period,
+.zte-preview-text {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .zte-preview-heading {
@@ -621,17 +666,17 @@
 
 .zte-preview-heading > span { display: inline-flex; align-items: center; gap: 6px; }
 .zte-preview-heading > button { display: inline-grid; place-items: center; border: 0; background: transparent; color: #fff; cursor: pointer; }
-.zte-preview-nakshatras { padding: 6px 8px; border-radius: 7px; background: rgba(255, 255, 255, 0.1); color: #fef3c7; font-size: 10px; line-height: 1.45; }
+.zte-preview-nakshatras { padding: 6px 8px; border-radius: 7px; background: rgba(255, 255, 255, 0.1); color: #fef3c7; font-size: 10px; line-height: 1.45; white-space: pre-wrap; }
 .zte-preview-notes { display: grid; gap: 7px; padding: 9px; border: 1px solid rgba(254, 240, 138, 0.25); border-radius: 9px; background: rgba(255, 255, 255, 0.07); }
 .zte-preview-notes > strong { color: #fde68a; font-size: 10.5px; }
 .zte-preview-note { display: grid; gap: 2px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.12); }
 .zte-preview-note span { color: #fef3c7; font-size: 10px; font-weight: 800; }
-.zte-preview-note p { margin: 0; color: #f3e8ff; font-size: 10.5px; line-height: 1.4; }
+.zte-preview-note p { margin: 0; color: #f3e8ff; font-size: 10.5px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
 .zte-preview-sections { display: grid; gap: 6px; }
-.zte-preview-sections > div { padding: 7px 8px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; background: rgba(255, 255, 255, 0.05); }
+.zte-preview-sections > div { min-width: 0; max-width: 100%; overflow: hidden; padding: 7px 8px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 7px; background: rgba(255, 255, 255, 0.05); }
 .zte-preview-sections > div.is-active { border-color: rgba(254, 240, 138, 0.45); background: rgba(254, 240, 138, 0.1); }
 .zte-preview-sections strong { color: #fde68a; font-size: 10px; }
-.zte-preview-sections p { margin: 4px 0 0; color: #f3e8ff; font-size: 10.5px; line-height: 1.4; }
+.zte-preview-sections p { margin: 4px 0 0; color: #f3e8ff; font-size: 10.5px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
 
 .zte-live-dot {
   display: inline-flex;
@@ -692,6 +737,7 @@
   color: #fef08a;
   font-size: 11px;
   font-weight: 750;
+  white-space: pre-wrap;
 }
 
 .zte-temple-pill {
@@ -703,6 +749,7 @@
   color: #e9d5ff;
   font-size: 10px;
   font-weight: 700;
+  white-space: pre-wrap;
   backdrop-filter: blur(4px);
 }
 
@@ -714,6 +761,7 @@
   color: #e9d5ff;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: pre-wrap;
 }
 
 .zte-preview-text {
@@ -727,6 +775,11 @@
   padding: 10px 12px;
   border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .zte-lucky-pills {

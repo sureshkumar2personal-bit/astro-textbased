@@ -359,6 +359,224 @@ html[data-theme='dark'] .astrologer-bottom-nav__item:focus-visible {
   outline-offset: 2px;
 }
 
+/* Text-Based Questions: premium dark espresso / burgundy palette. Keep this
+   page scoped so the existing layout, data, and other astrologer modules are
+   unaffected by the redesign. */
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) {
+  --tbq-bg: #0A0400;
+  --tbq-card: #1A0D08;
+  --tbq-inner: #24121F;
+  --tbq-border: #8C642E;
+  --tbq-text: #F5EBDD;
+  --tbq-muted: #C8B9A5;
+  --tbq-heading: #E8B85C;
+  --tbq-purple: #6D348C;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .page-content,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .page-transition,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page {
+  background: var(--tbq-bg) !important;
+  color: var(--tbq-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .page-title,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .section-title,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h1,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h2,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h3,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h4 {
+  color: var(--tbq-heading) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .muted,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page small,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page p {
+  color: var(--tbq-muted) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .page-header-back button {
+  color: var(--tbq-text) !important;
+  border-color: var(--tbq-border) !important;
+  background: transparent !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tabs {
+  border-color: var(--tbq-border) !important;
+  background: var(--tbq-card) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .24) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab:hover {
+  color: var(--tbq-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab.is-active {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-purple) !important;
+  border-color: var(--tbq-heading) !important;
+  box-shadow: 0 7px 18px rgba(109, 52, 140, .35) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .section,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .question-list,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .question-list-shell {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-border) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .22) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:first-of-type .card {
+  background: var(--tbq-card) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar {
+  border-color: var(--tbq-border) !important;
+  background: var(--tbq-inner) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar__input,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page input,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page textarea,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page select {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-inner) !important;
+  border-color: var(--tbq-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page input::placeholder,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page textarea::placeholder {
+  color: var(--tbq-muted) !important;
+  opacity: .9;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar .icon-btn {
+  color: var(--tbq-heading) !important;
+  background: transparent !important;
+  border-color: var(--tbq-border) !important;
+}
+
+/* Summary cards keep their five-card layout, while replacing the inline light
+   backgrounds with subtle dark surfaces and distinct status accents. */
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button > .card {
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center {
+  background: var(--tbq-inner) !important;
+  border-color: var(--tbq-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(1) .text-center { box-shadow: inset 3px 0 #6D348C; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(2) .text-center { box-shadow: inset 3px 0 #5B8DB8; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(3) .text-center { box-shadow: inset 3px 0 #C96B3B; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(4) .text-center { box-shadow: inset 3px 0 #D97706; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(5) .text-center { box-shadow: inset 3px 0 #B94A4A; }
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div {
+  color: var(--tbq-heading) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div:nth-child(2) {
+  color: var(--tbq-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__heading,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__name {
+  color: var(--tbq-heading) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__heading svg {
+  color: var(--tbq-heading) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__count {
+  color: var(--tbq-muted) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card {
+  color: var(--tbq-muted) !important;
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-border) !important;
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .22) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card:hover,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card:focus-visible,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card:hover,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card:focus-visible {
+  background: var(--tbq-inner) !important;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--tbq-purple), 0 7px 18px rgba(0, 0, 0, .22) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card strong,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card strong,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__details p,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__details p {
+  color: var(--tbq-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__details > span,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__details > span,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline b,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline b {
+  color: var(--tbq-muted) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline small,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline small {
+  color: var(--tbq-text) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__action .btn,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__action .btn,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-outline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-ghost {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-border) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__action .btn-primary,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__action .btn-primary,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-primary {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-heading) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .2) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn:hover {
+  color: var(--tbq-heading) !important;
+  background: var(--tbq-inner) !important;
+  border-color: var(--tbq-heading) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-row {
+  background: var(--tbq-card) !important;
+  border-color: rgba(140, 100, 46, .5) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-inline-answer,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-inline-answer__card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .modal-card {
+  color: var(--tbq-text) !important;
+  background: var(--tbq-card) !important;
+  border-color: var(--tbq-border) !important;
+}
+
 html[data-theme='dark'] ::selection {
   background: rgba(255, 194, 71, .34);
   color: var(--text-primary);
@@ -1925,4 +2143,29 @@ html[data-theme='light'] .create-post-camera span {
     justify-content: flex-start;
     flex-wrap: wrap;
   }
+}
+
+/* Keep Program at a Glance on the light card surface in every theme. */
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-section.subscriber-program-section--compact {
+  background: #FFFDF8 !important;
+  border-color: #E8D9C8 !important;
+  color: #382417 !important;
+  box-shadow: 0 10px 28px rgba(67, 43, 25, .055) !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-glance-heading h2,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat strong {
+  color: #382417 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat__label,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat small {
+  color: #857567 !important;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-glance-heading__icon,
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .subscriber-program-stat__icon {
+  border-color: #E8D9C8 !important;
+  color: #7C3AED !important;
+  background: #F3EDFF !important;
 }
