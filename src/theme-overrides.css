@@ -1926,3 +1926,138 @@ html[data-theme='light'] .create-post-camera span {
     flex-wrap: wrap;
   }
 }
+
+/* ==========================================================================
+   Role Selection Landing Page (/) — Devotional Dark Mode Harmonization
+   ========================================================================== */
+html[data-theme='dark'] .role-selection-page {
+  background: radial-gradient(circle at 12% 10%, rgba(245, 158, 11, 0.08), transparent 45%),
+              radial-gradient(circle at 88% 90%, rgba(234, 88, 12, 0.06), transparent 45%),
+              linear-gradient(180deg, #18120E 0%, #0F0B09 100%) !important;
+  color: #F7EFE8 !important;
+}
+
+html[data-theme='dark'] .role-selection-card {
+  background: rgba(27, 21, 18, 0.94) !important;
+  border: 1px solid rgba(245, 158, 11, 0.22) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(245, 158, 11, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+html[data-theme='dark'] .role-selection-brand {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .role-selection-brand strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .role-selection-brand small {
+  color: #BCAE9F !important;
+}
+
+html[data-theme='dark'] .role-selection-copy .page-eyebrow {
+  background: #321F0A !important;
+  color: #FB923C !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
+}
+
+html[data-theme='dark'] .role-selection-copy h1 {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .role-selection-copy p {
+  color: #BCAE9F !important;
+}
+
+html[data-theme='dark'] .role-selection-options button {
+  background: #231C18 !important;
+  border: 1px solid #3D3028 !important;
+  color: #F7EFE8 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html[data-theme='dark'] .role-selection-options button:hover {
+  background: #2B231E !important;
+  border-color: #FB923C !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(251, 146, 60, 0.16) !important;
+  transform: translateY(-2px) !important;
+}
+
+html[data-theme='dark'] .role-selection-icon {
+  background: #321F0A !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  color: #FB923C !important;
+}
+
+html[data-theme='dark'] .role-selection-options strong {
+  color: #FFFDF9 !important;
+  font-size: 15px !important;
+}
+
+html[data-theme='dark'] .role-selection-options small {
+  color: #BCAE9F !important;
+}
+
+html[data-theme='dark'] .role-selection-options b {
+  color: #FB923C !important;
+}
+
+/* ==========================================================================
+   Login Button — Navy Blue Only
+   ========================================================================== */
+.auth-submit-btn,
+.auth-submit-btn--user,
+.auth-submit-btn--astrologer {
+  background: #1E3A8A !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 24px rgba(30, 58, 138, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  font-weight: 700 !important;
+}
+
+.auth-submit-btn:hover,
+.auth-submit-btn--user:hover,
+.auth-submit-btn--astrologer:hover {
+  background: #1D4ED8 !important;
+  box-shadow: 0 14px 30px rgba(30, 58, 138, 0.38) !important;
+  transform: translateY(-1px) !important;
+}
+
+html[data-theme='dark'] .auth-submit-btn,
+html[data-theme='dark'] .auth-submit-btn--user,
+html[data-theme='dark'] .auth-submit-btn--astrologer {
+  background: #1E3A8A !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(30, 58, 138, 0.3) !important;
+  border: 1px solid rgba(96, 165, 250, 0.35) !important;
+}
+
+html[data-theme='dark'] .auth-submit-btn:hover,
+html[data-theme='dark'] .auth-submit-btn--user:hover,
+html[data-theme='dark'] .auth-submit-btn--astrologer:hover {
+  background: #2563EB !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(37, 99, 235, 0.4) !important;
+  border-color: rgba(96, 165, 250, 0.5) !important;
+}
+
+/* User Auth Form Card & Inputs in Dark Mode */
+html[data-theme='dark'] .auth-page--user .auth-form-card {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-theme='dark'] .auth-page--user input,
+html[data-theme='dark'] .auth-page--user textarea {
+  background: #1B1512 !important;
+  border-color: #3D3028 !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .auth-page--user input:focus,
+html[data-theme='dark'] .auth-page--user textarea:focus {
+  border-color: #FB923C !important;
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2) !important;
+}
