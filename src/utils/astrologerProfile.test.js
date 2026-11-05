@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateCompletion, createDefaultProfile, validateCredential, validatePhoto, validateSection } from './astrologerProfile.js'
+import { calculateCompletion, createDefaultProfile, findStateByCity, INDIAN_STATES, INDIAN_STATES_AND_CITIES, validateCredential, validatePhoto, validateSection } from './astrologerProfile.js'
 
 const today = new Date('2026-10-02T00:00:00')
 
@@ -46,5 +46,21 @@ describe('astrologerProfile validation', () => {
     const result = calculateCompletion(profile, { hasAvailability: true })
     expect(result.missing).toEqual(['Profile Photo', 'Credentials'])
     expect(result.percent).toBe(75)
+  })
+
+  it('provides comprehensive Indian states and cities mapping and findStateByCity', () => {
+    expect(INDIAN_STATES.length).toBeGreaterThan(25)
+    expect(INDIAN_STATES).toContain('Tamil Nadu')
+    expect(INDIAN_STATES).toContain('Maharashtra')
+    expect(INDIAN_STATES).toContain('Karnataka')
+    expect(INDIAN_STATES_AND_CITIES['Tamil Nadu']).toContain('Chennai')
+    expect(INDIAN_STATES_AND_CITIES['Tamil Nadu']).toContain('Coimbatore')
+    expect(INDIAN_STATES_AND_CITIES['Maharashtra']).toContain('Mumbai')
+
+    expect(findStateByCity('Chennai')).toBe('Tamil Nadu')
+    expect(findStateByCity('mumbai')).toBe('Maharashtra')
+    expect(findStateByCity('Bengaluru')).toBe('Karnataka')
+    expect(findStateByCity('UnknownCityXYZ')).toBe('')
+    expect(findStateByCity('')).toBe('')
   })
 })

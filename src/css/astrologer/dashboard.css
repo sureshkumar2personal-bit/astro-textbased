@@ -8018,7 +8018,7 @@ button.apt-week-day:focus-visible {
 .profile-account-about { padding: 16px 32px 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
 .profile-account-about b { color: rgba(255, 255, 255, .85); font-size: 11px; }
 .profile-account-about p { color: rgba(255, 255, 255, .74); font-size: 15px; line-height: 1.6; }
-.profile-account-meta span { color: rgba(255, 255, 255, .8); font-size: 12px; padding: 0 16px; border-left-color: rgba(255, 255, 255, .18); }
+.profile-account-meta span { color: #504955; font-size: 12px; padding: 0 16px; border-left-color: rgba(139, 115, 94, .25); }
 
 /* ---- Stats & services ---- */
 .profile-account-stats { padding: 22px 26px; border-radius: 26px; }
@@ -8082,7 +8082,7 @@ button.apt-week-day:focus-visible {
 .account-toast { border-radius: 16px; background: linear-gradient(135deg, #241638, #3d1f5e); box-shadow: 0 24px 56px rgba(15, 8, 30, .3); font-size: 13px; }
 
 /* ---- Content tabs (Posts / Live / Saved) ---- */
-.profile-content-tabs-section { padding: 22px 26px; border-radius: 26px; }
+.profile-content-tabs-section { margin: 24px 0; padding: 22px 26px; border-radius: 26px; }
 .profile-content-tabs nav { padding: 5px; border: 1px solid rgba(233, 224, 243, .9); border-radius: 16px; background: rgba(242, 236, 249, .9); }
 .profile-content-tabs nav button { min-height: 46px; border-radius: 12px; font-size: 13px; color: #7d7189; }
 .profile-content-tabs nav button.is-active { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; box-shadow: 0 8px 18px rgba(109, 40, 217, .28); }

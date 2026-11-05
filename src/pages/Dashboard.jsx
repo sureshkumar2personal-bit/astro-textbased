@@ -102,7 +102,6 @@ export default function Dashboard() {
         />
         <div className="astrologer-top-hero-image__services">
           <h1>Stay Connected with Your Followers</h1>
-          <p>Enable instant call or chat to be available for real time consultations.</p>
           <div className="adash-hero-service-cards" aria-label="Instant services">
             <ServiceToggleCard
               icon={PhoneCall}
@@ -202,7 +201,6 @@ export default function Dashboard() {
       <Section
         title="Upcoming Appointments"
         icon={CalendarDays}
-        subtitle="Your next three scheduled appointments"
       >
         <div className="adash-questions">
           {upcomingAppointments.length ? (

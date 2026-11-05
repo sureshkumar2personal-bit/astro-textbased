@@ -164,9 +164,9 @@ function PlanCard({ plan, config, isEditing, draft, onEdit, onChange, onDiscount
   )
 }
 
-export function SubscriberProgramGlance() {
+export function SubscriberProgramGlance({ className = '' }) {
   return (
-    <section className="subscriber-program-section subscriber-program-section--compact" aria-labelledby="subscriber-program-title">
+    <section className={`subscriber-program-section subscriber-program-section--compact ${className}`.trim()} aria-labelledby="subscriber-program-title">
       <div className="subscriber-program-glance-heading">
         <span className="subscriber-program-glance-heading__icon"><BarChart3 size={19} /></span>
         <h2 id="subscriber-program-title">Program at a Glance</h2>

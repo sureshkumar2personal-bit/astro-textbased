@@ -251,7 +251,7 @@ function ManageNavCard({ icon: Icon, tone, title, description, action, actionCol
       <span className={`stat-icon ${tone}`} style={{ width: 48, height: 48, borderRadius: 14 }}><Icon size={22} /></span>
       <div>
         <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--ink)' }}>{title}</div>
-        <div className="muted text-sm" style={{ marginTop: 6, lineHeight: 1.55 }}>{description}</div>
+        {description ? <div className="muted text-sm" style={{ marginTop: 6, lineHeight: 1.55 }}>{description}</div> : null}
       </div>
       <span style={{ marginTop: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: actionColor }}>
         {action} <ArrowRight size={15} />
@@ -1143,7 +1143,6 @@ export default function TextBasedQuestions() {
                 icon={Target}
                 tone="tone-violet"
                 title="Campaigns"
-                description="Create and manage topic-based question campaigns."
                 action="Manage Campaigns"
                 actionColor="var(--primary)"
                 gradient="linear-gradient(160deg, #ECE5F8 0%, #FAF7FF 55%, #FFFFFF 100%)"
@@ -1155,7 +1154,6 @@ export default function TextBasedQuestions() {
                 icon={MessageCircleQuestion}
                 tone="tone-teal"
                 title="Open Questions"
-                description="Manage your flexible question capacity and pricing."
                 action="Manage Open Questions"
                 actionColor="var(--green-600)"
                 gradient="linear-gradient(160deg, #E5F6EE 0%, #F4FBF8 55%, #FFFFFF 100%)"
@@ -1782,19 +1780,12 @@ export default function TextBasedQuestions() {
             <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
               <div style={{ minWidth: 0 }}>
                 <div id="open-settings-form-title" className="section-title" style={{ marginBottom: 0 }}>Open Question Settings</div>
-                <p className="muted" style={{ fontSize: 13, marginTop: 4, marginBottom: 0 }}>
-                  Set default prices and monthly capacity for questions asked outside a campaign. Open capacity counts toward the same {inr(monthSummary.capacity)} monthly limit ({monthLabel}).
-                </p>
               </div>
               <button type="button" className="icon-btn" aria-label="Close open question settings" onClick={closeOpenSettingsModal}><X size={18} /></button>
             </div>
 
             <div className="modal-card__content user-modal-card__content astrologer-modal-content">
               <div className="astrologer-modal-section">
-                <div className="section-title" style={{ fontSize: 14 }}>Question Types & Default Pricing</div>
-                <p className="muted" style={{ fontSize: 13, margin: '0 0 12px' }}>
-                  Enable the question types users can ask outside a campaign and set their default prices. At least one type must stay enabled.
-                </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {['General', 'Personal'].map((type) => {
                     const isPersonal = type === 'Personal'
@@ -1853,7 +1844,6 @@ export default function TextBasedQuestions() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="field-label-top">Enable offer</div>
-                    <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>Give first-time subscribers a discount on open questions.</div>
                   </div>
                   <div className="flex gap-2">
                     <button type="button" className={`btn btn-sm ${openForm.offerEnabled ? 'btn-primary' : 'btn-outline'}`} onClick={() => setOpenForm({ ...openForm, offerEnabled: true })}>Yes</button>

@@ -411,7 +411,34 @@
   gap: 0;
 }
 .astro-appointment-history .apt-history-list-view .apt-history-row.is-inline {
-  gap: 10px;
+  display: grid;
+  gap: 0;
+  border-radius: 14px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline.is-expanded,
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) {
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline.is-expanded:hover,
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details):hover {
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--surface-border));
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline.is-expanded .apt-history-item,
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) .apt-history-item {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline.is-expanded .apt-history-item:hover,
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) .apt-history-item:hover {
+  border-color: transparent;
+  box-shadow: none;
 }
 .astro-appointment-history .apt-inline-details {
   display: grid;
@@ -420,6 +447,16 @@
   border: 1px solid var(--surface-border);
   border-radius: 14px;
   background: var(--surface-soft);
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline .apt-inline-details {
+  border: none;
+  border-top: 1px solid var(--surface-border);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--surface-soft) 70%, var(--surface));
+  padding: 16px 20px 18px;
+}
+.astro-appointment-history .apt-history-list-view .apt-history-row.is-inline .apt-inline-details__heading {
+  display: none;
 }
 .astro-appointment-history .apt-inline-details__heading {
   display: flex;
