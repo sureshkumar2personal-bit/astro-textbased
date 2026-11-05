@@ -2492,6 +2492,9 @@ html[data-theme='dark'] .app-shell--astrologer .action-card--compact {
   background: #241507 !important;
   border-color: #4a3424 !important;
 }
+html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image {
+  background: #060810 !important;
+}
 html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services h1 {
   color: #ffffff !important;
 }

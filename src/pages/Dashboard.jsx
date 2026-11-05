@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTheme } from '../state/ThemeContext.jsx'
 import {
   Megaphone,
   MessageCircleReply,
@@ -42,6 +43,7 @@ const CAMPAIGN_CARD_STYLES = [
 const DASHBOARD_CAMPAIGN_LIMIT = 4
 
 export default function Dashboard() {
+  const { isDark } = useTheme()
   const { astrologerServices, actions, campaigns, appointments } = useAppData()
   const { currentUser } = useAuth()
   const [showInvitedPasswordPopup, setShowInvitedPasswordPopup] = useState(Boolean(currentUser?.requiresPasswordSetup))
@@ -92,13 +94,20 @@ export default function Dashboard() {
       .slice(0, 3)
   }, [appointments, currentUser?.id])
 
+  useEffect(() => {
+    // Preload alternate theme banner for instant theme switching
+    const preloader = new Image()
+    preloader.src = isDark ? '/golden-temple-sunset-banner.png' : '/golden-temple-sunset-banner-dark.png'
+  }, [isDark])
+
   return (
     <div>
       {showInvitedPasswordPopup && <InvitedPasswordPopup onComplete={() => setShowInvitedPasswordPopup(false)} />}
       <div className="astrologer-top-hero-image">
         <img
-          src="/golden-temple-sunset-banner.png"
-          alt="Golden temple at sunset beside a peaceful lake"
+          className={`astrologer-top-hero-image__img astrologer-top-hero-image__img--${isDark ? 'dark' : 'light'}`}
+          src={isDark ? '/golden-temple-sunset-banner-dark.png' : '/golden-temple-sunset-banner.png'}
+          alt={isDark ? 'Golden temple at night beside a peaceful lake' : 'Golden temple at sunset beside a peaceful lake'}
         />
         <div className="astrologer-top-hero-image__services">
           <h1>Stay Connected with Your Followers</h1>
