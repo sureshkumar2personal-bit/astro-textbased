@@ -1672,8 +1672,9 @@ html[data-theme='dark'] .app-shell--astrologer:has(.account-management-page) .as
 /* Account Management → Posts: exact dark brown/gold surfaces. */
 html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs-section {
   background: #241507 !important;
-  border-color: #80551B !important;
+  border: none !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, .18) !important;
+  margin: 24px 0 !important;
 }
 
 html[data-theme='dark'] .app-shell--astrologer .account-management-page .profile-content-tabs nav {
@@ -1866,6 +1867,17 @@ html[data-theme='light'] .app-shell--astrologer .account-management-page .profil
   color: var(--account-light-secondary) !important;
 }
 
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-meta span,
+html:not([data-theme='dark']) .app-shell--astrologer .account-management-page .profile-account-meta span {
+  color: var(--account-light-text, #3B2112) !important;
+  border-left-color: rgba(139, 115, 94, 0.3) !important;
+}
+
+html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-about,
+html:not([data-theme='dark']) .app-shell--astrologer .account-management-page .profile-account-about {
+  border-top-color: rgba(232, 182, 90, 0.35) !important;
+}
+
 html[data-theme='light'] .app-shell--astrologer .account-management-page .account-eyebrow,
 html[data-theme='light'] .app-shell--astrologer .account-management-page .account-section-tabs__label,
 html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-account-section-heading small,
@@ -1962,8 +1974,9 @@ html[data-theme='light'] .app-shell--astrologer .account-management-page textare
 
 html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs-section {
   background: #FFF8E8 !important;
-  border-color: var(--account-light-border) !important;
+  border: none !important;
   box-shadow: 0 10px 24px rgba(111, 72, 21, .08) !important;
+  margin: 24px 0 !important;
 }
 
 html[data-theme='light'] .app-shell--astrologer .account-management-page .profile-content-tabs nav {

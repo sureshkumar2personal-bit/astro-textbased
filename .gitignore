@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 this is for the test
+
+# Scratch & local agent files
+.agents/
+__pycache__/
+*.pyc
+monitor_*.py

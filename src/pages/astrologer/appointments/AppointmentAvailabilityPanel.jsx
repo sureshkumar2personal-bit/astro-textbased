@@ -2204,10 +2204,6 @@ export default function AppointmentAvailabilityPanel({
         </header>
 
         <section className="apt-policy-card">
-          <div className="apt-policy-card__head">
-            <span>Appointment Settings</span>
-          </div>
-
           <div>
             <span>
               Appointment Duration

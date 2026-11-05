@@ -18,11 +18,11 @@ export default function BenefitManagementLandingPage() {
   return <div className="perks-benefits-page">
     <button type="button" className="perks-benefits-back" onClick={() => navigate('/astrologer/dashboard')}><ArrowLeft size={16} aria-hidden="true" /> Back</button>
     <PageHeader eyebrow="Astrologer Workspace" title="Benefit Management" />
-    <SubscriberProgramGlance />
+    <SubscriberProgramGlance className="mt-4" />
     <Section className="mt-4">
       <div className="perks-tab-navigation">
         <button type="button" className="perks-tab-btn active" onClick={() => navigate('/astrologer/perks-benefits')}><SlidersHorizontal size={18} /><span>Benefit Management</span></button>
-        <button type="button" className="perks-tab-btn" onClick={() => navigate('/astrologer/perks-benefits/history')}><History size={18} /><span>3. History</span></button>
+        <button type="button" className="perks-tab-btn" onClick={() => navigate('/astrologer/perks-benefits/history')}><History size={18} /><span>History</span></button>
       </div>
     </Section>
       <BenefitManagementLanding

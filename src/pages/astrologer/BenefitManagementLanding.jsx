@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  AlertTriangle,
   Award,
   BarChart3,
   Calendar,
@@ -7,13 +8,10 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Clock,
   DollarSign,
-  Edit3,
   Eye,
   FileText,
   Gift,
-  GitMerge,
   Grid,
   History,
   LineChart,
@@ -26,9 +24,9 @@ import {
   Play,
   Send,
   Sparkles,
-  Star,
   Tag,
   Trash2,
+  Users,
   Wallet,
   Wand2,
   X,
@@ -41,144 +39,96 @@ const RASIS = [
     name: 'Aries',
     ta: 'மேஷம்',
     symbol: '♈',
-    stars: [
-      { name: 'Ashwini', ta: 'அஸ்வினி' },
-      { name: 'Bharani (Parani)', ta: 'பரணி' },
-      { name: 'Krittika (1)', ta: 'கிருத்திகை 1' },
-    ],
-    starsShort: 'Ashwini · Parani · Krittika',
+    emoji: '🐏',
+    starsDisplay: 'Ashwini, Parani, Krittika (அஸ்வினி, பரணி, கிருத்திகை)',
   },
   {
     id: 'taurus',
     name: 'Taurus',
     ta: 'ரிஷபம்',
     symbol: '♉',
-    stars: [
-      { name: 'Krittika (2-4)', ta: 'கிருத்திகை' },
-      { name: 'Rohini', ta: 'ரோகிணி' },
-      { name: 'Mrigashira (1-2)', ta: 'மிருகசீரிஷம்' },
-    ],
-    starsShort: 'Krittika · Rohini · Mrigashira',
+    emoji: '🐂',
+    starsDisplay: 'Krittika, Rohini, Mrigashira (கிருத்திகை, ரோகிணி, மிருகசீரிஷம்)',
   },
   {
     id: 'gemini',
     name: 'Gemini',
     ta: 'மிதுனம்',
     symbol: '♊',
-    stars: [
-      { name: 'Mrigashira (3-4)', ta: 'மிருகசீரிஷம்' },
-      { name: 'Ardra (Thiruvathirai)', ta: 'திருவாதிரை' },
-      { name: 'Punarvasu (1-3)', ta: 'புனர்பூசம்' },
-    ],
-    starsShort: 'Mrigashira · Ardra · Punarvasu',
+    emoji: '👥',
+    starsDisplay: 'Mrigashira, Thiruvathirai, Punarvasu (மிருகசீரிஷம், திருவாதிரை, புனர்பூசம்)',
   },
   {
     id: 'cancer',
     name: 'Cancer',
     ta: 'கடகம்',
     symbol: '♋',
-    stars: [
-      { name: 'Punarvasu (4)', ta: 'புனர்பூசம் 4' },
-      { name: 'Pushya (Poosam)', ta: 'பூசம்' },
-      { name: 'Ashlesha (Ayilyam)', ta: 'ஆயில்யம்' },
-    ],
-    starsShort: 'Punarvasu · Pushya · Ashlesha',
+    emoji: '🦀',
+    starsDisplay: 'Punarvasu, Pushya, Ashlesha (புனர்பூசம், பூசம், ஆயில்யம்)',
   },
   {
     id: 'leo',
     name: 'Leo',
     ta: 'சிம்மம்',
     symbol: '♌',
-    stars: [
-      { name: 'Magha (Makam)', ta: 'மகம்' },
-      { name: 'Purva Phalguni (Pooram)', ta: 'பூரம்' },
-      { name: 'Uttara Phalguni (1)', ta: 'உத்திரம் 1' },
-    ],
-    starsShort: 'Magha · Pooram · Uthiram',
+    emoji: '🦁',
+    starsDisplay: 'Makam, Pooram, Uthiram (மகம், பூரம், உத்திரம்)',
   },
   {
     id: 'virgo',
     name: 'Virgo',
     ta: 'கன்னி',
     symbol: '♍',
-    stars: [
-      { name: 'Uttara Phalguni (2-4)', ta: 'உத்திரம்' },
-      { name: 'Hasta (Hastham)', ta: 'அஸ்தம்' },
-      { name: 'Chitra (1-2)', ta: 'சித்திரை' },
-    ],
-    starsShort: 'Uthiram · Hasta · Chitra',
+    emoji: '👧',
+    starsDisplay: 'Uthiram, Hastham, Chithirai (உத்திரம், அஸ்தம், சித்திரை)',
   },
   {
     id: 'libra',
     name: 'Libra',
     ta: 'துலாம்',
     symbol: '♎',
-    stars: [
-      { name: 'Chitra (3-4)', ta: 'சித்திரை' },
-      { name: 'Swati', ta: 'சுவாதி' },
-      { name: 'Vishakha (1-3)', ta: 'விசாகம்' },
-    ],
-    starsShort: 'Chitra · Swati · Vishakha',
+    emoji: '⚖️',
+    starsDisplay: 'Chithirai, Swati, Visakam (சித்திரை, சுவாதி, விசாகம்)',
   },
   {
     id: 'scorpio',
     name: 'Scorpio',
     ta: 'விருச்சிகம்',
     symbol: '♏',
-    stars: [
-      { name: 'Vishakha (4)', ta: 'விசாகம் 4' },
-      { name: 'Anuradha (Anusham)', ta: 'அனுஷம்' },
-      { name: 'Jyeshtha (Kettai)', ta: 'கேட்டை' },
-    ],
-    starsShort: 'Vishakha · Anuradha · Jyeshtha',
+    emoji: '🦂',
+    starsDisplay: 'Visakam, Anusham, Kettai (விசாகம், அனுஷம், கேட்டை)',
   },
   {
     id: 'sagittarius',
     name: 'Sagittarius',
     ta: 'தனுசு',
     symbol: '♐',
-    stars: [
-      { name: 'Mula (Moolam)', ta: 'மூலம்' },
-      { name: 'Purva Ashadha (Pooradam)', ta: 'பூராடம்' },
-      { name: 'Uttara Ashadha (1)', ta: 'உத்திராடம் 1' },
-    ],
-    starsShort: 'Mula · Pooradam · Uthiradam',
+    emoji: '🏹',
+    starsDisplay: 'Moolam, Pooradam, Uthiradam (மூலம், பூராடம், உத்திராடம்)',
   },
   {
     id: 'capricorn',
     name: 'Capricorn',
     ta: 'மகரம்',
     symbol: '♑',
-    stars: [
-      { name: 'Uttara Ashadha (2-4)', ta: 'உத்திராடம்' },
-      { name: 'Shravana (Thiruvonam)', ta: 'திருவோணம்' },
-      { name: 'Dhanishta (1-2)', ta: 'அவிட்டம்' },
-    ],
-    starsShort: 'Uthiradam · Shravana · Dhanishta',
+    emoji: '🐐',
+    starsDisplay: 'Uthiradam, Thiruvonam, Avittam (உத்திராடம், திருவோணம், அவிட்டம்)',
   },
   {
     id: 'aquarius',
     name: 'Aquarius',
     ta: 'கும்பம்',
     symbol: '♒',
-    stars: [
-      { name: 'Dhanishta (3-4)', ta: 'அவிட்டம்' },
-      { name: 'Shatabhisha (Sadhayam)', ta: 'சதயம்' },
-      { name: 'Purva Bhadrapada (1-3)', ta: 'பூரட்டாதி' },
-    ],
-    starsShort: 'Dhanishta · Shatabhisha · Poorattathi',
+    emoji: '🏺',
+    starsDisplay: 'Avittam, Sadhayam, Poorattathi (அவிட்டம், சதயம், பூரட்டாதி)',
   },
   {
     id: 'pisces',
     name: 'Pisces',
     ta: 'மீனம்',
     symbol: '♓',
-    stars: [
-      { name: 'Purva Bhadrapada (4)', ta: 'பூரட்டாதி 4' },
-      { name: 'Uttara Bhadrapada (Uthirattathi)', ta: 'உத்திரட்டாதி' },
-      { name: 'Revati (Revathi)', ta: 'ரேவதி' },
-    ],
-    starsShort: 'Poorattathi · Uthirattathi · Revati',
+    emoji: '🐟',
+    starsDisplay: 'Poorattathi, Uthirattathi, Revathi (பூரட்டாதி, உத்திரட்டாதி, ரேவதி)',
   },
 ]
 
@@ -195,6 +145,13 @@ const ESTIMATED_VOLUMES = {
   call: 80,
   chat: 100,
 }
+
+const AUDIENCE_OPTIONS = [
+  { value: 'All Users', shortLabel: 'All Users', label: 'All App Users' },
+  { value: 'Followers', shortLabel: 'Followers', label: 'Followers Only' },
+  { value: 'Subscribers', shortLabel: 'Subscribers', label: 'Paid Subscribers Only' },
+  { value: 'VIPs', shortLabel: 'VIPs', label: 'VIPs & Public Figures' },
+]
 
 const INITIAL_SERVICES = [
   { id: 'text-q', name: 'Text Question', active: true, discount: 20, target: 'All Users', base: BASE_PRICES['text-q'], multiplier: 1, unit: 'Qn', icon: MessageSquare },
@@ -227,8 +184,7 @@ export default function BenefitManagementLanding({
   const [previewMode, setPreviewMode] = useState('ALL')
   const [toastMsg, setToastMsg] = useState('')
 
-  // 12 Rasis storage state
-  const [rasiStore, setRasiStore] = useState(() => {
+  const createInitialRasiStore = () => {
     const initial = {}
     RASIS.forEach((r) => {
       initial[r.id] = {
@@ -237,12 +193,21 @@ export default function BenefitManagementLanding({
         color: 'Yellow / Gold',
         number: '3, 9',
         remedy: 'Chant Lord Shiva stotram for peace and prosperity.',
-        suitedStars: r.stars.map((s) => s.name),
         filled: false,
       }
     })
     return initial
-  })
+  }
+
+  // Multi-category store (Daily, Weekly, Monthly, Special Transits)
+  const [categoryStore, setCategoryStore] = useState(() => ({
+    daily: createInitialRasiStore(),
+    weekly: createInitialRasiStore(),
+    monthly: createInitialRasiStore(),
+    special: createInitialRasiStore(),
+  }))
+  const [isPublished, setIsPublished] = useState(false)
+  const [publishWarning, setPublishWarning] = useState(false)
 
   const showToast = (msg) => {
     setToastMsg(msg)
@@ -251,13 +216,40 @@ export default function BenefitManagementLanding({
     }, 3200)
   }
 
-  // Active Rasi data
+  // Active Category & Rasi data
+  const currentCategoryStore = categoryStore[contentCategory] || {}
   const activeRasi = RASIS[currentRasiIndex]
-  const currentRasiData = rasiStore[activeRasi.id] || {}
+  const currentRasiData = currentCategoryStore[activeRasi.id] || {}
 
   const filledRasiCount = useMemo(() => {
-    return Object.values(rasiStore).filter((entry) => entry.filled).length
-  }, [rasiStore])
+    const store = categoryStore[contentCategory] || {}
+    return Object.values(store).filter((entry) => entry.filled).length
+  }, [categoryStore, contentCategory])
+
+  const categoryStats = useMemo(() => {
+    const list = [
+      { id: 'daily', label: 'Daily Horoscope' },
+      { id: 'weekly', label: 'Weekly Horoscope' },
+      { id: 'monthly', label: 'Monthly Horoscope' },
+      { id: 'special', label: 'Special Transits & Remedies' },
+    ]
+    return list.map((cat) => {
+      const store = categoryStore[cat.id] || {}
+      const filled = Object.values(store).filter((e) => e.filled).length
+      return {
+        ...cat,
+        filled,
+        total: 12,
+        isComplete: filled === 12,
+      }
+    })
+  }, [categoryStore])
+
+  const incompleteCategories = useMemo(() => {
+    return categoryStats.filter((c) => !c.isComplete)
+  }, [categoryStats])
+
+  const isAllComplete = incompleteCategories.length === 0
 
   // Financial calculations
   const financials = useMemo(() => {
@@ -304,8 +296,9 @@ export default function BenefitManagementLanding({
 
   // Service discount modification
   const handleDiscountChange = (id, newDiscount) => {
+    const clamped = Math.max(0, Math.min(80, Number(newDiscount) || 0))
     setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, discount: Number(newDiscount) } : s))
+      prev.map((s) => (s.id === id ? { ...s, discount: clamped } : s))
     )
   }
 
@@ -332,14 +325,22 @@ export default function BenefitManagementLanding({
 
   // Rasi form updates
   const handleRasiFieldChange = (field, value) => {
-    setRasiStore((prev) => {
-      const current = prev[activeRasi.id] || {}
+    setCategoryStore((prev) => {
+      const categoryData = prev[contentCategory] || {}
+      const current = categoryData[activeRasi.id] || {}
       const updated = { ...current, [field]: value }
       if (field === 'text') {
         updated.filled = String(value).trim().length > 5
       }
-      return { ...prev, [activeRasi.id]: updated }
+      return {
+        ...prev,
+        [contentCategory]: {
+          ...categoryData,
+          [activeRasi.id]: updated,
+        },
+      }
     })
+    setIsPublished(false)
   }
 
   const navigateRasi = (direction) => {
@@ -349,7 +350,7 @@ export default function BenefitManagementLanding({
     setCurrentRasiIndex(next)
   }
 
-  const autoFillSampleData = () => {
+  const autoFillSampleData = (fillAll = false) => {
     const samples = [
       'Excellent period for career growth and unexpected gains. Focus on new ventures.',
       'High energy levels. Important decisions regarding property and family will be favorable.',
@@ -359,33 +360,52 @@ export default function BenefitManagementLanding({
       'Financial stability improves. Meditation and spiritual activities bring inner peace.',
     ]
 
-    setRasiStore((prev) => {
+    setCategoryStore((prev) => {
       const nextStore = { ...prev }
-      RASIS.forEach((r, idx) => {
-        const sampleText = samples[idx % samples.length]
-        const isSpecial = contentCategory === 'special'
-        const transitTitle = isSpecial ? specialTransit : 'Horoscope Prediction'
+      const targets = fillAll ? ['daily', 'weekly', 'monthly', 'special'] : [contentCategory]
 
-        nextStore[r.id] = {
-          text: `[${transitTitle}] For ${r.name} (${r.ta}): ${sampleText}`,
-          rating: `${80 + ((idx * 2) % 20)}%`,
-          color: 'Yellow / Gold',
-          number: `${idx + 1}, ${idx + 5}`,
-          remedy: 'Morning prayer and offering prayers to Sun God brings luck.',
-          suitedStars: r.stars.map((s) => s.name),
-          filled: true,
-        }
+      targets.forEach((cat) => {
+        nextStore[cat] = { ...nextStore[cat] }
+        RASIS.forEach((r, idx) => {
+          const sampleText = samples[idx % samples.length]
+          const catTitle =
+            cat === 'special'
+              ? specialTransit
+              : `${cat.charAt(0).toUpperCase() + cat.slice(1)} Horoscope`
+
+          nextStore[cat][r.id] = {
+            text: `[${catTitle}] For ${r.name} (${r.ta}): ${sampleText}`,
+            rating: `${80 + ((idx * 2) % 20)}%`,
+            color: 'Yellow / Gold',
+            number: `${idx + 1}, ${idx + 5}`,
+            remedy: 'Morning prayer and offering prayers to Sun God brings luck.',
+            filled: true,
+          }
+        })
       })
       return nextStore
     })
 
-    showToast('All 12 Rasis populated with sample predictions!')
+    setIsPublished(false)
+    if (fillAll) {
+      showToast('🎉 All 12 Rasis populated across Daily, Weekly, Monthly & Special! Red button is now blinking!')
+    } else {
+      showToast(`12 Signs populated for ${contentCategory.toUpperCase()} Horoscope!`)
+    }
   }
 
   const publishAllRasis = () => {
-    if (filledRasiCount < 12) {
-      showToast(`Warning: Only ${filledRasiCount}/12 signs completed! Complete all 12 signs.`)
+    if (!isAllComplete) {
+      if (!publishWarning) {
+        setPublishWarning(true)
+      } else {
+        setIsPublished(true)
+        setPublishWarning(false)
+        showToast('🎉 Content published live to mobile app users!')
+      }
     } else {
+      setIsPublished(true)
+      setPublishWarning(false)
       showToast('🎉 All 12 Rasis predictions published live to app users!')
     }
   }
@@ -440,135 +460,198 @@ export default function BenefitManagementLanding({
         <section className="space-y-5">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Left 2 Cols: Service Discounts */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* 4 Service Cards Grid */}
+            <div className="lg:col-span-2">
+              {/* 4 Service Cards Grid (21st.dev Inspired Model) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {services.map((svc) => {
                   const Icon = svc.icon
+                  const discount = svc.active ? Number(svc.discount) || 0 : 0
+                  const rawFinalPrice = svc.base * (1 - discount / 100)
+                  const finalPrice = Math.round(rawFinalPrice * 100) / 100
+                  const rawSaved = svc.base - finalPrice
+                  const savedAmount = Math.round(rawSaved * 100) / 100
+
                   return (
-                    <div key={svc.id} className="perks-service-item space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)]">
-                            <Icon size={18} />
+                    <div
+                      key={svc.id}
+                      className={`perks-service-card space-y-4 ${
+                        !svc.active ? 'is-inactive' : ''
+                      }`}
+                    >
+                      {/* Top Row: Service Icon & Title + Active Switch */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] border border-[color:var(--bl-primary)]/20 flex items-center justify-center shrink-0">
+                            <Icon size={19} />
                           </div>
-                          <div>
-                            <h4 className="font-bold text-sm text-[color:var(--bl-ink)]">
-                              {svc.name}
-                            </h4>
-                            <p className="text-[11px] text-[color:var(--bl-muted)]">
-                              Base: <b>₹{svc.base} / {svc.unit}</b>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-bold text-sm text-[color:var(--bl-ink)] truncate">
+                                {svc.name}
+                              </h4>
+                              {svc.active && discount > 0 && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 shrink-0">
+                                  {discount}% OFF
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-[color:var(--bl-muted)] mt-0.5">
+                              Standard Base: <span className="font-semibold text-[color:var(--bl-ink)]">₹{svc.base}</span> / {svc.unit}
                             </p>
                           </div>
                         </div>
 
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={svc.active}
-                            onChange={() => handleToggleService(svc.id)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-stone-300 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[color:var(--bl-primary)]" />
-                        </label>
+                        {/* Minimalist Active Toggle Switch */}
+                        <div className="flex items-center gap-2 shrink-0 pt-0.5">
+                          <span
+                            className={`text-[11px] font-semibold ${
+                              svc.active
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-[color:var(--bl-muted)]'
+                            }`}
+                          >
+                            {svc.active ? 'Active' : 'Paused'}
+                          </span>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={svc.active}
+                              onChange={() => handleToggleService(svc.id)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-stone-300 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[color:var(--bl-primary)]" />
+                          </label>
+                        </div>
                       </div>
 
-                      <div className="space-y-2 pt-2 border-t border-[color:var(--bl-line)]">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-[color:var(--bl-muted)]">Discount:</span>
-                          <span className="font-bold text-[color:var(--bl-primary)] text-sm">
-                            {svc.discount}% OFF
-                          </span>
+                      {/* Hero Price & Savings Section (21st.dev Hero Typography) */}
+                      <div className="pt-3 border-t border-[color:var(--bl-line)]/70">
+                        <div className="flex items-baseline justify-between flex-wrap gap-2">
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[color:var(--bl-ink)]">
+                              ₹{svc.active ? finalPrice : svc.base}
+                            </span>
+                            <span className="text-xs text-[color:var(--bl-muted)] font-medium">
+                              / {svc.unit}
+                            </span>
+                            {svc.active && discount > 0 && (
+                              <span className="text-xs text-[color:var(--bl-muted)] line-through">
+                                ₹{svc.base}
+                              </span>
+                            )}
+                          </div>
+
+                          {svc.active && discount > 0 ? (
+                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                              <Check size={13} className="stroke-[2.5]" /> Saves ₹{savedAmount}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-[color:var(--bl-muted)] font-medium">
+                              {svc.active ? 'Standard Base Rate' : 'Perk Paused'}
+                            </span>
+                          )}
                         </div>
+                      </div>
+
+                      {/* Interactive Slider Control (21st.dev Style) */}
+                      <div className="space-y-2">
                         <input
                           type="range"
                           min="0"
                           max="80"
                           step="5"
-                          value={svc.discount}
+                          disabled={!svc.active}
+                          value={svc.active ? svc.discount : 0}
                           onChange={(e) => handleDiscountChange(svc.id, e.target.value)}
                           className="perks-range-slider"
                         />
+                        <div className="flex justify-between text-[10px] text-[color:var(--bl-muted)] font-medium px-0.5">
+                          <span>0%</span>
+                          <span>20%</span>
+                          <span>40%</span>
+                          <span>60%</span>
+                          <span>80% Max</span>
+                        </div>
+                      </div>
 
-                        <div className="pt-1">
-                          <label className="text-[11px] text-[color:var(--bl-muted)] block mb-1">
-                            Target Audience Tier:
-                          </label>
-                          <select
-                            value={svc.target}
-                            onChange={(e) => handleTargetChange(svc.id, e.target.value)}
-                            className="perks-engine-select"
-                          >
-                            <option value="All Users">All App Users</option>
-                            <option value="Followers">Followers Only</option>
-                            <option value="Subscribers">Paid Subscribers Only</option>
-                            <option value="VIPs">VIPs & Public Figures</option>
-                          </select>
+                      {/* Audience Segmented Pill Bar (21st.dev Segmented Control) */}
+                      <div className="pt-3 border-t border-[color:var(--bl-line)]/70">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[11px] font-semibold text-[color:var(--bl-muted)] flex items-center gap-1">
+                            <Users size={12} /> Target Audience:
+                          </span>
+                          <span className="text-[10px] font-bold text-[color:var(--bl-ink)]">
+                            {svc.target}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1 p-1 bg-[color:var(--bl-surface-soft)] rounded-xl border border-[color:var(--bl-line)]/80">
+                          {AUDIENCE_OPTIONS.map((opt) => {
+                            const isSelected = svc.target === opt.value
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                disabled={!svc.active}
+                                onClick={() => handleTargetChange(svc.id, opt.value)}
+                                className={`py-1 px-1.5 rounded-lg text-[10px] font-semibold transition-all truncate text-center ${
+                                  isSelected
+                                    ? 'bg-[color:var(--bl-primary)] text-white shadow-sm'
+                                    : 'text-[color:var(--bl-muted)] hover:text-[color:var(--bl-ink)] hover:bg-[color:var(--bl-surface)]'
+                                }`}
+                                title={opt.label}
+                              >
+                                {opt.shortLabel}
+                              </button>
+                            )
+                          })}
                         </div>
                       </div>
                     </div>
                   )
                 })}
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={resetPerks}
-                  className="perks-btn-secondary"
-                >
-                  Reset Defaults
-                </button>
-                <button
-                  type="button"
-                  onClick={savePerks}
-                  className="perks-btn-primary"
-                >
-                  <Check size={16} />
-                  <span>Save & Sync Perks Live</span>
-                </button>
-              </div>
             </div>
 
             {/* Right Side 1 Col: Summary & Engagement */}
-            <div className="space-y-4">
-              <div className="perks-engine-card perks-engine-card--active space-y-4">
-                <h4 className="text-sm font-bold text-[color:var(--bl-ink)] flex items-center gap-2 pb-3 border-b border-[color:var(--bl-line)]">
-                  <Award size={18} className="text-[color:var(--bl-primary)]" />
-                  Active Perks Live Summary
-                </h4>
+            <div className="flex flex-col justify-between gap-3 h-full">
+              <div className="perks-engine-card perks-engine-card--active flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <h4 className="text-sm font-bold text-[color:var(--bl-ink)] flex items-center gap-2 pb-3 border-b border-[color:var(--bl-line)]">
+                    <Award size={18} className="text-[color:var(--bl-primary)]" />
+                    Active Perks Live Summary
+                  </h4>
 
-                <div className="space-y-2.5">
-                  {services
-                    .filter((s) => s.active)
-                    .map((s) => (
-                      <div
-                        key={s.id}
-                        className="p-3 rounded-xl border border-[color:var(--bl-line)] bg-[color:var(--surface,#ffffff)] flex items-center justify-between"
-                      >
-                        <div>
-                          <h5 className="font-bold text-xs text-[color:var(--bl-ink)]">
-                            {s.name}
-                          </h5>
-                          <span className="text-[10px] text-[color:var(--bl-muted)]">
-                            Target: {s.target}
+                  <div className="space-y-3 pt-3">
+                    {services
+                      .filter((s) => s.active)
+                      .map((s) => (
+                        <div
+                          key={s.id}
+                          className="p-3 rounded-xl border border-[color:var(--bl-line)] bg-[color:var(--surface,#ffffff)] flex items-center justify-between"
+                        >
+                          <div>
+                            <h5 className="font-bold text-xs text-[color:var(--bl-ink)]">
+                              {s.name}
+                            </h5>
+                            <span className="text-[10px] text-[color:var(--bl-muted)]">
+                              Target: {s.target}
+                            </span>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-lg bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] font-bold text-xs">
+                            {s.discount}% OFF
                           </span>
                         </div>
-                        <span className="px-2.5 py-1 rounded-lg bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] font-bold text-xs">
-                          {s.discount}% OFF
-                        </span>
-                      </div>
-                    ))}
+                      ))}
 
-                  {services.filter((s) => s.active).length === 0 && (
-                    <p className="text-xs text-[color:var(--bl-muted)] italic">
-                      No active perks enabled.
-                    </p>
-                  )}
+                    {services.filter((s) => s.active).length === 0 && (
+                      <p className="text-xs text-[color:var(--bl-muted)] italic">
+                        No active perks enabled.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="pt-3 border-t border-[color:var(--bl-line)] space-y-2">
+                <div className="pt-3 border-t border-[color:var(--bl-line)] space-y-2 mt-auto">
                   <div className="flex justify-between text-xs">
                     <span className="text-[color:var(--bl-muted)]">Estimated Engagement:</span>
                     <span className="text-emerald-600 dark:text-emerald-400 font-bold">+38% Higher Volume</span>
@@ -577,6 +660,25 @@ export default function BenefitManagementLanding({
                     💡 <b>Pro Tip:</b> Offering 20%+ discounts on Text Questions drives 3.5x higher question volume from regular Followers.
                   </div>
                 </div>
+              </div>
+
+              {/* Action Buttons Under the Active Perks Live Summary Box */}
+              <div className="flex items-center gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={resetPerks}
+                  className="perks-btn-secondary perks-btn-sm flex-1"
+                >
+                  Reset Defaults
+                </button>
+                <button
+                  type="button"
+                  onClick={savePerks}
+                  className="perks-btn-primary perks-btn-sm flex-1"
+                >
+                  <Check size={14} className="stroke-[2.5]" />
+                  <span>Save & Sync Perks Live</span>
+                </button>
               </div>
             </div>
           </div>
@@ -596,7 +698,6 @@ export default function BenefitManagementLanding({
               <div className="text-2xl font-extrabold text-[color:var(--bl-ink)]">
                 ₹{financials.grossTotal.toLocaleString()}
               </div>
-              <p className="text-[11px] text-[color:var(--bl-muted)]">Before discounts & platform split</p>
             </div>
 
             <div className="perks-kpi-card perks-kpi-card--amber space-y-1">
@@ -607,9 +708,6 @@ export default function BenefitManagementLanding({
               <div className="text-2xl font-extrabold text-amber-600 dark:text-amber-300">
                 ₹{Math.round(financials.discountTotal).toLocaleString()}
               </div>
-              <p className="text-[11px] text-[color:var(--bl-muted)] font-semibold">
-                Avg {financials.avgDiscPct.toFixed(1)}% savings across users
-              </p>
             </div>
 
             <div className="perks-kpi-card perks-kpi-card--emerald space-y-1">
@@ -620,7 +718,6 @@ export default function BenefitManagementLanding({
               <div className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
                 ₹{Math.round(financials.netPayoutTotal).toLocaleString()}
               </div>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400/80">Direct payout after 20% commission</p>
             </div>
 
             <div className="perks-kpi-card perks-kpi-card--purple space-y-1">
@@ -631,7 +728,6 @@ export default function BenefitManagementLanding({
               <div className="text-2xl font-extrabold text-purple-600 dark:text-purple-300">
                 ₹{Math.round(financials.commissionTotal).toLocaleString()}
               </div>
-              <p className="text-[11px] text-[color:var(--bl-muted)]">Covers hosting, video/audio & marketing</p>
             </div>
           </div>
 
@@ -643,9 +739,6 @@ export default function BenefitManagementLanding({
                   <BarChart3 size={18} className="text-[color:var(--bl-primary)]" />
                   Revenue & Commission Split Breakdown by Service
                 </h3>
-                <p className="text-xs text-[color:var(--bl-muted)]">
-                  Detailed financial analysis of how perks affect your net earnings
-                </p>
               </div>
               <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold">
                 Astrologer Share: 80% Net
@@ -746,44 +839,111 @@ export default function BenefitManagementLanding({
       {activeTab === 'content' && (
         <section className="space-y-5">
           {/* Category Filter Header */}
-          <div className="perks-engine-card flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs text-[color:var(--bl-ink)] font-bold uppercase tracking-wider pr-2">
-                Category:
-              </span>
-              {[
-                { id: 'daily', label: 'Daily Horoscope' },
-                { id: 'weekly', label: 'Weekly Horoscope' },
-                { id: 'monthly', label: 'Monthly Horoscope' },
-                { id: 'special', label: 'Special Transits & Remedies', icon: Sparkles },
-              ].map((cat) => {
-                const Icon = cat.icon
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setContentCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
-                      contentCategory === cat.id
-                        ? 'bg-[color:var(--bl-primary)] text-white shadow'
-                        : 'text-[color:var(--bl-muted)] hover:bg-[color:var(--bl-surface-soft)]'
-                    }`}
-                  >
-                    {Icon && <Icon size={14} />}
-                    <span>{cat.label}</span>
-                  </button>
-                )
-              })}
+          <div className="perks-engine-card space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                <span className="text-xs text-[color:var(--bl-ink)] font-bold uppercase tracking-wider pr-2">
+                  Category:
+                </span>
+                {[
+                  { id: 'daily', label: 'Daily Horoscope' },
+                  { id: 'weekly', label: 'Weekly Horoscope' },
+                  { id: 'monthly', label: 'Monthly Horoscope' },
+                  { id: 'special', label: 'Special Transits & Remedies', icon: Sparkles },
+                ].map((cat) => {
+                  const Icon = cat.icon
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setContentCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                        contentCategory === cat.id
+                          ? 'bg-[color:var(--bl-primary)] text-white shadow'
+                          : 'text-[color:var(--bl-muted)] hover:bg-[color:var(--bl-surface-soft)]'
+                      }`}
+                    >
+                      {Icon && <Icon size={14} />}
+                      <span>{cat.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={publishAllRasis}
+                  className={`px-3.5 py-1.5 rounded-lg text-white text-xs font-bold transition flex items-center gap-1.5 shadow whitespace-nowrap ${
+                    isPublished
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : isAllComplete
+                      ? 'perks-publish-btn-blinking'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
+                >
+                  {isPublished ? (
+                    <>
+                      <Check size={14} className="stroke-[2.5]" />
+                      <span>Published Live</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={13} />
+                      <span>Publish Content Now</span>
+                    </>
+                  )}
+                </button>
+                <input
+                  type="date"
+                  value={contentDate}
+                  onChange={(e) => setContentDate(e.target.value)}
+                  className="perks-engine-input text-xs"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <input
-                type="date"
-                value={contentDate}
-                onChange={(e) => setContentDate(e.target.value)}
-                className="perks-engine-input text-xs"
-              />
-            </div>
+            {/* Incomplete Warning Message - Simply Notified Near the Button (No Popup) */}
+            {publishWarning && !isAllComplete && (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span className="font-bold">Still didn't write:</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {incompleteCategories.map((cat) => (
+                      <span
+                        key={cat.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50 text-[11px]"
+                      >
+                        <span>{cat.label}</span>
+                        <span className="opacity-75">({cat.filled}/12)</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setPublishWarning(false)}
+                    className="px-2.5 py-1 rounded-lg border border-[color:var(--bl-line)] text-[11px] font-semibold text-[color:var(--bl-ink)] hover:bg-[color:var(--bl-surface-soft)] transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPublished(true)
+                      setPublishWarning(false)
+                      showToast('🎉 Content published live to mobile app users!')
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow transition flex items-center gap-1"
+                  >
+                    <Check size={12} />
+                    <span>OK Publish</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Special Transit Selector Banner */}
@@ -814,100 +974,6 @@ export default function BenefitManagementLanding({
             </div>
           )}
 
-          {/* Visual 4-Step Workflow Process Map */}
-          <div className="perks-engine-card space-y-3">
-            <h4 className="text-xs font-bold text-[color:var(--bl-ink)] uppercase tracking-wider flex items-center gap-2">
-              <GitMerge size={16} className="text-[color:var(--bl-primary)]" />
-              Horoscope Publishing Workflow Process Map
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-              <div className="perks-workflow-step flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] text-xs font-bold flex items-center justify-center">
-                      1
-                    </span>
-                    <Calendar size={16} className="text-[color:var(--bl-muted)]" />
-                  </div>
-                  <h5 className="text-xs font-bold text-[color:var(--bl-ink)]">
-                    Category Selection
-                  </h5>
-                  <p className="text-[11px] text-[color:var(--bl-muted)] mt-0.5">
-                    {contentCategory.toUpperCase()} mode active
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-semibold">
-                  <CheckCircle size={12} /> Active Mode Ready
-                </div>
-              </div>
-
-              <div className="perks-workflow-step flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] text-xs font-bold flex items-center justify-center">
-                      2
-                    </span>
-                    <Edit3 size={16} className="text-[color:var(--bl-muted)]" />
-                  </div>
-                  <h5 className="text-xs font-bold text-[color:var(--bl-ink)]">
-                    12 Rasis Batch Entry
-                  </h5>
-                  <p className="text-[11px] text-[color:var(--bl-muted)] mt-0.5">
-                    Write or record predictions
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] text-[color:var(--bl-primary)] flex items-center gap-1 font-semibold">
-                  <Clock size={12} /> {filledRasiCount}/12 Completed
-                </div>
-              </div>
-
-              <div className="perks-workflow-step flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] text-xs font-bold flex items-center justify-center">
-                      3
-                    </span>
-                    <Star size={16} className="text-[color:var(--bl-muted)]" />
-                  </div>
-                  <h5 className="text-xs font-bold text-[color:var(--bl-ink)]">
-                    Remedies & Ratings
-                  </h5>
-                  <p className="text-[11px] text-[color:var(--bl-muted)] mt-0.5">
-                    Colors, numbers & Pariharams
-                  </p>
-                </div>
-                <div className="mt-2 text-[10px] text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-semibold">
-                  <CheckCircle size={12} /> Configured
-                </div>
-              </div>
-
-              <div className="perks-workflow-step flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 text-xs font-bold flex items-center justify-center">
-                      4
-                    </span>
-                    <Send size={16} className="text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <h5 className="text-xs font-bold text-[color:var(--bl-ink)]">
-                    App Broadcast & Push
-                  </h5>
-                  <p className="text-[11px] text-[color:var(--bl-muted)] mt-0.5">
-                    Publish feed to followers
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={publishAllRasis}
-                  className="mt-2 w-full py-1.5 rounded-lg bg-[color:var(--bl-primary)] text-white text-[11px] font-bold text-center transition hover:opacity-90"
-                >
-                  Publish Content Now
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* 12 Rasis Batch Editor Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             {/* Left 5 Cols: 12 Rasis Grid */}
@@ -916,21 +982,34 @@ export default function BenefitManagementLanding({
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-bold text-[color:var(--bl-ink)] flex items-center gap-1.5">
                     <Grid size={16} className="text-[color:var(--bl-primary)]" />
-                    Select Rasi to Edit (12 Signs)
+                    <span>Select Rasi to Edit (12 Signs)</span>
+                    <span className="text-[11px] font-bold text-[color:var(--bl-primary)] bg-[color:var(--bl-primary-bg)] px-2 py-0.5 rounded-full ml-1">
+                      {filledRasiCount}/12
+                    </span>
                   </h4>
-                  <button
-                    type="button"
-                    onClick={autoFillSampleData}
-                    className="text-[11px] px-2.5 py-1 bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] rounded-lg hover:opacity-90 transition flex items-center gap-1 font-semibold"
-                  >
-                    <Wand2 size={12} /> Fill 12 Signs Sample
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => autoFillSampleData(false)}
+                      className="text-[11px] px-2.5 py-1 bg-[color:var(--bl-primary-bg)] text-[color:var(--bl-primary)] rounded-lg hover:opacity-90 transition flex items-center gap-1 font-semibold"
+                    >
+                      <Wand2 size={12} /> Fill 12 Signs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => autoFillSampleData(true)}
+                      title="Populate all categories to test red blinking button"
+                      className="text-[11px] px-2 py-1 bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 rounded-lg hover:opacity-90 transition flex items-center gap-1 font-semibold"
+                    >
+                      <Sparkles size={12} /> Fill All
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {RASIS.map((r, idx) => {
                     const isCurrent = idx === currentRasiIndex
-                    const isFilled = rasiStore[r.id]?.filled
+                    const isFilled = currentCategoryStore[r.id]?.filled
 
                     return (
                       <button
@@ -939,15 +1018,12 @@ export default function BenefitManagementLanding({
                         onClick={() => setCurrentRasiIndex(idx)}
                         className={`perks-rasi-btn ${isCurrent ? 'is-active' : ''}`}
                       >
-                        <span className="text-2xl">{r.symbol}</span>
+                        <span className="text-2xl">{r.emoji}</span>
                         <span className="text-xs font-bold">
                           {r.name}
                         </span>
                         <span className="text-[10px] text-[color:var(--bl-muted)]">
                           {r.ta}
-                        </span>
-                        <span className="text-[9px] text-amber-700 dark:text-amber-300 font-medium truncate max-w-full px-1">
-                          {r.starsShort}
                         </span>
                         {isFilled && (
                           <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
@@ -964,13 +1040,16 @@ export default function BenefitManagementLanding({
               <div className="perks-engine-card border-l-4 border-l-[color:var(--bl-primary)] space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-[color:var(--bl-line)]">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">{activeRasi.symbol}</span>
+                    <div className="w-12 h-12 rounded-xl bg-[color:var(--bl-primary-bg)] border border-[color:var(--bl-primary)]/20 flex items-center justify-center text-2xl shrink-0">
+                      <span>{activeRasi.emoji}</span>
+                    </div>
                     <div>
-                      <h4 className="font-bold text-base text-[color:var(--bl-ink)]">
-                        {activeRasi.name} ({activeRasi.ta})
+                      <h4 className="font-bold text-base text-[color:var(--bl-ink)] flex items-center gap-2">
+                        <span>{activeRasi.name}</span>
+                        <span className="text-xs font-normal text-[color:var(--bl-muted)]">({activeRasi.ta})</span>
                       </h4>
                       <p className="text-xs text-[color:var(--bl-muted)]">
-                        Editing Prediction for {contentCategory.toUpperCase()} Horoscope
+                        {activeRasi.starsDisplay}
                       </p>
                     </div>
                   </div>
@@ -987,17 +1066,18 @@ export default function BenefitManagementLanding({
 
                 {/* Prediction Text Area */}
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-semibold text-[color:var(--bl-ink)] flex items-center gap-1">
-                      <FileText size={14} className="text-[color:var(--bl-primary)]" />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs font-semibold text-[color:var(--bl-ink)] flex items-center gap-1.5">
+                      <FileText size={15} className="text-[color:var(--bl-primary)]" />
                       Prediction Content & Details:
                     </label>
                     <button
                       type="button"
                       onClick={() => setAudioAttached(!audioAttached)}
-                      className="text-[11px] text-[color:var(--bl-primary)] hover:underline flex items-center gap-1 font-medium"
+                      className={`perks-voice-note-btn ${audioAttached ? 'is-active' : ''}`}
                     >
-                      <Mic size={14} /> {audioAttached ? 'Remove Voice Note' : 'Attach Voice Note (Audio)'}
+                      <Mic size={14} />
+                      <span>{audioAttached ? 'Remove Voice Note' : 'Attach Voice Note (Audio)'}</span>
                     </button>
                   </div>
                   <textarea
@@ -1270,15 +1350,16 @@ export default function BenefitManagementLanding({
                   <div className="space-y-3">
                     {previewMode === 'ALL' ? (
                       RASIS.map((r) => {
-                        const data = rasiStore[r.id]
+                        const data = currentCategoryStore[r.id] || {}
                         return (
                           <div
                             key={r.id}
                             className="simulator-card space-y-1.5"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-xs text-[color:var(--bl-primary)]">
-                                {r.symbol} {r.name} ({r.ta})
+                              <span className="font-bold text-xs text-[color:var(--bl-primary)] flex items-center gap-1.5">
+                                <span>{r.emoji}</span>
+                                <span>{r.name} ({r.ta})</span>
                               </span>
                               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
                                 {data.rating}
@@ -1287,10 +1368,6 @@ export default function BenefitManagementLanding({
                             <p className="text-xs text-[color:var(--bl-ink)] leading-relaxed">
                               {data.text || 'Prediction pending entry by astrologer...'}
                             </p>
-                            <div className="text-[10px] text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-800/40 flex items-center gap-1 font-medium">
-                              <Star size={10} className="fill-amber-500 text-amber-500 shrink-0" />
-                              <span className="truncate"><b>Suited Stars:</b> {data.suitedStars?.join(', ') || r.starsShort}</span>
-                            </div>
                             <div className="text-[10px] text-[color:var(--bl-muted)] pt-1 border-t border-[color:var(--bl-line)] flex justify-between">
                               <span>
                                 <b>Remedy:</b> {data.remedy}
@@ -1302,8 +1379,9 @@ export default function BenefitManagementLanding({
                     ) : (
                       <div className="simulator-card space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-sm text-[color:var(--bl-primary)]">
-                            {activeRasi.symbol} {activeRasi.name} ({activeRasi.ta})
+                          <span className="font-bold text-sm text-[color:var(--bl-primary)] flex items-center gap-1.5">
+                            <span className="text-base">{activeRasi.emoji}</span>
+                            <span>{activeRasi.name} ({activeRasi.ta})</span>
                           </span>
                           <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded">
                             {currentRasiData.rating}
@@ -1312,10 +1390,6 @@ export default function BenefitManagementLanding({
                         <p className="text-xs text-[color:var(--bl-ink)] leading-relaxed">
                           {currentRasiData.text || 'Prediction pending entry...'}
                         </p>
-                        <div className="text-[10px] text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-1 rounded border border-amber-200/60 dark:border-amber-800/40 flex items-center gap-1 font-medium">
-                          <Star size={11} className="fill-amber-500 text-amber-500 shrink-0" />
-                          <span><b>Suited Stars:</b> {currentRasiData.suitedStars?.join(', ') || activeRasi.starsShort}</span>
-                        </div>
                         <div className="text-[11px] text-[color:var(--bl-muted)] pt-2 border-t border-[color:var(--bl-line)] space-y-1">
                           <div>
                             <b>Lucky Color:</b> {currentRasiData.color}
@@ -1342,6 +1416,7 @@ export default function BenefitManagementLanding({
             </div>
           </div>
         )}
+
 
         {/* Toast Notification */}
         {toastMsg && (

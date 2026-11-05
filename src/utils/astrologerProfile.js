@@ -26,6 +26,152 @@ export const PHOTO_TYPES = ['image/jpeg', 'image/png']
 export const PROFILE_STATUSES = ['Draft', 'Pending Review', 'Approved', 'Rejected']
 export const VERIFICATION_STATUSES = ['Pending', 'Verified', 'Rejected']
 
+export const INDIAN_STATES_AND_CITIES = {
+  'Andhra Pradesh': [
+    'Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Kurnool', 'Tirupati',
+    'Rajahmundry', 'Kakinada', 'Kadapa', 'Anantapur', 'Eluru', 'Ongole', 'Vizianagaram',
+  ],
+  'Arunachal Pradesh': [
+    'Itanagar', 'Naharlagun', 'Pasighat', 'Tawang', 'Ziro', 'Bomdila',
+  ],
+  'Assam': [
+    'Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon', 'Tinsukia',
+    'Tezpur', 'Bongaigaon', 'Karimganj', 'Sivasagar',
+  ],
+  'Bihar': [
+    'Patna', 'Gaya', 'Bhagalpur', 'Muzaffarpur', 'Purnia', 'Darbhanga',
+    'Bihar Sharif', 'Arrah', 'Begusarai', 'Katihar', 'Munger', 'Chhapra',
+  ],
+  'Chandigarh': [
+    'Chandigarh',
+  ],
+  'Chhattisgarh': [
+    'Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Rajnandgaon', 'Durg', 'Jagdalpur', 'Ambikapur',
+  ],
+  'Delhi': [
+    'New Delhi', 'Central Delhi', 'East Delhi', 'North Delhi', 'South Delhi', 'West Delhi', 'Dwarka',
+  ],
+  'Goa': [
+    'Panaji', 'Margao', 'Vasco da Gama', 'Mapusa', 'Ponda', 'Calangute',
+  ],
+  'Gujarat': [
+    'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar',
+    'Junagadh', 'Gandhinagar', 'Anand', 'Navsari', 'Morbi', 'Mehsana', 'Bharuch',
+  ],
+  'Haryana': [
+    'Faridabad', 'Gurugram', 'Panipat', 'Ambala', 'Yamunanagar', 'Rohtak',
+    'Hisar', 'Karnal', 'Sonipat', 'Panchkula', 'Sirsa', 'Bahadurgarh',
+  ],
+  'Himachal Pradesh': [
+    'Shimla', 'Dharamshala', 'Solan', 'Mandi', 'Kullu', 'Manali', 'Baddi', 'Bilaspur', 'Hamirpur',
+  ],
+  'Jammu & Kashmir': [
+    'Srinagar', 'Jammu', 'Anantnag', 'Baramulla', 'Udhampur', 'Kathua', 'Sopore',
+  ],
+  'Jharkhand': [
+    'Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro Steel City', 'Deoghar', 'Hazaribagh', 'Giridih',
+  ],
+  'Karnataka': [
+    'Bengaluru', 'Mysuru', 'Hubballi-Dharwad', 'Mangaluru', 'Belagavi', 'Davanagere',
+    'Ballari', 'Kalaburagi', 'Shivamogga', 'Tumakuru', 'Udupi', 'Bidar', 'Hassan',
+  ],
+  'Kerala': [
+    'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Kollam', 'Palakkad',
+    'Alappuzha', 'Kannur', 'Kottayam', 'Malappuram', 'Kasaragod', 'Pathanamthitta',
+  ],
+  'Ladakh': [
+    'Leh', 'Kargil',
+  ],
+  'Madhya Pradesh': [
+    'Indore', 'Bhopal', 'Jabalpur', 'Gwalior', 'Ujjain', 'Sagar',
+    'Dewas', 'Satna', 'Ratlam', 'Rewa', 'Katni', 'Singrauli',
+  ],
+  'Maharashtra': [
+    'Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Kalyan-Dombivli',
+    'Vasai-Virar', 'Chhatrapati Sambhajinagar', 'Navi Mumbai', 'Solapur',
+    'Kolhapur', 'Amravati', 'Nanded', 'Jalgaon', 'Akola', 'Latur',
+  ],
+  'Manipur': [
+    'Imphal', 'Churachandpur', 'Thoubal', 'Bishnupur',
+  ],
+  'Meghalaya': [
+    'Shillong', 'Tura', 'Jowai', 'Nongpoh',
+  ],
+  'Mizoram': [
+    'Aizawl', 'Lunglei', 'Champhai', 'Serchhip',
+  ],
+  'Nagaland': [
+    'Kohima', 'Dimapur', 'Mokokchung', 'Tuensang',
+  ],
+  'Odisha': [
+    'Bhubaneswar', 'Cuttack', 'Rourkela', 'Berhampur', 'Sambalpur', 'Puri', 'Balasore', 'Bhadrak',
+  ],
+  'Puducherry': [
+    'Puducherry', 'Karaikal', 'Mahe', 'Yanam',
+  ],
+  'Punjab': [
+    'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda', 'Mohali',
+    'Pathankot', 'Hoshiarpur', 'Batala', 'Moga',
+  ],
+  'Rajasthan': [
+    'Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Ajmer', 'Udaipur',
+    'Bhilwara', 'Alwar', 'Bharatpur', 'Sikar', 'Pali', 'Sri Ganganagar',
+  ],
+  'Sikkim': [
+    'Gangtok', 'Namchi', 'Geyzing', 'Mangan',
+  ],
+  'Tamil Nadu': [
+    'Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem', 'Tirunelveli',
+    'Tiruppur', 'Vellore', 'Erode', 'Thoothukudi', 'Dindigul', 'Thanjavur',
+    'Ranipet', 'Sivakasi', 'Karur', 'Theni', 'Kanchipuram', 'Chengalpattu',
+    'Chidambaram', 'Cuddalore', 'Kumbakonam', 'Nagercoil', 'Hosur', 'Pollachi',
+  ],
+  'Telangana': [
+    'Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar', 'Ramagundam',
+    'Khammam', 'Mahbubnagar', 'Nalgonda', 'Adilabad', 'Siddipet',
+  ],
+  'Tripura': [
+    'Agartala', 'Dharmanagar', 'Udaipur', 'Kailashahar',
+  ],
+  'Uttar Pradesh': [
+    'Lucknow', 'Kanpur', 'Varanasi', 'Agra', 'Prayagraj', 'Meerut',
+    'Bareilly', 'Aligarh', 'Moradabad', 'Saharanpur', 'Gorakhpur',
+    'Noida', 'Greater Noida', 'Ghaziabad', 'Mathura', 'Ayodhya', 'Jhansi',
+  ],
+  'Uttarakhand': [
+    'Dehradun', 'Haridwar', 'Roorkee', 'Haldwani', 'Rishikesh', 'Nainital', 'Almora', 'Kashipur',
+  ],
+  'West Bengal': [
+    'Kolkata', 'Howrah', 'Asansol', 'Siliguri', 'Durgapur', 'Bardhaman',
+    'Malda', 'Kharagpur', 'Haldia', 'Darjeeling',
+  ],
+  'Other / Outside India': ['Other'],
+}
+
+export const INDIAN_STATES = Object.keys(INDIAN_STATES_AND_CITIES)
+
+export const POPULAR_INDIAN_CITIES = [
+  'Chennai', 'Mumbai', 'Bengaluru', 'Delhi', 'Hyderabad', 'Kolkata',
+  'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Coimbatore', 'Madurai',
+  'Kochi', 'Thiruvananthapuram', 'Visakhapatnam', 'Chandigarh', 'Indore', 'Bhopal',
+]
+
+export const COUNTRY_OPTIONS = [
+  'India', 'Nepal', 'Sri Lanka', 'United States', 'United Kingdom',
+  'Canada', 'Australia', 'Singapore', 'Malaysia', 'United Arab Emirates', 'Other',
+]
+
+export function findStateByCity(cityName) {
+  if (!cityName) return ''
+  const trimmed = cityName.trim().toLowerCase()
+  for (const [state, cities] of Object.entries(INDIAN_STATES_AND_CITIES)) {
+    if (cities.some((c) => c.toLowerCase() === trimmed)) {
+      return state
+    }
+  }
+  return ''
+}
+
 // `shared` services (chat, voice) are stored by the existing astrologerServices
 // settings so the dashboard, wallet and booking flows keep a single source of truth.
 export const SERVICE_DEFINITIONS = [

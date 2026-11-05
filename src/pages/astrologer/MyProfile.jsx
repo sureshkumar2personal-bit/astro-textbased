@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useSafeBack } from '../../utils/useSafeBack.js'
 import {
-  Award, ArrowLeft, CalendarDays, Camera, Check, ChevronRight, Globe2, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Star, Trash2, UserRound, X,
+  Award, ArrowLeft, Briefcase, Building2, CalendarDays, Camera, Check, ChevronRight, Globe2, Landmark, Languages, Mail, MapPin, Eye, Pencil, Phone, Plus, Save, Sparkles, Star, Trash2, UserRound, Users, X,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import { useAppData } from '../../state/AppDataContext.jsx'
@@ -12,21 +12,11 @@ import { mockAstrologers } from '../../data/notificationData.js'
 import { buildPublicProfile, publishPublicProfile } from '../../utils/publicAstrologerProfile.js'
 import { getRoleRoutes } from '../../utils/roleRoutes.js'
 import {
-  ASTROLOGY_SYSTEMS, BIO_LIMIT, CONSULTATION_STYLES, EXPERTISE_OPTIONS, GENDERS, GUIDANCE_AREAS, LANGUAGE_OPTIONS, SECTION_TEXT_LIMIT, PRICING_FIELDS, PROFILE_SECTIONS,
-  SECTION_KEYS, SERVICE_DEFINITIONS, calculateCompletion, effectiveVisibility, formatProfileDate, mergeProfile, profileStorageKey, validateCredential, validatePhoto, validateSection,
+  ASTROLOGY_SYSTEMS, BIO_LIMIT, CONSULTATION_STYLES, COUNTRY_OPTIONS, EXPERTISE_OPTIONS, GENDERS, GUIDANCE_AREAS,
+  INDIAN_STATES, INDIAN_STATES_AND_CITIES, LANGUAGE_OPTIONS, POPULAR_INDIAN_CITIES, SECTION_TEXT_LIMIT, PRICING_FIELDS, PROFILE_SECTIONS,
+  SECTION_KEYS, SERVICE_DEFINITIONS, calculateCompletion, effectiveVisibility, findStateByCity, formatProfileDate, mergeProfile, profileStorageKey, validateCredential, validatePhoto, validateSection,
 } from '../../utils/astrologerProfile.js'
 import '../../css/astrologer/my-profile.css'
-
-const SECTION_DESCRIPTIONS = {
-  basic: 'This information will be used to build your professional astrologer profile.',
-  experience: 'Tell users what you practise and how long you have been doing it.',
-  languages: 'Select the languages you can consult in.',
-  services: 'Choose the consultation services you offer.',
-  pricing: 'Manage your professional consultation pricing.',
-  credentials: 'Add the qualifications that support your practice.',
-  about: 'Introduce yourself and describe how you guide users.',
-  availability: 'Control when users can reach you.',
-}
 
 const PROFILE_NAV_SECTIONS = PROFILE_SECTIONS.filter(({ id }) => !['experience', 'languages', 'credentials', 'availability', 'about'].includes(id))
 const SERVICE_TOGGLE_DEFINITIONS = SERVICE_DEFINITIONS.filter(({ key }) => ['chat', 'voice', 'live', 'question'].includes(key))
@@ -84,13 +74,14 @@ function FieldError({ message }) {
   return message ? <small className="mp-error" role="alert">{message}</small> : null
 }
 
-function TextField({ label, required, error, children, icon: Icon, ...inputProps }) {
+function TextField({ label, required, error, children, icon: Icon, extra, ...inputProps }) {
   const control = children || <input {...inputProps} aria-invalid={error ? 'true' : undefined} />
   return (
     <label className="account-field">
       <span>{label}{required && ' *'}</span>
       {Icon ? <span className="mp-input"><Icon size={16} aria-hidden="true" />{control}</span> : control}
       <FieldError message={error} />
+      {extra}
     </label>
   )
 }
@@ -139,6 +130,8 @@ export default function MyProfile() {
   const [editingCredential, setEditingCredential] = useState(null)
   const [previewing, setPreviewing] = useState(false)
   const [reviewing, setReviewing] = useState(false)
+  const [customCityMode, setCustomCityMode] = useState(false)
+  const [customStateMode, setCustomStateMode] = useState(false)
   const photoInput = useRef(null)
 
   const requested = searchParams.get('section')
@@ -209,6 +202,8 @@ export default function MyProfile() {
   const selectSection = (id) => {
     setErrors({})
     setEditingCredential(null)
+    setCustomCityMode(false)
+    setCustomStateMode(false)
     setDraft(clone(stored))
     setSearchParams({ section: id }, { replace: true })
   }
@@ -218,6 +213,43 @@ export default function MyProfile() {
     ...current,
     [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value],
   }))
+
+  const availableCities = useMemo(() => {
+    if (shown.state && INDIAN_STATES_AND_CITIES[shown.state]) {
+      return INDIAN_STATES_AND_CITIES[shown.state]
+    }
+    return POPULAR_INDIAN_CITIES
+  }, [shown.state])
+
+  const onStateChange = (nextState) => {
+    if (nextState === '__custom__') {
+      setCustomStateMode(true)
+      setField('state', '')
+      return
+    }
+    setCustomStateMode(false)
+    setField('state', nextState)
+    if (nextState && INDIAN_STATES_AND_CITIES[nextState]) {
+      const cities = INDIAN_STATES_AND_CITIES[nextState]
+      if (shown.city && !cities.includes(shown.city) && !customCityMode) {
+        setField('city', '')
+      }
+    }
+  }
+
+  const onCityChange = (nextCity) => {
+    if (nextCity === '__custom__') {
+      setCustomCityMode(true)
+      setField('city', '')
+      return
+    }
+    setCustomCityMode(false)
+    setField('city', nextCity)
+    const matchingState = findStateByCity(nextCity)
+    if (matchingState && (!shown.state || shown.state !== matchingState)) {
+      setField('state', matchingState)
+    }
+  }
 
   const persist = (next, message) => {
     const withStatus = { ...next, lastUpdated: new Date().toISOString(), status: next.status === 'Draft' && calculateCompletion(withSharedServices(next), { hasAvailability }).percent >= 75 ? 'Pending Review' : next.status }
@@ -235,6 +267,8 @@ export default function MyProfile() {
     setDraft(clone(stored))
     setErrors({})
     setEditingCredential(null)
+    setCustomCityMode(false)
+    setCustomStateMode(false)
   }
 
   const saveSection = () => {
@@ -318,24 +352,26 @@ export default function MyProfile() {
           <div className="mp-photo">
             <div className="mp-photo__frame">
               <span className="mp-photo__avatar">{shown.photo ? <img src={shown.photo} alt="Profile" /> : initials}</span>
-              <button type="button" className="mp-photo__camera" aria-label="Change photo" onClick={() => photoInput.current?.click()}><Camera size={14} /></button>
+              <button type="button" className="mp-photo__camera" aria-label="Change photo" onClick={() => photoInput.current?.click()}><Camera size={13} /></button>
             </div>
             <div className="mp-photo__info">
-              <strong>Profile Photo</strong>
-              <small>JPG / PNG · Max size 2MB</small>
+              <div className="mp-photo__meta">
+                <strong>Profile Photo</strong>
+                <small>JPG / PNG · Max size 2MB</small>
+              </div>
               <div className="mp-photo__buttons">
-                <button type="button" className="account-btn account-btn--primary" onClick={() => photoInput.current?.click()}><Camera size={15} /> {shown.photo ? 'Change Photo' : 'Upload Photo'}</button>
-                {shown.photo && <button type="button" className="account-btn account-btn--outline" onClick={() => setField('photo', '')}><Trash2 size={15} /> Remove</button>}
+                <button type="button" className="account-btn account-btn--primary" onClick={() => photoInput.current?.click()}><Camera size={14} /> {shown.photo ? 'Change Photo' : 'Upload Photo'}</button>
+                {shown.photo && <button type="button" className="account-btn account-btn--outline" onClick={() => setField('photo', '')}><Trash2 size={14} /> Remove</button>}
               </div>
               <FieldError message={errors.photo} />
               <input ref={photoInput} type="file" accept="image/jpeg,image/png" hidden onChange={onPhotoChange} />
             </div>
           </div>
-          <div className="account-form-grid">
+          <div className="account-form-grid mp-form-grid--basic">
             <TextField icon={UserRound} label="Name" required value={shown.fullName} error={errors.fullName} onChange={(e) => setField('fullName', e.target.value)} placeholder="Full legal / professional name" />
             <TextField icon={Phone} label="Phone Number" type="tel" value={shown.phone} error={errors.phone} onChange={(e) => setField('phone', e.target.value)} />
             <TextField icon={Mail} label="Email" type="email" value={shown.email} error={errors.email} onChange={(e) => setField('email', e.target.value)} />
-            <TextField icon={UserRound} label="Gender">
+            <TextField icon={Users} label="Gender">
               <select value={shown.gender} onChange={(e) => setField('gender', e.target.value)}>
                 <option value="">Select gender</option>
                 {GENDERS.map((item) => <option key={item}>{item}</option>)}
@@ -343,16 +379,112 @@ export default function MyProfile() {
             </TextField>
             <TextField icon={CalendarDays} label="Date of Birth" type="date" value={shown.dob} error={errors.dob} onChange={(e) => setField('dob', e.target.value)} />
           </div>
-          <h3 className="mp-subtitle">Location</h3>
+          <h3 className="mp-subtitle">
+            <MapPin size={13} aria-hidden="true" />
+            <span>Location</span>
+          </h3>
           <div className="account-form-grid account-form-grid--three">
-            <TextField icon={MapPin} label="City" value={shown.city} onChange={(e) => setField('city', e.target.value)} />
-            <TextField icon={MapPin} label="State" value={shown.state} onChange={(e) => setField('state', e.target.value)} />
-            <TextField icon={Globe2} label="Country" value={shown.country} onChange={(e) => setField('country', e.target.value)} />
+            <TextField
+              icon={Building2}
+              label="City"
+              extra={
+                <button
+                  type="button"
+                  className="mp-picker-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setCustomCityMode((prev) => !prev)
+                  }}
+                >
+                  {customCityMode ? '← Pick from city list' : "Can't find your city? Type manually"}
+                </button>
+              }
+            >
+              {customCityMode ? (
+                <input
+                  type="text"
+                  placeholder="Enter city name"
+                  value={shown.city}
+                  onChange={(e) => setField('city', e.target.value)}
+                  autoFocus
+                />
+              ) : (
+                <select
+                  value={shown.city}
+                  onChange={(e) => onCityChange(e.target.value)}
+                >
+                  <option value="">{shown.state ? `Select city in ${shown.state}` : 'Select city (or choose State)'}</option>
+                  {availableCities.map((city) => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                  {shown.city && !availableCities.includes(shown.city) && (
+                    <option value={shown.city}>{shown.city}</option>
+                  )}
+                  <option value="__custom__">+ Other / Enter city manually</option>
+                </select>
+              )}
+            </TextField>
+            <TextField
+              icon={Landmark}
+              label="State"
+              extra={
+                <button
+                  type="button"
+                  className="mp-picker-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setCustomStateMode((prev) => !prev)
+                  }}
+                >
+                  {customStateMode ? '← Pick from state list' : "Can't find your state? Type manually"}
+                </button>
+              }
+            >
+              {customStateMode ? (
+                <input
+                  type="text"
+                  placeholder="Enter state name"
+                  value={shown.state}
+                  onChange={(e) => setField('state', e.target.value)}
+                  autoFocus
+                />
+              ) : (
+                <select
+                  value={shown.state}
+                  onChange={(e) => onStateChange(e.target.value)}
+                >
+                  <option value="">Select state</option>
+                  {INDIAN_STATES.map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                  {shown.state && !INDIAN_STATES.includes(shown.state) && (
+                    <option value={shown.state}>{shown.state}</option>
+                  )}
+                  <option value="__custom__">+ Other / Enter state manually</option>
+                </select>
+              )}
+            </TextField>
+            <TextField icon={Globe2} label="Country">
+              <select
+                value={shown.country || 'India'}
+                onChange={(e) => setField('country', e.target.value)}
+              >
+                {COUNTRY_OPTIONS.map((country) => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+                {shown.country && !COUNTRY_OPTIONS.includes(shown.country) && (
+                  <option value={shown.country}>{shown.country}</option>
+                )}
+              </select>
+            </TextField>
           </div>
-          <h3 className="mp-subtitle">Experience &amp; Expertise</h3>
-          <div className="account-form-grid">
-            <TextField label="Years of Experience" required type="number" min="0" value={shown.yearsOfExperience} error={errors.yearsOfExperience} onChange={(e) => setField('yearsOfExperience', e.target.value)} />
-            <TextField label="Primary Astrology System" required error={errors.primarySystem}>
+          <h3 className="mp-subtitle">
+            <Sparkles size={13} aria-hidden="true" />
+            <span>Experience &amp; Expertise</span>
+          </h3>
+          <div className="account-form-grid mp-form-grid--two">
+            <TextField icon={Briefcase} label="Years of Experience" required type="number" min="0" value={shown.yearsOfExperience} error={errors.yearsOfExperience} onChange={(e) => setField('yearsOfExperience', e.target.value)} />
+            <TextField icon={Sparkles} label="Primary Astrology System" required error={errors.primarySystem}>
               <select value={shown.primarySystem} onChange={(e) => setField('primarySystem', e.target.value)}>
                 <option value="">Select a system</option>
                 {ASTROLOGY_SYSTEMS.map((item) => <option key={item}>{item}</option>)}
@@ -361,7 +493,10 @@ export default function MyProfile() {
           </div>
           <ChipGroup label="Areas of expertise" options={EXPERTISE_OPTIONS} selected={shown.expertise} onToggle={(value) => toggleIn('expertise', value)} />
           <FieldError message={errors.expertise} />
-          <h3 className="mp-subtitle">Languages</h3>
+          <h3 className="mp-subtitle">
+            <Languages size={13} aria-hidden="true" />
+            <span>Languages</span>
+          </h3>
           <ChipGroup
             label="Languages"
             options={LANGUAGE_OPTIONS}
@@ -374,7 +509,9 @@ export default function MyProfile() {
           <FieldError message={errors.languages} />
           {shown.languages.length > 0 && (
             <>
-              <h3 className="mp-subtitle">Primary Language</h3>
+              <h3 className="mp-subtitle">
+                <span>Primary Language</span>
+              </h3>
               <div className="mp-radios" role="radiogroup" aria-label="Primary language">
                 {shown.languages.map((language) => (
                   <label key={language} className={`mp-radio${shown.primaryLanguage === language ? ' is-active' : ''}`}>
@@ -392,9 +529,9 @@ export default function MyProfile() {
     if (section === 'experience') {
       return (
         <>
-          <div className="account-form-grid">
-            <TextField label="Years of Experience" required type="number" min="0" value={shown.yearsOfExperience} error={errors.yearsOfExperience} onChange={(e) => setField('yearsOfExperience', e.target.value)} />
-            <TextField label="Primary Astrology System" required error={errors.primarySystem}>
+          <div className="account-form-grid mp-form-grid--two">
+            <TextField icon={Briefcase} label="Years of Experience" required type="number" min="0" value={shown.yearsOfExperience} error={errors.yearsOfExperience} onChange={(e) => setField('yearsOfExperience', e.target.value)} />
+            <TextField icon={Sparkles} label="Primary Astrology System" required error={errors.primarySystem}>
               <select value={shown.primarySystem} onChange={(e) => setField('primarySystem', e.target.value)}>
                 <option value="">Select a system</option>
                 {ASTROLOGY_SYSTEMS.map((item) => <option key={item}>{item}</option>)}
@@ -631,7 +768,6 @@ export default function MyProfile() {
           <div className="account-panel-heading">
             <div>
               <h2 id="mp-section-title">{sectionMeta.label}</h2>
-              <p>{SECTION_DESCRIPTIONS[section]}</p>
             </div>
           </div>
           {renderSection()}

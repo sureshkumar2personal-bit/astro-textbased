@@ -20,7 +20,8 @@ import {
   Calendar,
   CalendarDays,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -1119,7 +1120,7 @@ export default function PerksAndBenefits({ defaultTab }) {
 
       {/* Main Tab Navigation */}
       <Section className="mt-4">
-        <div className="perks-tab-navigation">
+        <div className="perks-tab-navigation items-center">
           <button type="button" className={`perks-tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => navigate('/astrologer/perks-benefits')}>
             <SlidersHorizontal size={18} />
             <span>Benefit Management</span>
@@ -1130,8 +1131,19 @@ export default function PerksAndBenefits({ defaultTab }) {
             onClick={() => navigate('/astrologer/perks-benefits/history')}
           >
             <History size={18} />
-            <span>3. History</span>
+            <span>History</span>
           </button>
+          {activeTab === 'history' && (
+            <button
+              type="button"
+              className="btn btn-outline"
+              style={{ height: '40px', padding: '0 16px', fontSize: '13.5px', borderRadius: '10px', marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+              onClick={() => navigate('/astrologer/perks-benefits')}
+            >
+              <span>Manage Benefits</span>
+              <ArrowRight size={15} />
+            </button>
+          )}
         </div>
       </Section>
 
@@ -1802,7 +1814,7 @@ export default function PerksAndBenefits({ defaultTab }) {
       {activeTab === 'history' && (
         <PerksBenefitHistory
           tierConfigs={tierConfigs}
-          onManageBenefits={() => navigate('/astrologer/perks-benefits/delivery')}
+          onManageBenefits={() => navigate('/astrologer/perks-benefits')}
         />
       )}
 

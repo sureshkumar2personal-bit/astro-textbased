@@ -371,11 +371,9 @@ export default function AstrologerActivity() {
       <PageHeader
         eyebrow="Astrologer workspace"
         title="My Activity"
-        subtitle="Recent appointment completions, consultation sessions, and remedy notes in one place."
       />
 
-      <Section title="Recent Activity">
-        <p className="my-activity-subtitle">Everything you've done across appointments, questions, calls, chats, wallet, live sessions, campaigns, disputes and audience — newest first.</p>
+      <Section>
         <p className="my-activity-window"><Clock3 size={13} /> Showing activities for the last {ACTIVITY_WINDOW_DAYS} days</p>
         {recentItems.length ? (
           <div className="my-activity-list">

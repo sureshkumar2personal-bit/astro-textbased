@@ -251,16 +251,12 @@ function PastLiveDetailsModal({ session, onClose }) {
       <div className="live-config-modal" role="dialog" aria-modal="true" aria-label="Past live session details">
         <div className="live-config-header">
           <div>
-            <span className="live-eyebrow">Live history details</span>
             <h2>{session.title}</h2>
           </div>
           <button type="button" className="icon-btn" aria-label="Close" onClick={onClose}><X size={18} /></button>
         </div>
 
         <div className="live-config-body">
-          {session.description ? (
-            <p className="live-list-card__desc">{session.description}</p>
-          ) : null}
           <dl className="live-list-details live-detail-grid">
             <div>
               <dt>Date</dt>
@@ -736,7 +732,6 @@ export function LiveHistory() {
       <PageHeader
         eyebrow="Astrologer portal"
         title="Live History"
-        subtitle="Review your past live broadcasts and held session details."
         showBack
         backTo={routes.liveSessionSetup}
       />

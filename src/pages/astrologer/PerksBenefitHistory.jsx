@@ -1,6 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
 import {
-  ArrowRight,
   Check,
   ChevronDown,
   ChevronUp,
@@ -38,7 +37,7 @@ function statusClass(status) {
   return `benefit-history-status benefit-history-status--${status.toLowerCase()}`
 }
 
-export default function PerksBenefitHistory({ tierConfigs, onManageBenefits }) {
+export default function PerksBenefitHistory({ tierConfigs }) {
   const [search, setSearch] = useState('')
   const [service, setService] = useState('all')
   const [plan, setPlan] = useState('all')
@@ -75,15 +74,6 @@ export default function PerksBenefitHistory({ tierConfigs, onManageBenefits }) {
   return (
     <div className="benefit-history-redesign">
       <section className="benefit-history-overview">
-        <div className="benefit-history-overview__heading">
-          <div>
-            <h2>Subscriber value delivered</h2>
-            <p>Recorded activity from benefits configured in Benefit Management.</p>
-          </div>
-          <button type="button" className="btn btn-outline" onClick={onManageBenefits}>
-            Manage Benefits <ArrowRight size={15} />
-          </button>
-        </div>
         <div className="benefit-history-metrics">
           <Card><span>TOTAL BENEFITS USED</span><strong>{summary.used}</strong><small>Recorded transactions</small></Card>
           <Card><span>TOTAL DISCOUNTS GIVEN</span><strong>{money(summary.discounts)}</strong><small>Subscriber savings</small></Card>

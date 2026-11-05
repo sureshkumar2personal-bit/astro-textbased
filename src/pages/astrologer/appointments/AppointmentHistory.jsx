@@ -5,7 +5,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { useToast } from '../../../components/Toast.jsx'
-import { getRoleRoutes } from '../../../utils/roleRoutes.js'
 import Card from '../../../components/ui/Card.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import HistoryCalendar from './HistoryCalendar.jsx'
@@ -117,9 +116,10 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
         const customerName = appointment.customerName || 'Customer'
         const hasAnalysis = Boolean(String(appointment.preCallAnalysis || '').trim())
         const avatarInitials = customerName.split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AS'
+        const isExpanded = inline && expandedId === appointment.id
         const toggle = () => (inline ? onToggle(appointment) : onSelect(appointment))
         return (
-          <div className={`apt-history-row${inline ? ' is-inline' : ''}`} key={appointment.id}>
+          <div className={`apt-history-row${inline ? ' is-inline' : ''}${isExpanded ? ' is-expanded' : ''}`} key={appointment.id}>
             <article
               className={`apt-history-item${isCancelled ? ' is-cancelled' : ''}${rescheduleLabel ? ' is-rescheduled' : ''}`}
               role="button"
@@ -144,13 +144,13 @@ function DayAppointmentsList({ appointments, allHistory = [], onSelect, emptyTit
               <small>Order {String(appointment.orderId || appointment.id).startsWith('#') ? (appointment.orderId || appointment.id) : `#${appointment.orderId || appointment.id}`}</small>
             </div>
             <StatusBadge label={displayStatus} />
-            <button type="button" className="apt-history-item__view" onClick={(event) => { event.stopPropagation(); toggle() }}>{inline && expandedId === appointment.id ? 'Hide' : 'View'}</button>
+            <button type="button" className="apt-history-item__view" onClick={(event) => { event.stopPropagation(); toggle() }}>{isExpanded ? 'Hide' : 'View'}</button>
             {rescheduleLabel && (
               <div className="apt-history-item__reschedule">{rescheduleLabel}</div>
             )}
             {hasAnalysis && <span className="apt-history-item__analysis is-saved">✓ Analysis Saved</span>}
             </article>
-            {inline && expandedId === appointment.id && <AppointmentInlineDetails appointment={appointment} consultation={null} />}
+            {isExpanded && <AppointmentInlineDetails appointment={appointment} consultation={null} />}
           </div>
         )
       })}
@@ -195,7 +195,6 @@ export default function AppointmentHistory() {
   const { currentUser } = useAuth()
   const { appointments, consultations, actions } = useAppData()
   const { success } = useToast()
-  const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 

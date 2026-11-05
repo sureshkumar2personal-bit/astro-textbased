@@ -226,18 +226,59 @@ html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-engin
   box-shadow: 0 4px 18px rgba(124, 58, 237, 0.08);
 }
 
-/* Service Item Cards */
-.perks-service-item {
+/* Service Item Cards (21st.dev Inspired Model) */
+.perks-service-card {
   background: var(--bl-surface-card);
   border: 1px solid var(--bl-line);
-  border-radius: 14px;
-  padding: 18px;
-  transition: all 0.2s ease;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
-.perks-service-item:hover {
+.perks-service-card:hover {
   border-color: var(--bl-primary);
-  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.08);
+  box-shadow: 0 8px 24px rgba(109, 40, 217, 0.08);
+}
+
+.perks-service-card.is-inactive {
+  opacity: 0.65;
+  background: var(--bl-surface-soft);
+}
+
+/* Range Slider (21st.dev style) */
+.perks-range-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  appearance: none;
+  background: var(--bl-line);
+  accent-color: var(--bl-primary);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.perks-range-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bl-primary);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.35);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.perks-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-range-slider::-webkit-slider-thumb {
+  background: var(--perks-gold, #FFC247);
+  border-color: #1A0F05;
+  box-shadow: 0 0 10px rgba(255, 194, 71, 0.5);
 }
 
 /* KPI Summary Cards */
@@ -253,17 +294,6 @@ html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-engin
 .perks-kpi-card--amber { border-left: 4px solid #d97706; }
 .perks-kpi-card--emerald { border-left: 4px solid #059669; }
 .perks-kpi-card--purple { border-left: 4px solid #9333ea; }
-
-/* Range Slider */
-.perks-range-slider {
-  width: 100%;
-  height: 6px;
-  border-radius: 6px;
-  appearance: none;
-  background: var(--bl-line);
-  accent-color: var(--bl-primary);
-  cursor: pointer;
-}
 
 /* Form Controls */
 .perks-engine-input,
@@ -386,6 +416,82 @@ html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-btn-p
   background: var(--bl-surface-soft);
   border-color: var(--bl-primary);
   color: var(--bl-primary);
+}
+
+.perks-btn-sm {
+  min-height: 32px !important;
+  padding: 6px 12px !important;
+  font-size: 11px !important;
+  border-radius: 8px !important;
+  white-space: nowrap !important;
+  gap: 5px !important;
+}
+
+/* Voice Note Action Button */
+.perks-voice-note-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--bl-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--bl-primary-bg);
+  color: var(--bl-primary-dark, var(--bl-primary));
+  box-shadow: 0 1px 3px rgba(109, 40, 217, 0.1);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.perks-voice-note-btn:hover {
+  background: var(--bl-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.22);
+}
+
+.perks-voice-note-btn:focus-visible {
+  outline: 2px solid var(--bl-primary);
+  outline-offset: 2px;
+}
+
+.perks-voice-note-btn.is-active {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #f87171;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.1);
+}
+
+.perks-voice-note-btn.is-active:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #ef4444;
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-voice-note-btn {
+  background: rgba(255, 194, 71, 0.14);
+  color: var(--bl-primary, #FFC247);
+  border-color: var(--bl-primary, #FFC247);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-voice-note-btn:hover {
+  background: var(--bl-primary, #FFC247);
+  color: #1A0F05;
+  box-shadow: 0 4px 14px rgba(255, 194, 71, 0.3);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-voice-note-btn.is-active {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .perks-voice-note-btn.is-active:hover {
+  background: rgba(239, 68, 68, 0.28);
+  color: #ffffff;
 }
 
 /* ============================================================
@@ -530,4 +636,22 @@ html[data-theme='dark'] .app-shell--astrologer .perks-benefits-page .platform-to
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Blinking Red Animation when all 12 signs & special transits are written */
+@keyframes redBlinkPulse {
+  0%, 100% {
+    background-color: #dc2626; /* red-600 */
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    background-color: #ef4444; /* red-500 */
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    transform: scale(1.04);
+  }
+}
+
+.perks-publish-btn-blinking {
+  animation: redBlinkPulse 1.3s infinite cubic-bezier(0.4, 0, 0.6, 1) !important;
 }
