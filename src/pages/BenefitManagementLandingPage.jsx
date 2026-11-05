@@ -4,8 +4,9 @@ import { ArrowLeft, History, SlidersHorizontal } from 'lucide-react'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Section from '../components/ui/Section.jsx'
 import BenefitManagementLanding from './astrologer/BenefitManagementLanding.jsx'
-import PerksSettings from './astrologer/PerksSettings.jsx'
+import PerksSettings, { SubscriberProgramGlance } from './astrologer/PerksSettings.jsx'
 import { INITIAL_DELIVERIES, INITIAL_TIER_CONFIGS } from './PerksAndBenefits.jsx'
+import './astrologer/perksSettings.css'
 
 export default function BenefitManagementLandingPage() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export default function BenefitManagementLandingPage() {
   return <div className="perks-benefits-page">
     <button type="button" className="perks-benefits-back" onClick={() => navigate('/astrologer/dashboard')}><ArrowLeft size={16} aria-hidden="true" /> Back</button>
     <PageHeader eyebrow="Astrologer Workspace" title="Benefit Management" />
+    <SubscriberProgramGlance />
     <Section className="mt-4">
       <div className="perks-tab-navigation">
         <button type="button" className="perks-tab-btn active" onClick={() => navigate('/astrologer/perks-benefits')}><SlidersHorizontal size={18} /><span>Benefit Management</span></button>
@@ -34,6 +36,7 @@ export default function BenefitManagementLandingPage() {
       />
     <div className="benefit-landing-parameters">
       <PerksSettings
+        showGlance={false}
         tierConfigs={tierConfigs}
         onTierSave={(tier, nextConfig) => setTierConfigs((current) => ({ ...current, [tier]: nextConfig }))}
         onSave={() => {}}

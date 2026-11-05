@@ -102,7 +102,7 @@ export const INITIAL_TIER_CONFIGS = {
     formats: ['Text', 'Audio'],
     categories: ['Weekly Prediction', 'Monthly Prediction'],
     price: 199,
-    discounts: { questions: 10, audio: 10, appointments: 10 },
+    discounts: { questions: 10, chat: 10, audio: 10, appointments: 10 },
     access: { booking: 'Standard', live: 'Standard Access', content: 'Standard' },
   },
   Gold: {
@@ -110,7 +110,7 @@ export const INITIAL_TIER_CONFIGS = {
     formats: ['Text', 'Audio', 'Video'],
     categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
     price: 399,
-    discounts: { questions: 20, audio: 15, appointments: 15 },
+    discounts: { questions: 20, chat: 20, audio: 15, appointments: 15 },
     access: { booking: 'Priority', live: 'Early Access', content: 'Early Access' },
   },
   Platinum: {
@@ -118,7 +118,7 @@ export const INITIAL_TIER_CONFIGS = {
     formats: ['Text', 'Audio', 'Video'],
     categories: ['Weekly Prediction', 'Monthly Prediction', 'Special Event Prediction', 'Guru Peyarchi Prediction'],
     price: 699,
-    discounts: { questions: 30, audio: 20, appointments: 20 },
+    discounts: { questions: 30, chat: 25, audio: 20, appointments: 20 },
     access: { booking: 'Priority+', live: 'Priority Access', content: 'Premium Access' },
   },
 }
