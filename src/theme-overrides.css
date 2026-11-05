@@ -362,7 +362,7 @@ html[data-theme='dark'] .astrologer-bottom-nav__item:focus-visible {
 /* Text-Based Questions: premium dark espresso / burgundy palette. Keep this
    page scoped so the existing layout, data, and other astrologer modules are
    unaffected by the redesign. */
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) {
   --tbq-bg: #0A0400;
   --tbq-card: #1A0D08;
   --tbq-inner: #24121F;
@@ -373,91 +373,92 @@ html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) {
   --tbq-purple: #6D348C;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .page-content,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .page-transition,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .page-content,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .page-transition,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-page,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page {
   background: var(--tbq-bg) !important;
   color: var(--tbq-text) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .page-title,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .section-title,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h1,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h2,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h3,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page h4 {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .page-title,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .section-title,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) h1,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) h2,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) h3,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) h4 {
   color: var(--tbq-heading) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .muted,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page small,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page p {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .muted,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) small,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) p {
   color: var(--tbq-muted) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .page-header-back button {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .page-header-back button {
   color: var(--tbq-text) !important;
   border-color: var(--tbq-border) !important;
   background: transparent !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tabs {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-module-tabs {
   border-color: var(--tbq-border) !important;
   background: var(--tbq-card) !important;
   box-shadow: 0 12px 30px rgba(0, 0, 0, .24) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab:hover {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-module-tab,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-module-tab:hover {
   color: var(--tbq-muted) !important;
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-module-tab.is-active {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-module-tab.is-active {
   color: var(--tbq-text) !important;
   background: var(--tbq-purple) !important;
   border-color: var(--tbq-heading) !important;
   box-shadow: 0 7px 18px rgba(109, 52, 140, .35) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .section,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .card,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .question-list,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .question-list-shell {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .section,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-list,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-list-shell {
   color: var(--tbq-text) !important;
   background: var(--tbq-card) !important;
   border-color: var(--tbq-border) !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, .22) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:first-of-type .card {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:first-of-type .card {
   background: var(--tbq-card) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .search-bar {
   border-color: var(--tbq-border) !important;
   background: var(--tbq-inner) !important;
   box-shadow: none !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar__input,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page input,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page textarea,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page select {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .search-bar__input,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) input,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) textarea,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) select {
   color: var(--tbq-text) !important;
   background: var(--tbq-inner) !important;
   border-color: var(--tbq-border) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page input::placeholder,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page textarea::placeholder {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) input::placeholder,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) textarea::placeholder {
   color: var(--tbq-muted) !important;
   opacity: .9;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-bar .icon-btn {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .search-bar .icon-btn {
   color: var(--tbq-heading) !important;
   background: transparent !important;
   border-color: var(--tbq-border) !important;
@@ -465,113 +466,113 @@ html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .search-
 
 /* Summary cards keep their five-card layout, while replacing the inline light
    backgrounds with subtle dark surfaces and distinct status accents. */
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button > .card {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button > .card {
   background: var(--tbq-card) !important;
   border-color: var(--tbq-border) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center {
   background: var(--tbq-inner) !important;
   border-color: var(--tbq-border) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(1) .text-center { box-shadow: inset 3px 0 #6D348C; }
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(2) .text-center { box-shadow: inset 3px 0 #5B8DB8; }
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(3) .text-center { box-shadow: inset 3px 0 #C96B3B; }
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(4) .text-center { box-shadow: inset 3px 0 #D97706; }
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(5) .text-center { box-shadow: inset 3px 0 #B94A4A; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(1) .text-center { box-shadow: inset 3px 0 #6D348C; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(2) .text-center { box-shadow: inset 3px 0 #5B8DB8; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(3) .text-center { box-shadow: inset 3px 0 #C96B3B; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(4) .text-center { box-shadow: inset 3px 0 #D97706; }
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) > .grid > button:nth-child(5) .text-center { box-shadow: inset 3px 0 #B94A4A; }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div {
   color: var(--tbq-heading) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div:nth-child(2) {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-answer-page .answer-question-tight-section:nth-of-type(2) .text-center > div:nth-child(2) {
   color: var(--tbq-text) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__heading,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__name {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-month__heading,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-month__name {
   color: var(--tbq-heading) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__heading svg {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-month__heading svg {
   color: var(--tbq-heading) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-month__count {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-month__count {
   color: var(--tbq-muted) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card {
   color: var(--tbq-muted) !important;
   background: var(--tbq-card) !important;
   border-color: var(--tbq-border) !important;
   box-shadow: 0 7px 18px rgba(0, 0, 0, .22) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card:hover,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card:focus-visible,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card:hover,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card:focus-visible {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card:hover,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card:focus-visible,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card:hover,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card:focus-visible {
   background: var(--tbq-inner) !important;
   outline: none;
   box-shadow: inset 0 0 0 2px var(--tbq-purple), 0 7px 18px rgba(0, 0, 0, .22) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card strong,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card strong,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__details p,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__details p {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card strong,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card strong,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__details p,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__details p {
   color: var(--tbq-text) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__details > span,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__details > span,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline b,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline b {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__details > span,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__details > span,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__deadline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__deadline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__deadline b,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__deadline b {
   color: var(--tbq-muted) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__deadline small,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__deadline small {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__deadline small,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__deadline small {
   color: var(--tbq-text) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__action .btn,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__action .btn,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-outline,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-ghost {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__action .btn,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__action .btn,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .btn-outline,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .btn-ghost {
   color: var(--tbq-text) !important;
   background: var(--tbq-card) !important;
   border-color: var(--tbq-border) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-card__action .btn-primary,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .question-card__action .btn-primary,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn-primary {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-card__action .btn-primary,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .question-card__action .btn-primary,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .btn-primary {
   color: var(--tbq-text) !important;
   background: var(--tbq-card) !important;
   border-color: var(--tbq-heading) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, .2) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-page .btn:hover {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .btn:hover {
   color: var(--tbq-heading) !important;
   background: var(--tbq-inner) !important;
   border-color: var(--tbq-heading) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-question-row {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-question-row {
   background: var(--tbq-card) !important;
   border-color: rgba(140, 100, 46, .5) !important;
 }
 
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-inline-answer,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .tbq-inline-answer__card,
-html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page) .modal-card {
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-inline-answer,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .tbq-inline-answer__card,
+html[data-theme='dark'] .app-shell--astrologer:has(.tbq-page, .tbq-answer-page) .modal-card {
   color: var(--tbq-text) !important;
   background: var(--tbq-card) !important;
   border-color: var(--tbq-border) !important;
@@ -626,7 +627,7 @@ html[data-theme='dark'] .app-shell--astrologer .apt-page {
   --green-600: #14B8A6;
   --amber-600: #FFBB32;
   --red-600: #F87171;
-  --text-on-primary: #38230B;
+  --text-on-primary: #FFFFFF;
   --appointment-emphasis: #FFE7B5;
   --appointment-calendar-bg: #211509;
   --appointment-cell-bg: #30200F;
@@ -2444,4 +2445,569 @@ html[data-theme='dark'] .auth-page--astrologer .auth-switch-link:hover,
 html[data-theme='dark'] .auth-page--astrologer .auth-switch-role:hover {
   color: #A78BFA !important;
   text-decoration: underline;
+}
+
+/* ==========================================================================
+   Astrologer Portal - Comprehensive Dark Mode Fixes
+   - Eliminates white / light background bleed-through
+   - Ensures high-contrast white / gold text on dark surfaces
+   - Strictly scoped to html[data-theme='dark'] .app-shell--astrologer
+   ========================================================================== */
+
+/* 1. Header Avatar Chip */
+html[data-theme='dark'] .app-shell--astrologer .topbar-actions .avatar-chip,
+html[data-theme='dark'] .app-shell--astrologer .avatar-chip {
+  background: rgba(42, 27, 14, 0.95) !important;
+  border-color: rgba(232, 184, 62, 0.6) !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .topbar-actions .avatar-chip:hover,
+html[data-theme='dark'] .app-shell--astrologer .avatar-chip:hover {
+  background: rgba(232, 184, 62, 0.22) !important;
+  border-color: #f1bf25 !important;
+}
+
+/* 2. Dashboard */
+html[data-theme='dark'] .app-shell--astrologer .adash-questions {
+  background: #201308 !important;
+  border-color: #4a3424 !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-questions thead {
+  background: #2a1a0e !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-questions th {
+  color: #e5be7a !important;
+  background: #2a1a0e !important;
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-questions td {
+  color: #ffffff !important;
+  border-bottom: 1px solid #382417 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-questions tbody tr:hover {
+  background: rgba(232, 184, 62, 0.08) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .action-card--compact {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image {
+  background: #060810 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services h1 {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services > p {
+  color: #f3dfc8 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action-icon {
+  background: rgba(232, 184, 62, 0.16) !important;
+  color: #f1bf25 !important;
+  border: 1px solid rgba(232, 184, 62, 0.25) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .adash-quick-action-label {
+  color: #ffffff !important;
+}
+
+/* 3. Astrologer Profile */
+html[data-theme='dark'] .app-shell--astrologer .account-panel,
+html[data-theme='dark'] .app-shell--astrologer .mp-completion,
+html[data-theme='dark'] .app-shell--astrologer .mp-visibility,
+html[data-theme='dark'] .app-shell--astrologer .mp-content {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45) !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-panel h2,
+html[data-theme='dark'] .app-shell--astrologer .account-panel-heading h2,
+html[data-theme='dark'] .app-shell--astrologer .mp-completion__title strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-panel-heading p,
+html[data-theme='dark'] .app-shell--astrologer .account-panel > p,
+html[data-theme='dark'] .app-shell--astrologer .mp-completion__text > small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-back-button {
+  background: #2a1a0e !important;
+  border-color: #4a3424 !important;
+  color: #e5be7a !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-back-button:hover {
+  background: #382417 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field input,
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field select,
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field textarea {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field input:focus,
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field select:focus,
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field textarea:focus {
+  border-color: #f1bf25 !important;
+  box-shadow: 0 0 0 3px rgba(241, 191, 37, 0.18) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-content .account-field > span:first-child {
+  color: #f5effa !important;
+}
+
+/* 4. Account Management & Editors/Assistants */
+html[data-theme='dark'] .app-shell--astrologer .account-management-back {
+  background: #2a1a0e !important;
+  border-color: #4a3424 !important;
+  color: #e5be7a !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-management-back:hover {
+  background: #382417 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-toolbar-shortcut,
+html[data-theme='dark'] .app-shell--astrologer .account-navmenu-trigger {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-toolbar-shortcut:hover,
+html[data-theme='dark'] .app-shell--astrologer .account-navmenu-trigger:hover {
+  background: #2e1c0d !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-toolbar-shortcut.is-active,
+html[data-theme='dark'] .app-shell--astrologer .account-navmenu-trigger.is-active {
+  background: #e9a817 !important;
+  color: #1a0f05 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-eyebrow {
+  color: #e5be7a !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-person span {
+  background: #382417 !important;
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-person strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-person small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .editor-members-table th {
+  background: #2a1a0e !important;
+  color: #e5be7a !important;
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .editor-members-table td {
+  color: #ffffff !important;
+  border-bottom: 1px solid #382417 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .editor-summary-grid .summary-card {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+
+/* 5. Appointments */
+html[data-theme='dark'] .app-shell--astrologer .apt-break-reminder {
+  background: rgba(232, 184, 62, 0.12) !important;
+  border-color: rgba(232, 184, 62, 0.35) !important;
+  color: #f5effa !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .apt-break-reminder strong {
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .apt-toast-btn {
+  background: linear-gradient(135deg, #d9a42a, #ad7a13) !important;
+  color: #1a0f05 !important;
+  font-weight: 750 !important;
+  border: 1px solid #e5be7a !important;
+}
+
+/* 6. Perks & Benefits - Zodiac and Jyotish Panchangam Editor */
+html[data-theme='dark'] .app-shell--astrologer .zte {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-title {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-sub {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-mode-switcher,
+html[data-theme='dark'] .app-shell--astrologer .zte-mode-toggle {
+  background: #1a0f05 !important;
+  border: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-mode-btn,
+html[data-theme='dark'] .app-shell--astrologer .zte-mode {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-mode-btn-active,
+html[data-theme='dark'] .app-shell--astrologer .zte-mode-active {
+  background: #382417 !important;
+  color: #f1bf25 !important;
+  border-color: #8c642e !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-panel {
+  background: #1e1008 !important;
+  border: 1px solid #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-panel-head {
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-selected-label {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-sign-meta,
+html[data-theme='dark'] .app-shell--astrologer .zte-created-date,
+html[data-theme='dark'] .app-shell--astrologer .zte-selected-nakshatras {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-ruler {
+  background: rgba(232, 184, 62, 0.18) !important;
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-vedic-meta span {
+  background: rgba(139, 92, 246, 0.2) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  color: #c4b5fd !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-tabs {
+  background: #1a0f05 !important;
+  border: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-tab {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-tab-active {
+  background: #382417 !important;
+  color: #f1bf25 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-rich-editor,
+html[data-theme='dark'] .app-shell--astrologer .zte-textarea {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-editor-toolbar {
+  background: #241507 !important;
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-editor-toolbar button {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-editor-toolbar button:hover:not(:disabled) {
+  background: #382417 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-add-button,
+html[data-theme='dark'] .app-shell--astrologer .zte-preview-btn {
+  background: #382417 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-secondary,
+html[data-theme='dark'] .app-shell--astrologer .zte-voice-note {
+  background: #2a1a0e !important;
+  border-color: #4a3424 !important;
+  color: #e5be7a !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-template-select select {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-editor-footer {
+  border-top: 1px solid #4a3424 !important;
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-special-arrow {
+  color: #f1bf25 !important;
+}
+
+/* 7. Perks & Benefits History */
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table-wrap {
+  border-color: #4a3424 !important;
+  background: #241507 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table th {
+  background: #2a1a0e !important;
+  color: #e5be7a !important;
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table td {
+  color: #ffffff !important;
+  border-bottom: 1px solid #382417 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table td > strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table td > small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table tbody tr:hover,
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-table tbody tr:focus {
+  background: rgba(232, 184, 62, 0.08) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-plan--silver {
+  color: #e2e8f0 !important;
+  background: rgba(148, 163, 184, 0.2) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-plan--gold {
+  color: #f1bf25 !important;
+  background: rgba(241, 191, 37, 0.2) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-plan--platinum {
+  color: #c4b5fd !important;
+  background: rgba(139, 92, 246, 0.2) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-status {
+  color: #4ade80 !important;
+  background: rgba(74, 222, 128, 0.15) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-status--cancelled,
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-status--expired {
+  color: #cbd5e1 !important;
+  background: rgba(148, 163, 184, 0.15) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .benefit-history-status--refunded {
+  color: #f1bf25 !important;
+  background: rgba(241, 191, 37, 0.15) !important;
+}
+
+/* 8. Wallet */
+html[data-theme='dark'] .app-shell--astrologer .wd-btn--light {
+  background: rgba(232, 184, 62, 0.18) !important;
+  color: #f1bf25 !important;
+  border: 1px solid rgba(232, 184, 62, 0.4) !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .wd-btn--light:hover:not(:disabled) {
+  background: rgba(232, 184, 62, 0.28) !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .wallet-txn-status--pending {
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.15) !important;
+}
+
+/* 9. Dispute Management */
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card {
+  background: #241507 !important;
+  border: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card:nth-child(1) {
+  border-left: 3px solid #8b5cf6 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card:nth-child(2) {
+  border-left: 3px solid #f87171 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card:nth-child(3) {
+  border-left: 3px solid #f1bf25 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card:nth-child(4) {
+  border-left: 3px solid #4ade80 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-value {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-label {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-wrap {
+  border-color: #4a3424 !important;
+  background: #201308 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-head {
+  background: #2a1a0e !important;
+  color: #e5be7a !important;
+  border-bottom: 1px solid #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-row {
+  border-bottom: 1px solid #382417 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-summary strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-summary small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-view-button {
+  background: rgba(232, 184, 62, 0.15) !important;
+  border-color: #d8b77d !important;
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-details {
+  background: #28170a !important;
+  border-color: #4a3424 !important;
+  color: #f5effa !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-details strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-search,
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-status-filter {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-search input,
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-status-filter select {
+  color: #ffffff !important;
+}
+
+/* 10. Additional Dark Mode Contrast & Typography Polish */
+html[data-theme='dark'] .app-shell--astrologer .account-toggle strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .account-toggle small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .mp-visibility__state {
+  color: #4ade80 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .apt-toast-btn,
+html[data-theme='dark'] .app-shell--astrologer .btn-primary.apt-toast-btn {
+  background: linear-gradient(135deg, #d9a42a, #ad7a13) !important;
+  color: #ffffff !important;
+  border-color: #e5be7a !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-special-card {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-special-card strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-special-copy > span {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .zte-field-label {
+  color: #ffffff !important;
+}
+
+/* 11. Dispute Modal & Details Overrides */
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-details__evidence span {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-status--open {
+  background: rgba(248, 113, 113, 0.18) !important;
+  color: #f87171 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-status--under-review {
+  background: rgba(251, 191, 36, 0.18) !important;
+  color: #fbbf24 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-status--awaiting-response {
+  background: rgba(167, 139, 250, 0.18) !important;
+  color: #a78bfa !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-status--resolved {
+  background: rgba(74, 222, 128, 0.18) !important;
+  color: #4ade80 !important;
+}
+html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-status--closed {
+  background: rgba(148, 163, 184, 0.18) !important;
+  color: #cbd5e1 !important;
+}
+html[data-theme='dark'] .complaint-form-modal,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal {
+  background: #241507 !important;
+  border-color: #4a3424 !important;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.5) !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-panel-heading .section-title,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-panel-heading .section-title {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-panel-heading,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-panel-heading {
+  border-bottom-color: #4a3424 !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-panel-heading .icon-btn,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-panel-heading .icon-btn {
+  background: #2a1a0e !important;
+  border-color: #4a3424 !important;
+  color: #e5be7a !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-intro,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-intro {
+  background: #1e1008 !important;
+  border-color: #4a3424 !important;
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-intro svg,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-intro svg {
+  background: rgba(232, 184, 62, 0.18) !important;
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .complaint-form-modal .complaint-form-field,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-form-field {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-form-modal .complaint-form-field input,
+html[data-theme='dark'] .complaint-form-modal .complaint-form-field select,
+html[data-theme='dark'] .complaint-form-modal .complaint-form-field textarea,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-form-field input,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-form-field select,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-form-field textarea {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-upload-box,
+html[data-theme='dark'] .complaint-form-modal .complaint-upload-box,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-upload-box {
+  background: #1e1008 !important;
+  border-color: #4a3424 !important;
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .complaint-form-modal .complaint-evidence-item,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .complaint-evidence-item {
+  background: #1a0f05 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-form-modal .raise-complaint-actions,
+html[data-theme='dark'] .app-shell--astrologer .complaint-form-modal .raise-complaint-actions {
+  border-top-color: #4a3424 !important;
+}
+html[data-theme='dark'] .complaint-type-options button {
+  background: #1e1008 !important;
+  border-color: #4a3424 !important;
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-type-options button.is-selected {
+  background: rgba(232, 184, 62, 0.16) !important;
+  border-color: #f1bf25 !important;
+}
+html[data-theme='dark'] .complaint-type-options button:hover {
+  background: rgba(232, 184, 62, 0.1) !important;
+  border-color: #d8b77d !important;
+}
+html[data-theme='dark'] .complaint-type-options strong {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .complaint-type-options small {
+  color: #d1c4b7 !important;
+}
+html[data-theme='dark'] .complaint-type-icon {
+  background: rgba(232, 184, 62, 0.2) !important;
+  color: #f1bf25 !important;
+}
+html[data-theme='dark'] .complaint-type-icon--user {
+  background: rgba(139, 92, 246, 0.2) !important;
+  color: #c4b5fd !important;
 }
