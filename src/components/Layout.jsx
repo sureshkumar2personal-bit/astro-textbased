@@ -32,6 +32,7 @@ import {
   Search,
   Headphones,
   Gavel,
+  Star,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
@@ -59,23 +60,17 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'text-based-questions', label: 'Text-Based Questions', icon: TempleScrollIcon },
-      // Single Appointments entry: /appointments redirects to Schedule and every
-      // /appointments/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'text-based-questions', label: 'Text Questions', icon: TempleScrollIcon },
       { to: 'appointments', label: 'Appointments', icon: CalendarDays },
-      { to: 'consultation', label: 'Consultation', icon: Headphones },
-      { to: 'atonement', label: 'Atonement', icon: Flame },
-      // Single Live entry: /live-session redirects to setup and every
-      // /live-session/* page keeps it highlighted; the sub-pages stay routable.
-      { to: 'live-session', label: 'Live', icon: Radio },
-      // Single Benefit Management entry: /perks-benefits opens the landing page and
-      // every /perks-benefits/* page keeps it highlighted; the editor stays at /settings.
-      { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
-      { to: 'dispute-management', label: 'Dispute Management', icon: Gavel },
-      // Single Wallet entry: /wallet redirects to the overview and every
-      // /wallet/* page keeps it highlighted; the sub-pages stay routable.
-      { to: 'wallet', label: 'Wallet', icon: Wallet },
-      { to: 'my-account', label: 'My Account', icon: UserRound },
+      { to: 'consultation', label: 'Instant Call', icon: Headphones },
+      { to: 'instant-consultation', label: 'Instant Chat', icon: MessageCircle },
+      { to: 'atonement', label: 'Atonements (Pariharam)', icon: Flame },
+      { to: 'live-session', label: 'Live Stream', icon: Radio },
+      { to: 'my-account', label: 'Profiles', icon: UserRound },
+      { to: '', label: 'Quick Actions', icon: Sparkles },
+      { to: 'activity', label: 'Analytics & Graphs', icon: TrendingUp },
+      { to: 'dispute-management', label: 'Disputes & Support', icon: Gavel },
+      { to: 'my-account', label: 'Settings & Account', icon: SlidersHorizontal },
     ],
   },
   [ROLES.USER]: {
@@ -585,6 +580,15 @@ export default function Layout() {
   const globalActions = (
     <div className="topbar-actions" ref={actionRef}>
       {!isAstrologer && <ActiveCallIndicator />}
+      {shellIsAstrologer && (
+        <div className="astrologer-topbar-metrics" aria-label="Astrologer workspace status">
+          <span className={`astrologer-topbar-pill astrologer-topbar-pill--online${astrologerServices.available ? '' : ' is-off'}`}><i /> {astrologerServices.available ? 'Online' : 'Offline'} <b>⌄</b></span>
+          <span className={`astrologer-topbar-pill${astrologerServices.chatAvailable ? ' is-on' : ' is-off'}`}><i /> Chat {astrologerServices.chatAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
+          <span className={`astrologer-topbar-pill${astrologerServices.callAvailable ? ' is-on' : ' is-off'}`}><i /> Call {astrologerServices.callAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
+          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹1,250</strong></span>
+          <span className="astrologer-topbar-stat astrologer-topbar-stat--rating"><small>AVERAGE RATING</small><strong><Star size={12} fill="currentColor" /> 4.9 / 5</strong></span>
+        </div>
+      )}
       {!shellIsAstrologer && (
         <button
           type="button"
@@ -726,6 +730,7 @@ export default function Layout() {
                 </div>
                 <div>
                   <div className="sidebar-brand-text">Astro Connect</div>
+                  <small className="sidebar-brand-subtitle">Professional Astrologer Portal</small>
                 </div>
               </div>
 
@@ -740,7 +745,7 @@ export default function Layout() {
                     <span className="astrologer-topbar-brand__mark">
                       <img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" />
                     </span>
-                    <strong>Astro Connect</strong>
+                    <div><strong>Dr. Rani</strong><small>ASTROLOGER WORKSPACE</small></div>
                   </div>
                   {globalActions}
                 </header>
@@ -778,11 +783,6 @@ export default function Layout() {
             <aside className={`sidebar sidebar--${role}`}>
               <div className="sidebar-group-label">{shellConfig.navLabel}</div>
               <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
-              {isUserDashboard && <div className="sidebar-kundli-card">
-                <div className="sidebar-kundli-card__icon"><Sparkles size={17} /></div>
-                <div><strong>Kundli Chart Synced</strong><span>{currentUser?.rasi || 'Rashi'} · {currentUser?.nakshatra || 'Moon details'}</span></div>
-                <Link to={`${shellBasePath}/horoscope`}>View Horoscope Chart <ChevronRight size={13} /></Link>
-              </div>}
             </aside>
 
             <div className="main-column">

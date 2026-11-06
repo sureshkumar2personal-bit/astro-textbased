@@ -85,7 +85,7 @@ export default function UserDashboard() {
         <div className="quick-actions-grid">
           <QuickAction icon={MessageCircle} tone="green" title="Instant Call & Chat" subtitle="Connect in 60s" onClick={() => navigate(routes.instantConsultation)} />
           <QuickAction icon={CircleHelp} tone="purple" title="Ask a Question" subtitle="Detailed Text Reply" onClick={() => navigate(routes.askQuestion, { state: { from: 'dashboard' } })} />
-          <QuickAction icon={Gem} tone="orange" title="Remedies (Atonement)" subtitle="Pooja & Gemstones" onClick={() => navigate(`${routes.base}/atonements`)} />
+          <QuickAction icon={Gem} tone="orange" title="Remedies (Atonement)" subtitle="Pooja" onClick={() => navigate(`${routes.base}/atonements`)} />
           <QuickAction icon={CalendarDays} tone="blue" title="Schedule Slot" subtitle="Book Specific Time" onClick={() => navigate(routes.appointmentBook, { state: { from: 'dashboard' } })} />
         </div>
       </DashboardSection>

@@ -66,11 +66,13 @@
 .app-shell--user:has(.user-dashboard-page) .quick-action strong{font-size:13px}
 .app-shell--user:has(.user-dashboard-page) .quick-action small{font-size:11px}
 .app-shell--user:has(.user-dashboard-page) .dashboard-card{height:162px;min-height:162px;padding:14px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card-heading{gap:8px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card-heading .dashboard-icon{width:24px;height:24px;border-radius:0;background:transparent}
 .app-shell--user:has(.user-dashboard-page) .lucky-card{padding-top:13px}
 .app-shell--user:has(.user-dashboard-page) .dashboard-card-corner-label{position:absolute;top:16px;right:16px;color:#c36b25;font-size:11px;font-weight:800}
-.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list{margin-top:14px;gap:8px}
-.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list span{padding:7px 9px;border:1px solid #f0e5db;border-radius:10px;background:#fffaf4;color:#49362b;font-size:11px}
-.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list b{font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list{width:100%;margin-top:14px;gap:7px}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list span{grid-template-columns:8px minmax(0,1fr) auto;width:100%;box-sizing:border-box;padding:6px 9px;border:1px solid #f0e5db;border-radius:10px;background:#fffaf4;color:#49362b;font-size:11px;text-align:left}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list b{font-size:11px;text-align:right;white-space:nowrap}
 .app-shell--user:has(.user-dashboard-page) .advice-sign{margin:5px 0 4px;gap:12px}
 .app-shell--user:has(.user-dashboard-page) .advice-orb{width:60px;height:60px;min-width:60px;font-size:31px;background:#fde8f0;color:#df3d7e}
 .app-shell--user:has(.user-dashboard-page) .advice-sign strong{font-size:15px}
