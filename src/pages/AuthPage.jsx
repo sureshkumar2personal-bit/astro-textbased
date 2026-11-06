@@ -311,7 +311,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="auth-portal-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+                  className="auth-portal-input w-full pl-10 pr-4 py-2 rounded-lg text-sm"
                 />
               </div>
             </div>
@@ -333,14 +333,14 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Enter your full name"
-                      className="auth-portal-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+                      className="auth-portal-input w-full pl-10 pr-4 py-2 rounded-lg text-sm"
                     />
                   </div>
                 </div>
 
                 {/* USER SPECIFIC FIELDS */}
                 {currentRole === 'user' && (
-                  <div id="userSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-2xl border border-amber-500/25">
+                  <div id="userSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-xl border border-amber-500/25">
                     <p className="text-xs font-semibold text-amber-300 flex items-center gap-1.5 mb-1">
                       <Sparkles size={14} /> Birth Information (For Kundli Chart)
                     </p>
@@ -355,7 +355,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                           required
                           value={dateOfBirth}
                           onChange={(e) => setDateOfBirth(e.target.value)}
-                          className="auth-portal-input w-full px-3 py-2 rounded-xl text-xs"
+                          className="auth-portal-input w-full px-3 py-2 rounded-lg text-xs"
                         />
                       </div>
                       <div>
@@ -367,7 +367,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                           required
                           value={birthTime}
                           onChange={(e) => setBirthTime(e.target.value)}
-                          className="auth-portal-input w-full px-3 py-2 rounded-xl text-xs"
+                          className="auth-portal-input w-full px-3 py-2 rounded-lg text-xs"
                         />
                       </div>
                     </div>
@@ -382,7 +382,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                         value={birthPlace}
                         onChange={(e) => setBirthPlace(e.target.value)}
                         placeholder="e.g. New York, USA"
-                        className="auth-portal-input w-full px-3 py-2 rounded-xl text-xs"
+                        className="auth-portal-input w-full px-3 py-2 rounded-lg text-xs"
                       />
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
 
                 {/* ASTROLOGER SPECIFIC FIELDS */}
                 {currentRole === 'astrologer' && (
-                  <div id="astrologerSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-2xl border border-purple-500/25">
+                  <div id="astrologerSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-xl border border-purple-500/25">
                     <p className="text-xs font-semibold text-purple-300 flex items-center gap-1.5 mb-1">
                       <Award size={14} /> Professional Details
                     </p>
@@ -404,7 +404,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                           max="60"
                           value={experience}
                           onChange={(e) => setExperience(e.target.value)}
-                          className="auth-portal-input w-full px-3 py-2 rounded-xl text-xs"
+                          className="auth-portal-input w-full px-3 py-2 rounded-lg text-xs"
                         />
                       </div>
                       <div>
@@ -412,7 +412,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                         <select
                           value={specialization}
                           onChange={(e) => setSpecialization(e.target.value)}
-                          className="auth-portal-input w-full px-3 py-2 rounded-xl text-xs"
+                          className="auth-portal-input w-full px-3 py-2 rounded-lg text-xs"
                         >
                           <option value="vedic">Vedic Astrology</option>
                           <option value="kp">KP System</option>
@@ -425,14 +425,14 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
 
                     <div>
                       <label className="block text-[11px] text-slate-300 mb-1">Upload Certification Document</label>
-                      <div className="border-2 border-dashed border-purple-500/30 rounded-xl p-2.5 text-center bg-[#090818] hover:border-purple-400 transition-colors cursor-pointer">
+                      <div className="border-2 border-dashed border-purple-500/30 rounded-lg p-2.5 text-center bg-[#090818] hover:border-purple-400 transition-colors cursor-pointer">
                         <UploadCloud className="mx-auto text-purple-400 mb-1 w-5 h-5" />
                         <p className="text-[10px] text-slate-400">Upload PDF or JPG (Max 5MB)</p>
                       </div>
                     </div>
 
                     {/* Verification Alert Banner */}
-                    <div className="bg-amber-500/10 border border-amber-500/30 p-2 rounded-xl flex items-start space-x-2">
+                    <div className="bg-amber-500/10 border border-amber-500/30 p-2 rounded-lg flex items-start space-x-2">
                       <AlertCircle className="text-amber-400 w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                       <p className="text-[11px] text-amber-200/90 leading-snug">
                         <strong>Note:</strong> Registration requires Admin approval before profile activation.
@@ -443,7 +443,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
 
                 {/* ADMIN SPECIFIC FIELDS */}
                 {currentRole === 'admin' && (
-                  <div id="adminSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-2xl border border-emerald-500/25">
+                  <div id="adminSpecificFields" className="space-y-3 p-3.5 bg-[#090818]/80 rounded-xl border border-emerald-500/25">
                     <p className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 mb-1">
                       <Key size={14} /> Administrative Authorization
                     </p>
@@ -458,7 +458,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                           value={adminKey}
                           onChange={(e) => setAdminKey(e.target.value)}
                           placeholder="Enter Security Secret"
-                          className="auth-portal-input w-full pl-9 pr-3 py-2 rounded-xl text-xs"
+                          className="auth-portal-input w-full pl-9 pr-3 py-2 rounded-lg text-xs"
                         />
                       </div>
                     </div>
@@ -493,7 +493,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="auth-portal-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm"
+                  className="auth-portal-input w-full pl-10 pr-10 py-2 rounded-lg text-sm"
                 />
                 <button
                   type="button"
@@ -524,7 +524,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
 
             {/* Error Message */}
             {error && (
-              <div className="p-3 rounded-xl bg-red-950/70 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
+              <div className="p-3 rounded-lg bg-red-950/70 border border-red-500/40 text-red-200 text-xs flex items-center gap-2">
                 <AlertCircle size={15} className="flex-shrink-0 text-red-400" />
                 <span>{error}</span>
               </div>
@@ -534,7 +534,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
             <button
               type="submit"
               id="submitAuthBtn"
-              className="auth-portal-submit-btn w-full py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer border-0 mt-3"
+              className="auth-portal-submit-btn w-full py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer border-0 mt-3"
             >
               <span id="submitBtnText">
                 {authMode === 'signin'
@@ -547,12 +547,18 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
             {/* Social / Alternative Auth Section (Sign In Only) */}
             {authMode === 'signin' && (
               <div id="socialAuthSection" className="mt-4 pt-1">
-                <div className="relative flex items-center justify-center my-4">
-                  <div className="border-t border-slate-800 w-full" />
-                  <span className="bg-[#121127] px-3 text-[10px] text-slate-500 font-semibold uppercase tracking-wider relative z-10">
-                    Or continue with
-                  </span>
+                {/* Hairline Divider with Centered Badge */}
+                <div className="relative my-4 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-slate-700/50" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-[#121127] px-3.5 text-[10px] text-slate-400 font-medium uppercase tracking-widest leading-none py-1 select-none">
+                      Or continue with
+                    </span>
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   {/* Google Login (Demo credentials pre-filled) */}
                   <button
@@ -566,7 +572,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                         setPassword('User@123')
                       }
                     }}
-                    className="auth-portal-alt-btn flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium cursor-pointer"
+                    className="auth-portal-alt-btn flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium cursor-pointer"
                   >
                     <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -588,7 +594,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                         alert(`OTP has been sent to ${mobileNumber}. (Credentials pre-filled for instant verification)`)
                       }
                     }}
-                    className="auth-portal-alt-btn flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium cursor-pointer"
+                    className="auth-portal-alt-btn flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium cursor-pointer"
                   >
                     <Smartphone size={14} className="text-amber-400" />
                     <span>OTP Login</span>

@@ -101,14 +101,17 @@
 .auth-portal-input {
   background: #090818 !important;
   border: 1px solid rgba(71, 85, 105, 0.65) !important;
+  border-radius: 8px !important;
   color: #ffffff !important;
+  min-height: 42px;
+  font-size: 13.5px !important;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-portal-input:focus {
   outline: none;
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.25) !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
 }
 
 .auth-portal-input::placeholder {
@@ -120,13 +123,15 @@
   background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
   color: #0b0a1a !important;
   font-weight: 700 !important;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+  border-radius: 8px !important;
+  min-height: 44px;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.25);
   transition: all 0.25s ease;
 }
 
 .auth-portal-submit-btn:hover {
   filter: brightness(1.08);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.35);
   transform: translateY(-1px);
 }
 
@@ -134,6 +139,8 @@
 .auth-portal-alt-btn {
   background: #090818;
   border: 1px solid rgba(71, 85, 105, 0.6);
+  border-radius: 8px !important;
+  min-height: 40px;
   color: #cbd5e1;
   transition: all 0.2s ease;
 }
