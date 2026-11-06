@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate, useOutlet } from 'react-router-dom'
 import { GlobalHeaderActionsContext } from '../contexts/GlobalHeaderActionsContext.jsx'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -83,7 +83,7 @@ const ROLE_CONFIG = {
     subtitle: 'Packages, questions, tracking, and disputes',
     navLabel: 'User',
     nav: [
-      { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true },
+      { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true, section: 'MAIN MENU' },
       // Explore Astrologers now lives in the top header (see the topbar actions)
       // so the sidebar stays focused on the account modules.
       // Single Ask a Question entry: it opens the question dashboard, whose
@@ -93,33 +93,38 @@ const ROLE_CONFIG = {
         label: 'Ask a Question',
         to: 'ask-question',
         icon: CircleHelp,
+        section: 'MAIN MENU',
       },
       {
         label: 'Appointments',
         to: 'appointments/my',
         icon: CalendarCheck,
+        section: 'MAIN MENU',
       },
       {
         label: 'Instant consultation',
         to: 'instant-consultation',
         icon: Headphones,
+        section: 'MAIN MENU',
       },
-      { to: 'atonements', label: 'Atonement', icon: Sparkles },
-      { to: 'live-session', label: 'Live', icon: Radio },
-      { to: 'rewards', label: 'Perks & Benefits', icon: Gift },
+      { to: 'atonements', label: 'Atonement', icon: Sparkles, section: 'MAIN MENU' },
+      { to: 'live-session', label: 'Live', icon: Radio, section: 'MAIN MENU' },
+      { to: 'rewards', label: 'Perks & Benefits', icon: Gift, section: 'ACCOUNT & BENEFITS' },
       {
         label: 'Disputes',
         to: 'disputes',
         icon: Gavel,
+        section: 'ACCOUNT & BENEFITS',
       },
       {
         label: 'Wallet',
         to: 'wallet/overview',
         icon: Wallet,
         activeWhen: ['wallet/transactions', 'wallet/topups', 'wallet/refunds', 'payment-methods', 'autopay'],
+        section: 'ACCOUNT & BENEFITS',
       },
-      { to: 'activity', label: 'My Activity', icon: Activity },
-      { to: 'my-account', label: 'My Account', icon: UserRound },
+      { to: 'activity', label: 'My Activity', icon: Activity, section: 'ACCOUNT & BENEFITS' },
+      { to: 'my-account', label: 'My Account', icon: UserRound, section: 'ACCOUNT & BENEFITS' },
     ],
   },
 }
@@ -217,6 +222,18 @@ const QUESTION_DASHBOARD_META = {
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const isUserDashboard = basePath === '/user' && location.pathname === '/user'
+  const dashboardLabels = {
+    'Ask a Question': 'Ask Question (Text)',
+    Appointments: 'Book Appointment',
+    'Instant consultation': 'Instant Call & Chat',
+    Atonement: 'Atonement (Remedies)',
+    Live: 'Live Streams',
+    Disputes: 'Disputes & Support',
+    Wallet: 'Wallet & Top-Up',
+    'My Activity': 'Activity History',
+    'My Account': 'Account Settings',
+  }
   const [openSections, setOpenSections] = useState(() => {
     const initial = {}
     links.forEach((link) => {
@@ -248,10 +265,13 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
   return (
     <nav className="sidebar-nav">
       {links.map((link) => {
+        const displayLabel = isUserDashboard ? (dashboardLabels[link.label] || link.label) : link.label
+        const sectionLabel = isUserDashboard && link.section && (links.findIndex((item) => item === link) === 0 || links[links.findIndex((item) => item === link) - 1]?.section !== link.section)
+        const sectionHeading = sectionLabel ? <div className="sidebar-nav-section-label" key={`${link.section}-label`}>{link.section}</div> : null
         if (!link.children) {
           const route = `${basePath}/${link.to}`.replace(/\/$/, '')
           const activeWhen = (link.activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
-          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} activeWhen={activeWhen} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} />
+          return <Fragment key={route}>{sectionHeading}<SidebarItem to={route} end={link.end} icon={link.icon} label={displayLabel} activeWhen={activeWhen} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} /></Fragment>
         }
 
         const isOpen = Boolean(openSections[link.label])
@@ -411,7 +431,7 @@ export default function Layout() {
   const outlet = useOutlet()
   const navigate = useNavigate()
   const { currentUser, logout } = useAuth()
-  const { notifications, consultations, actions, astrologerServices, incomingRequests } = useAppData()
+  const { notifications, consultations, actions, astrologerServices, incomingRequests, userWallet } = useAppData()
   const role = currentUser?.role || ROLES.ASTROLOGER
   const basePath = getRoleBasePath(role)
   const routes = {
@@ -435,6 +455,7 @@ export default function Layout() {
   const shellConfig = ROLE_CONFIG[shellRole]
   const shellBasePath = getRoleBasePath(shellRole)
   const shellIsAstrologer = shellRole === ROLES.ASTROLOGER
+  const isUserDashboard = role === ROLES.USER && location.pathname === '/user'
   const headerName = currentUser?.name || 'Dashboard'
   const isOwnerProfile = location.pathname === '/user/profile'
   const isSidebarHidden = isOwnerProfile || location.pathname === '/user/my-account'
@@ -567,15 +588,16 @@ export default function Layout() {
       {!shellIsAstrologer && (
         <button
           type="button"
-          className="topbar-explore-btn"
+          className={`topbar-explore-btn${isUserDashboard ? ' user-topbar-search' : ''}`}
           aria-label="Explore Astrologers"
           title="Explore Astrologers"
           onClick={() => navigate(`${basePath}/astrologers`)}
         >
           <Search size={18} aria-hidden="true" />
-          <span className="topbar-explore-btn__label">Explore</span>
+          <span className="topbar-explore-btn__label">{isUserDashboard ? 'Search astrologers, remedies, planetary reports...' : 'Explore'}</span>
         </button>
       )}
+      {!shellIsAstrologer && isUserDashboard && <button type="button" className="user-wallet-balance" onClick={() => navigate(routes.walletHistory)}><Wallet size={17} /><span><small>Wallet balance</small><strong>${Number(userWallet?.balance || 0).toFixed(2)}</strong></span><span className="user-wallet-topup">Top up</span></button>}
       <button
         type="button"
         className="icon-btn"
@@ -615,6 +637,7 @@ export default function Layout() {
           {shellIsAstrologer && headerName === 'Dr. Rani' ? <img src="/astrologer-photos/reference/dr-rani.png" alt="" /> : headerName.split(' ').map((part) => part[0]).slice(0, 2).join('') || 'K'}
         </span>
         <span>{headerName}</span>
+        {!shellIsAstrologer && isUserDashboard && <small className="user-profile-tier">Premium Member</small>}
         {shellIsAstrologer && (
           <span className={`topbar-service-status ${astrologerServices.available ? 'is-available' : 'is-unavailable'}`} title="Astrologer service status">
             <span className="service-status-dot" />
@@ -755,6 +778,11 @@ export default function Layout() {
             <aside className={`sidebar sidebar--${role}`}>
               <div className="sidebar-group-label">{shellConfig.navLabel}</div>
               <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
+              {isUserDashboard && <div className="sidebar-kundli-card">
+                <div className="sidebar-kundli-card__icon"><Sparkles size={17} /></div>
+                <div><strong>Kundli Chart Synced</strong><span>{currentUser?.rasi || 'Rashi'} · {currentUser?.nakshatra || 'Moon details'}</span></div>
+                <Link to={`${shellBasePath}/horoscope`}>View Horoscope Chart <ChevronRight size={13} /></Link>
+              </div>}
             </aside>
 
             <div className="main-column">
