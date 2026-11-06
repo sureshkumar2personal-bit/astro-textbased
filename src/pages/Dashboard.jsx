@@ -3,24 +3,20 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../state/ThemeContext.jsx'
 import {
   Megaphone,
-  MessageCircleReply,
   MessageCircle,
   ArrowUp,
-  PhoneCall,
-  ChevronDown,
   ChevronRight,
   CalendarDays,
   Radio,
-  Wallet,
-  SlidersHorizontal,
   Zap,
+  Sparkles,
+  Flame,
   Eye,
   EyeOff,
+  RefreshCw,
 } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { useAppData } from '../state/AppDataContext.jsx'
-import FlipButton from '../components/ui/flip-button.jsx'
-import TiltCard from '../components/ui/tilt-card.tsx'
 import {
   filterCampaignsByStatus,
   getCampaignAllocation,
@@ -41,12 +37,18 @@ const CAMPAIGN_CARD_STYLES = [
   { match: /./, image: '/campaigns/education-books.png', thumb: 'adash-thumb--education' },
 ]
 const DASHBOARD_CAMPAIGN_LIMIT = 4
+const ASTROLOGER_GREETING_QUOTES = [
+  'Planets set the rhythm, but humans choose the dance step.',
+  'Every chart carries a story, and every choice can shape the next chapter.',
+  'Let intuition guide the question, and wisdom guide the answer.',
+]
 
 export default function Dashboard() {
   const { isDark } = useTheme()
-  const { astrologerServices, actions, campaigns, appointments } = useAppData()
+  const { campaigns, appointments } = useAppData()
   const { currentUser } = useAuth()
   const [showInvitedPasswordPopup, setShowInvitedPasswordPopup] = useState(Boolean(currentUser?.requiresPasswordSetup))
+  const [greetingQuoteIndex, setGreetingQuoteIndex] = useState(0)
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
   // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
@@ -74,11 +76,11 @@ export default function Dashboard() {
       })
   }, [campaigns])
   const quickActions = [
-    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.textBasedQuestions, accent: 'orange' },
-    { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments, accent: 'red' },
-    { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup, accent: 'rose' },
-    { icon: Wallet, label: 'View Earnings', route: routes.walletManagement, accent: 'amber' },
-    { icon: SlidersHorizontal, label: 'Profile Settings', route: routes.myAccount, accent: 'purple' },
+    { icon: Sparkles, label: 'Generate Kundli', route: routes.myAccount, accent: 'orange' },
+    { icon: Flame, label: 'Send Remedy', route: routes.atonement, accent: 'purple' },
+    { icon: Radio, label: 'Schedule Live', route: routes.liveSessionSetup, accent: 'rose' },
+    { icon: CalendarDays, label: 'Add Slot', route: routes.appointments, accent: 'blue' },
+    { icon: MessageCircle, label: 'Dispute Note', route: routes.disputeManagement, accent: 'red' },
   ]
 
   const upcomingAppointments = useMemo(() => {
@@ -103,33 +105,11 @@ export default function Dashboard() {
   return (
     <div>
       {showInvitedPasswordPopup && <InvitedPasswordPopup onComplete={() => setShowInvitedPasswordPopup(false)} />}
-      <div className="astrologer-top-hero-image">
-        <img
-          className={`astrologer-top-hero-image__img astrologer-top-hero-image__img--${isDark ? 'dark' : 'light'}`}
-          src={isDark ? '/golden-temple-sunset-banner-dark.png' : '/golden-temple-sunset-banner.png'}
-          alt={isDark ? 'Golden temple at night beside a peaceful lake' : 'Golden temple at sunset beside a peaceful lake'}
-        />
-        <div className="astrologer-top-hero-image__services">
-          <h1>Stay Connected with Your Followers</h1>
-          <div className="adash-hero-service-cards" aria-label="Instant services">
-            <ServiceToggleCard
-              icon={PhoneCall}
-              label="Instant Call"
-              description="Receive instant calls"
-              enabled={astrologerServices.callEnabled && !astrologerServices.dndEnabled}
-              onToggle={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
-            />
-            <ServiceToggleCard
-              icon={MessageCircle}
-              label="Instant Chat"
-              description="Receive instant chats"
-              enabled={astrologerServices.chatEnabled && !astrologerServices.dndEnabled}
-              onToggle={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
-            />
-          </div>
-        </div>
-      </div>
-      <Section title="Quick Actions" icon={Zap}>
+      <header className="astrologer-greeting-header">
+        <h1>GOOD AFTERNOON, {(currentUser?.name || 'Acharya Gurudev').toUpperCase()}! <span aria-hidden="true">✨</span></h1>
+        <p><strong>“</strong> <em>{ASTROLOGER_GREETING_QUOTES[greetingQuoteIndex]}</em> <button type="button" aria-label="Show another greeting" title="Show another greeting" onClick={() => setGreetingQuoteIndex((index) => (index + 1) % ASTROLOGER_GREETING_QUOTES.length)}><RefreshCw size={18} aria-hidden="true" /></button></p>
+      </header>
+      <Section title="Quick Actions" icon={Zap} sectionClassName="adash-quick-actions-section" action={<span className="adash-quick-actions-caption">Fast Shortcuts</span>}>
         <div className="adash-quick-actions">
           {quickActions.map(({ icon: Icon, label, route, onClick, accent }) => (
             <button
@@ -275,50 +255,6 @@ function InvitedPasswordPopup({ onComplete }) {
   }
 
   return <div className="invited-password-overlay" role="dialog" aria-modal="true" aria-labelledby="invited-password-title"><div className="invited-password-modal"><div className="invited-password-modal__eyebrow">SECURE YOUR ACCOUNT</div><h2 id="invited-password-title">Set Your Password</h2><p>Create a password before continuing.</p><label><span>New Password</span><div className="invited-password-input"><input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showPassword ? 'Hide new password' : 'Show new password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label><label><span>Confirm Password</span><div className="invited-password-input"><input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>{error && <p className="invited-password-error">{error}</p>}<button type="button" className="invited-password-button" onClick={handleSubmit}>Set Password</button></div></div>
-}
-
-function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
-  return (
-    <TiltCard
-      className="adash-hero-service-card__tilt"
-      tiltLimit={8}
-      scale={1.015}
-      perspective={1000}
-      effect="evade"
-      spotlight
-    >
-      <div
-        role="button"
-        tabIndex={0}
-        className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
-        aria-pressed={enabled}
-        aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
-        onClick={onToggle}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            onToggle()
-          }
-        }}
-      >
-        <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
-        <span className="adash-hero-service-card__copy">
-          <strong>{label}</strong>
-          <small>{description}</small>
-        </span>
-        <FlipButton
-          key={`${label}-${enabled}`}
-          text1="ON"
-          text2="OFF"
-          initialShow={enabled}
-          className="adash-hero-service-card__flip"
-          aria-label={`${label} ${enabled ? 'ON' : 'OFF'}`}
-          aria-pressed={enabled}
-          onClick={onToggle}
-        />
-      </div>
-    </TiltCard>
-  )
 }
 
 function generateSmoothPath(values, width, height) {

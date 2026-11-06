@@ -32,6 +32,7 @@ import {
   Search,
   Headphones,
   Gavel,
+  Star,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
@@ -585,6 +586,15 @@ export default function Layout() {
   const globalActions = (
     <div className="topbar-actions" ref={actionRef}>
       {!isAstrologer && <ActiveCallIndicator />}
+      {shellIsAstrologer && (
+        <div className="astrologer-topbar-metrics" aria-label="Astrologer workspace status">
+          <span className={`astrologer-topbar-pill astrologer-topbar-pill--online${astrologerServices.available ? '' : ' is-off'}`}><i /> {astrologerServices.available ? 'Online' : 'Offline'} <b>⌄</b></span>
+          <span className={`astrologer-topbar-pill${astrologerServices.chatAvailable ? ' is-on' : ' is-off'}`}><i /> Chat {astrologerServices.chatAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
+          <span className={`astrologer-topbar-pill${astrologerServices.callAvailable ? ' is-on' : ' is-off'}`}><i /> Call {astrologerServices.callAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
+          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹1,250</strong></span>
+          <span className="astrologer-topbar-stat astrologer-topbar-stat--rating"><small>AVERAGE RATING</small><strong><Star size={12} fill="currentColor" /> 4.9 / 5</strong></span>
+        </div>
+      )}
       {!shellIsAstrologer && (
         <button
           type="button"
@@ -740,7 +750,7 @@ export default function Layout() {
                     <span className="astrologer-topbar-brand__mark">
                       <img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" />
                     </span>
-                    <strong>Astro Connect</strong>
+                    <div><strong>Dr. Rani</strong><small>ASTROLOGER WORKSPACE</small></div>
                   </div>
                   {globalActions}
                 </header>
@@ -778,11 +788,6 @@ export default function Layout() {
             <aside className={`sidebar sidebar--${role}`}>
               <div className="sidebar-group-label">{shellConfig.navLabel}</div>
               <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
-              {isUserDashboard && <div className="sidebar-kundli-card">
-                <div className="sidebar-kundli-card__icon"><Sparkles size={17} /></div>
-                <div><strong>Kundli Chart Synced</strong><span>{currentUser?.rasi || 'Rashi'} · {currentUser?.nakshatra || 'Moon details'}</span></div>
-                <Link to={`${shellBasePath}/horoscope`}>View Horoscope Chart <ChevronRight size={13} /></Link>
-              </div>}
             </aside>
 
             <div className="main-column">
