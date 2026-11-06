@@ -81,6 +81,7 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(14, 13, 30, 0.8);
   border: 1px solid rgba(71, 85, 105, 0.55);
+  border-radius: 8px !important;
   color: #94a3b8;
   cursor: pointer;
 }
@@ -93,6 +94,7 @@
 .auth-portal-role-btn.active {
   background: rgba(36, 34, 71, 0.95);
   border: 2px solid #fbbf24;
+  border-radius: 8px !important;
   color: #ffffff;
   box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
 }

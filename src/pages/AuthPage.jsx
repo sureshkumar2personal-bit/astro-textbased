@@ -259,7 +259,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                 type="button"
                 onClick={() => { setCurrentRole('user'); setError('') }}
                 id="roleBtn-user"
-                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-xl ${
+                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-lg ${
                   currentRole === 'user' ? 'active' : ''
                 }`}
               >
@@ -272,7 +272,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                 type="button"
                 onClick={() => { setCurrentRole('astrologer'); setError('') }}
                 id="roleBtn-astrologer"
-                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-xl ${
+                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-lg ${
                   currentRole === 'astrologer' ? 'active' : ''
                 }`}
               >
@@ -285,7 +285,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
                 type="button"
                 onClick={() => { setCurrentRole('admin'); setError('') }}
                 id="roleBtn-admin"
-                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-xl ${
+                className={`auth-portal-role-btn flex flex-col items-center justify-center py-2.5 px-3 rounded-lg ${
                   currentRole === 'admin' ? 'active' : ''
                 }`}
               >
