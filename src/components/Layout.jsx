@@ -60,23 +60,17 @@ const ROLE_CONFIG = {
     navLabel: 'Astrologer',
     nav: [
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
-      { to: 'text-based-questions', label: 'Text-Based Questions', icon: TempleScrollIcon },
-      // Single Appointments entry: /appointments redirects to Schedule and every
-      // /appointments/* page keeps it highlighted; the sub-pages stay routable.
+      { to: 'text-based-questions', label: 'Text Questions', icon: TempleScrollIcon },
       { to: 'appointments', label: 'Appointments', icon: CalendarDays },
-      { to: 'consultation', label: 'Consultation', icon: Headphones },
-      { to: 'atonement', label: 'Atonement', icon: Flame },
-      // Single Live entry: /live-session redirects to setup and every
-      // /live-session/* page keeps it highlighted; the sub-pages stay routable.
-      { to: 'live-session', label: 'Live', icon: Radio },
-      // Single Benefit Management entry: /perks-benefits opens the landing page and
-      // every /perks-benefits/* page keeps it highlighted; the editor stays at /settings.
-      { to: 'perks-benefits', label: 'Benefit Management', icon: Gift },
-      { to: 'dispute-management', label: 'Dispute Management', icon: Gavel },
-      // Single Wallet entry: /wallet redirects to the overview and every
-      // /wallet/* page keeps it highlighted; the sub-pages stay routable.
-      { to: 'wallet', label: 'Wallet', icon: Wallet },
-      { to: 'my-account', label: 'My Account', icon: UserRound },
+      { to: 'consultation', label: 'Instant Call', icon: Headphones },
+      { to: 'instant-consultation', label: 'Instant Chat', icon: MessageCircle },
+      { to: 'atonement', label: 'Atonements (Pariharam)', icon: Flame },
+      { to: 'live-session', label: 'Live Stream', icon: Radio },
+      { to: 'my-account', label: 'Profiles', icon: UserRound },
+      { to: '', label: 'Quick Actions', icon: Sparkles },
+      { to: 'activity', label: 'Analytics & Graphs', icon: TrendingUp },
+      { to: 'dispute-management', label: 'Disputes & Support', icon: Gavel },
+      { to: 'my-account', label: 'Settings & Account', icon: SlidersHorizontal },
     ],
   },
   [ROLES.USER]: {
@@ -736,6 +730,7 @@ export default function Layout() {
                 </div>
                 <div>
                   <div className="sidebar-brand-text">Astro Connect</div>
+                  <small className="sidebar-brand-subtitle">Professional Astrologer Portal</small>
                 </div>
               </div>
 
