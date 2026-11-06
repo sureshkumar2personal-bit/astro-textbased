@@ -1,0 +1,154 @@
+/* Cosmic Animated Starry Background & Glassmorphic Auth Portal - Matching Exact Design */
+
+@keyframes starsMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 350px 700px;
+  }
+}
+
+.auth-portal-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #070712 !important;
+  color: #e2e8f0;
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1rem;
+}
+
+.auth-portal-page .stars-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(1.5px 1.5px at 25px 35px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 60px 80px, #ffd700, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 110px 45px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 170px 130px, #c084fc, rgba(0, 0, 0, 0)),
+    radial-gradient(1.5px 1.5px at 240px 200px, #ffffff, rgba(0, 0, 0, 0)),
+    radial-gradient(2px 2px at 310px 70px, #fbbf24, rgba(0, 0, 0, 0)),
+    radial-gradient(1px 1px at 340px 290px, #ffffff, rgba(0, 0, 0, 0));
+  background-size: 350px 350px;
+  animation: starsMove 60s linear infinite;
+  z-index: 0;
+}
+
+.auth-portal-brand-font {
+  font-family: 'Cinzel', serif, Georgia, 'Times New Roman';
+  letter-spacing: 0.15em;
+}
+
+/* Glassmorphism Card Container */
+.auth-portal-glass-card {
+  background: rgba(18, 17, 39, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(88, 70, 150, 0.35);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 50px rgba(147, 51, 234, 0.08);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-portal-glass-card:hover {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+/* Mode Switcher Tabs */
+.auth-portal-tab-active {
+  background: #2f275e !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.auth-portal-tab-inactive {
+  color: #94a3b8 !important;
+  background: transparent !important;
+}
+
+.auth-portal-tab-inactive:hover {
+  color: #f8fafc !important;
+}
+
+/* Account Type Buttons */
+.auth-portal-role-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(14, 13, 30, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.55);
+  border-radius: 8px !important;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.auth-portal-role-btn:hover {
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #f8fafc;
+}
+
+.auth-portal-role-btn.active {
+  background: rgba(36, 34, 71, 0.95);
+  border: 2px solid #fbbf24;
+  border-radius: 8px !important;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
+}
+
+/* Form Inputs inside Auth Portal */
+.auth-portal-input {
+  background: #090818 !important;
+  border: 1px solid rgba(71, 85, 105, 0.65) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  min-height: 42px;
+  font-size: 13.5px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-portal-input:focus {
+  outline: none;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+}
+
+.auth-portal-input::placeholder {
+  color: #64748b !important;
+}
+
+/* Primary Amber Action Button */
+.auth-portal-submit-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+  color: #0b0a1a !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  min-height: 44px;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.25);
+  transition: all 0.25s ease;
+}
+
+.auth-portal-submit-btn:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 22px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Social & Alternative Auth Buttons */
+.auth-portal-alt-btn {
+  background: #090818;
+  border: 1px solid rgba(71, 85, 105, 0.6);
+  border-radius: 8px !important;
+  min-height: 40px;
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.auth-portal-alt-btn:hover {
+  background: #14132b;
+  border-color: rgba(148, 163, 184, 0.6);
+  color: #ffffff;
+}

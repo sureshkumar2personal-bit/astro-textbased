@@ -347,7 +347,7 @@ function AppRoutes() {
 
       <Route
         path="/login"
-        element={<RoleSelection />}
+        element={<Login />}
       />
 
       <Route
