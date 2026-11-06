@@ -1,444 +1,109 @@
-.user-dashboard-page {
-  width: 100%;
-  max-width: 1280px;
-  margin-inline: auto;
-  padding-bottom: 28px;
+.user-dashboard-page{--dash-ink:#34221b;--dash-muted:#927d70;--dash-border:#eadfd5;--dash-surface:#fffdf9;max-width:1400px;margin:0 auto;padding:4px 0 36px;color:var(--dash-ink)}
+.dashboard-welcome-banner{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;min-height:164px;margin-bottom:22px;padding:30px 38px;border:1px solid #e7b56f;border-radius:20px;background:linear-gradient(112deg,#fff7e8 0%,#fce4bd 62%,#f6c36f 100%);box-shadow:0 10px 26px rgba(152,91,25,.08)}
+.dashboard-welcome-banner:after{content:"";position:absolute;right:9%;top:-100px;width:330px;height:330px;border:1px solid rgba(196,126,41,.18);border-radius:50%;box-shadow:0 0 0 22px rgba(255,255,255,.13),0 0 0 52px rgba(255,255,255,.1)}
+.dashboard-eyebrow{position:relative;z-index:1;color:#a4672d;font-size:11px;font-weight:800;letter-spacing:.12em}.dashboard-eyebrow strong{color:#dd7b24}.dashboard-welcome-banner h1{position:relative;z-index:1;margin:13px 0 0;font-size:clamp(25px,3vw,36px);letter-spacing:-.04em;color:#3c2419}.dashboard-welcome-banner h1 em{color:#e5761e;font-style:normal}.dashboard-diya{position:relative;z-index:2;display:grid;place-items:center;width:100px;height:100px;border-radius:50%;font-size:57px;background:radial-gradient(circle,#fff7cc 0 35%,rgba(255,191,72,.2) 36% 55%,transparent 56%);filter:drop-shadow(0 8px 10px rgba(155,79,11,.15))}
+.dashboard-info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}.dashboard-card,.dashboard-section{border:1px solid var(--dash-border);border-radius:16px;background:var(--dash-surface);box-shadow:0 5px 18px rgba(76,49,29,.045)}.dashboard-card{position:relative;min-height:220px;padding:20px}.dashboard-card-heading{display:flex;align-items:center;gap:10px}.dashboard-card-heading h2,.dashboard-section-heading h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em}.dashboard-icon,.section-heading-icon{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#fff0d9;color:#df812c}.dashboard-date{margin:9px 0 16px;color:var(--dash-muted);font-size:12px;font-weight:700}.panchang-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.panchang-tile{display:grid;grid-template-columns:17px 1fr;column-gap:7px;padding:10px;border:1px solid #f0e5db;border-radius:10px;background:#fffaf4}.panchang-tile svg{grid-row:span 2;color:#de872e}.panchang-tile small,.lucky-sign small,.advice-sign small{color:#a29084;font-size:10px}.panchang-tile strong{font-size:11px}.lucky-sign,.advice-sign{display:flex;align-items:center;gap:11px;margin:18px 0}.zodiac-orb,.advice-orb{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#fff2d5;color:#dd842a;font-size:25px}.lucky-sign{padding-bottom:15px;border-bottom:1px solid #f0e6dd}.lucky-sign div,.advice-sign div{display:grid;gap:3px}.lucky-sign strong,.advice-sign strong{font-size:14px}.lucky-list{display:grid;gap:10px}.lucky-list span{display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:7px;color:#8b796d;font-size:11px}.lucky-list b{color:#49362b;font-size:11px}.dot{width:7px;height:7px;border-radius:50%}.dot-yellow{background:#eeb52e}.dot-orange{background:#e68130}.dot-blue{background:#5b9ed1}.dashboard-label{display:block;margin-top:17px;color:#c17a39;font-size:9px;font-weight:800;letter-spacing:.14em}.advice-card .dashboard-label{position:absolute;top:18px;right:16px;margin:0}.advice-card h3{margin:6px 0 5px;font-size:14px}.advice-card p{min-height:34px;margin:0;color:#8e7b70;font-size:11px;line-height:1.45}.dashboard-outline-button{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:8px 11px;border:1px solid #e8b16b;border-radius:8px;background:#fffaf2;color:#c56b20;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.dashboard-section{margin-top:22px;padding:19px 20px}.dashboard-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}.dashboard-section-heading>div{display:flex;align-items:flex-start;gap:9px}.dashboard-section-heading h2{font-size:15px;letter-spacing:.08em}.dashboard-section-heading p{margin:4px 0 0;color:#a18d80;font-size:11px}.dashboard-section-heading>a{display:inline-flex;align-items:center;gap:5px;color:#d47425;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap}.section-heading-icon{width:29px;height:29px;background:#fff2df}
+.quick-actions-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.quick-action{display:flex;align-items:center;gap:11px;min-height:70px;padding:13px;border:1px solid #eee2d8;border-radius:12px;background:#fffdfa;color:var(--dash-ink);text-align:left;cursor:pointer;transition:.18s ease}.quick-action:hover{transform:translateY(-2px);border-color:#e4b17b;box-shadow:0 7px 16px rgba(95,53,19,.08)}.quick-action>span:nth-child(2){display:grid;gap:4px;flex:1}.quick-action strong{font-size:12px}.quick-action small{color:#a18d80;font-size:10px}.quick-action>svg{color:#b6a398}.quick-action-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px}.quick-action--green .quick-action-icon{background:#e4f6ed;color:#2ba56b}.quick-action--purple .quick-action-icon{background:#f1e8ff;color:#8d5fd2}.quick-action--orange .quick-action-icon{background:#fff0d6;color:#dc8a2b}.quick-action--blue .quick-action-icon{background:#e7f1ff;color:#4785ca}.dashboard-recommended-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.dashboard-recommended-grid>div{min-width:0}.dashboard-bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.dashboard-bottom-grid .dashboard-section{min-width:0}.dashboard-event-list,.dashboard-activity-list{display:grid;gap:3px}.dashboard-event-row,.dashboard-activity-row{display:flex;align-items:center;gap:12px;padding:12px 5px;border-bottom:1px solid #f0e7df}.dashboard-event-row:last-child,.dashboard-activity-row:last-child{border-bottom:0}.dashboard-event-row[role=button],.dashboard-activity-row[role=button]{cursor:pointer}.dashboard-event-row>div,.dashboard-activity-row>div{min-width:0;flex:1}.event-date{display:grid;place-items:center;width:49px;min-width:49px;height:42px;border-radius:9px;background:#fff0db;color:#cf7629;font-size:10px;font-weight:800;text-align:center}.event-date.is-live{background:#e6f7ed;color:#23955e}.dashboard-event-row strong,.dashboard-activity-row strong{display:block;overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.dashboard-event-row p,.dashboard-activity-row p{margin:3px 0 0;color:#948177;font-size:10px}.dashboard-event-row small{display:block;margin-top:5px;color:#ad9689;font-size:10px}.dashboard-activity-row time{color:#a38e82;font-size:10px;white-space:nowrap}.activity-icon{display:grid;place-items:center;width:31px;height:31px;border-radius:9px;background:#fff2df;color:#d57a2b}.dashboard-empty{padding:12px 0;color:#a18e83;font-size:12px}
+@media (max-width:1100px){.dashboard-info-grid{grid-template-columns:1fr 1fr}.advice-card{grid-column:span 2}.dashboard-recommended-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:760px){.user-dashboard-page{padding-top:0}.dashboard-welcome-banner{min-height:145px;padding:23px}.dashboard-diya{width:74px;height:74px;font-size:42px}.dashboard-info-grid,.dashboard-bottom-grid{grid-template-columns:1fr}.advice-card{grid-column:auto}.quick-actions-grid,.dashboard-recommended-grid{grid-template-columns:1fr 1fr}.dashboard-section{padding:16px}.dashboard-section-heading h2{font-size:13px}.dashboard-event-row .badge{font-size:9px}.user-topbar-search .topbar-explore-btn__label{display:none}}
+@media (max-width:500px){.dashboard-welcome-banner h1{font-size:25px}.dashboard-eyebrow{font-size:9px}.dashboard-welcome-banner:after{right:-80px}.quick-actions-grid,.dashboard-recommended-grid{grid-template-columns:1fr}.panchang-grid{grid-template-columns:1fr 1fr}}
+
+/* Exact desktop composition for the dashboard route only. */
+.app-shell--user:has(.user-dashboard-page){--sidebar-w:275px}
+.app-shell--user:has(.user-dashboard-page) .topbar-header{height:62px;margin:0;padding:0 30px}
+.app-shell--user:has(.user-dashboard-page) .topbar-brand-and-heading{flex:0 0 406px}
+.app-shell--user:has(.user-dashboard-page) .topbar-actions{flex:1;justify-content:flex-start}
+.app-shell--user:has(.user-dashboard-page) .page-content{max-width:none;padding:12px 40px 24px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-welcome-banner{height:98px;min-height:98px;padding:17px 20px;margin-bottom:10px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-welcome-banner h1{margin-top:8px;font-size:34px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-diya{width:76px;height:76px;font-size:46px}
+.app-shell--user:has(.user-dashboard-page) .user-topbar-search{display:inline-flex;align-items:center;justify-content:flex-start;flex:0 0 562px;width:562px;min-width:360px;height:44px;padding:0 15px;border:1px solid #e3d4c4;border-radius:16px;white-space:nowrap;background:#fffdfb;box-sizing:border-box}
+.app-shell--user:has(.user-dashboard-page) .user-topbar-search .topbar-explore-btn__label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-shell--user:has(.user-dashboard-page) .avatar-chip>span:not(.avatar-circle){white-space:nowrap}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card{min-height:0;height:162px;padding:13px 14px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card-heading h2{font-size:15px;text-transform:uppercase}
+.app-shell--user:has(.user-dashboard-page) .dashboard-date{margin:0 0 8px;text-align:right;position:relative;top:-22px;font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .panchang-grid{gap:7px;margin-top:-30px}
+.app-shell--user:has(.user-dashboard-page) .panchang-tile{padding:7px 9px}
+.app-shell--user:has(.user-dashboard-page) .lucky-sign{margin:-10px 0 8px;padding-bottom:8px}
+.app-shell--user:has(.user-dashboard-page) .lucky-list{gap:6px}
+.app-shell--user:has(.user-dashboard-page) .advice-sign{margin:-10px 0 4px}
+.app-shell--user:has(.user-dashboard-page) .advice-card h3{margin:2px 0 2px}
+.app-shell--user:has(.user-dashboard-page) .advice-card p{min-height:0;max-width:270px}
+.app-shell--user:has(.user-dashboard-page) .advice-sign p{margin:3px 0 0;line-height:1.35}
+.app-shell--user:has(.user-dashboard-page) .advice-sign small{display:none}
+.app-shell--user:has(.user-dashboard-page) .dashboard-outline-button{width:100%;justify-content:center;margin-top:8px;padding:7px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-section{margin-top:14px;padding:0;border:0;background:transparent;box-shadow:none}
+.app-shell--user:has(.user-dashboard-page) .dashboard-section-heading{margin-bottom:4px}
+.app-shell--user:has(.user-dashboard-page) .section-heading-icon{width:25px;height:25px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-section-heading h2{font-size:17px;letter-spacing:-.02em}
+.app-shell--user:has(.user-dashboard-page) .quick-actions-grid{gap:10px}
+.app-shell--user:has(.user-dashboard-page) .quick-action{height:106px;min-height:106px;flex-direction:column;justify-content:center;gap:6px;padding:9px;text-align:center}
+.app-shell--user:has(.user-dashboard-page) .quick-action>span:nth-child(2){display:grid;flex:0;gap:3px}
+.app-shell--user:has(.user-dashboard-page) .quick-action>svg{display:none}
+.app-shell--user:has(.user-dashboard-page) .quick-action-icon{width:39px;height:39px;border-radius:50%}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid{gap:12px}
+.dashboard-astrologer-card{min-height:158px;padding:10px 14px;border:1px solid #eadfd5;border-radius:16px;background:#fffdfb;box-shadow:0 5px 18px rgba(76,49,29,.06);cursor:pointer}.dashboard-astrologer-top{display:flex;align-items:center;gap:10px;min-width:0}.dashboard-astrologer-avatar{width:60px;height:60px;min-width:60px;overflow:hidden;border:2px solid #f3d8bd;border-radius:14px;background:#fff0dd;color:#d87525;display:grid;place-items:center;font-size:20px;font-weight:800}.dashboard-astrologer-avatar img{width:100%;height:100%;object-fit:cover}.dashboard-astrologer-copy{min-width:0;display:grid;gap:3px;flex:1}.dashboard-astrologer-copy h3{margin:0;overflow:hidden;color:#34221b;font-size:15px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.dashboard-astrologer-copy p{margin:0;overflow:hidden;color:#5e4c42;font-size:11px;text-overflow:ellipsis;white-space:nowrap}.dashboard-astrologer-copy span{color:#927d70;font-size:10px;white-space:nowrap}.dashboard-astrologer-status{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;padding:5px 8px;border:1px solid #f0d7b5;border-radius:999px;background:#fff5e7;color:#c87922;font-size:9px;white-space:nowrap}.dashboard-astrologer-status i{width:6px;height:6px;border-radius:50%;background:#d88020}.dashboard-astrologer-status.is-online{border-color:#bcebd1;background:#e9fbf0;color:#21955b}.dashboard-astrologer-status.is-online i{background:#25a868}.dashboard-astrologer-meta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:7px;border-top:1px solid #f0e7df;color:#7f6c61;font-size:11px}.dashboard-astrologer-meta>span{display:inline-flex;align-items:center;gap:3px}.dashboard-astrologer-meta svg{color:#eda321}.dashboard-astrologer-rate{color:#198b50;font-size:16px}.dashboard-astrologer-rate small{color:#7f6c61;font-size:10px;font-weight:600}.dashboard-astrologer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.dashboard-astrologer-actions button{height:31px;border-radius:9px;font:inherit;font-size:11px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px}.dashboard-call-button{border:1px solid #a9e7c7;background:#eafbf1;color:#15915a}.dashboard-chat-button{border:1px solid #f2a126;background:#ff9517;color:#fff;box-shadow:0 4px 9px rgba(237,137,18,.22)}
+.app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid{gap:18px;margin-top:34px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid .dashboard-section{padding:12px 18px;border:1px solid var(--dash-border);border-radius:16px;background:var(--dash-surface);box-shadow:0 5px 18px rgba(76,49,29,.045)}
+.app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid .dashboard-section-heading{margin-bottom:4px}
+.app-shell--user:has(.user-dashboard-page) .sidebar{gap:0}
+.app-shell--user:has(.user-dashboard-page) .sidebar-nav{padding:8px 14px}
+.app-shell--user:has(.user-dashboard-page) .sidebar-link{white-space:nowrap;font-size:13px}
+.app-shell--user:has(.user-dashboard-page) .sidebar-nav-section-label{margin:8px 10px 5px}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card{grid-template-columns:1fr;min-height:164px;margin-top:auto;margin-bottom:18px;text-align:center;box-sizing:border-box}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card__icon{margin:0 auto}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card>div:nth-child(2){justify-items:center}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card strong{color:#34221b!important;font-size:14px}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card span{color:#806a5d!important;font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card>a{justify-content:center;min-height:34px;border-radius:9px;background:#ff9417;color:#fff!important}
+
+/* Dashboard-only refinements for the approved reference layout. */
+.app-shell--user:has(.user-dashboard-page) .topbar-actions{position:relative}
+.app-shell--user:has(.user-dashboard-page) .topbar-actions>.active-call-chip{position:absolute;top:50px;right:0;z-index:20;min-width:max-content;box-shadow:0 8px 20px rgba(76,49,29,.16)}
+.app-shell--user:has(.user-dashboard-page) .quick-action-icon{width:46px;height:46px;border-radius:50%}
+.app-shell--user:has(.user-dashboard-page) .quick-action-icon svg{width:24px;height:24px}
+.app-shell--user:has(.user-dashboard-page) .quick-action strong{font-size:13px}
+.app-shell--user:has(.user-dashboard-page) .quick-action small{font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card{height:162px;min-height:162px;padding:14px}
+.app-shell--user:has(.user-dashboard-page) .lucky-card{padding-top:13px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-card-corner-label{position:absolute;top:16px;right:16px;color:#c36b25;font-size:11px;font-weight:800}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list{margin-top:14px;gap:8px}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list span{padding:7px 9px;border:1px solid #f0e5db;border-radius:10px;background:#fffaf4;color:#49362b;font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .lucky-card .lucky-list b{font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .advice-sign{margin:5px 0 4px;gap:12px}
+.app-shell--user:has(.user-dashboard-page) .advice-orb{width:60px;height:60px;min-width:60px;font-size:31px;background:#fde8f0;color:#df3d7e}
+.app-shell--user:has(.user-dashboard-page) .advice-sign strong{font-size:15px}
+.app-shell--user:has(.user-dashboard-page) .advice-card p{font-size:12px;line-height:1.35}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__followers,.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__tags{display:none}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card{min-height:158px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__name{font-size:16px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__specialization{font-size:12px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid{margin-top:18px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card{min-height:0;padding:10px 14px;border-color:#eadfd5;border-radius:16px;background:#fffdfb;box-shadow:0 5px 18px rgba(76,49,29,.06)}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__main{gap:10px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__avatar-wrap,.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__avatar{width:60px;height:60px;flex-basis:60px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__details{gap:3px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__name{font-size:15px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__specialization{font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__meta,.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__followers{font-size:10px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__tags span{padding:2px 5px;font-size:9px;line-height:12px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;min-height:34px;margin-top:8px;padding-top:8px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action-divider{display:none}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action{height:34px;border:1px solid #a9e7c7;border-radius:9px;background:#eafbf1;color:#15915a;font-size:11px}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action:last-of-type{border-color:#f2a126;background:#ff9517;color:#fff;box-shadow:0 4px 9px rgba(237,137,18,.22)}
+
+@media (max-width:760px){
+  .app-shell--user:has(.user-dashboard-page) .page-content{padding:14px 16px 24px}
+  .app-shell--user:has(.user-dashboard-page) .topbar-header{padding:0 16px}
+  .app-shell--user:has(.user-dashboard-page) .user-topbar-search{min-width:0;flex:1}
+  .app-shell--user:has(.user-dashboard-page) .dashboard-card{height:auto;min-height:162px}
 }
 
-.user-dashboard-page .hero-banner-user {
-  min-height: 178px;
-  padding: 32px 36px;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  background:
-    radial-gradient(circle at 83% 45%, rgba(255, 255, 255, .12) 0 2px, transparent 3px),
-    radial-gradient(circle at 90% 25%, rgba(255, 255, 255, .16) 0 1px, transparent 2px),
-    radial-gradient(ellipse at 88% 50%, transparent 0 54px, rgba(255, 255, 255, .12) 55px 56px, transparent 57px),
-    radial-gradient(ellipse at 88% 50%, transparent 0 94px, rgba(255, 255, 255, .08) 95px 96px, transparent 97px),
-    linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--secondary) 100%);
+@media (min-width:761px){
+  .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card{min-height:158px}
 }
 
-.user-dashboard-page .hero-banner-topbar-actions {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 100;
-}
-
-.hero-banner-actions-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hero-banner-actions-wrap .topbar-explore-btn,
-.hero-banner-actions-wrap .icon-btn,
-.hero-banner-actions-wrap .theme-toggle-btn,
-.hero-banner-actions-wrap .avatar-chip {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.32);
-  color: #ffffff;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.hero-banner-actions-wrap .avatar-chip span {
-  color: #ffffff;
-}
-
-.hero-banner-actions-wrap .topbar-explore-btn:hover,
-.hero-banner-actions-wrap .icon-btn:hover,
-.hero-banner-actions-wrap .theme-toggle-btn:hover,
-.hero-banner-actions-wrap .avatar-chip:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.6);
-  color: #ffffff;
-}
-
-.hero-banner-actions-wrap .topbar-popover {
-  top: 54px;
-}
-
-.user-dashboard-page .hero-banner-user .page-eyebrow {
-  margin-bottom: 14px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 10px;
-  letter-spacing: .08em;
-}
-
-.user-dashboard-page .hero-banner-user h2 {
-  margin: 0;
-  font-size: clamp(28px, 3vw, 36px);
-  letter-spacing: -.035em;
-}
-
-.user-dashboard-page .hero-banner-user p {
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-.user-dashboard-page .hero-banner-user .hero-banner-button {
-  min-width: 148px;
-  min-height: 40px;
-  padding: 9px 16px;
-  border: 1px solid rgba(255, 255, 255, .66);
-  border-radius: 10px;
-  background: transparent;
-  box-shadow: none;
-  font-size: 12px;
-}
-
-.user-dashboard-page > .section {
-  margin-top: 30px;
-}
-
-.user-dashboard-page > .section > .section-title {
-  margin-bottom: 14px;
-  font-size: 19px;
-  font-weight: 800;
-}
-
-.user-dashboard-page .action-card--compact {
-  min-height: 136px;
-  padding: 20px;
-  border-color: #e8def4;
-  border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(74, 42, 116, .05);
-}
-
-.user-dashboard-page .action-card--compact .action-card-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-}
-
-.user-dashboard-page .action-card-title {
-  font-size: 13.5px;
-  line-height: 1.35;
-}
-
-.user-dashboard-page .action-card-desc {
-  margin-top: 5px;
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.dashboard-recommended-grid {
-  align-items: stretch;
-}
-
-.dashboard-recommended-grid > div {
-  min-width: 0;
-  height: 100%;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card {
-  min-height: 252px;
-  padding: 14px;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__main {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  column-gap: 12px;
-  row-gap: 5px;
-  align-items: start;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__avatar-wrap,
-.dashboard-recommended-grid .explore-astrologer-card__avatar {
-  flex: 0 0 88px;
-  width: 88px;
-  height: 88px;
-  min-width: 88px;
-  min-height: 88px;
-  aspect-ratio: 1 / 1;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__details {
-  display: contents;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__avatar-wrap {
-  grid-column: 1;
-  grid-row: 1 / span 4;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__name {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__specialization {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__meta {
-  grid-column: 2;
-  grid-row: 3;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__followers {
-  grid-column: 2;
-  grid-row: 4;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__expertise,
-.dashboard-recommended-grid .explore-astrologer-card__languages {
-  grid-column: 1 / -1;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__expertise {
-  grid-row: 5;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__languages {
-  grid-row: 6;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__actions {
-  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-  gap: 6px;
-  min-height: 42px;
-  margin-top: 12px;
-  padding-top: 8px;
-}
-
-.dashboard-recommended-grid .explore-astrologer-card__action {
-  width: 100%;
-  height: 100%;
-}
-
-@media (max-width: 760px) {
-  .user-dashboard-page .hero-banner-user {
-    min-height: 0;
-    padding: 24px 22px;
-  }
-
-  .user-dashboard-page .hero-banner-user .hero-banner-cta {
-    justify-content: flex-start;
-    margin-top: 16px;
-  }
-}
-
-/* "Explore Astrologers" moved from the user sidebar into the top header. The
-   button mirrors the existing header icon buttons (same border, surface, radius,
-   shadow and hover) and collapses to an icon on narrower screens so it never
-   crowds Wallet, Notifications or the profile chip. */
-.topbar-explore-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 15px;
-  border-radius: var(--radius-s);
-  border: 1px solid var(--surface-border);
-  background: var(--surface-strong);
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: var(--shadow-xs);
-  transition: transform 200ms var(--ease-premium), background 200ms var(--ease-premium), border-color 200ms var(--ease-premium), color 200ms var(--ease-premium), box-shadow 200ms var(--ease-premium);
-}
-
-.topbar-explore-btn:hover {
-  background: var(--primary-bg);
-  border-color: var(--secondary);
-  color: var(--primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.invited-password-overlay { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(25, 15, 8, .58); }
-.invited-password-modal { width: min(360px, 100%); padding: 24px; border: 1px solid #D6A34A; border-radius: 18px; background: #FFF9EF; color: #351B10; box-shadow: 0 22px 60px rgba(20, 10, 4, .3), 0 0 0 4px rgba(214, 163, 74, .12); }
-.invited-password-modal__eyebrow { color: #9A6335; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
-.invited-password-modal h2 { margin: 7px 0 5px; color: #351B10; font-size: 22px; }
-.invited-password-modal p { margin: 0 0 16px; color: #796B61; font-size: 13px; line-height: 1.5; }
-.invited-password-modal label { display: grid; gap: 6px; margin-top: 12px; color: #5E4D40; font-size: 12px; font-weight: 700; }
-.invited-password-input { position: relative; }
-.invited-password-input input { width: 100%; box-sizing: border-box; padding: 10px 38px 10px 11px; border: 1px solid #DFD0C2; border-radius: 9px; background: #FFF; color: #3E3027; font: inherit; }
-.invited-password-input button { position: absolute; top: 50%; right: 7px; display: grid; place-items: center; padding: 4px; border: 0; background: transparent; color: #8B715C; cursor: pointer; transform: translateY(-50%); }
-.invited-password-button { width: 100%; margin-top: 18px; padding: 11px 14px; border: 0; border-radius: 10px; background: #9A6335; color: #FFF; font: inherit; font-weight: 800; cursor: pointer; }
-.invited-password-error { margin: 12px 0 -4px !important; color: #B14E45 !important; font-size: 12px !important; }
-
-/* Keep the wide banner compact while preserving its responsive proportions. */
-.app-shell--astrologer .astrologer-top-hero-image {
-  height: max(220px, calc(100vw * 885 / 1672 - 180px));
-  min-height: 0;
-  aspect-ratio: auto;
-  background-size: cover;
-  background-position: center;
-}
-
-.app-shell--astrologer .astrologer-top-hero-image img {
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* Hero copy contrast in Dark Mode only; preserve all existing typography. */
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services h1 {
-  color: #351B10 !important;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services > p {
-  color: #6B4A25 !important;
-}
-
-/* Hero service cards only in Dark Mode. */
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-cards {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card {
-  min-height: 118px;
-  padding: 20px 86px 20px 22px;
-  gap: 16px;
-  border: 1px solid rgba(214, 163, 74, .68) !important;
-  border-radius: 18px;
-  background: transparent !important;
-  color: #FFF5E5 !important;
-  box-shadow: 0 12px 26px rgba(44, 20, 5, .26), 0 0 18px rgba(214, 163, 74, .08);
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card:hover,
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card:focus-visible {
-  border-color: #D6A34A !important;
-  box-shadow: 0 14px 30px rgba(44, 20, 5, .32), 0 0 22px rgba(214, 163, 74, .16);
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon {
-  width: 62px;
-  height: 62px;
-  flex-basis: 62px;
-  background: #6B4A25 !important;
-  color: #F4C96B !important;
-  box-shadow: inset 0 0 0 1px rgba(214, 163, 74, .34), 0 4px 12px rgba(0, 0, 0, .2);
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon svg {
-  width: 26px;
-  height: 26px;
-  stroke-width: 2.2;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy {
-  gap: 6px;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy strong {
-  color: #FFF5E5 !important;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy small {
-  color: #E7D5BB !important;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .flip-button.adash-hero-service-card__flip {
-  top: 50%;
-  right: 22px;
-  width: 62px;
-  height: 34px;
-  min-width: 62px;
-  min-height: 34px;
-  border: 1px solid rgba(255, 225, 117, .85);
-  background: #F5B51B;
-  color: #3A2618;
-  box-shadow: 0 0 12px rgba(245, 181, 27, .34), 0 4px 10px rgba(0, 0, 0, .24);
-  transform: translateY(-50%);
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card.is-enabled .flip-button.adash-hero-service-card__flip {
-  background: #F5B51B !important;
-  color: #3A2618 !important;
-  border-color: #FFE175 !important;
-  box-shadow: 0 0 14px rgba(245, 181, 27, .42), 0 4px 10px rgba(0, 0, 0, .24) !important;
-}
-
-html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card.is-enabled .flip-button.adash-hero-service-card__flip span {
-  color: #3A2618 !important;
-  text-shadow: none;
-}
-
-@media (max-width: 900px) {
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card {
-    min-height: 104px;
-    padding: 16px 76px 16px 16px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon {
-    width: 52px;
-    height: 52px;
-    flex-basis: 52px;
-  }
-}
-
-@media (max-width: 640px) {
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card {
-    min-height: 82px;
-    padding: 11px 60px 11px 11px;
-    gap: 9px;
-    border-radius: 16px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon {
-    width: 40px;
-    height: 40px;
-    flex-basis: 40px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy {
-    gap: 3px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy strong {
-    font-size: 12px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .adash-hero-service-card__copy small {
-    font-size: 9px;
-  }
-
-  html[data-theme='dark'] .app-shell--astrologer .astrologer-top-hero-image__services .flip-button.adash-hero-service-card__flip {
-    right: 10px;
-    width: 46px;
-    height: 27px;
-    min-width: 46px;
-    min-height: 27px;
-    font-size: 9px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .topbar-explore-btn {
-    width: 44px;
-    padding: 0;
-  }
-
-  .topbar-explore-btn__label {
-    display: none;
-  }
-}
+/* User-shell chrome is part of the dashboard visual system; all actions remain
+   the existing buttons and routes from Layout.jsx. */
+.app-shell--user:has(.user-dashboard-page) .topbar-header{background:#fffdf9;border-bottom:1px solid #eee2d7}.app-shell--user:has(.user-dashboard-page) .topbar-actions{gap:9px}.app-shell--user:has(.user-dashboard-page) .user-topbar-search{width:min(360px,28vw);justify-content:flex-start;overflow:hidden;color:#a18d80;background:#fffaf4;border-color:#eadfd5;box-shadow:none}.app-shell--user:has(.user-dashboard-page) .user-topbar-search__label{overflow:hidden;text-overflow:ellipsis}.app-shell--user:has(.user-dashboard-page) .user-wallet-balance{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #eadfd5;border-radius:10px;background:#fffaf4;color:#d27728;cursor:pointer}.app-shell--user:has(.user-dashboard-page) .user-wallet-balance>span{display:grid;text-align:left}.app-shell--user:has(.user-dashboard-page) .user-wallet-balance small{color:#a28d80;font-size:9px}.app-shell--user:has(.user-dashboard-page) .user-wallet-balance strong{color:#4a362c;font-size:12px}.app-shell--user:has(.user-dashboard-page) .user-wallet-topup{padding-left:7px;border-left:1px solid #e7dacf;font-size:10px;font-weight:800}.app-shell--user:has(.user-dashboard-page) .avatar-chip{display:grid;grid-template-columns:30px auto;grid-template-rows:auto auto;column-gap:7px;text-align:left}.app-shell--user:has(.user-dashboard-page) .avatar-chip .avatar-circle{grid-row:span 2}.app-shell--user:has(.user-dashboard-page) .user-profile-tier{color:#b27a49;font-size:9px;font-weight:700}.app-shell--user:has(.user-dashboard-page) .sidebar{background:#fffaf4;border-right:1px solid #eadfd5}.app-shell--user:has(.user-dashboard-page) .sidebar-group-label{display:none}.app-shell--user:has(.user-dashboard-page) .sidebar-nav{padding:18px 14px}.app-shell--user:has(.user-dashboard-page) .sidebar-nav-section-label{margin:14px 10px 7px;color:#b29b8c;font-size:9px;font-weight:800;letter-spacing:.13em}.app-shell--user:has(.user-dashboard-page) .sidebar-nav-section-label:not(:first-child){padding-top:14px;border-top:1px solid #eee2d8}.app-shell--user:has(.user-dashboard-page) .sidebar-link{color:#846f63;border-radius:10px}.app-shell--user:has(.user-dashboard-page) .sidebar-link.active{background:#fff0d9;color:#d87525;box-shadow:inset 3px 0 #e28a31}.app-shell--user:has(.user-dashboard-page) .sidebar-link:hover{background:#fff4e8;color:#d87525}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card{display:grid;grid-template-columns:30px 1fr;gap:9px;margin:18px 14px;padding:13px 11px;border:1px solid #efd8b8;border-radius:13px;background:#fff3dd}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card__icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#ffe5b6;color:#d87926}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card>div:nth-child(2){display:grid;gap:3px}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card strong{font-size:11px}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card span{color:#a17e62;font-size:9px}.app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card>a{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-top:5px;color:#c36d22;font-size:10px;font-weight:800;text-decoration:none}
