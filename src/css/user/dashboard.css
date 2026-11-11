@@ -47,10 +47,10 @@
 .app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid{gap:18px;margin-top:34px}
 .app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid .dashboard-section{padding:12px 18px;border:1px solid var(--dash-border);border-radius:16px;background:var(--dash-surface);box-shadow:0 5px 18px rgba(76,49,29,.045)}
 .app-shell--user:has(.user-dashboard-page) .dashboard-bottom-grid .dashboard-section-heading{margin-bottom:4px}
-.app-shell--user:has(.user-dashboard-page) .sidebar{gap:0}
-.app-shell--user:has(.user-dashboard-page) .sidebar-nav{padding:8px 14px}
-.app-shell--user:has(.user-dashboard-page) .sidebar-link{white-space:nowrap;font-size:13px}
-.app-shell--user:has(.user-dashboard-page) .sidebar-nav-section-label{margin:8px 10px 5px}
+.app-shell--user .sidebar{gap:0}
+.app-shell--user .sidebar-nav{padding:8px 14px}
+.app-shell--user .sidebar-link{white-space:nowrap;font-size:13px}
+.app-shell--user .sidebar-nav-section-label{margin:8px 10px 5px}
 .app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card{grid-template-columns:1fr;min-height:164px;margin-top:auto;margin-bottom:18px;text-align:center;box-sizing:border-box}
 .app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card__icon{margin:0 auto}
 .app-shell--user:has(.user-dashboard-page) .sidebar-kundli-card>div:nth-child(2){justify-items:center}

@@ -7,6 +7,7 @@ import {
   Sparkles,
   Gift,
   LayoutDashboard,
+  LayoutGrid,
   CircleHelp,
   Bell,
   ChevronRight,
@@ -77,7 +78,7 @@ const ROLE_CONFIG = {
     subtitle: 'Packages, questions, tracking, and disputes',
     navLabel: 'User',
     nav: [
-      { to: '', label: 'Dashboard', icon: LayoutDashboard, end: true, section: 'MAIN MENU' },
+      { to: '', label: 'Dashboard', icon: LayoutGrid, end: true, section: 'MAIN MENU' },
       // Explore Astrologers now lives in the top header (see the topbar actions)
       // so the sidebar stays focused on the account modules.
       // Single Ask a Question entry: it opens the question dashboard, whose
@@ -216,7 +217,7 @@ const QUESTION_DASHBOARD_META = {
 function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const isUserDashboard = basePath === '/user' && location.pathname === '/user'
+  const isUserRole = basePath === '/user'
   const dashboardLabels = {
     'Ask a Question': 'Ask Question (Text)',
     Appointments: 'Book Appointment',
@@ -259,12 +260,22 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
   return (
     <nav className="sidebar-nav">
       {links.map((link) => {
-        const displayLabel = isUserDashboard ? (dashboardLabels[link.label] || link.label) : link.label
-        const sectionLabel = isUserDashboard && link.section && (links.findIndex((item) => item === link) === 0 || links[links.findIndex((item) => item === link) - 1]?.section !== link.section)
-        const sectionHeading = sectionLabel ? <div className="sidebar-nav-section-label" key={`${link.section}-label`}>{link.section}</div> : null
+        const displayLabel = isUserRole ? (dashboardLabels[link.label] || link.label) : link.label
+        const linkIndex = links.findIndex((item) => item === link)
+        const isFirstOfSection = isUserRole && link.section && (linkIndex === 0 || links[linkIndex - 1]?.section !== link.section)
+        const showDivider = isFirstOfSection && linkIndex > 0
+        const sectionHeading = isFirstOfSection ? (
+          <Fragment key={`${link.section}-header`}>
+            {showDivider && <div className="sidebar-nav-section-divider" />}
+            <div className="sidebar-nav-section-label">{link.section}</div>
+          </Fragment>
+        ) : null
         if (!link.children) {
           const route = `${basePath}/${link.to}`.replace(/\/$/, '')
           const activeWhen = (link.activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
+          if (link.to === 'ask-question') {
+            activeWhen.push(`${basePath}/track-questions`)
+          }
           return <Fragment key={route}>{sectionHeading}<SidebarItem to={route} end={link.end} icon={link.icon} label={displayLabel} activeWhen={activeWhen} showBadge={showRewardBadge && link.label === 'Perks & Benefits'} badgeCount={link.label === 'Perks & Benefits' ? rewardCount : 0} /></Fragment>
         }
 
@@ -800,7 +811,7 @@ export default function Layout() {
         ) : (
           <div className="app-shell-body">
             <aside className={`sidebar sidebar--${role}`}>
-              <div className="sidebar-group-label">{shellConfig.navLabel}</div>
+              {role !== ROLES.USER && <div className="sidebar-group-label">{shellConfig.navLabel}</div>}
               <NavGroup links={shellConfig.nav} basePath={shellBasePath} showRewardBadge={showRewardBadge} rewardCount={rewardCount} />
             </aside>
 

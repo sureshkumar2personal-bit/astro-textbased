@@ -183,35 +183,83 @@ html[data-theme='dark'] .app-shell--user .sidebar--user {
 }
 
 .app-shell--user .sidebar--user .sidebar-group-label {
-  color: #9A7240;
-  font-size: 10.5px;
+  display: none !important;
+}
+
+.app-shell--user .sidebar--user .sidebar-nav {
+  padding: 8px 14px;
+}
+
+.app-shell--user .sidebar--user .sidebar-nav-section-label {
+  margin: 14px 10px 7px;
+  color: #b29b8c;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.app-shell--user .sidebar--user .sidebar-nav-section-divider {
+  margin: 14px 10px;
+  border-top: 1px solid #eee2d8;
+}
+
+html[data-theme='dark'] .app-shell--user .sidebar--user .sidebar-nav-section-divider {
+  border-top: 1px solid rgba(245, 158, 11, 0.18);
 }
 
 .app-shell--user .sidebar--user .sidebar-link,
 .app-shell--user .sidebar--user .sidebar-nav-section-title {
-  color: #4E4856;
-  font-size: 14px;
+  color: #846f63;
+  font-size: 13px;
   font-weight: 600;
-  border-radius: var(--radius-s);
+  border-radius: 10px;
+  white-space: nowrap;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-shell--user .sidebar--user .sidebar-link:hover,
 .app-shell--user .sidebar--user .sidebar-nav-section-title:hover {
-  background: rgba(245, 158, 11, 0.1);
-  color: #C2410C;
-  transform: translateX(3px);
+  background: #fff4e8;
+  color: #d87525;
 }
 
 .app-shell--user .sidebar--user .sidebar-link.active,
 .app-shell--user .sidebar--user .sidebar-active-pill {
-  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
-  border-left: 3.5px solid #FCD34D;
-  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.3);
-  color: #FFFFFF;
-  font-weight: 700;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  border-left: 3.5px solid #FCD34D !important;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.3) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.app-shell--user .sidebar--user .sidebar-link.active svg {
+  color: #FFFFFF !important;
+}
+
+.app-shell--user .sidebar--user .sidebar-link.active .sidebar-link-label {
+  color: #FFFFFF !important;
+}
+
+.app-shell--user .sidebar--user .sidebar-badge-count {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 999px;
+  background: #EA580C !important;
+  color: #FFFFFF !important;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.app-shell--user .sidebar--user .sidebar-link.active .sidebar-badge-count {
+  background: rgba(255, 255, 255, 0.28) !important;
+  color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .app-shell--user .sidebar--user .sidebar-brand-text {
