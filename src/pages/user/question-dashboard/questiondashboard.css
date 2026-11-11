@@ -1,156 +1,178 @@
 /* =========================================================================
-   Ask a Question dashboard (user side)
-   Section tabs for Ask New / My Questions / Disputes / History.
-   Mirrors the wallet and appointments section tabs so the spacing, radius
-   and active treatment stay identical to the rest of the user portal.
-
-   Search bar styles
+   Ask a Question Dashboard - Royal Emerald & Purple Edition
    ========================================================================= */
- .search-bar-wrapper {
-   display: flex;
-   flex-direction: column;
-   align-items: stretch;
-   width: 100%;
- }
 
- .search-bar-container {
-   display: flex;
-   align-items: center;
-   height: 104px;
-   background: var(--bg);
-   border-radius: var(--radius-pill);
-   overflow: hidden;
-   box-shadow: var(--shadow-float);
-   margin-bottom: var(--space-6);
-   position: relative;
- }
+.purple-gradient {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%) !important;
+  color: #ffffff !important;
+}
 
- .search-bar-container input {
-   flex: 1;
+.emerald-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+}
+
+.glass-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.05);
+  border-radius: 1rem;
+}
+
+.glass-card.border-l-4 {
+  border-left-width: 4px !important;
+}
+
+.glass-card.border-l-emerald-500 {
+  border-left-color: #10b981 !important;
+}
+
+.glass-card.border-l-indigo-500 {
+  border-left-color: #6366f1 !important;
+}
+
+.glass-card.border-l-rose-500 {
+  border-left-color: #f43f5e !important;
+}
+
+.glass-card.border-l-amber-500 {
+  border-left-color: #f59e0b !important;
+}
+
+.glass-card.border-l-purple-500,
+.glass-card.border-l-purple-600 {
+  border-left-color: #7c3aed !important;
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(20, 19, 42, 0.95);
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  color: #f1f5f9;
+}
+
+.banner-shield-badge {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.aq-tab-btn-active {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.35);
+  border: 1px solid transparent !important;
+}
+
+.aq-tab-btn-inactive {
+  background: var(--surface, #ffffff) !important;
+  color: var(--muted, #64748b) !important;
+  border: 1px solid var(--surface-border, #e2e8f0) !important;
+}
+
+.aq-tab-btn-inactive:hover {
+  color: #7c3aed !important;
+  border-color: rgba(124, 58, 237, 0.4) !important;
+}
+
+/* =========================================================================
+   Search Bar Styles
+   ========================================================================= */
+.search-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.search-bar-container input {
+  flex: 1;
   height: 100%;
-   padding: 0 var(--space-4);
-   font-size: 34px;
-   color: #555555;
-   background: #FFFFFF;
-   border: none;
-   border-radius: inherit;
-   outline: none;
-   font-family: 'Inter', system-ui, sans-serif;
- }
+  padding: 0 1rem;
+  font-size: 15px;
+  color: var(--text-primary, #1e293b);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Inter', system-ui, sans-serif;
+}
 
- .search-bar-container .search-btn {
-   position: absolute;
-   right: -12px;
-   top: 0;
-   bottom: 0;
-   width: 104px;
-  height: 104px;
-   background: #252222;
-   border: none;
-   border-radius: 999px;
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   z-index: 10;
- }
+.search-bar-container .search-btn {
+  width: 52px;
+  height: 100%;
+  background: #7c3aed;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
 
- .search-bar-container .search-btn svg {
-   width: 28px;
-  height: 28px;
-   color: #FFFFFF;
- }
+.search-bar-container .search-btn:hover {
+  background: #6d28d9;
+}
 
+.search-bar-container .search-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+}
+
+/* =========================================================================
+   Tabs Navigation Layout
+   ========================================================================= */
 .question-dashboard-tabs {
   display: flex;
-  align-items: stretch;
+  flex-wrap: wrap;
   gap: 8px;
   width: 100%;
-  max-width: 100%;
-  margin: 10px 0 24px;
-  padding: 8px;
-  overflow: hidden;
-  border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  background: var(--surface-soft);
+  margin: 16px 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--surface-border, #e2e8f0);
 }
 
 .question-dashboard-tab {
   display: inline-flex;
-  flex: 1 1 0;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-width: 0;
-  min-height: 54px;
-  padding: 14px 22px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  color: var(--muted);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.2;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 1rem;
+  font-size: 12px;
+  font-weight: 800;
   text-decoration: none;
   white-space: nowrap;
-  transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
-}
-
-.question-dashboard-tab:hover {
-  background: var(--primary-bg);
-  color: var(--primary);
-}
-
-.question-dashboard-tab.is-active {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: #fff;
-  box-shadow: var(--shadow-sm);
-}
-
-.question-dashboard-tab-icon {
-  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .question-dashboard-tab-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
   border-radius: 999px;
-  background: var(--primary-bg);
-  color: var(--primary);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
+  margin-left: 2px;
 }
 
-.question-dashboard-tab.is-active .question-dashboard-tab-count {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-}
-
-@media (max-width: 720px) {
-  .question-dashboard-tab {
-    min-height: 50px;
-    padding: 12px 14px;
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 560px) {
-  .question-dashboard-tabs {
-    flex-wrap: wrap;
-  }
-
-  .question-dashboard-tab {
-    flex: 1 1 calc(50% - 4px);
-    padding: 12px 10px;
-    font-size: 13px;
-  }
-}
-
-/* Dispute / history rows share the card rhythm used by Track My Questions. */
+/* Dispute / history rows */
 .question-dashboard-row {
   display: flex;
   flex-direction: column;

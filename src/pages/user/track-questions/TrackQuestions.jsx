@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, ChevronDown, Star } from 'lucide-react'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { ChipGroup } from '../../../components/OptionGroup.jsx'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
@@ -86,7 +86,68 @@ function TimeLimitBadge({ label, timeRemaining, tooltip, isEnabled }) {
   )
 }
 
-export default function TrackQuestions() {
+function InteractiveStarRating({ question, onRate }) {
+  const [hoverValue, setHoverValue] = useState(0)
+  const [justSaved, setJustSaved] = useState(false)
+  const currentRating = question.answerRating || question.rating || 0
+  const activeRating = hoverValue || currentRating
+
+  const handleSelect = (val, event) => {
+    event?.stopPropagation?.()
+    if (onRate) onRate(val)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2400)
+  }
+
+  return (
+    <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center space-x-0.5" role="radiogroup" aria-label="Rate astrologer answer">
+        {[1, 2, 3, 4, 5].map((val) => {
+          const isFilled = val <= activeRating
+          return (
+            <button
+              key={val}
+              type="button"
+              role="radio"
+              aria-checked={currentRating === val}
+              aria-label={`Rate ${val} star${val === 1 ? '' : 's'}`}
+              className="p-1 rounded hover:scale-125 focus:outline-none cursor-pointer border-0 bg-transparent transition-transform"
+              onMouseEnter={() => setHoverValue(val)}
+              onMouseLeave={() => setHoverValue(0)}
+              onClick={(e) => handleSelect(val, e)}
+            >
+              <Star
+                size={16}
+                className={`transition-colors duration-150 ${
+                  isFilled
+                    ? 'fill-amber-400 text-amber-500'
+                    : 'fill-transparent text-slate-300 dark:text-slate-600 hover:text-amber-400'
+                }`}
+              />
+            </button>
+          )
+        })}
+      </div>
+      <span className="text-xs font-semibold ml-1">
+        {justSaved ? (
+          <span className="text-emerald-600 dark:text-emerald-400 font-bold transition-all">
+            ✓ Rated {currentRating}/5
+          </span>
+        ) : currentRating > 0 ? (
+          <span className="text-slate-600 dark:text-slate-300">
+            (Rated {currentRating}/5)
+          </span>
+        ) : (
+          <span className="text-purple-600 dark:text-purple-400 font-medium">
+            (Click stars to rate)
+          </span>
+        )}
+      </span>
+    </div>
+  )
+}
+
+export default function TrackQuestions({ embedded = false }) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { questions, questionPreviewId, setQuestionPreviewId, actions } = useAppData()
@@ -97,6 +158,7 @@ export default function TrackQuestions() {
   const [statusFilter, setStatusFilter] = useState(() => normalizeStatusFilter(searchParams.get('status') || 'All'))
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [timeElapsed, setTimeElapsed] = useState(0)
+  const [expandedQuestionIds, setExpandedQuestionIds] = useState(() => new Set())
 
   const matchesStatusFilter = useCallback((question) => {
     if (statusFilter === 'All') return true
@@ -241,7 +303,9 @@ export default function TrackQuestions() {
 
   return (
     <div>
-      <PageHeader eyebrow="User portal" title="Track My Questions" showBack backTo={routes.askQuestion} />
+      {!embedded && (
+        <PageHeader eyebrow="User portal" title="Track My Questions" showBack backTo={routes.askQuestion} />
+      )}
 
       <Section>
         <Card>
@@ -261,7 +325,12 @@ export default function TrackQuestions() {
                       }
                     }}
                   />
-                  <button type="button" className="search-btn" aria-label="Search">
+                  <button
+                    type="button"
+                    className="search-btn"
+                    aria-label="Search"
+                    onClick={() => setAppliedSearch(search)}
+                  >
                     <svg
                       width="28"
                       height="28"
@@ -297,34 +366,179 @@ export default function TrackQuestions() {
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {visibleQuestions.map((question) => {
+              const isExpanded = expandedQuestionIds.has(question.id)
+              const toggleExpand = (event) => {
+                event?.stopPropagation()
+                setExpandedQuestionIds((prev) => {
+                  const next = new Set(prev)
+                  if (next.has(question.id)) next.delete(question.id)
+                  else next.add(question.id)
+                  return next
+                })
+              }
+
+              const isAnswered = question.status === 'Answered'
+              const isPending = question.status === 'Pending'
+              const isDisputed = question.status === 'Disputed'
+              const { editTimeRemaining, deleteTimeRemaining, isEditEnabled, isDeleteEnabled } = getQuestionTimeLimits(question)
+
+              const borderAccent = isDisputed
+                ? 'border-l-rose-500'
+                : isAnswered
+                  ? 'border-l-emerald-500'
+                  : 'border-l-indigo-500'
+
               return (
-                <Card
-                  key={question.id}
-                  hover
-                  className="cursor-pointer"
-                  onClick={() => openQuestion(question.id)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'grid', gap: 8 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{question.id}</div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="badge badge-green">{question.type}</span>
-                        <span className="badge badge-gold">{question.purchaseType}</span>
+                <div key={question.id} className={`glass-card rounded-2xl p-5 md:p-6 border border-slate-200 dark:border-slate-800 border-l-4 ${borderAccent} transition hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md mb-3`}>
+                  <div className="flex justify-between items-start gap-4 cursor-pointer" onClick={toggleExpand}>
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-bold text-slate-400">{question.id}</span>
+                        {isAnswered ? (
+                          <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] px-3 py-0.5 rounded-full font-bold">
+                            🟢 Answered
+                          </span>
+                        ) : isPending ? (
+                          <span className="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[11px] px-3 py-0.5 rounded-full font-bold">
+                            🔵 Waiting for Answer
+                          </span>
+                        ) : isDisputed ? (
+                          <span className="bg-rose-50 text-rose-600 border border-rose-200 text-[11px] px-3 py-0.5 rounded-full font-bold">
+                            🔴 Disputed
+                          </span>
+                        ) : (
+                          <StatusBadge label={question.status} />
+                        )}
+                        <span className="bg-purple-50 text-purple-600 text-[11px] px-3 py-0.5 rounded-full font-bold">
+                          {question.type}
+                        </span>
+                        <span className="text-xs text-slate-400 font-semibold">
+                          Paid: {question.purchaseAmount ? `₹${question.purchaseAmount}` : (question.purchaseType || 'Free')}
+                        </span>
                       </div>
-                      <div className="muted">Raised: {question.raised}</div>
+                      <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 line-clamp-2">
+                        {question.question}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {question.astrologerName || 'Dr. Rani'} • {question.campaignName || question.category || 'Health Campaign'} • {question.raised || '05 Nov 2026'}
+                        {isPending && ' (Day 3 of 30 Guarantee)'}
+                      </p>
                     </div>
-                    <StatusBadge label={question.status} />
+
+                    <button
+                      type="button"
+                      onClick={toggleExpand}
+                      aria-label={isExpanded ? 'Collapse answer' : 'Expand answer'}
+                      className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 transition flex-shrink-0 cursor-pointer border-0"
+                    >
+                      <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
                   </div>
-                  <div className="btn-row" style={{ marginTop: 14 }}>
-                    <button className="btn btn-outline" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
-                    {question.status === 'Answered' && !question.dispute && (
-                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); navigate(`${routes.raiseDispute}?questionId=${question.id}`) }}>Raise Dispute</button>
-                    )}
-                    {question.dispute?.status === 'Resolved' && (
-                      <button className="btn btn-primary" onClick={(event) => { event.stopPropagation(); openQuestion(question.id) }}>View</button>
-                    )}
-                  </div>
-                </Card>
+
+                  {/* Dropdown Content */}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                      {isAnswered && (
+                        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                          <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                            <strong className="text-purple-600 dark:text-purple-400">Astrologer's Detailed Answer:</strong>{' '}
+                            {question.answer || 'Your Saturn transit is currently shifting. Rest assured, by next Tuesday, your vitality will recover significantly. Perform Surya Namaskar daily.'}
+                          </p>
+
+                          {/* Audio Player Widget */}
+                          <div className="flex items-center space-x-3 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <button
+                              type="button"
+                              className="w-8 h-8 rounded-full emerald-gradient text-white flex items-center justify-center text-xs shadow cursor-pointer border-0"
+                            >
+                              ▶
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div className="w-1/2 h-full bg-emerald-500"></div>
+                              </div>
+                              <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                                <span>Voice Report (0:35)</span>
+                                <span>1:10</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Attachments */}
+                          <div className="flex items-center space-x-3 pt-1">
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Attachments:</span>
+                            <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-indigo-600 dark:text-indigo-400 font-semibold flex items-center space-x-1">
+                              📄 <span>{question.horoscopeAttachment || question.attachmentNames?.[0] || 'Horoscope_Chart.pdf'}</span>
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {isPending && (
+                        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 text-xs text-slate-600 dark:text-slate-300">
+                          Question under review by astrologer. Guaranteed reply within 30 days or wallet refund.
+                          {(isEditEnabled || isDeleteEnabled) && (
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              {isEditEnabled && (
+                                <TimeLimitBadge
+                                  label="Edit"
+                                  timeRemaining={editTimeRemaining}
+                                  tooltip="You can edit this question within 30 minutes."
+                                  isEnabled={isEditEnabled}
+                                />
+                              )}
+                              {isDeleteEnabled && (
+                                <TimeLimitBadge
+                                  label="Delete"
+                                  timeRemaining={deleteTimeRemaining}
+                                  tooltip="You can delete this question within 1 hour."
+                                  isEnabled={isDeleteEnabled}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap justify-between items-center gap-2 pt-2">
+                        {isAnswered ? (
+                          <InteractiveStarRating
+                            question={question}
+                            onRate={(val) => actions.rateQuestionAnswer(question.id, val, '')}
+                          />
+                        ) : (
+                          <div className="text-xs text-slate-400">
+                            {isPending ? 'Answer pending from astrologer' : `Status: ${question.status}`}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          {isAnswered && !question.dispute && (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                navigate(`${routes.raiseDispute}?questionId=${question.id}`)
+                              }}
+                              className="px-4 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              🚩 Raise a Dispute
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              openQuestion(question.id)
+                            }}
+                            className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer border-0"
+                          >
+                            Full Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>

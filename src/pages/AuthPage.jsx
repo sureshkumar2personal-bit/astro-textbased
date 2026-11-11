@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import {
   Sparkles,
   User,
@@ -77,8 +77,7 @@ export default function AuthPage({ mode = 'login', selectedRole }) {
   const routes = useMemo(() => getRoleRoutes(targetRoleConstant), [targetRoleConstant])
 
   if (currentUser) {
-    navigate(getRoleRoutes(currentUser.role).dashboard, { replace: true })
-    return null
+    return <Navigate to={getRoleRoutes(currentUser.role).dashboard} replace />
   }
 
   const handleSubmit = (event) => {
