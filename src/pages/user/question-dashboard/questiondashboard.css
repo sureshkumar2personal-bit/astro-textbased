@@ -362,14 +362,30 @@ html[data-theme='dark'] .search-bar-container input,
   margin-bottom: 20px;
 }
 
+.question-summary-card .question-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
 .question-summary-card .section-title {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   font-size: 16px;
   font-weight: 800;
   color: var(--text-primary, #1e1b24);
+}
+
+.question-summary-card .question-summary-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 html[data-theme='dark'] .question-summary-card .section-title {

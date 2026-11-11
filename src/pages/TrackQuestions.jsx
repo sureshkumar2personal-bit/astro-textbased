@@ -590,7 +590,7 @@ function MonthSelector({ monthKey, options, onChange }) {
   )
 }
 
-function QuestionStatusStats({ filter, counts, onChange }) {
+function QuestionStatusStats({ filter, counts, onChange, headerActions }) {
   const statConfig = [
     {
       key: 'All',
@@ -631,8 +631,15 @@ function QuestionStatusStats({ filter, counts, onChange }) {
 
   return (
     <Card className="section question-summary-card">
-      <div className="section-title">
-        <History size={18} /> Question Status Overview
+      <div className="question-summary-header">
+        <div className="section-title">
+          <History size={18} /> Question Status Overview
+        </div>
+        {headerActions && (
+          <div className="question-summary-controls">
+            {headerActions}
+          </div>
+        )}
       </div>
       <div className="question-summary-grid">
         {statConfig.map(({ key, label, count, tone, icon: Icon }) => {
@@ -1009,123 +1016,127 @@ const selectedQuestion = detailsOpen
 
   return (
     <div>
-      {/* Clickable Stat Cards - User Disputes Style */}
-      <QuestionStatusStats filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
-
-      {/* Search & Month selector row */}
-      {embedded ? (
-        <div className="aq-track-controls" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', marginLeft: 'auto' }}>
-            <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
-              <div className="search-filter-row__heading"></div>
-              <div
-                className="search-bar"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: isSearchOpen ? 6 : 0,
-                  width: isSearchOpen ? 280 : 40,
-                  height: 40,
-                  transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), gap 360ms ease',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                  margin: 0,
-                  position: 'relative',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                <input
-                  ref={searchInputRef}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search Paid / Individual / General"
-                  className="text-input search-bar__input"
+      {/* Clickable Stat Cards - User Disputes Style with embedded Header Controls in same horizontal row */}
+      <QuestionStatusStats
+        filter={lifecycleFilter}
+        counts={lifecycleCounts}
+        onChange={setLifecycleFilter}
+        headerActions={
+          embedded ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
+              <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
+                <div className="search-filter-row__heading"></div>
+                <div
+                  className="search-bar"
                   style={{
-                    width: isSearchOpen ? '100%' : 0,
-                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isSearchOpen ? 6 : 0,
+                    width: isSearchOpen ? 280 : 40,
                     height: 40,
-                    opacity: isSearchOpen ? 1 : 0,
-                    padding: isSearchOpen ? (search ? '0 32px 0 12px' : '0 12px') : 0,
-                    borderWidth: isSearchOpen ? 1 : 0,
-                    pointerEvents: isSearchOpen ? 'auto' : 'none',
-                    transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease, padding 360ms ease, border-width 360ms ease',
+                    transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), gap 360ms ease',
+                    overflow: 'hidden',
+                    flexShrink: 0,
                     margin: 0,
+                    position: 'relative',
+                    justifyContent: 'flex-end',
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAppliedSearch(search)
-                    } else if (e.key === 'Escape') {
-                      setIsSearchOpen(false)
-                      setSearch('')
-                      setAppliedSearch('')
-                    }
-                  }}
-                />
-                {isSearchOpen && search && (
+                >
+                  <input
+                    ref={searchInputRef}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search Paid / Individual / General"
+                    className="text-input search-bar__input"
+                    style={{
+                      width: isSearchOpen ? '100%' : 0,
+                      minWidth: 0,
+                      height: 40,
+                      opacity: isSearchOpen ? 1 : 0,
+                      padding: isSearchOpen ? (search ? '0 32px 0 12px' : '0 12px') : 0,
+                      borderWidth: isSearchOpen ? 1 : 0,
+                      pointerEvents: isSearchOpen ? 'auto' : 'none',
+                      transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease, padding 360ms ease, border-width 360ms ease',
+                      margin: 0,
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAppliedSearch(search)
+                      } else if (e.key === 'Escape') {
+                        setIsSearchOpen(false)
+                        setSearch('')
+                        setAppliedSearch('')
+                      }
+                    }}
+                  />
+                  {isSearchOpen && search && (
+                    <button
+                      type="button"
+                      aria-label="Clear search"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSearch('')
+                        setAppliedSearch('')
+                        searchInputRef.current?.focus()
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: 44,
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--muted)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 4,
+                        zIndex: 2,
+                      }}
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    aria-label="Clear search"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSearch('')
-                      setAppliedSearch('')
-                      searchInputRef.current?.focus()
-                    }}
+                    className="icon-btn"
+                    aria-label={isSearchOpen ? 'Search' : 'Open search'}
                     style={{
-                      position: 'absolute',
-                      right: 44,
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--muted)',
+                      flex: '0 0 40px',
+                      width: 40,
+                      height: 40,
                       cursor: 'pointer',
+                      borderRadius: 8,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: 4,
-                      zIndex: 2,
+                      background: isSearchOpen ? 'var(--primary-bg)' : undefined,
+                      color: isSearchOpen ? 'var(--primary)' : undefined,
+                      transition: 'background 240ms ease, color 240ms ease',
+                    }}
+                    onClick={() => {
+                      if (!isSearchOpen) {
+                        setIsSearchOpen(true)
+                        setTimeout(() => searchInputRef.current?.focus(), 80)
+                      } else {
+                        if (search.trim()) {
+                          setAppliedSearch(search)
+                        } else {
+                          setIsSearchOpen(false)
+                        }
+                      }
                     }}
                   >
-                    <X size={15} />
+                    <Search size={18} />
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label={isSearchOpen ? 'Search' : 'Open search'}
-                  style={{
-                    flex: '0 0 40px',
-                    width: 40,
-                    height: 40,
-                    cursor: 'pointer',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isSearchOpen ? 'var(--primary-bg)' : undefined,
-                    color: isSearchOpen ? 'var(--primary)' : undefined,
-                    transition: 'background 240ms ease, color 240ms ease',
-                  }}
-                  onClick={() => {
-                    if (!isSearchOpen) {
-                      setIsSearchOpen(true)
-                      setTimeout(() => searchInputRef.current?.focus(), 80)
-                    } else {
-                      if (search.trim()) {
-                        setAppliedSearch(search)
-                      } else {
-                        setIsSearchOpen(false)
-                      }
-                    }
-                  }}
-                >
-                  <Search size={18} />
-                </button>
+                </div>
               </div>
+              <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
             </div>
-            <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
-          </div>
-        </div>
-      ) : (
+          ) : null
+        }
+      />
+
+      {!embedded && (
         <PageHeader
           eyebrow="User portal"
           title="Track My Questions"
