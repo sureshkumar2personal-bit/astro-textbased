@@ -599,32 +599,34 @@ export default function Layout() {
       {shellIsAstrologer && (
         <div className="astrologer-topbar-metrics" aria-label="Astrologer workspace status">
           <span className={`astrologer-topbar-status${astrologerServices.available ? '' : ' is-off'}`}><i /> {astrologerServices.available ? 'Online' : 'Offline'}</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={astrologerServices.chatAvailable}
-            className={`astrologer-topbar-switch${astrologerServices.chatAvailable ? ' is-on' : ''}`}
+          <span
+            className={`astrologer-topbar-service${astrologerServices.chatEnabled ? '' : ' is-off'}`}
+            role="button"
+            tabIndex={0}
+            aria-pressed={astrologerServices.chatEnabled}
+            aria-label={`Chat ${astrologerServices.chatEnabled ? 'on' : 'off'}`}
             onClick={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })}
-          >
-            <span>Chat</span><b>{astrologerServices.chatAvailable ? 'ON' : 'OFF'}</b><i aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={astrologerServices.callAvailable}
-            className={`astrologer-topbar-switch${astrologerServices.callAvailable ? ' is-on' : ''}`}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })
+              }
+            }}
+          ><i /> Chat</span>
+          <span
+            className={`astrologer-topbar-service${astrologerServices.callEnabled ? '' : ' is-off'}`}
+            role="button"
+            tabIndex={0}
+            aria-pressed={astrologerServices.callEnabled}
+            aria-label={`Call ${astrologerServices.callEnabled ? 'on' : 'off'}`}
             onClick={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })}
-          >
-            <span>Call</span><b>{astrologerServices.callAvailable ? 'ON' : 'OFF'}</b><i aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            className={`astrologer-dnd-toggle${astrologerServices.dndEnabled ? ' is-active' : ''}`}
-            aria-pressed={astrologerServices.dndEnabled}
-            onClick={handleDndToggle}
-          >
-            <span className="astrologer-dnd-toggle__dot" /> <span>DND Mode <b>{astrologerServices.dndEnabled ? 'ON' : 'OFF'}</b></span>
-          </button>
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })
+              }
+            }}
+          ><i /> Call</span>
           <span className="astrologer-topbar-date"><small>TODAY'S DATE</small><strong>{currentDateLabel}</strong></span>
           <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹5,420</strong></span>
         </div>
@@ -661,6 +663,28 @@ export default function Layout() {
       <ThemeToggle />
       <button
         type="button"
+        className="icon-btn danger"
+        aria-label="Logout"
+        onClick={() => {
+          if (isAstrologer) actions.setAstrologerPresence(false)
+          logout()
+          navigate('/login')
+        }}
+      >
+        {shellIsAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
+      </button>
+      {shellIsAstrologer && (
+        <button
+          type="button"
+          className={`astrologer-dnd-toggle${astrologerServices.dndEnabled ? ' is-active' : ''}`}
+          aria-pressed={astrologerServices.dndEnabled}
+          onClick={handleDndToggle}
+        >
+          <span className="astrologer-dnd-toggle__dot" /> <span>DND Mode <b>{astrologerServices.dndEnabled ? 'ON' : 'OFF'}</b></span>
+        </button>
+      )}
+      <button
+        type="button"
         className="avatar-chip"
         onClick={() => {
           setPanel(null)
@@ -680,19 +704,6 @@ export default function Layout() {
         )}
         {shellIsAstrologer && <ChevronDown size={14} aria-hidden="true" />}
       </button>
-      <button
-        type="button"
-        className="icon-btn danger"
-        aria-label="Logout"
-        onClick={() => {
-          if (isAstrologer) actions.setAstrologerPresence(false)
-          logout()
-          navigate('/login')
-        }}
-      >
-        {shellIsAstrologer ? <TempleReturnIcon size={18} /> : <LogOut size={18} />}
-      </button>
-
       {panel === 'notifications' && (
         <div className="topbar-popover" style={{ width: 'min(420px, calc(100vw - 40px))' }}>
           <NotificationsPanel

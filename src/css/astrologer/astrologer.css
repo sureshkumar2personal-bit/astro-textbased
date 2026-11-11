@@ -1168,8 +1168,8 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   line-height: 1;
 }
 
-.sidebar-link:hover {
-  color: #fff;
+.sidebar-link:not(.active):hover {
+  color: #f5b82e;
   transform: translateX(3px);
 }
 
@@ -1178,8 +1178,13 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
 }
 
 .sidebar-link.active {
-  color: #fff;
+  background: #f5b400;
+  color: #080808;
   font-weight: 700;
+}
+
+.sidebar-link.active svg {
+  color: #080808;
 }
 
 .sidebar-active-pill {
@@ -1187,7 +1192,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   inset: 0;
   z-index: -1;
   border-radius: var(--radius-s);
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  background: #f5b400;
   box-shadow: 0 10px 24px rgba(255, 138, 76, 0.35);
 }
 
