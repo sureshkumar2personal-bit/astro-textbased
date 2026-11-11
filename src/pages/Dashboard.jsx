@@ -1,98 +1,82 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../state/ThemeContext.jsx'
 import {
-  Megaphone,
-  MessageCircleReply,
   MessageCircle,
-  ArrowUp,
-  PhoneCall,
-  ChevronDown,
   ChevronRight,
   CalendarDays,
   Radio,
-  Wallet,
-  SlidersHorizontal,
   Zap,
+  Sparkles,
+  Flame,
   Eye,
   EyeOff,
+  RefreshCw,
 } from 'lucide-react'
-import StatusBadge from '../components/StatusBadge.jsx'
-import { useAppData } from '../state/AppDataContext.jsx'
-import FlipButton from '../components/ui/flip-button.jsx'
-import TiltCard from '../components/ui/tilt-card.tsx'
-import {
-  filterCampaignsByStatus,
-  getCampaignAllocation,
-  getCampaignDisplayStatus,
-  getCampaignQuestionTypes,
-  getCampaignUsed,
-  getMonthKeyFromDate,
-} from '../utils/questions.js'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { getInstantConsultations, subscribeToInstantConsultations, updateInstantConsultation } from '../utils/instantConsultation.js'
 
-// Card look (icon + thumb tint) keyed off the campaign topic; purely presentational.
-const CAMPAIGN_CARD_STYLES = [
-  { match: /love|marriage|relationship|family/i, image: '/campaigns/marriage-rings-reference.png', thumb: 'adash-thumb--love' },
-  { match: /health|well|medical/i, image: '/campaigns/health.png', thumb: 'adash-thumb--health' },
-  { match: /career|finance|business|job|money/i, image: '/campaigns/career.png', thumb: 'adash-thumb--career' },
-  { match: /education|study|school|learning/i, image: '/campaigns/education.png', thumb: 'adash-thumb--education' },
-  { match: /./, image: '/campaigns/education-books.png', thumb: 'adash-thumb--education' },
+const ASTROLOGER_GREETING_QUOTES = [
+  'The stars impel, they do not compel. Guide your seekers with wisdom today.',
+  'Every chart carries a story, and every choice can shape the next chapter.',
+  'Let intuition guide the question, and wisdom guide the answer.',
 ]
-const DASHBOARD_CAMPAIGN_LIMIT = 4
+const INCOMING_CALL_TIMEOUT_MS = 60 * 1000
+
+function requestInitials(name) {
+  return String(name || 'User').split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+}
+
+function requestBirthDetail(request, ...keys) {
+  for (const key of keys) {
+    if (request?.birthDetails?.[key]) return request.birthDetails[key]
+  }
+  return ''
+}
 
 export default function Dashboard() {
   const { isDark } = useTheme()
-  const { astrologerServices, actions, campaigns, appointments } = useAppData()
   const { currentUser } = useAuth()
   const [showInvitedPasswordPopup, setShowInvitedPasswordPopup] = useState(Boolean(currentUser?.requiresPasswordSetup))
+  const [greetingQuoteIndex, setGreetingQuoteIndex] = useState(0)
+  const [instantConsultations, setInstantConsultations] = useState([])
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
-  // Same source and rules as Text-Based Questions → Campaigns (current month, "All"), so both always agree.
-  const showcaseCampaigns = useMemo(() => {
-    const now = new Date()
-    const monthKey = getMonthKeyFromDate(now)
-    return filterCampaignsByStatus(campaigns, 'All', monthKey, now)
-      .slice(0, DASHBOARD_CAMPAIGN_LIMIT)
-      .map((campaign, index) => {
-        const label = `${campaign.name || ''} ${campaign.category || ''} ${campaign.categories?.[0]?.name || ''}`
-        const look = CAMPAIGN_CARD_STYLES.find((style, i) => (i === CAMPAIGN_CARD_STYLES.length - 1 ? false : style.match.test(label))) || CAMPAIGN_CARD_STYLES[index % CAMPAIGN_CARD_STYLES.length]
-        return {
-          id: campaign.id,
-          name: campaign.name,
-          category: campaign.category || campaign.categories?.[0]?.name || getCampaignQuestionTypes(campaign).join(' · '),
-          // Dashboard presentation requested: these two showcase cards are active.
-          status: /career|education|study/i.test(label)
-            ? 'Active'
-            : getCampaignDisplayStatus(campaign, monthKey, now.getTime()),
-          sold: getCampaignUsed(campaign),
-          target: getCampaignAllocation(campaign),
-          image: look.image,
-          thumb: look.thumb,
-        }
-      })
-  }, [campaigns])
-  const quickActions = [
-    { icon: MessageCircleReply, label: 'Answer Questions', route: routes.textBasedQuestions, accent: 'orange' },
-    { icon: CalendarDays, label: 'Manage Appointments', route: routes.appointments, accent: 'red' },
-    { icon: Radio, label: 'Go Live', route: routes.liveSessionSetup, accent: 'rose' },
-    { icon: Wallet, label: 'View Earnings', route: routes.walletManagement, accent: 'amber' },
-    { icon: SlidersHorizontal, label: 'Profile Settings', route: routes.myAccount, accent: 'purple' },
-  ]
+  const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
 
-  const upcomingAppointments = useMemo(() => {
-    const astrologerId = currentUser?.id || 'astrologer-demo'
-    const now = Date.now()
-    return appointments
-      .filter((appointment) => {
-        if (appointment.astrologerId !== astrologerId || /cancelled|completed|no-show|refunded/i.test(appointment.status || '')) return false
-        const timestamp = new Date(`${appointment.dateIso || appointment.date}T${appointment.start || '00:00'}`).getTime()
-        return Number.isFinite(timestamp) && timestamp >= now
-      })
-      .sort((a, b) => new Date(`${a.dateIso || a.date}T${a.start || '00:00'}`).getTime() - new Date(`${b.dateIso || b.date}T${b.start || '00:00'}`).getTime())
-      .slice(0, 3)
-  }, [appointments, currentUser?.id])
+  useEffect(() => {
+    const refreshConsultations = () => {
+      const now = Date.now()
+      const consultations = getInstantConsultations()
+      consultations
+        .filter((request) => request.type === 'call' && request.status === 'ringing' && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
+        .forEach((request) => updateInstantConsultation(request.id, { status: 'expired', expiredAt: new Date().toISOString() }))
+      setInstantConsultations(getInstantConsultations())
+    }
+
+    refreshConsultations()
+    const unsubscribe = subscribeToInstantConsultations(refreshConsultations)
+    const timer = window.setInterval(refreshConsultations, 1000)
+    return () => {
+      unsubscribe()
+      window.clearInterval(timer)
+    }
+  }, [])
+
+  const pendingCallRequests = instantConsultations.filter((request) => (
+    request.astrologerId === astrologerId
+    && request.type === 'call'
+    && request.status === 'ringing'
+    && Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS
+  ))
+  const quickActions = [
+    { icon: Sparkles, label: 'Generate Kundli', route: routes.myAccount, accent: 'orange' },
+    { icon: Flame, label: 'Send Remedy', route: routes.atonement, accent: 'purple' },
+    { icon: Radio, label: 'Schedule Live', route: routes.liveSessionSetup, accent: 'rose' },
+    { icon: CalendarDays, label: 'Add Slot', route: routes.appointments, accent: 'blue' },
+    { icon: MessageCircle, label: 'Dispute Note', route: routes.disputeManagement, accent: 'red' },
+  ]
 
   useEffect(() => {
     // Preload alternate theme banner for instant theme switching
@@ -103,33 +87,13 @@ export default function Dashboard() {
   return (
     <div>
       {showInvitedPasswordPopup && <InvitedPasswordPopup onComplete={() => setShowInvitedPasswordPopup(false)} />}
-      <div className="astrologer-top-hero-image">
-        <img
-          className={`astrologer-top-hero-image__img astrologer-top-hero-image__img--${isDark ? 'dark' : 'light'}`}
-          src={isDark ? '/golden-temple-sunset-banner-dark.png' : '/golden-temple-sunset-banner.png'}
-          alt={isDark ? 'Golden temple at night beside a peaceful lake' : 'Golden temple at sunset beside a peaceful lake'}
-        />
-        <div className="astrologer-top-hero-image__services">
-          <h1>Stay Connected with Your Followers</h1>
-          <div className="adash-hero-service-cards" aria-label="Instant services">
-            <ServiceToggleCard
-              icon={PhoneCall}
-              label="Instant Call"
-              description="Receive instant calls"
-              enabled={astrologerServices.callEnabled && !astrologerServices.dndEnabled}
-              onToggle={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
-            />
-            <ServiceToggleCard
-              icon={MessageCircle}
-              label="Instant Chat"
-              description="Receive instant chats"
-              enabled={astrologerServices.chatEnabled && !astrologerServices.dndEnabled}
-              onToggle={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled, ...(astrologerServices.dndEnabled ? { dndEnabled: false } : {}) })}
-            />
-          </div>
-        </div>
-      </div>
-      <Section title="Quick Actions" icon={Zap}>
+      <header className="astrologer-greeting-header">
+        <div className="astrologer-greeting-header__mandala" aria-hidden="true" />
+        <div className="astrologer-greeting-header__temple" aria-hidden="true" />
+        <h1>GOOD AFTERNOON, {(currentUser?.name || 'Acharya Gurudev').toUpperCase()}! <span aria-hidden="true">✨</span></h1>
+        <p><strong>“</strong> <em>{ASTROLOGER_GREETING_QUOTES[greetingQuoteIndex]}</em> <button type="button" aria-label="Show another greeting" title="Show another greeting" onClick={() => setGreetingQuoteIndex((index) => (index + 1) % ASTROLOGER_GREETING_QUOTES.length)}><RefreshCw size={18} aria-hidden="true" /></button></p>
+      </header>
+      <Section title="Quick Actions" icon={Zap} sectionClassName="adash-quick-actions-section" action={<span className="adash-quick-actions-caption">Fast Shortcuts</span>}>
         <div className="adash-quick-actions">
           {quickActions.map(({ icon: Icon, label, route, onClick, accent }) => (
             <button
@@ -146,110 +110,100 @@ export default function Dashboard() {
         </div>
       </Section>
 
-      <Section
-        title="Your Campaigns"
-        icon={Megaphone}
-        sectionClassName="adash-campaigns-section"
-        onNavigate={() => navigate(`${routes.textBasedQuestions}?view=campaigns`)}
-        action={
-          <Link
-            to={`${routes.textBasedQuestions}?view=campaigns`}
-            className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-[color:var(--primary)] transition-colors hover:text-[color:var(--primary-dark)] hover:underline"
-          >
-            View All →
-          </Link>
-        }
-      >
-        {!showcaseCampaigns.length && <p className="muted" style={{ margin: 0, fontSize: 14 }}>No campaigns yet. Use Create Campaign to add one.</p>}
-        <div className="adash-campaign-carousel" aria-label="Your campaigns">
-          <div className="adash-campaign-carousel__track">
-            {[false, true].map((isClone) => (
-              <div className={`adash-campaign-carousel__set${isClone ? ' adash-campaign-carousel__set--clone' : ''}`} key={isClone ? 'campaigns-clone' : 'campaigns'} aria-hidden={isClone || undefined}>
-                {showcaseCampaigns.map((campaign) => {
-                  const pct = campaign.target ? Math.min(100, Math.round((campaign.sold / campaign.target) * 100)) : 0
-                  return (
-                    <article
-                      key={`${isClone ? 'clone-' : ''}${campaign.id}`}
-                      className={`adash-campaign${isClone ? ' adash-campaign--clone' : ''}`}
-                      role={isClone ? undefined : 'link'}
-                      tabIndex={isClone ? -1 : 0}
-                      onClick={isClone ? undefined : (event) => {
-                        event.stopPropagation()
-                        navigate(routes.textBasedQuestions)
-                      }}
-                      onKeyDown={isClone ? undefined : (event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          event.stopPropagation()
-                          navigate(routes.textBasedQuestions)
-                        }
-                      }}
-                    >
-                      <div className={`adash-campaign-thumb ${campaign.thumb}`}>
-                        <img className="adash-campaign-image" src={campaign.image} alt={isClone ? '' : `${campaign.category}: ${campaign.name} illustration`} />
-                        <span className="adash-campaign-status"><StatusBadge label={campaign.status} /></span>
-                      </div>
-                      <div className="adash-campaign-body">
-                        <div className="adash-campaign-labels">
-                          <div className="adash-campaign-category">{campaign.category}</div>
-                          <h3 className="adash-campaign-name">{campaign.name}</h3>
-                        </div>
-                        <div className="adash-campaign-sold">{campaign.sold} / {campaign.target} Questions Sold</div>
-                        <CampaignMonthGraph campaignId={`${campaign.id}${isClone ? '-clone' : ''}`} sold={campaign.sold} target={campaign.target} />
-                        <div className="adash-campaign-track"><span style={{ width: `${pct}%` }} /></div>
-                      </div>
-                    </article>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
+      <div className="astrologer-dashboard-metrics" aria-label="Dashboard metrics">
+        <MetricCard label="Today's Revenue" value="₹5,420" note="↑ +18% from yesterday" tone="gold" />
+        <MetricCard label="Consultations" value="28 Sessions" note="16 Chats  •  10 Calls  •  2 Reports" tone="blue" />
+        <MetricCard label="Avg Rating" value="4.94 ★" note="From 520 reviews" tone="purple" />
+        <MetricCard label="Active Talk Time" value="4h 12m" note="Avg 14 mins / call" tone="cyan" />
+        <MetricCard label="Pending Questions" value="4 Queries" note="Requires attention" tone="rose" />
+      </div>
 
-      <Section
-        title="Upcoming Appointments"
-        icon={CalendarDays}
-      >
-        <div className="adash-questions">
-          {upcomingAppointments.length ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Customer Name</th>
-                  <th>Type</th>
-                  <th>Topic</th>
-                  <th>Status</th>
-                  <th className="adash-q-col-time">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {upcomingAppointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td className="adash-q-id">{appointment.id}</td>
-                    <td>{appointment.customerName || appointment.userName || 'Customer'}</td>
-                    <td>
-                      <span className="flex items-center gap-1.5">
-                        <CalendarDays size={14} className="text-[color:var(--primary)]" />
-                        {appointment.type || 'Appointment'}
-                      </span>
-                    </td>
-                    <td>{appointment.topic || appointment.category || 'Consultation'}</td>
-                    <td><StatusBadge label={appointment.status || 'Booked'} className="!px-2 !py-0.5 !text-[11px]" /></td>
-                    <td className="muted adash-q-col-time" style={{ fontSize: 12.5, whiteSpace: 'nowrap' }}>{appointment.date} · {appointment.time}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : <p className="muted" style={{ margin: 0, fontSize: 14 }}>No upcoming appointments.</p>}
-          <Link to={routes.appointments} className="adash-q-more-link">
-            Manage Appointments →
-          </Link>
-        </div>
-      </Section>
+      {pendingCallRequests.length > 0 && (
+        <section className="astrologer-consultation-queue" aria-labelledby="consultation-queue-title">
+          <div className="astrologer-queue-heading">
+            <span id="consultation-queue-title">● LIVE CONSULTATION REQUEST QUEUE</span>
+            <small>{pendingCallRequests.length} Incoming Call{pendingCallRequests.length === 1 ? '' : 's'}</small>
+          </div>
+          {pendingCallRequests.map((request) => {
+            const rashi = requestBirthDetail(request, 'rashi', 'rashiName', 'sign')
+            const nakshatra = requestBirthDetail(request, 'nakshatra', 'nakshatraName')
+            const details = [rashi, nakshatra].filter(Boolean).join('  •  ')
+            const avatar = request.userAvatar || request.userPhoto || request.profileImage
+            return (
+              <div className="astrologer-queue-content" key={request.id}>
+                <div className="astrologer-queue-avatar">
+                  {avatar ? <img src={avatar} alt="" /> : requestInitials(request.userName)}
+                </div>
+                <div className="astrologer-queue-person">
+                  <strong>{request.userName || 'Astro Connect user'}</strong>
+                  <small>{details || 'Birth details not available'}  •  Instant Call</small>
+                  <span><b>Incoming:</b> {request.topic || 'Astrology consultation request'}  •  <b>Status:</b> Ringing</span>
+                </div>
+                <div className="astrologer-queue-actions">
+                  <button type="button" className="astrologer-queue-decline" onClick={() => updateInstantConsultation(request.id, { status: 'rejected', rejectedAt: new Date().toISOString() })}>Decline</button>
+                  <button type="button" className="astrologer-queue-accept" onClick={() => updateInstantConsultation(request.id, { status: 'accepted', startedAt: new Date().toISOString() })}>Accept Call (₹{request.pricePerMinute || 0}/min)</button>
+                </div>
+              </div>
+            )
+          })}
+        </section>
+      )}
+
+      <div className="astrologer-reference-grid">
+        <section className="astrologer-reference-panel" aria-labelledby="work-events-title">
+          <div className="astrologer-reference-panel__heading">
+            <h2 id="work-events-title"><span aria-hidden="true">▣</span> APPOINTMENTS</h2>
+            <button type="button" onClick={() => navigate(routes.appointments)}>View All</button>
+          </div>
+          <div className="astrologer-work-event">
+            <div><strong>Meera Kulkarni</strong><small>Vedic Chart Consultation</small></div>
+            <span className="astrologer-event-time">In 25 Mins</span>
+            <div className="astrologer-event-meta"><span>◷ 12:30 PM (45m)</span><button type="button" onClick={() => navigate(routes.appointments)}>Start Session</button></div>
+          </div>
+          <div className="astrologer-work-event">
+            <div><strong>Karthik Raja</strong><small>Pariharam Video Call</small></div>
+            <span className="astrologer-event-time">02:15 PM</span>
+            <div className="astrologer-event-meta"><span>◷ 02:15 PM (30m)</span><button type="button" onClick={() => navigate(routes.appointments)}>View Details</button></div>
+          </div>
+          <div className="astrologer-work-event">
+            <div><strong>Ananya V.</strong><small>Career Guidance Chat</small></div>
+            <span className="astrologer-event-time">04:00 PM</span>
+            <div className="astrologer-event-meta"><span>◷ 04:00 PM (30m)</span><button type="button" onClick={() => navigate(routes.appointments)}>View Details</button></div>
+          </div>
+        </section>
+
+        <section className="astrologer-reference-panel" aria-labelledby="activity-feed-title">
+          <div className="astrologer-reference-panel__heading">
+            <h2 id="activity-feed-title"><span aria-hidden="true">☷</span> RECENT ACTIVITY FEED</h2>
+            <span className="astrologer-live-updates"><i /> Live Updates</span>
+          </div>
+          <div className="astrologer-activity-item"><span className="astrologer-activity-icon">☎</span><div><strong>Completed Instant Call with <b>Ramesh Kumar</b> (12 mins)</strong><small>10 mins ago  •  Rate: ₹40/min</small></div><em>+₹480</em></div>
+          <div className="astrologer-activity-item"><span className="astrologer-activity-icon">★</span><div><strong>Received 5★ Rating &amp; Review from <b>Ananya V.</b></strong><small>28 mins ago  •  “Very accurate Rahu Dasha remedies!”</small></div><em className="activity-stars">★★★★★</em></div>
+          <div className="astrologer-activity-item"><span className="astrologer-activity-icon">●</span><div><strong>Instant Chat Session ended with <b>Siddharth N.</b> (18 mins)</strong><small>42 mins ago  •  Career consultation completed</small></div><em>+₹540</em></div>
+        </section>
+      </div>
+
+      <div className="astrologer-analytics-grid">
+        <section className="astrologer-analytics-panel" aria-labelledby="revenue-trend-title">
+          <div className="astrologer-analytics-heading"><h2 id="revenue-trend-title">WEEKLY REVENUE &amp; SESSION TRENDS</h2><small>Updated Realtime</small></div>
+          <div className="astrologer-trend-chart">
+            <div className="astrologer-chart-y-axis"><span>7,500</span><span>6,000</span><span>4,500</span><span>3,000</span></div>
+            <div className="astrologer-chart-plot"><svg viewBox="0 0 700 230" preserveAspectRatio="none" role="img" aria-label="Weekly revenue trend"><path className="trend-area" d="M0 188 C50 169 90 128 145 142 C190 153 222 160 270 126 C320 92 360 90 410 61 C458 32 508 1 560 18 C610 34 655 94 700 74 L700 220 L0 220 Z" /><path className="trend-line" d="M0 188 C50 169 90 128 145 142 C190 153 222 160 270 126 C320 92 360 90 410 61 C458 32 508 1 560 18 C610 34 655 94 700 74" /></svg><div className="astrologer-chart-x-axis"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+          </div>
+        </section>
+        <section className="astrologer-analytics-panel astrologer-services-chart" aria-labelledby="services-mix-title">
+          <div className="astrologer-analytics-heading"><h2 id="services-mix-title">CONSULTATION SERVICES MIX</h2></div>
+          <div className="astrologer-donut" role="img" aria-label="Consultation services mix chart"><span /></div>
+          <div className="astrologer-donut-legend"><span><i className="legend-call" />Instant Call</span><span><i className="legend-chat" />Instant Chat</span><span><i className="legend-text" />Text Answers</span><span><i className="legend-pooja" />Atonements</span></div>
+        </section>
+      </div>
+
     </div>
   )
+}
+
+function MetricCard({ label, value, note, tone }) {
+  return <article className={`astrologer-metric-card astrologer-metric-card--${tone}`}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>
 }
 
 function InvitedPasswordPopup({ onComplete }) {
@@ -275,143 +229,6 @@ function InvitedPasswordPopup({ onComplete }) {
   }
 
   return <div className="invited-password-overlay" role="dialog" aria-modal="true" aria-labelledby="invited-password-title"><div className="invited-password-modal"><div className="invited-password-modal__eyebrow">SECURE YOUR ACCOUNT</div><h2 id="invited-password-title">Set Your Password</h2><p>Create a password before continuing.</p><label><span>New Password</span><div className="invited-password-input"><input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showPassword ? 'Hide new password' : 'Show new password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label><label><span>Confirm Password</span><div className="invited-password-input"><input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} autoComplete="new-password" /><button type="button" aria-label={showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>{error && <p className="invited-password-error">{error}</p>}<button type="button" className="invited-password-button" onClick={handleSubmit}>Set Password</button></div></div>
-}
-
-function ServiceToggleCard({ icon: Icon, label, description, enabled, onToggle }) {
-  return (
-    <TiltCard
-      className="adash-hero-service-card__tilt"
-      tiltLimit={8}
-      scale={1.015}
-      perspective={1000}
-      effect="evade"
-      spotlight
-    >
-      <div
-        role="button"
-        tabIndex={0}
-        className={`adash-hero-service-card${enabled ? ' is-enabled' : ''}`}
-        aria-pressed={enabled}
-        aria-label={`${label}: ${enabled ? 'ON' : 'OFF'}. Click to turn ${enabled ? 'off' : 'on'}`}
-        onClick={onToggle}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault()
-            onToggle()
-          }
-        }}
-      >
-        <span className="adash-hero-service-card__icon"><Icon size={22} /></span>
-        <span className="adash-hero-service-card__copy">
-          <strong>{label}</strong>
-          <small>{description}</small>
-        </span>
-        <FlipButton
-          key={`${label}-${enabled}`}
-          text1="ON"
-          text2="OFF"
-          initialShow={enabled}
-          className="adash-hero-service-card__flip"
-          aria-label={`${label} ${enabled ? 'ON' : 'OFF'}`}
-          aria-pressed={enabled}
-          onClick={onToggle}
-        />
-      </div>
-    </TiltCard>
-  )
-}
-
-function generateSmoothPath(values, width, height) {
-  if (!values || values.length < 2) return `M 0 ${height}`
-  const xStep = width / (values.length - 1)
-  const points = values.map((value, index) => [
-    index * xStep,
-    height - (value / 100) * (height * 0.8) - (height * 0.1),
-  ])
-  let path = `M ${points[0][0]} ${points[0][1]}`
-  for (let index = 0; index < points.length - 1; index += 1) {
-    const [x1, y1] = points[index]
-    const [x2, y2] = points[index + 1]
-    const midX = (x1 + x2) / 2
-    path += ` C ${midX},${y1} ${midX},${y2} ${x2},${y2}`
-  }
-  return path
-}
-
-function CampaignMonthGraph({ campaignId, sold, target }) {
-  const linePathRef = useRef(null)
-  const areaPathRef = useRef(null)
-  const [animationPhase, setAnimationPhase] = useState(0)
-  const svgWidth = 150
-  const svgHeight = 60
-  const capacity = Number(target) || 1
-  const progress = Math.min(Math.max((Number(sold) / capacity) * 100, 0), 100)
-  const chartData = useMemo(() => {
-    // Keep the card's actual sales value fixed while gently changing the
-    // intermediate points so the graph has the same live motion as the
-    // supplied stats-widget animation.
-    const shapes = [
-      [0.35, 0.62, 0.5, 0.78, 0.68, 0.9, 1],
-      [0.42, 0.55, 0.66, 0.52, 0.82, 0.74, 1],
-      [0.3, 0.7, 0.58, 0.84, 0.6, 0.88, 1],
-      [0.48, 0.58, 0.44, 0.72, 0.8, 0.66, 1],
-    ]
-    const shape = shapes[animationPhase % shapes.length]
-    return shape.map((value) => progress * value)
-  }, [animationPhase, progress])
-  const linePath = useMemo(() => generateSmoothPath(chartData, svgWidth, svgHeight), [chartData])
-  const areaPath = useMemo(() => `${linePath} L ${svgWidth} ${svgHeight} L 0 ${svgHeight} Z`, [linePath])
-  const gradientId = `campaign-area-${String(campaignId || 'default').replace(/[^a-zA-Z0-9_-]/g, '-')}`
-
-  useEffect(() => {
-    const phaseInterval = window.setInterval(() => {
-      setAnimationPhase((phase) => phase + 1)
-    }, 3000)
-    return () => window.clearInterval(phaseInterval)
-  }, [])
-
-  useEffect(() => {
-    const animateGraph = () => {
-      const path = linePathRef.current
-      const area = areaPathRef.current
-      if (!path || !area || typeof path.getTotalLength !== 'function') return
-      const length = path.getTotalLength()
-      path.style.transition = 'none'
-      path.style.strokeDasharray = `${length} ${length}`
-      path.style.strokeDashoffset = `${length}`
-      area.style.transition = 'none'
-      area.style.opacity = '0'
-      path.getBoundingClientRect()
-      path.style.transition = 'stroke-dashoffset 0.8s ease-in-out'
-      path.style.strokeDashoffset = '0'
-      area.style.transition = 'opacity 0.8s ease-in-out 0.2s'
-      area.style.opacity = '1'
-    }
-
-    animateGraph()
-    const intervalId = window.setInterval(animateGraph, 3000)
-    return () => window.clearInterval(intervalId)
-  }, [linePath])
-
-  return (
-    <div className="adash-campaign-month-graph">
-      <div className="adash-campaign-month-graph__summary">
-        <span>This Month</span>
-        <strong>{Math.round(progress)}% {progress > 0 && <ArrowUp size={14} strokeWidth={2.5} aria-hidden="true" />}</strong>
-        <b>{sold} sold</b>
-      </div>
-      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} role="img" aria-label={`One-month sales graph: ${sold} of ${target} questions sold`} preserveAspectRatio="none">
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#f1bf25" stopOpacity="0.34" />
-            <stop offset="100%" stopColor="#f1bf25" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path className="adash-campaign-month-graph__area" ref={areaPathRef} d={areaPath} fill={`url(#${gradientId})`} />
-        <path className="adash-campaign-month-graph__line" ref={linePathRef} d={linePath} />
-      </svg>
-    </div>
-  )
 }
 
 function Section({ title, icon: Icon, subtitle, action, onNavigate, sectionClassName = '', children }) {

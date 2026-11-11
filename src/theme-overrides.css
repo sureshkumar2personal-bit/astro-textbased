@@ -2801,8 +2801,8 @@ html[data-theme='dark'] .app-shell--astrologer .wallet-txn-status--pending {
 
 /* 9. Dispute Management */
 html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card {
-  background: #241507 !important;
-  border: 1px solid #4a3424 !important;
+  background: #151b2d !important;
+  border: 1px solid #594522 !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-card:nth-child(1) {
   border-left: 3px solid #8b5cf6 !important;
@@ -2820,44 +2820,45 @@ html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-value
   color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-summary-grid .stat-label {
-  color: #d1c4b7 !important;
+  color: #e5b84b !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-wrap {
-  border-color: #4a3424 !important;
-  background: #201308 !important;
+  border-color: #594522 !important;
+  background: #101625 !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-head {
-  background: #2a1a0e !important;
-  color: #e5be7a !important;
-  border-bottom: 1px solid #4a3424 !important;
+  background: #1a1d2a !important;
+  color: #f5c451 !important;
+  border-bottom: 1px solid #594522 !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-table-row {
-  border-bottom: 1px solid #382417 !important;
+  background: #111729 !important;
+  border-bottom: 1px solid #594522 !important;
   color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-summary strong {
   color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-summary small {
-  color: #d1c4b7 !important;
+  color: #a5adbd !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-view-button {
-  background: rgba(232, 184, 62, 0.15) !important;
-  border-color: #d8b77d !important;
-  color: #f1bf25 !important;
+  background: #151b2d !important;
+  border-color: #8b641b !important;
+  color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-details {
-  background: #28170a !important;
-  border-color: #4a3424 !important;
-  color: #f5effa !important;
+  background: #101625 !important;
+  border-color: #594522 !important;
+  color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaint-inline-details strong {
   color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-search,
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-status-filter {
-  background: #241507 !important;
-  border-color: #4a3424 !important;
+  background: #111729 !important;
+  border-color: #8b641b !important;
   color: #ffffff !important;
 }
 html[data-theme='dark'] .app-shell--astrologer .dispute-management-page .complaints-search input,

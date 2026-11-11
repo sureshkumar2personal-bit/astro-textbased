@@ -107,6 +107,35 @@ describe('consultation duration maths', () => {
     expect(store()).toContain('"type":"chat"')
   })
 })
+
+describe('storage failures', () => {
+  it('does not throw when localStorage quota is exceeded while seeding consultations', () => {
+    installWindowStub()
+    globalThis.window.localStorage.setItem = () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    }
+
+    expect(() => getInstantConsultations()).not.toThrow()
+    expect(getInstantConsultations()).toHaveLength(5)
+  })
+
+  it('does not throw when a new consultation cannot be persisted', () => {
+    installWindowStub()
+    globalThis.window.localStorage.setItem = () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
+    }
+
+    const request = createInstantConsultation({
+      type: 'call',
+      userId: 'u1',
+      astrologerId: 'a1',
+      durationMinutes: 10,
+    })
+
+    expect(getInstantConsultation(request.id)).toEqual(request)
+  })
+})
+
 describe('birth details on chat sessions', () => {
   beforeEach(() => {
     installWindowStub()

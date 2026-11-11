@@ -2,6 +2,11 @@ import { calculateInstantAmount, getInstantRate } from './consultationPricing.js
 
 export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultations'
 
+// Keep consultations available in the current tab when browser storage is full.
+// A later successful write clears this fallback and restores persistence.
+let volatileConsultations = null
+let volatileStorage = null
+
 function demoConsultations() {
   const now = Date.now()
   const session = (id, type, astrologerName, durationMinutes, daysAgo, messages = []) => {
@@ -40,6 +45,9 @@ function demoConsultations() {
 
 function readAll() {
   if (typeof window === 'undefined') return []
+  if (volatileConsultations && volatileStorage === window.localStorage) return volatileConsultations
+  volatileConsultations = null
+  volatileStorage = null
   try {
     const value = JSON.parse(window.localStorage.getItem(INSTANT_CONSULTATION_STORAGE_KEY) || '[]')
     return Array.isArray(value) ? value : []
@@ -50,8 +58,19 @@ function readAll() {
 
 function writeAll(requests) {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(INSTANT_CONSULTATION_STORAGE_KEY, JSON.stringify(requests))
+  try {
+    window.localStorage.setItem(INSTANT_CONSULTATION_STORAGE_KEY, JSON.stringify(requests))
+  } catch {
+    // A full or restricted localStorage must not crash the React tree.
+    volatileConsultations = requests
+    volatileStorage = window.localStorage
+    return false
+  }
+
+  volatileConsultations = null
+  volatileStorage = null
   window.dispatchEvent(new CustomEvent('astroconnect:instant-consultation', { detail: requests }))
+  return true
 }
 
 export function getInstantConsultations() {
