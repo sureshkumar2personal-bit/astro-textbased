@@ -1262,6 +1262,7 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   .user-profile-tabs button { padding: 12px 15px; }
   .user-profile-content { width: 100%; }
 }
+
 @media (max-width: 480px) {
   .user-profile-consultation-modal__content { padding: 18px; }
   .user-profile-consultation-modal__topbar { padding: 17px 18px; }
@@ -16418,8 +16419,55 @@ div.reward-section-head:nth-of-type(1) > h2.reward-section-title {
   .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header p { font-size: 16px; }
   .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card { min-height: 122px; padding: 15px; }
   .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 14px; }
-  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { font-size: 28px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { font-size: 28px; }
 }
+
+/* Keep the DND control compact without changing its placement or behavior. */
+.app-shell--astrologer .topbar-actions > .astrologer-dnd-toggle {
+  min-width: 0 !important;
+  min-height: 36px !important;
+  padding: 0 8px !important;
+  gap: 5px !important;
+}
+.app-shell--astrologer .topbar-actions > .astrologer-dnd-toggle .astrologer-dnd-toggle__dot {
+  width: 6px;
+  height: 6px;
+}
+
+
+/* Compact header service indicators: Chat and Call are status labels, not toggles. */
+.app-shell--astrologer .astrologer-topbar-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(87, 214, 158, .28);
+  border-radius: 10px;
+  background: #101c1c;
+  color: #74e0a7;
+  font-size: 11px;
+  font-weight: 800;
+}
+.app-shell--astrologer .astrologer-topbar-service i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #50d18e;
+  box-shadow: 0 0 0 3px rgba(80, 209, 142, .12);
+}
+.app-shell--astrologer .astrologer-topbar-service.is-off {
+  border-color: #31394a;
+  background: #131722;
+  color: #9da5b5;
+}
+.app-shell--astrologer .astrologer-topbar-service.is-off i {
+  background: #747d90;
+  box-shadow: none;
+}
+.app-shell--astrologer .topbar-actions > .astrologer-dnd-toggle { order: 5; }
+.app-shell--astrologer .topbar-actions > .avatar-chip { order: 6; }
+
 
 /* Dispute Management palette — scoped to this page and its portal dialogs. */
 .app-shell--astrologer:has(.dispute-management-page) {
@@ -16556,8 +16604,8 @@ body:has(.dispute-management-page) .modal-card .muted { color: #a5adbd !importan
 .app-shell--astrologer:has(.dispute-management-page) .sidebar-link { color: #a5adbd !important; }
 .app-shell--astrologer:has(.dispute-management-page) .sidebar-link.active,
 .app-shell--astrologer:has(.dispute-management-page) .sidebar-link:hover {
-  background-color: #151b2d !important;
-  color: #e5b84b !important;
+  background-color: #f5b400 !important;
+  color: #080808 !important;
 }
 .app-shell--astrologer:has(.dispute-management-page) .topbar-header {
   background-color: #0b0f1b !important;
@@ -16747,8 +16795,8 @@ body:has(.dispute-management-page) .modal-card .icon-btn { background-color: #15
 .app-shell--astrologer:has(.apt-page) .apt-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.apt-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.apt-page) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.apt-page) .sidebar-link.active,
-.app-shell--astrologer:has(.apt-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.apt-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.apt-page) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.apt-page) .topbar-header .theme-toggle-btn,
@@ -16898,8 +16946,8 @@ body:has(.apt-page) .apt-cancel-modal .icon-btn { background-color: #151b2d !imp
 .app-shell--astrologer:has(.atonement-page) .atonement-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.atonement-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.atonement-page) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.atonement-page) .sidebar-link.active,
-.app-shell--astrologer:has(.atonement-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.atonement-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.atonement-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.atonement-page) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.atonement-page) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.atonement-page) .topbar-header .theme-toggle-btn,
@@ -17029,8 +17077,8 @@ body:has(.atonement-page) .atonement-modal-close { background-color: #151b2d !im
 .app-shell--astrologer:has(.live-workspace) .live-workspace { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.live-workspace) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.live-workspace) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.live-workspace) .sidebar-link.active,
-.app-shell--astrologer:has(.live-workspace) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.live-workspace) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.live-workspace) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.live-workspace) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.live-workspace) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.live-workspace) .topbar-header .theme-toggle-btn,
@@ -17132,8 +17180,8 @@ body:has(.live-workspace) .live-config-modal textarea { background-color: #11172
 .app-shell--astrologer:has(.live-list-page) .live-list-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.live-list-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.live-list-page) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.live-list-page) .sidebar-link.active,
-.app-shell--astrologer:has(.live-list-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.live-list-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.live-list-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.live-list-page) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.live-list-page) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.live-list-page) .topbar-header .theme-toggle-btn,
@@ -17182,7 +17230,8 @@ body:has(.live-workspace) .live-config-modal textarea { background-color: #11172
 .app-shell--astrologer:has(.tbq-page) .tbq-page { background-color: #080b14 !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.tbq-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.tbq-page) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.tbq-page) .sidebar-link.active, .app-shell--astrologer:has(.tbq-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.tbq-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.tbq-page) .topbar-header .icon-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .theme-toggle-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
 .tbq-page .page-eyebrow, .tbq-page .tbq-module-tabs, .tbq-page .tbq-module-tab, .tbq-page .search-bar { background: #111729 !important; border-color: #80602b !important; }
@@ -17457,9 +17506,10 @@ body:has(.live-workspace) .live-config-modal textarea { background-color: #11172
 .app-shell--astrologer .sidebar-brand-subtitle { display: block; margin-top: 2px; color: #8f98ad; font-size: 9px; }
 .app-shell--astrologer .sidebar-group-label { display: none; }
 .app-shell--astrologer .sidebar-nav { padding: 14px 0; }
-.app-shell--astrologer .sidebar-link { min-height: 40px; margin: 2px 0; border-radius: 10px; color: #aeb4c6; }
-.app-shell--astrologer .sidebar-link:hover { background: #171d2d; color: #fff; }
-.app-shell--astrologer .sidebar-link.active { background: #342917; color: #ffd250; box-shadow: inset 3px 0 #e9b42b; }
+.app-shell--astrologer .sidebar-link { min-height: 40px; margin: 2px 0; border-radius: 10px; color: #a5adbd; }
+.app-shell--astrologer .sidebar-link:not(.active):hover { background: #2a2416; color: #f5b82e; }
+.app-shell--astrologer .sidebar-link.active { background: #f5b400; color: #080808; font-weight: 700; box-shadow: inset 3px 0 #080808; }
+.app-shell--astrologer .sidebar-link.active svg { color: #080808; }
 .app-shell--astrologer .main-column { background: #080b14; }
 .app-shell--astrologer .page-content { min-height: calc(100vh - 80px); padding: 24px 28px 56px; background: #080b14; }
 .app-shell--astrologer .page-transition { max-width: none; }
@@ -19852,7 +19902,8 @@ html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
 .app-shell--astrologer:has(.tbq-page) .tbq-page { background-color: #080b14 !important; color: #f5f5f5 !important; }
 .app-shell--astrologer:has(.tbq-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
 .app-shell--astrologer:has(.tbq-page) .sidebar-link { color: #a5adbd !important; }
-.app-shell--astrologer:has(.tbq-page) .sidebar-link.active, .app-shell--astrologer:has(.tbq-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
 .app-shell--astrologer:has(.tbq-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.tbq-page) .topbar-header .icon-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .theme-toggle-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
 .tbq-page .page-eyebrow, .tbq-page .tbq-module-tabs, .tbq-page .tbq-module-tab, .tbq-page .search-bar { background: #111729 !important; border-color: #80602b !important; }
