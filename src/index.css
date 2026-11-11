@@ -16753,115 +16753,115 @@ body:has(.dispute-management-page) .modal-card .icon-btn { background-color: #15
 .app-shell--astrologer:has(.apt-page) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.apt-page) .topbar-header .theme-toggle-btn,
 .app-shell--astrologer:has(.apt-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
-.apt-page .page-title,
-.apt-page .section-title,
-.apt-page .apt-calendar-title,
-.apt-page .apt-side-head,
-.apt-page .apt-list-view-date-nav strong { color: #e5b84b !important; }
-.apt-page .wd-tabs { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
-.apt-page .wd-tabs .wd-tab,
-.apt-page .wd-tabs .wd-tab:visited { background-color: transparent !important; color: #a5adbd !important; }
-.apt-page .wd-tabs .wd-tab:hover,
-.apt-page .wd-tabs .wd-tab:focus-visible { background-color: #151b2d !important; color: #f5f5f5 !important; }
-.apt-page .wd-tabs .wd-tab.is-active,
-.apt-page .wd-tabs .wd-tab.is-active:visited { background-color: #151b2d !important; color: #e5b84b !important; }
-.apt-page .wd-tabs .wd-tab.is-active::after { background-color: #e9a900 !important; }
-.apt-page .apt-main,
-.apt-page .apt-calendar-col,
-.apt-page .apt-side-col { background-color: #0b0f1b !important; }
-.apt-page .muted,
-.apt-page .apt-history-item__top span,
-.apt-page .apt-history-item__meta,
-.apt-page .apt-history-item__footer,
-.apt-page .apt-history-item__id,
-.apt-page .apt-history-calendar-legend span,
-.apt-page .apt-history-summary span,
-.apt-page .apt-inline-details small { color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .page-title,
+.app-shell--astrologer .apt-page .section-title,
+.app-shell--astrologer .apt-page .apt-calendar-title,
+.app-shell--astrologer .apt-page .apt-side-head,
+.app-shell--astrologer .apt-page .apt-list-view-date-nav strong { color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .wd-tabs { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab,
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab:visited { background-color: transparent !important; color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab:hover,
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab:focus-visible { background-color: #151b2d !important; color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab.is-active,
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab.is-active:visited { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .wd-tabs .wd-tab.is-active::after { background-color: #e9a900 !important; }
+.app-shell--astrologer .apt-page .apt-main,
+.app-shell--astrologer .apt-page .apt-calendar-col,
+.app-shell--astrologer .apt-page .apt-side-col { background-color: #0b0f1b !important; }
+.app-shell--astrologer .apt-page .muted,
+.app-shell--astrologer .apt-page .apt-history-item__top span,
+.app-shell--astrologer .apt-page .apt-history-item__meta,
+.app-shell--astrologer .apt-page .apt-history-item__footer,
+.app-shell--astrologer .apt-page .apt-history-item__id,
+.app-shell--astrologer .apt-page .apt-history-calendar-legend span,
+.app-shell--astrologer .apt-page .apt-history-summary span,
+.app-shell--astrologer .apt-page .apt-inline-details small { color: #a5adbd !important; }
 
-.apt-page .apt-history-toolbar,
-.apt-page .apt-scheduling-calendar--history,
-.apt-page .apt-history-list-view,
-.apt-page .apt-side-panel,
-.apt-page .apt-history-list-card,
-.apt-page .apt-history-detail-card,
-.apt-page .apt-history-intro { background-color: #0b0f1b !important; border-color: #80602b !important; }
-.apt-page .apt-history-tabs,
-.apt-page .apt-display-toggle,
-.apt-page .apt-list-view-modes { background-color: #151b2d !important; border-color: #80602b !important; }
-.apt-page .apt-history-tabs button,
-.apt-page .apt-display-toggle button,
-.apt-page .apt-list-view-modes button { background-color: transparent !important; color: #a5adbd !important; }
-.apt-page .apt-history-tabs button:hover,
-.apt-page .apt-display-toggle button:hover,
-.apt-page .apt-display-toggle button:focus-visible,
-.apt-page .apt-list-view-modes button:hover { background-color: #111729 !important; color: #f5f5f5 !important; }
-.apt-page .apt-history-tabs button.is-active,
-.apt-page .apt-display-toggle button.is-active,
-.apt-page .apt-list-view-modes button.is-active { background-color: #e9a900 !important; color: #10131c !important; }
-.apt-page .apt-history-status-filter,
-.apt-page .apt-calendar-search,
-.apt-page .apt-calendar-search input { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
-.apt-page .apt-calendar-search svg,
-.apt-page .apt-calendar-search input::placeholder { color: #a5adbd !important; }
-.apt-page .apt-calendar-arrow,
-.apt-page .apt-today-btn,
-.apt-page .apt-list-view-date-nav .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
-.apt-page .apt-calendar-arrow:hover,
-.apt-page .apt-today-btn:hover,
-.apt-page .apt-list-view-date-nav .icon-btn:hover { background-color: #80602b !important; color: #10131c !important; }
+.app-shell--astrologer .apt-page .apt-history-toolbar,
+.app-shell--astrologer .apt-page .apt-scheduling-calendar--history,
+.app-shell--astrologer .apt-page .apt-history-list-view,
+.app-shell--astrologer .apt-page .apt-side-panel,
+.app-shell--astrologer .apt-page .apt-history-list-card,
+.app-shell--astrologer .apt-page .apt-history-detail-card,
+.app-shell--astrologer .apt-page .apt-history-intro { background-color: #0b0f1b !important; border-color: #80602b !important; }
+.app-shell--astrologer .apt-page .apt-history-tabs,
+.app-shell--astrologer .apt-page .apt-display-toggle,
+.app-shell--astrologer .apt-page .apt-list-view-modes { background-color: #151b2d !important; border-color: #80602b !important; }
+.app-shell--astrologer .apt-page .apt-history-tabs button,
+.app-shell--astrologer .apt-page .apt-display-toggle button,
+.app-shell--astrologer .apt-page .apt-list-view-modes button { background-color: transparent !important; color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .apt-history-tabs button:hover,
+.app-shell--astrologer .apt-page .apt-display-toggle button:hover,
+.app-shell--astrologer .apt-page .apt-display-toggle button:focus-visible,
+.app-shell--astrologer .apt-page .apt-list-view-modes button:hover { background-color: #111729 !important; color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-history-tabs button.is-active,
+.app-shell--astrologer .apt-page .apt-display-toggle button.is-active,
+.app-shell--astrologer .apt-page .apt-list-view-modes button.is-active { background-color: #e9a900 !important; color: #10131c !important; }
+.app-shell--astrologer .apt-page .apt-history-status-filter,
+.app-shell--astrologer .apt-page .apt-calendar-search,
+.app-shell--astrologer .apt-page .apt-calendar-search input { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-calendar-search svg,
+.app-shell--astrologer .apt-page .apt-calendar-search input::placeholder { color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .apt-calendar-arrow,
+.app-shell--astrologer .apt-page .apt-today-btn,
+.app-shell--astrologer .apt-page .apt-list-view-date-nav .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .apt-calendar-arrow:hover,
+.app-shell--astrologer .apt-page .apt-today-btn:hover,
+.app-shell--astrologer .apt-page .apt-list-view-date-nav .icon-btn:hover { background-color: #80602b !important; color: #10131c !important; }
 
-.apt-page .apt-month-weekday { color: #a5adbd !important; }
-.apt-page .apt-month-cell { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
-.apt-page .apt-month-cell.is-muted { background-color: #0b0f1b !important; }
-.apt-page .apt-month-cell:hover,
-.apt-page .apt-history-cell.is-selected { background-color: #151b2d !important; }
-.apt-page .apt-month-day,
-.apt-page .apt-cell-line { color: #f5f5f5 !important; }
-.apt-page .apt-history-cell.has-booked .apt-month-day,
-.apt-page .apt-history-cell.has-pending .apt-month-day { color: #e5b84b !important; }
-.apt-page .apt-history-cell.has-rescheduled .apt-month-day { color: #4b9eff !important; }
-.apt-page .apt-history-cell.has-completed .apt-month-day { color: #00c995 !important; }
-.apt-page .apt-history-cell.has-cancelled .apt-month-day { color: #ff5b65 !important; }
+.app-shell--astrologer .apt-page .apt-month-weekday { color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .apt-month-cell { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-month-cell.is-muted { background-color: #0b0f1b !important; }
+.app-shell--astrologer .apt-page .apt-month-cell:hover,
+.app-shell--astrologer .apt-page .apt-history-cell.is-selected { background-color: #151b2d !important; }
+.app-shell--astrologer .apt-page .apt-month-day,
+.app-shell--astrologer .apt-page .apt-cell-line { color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-history-cell.has-booked .apt-month-day,
+.app-shell--astrologer .apt-page .apt-history-cell.has-pending .apt-month-day { color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .apt-history-cell.has-rescheduled .apt-month-day { color: #4b9eff !important; }
+.app-shell--astrologer .apt-page .apt-history-cell.has-completed .apt-month-day { color: #00c995 !important; }
+.app-shell--astrologer .apt-page .apt-history-cell.has-cancelled .apt-month-day { color: #ff5b65 !important; }
 
-.apt-page .apt-history-item,
-.apt-page .apt-history-list-view .apt-history-item { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
-.apt-page .apt-history-item:hover,
-.apt-page .apt-history-item:focus-visible { background-color: #151b2d !important; }
-.apt-page .apt-history-item.is-active { background-color: #151b2d !important; border-color: #e5b84b !important; }
-.apt-page .apt-history-item__top strong,
-.apt-page .apt-history-item__info-item,
-.apt-page .apt-history-item__amount,
-.apt-page .apt-history-item__time strong { color: #f5f5f5 !important; }
-.apt-page .apt-history-item__info,
-.apt-page .apt-inline-details,
-.apt-page .apt-history-list-view .apt-history-row.is-inline.is-expanded,
-.apt-page .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) { background-color: #151b2d !important; border-color: #80602b !important; }
-.apt-page .apt-inline-details__heading strong,
-.apt-page .apt-inline-details strong { color: #f5f5f5 !important; }
-.apt-page .apt-inline-details__note { color: #a5adbd !important; }
-.apt-page .apt-history-item__footer { border-top-color: #80602b !important; }
-.apt-page .apt-history-empty { background-color: #151b2d !important; border-color: #80602b !important; }
-.apt-page .apt-history-empty strong { color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-history-item,
+.app-shell--astrologer .apt-page .apt-history-list-view .apt-history-item { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-history-item:hover,
+.app-shell--astrologer .apt-page .apt-history-item:focus-visible { background-color: #151b2d !important; }
+.app-shell--astrologer .apt-page .apt-history-item.is-active { background-color: #151b2d !important; border-color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .apt-history-item__top strong,
+.app-shell--astrologer .apt-page .apt-history-item__info-item,
+.app-shell--astrologer .apt-page .apt-history-item__amount,
+.app-shell--astrologer .apt-page .apt-history-item__time strong { color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-history-item__info,
+.app-shell--astrologer .apt-page .apt-inline-details,
+.app-shell--astrologer .apt-page .apt-history-list-view .apt-history-row.is-inline.is-expanded,
+.app-shell--astrologer .apt-page .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) { background-color: #151b2d !important; border-color: #80602b !important; }
+.app-shell--astrologer .apt-page .apt-inline-details__heading strong,
+.app-shell--astrologer .apt-page .apt-inline-details strong { color: #f5f5f5 !important; }
+.app-shell--astrologer .apt-page .apt-inline-details__note { color: #a5adbd !important; }
+.app-shell--astrologer .apt-page .apt-history-item__footer { border-top-color: #80602b !important; }
+.app-shell--astrologer .apt-page .apt-history-empty { background-color: #151b2d !important; border-color: #80602b !important; }
+.app-shell--astrologer .apt-page .apt-history-empty strong { color: #f5f5f5 !important; }
 
-.apt-page .status-badge[data-tone='badge-appointment-upcoming'] { background-color: #3c2d16 !important; border-color: #e5b84b !important; color: #e5b84b !important; }
-.apt-page .status-badge[data-tone='badge-appointment-completed'] { background-color: #12372d !important; border-color: #00c995 !important; color: #00c995 !important; }
-.apt-page .status-badge[data-tone='badge-appointment-cancelled'] { background-color: #421e28 !important; border-color: #ff5b65 !important; color: #ff5b65 !important; }
-.apt-page .status-badge[data-tone='badge-appointment-rescheduled'] { background-color: #142d4a !important; border-color: #4b9eff !important; color: #4b9eff !important; }
-.apt-page .status-badge[data-tone='badge-appointment-refunded'] { background-color: #2d1d45 !important; border-color: #a855f7 !important; color: #a855f7 !important; }
-.apt-page .status-badge[data-tone='badge-appointment-upcoming'] .status-badge__dot { background-color: #e5b84b !important; }
-.apt-page .status-badge[data-tone='badge-appointment-completed'] .status-badge__dot { background-color: #00c995 !important; }
-.apt-page .status-badge[data-tone='badge-appointment-cancelled'] .status-badge__dot { background-color: #ff5b65 !important; }
-.apt-page .status-badge[data-tone='badge-appointment-rescheduled'] .status-badge__dot { background-color: #4b9eff !important; }
-.apt-page .status-badge[data-tone='badge-appointment-refunded'] .status-badge__dot { background-color: #a855f7 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-upcoming'] { background-color: #3c2d16 !important; border-color: #e5b84b !important; color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-completed'] { background-color: #12372d !important; border-color: #00c995 !important; color: #00c995 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-cancelled'] { background-color: #421e28 !important; border-color: #ff5b65 !important; color: #ff5b65 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-rescheduled'] { background-color: #142d4a !important; border-color: #4b9eff !important; color: #4b9eff !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-refunded'] { background-color: #2d1d45 !important; border-color: #a855f7 !important; color: #a855f7 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-upcoming'] .status-badge__dot { background-color: #e5b84b !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-completed'] .status-badge__dot { background-color: #00c995 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-cancelled'] .status-badge__dot { background-color: #ff5b65 !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-rescheduled'] .status-badge__dot { background-color: #4b9eff !important; }
+.app-shell--astrologer .apt-page .status-badge[data-tone='badge-appointment-refunded'] .status-badge__dot { background-color: #a855f7 !important; }
 
-body:has(.apt-page) .apt-appointment-modal,
-body:has(.apt-page) .apt-cancel-modal,
-body:has(.apt-page) .modal-card.apt-appointment-modal { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
-body:has(.apt-page) .apt-appointment-modal .apt-drawer-head,
-body:has(.apt-page) .apt-appointment-modal .apt-drawer-body,
-body:has(.apt-page) .apt-cancel-modal > * { background-color: #111729 !important; color: #f5f5f5 !important; }
-body:has(.apt-page) .apt-appointment-modal .icon-btn,
-body:has(.apt-page) .apt-cancel-modal .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.apt-page) .apt-appointment-modal,
+.app-shell--astrologer:has(.apt-page) .apt-cancel-modal,
+.app-shell--astrologer:has(.apt-page) .modal-card.apt-appointment-modal { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.apt-page) .apt-appointment-modal .apt-drawer-head,
+.app-shell--astrologer:has(.apt-page) .apt-appointment-modal .apt-drawer-body,
+.app-shell--astrologer:has(.apt-page) .apt-cancel-modal > * { background-color: #111729 !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.apt-page) .apt-appointment-modal .icon-btn,
+.app-shell--astrologer:has(.apt-page) .apt-cancel-modal .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
 
 /* Atonement page dark palette — colors only, scoped to this page. */
 .app-shell--astrologer:has(.atonement-page) {

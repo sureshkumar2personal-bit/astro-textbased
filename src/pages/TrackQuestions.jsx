@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, List, Grid2X2, Filter } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, List, Grid2X2, Filter, History, CheckCircle2, AlertCircle, CheckCheck } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
@@ -446,7 +446,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
             )}
             <span className={`text-[11px] px-3 py-0.5 rounded-full font-bold ${
               isPersonal
-                ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300'
+                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
             }`}>
               {typeLabel}
@@ -469,7 +469,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           type="button"
           onClick={onToggle}
           aria-label={isExpanded ? 'Collapse answer' : 'Expand answer'}
-          className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 transition flex-shrink-0 cursor-pointer border-0"
+          className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400 transition flex-shrink-0 cursor-pointer border-0"
         >
           <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
@@ -481,7 +481,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           {answered && (
             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
               <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
-                <strong className="text-purple-600 dark:text-purple-400">Astrologer's Detailed Answer:</strong>{' '}
+                <strong className="text-amber-700 dark:text-amber-400">Astrologer's Detailed Answer:</strong>{' '}
                 {question.answer || 'Your Saturn transit is currently shifting. Rest assured, by next Tuesday, your vitality will recover significantly. Perform Surya Namaskar daily.'}
               </p>
 
@@ -507,7 +507,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
               {/* Attachments */}
               <div className="flex items-center space-x-3 pt-1">
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Attachments:</span>
-                <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-indigo-600 dark:text-indigo-400 font-semibold flex items-center space-x-1">
+                <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-amber-700 dark:text-amber-400 font-semibold flex items-center space-x-1">
                   📄 <span>{question.horoscopeAttachment || question.attachmentNames?.[0] || 'Horoscope_Chart.pdf'}</span>
                 </span>
               </div>
@@ -517,7 +517,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           {isWaiting && (
             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 text-xs text-slate-600 dark:text-slate-300">
               <p>Astrologer has received your query. In line with the 30-day guarantee, your answer will be provided with extensive transit analysis.</p>
-              <div className="flex items-center space-x-2 text-xs text-purple-600 dark:text-purple-400 font-semibold">
+              <div className="flex items-center space-x-2 text-xs text-amber-600 dark:text-amber-400 font-semibold">
                 <Clock size={13} />
                 <span>Time Remaining: <strong>27 Days left</strong></span>
               </div>
@@ -590,24 +590,80 @@ function MonthSelector({ monthKey, options, onChange }) {
   )
 }
 
-function StatusSelector({ filter, counts, onChange }) {
+function QuestionStatusStats({ filter, counts, onChange, headerActions }) {
+  const statConfig = [
+    {
+      key: 'All',
+      label: 'Total Questions',
+      count: counts['All'] || 0,
+      tone: 'tone-violet',
+      icon: History,
+    },
+    {
+      key: STAGE_WAITING,
+      label: 'Waiting for Answer',
+      count: counts[STAGE_WAITING] || 0,
+      tone: 'tone-sky',
+      icon: Clock,
+    },
+    {
+      key: STAGE_ANSWERED,
+      label: 'Answered',
+      count: counts[STAGE_ANSWERED] || 0,
+      tone: 'tone-green',
+      icon: CheckCircle2,
+    },
+    {
+      key: STAGE_DISPUTED,
+      label: 'Disputed',
+      count: counts[STAGE_DISPUTED] || 0,
+      tone: 'tone-red',
+      icon: AlertCircle,
+    },
+    {
+      key: STAGE_RESOLVED,
+      label: 'Resolved',
+      count: counts[STAGE_RESOLVED] || 0,
+      tone: 'tone-amber',
+      icon: CheckCheck,
+    },
+  ]
+
   return (
-    <label className="aq-track-month">
-      <Filter size={15} aria-hidden="true" />
-      <select
-        className="select-input"
-        value={filter}
-        aria-label="Filter by question status"
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {LIFECYCLE_FILTERS.map((stage) => (
-          <option key={stage} value={stage}>
-            {stage} ({counts[stage] || 0})
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
-    </label>
+    <Card className="section question-summary-card">
+      <div className="question-summary-header">
+        <div className="section-title">
+          <History size={18} /> Question Status Overview
+        </div>
+        {headerActions && (
+          <div className="question-summary-controls">
+            {headerActions}
+          </div>
+        )}
+      </div>
+      <div className="question-summary-grid">
+        {statConfig.map(({ key, label, count, tone, icon: Icon }) => {
+          const isActive = filter === key
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`stat-card-clickable ${isActive ? 'is-active' : ''}`}
+              onClick={() => onChange(key)}
+              aria-pressed={isActive}
+            >
+              <div className={`stat-icon ${tone}`}>
+                <Icon size={20} />
+              </div>
+              <div className="stat-card-body">
+                <div className="stat-value">{count}</div>
+                <div className="stat-label">{label}</div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </Card>
   )
 }
 
@@ -960,121 +1016,127 @@ const selectedQuestion = detailsOpen
 
   return (
     <div>
-      {/* Status dropdown on the left, Search & Month selector on the right */}
-      {embedded ? (
-        <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
-            <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
-              <div className="search-filter-row__heading"></div>
-              <div
-                className="search-bar"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: isSearchOpen ? 6 : 0,
-                  width: isSearchOpen ? 280 : 40,
-                  height: 40,
-                  transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), gap 360ms ease',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                  margin: 0,
-                  position: 'relative',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                <input
-                  ref={searchInputRef}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search Paid / Individual / General"
-                  className="text-input search-bar__input"
+      {/* Clickable Stat Cards - User Disputes Style with embedded Header Controls in same horizontal row */}
+      <QuestionStatusStats
+        filter={lifecycleFilter}
+        counts={lifecycleCounts}
+        onChange={setLifecycleFilter}
+        headerActions={
+          embedded ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
+              <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
+                <div className="search-filter-row__heading"></div>
+                <div
+                  className="search-bar"
                   style={{
-                    width: isSearchOpen ? '100%' : 0,
-                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isSearchOpen ? 6 : 0,
+                    width: isSearchOpen ? 280 : 40,
                     height: 40,
-                    opacity: isSearchOpen ? 1 : 0,
-                    padding: isSearchOpen ? (search ? '0 32px 0 12px' : '0 12px') : 0,
-                    borderWidth: isSearchOpen ? 1 : 0,
-                    pointerEvents: isSearchOpen ? 'auto' : 'none',
-                    transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease, padding 360ms ease, border-width 360ms ease',
+                    transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), gap 360ms ease',
+                    overflow: 'hidden',
+                    flexShrink: 0,
                     margin: 0,
+                    position: 'relative',
+                    justifyContent: 'flex-end',
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setAppliedSearch(search)
-                    } else if (e.key === 'Escape') {
-                      setIsSearchOpen(false)
-                      setSearch('')
-                      setAppliedSearch('')
-                    }
-                  }}
-                />
-                {isSearchOpen && search && (
+                >
+                  <input
+                    ref={searchInputRef}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search Paid / Individual / General"
+                    className="text-input search-bar__input"
+                    style={{
+                      width: isSearchOpen ? '100%' : 0,
+                      minWidth: 0,
+                      height: 40,
+                      opacity: isSearchOpen ? 1 : 0,
+                      padding: isSearchOpen ? (search ? '0 32px 0 12px' : '0 12px') : 0,
+                      borderWidth: isSearchOpen ? 1 : 0,
+                      pointerEvents: isSearchOpen ? 'auto' : 'none',
+                      transition: 'width 360ms cubic-bezier(0.16, 1, 0.3, 1), opacity 260ms ease, padding 360ms ease, border-width 360ms ease',
+                      margin: 0,
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setAppliedSearch(search)
+                      } else if (e.key === 'Escape') {
+                        setIsSearchOpen(false)
+                        setSearch('')
+                        setAppliedSearch('')
+                      }
+                    }}
+                  />
+                  {isSearchOpen && search && (
+                    <button
+                      type="button"
+                      aria-label="Clear search"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSearch('')
+                        setAppliedSearch('')
+                        searchInputRef.current?.focus()
+                      }}
+                      style={{
+                        position: 'absolute',
+                        right: 44,
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--muted)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 4,
+                        zIndex: 2,
+                      }}
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    aria-label="Clear search"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSearch('')
-                      setAppliedSearch('')
-                      searchInputRef.current?.focus()
-                    }}
+                    className="icon-btn"
+                    aria-label={isSearchOpen ? 'Search' : 'Open search'}
                     style={{
-                      position: 'absolute',
-                      right: 44,
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--muted)',
+                      flex: '0 0 40px',
+                      width: 40,
+                      height: 40,
                       cursor: 'pointer',
+                      borderRadius: 8,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: 4,
-                      zIndex: 2,
+                      background: isSearchOpen ? 'var(--primary-bg)' : undefined,
+                      color: isSearchOpen ? 'var(--primary)' : undefined,
+                      transition: 'background 240ms ease, color 240ms ease',
+                    }}
+                    onClick={() => {
+                      if (!isSearchOpen) {
+                        setIsSearchOpen(true)
+                        setTimeout(() => searchInputRef.current?.focus(), 80)
+                      } else {
+                        if (search.trim()) {
+                          setAppliedSearch(search)
+                        } else {
+                          setIsSearchOpen(false)
+                        }
+                      }
                     }}
                   >
-                    <X size={15} />
+                    <Search size={18} />
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label={isSearchOpen ? 'Search' : 'Open search'}
-                  style={{
-                    flex: '0 0 40px',
-                    width: 40,
-                    height: 40,
-                    cursor: 'pointer',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isSearchOpen ? 'var(--primary-bg)' : undefined,
-                    color: isSearchOpen ? 'var(--primary)' : undefined,
-                    transition: 'background 240ms ease, color 240ms ease',
-                  }}
-                  onClick={() => {
-                    if (!isSearchOpen) {
-                      setIsSearchOpen(true)
-                      setTimeout(() => searchInputRef.current?.focus(), 80)
-                    } else {
-                      if (search.trim()) {
-                        setAppliedSearch(search)
-                      } else {
-                        setIsSearchOpen(false)
-                      }
-                    }
-                  }}
-                >
-                  <Search size={18} />
-                </button>
+                </div>
               </div>
+              <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
             </div>
-            <MonthSelector monthKey={monthKey} options={monthOptions} onChange={handleMonthChange} />
-          </div>
-        </div>
-      ) : (
+          ) : null
+        }
+      />
+
+      {!embedded && (
         <PageHeader
           eyebrow="User portal"
           title="Track My Questions"
@@ -1082,7 +1144,6 @@ const selectedQuestion = detailsOpen
           backTo={routes.askQuestion}
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
               <div className="search-bar" style={{ width: 280 }}>
                 <input
                   value={search}

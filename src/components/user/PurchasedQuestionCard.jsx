@@ -40,13 +40,13 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
   const daysLeft = getQuestionCreditDaysRemaining(credit)
 
   return (
-    <div className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-purple-500'} space-y-4 flex flex-col justify-between`}>
+    <div className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-amber-500'} space-y-4 flex flex-col justify-between`}>
       <div>
         <div className="flex justify-between items-start mb-2">
           <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
             isPersonal
               ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
-              : 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/40 dark:border-purple-800'
+              : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
           }`}>
             {isPersonal ? 'Personal Q&A' : 'General Q&A'}
           </span>

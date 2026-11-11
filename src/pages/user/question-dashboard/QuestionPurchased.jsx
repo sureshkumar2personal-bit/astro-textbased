@@ -330,14 +330,14 @@ export default function QuestionPurchased() {
                     return (
                       <div
                         key={card.key}
-                        className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-purple-500'} space-y-4 flex flex-col justify-between`}
+                        className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-amber-500'} space-y-4 flex flex-col justify-between`}
                       >
                         <div>
                           <div className="flex justify-between items-start mb-2">
                             <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
                               isPersonal
                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
-                                : 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/40 dark:border-purple-800'
+                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
                             }`}>
                               {questionTypePillLabel(card.type)} Q&amp;A
                             </span>
@@ -350,7 +350,7 @@ export default function QuestionPurchased() {
                           <div className="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1 text-xs mb-3">
                             <div className="flex justify-between">
                               <span className="text-slate-500">Remaining:</span>
-                              <span className="font-extrabold text-purple-600 dark:text-purple-400">{card.remaining} {card.remaining === 1 ? 'Question' : 'Questions'}</span>
+                              <span className="font-extrabold text-amber-600 dark:text-amber-400">{card.remaining} {card.remaining === 1 ? 'Question' : 'Questions'}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">Total Paid:</span>

@@ -55,22 +55,22 @@ export default function AskQuestionDashboard() {
 
   return (
     <div className="question-dashboard space-y-4">
-      {/* Royal Emerald & Purple Header Banner */}
-      <div className="purple-gradient rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* User Side Theme Dynamic Hero Banner */}
+      <div className="aq-hero-banner rounded-3xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full text-indigo-100">
+          <span className="aq-hero-eyebrow text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
             Premium Astrological Suite
           </span>
-          <h1 className="text-2xl md:text-3xl font-extrabold mt-2">Ask a Question Hub</h1>
-          <p className="text-indigo-100 text-xs mt-1">
+          <h1 className="aq-hero-title text-2xl md:text-3xl font-extrabold mt-2">Ask a Question Hub</h1>
+          <p className="aq-hero-desc text-xs mt-1">
             Managed campaigns, active slots, and 30-day astrologer response guarantee.
           </p>
         </div>
         <div className="flex items-center space-x-3 banner-shield-badge px-4 py-3 rounded-2xl">
-          <ShieldCheck className="text-emerald-400 w-7 h-7 flex-shrink-0" />
+          <ShieldCheck className="banner-shield-icon w-7 h-7 flex-shrink-0" />
           <div className="text-xs">
-            <p className="font-bold">100% Refund Guarantee</p>
-            <p className="text-indigo-200">Auto-refund on 30-day delay</p>
+            <p className="banner-shield-title font-bold">100% Refund Guarantee</p>
+            <p className="banner-shield-sub">Auto-refund on 30-day delay</p>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function AskQuestionDashboard() {
               <Icon size={15} strokeWidth={2.4} aria-hidden="true" />
               <span>{section.label}</span>
               {section.count > 0 && (
-                <span className={`question-dashboard-tab-count ${isActive ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'}`}>
+                <span className={`question-dashboard-tab-count ${isActive ? 'aq-tab-count-active' : 'aq-tab-count-inactive'}`}>
                   {section.count}
                 </span>
               )}
