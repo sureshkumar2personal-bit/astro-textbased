@@ -338,7 +338,68 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
   )
 }
 
-function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpen, onRaiseDispute }) {
+function InteractiveStarRating({ question, onRate }) {
+  const [hoverValue, setHoverValue] = useState(0)
+  const [justSaved, setJustSaved] = useState(false)
+  const currentRating = question.answerRating || question.rating || 0
+  const activeRating = hoverValue || currentRating
+
+  const handleSelect = (val, event) => {
+    event?.stopPropagation?.()
+    if (onRate) onRate(val)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2400)
+  }
+
+  return (
+    <div className="flex items-center space-x-1.5" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center space-x-0.5" role="radiogroup" aria-label="Rate astrologer answer">
+        {[1, 2, 3, 4, 5].map((val) => {
+          const isFilled = val <= activeRating
+          return (
+            <button
+              key={val}
+              type="button"
+              role="radio"
+              aria-checked={currentRating === val}
+              aria-label={`Rate ${val} star${val === 1 ? '' : 's'}`}
+              className="p-1 rounded hover:scale-125 focus:outline-none cursor-pointer border-0 bg-transparent transition-transform"
+              onMouseEnter={() => setHoverValue(val)}
+              onMouseLeave={() => setHoverValue(0)}
+              onClick={(e) => handleSelect(val, e)}
+            >
+              <Star
+                size={16}
+                className={`transition-colors duration-150 ${
+                  isFilled
+                    ? 'fill-amber-400 text-amber-500'
+                    : 'fill-transparent text-slate-300 dark:text-slate-600 hover:text-amber-400'
+                }`}
+              />
+            </button>
+          )
+        })}
+      </div>
+      <span className="text-xs font-semibold ml-1">
+        {justSaved ? (
+          <span className="text-emerald-600 dark:text-emerald-400 font-bold transition-all">
+            ✓ Rated {currentRating}/5
+          </span>
+        ) : currentRating > 0 ? (
+          <span className="text-slate-600 dark:text-slate-300">
+            (Rated {currentRating}/5)
+          </span>
+        ) : (
+          <span className="text-purple-600 dark:text-purple-400 font-medium">
+            (Click stars to rate)
+          </span>
+        )}
+      </span>
+    </div>
+  )
+}
+
+function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpen, onRaiseDispute, onRate }) {
   const stage = getQuestionLifecycleStage(question, nowMs)
   const answered = isQuestionAnswered(question)
   const canRaiseDispute = isDisputeWindowOpen(question, nowMs)
@@ -350,8 +411,16 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
   const isDisputed = stage === STAGE_DISPUTED
   const isResolved = stage === STAGE_RESOLVED
 
+  const borderAccent = isDisputed
+    ? 'border-l-rose-500'
+    : isResolved
+      ? 'border-l-amber-500'
+      : answered
+        ? 'border-l-emerald-500'
+        : 'border-l-indigo-500'
+
   return (
-    <div className="glass-card rounded-2xl p-5 md:p-6 transition hover:shadow-md mb-3">
+    <div className={`glass-card rounded-2xl p-5 md:p-6 border border-slate-200 dark:border-slate-800 border-l-4 ${borderAccent} transition hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md mb-3`}>
       <div className="flex justify-between items-start gap-4 cursor-pointer" onClick={onToggle}>
         <div className="space-y-1.5 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -464,9 +533,13 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           )}
 
           <div className="flex flex-wrap justify-between items-center gap-2 pt-2">
-            <div className="flex items-center space-x-1 text-amber-500 text-xs">
-              ★ ★ ★ ★ ★ <span className="text-slate-400 ml-1">({question.answerRating ? `Rated ${question.answerRating}/5` : 'Rated 5/5'})</span>
-            </div>
+            {answered ? (
+              <InteractiveStarRating question={question} onRate={onRate} />
+            ) : (
+              <div className="text-xs text-slate-400">
+                {isWaiting ? 'Answer pending from astrologer' : `Status: ${stage}`}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               {canRaiseDispute && (
                 <button
@@ -674,6 +747,12 @@ export default function TrackQuestions({ embedded = false }) {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [viewMode, setViewMode] = useState('list')
   const [expandedQuestionIds, setExpandedQuestionIds] = useState(() => new Set())
+  const [localRatings, setLocalRatings] = useState({})
+
+  const handleRateQuestion = (questionId, ratingValue) => {
+    setLocalRatings((prev) => ({ ...prev, [questionId]: ratingValue }))
+    actions.rateQuestionAnswer(questionId, ratingValue, '')
+  }
 
   const toggleAccordion = (questionId, event) => {
     event?.stopPropagation?.()
@@ -1059,25 +1138,31 @@ const selectedQuestion = detailsOpen
             </div>
            )}
            <div className={`track-questions-grid${viewMode === 'list' ? ' is-list' : ' is-grid'}`}>
-             {visibleQuestions.map((question) => viewMode === 'list' ? (
-               <LifecycleQuestionListRow
-                 key={question.id}
-                 question={question}
-                 nowMs={nowMs}
-                 isExpanded={expandedQuestionIds.has(question.id)}
-                 onToggle={(e) => toggleAccordion(question.id, e)}
-                 onOpen={() => openQuestion(question.id)}
-                 onRaiseDispute={(id) => openRaiseDispute(id)}
-               />
-             ) : (
-               <LifecycleQuestionCard
-                 key={question.id}
-                 question={question}
-                 nowMs={nowMs}
-                 onOpen={() => openQuestion(question.id)}
-                 onRaiseDispute={(id) => openRaiseDispute(id)}
-               />
-             ))}
+             {visibleQuestions.map((question) => {
+               const questionWithRating = localRatings[question.id] != null
+                 ? { ...question, answerRating: localRatings[question.id] }
+                 : question
+               return viewMode === 'list' ? (
+                 <LifecycleQuestionListRow
+                   key={question.id}
+                   question={questionWithRating}
+                   nowMs={nowMs}
+                   isExpanded={expandedQuestionIds.has(question.id)}
+                   onToggle={(e) => toggleAccordion(question.id, e)}
+                   onOpen={() => openQuestion(question.id)}
+                   onRaiseDispute={(id) => openRaiseDispute(id)}
+                   onRate={(val) => handleRateQuestion(question.id, val)}
+                 />
+               ) : (
+                 <LifecycleQuestionCard
+                   key={question.id}
+                   question={questionWithRating}
+                   nowMs={nowMs}
+                   onOpen={() => openQuestion(question.id)}
+                   onRaiseDispute={(id) => openRaiseDispute(id)}
+                 />
+               )
+             })}
            </div>
         </Card>
       </div>
