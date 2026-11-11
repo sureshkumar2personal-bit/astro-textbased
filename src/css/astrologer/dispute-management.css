@@ -818,41 +818,41 @@
 }
 
 /* Reference layout for the All Complaints view. */
-.dispute-management-page { max-width: none; margin: 0; padding: 8px 28px 38px; background: #fffaf0; color: #38271c; }
+.dispute-management-page { max-width: none; margin: 0; padding: 8px 28px 38px; background: #0b1020; color: #f5f5f5; }
 .dispute-management-page .page-header-back { margin-bottom: 8px; }
-.dispute-management-page .page-header-back button { border-color: #e1cda8; color: #39281d; }
+.dispute-management-page .page-header-back button { border-color: #8b641b; color: #ffffff; }
 .dispute-management-page .page-header-row { align-items: center; margin-bottom: 20px; }
-.dispute-management-page .page-title { color: #302015; font-family: Poppins, Inter, sans-serif; font-size: 31px; font-weight: 800; letter-spacing: -.04em; }
+.dispute-management-page .page-title { color: #f5b82e; font-family: Poppins, Inter, sans-serif; font-size: 31px; font-weight: 800; letter-spacing: -.04em; }
 .dispute-management-page .raise-complaint-trigger { min-height: 42px; padding: 10px 22px; border: 1px solid #6b431f; border-radius: 9px; background: linear-gradient(135deg, #704615, #9a6829); box-shadow: 0 6px 14px rgba(107, 67, 31, .2); font-size: 13px; font-weight: 800; }
-.dispute-management-page > .section { margin-top: 0; padding: 0 12px 12px; border: 0; border-radius: 16px; background: #fff; box-shadow: none; }
-.dispute-management-page > .section > .section-title, .dispute-management-page .complaints-section > .section-title { margin: 0 0 10px; color: #a46610; font-family: Georgia, serif; font-size: 17px; font-weight: 800; }
+.dispute-management-page > .section { margin-top: 0; padding: 0 12px 12px; border: 0; border-radius: 16px; background: #0b1020; box-shadow: none; }
+.dispute-management-page > .section > .section-title, .dispute-management-page .complaints-section > .section-title { margin: 0 0 10px; color: #f5c451; font-family: Georgia, serif; font-size: 17px; font-weight: 800; }
 .dispute-summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .dispute-summary-grid .stat-card { min-height: 72px; padding: 13px 16px; border: 1px solid transparent; border-radius: 12px; box-shadow: none; }
-.dispute-summary-grid .stat-card:nth-child(1) { background: #f0eafd; }
-.dispute-summary-grid .stat-card:nth-child(2) { background: #fff0f0; }
-.dispute-summary-grid .stat-card:nth-child(3) { background: #fff8e8; }
-.dispute-summary-grid .stat-card:nth-child(4) { background: #eafaf3; }
+.dispute-summary-grid .stat-card:nth-child(1),
+.dispute-summary-grid .stat-card:nth-child(2),
+.dispute-summary-grid .stat-card:nth-child(3),
+.dispute-summary-grid .stat-card:nth-child(4) { background: #151b2d; border-color: #594522; }
 .dispute-summary-grid .stat-card:hover { border-color: #e1c78f; }
 .dispute-summary-grid .stat-icon { width: 38px; height: 38px; border-radius: 50%; }
-.dispute-summary-grid .stat-value { color: #332217; font-size: 26px; }
-.dispute-summary-grid .stat-label { color: #5e5147; font-size: 12px; }
-.dispute-summary-grid .tone-amber { background: #fff0c7; color: #b87900; }
+.dispute-summary-grid .stat-value { color: #ffffff; font-size: 26px; }
+.dispute-summary-grid .stat-label { color: #e5b84b; font-size: 12px; }
+.dispute-summary-grid .stat-icon.tone-amber { background: #3c2d16; color: #f5b82e; }
 .dispute-management-page .dispute-main-workspace { grid-template-columns: 1fr; gap: 0; margin-top: 14px; }
-.dispute-management-page .complaints-section { padding: 0 12px 18px; border: 0; border-radius: 16px; background: #fff; box-shadow: none; }
+.dispute-management-page .complaints-section { padding: 0 12px 18px; border: 0; border-radius: 16px; background: #0b1020; box-shadow: none; }
 .dispute-management-page .complaints-toolbar { justify-content: flex-end; margin-bottom: 10px; }
-.dispute-management-page .complaints-search { flex: 0 1 268px; min-height: 36px; border-color: #e4ded4; border-radius: 8px; }
+.dispute-management-page .complaints-search { flex: 0 1 268px; min-height: 36px; border-color: #8b641b; border-radius: 8px; background: #111729; color: #ffffff; }
 .dispute-management-page .complaints-status-filter {
   flex: 0 0 126px;
   min-height: 36px;
   padding: 0 10px 0 12px;
-  border: 1px solid #ded6ca;
+  border: 1px solid #8b641b;
   border-radius: 8px;
-  background: #fff;
+  background: #111729;
   box-shadow: 0 1px 2px rgba(55, 38, 24, .03);
 }
 .dispute-management-page .complaints-status-filter select {
   min-height: 34px;
-  color: #3f332a;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 700;
 }
@@ -860,16 +860,17 @@
   border-color: #b58a4b;
   box-shadow: 0 0 0 3px rgba(181, 138, 75, .12);
 }
-.dispute-management-page .complaints-table-wrap { border-color: #f0e9dc; border-radius: 10px; }
+.dispute-management-page .complaints-table-wrap { border-color: #594522; border-radius: 10px; background: #101625; }
 .dispute-management-page .complaints-table { min-width: 1080px; }
-.dispute-management-page .complaints-table-row { grid-template-columns: 52px minmax(180px, 1.4fr) minmax(180px, 1.2fr) 140px 132px; min-height: 55px; gap: 12px; padding: 0 14px; font-size: 12px; }
-.dispute-management-page .complaints-table-head { min-height: 42px; background: #fff9ed; color: #3e3127; font-size: 11px; text-transform: none; }
-.dispute-management-page .complaint-summary { display: grid; gap: 3px; min-width: 0; color: #2d2118; font-size: 12px; }
+.dispute-management-page .complaints-table-row { grid-template-columns: 52px minmax(180px, 1.4fr) minmax(180px, 1.2fr) 140px 132px; min-height: 55px; gap: 12px; padding: 0 14px; background: #111729; color: #ffffff; font-size: 12px; }
+.dispute-management-page .complaints-table-row:not(.complaints-table-head) { border-top-color: #594522; }
+.dispute-management-page .complaints-table-head { min-height: 42px; background: #1a1d2a; color: #f5b82e; font-size: 11px; text-transform: none; }
+.dispute-management-page .complaint-summary { display: grid; gap: 3px; min-width: 0; color: #ffffff; font-size: 12px; }
 .dispute-management-page .complaint-summary strong { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-.dispute-management-page .complaint-summary small { overflow: hidden; color: #85786b; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.dispute-management-page .complaint-view-button { padding: 7px 11px; border: 1px solid #d8b77d; border-radius: 8px; color: #4c321d; font-size: 11px; }
-.dispute-management-page .complaint-view-button:hover { background: #fff9ed; text-decoration: none; }
-.dispute-management-page .complaint-inline-details { display: grid; grid-column: 1 / -1; gap: 14px; margin: 0 14px; padding: 14px 16px 16px; border-top: 1px solid #eadfcd; border-bottom: 1px solid #eadfcd; background: #fffaf2; color: #4d3929; font-size: 12px; }
+.dispute-management-page .complaint-summary small { overflow: hidden; color: #a5adbd; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.dispute-management-page .complaint-view-button { padding: 7px 11px; border: 1px solid #8b641b; border-radius: 8px; background: #151b2d; color: #ffffff; font-size: 11px; }
+.dispute-management-page .complaint-view-button:hover { background: #1a1d2a; text-decoration: none; }
+.dispute-management-page .complaint-inline-details { display: grid; grid-column: 1 / -1; gap: 14px; margin: 0 14px; padding: 14px 16px 16px; border-top: 1px solid #594522; border-bottom: 1px solid #594522; background: #101625; color: #ffffff; font-size: 12px; }
 .dispute-management-page .complaint-inline-details__main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 18px; }
 .dispute-management-page .complaint-inline-details__main > div:first-child { min-width: 0; }
 .dispute-management-page .complaint-inline-details__meta { padding-left: 30px; border-left: 1px solid #e6d6bd; }
@@ -1030,5 +1031,3 @@ html[data-theme='dark'] .complaints-status-filter {
   border-color: var(--border, #6B4A25);
   color: var(--text-primary, #FFF8E8);
 }
-
-

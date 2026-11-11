@@ -332,6 +332,186 @@
   color-scheme: light;
 }
 
+/* Text Based Questions: page-local AstroConnect dark palette. */
+.app-shell--astrologer:has(.tbq-page) { --surface: #111729; --surface-strong: #111729; --surface-soft: #151b2d; --surface-border: #80602b; --ink: #f5f5f5; --body: #f5f5f5; --muted: #a5adbd; --text-primary: #f5f5f5; --text-secondary: #a5adbd; --primary: #e5b84b; --primary-dark: #c89422; --primary-bg: #151b2d; --accent: #e9a900; --accent-dark: #e9a900; --warning-bg: #3c2d16; --amber-600: #e9a900; --sky-bg: #142d4a; --sky-600: #72b7f2; --success-bg: #12372d; --green-600: #5ee0a8; --danger-bg: #421e28; --red-600: #ff7b82; --neutral-bg: #252b3a; }
+.app-shell--astrologer:has(.tbq-page) .main-column, .app-shell--astrologer:has(.tbq-page) .page-content, .app-shell--astrologer:has(.tbq-page) .page-transition, .app-shell--astrologer:has(.tbq-page) .tbq-page { background-color: #080b14; color: #f5f5f5; }
+.app-shell--astrologer:has(.tbq-page) .sidebar { background-color: #0a0d17; border-right-color: #80602b; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link { color: #a5adbd; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link:hover { background-color: #151b2d; color: #f5f5f5; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link.active { background-color: #151b2d; color: #e5b84b; box-shadow: inset 3px 0 #e5b84b; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header { background-color: #0b0e19; border-bottom-color: #80602b; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header .icon-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .theme-toggle-btn { background-color: #151b2d; border-color: #80602b; color: #f5f5f5; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header .avatar-chip { background-color: #111729; border-color: #80602b; color: #f5f5f5; }
+.tbq-page .page-eyebrow { color: #e5b84b; background-color: #151b2d; border-color: #80602b; }
+.tbq-page .page-title, .tbq-page .section-title, .tbq-page .page-header-row h1 { color: #e5b84b; }
+.tbq-page .page-header-row > div > p, .tbq-page .muted { color: #a5adbd; }
+.tbq-page .tbq-module-tabs { background: #111729; border-color: #80602b; box-shadow: none; }
+.tbq-page .tbq-module-tab { background-color: #151b2d; border-color: #80602b; color: #f5f5f5; }
+.tbq-page .tbq-module-tab:hover { background-color: #1d263d; color: #e5b84b; }
+.tbq-page .tbq-module-tab.is-active { background-color: #80602b; border-color: #e5b84b; color: #10131c; }
+.tbq-page .search-bar { background-color: #111729; border-color: #80602b; }
+.tbq-page .search-bar svg, .tbq-page .search-bar__input::placeholder { color: #a5adbd; }
+.tbq-page .search-bar__input { background-color: transparent; color: #f5f5f5; }
+.tbq-page .btn-primary { background-color: #e9a900; border-color: #e9a900; color: #10131c; }
+.tbq-page .btn-primary:hover { background-color: #f0bb2f; border-color: #f0bb2f; color: #10131c; }
+.tbq-page .btn-outline { background-color: #151b2d; border-color: #80602b; color: #f5f5f5; }
+.tbq-page .btn-outline:hover { background-color: #80602b; border-color: #e5b84b; color: #10131c; }
+.tbq-page .btn-ghost { color: #e5b84b; }
+.tbq-page .tbq-question-month__heading, .tbq-page .tbq-question-month__heading .tbq-question-month__name { color: #e5b84b; }
+.tbq-page .tbq-question-month__heading .tbq-question-month__count { color: #a5adbd; }
+.tbq-page .tbq-question-card { background-color: #111729; border-color: #80602b; color: #a5adbd; box-shadow: none; }
+.tbq-page .tbq-question-card:hover, .tbq-page .tbq-question-card:focus-visible { background-color: #151b2d; }
+.tbq-page .tbq-question-card__customer strong, .tbq-page .tbq-question-card__details strong, .tbq-page .tbq-question-card__details p, .tbq-page .tbq-question-card__deadline small { color: #f5f5f5; }
+.tbq-page .tbq-question-card__details > span, .tbq-page .tbq-question-card__deadline, .tbq-page .tbq-question-card__deadline b, .tbq-page .tbq-question-card__dates { color: #a5adbd; }
+.tbq-page .tbq-question-card__action .btn { border-color: #80602b; }
+.tbq-page .status-badge[data-tone="badge-green"] { background-color: #12372d !important; color: #5ee0a8 !important; }
+.tbq-page .status-badge[data-tone="badge-blue"] { background-color: #142d4a !important; color: #72b7f2 !important; }
+.tbq-page .status-badge[data-tone="badge-amber"], .tbq-page .status-badge[data-tone="badge-violet"] { background-color: #3c2d16 !important; color: #e9a900 !important; }
+.tbq-page .status-badge[data-tone="badge-red"] { background-color: #421e28 !important; color: #ff7b82 !important; }
+.tbq-page .status-badge[data-tone="badge-gray"] { background-color: #252b3a !important; color: #a5adbd !important; }
+.tbq-page .status-badge { border-color: #80602b !important; }
+.tbq-page .card, .tbq-page .question-list, .tbq-page .question-list-shell, .tbq-page .tbq-question-empty > .card { background-color: #111729; border-color: #80602b; color: #f5f5f5; box-shadow: none; }
+.tbq-page .tbq-question-card:focus-visible { box-shadow: inset 0 0 0 2px #e5b84b; }
+.tbq-page .tbq-question-card svg, .tbq-page .section-title svg, .tbq-page .tbq-question-month__heading svg { color: #e5b84b; }
+.tbq-page [style*="background"] { background: #111729 !important; }
+.tbq-page [style*="border:"] { border-color: #80602b !important; }
+.tbq-page [style*="color: var(--ink)"] { color: #f5f5f5 !important; }
+.tbq-page [style*="color: var(--muted)"] { color: #a5adbd !important; }
+
+/* Answer workspace surfaces: cover the nested wrappers used by the live Questions tab. */
+.tbq-page .tbq-answer-page,
+.tbq-page .tbq-answer-page > .section,
+.tbq-page .tbq-question-list-section,
+.tbq-page .tbq-question-months,
+.tbq-page .tbq-question-groups,
+.tbq-page .tbq-question-month,
+.tbq-page .tbq-question-month__grid,
+.tbq-page .question-list-shell,
+.tbq-page .question-list,
+.tbq-page .question-table-scroll,
+.tbq-page .question-table {
+  background-color: #0b0f1b !important;
+}
+.tbq-page .tbq-answer-page > .section:first-child > .card {
+  background-color: #0b0f1b !important;
+}
+.tbq-page .tbq-answer-page .question-card,
+.tbq-page .tbq-answer-page .tbq-question-row,
+.tbq-page .tbq-answer-page .question-table-row,
+.tbq-page .tbq-answer-page .question-card > div {
+  background-color: #111729 !important;
+  color: #f5f5f5 !important;
+}
+.tbq-page .tbq-answer-page .question-card:hover,
+.tbq-page .tbq-answer-page .question-card:focus-visible,
+.tbq-page .tbq-answer-page .question-table-row:hover,
+.tbq-page .tbq-answer-page .question-table-row:focus-visible {
+  background-color: #151b2d !important;
+}
+.tbq-page .tbq-answer-page .question-table-cell {
+  background-color: #111729 !important;
+  color: #a5adbd !important;
+}
+.tbq-page .tbq-answer-page .question-card__customer strong,
+.tbq-page .tbq-answer-page .question-card__details strong,
+.tbq-page .tbq-answer-page .question-card__details p {
+  color: #f5f5f5 !important;
+}
+
+/* Text-Based Questions detail views and portal modals use the same palette. */
+body:has(.tbq-page) .modal-card,
+body:has(.tbq-page) .tbq-inline-answer__card {
+  background: #111729 !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+body:has(.tbq-page) .modal-card__header,
+body:has(.tbq-page) .modal-card__footer,
+body:has(.tbq-page) .tbq-inline-answer .modal-card__header {
+  background: #0b0f1b !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+body:has(.tbq-page) .modal-card__content,
+body:has(.tbq-page) .astrologer-modal-content,
+body:has(.tbq-page) .astrologer-modal-section,
+body:has(.tbq-page) .tbq-inline-answer,
+body:has(.tbq-page) .tbq-inline-answer .modal-card__content {
+  background: #111729 !important;
+  color: #f5f5f5 !important;
+}
+body:has(.tbq-page) .astrologer-modal-highlight,
+body:has(.tbq-page) .astrologer-modal-details-grid,
+body:has(.tbq-page) .astrologer-modal-question,
+body:has(.tbq-page) .tbq-inline-answer__card .astrologer-modal-highlight {
+  background: #101625 !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+body:has(.tbq-page) .astrologer-modal-title,
+body:has(.tbq-page) .modal-card .section-title {
+  color: #e5b84b !important;
+}
+body:has(.tbq-page) .modal-card .muted,
+body:has(.tbq-page) .astrologer-modal-section > span,
+body:has(.tbq-page) .astrologer-modal-details-grid small,
+body:has(.tbq-page) .astrologer-modal-content small {
+  color: #a5adbd !important;
+}
+body:has(.tbq-page) .modal-card .icon-btn,
+body:has(.tbq-page) .modal-card .btn-ghost,
+body:has(.tbq-page) .tbq-inline-answer .icon-btn {
+  background: #111729 !important;
+  border-color: #80602b !important;
+  color: #e5b84b !important;
+}
+body:has(.tbq-page) .modal-card .btn-outline {
+  background: #151b2d !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+body:has(.tbq-page) .modal-card .btn-primary {
+  background: #e9a900 !important;
+  border-color: #e9a900 !important;
+  color: #10131c !important;
+}
+
+/* Approved premium astrologer dashboard header treatment. */
+.app-shell--astrologer > .main-column > .topbar-header { min-height: 86px; height: auto; padding: 13px 28px; gap: 24px; background: #090c16; border-bottom: 1px solid rgba(218,174,61,.22); box-shadow: 0 10px 28px rgba(0,0,0,.2); }
+.app-shell--astrologer .astrologer-topbar-brand { flex: 0 0 auto; min-width: 204px; gap: 11px; }
+.app-shell--astrologer .astrologer-topbar-brand__mark { width: 38px; height: 38px; border-radius: 11px; background: #e8b83e; }
+.app-shell--astrologer .astrologer-topbar-brand__mark-img { width: 31px; height: 31px; }
+.app-shell--astrologer .astrologer-topbar-brand strong { color: #fff8e9; font: 700 18px Georgia, 'Times New Roman', serif; letter-spacing: .01em; }
+.app-shell--astrologer .astrologer-topbar-brand small { color: #aeb5c6; font-size: 8px; letter-spacing: .12em; }
+.app-shell--astrologer .topbar-actions { flex-wrap: wrap; justify-content: flex-end; gap: 9px 12px; }
+.app-shell--astrologer .astrologer-topbar-metrics { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.app-shell--astrologer .astrologer-topbar-status, .app-shell--astrologer .astrologer-topbar-switch, .app-shell--astrologer .astrologer-topbar-date, .app-shell--astrologer .astrologer-topbar-stat { min-height: 40px; box-sizing: border-box; }
+.app-shell--astrologer .astrologer-topbar-status { display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid rgba(87,214,158,.28); border-radius: 10px; background: #101c1c; color: #74e0a7; font-size: 11px; font-weight: 800; }
+.app-shell--astrologer .astrologer-topbar-status i { width: 7px; height: 7px; border-radius: 50%; background: #50d18e; box-shadow: 0 0 0 3px rgba(80,209,142,.12); }
+.app-shell--astrologer .astrologer-topbar-status.is-off { color: #9da5b5; border-color: #31394a; background: #131722; }
+.app-shell--astrologer .astrologer-topbar-status.is-off i { background: #747d90; box-shadow: none; }
+.app-shell--astrologer .astrologer-topbar-switch { display: inline-flex; align-items: center; gap: 6px; padding: 0 9px 0 11px; border: 1px solid #343c4d; border-radius: 10px; background: #131722; color: #c1c8d7; font: inherit; cursor: pointer; }
+.app-shell--astrologer .astrologer-topbar-switch span { font-size: 10px; font-weight: 700; }
+.app-shell--astrologer .astrologer-topbar-switch b { color: #9fa7b7; font-size: 9px; letter-spacing: .06em; }
+.app-shell--astrologer .astrologer-topbar-switch > i { position: relative; width: 25px; height: 14px; border-radius: 999px; background: #4b5362; }
+.app-shell--astrologer .astrologer-topbar-switch > i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #d1d5dc; transition: transform .18s ease; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on { border-color: rgba(65,207,147,.35); background: #10201d; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on b { color: #67dca1; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on > i { background: #1daa78; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on > i::after { transform: translateX(11px); background: #f4fff9; }
+.app-shell--astrologer .astrologer-topbar-date, .app-shell--astrologer .astrologer-topbar-stat { display: grid; align-content: center; gap: 2px; padding: 0 12px; border-left: 1px solid #2b3242; }
+.app-shell--astrologer .astrologer-topbar-date small, .app-shell--astrologer .astrologer-topbar-stat small { color: #858da0; font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+.app-shell--astrologer .astrologer-topbar-date strong { color: #e7ebf2; font-size: 10px; white-space: nowrap; }
+.app-shell--astrologer .astrologer-topbar-stat strong { color: #67dca1; font-size: 16px; white-space: nowrap; }
+.app-shell--astrologer .astrologer-queue-avatar { overflow: hidden; }
+.app-shell--astrologer .astrologer-queue-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle { min-height: 40px; padding: 0 11px; gap: 7px; border-radius: 10px; background: #141925; border-color: #353d4e; color: #d0d6e2; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle span:last-child { display: inline-flex; gap: 5px; align-items: center; font-size: 10px; font-weight: 800; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle b { color: #9ca5b6; font-size: 9px; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle.is-active b { color: #ffcf6b; }
+@media (max-width: 1120px) { .app-shell--astrologer > .main-column > .topbar-header { align-items: flex-start; } .app-shell--astrologer .topbar-actions { flex: 1; } }
+@media (max-width: 760px) { .app-shell--astrologer > .main-column > .topbar-header { padding: 12px 16px; } .app-shell--astrologer .astrologer-topbar-brand { min-width: 100%; } .app-shell--astrologer .topbar-actions { justify-content: flex-start; } .app-shell--astrologer .astrologer-topbar-date { border-left: 0; padding-left: 0; } }
+
 /* Reference treatment for the astrologer topbar controls. Keep this scoped to
    the shell and place it last so dashboard-specific overrides cannot collapse
    the DND pill or profile control. */
@@ -16174,6 +16354,865 @@ div.reward-section-head:nth-of-type(1) > h2.reward-section-title {
 @media (max-width: 900px) { .app-shell--astrologer .astrologer-analytics-grid { grid-template-columns: 1fr; } }
 @media (max-width: 650px) { .app-shell--astrologer .astrologer-queue-content { grid-template-columns: 44px 1fr; }.app-shell--astrologer .astrologer-queue-avatar { width: 44px; height: 44px; }.app-shell--astrologer .astrologer-queue-actions { grid-column: 1 / -1; justify-content: flex-end; }.app-shell--astrologer .astrologer-queue-heading { align-items: flex-start; flex-direction: column; } }
 
+/* Dashboard-only full-width alignment and section rhythm. */
+.app-shell--astrologer .page-content { width: 100%; max-width: none; box-sizing: border-box; }
+.app-shell--astrologer .page-transition { width: 100%; max-width: none; margin-inline: 0; }
+.app-shell--astrologer .page-transition > div { width: 100%; max-width: none; }
+.app-shell--astrologer .adash-quick-actions-section { width: 100%; box-sizing: border-box; margin-bottom: 0; }
+.app-shell--astrologer .adash-quick-actions-section + .astrologer-dashboard-metrics { margin-top: 18px; }
+.app-shell--astrologer .astrologer-dashboard-metrics,
+.app-shell--astrologer .astrologer-reference-grid,
+.app-shell--astrologer .astrologer-consultation-queue,
+.app-shell--astrologer .astrologer-analytics-grid { width: 100%; box-sizing: border-box; margin-left: 0; margin-right: 0; }
+@media (max-width: 600px) {
+  .app-shell--astrologer .astrologer-dashboard-metrics,
+  .app-shell--astrologer .astrologer-reference-grid,
+  .app-shell--astrologer .astrologer-consultation-queue,
+  .app-shell--astrologer .astrologer-analytics-grid { width: 100%; }
+}
+
+/* Dashboard typography scale: scoped to the dashboard so the other astrologer
+   workspaces retain their existing compact controls and tables. */
+.app-shell--astrologer:has(.astrologer-greeting-header) .sidebar-link { min-height: 42px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .sidebar-link span { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-brand strong { font-size: 21px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-brand small { font-size: 10px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-status,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch span { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch b { font-size: 11px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-date strong { font-size: 12px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-stat strong { font-size: 18px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header h1 { font-size: clamp(32px, 3vw, 36px); line-height: 1.18; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header p { font-size: clamp(16px, 1.45vw, 18px); line-height: 1.5; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .section-title { font-size: 18px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .adash-quick-actions-caption { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .adash-quick-action-label { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .adash-quick-actions-section .adash-quick-action { min-height: 62px; height: auto; padding-block: 10px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card { min-height: 128px; padding: 18px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { margin: 10px 0 8px; font-size: clamp(28px, 2.4vw, 32px); line-height: 1.12; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card small { font-size: 13px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-reference-panel__heading h2 { font-size: 18px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-reference-panel__heading button { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event { min-height: 94px; padding: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event strong { font-size: 16px; line-height: 1.35; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event small { font-size: 13px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-time { font-size: 12px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-meta { font-size: 13px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-meta button { padding: 7px 11px; font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item { min-height: 66px; padding: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item strong { font-size: 14px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item small { font-size: 13px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item em { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-analytics-heading h2 { font-size: 17px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-analytics-heading small { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-heading { font-size: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-heading small { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person strong { font-size: 16px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person small,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person span { font-size: 13px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-actions button { font-size: 13px; }
+@media (max-width: 760px) {
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header h1 { font-size: clamp(28px, 7vw, 32px); }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header p { font-size: 16px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card { min-height: 122px; padding: 15px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 14px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { font-size: 28px; }
+}
+
+/* Dispute Management palette — scoped to this page and its portal dialogs. */
+.app-shell--astrologer:has(.dispute-management-page) {
+  --bg: #080b14;
+  --surface: #111729;
+  --surface-strong: #111729;
+  --surface-soft: #151b2d;
+  --surface-border: #80602b;
+  --border: #80602b;
+  --line: #80602b;
+  --ink: #f5f5f5;
+  --body: #f5f5f5;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a5adbd;
+  --muted: #a5adbd;
+  --primary: #e5b84b;
+  --primary-bg: #151b2d;
+  --warning-bg: #3c2d16;
+  --amber-600: #e5b84b;
+  --success-bg: #12372d;
+  --green-600: #00c995;
+  --danger-bg: #421e28;
+  --red-600: #ff5b65;
+  --neutral-bg: #252b3a;
+}
+
+/* Latest Dispute Management reference palette. Keep this page-local. */
+.app-shell--astrologer:has(.dispute-management-page) .sidebar {
+  background-color: #090d18 !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header {
+  background-color: #0b1020 !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .main-column,
+.app-shell--astrologer:has(.dispute-management-page) .page-content,
+.app-shell--astrologer:has(.dispute-management-page) .page-transition,
+.app-shell--astrologer:has(.dispute-management-page) .dispute-management-page {
+  background-color: #0b1020 !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .sidebar-link.active,
+.app-shell--astrologer:has(.dispute-management-page) .sidebar-link:hover,
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .avatar-chip {
+  background-color: #151b2d !important;
+}
+
+.dispute-management-page .dispute-hero,
+.dispute-management-page .dispute-section,
+.dispute-management-page .dispute-stats-strip,
+.dispute-management-page .dispute-table {
+  background-color: #111729 !important;
+  border-color: #8b641b !important;
+}
+.dispute-management-page .page-title,
+.dispute-management-page .dispute-section__title,
+.dispute-management-page .dispute-section__title svg,
+.dispute-management-page .dispute-row__action,
+.dispute-management-page .complaint-view-button {
+  color: #f5b82e !important;
+}
+.dispute-management-page .dispute-stat {
+  background-color: #111729 !important;
+  border-right-color: #594522 !important;
+}
+.dispute-management-page .dispute-stat:hover,
+.dispute-management-page .dispute-stat.is-active { background-color: #151b2d !important; }
+.dispute-management-page .dispute-stat__value,
+.dispute-management-page .dispute-row__id,
+.dispute-management-page .dispute-row__user-main,
+.dispute-management-page .complaint-summary,
+.dispute-management-page .complaint-summary strong { color: #ffffff !important; }
+.dispute-management-page .dispute-stat__label,
+.dispute-management-page .dispute-row__user-sub,
+.dispute-management-page .dispute-row__date,
+.dispute-management-page .complaint-summary small,
+.dispute-management-page .complaint-related,
+.dispute-management-page .complaint-transaction,
+.dispute-management-page .complaint-date { color: #a5adbd !important; }
+.dispute-management-page .dispute-table {
+  background-color: #101625 !important;
+}
+.dispute-management-page .dispute-table__head,
+.dispute-management-page .complaints-table-head {
+  background-color: #1a1d2a !important;
+  border-color: #594522 !important;
+  color: #f5b82e !important;
+}
+.dispute-management-page .dispute-row,
+.dispute-management-page .complaints-table-row {
+  background-color: #111729 !important;
+  border-top-color: #594522 !important;
+  color: #ffffff !important;
+}
+.dispute-management-page .dispute-row:hover,
+.dispute-management-page .complaints-table-row:not(.complaints-table-head):hover { background-color: #151b2d !important; }
+.dispute-management-page .dispute-row__icon { background-color: #2b2341 !important; color: #f5b82e !important; }
+.dispute-management-page .dispute-stat__icon--lavender { background-color: #2b2341 !important; color: #c3a5ff !important; }
+.dispute-management-page .dispute-stat__icon--red { background-color: #421e28 !important; color: #ff5b65 !important; }
+.dispute-management-page .dispute-stat__icon--green { background-color: #12372d !important; color: #00c995 !important; }
+.dispute-management-page .complaints-search,
+.dispute-management-page .complaints-status-filter,
+.dispute-management-page .complaint-view-button {
+  background-color: #111729 !important;
+  border-color: #8b641b !important;
+}
+.dispute-management-page .complaints-search input,
+.dispute-management-page .complaints-status-filter select { color: #ffffff !important; }
+.dispute-management-page .complaints-search input::placeholder { color: #a5adbd !important; }
+.dispute-management-page .status-badge[data-tone='badge-gray'] { background-color: #2b2341 !important; color: #c3a5ff !important; }
+.dispute-management-page .status-badge[data-tone='badge-red'] { background-color: #421e28 !important; color: #ff5b65 !important; }
+.dispute-management-page .status-badge[data-tone='badge-green'] { background-color: #12372d !important; color: #00c995 !important; }
+.dispute-management-page .status-badge[data-tone='badge-violet'],
+.dispute-management-page .status-badge[data-tone='badge-amber'] { background-color: #3c2d16 !important; color: #f5b82e !important; }
+.dispute-management-page .btn-primary,
+.dispute-management-page .raise-complaint-trigger { background: #f5b82e !important; border-color: #f5b82e !important; color: #10131c !important; }
+.dispute-management-page .btn-ghost,
+.dispute-management-page .btn-outline { background-color: #151b2d !important; border-color: #8b641b !important; color: #ffffff !important; }
+
+body:has(.dispute-management-page) .modal-overlay,
+body:has(.dispute-management-page) .complaint-form-overlay { background-color: rgba(8, 11, 20, .78) !important; }
+body:has(.dispute-management-page) .modal-card,
+body:has(.dispute-management-page) .complaint-form-modal { background-color: #111729 !important; border-color: #8b641b !important; color: #ffffff !important; }
+body:has(.dispute-management-page) .modal-card__header,
+body:has(.dispute-management-page) .modal-card__footer { background-color: #0b1020 !important; border-color: #8b641b !important; }
+body:has(.dispute-management-page) .modal-card .astrologer-modal-title,
+body:has(.dispute-management-page) .modal-card .section-title { color: #f5b82e !important; }
+body:has(.dispute-management-page) .modal-card .muted { color: #a5adbd !important; }
+
+.app-shell--astrologer:has(.dispute-management-page) .sidebar {
+  background-color: #0a0d17 !important;
+  border-right-color: #80602b !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.dispute-management-page) .sidebar-link.active,
+.app-shell--astrologer:has(.dispute-management-page) .sidebar-link:hover {
+  background-color: #151b2d !important;
+  color: #e5b84b !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header {
+  background-color: #0b0f1b !important;
+  border-bottom-color: #80602b !important;
+}
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.dispute-management-page) .topbar-header .avatar-chip {
+  background-color: #111729 !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+
+.app-shell--astrologer:has(.dispute-management-page) .main-column,
+.app-shell--astrologer:has(.dispute-management-page) .page-content,
+.app-shell--astrologer:has(.dispute-management-page) .page-transition,
+.dispute-management-page {
+  background-color: #0b0f1b !important;
+  color: #f5f5f5 !important;
+}
+.dispute-management-page .dispute-hero {
+  background: linear-gradient(160deg, #111729 0%, #151b2d 100%) !important;
+  border-color: #80602b !important;
+}
+.dispute-management-page .dispute-section__title,
+.dispute-management-page .page-title,
+.dispute-management-page .section-title { color: #e5b84b !important; }
+.dispute-management-page .dispute-section__title svg,
+.dispute-management-page .dispute-stat__icon,
+.dispute-management-page .dispute-row__icon { color: #e5b84b !important; }
+
+.dispute-management-page .dispute-stats-strip,
+.dispute-management-page .dispute-table,
+.dispute-management-page .complaints-section,
+.dispute-management-page > .section {
+  background-color: #0b0f1b !important;
+  border-color: #80602b !important;
+}
+.dispute-management-page .dispute-stat {
+  background-color: #111729 !important;
+  border-right-color: #594522 !important;
+  color: #f5f5f5 !important;
+}
+.dispute-management-page .dispute-stat:hover,
+.dispute-management-page .dispute-stat.is-active { background-color: #151b2d !important; }
+.dispute-management-page .dispute-stat__value { color: #f5f5f5 !important; }
+.dispute-management-page .dispute-stat__label { color: #a5adbd !important; }
+.dispute-management-page .dispute-stat__icon--lavender { background-color: #2b2341 !important; }
+.dispute-management-page .dispute-stat__icon--green { background-color: #12372d !important; color: #00c995 !important; }
+.dispute-management-page .dispute-stat__icon--red { background-color: #421e28 !important; color: #ff5b65 !important; }
+
+.dispute-management-page .dispute-table {
+  background-color: #101625 !important;
+  border-color: #80602b !important;
+}
+.dispute-management-page .dispute-table__head {
+  background-color: #1a1d2a !important;
+  border-bottom-color: #594522 !important;
+  color: #e5b84b !important;
+}
+.dispute-management-page .dispute-row {
+  background-color: #111729 !important;
+  border-top-color: #594522 !important;
+  color: #f5f5f5 !important;
+}
+.dispute-management-page .dispute-row:hover { background-color: #151b2d !important; }
+.dispute-management-page .dispute-row__id,
+.dispute-management-page .dispute-row__user-main { color: #f5f5f5 !important; }
+.dispute-management-page .dispute-row__user-sub,
+.dispute-management-page .dispute-row__date { color: #a5adbd !important; }
+.dispute-management-page .dispute-row__icon { background-color: #151b2d !important; }
+.dispute-management-page .dispute-row__action,
+.dispute-management-page .complaint-view-button { color: #e5b84b !important; }
+
+.dispute-management-page .complaints-search,
+.dispute-management-page .complaints-status-filter,
+.dispute-management-page .complaint-type-options button,
+.dispute-management-page .complaint-form-field input,
+.dispute-management-page .complaint-form-field select,
+.dispute-management-page .complaint-form-field textarea {
+  background-color: #111729 !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+.dispute-management-page .complaints-search input,
+.dispute-management-page .complaints-status-filter select { color: #f5f5f5 !important; }
+.dispute-management-page .complaints-search input::placeholder,
+.dispute-management-page .complaint-form-field input::placeholder,
+.dispute-management-page .complaint-form-field textarea::placeholder { color: #a5adbd !important; }
+.dispute-management-page .complaints-table-row {
+  background-color: #111729 !important;
+  color: #f5f5f5 !important;
+}
+.dispute-management-page .complaints-table-row:not(.complaints-table-head) { border-top-color: #594522 !important; }
+.dispute-management-page .complaints-table-row:not(.complaints-table-head):hover { background-color: #151b2d !important; }
+.dispute-management-page .complaints-table-head { background-color: #1a1d2a !important; color: #e5b84b !important; }
+.dispute-management-page .complaint-summary,
+.dispute-management-page .complaint-summary strong { color: #f5f5f5 !important; }
+.dispute-management-page .complaint-summary small,
+.dispute-management-page .complaint-related,
+.dispute-management-page .complaint-transaction,
+.dispute-management-page .complaint-date { color: #a5adbd !important; }
+.dispute-management-page .complaint-view-button {
+  background-color: #151b2d !important;
+  border-color: #80602b !important;
+}
+.dispute-management-page .complaint-against-platform { background-color: #3c2d16 !important; color: #e5b84b !important; }
+.dispute-management-page .complaint-against-user { background-color: #2b2341 !important; color: #c4a6ff !important; }
+
+.dispute-management-page .status-badge[data-tone='badge-red'] { background-color: #421e28 !important; color: #ff5b65 !important; }
+.dispute-management-page .status-badge[data-tone='badge-green'] { background-color: #12372d !important; color: #00c995 !important; }
+.dispute-management-page .status-badge[data-tone='badge-gray'] { background-color: #252b3a !important; color: #a5adbd !important; }
+.dispute-management-page .status-badge[data-tone='badge-violet'] { background-color: #3c2d16 !important; color: #e5b84b !important; }
+.dispute-management-page .status-badge[data-tone='badge-amber'] { background-color: #3c2d16 !important; color: #e5b84b !important; }
+.dispute-management-page .btn-primary,
+.dispute-management-page .raise-complaint-trigger {
+  background: #e9a900 !important;
+  border-color: #e9a900 !important;
+  color: #10131c !important;
+}
+.dispute-management-page .btn-ghost,
+.dispute-management-page .btn-outline { background-color: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+
+/* Portal-rendered complaint dialogs inherit the page theme while open. */
+body:has(.dispute-management-page) .complaint-form-overlay,
+body:has(.dispute-management-page) .modal-overlay { background-color: rgba(8, 11, 20, .78) !important; }
+body:has(.dispute-management-page) .complaint-form-modal,
+body:has(.dispute-management-page) .modal-card {
+  background-color: #111729 !important;
+  border-color: #80602b !important;
+  color: #f5f5f5 !important;
+}
+body:has(.dispute-management-page) .complaint-form-modal .raise-complaint-panel-heading,
+body:has(.dispute-management-page) .modal-card__header,
+body:has(.dispute-management-page) .modal-card__footer { background-color: #0b0f1b !important; border-color: #80602b !important; }
+body:has(.dispute-management-page) .complaint-form-modal .raise-complaint-panel-heading .section-title,
+body:has(.dispute-management-page) .modal-card .section-title,
+body:has(.dispute-management-page) .modal-card .astrologer-modal-title { color: #e5b84b !important; }
+body:has(.dispute-management-page) .complaint-form-modal .raise-complaint-intro,
+body:has(.dispute-management-page) .complaint-form-modal .complaint-upload-box,
+body:has(.dispute-management-page) .complaint-form-modal .complaint-evidence-item,
+body:has(.dispute-management-page) .astrologer-modal-highlight,
+body:has(.dispute-management-page) .textarea-box { background-color: #101625 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+body:has(.dispute-management-page) .complaint-form-modal .complaint-form-field,
+body:has(.dispute-management-page) .modal-card .field-label-top,
+body:has(.dispute-management-page) .modal-card strong { color: #f5f5f5 !important; }
+body:has(.dispute-management-page) .modal-card .muted,
+body:has(.dispute-management-page) .complaint-form-modal .complaint-helper,
+body:has(.dispute-management-page) .complaint-form-modal .complaint-character-count { color: #a5adbd !important; }
+body:has(.dispute-management-page) .complaint-form-modal .icon-btn,
+body:has(.dispute-management-page) .modal-card .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+
+/* Appointment Management dark palette — colors only, scoped to this page. */
+.app-shell--astrologer:has(.apt-page) {
+  --surface: #111729;
+  --surface-strong: #111729;
+  --surface-soft: #151b2d;
+  --surface-border: #80602b;
+  --surface-overlay: #111729;
+  --ink: #f5f5f5;
+  --body: #f5f5f5;
+  --muted: #a5adbd;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a5adbd;
+  --primary: #e9a900;
+  --primary-dark: #c78d00;
+  --primary-bg: #151b2d;
+  --accent: #4b9eff;
+  --accent-dark: #4b9eff;
+  --secondary-bg: #142d4a;
+  --success: #00c995;
+  --success-bg: #12372d;
+  --green-600: #00c995;
+  --danger: #ff5b65;
+  --danger-bg: #421e28;
+  --red-600: #ff5b65;
+  --warning: #e5b84b;
+  --warning-bg: #3c2d16;
+  --amber-600: #e5b84b;
+  --neutral-bg: #252b3a;
+  --sky-bg: #142d4a;
+  --sky-600: #4b9eff;
+}
+.app-shell--astrologer:has(.apt-page) .main-column,
+.app-shell--astrologer:has(.apt-page) .page-content,
+.app-shell--astrologer:has(.apt-page) .page-transition,
+.app-shell--astrologer:has(.apt-page) .apt-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar-link.active,
+.app-shell--astrologer:has(.apt-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.apt-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.apt-page) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.apt-page) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.apt-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.apt-page .page-title,
+.apt-page .section-title,
+.apt-page .apt-calendar-title,
+.apt-page .apt-side-head,
+.apt-page .apt-list-view-date-nav strong { color: #e5b84b !important; }
+.apt-page .wd-tabs { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
+.apt-page .wd-tabs .wd-tab,
+.apt-page .wd-tabs .wd-tab:visited { background-color: transparent !important; color: #a5adbd !important; }
+.apt-page .wd-tabs .wd-tab:hover,
+.apt-page .wd-tabs .wd-tab:focus-visible { background-color: #151b2d !important; color: #f5f5f5 !important; }
+.apt-page .wd-tabs .wd-tab.is-active,
+.apt-page .wd-tabs .wd-tab.is-active:visited { background-color: #151b2d !important; color: #e5b84b !important; }
+.apt-page .wd-tabs .wd-tab.is-active::after { background-color: #e9a900 !important; }
+.apt-page .apt-main,
+.apt-page .apt-calendar-col,
+.apt-page .apt-side-col { background-color: #0b0f1b !important; }
+.apt-page .muted,
+.apt-page .apt-history-item__top span,
+.apt-page .apt-history-item__meta,
+.apt-page .apt-history-item__footer,
+.apt-page .apt-history-item__id,
+.apt-page .apt-history-calendar-legend span,
+.apt-page .apt-history-summary span,
+.apt-page .apt-inline-details small { color: #a5adbd !important; }
+
+.apt-page .apt-history-toolbar,
+.apt-page .apt-scheduling-calendar--history,
+.apt-page .apt-history-list-view,
+.apt-page .apt-side-panel,
+.apt-page .apt-history-list-card,
+.apt-page .apt-history-detail-card,
+.apt-page .apt-history-intro { background-color: #0b0f1b !important; border-color: #80602b !important; }
+.apt-page .apt-history-tabs,
+.apt-page .apt-display-toggle,
+.apt-page .apt-list-view-modes { background-color: #151b2d !important; border-color: #80602b !important; }
+.apt-page .apt-history-tabs button,
+.apt-page .apt-display-toggle button,
+.apt-page .apt-list-view-modes button { background-color: transparent !important; color: #a5adbd !important; }
+.apt-page .apt-history-tabs button:hover,
+.apt-page .apt-display-toggle button:hover,
+.apt-page .apt-display-toggle button:focus-visible,
+.apt-page .apt-list-view-modes button:hover { background-color: #111729 !important; color: #f5f5f5 !important; }
+.apt-page .apt-history-tabs button.is-active,
+.apt-page .apt-display-toggle button.is-active,
+.apt-page .apt-list-view-modes button.is-active { background-color: #e9a900 !important; color: #10131c !important; }
+.apt-page .apt-history-status-filter,
+.apt-page .apt-calendar-search,
+.apt-page .apt-calendar-search input { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.apt-page .apt-calendar-search svg,
+.apt-page .apt-calendar-search input::placeholder { color: #a5adbd !important; }
+.apt-page .apt-calendar-arrow,
+.apt-page .apt-today-btn,
+.apt-page .apt-list-view-date-nav .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+.apt-page .apt-calendar-arrow:hover,
+.apt-page .apt-today-btn:hover,
+.apt-page .apt-list-view-date-nav .icon-btn:hover { background-color: #80602b !important; color: #10131c !important; }
+
+.apt-page .apt-month-weekday { color: #a5adbd !important; }
+.apt-page .apt-month-cell { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.apt-page .apt-month-cell.is-muted { background-color: #0b0f1b !important; }
+.apt-page .apt-month-cell:hover,
+.apt-page .apt-history-cell.is-selected { background-color: #151b2d !important; }
+.apt-page .apt-month-day,
+.apt-page .apt-cell-line { color: #f5f5f5 !important; }
+.apt-page .apt-history-cell.has-booked .apt-month-day,
+.apt-page .apt-history-cell.has-pending .apt-month-day { color: #e5b84b !important; }
+.apt-page .apt-history-cell.has-rescheduled .apt-month-day { color: #4b9eff !important; }
+.apt-page .apt-history-cell.has-completed .apt-month-day { color: #00c995 !important; }
+.apt-page .apt-history-cell.has-cancelled .apt-month-day { color: #ff5b65 !important; }
+
+.apt-page .apt-history-item,
+.apt-page .apt-history-list-view .apt-history-item { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.apt-page .apt-history-item:hover,
+.apt-page .apt-history-item:focus-visible { background-color: #151b2d !important; }
+.apt-page .apt-history-item.is-active { background-color: #151b2d !important; border-color: #e5b84b !important; }
+.apt-page .apt-history-item__top strong,
+.apt-page .apt-history-item__info-item,
+.apt-page .apt-history-item__amount,
+.apt-page .apt-history-item__time strong { color: #f5f5f5 !important; }
+.apt-page .apt-history-item__info,
+.apt-page .apt-inline-details,
+.apt-page .apt-history-list-view .apt-history-row.is-inline.is-expanded,
+.apt-page .apt-history-list-view .apt-history-row.is-inline:has(.apt-inline-details) { background-color: #151b2d !important; border-color: #80602b !important; }
+.apt-page .apt-inline-details__heading strong,
+.apt-page .apt-inline-details strong { color: #f5f5f5 !important; }
+.apt-page .apt-inline-details__note { color: #a5adbd !important; }
+.apt-page .apt-history-item__footer { border-top-color: #80602b !important; }
+.apt-page .apt-history-empty { background-color: #151b2d !important; border-color: #80602b !important; }
+.apt-page .apt-history-empty strong { color: #f5f5f5 !important; }
+
+.apt-page .status-badge[data-tone='badge-appointment-upcoming'] { background-color: #3c2d16 !important; border-color: #e5b84b !important; color: #e5b84b !important; }
+.apt-page .status-badge[data-tone='badge-appointment-completed'] { background-color: #12372d !important; border-color: #00c995 !important; color: #00c995 !important; }
+.apt-page .status-badge[data-tone='badge-appointment-cancelled'] { background-color: #421e28 !important; border-color: #ff5b65 !important; color: #ff5b65 !important; }
+.apt-page .status-badge[data-tone='badge-appointment-rescheduled'] { background-color: #142d4a !important; border-color: #4b9eff !important; color: #4b9eff !important; }
+.apt-page .status-badge[data-tone='badge-appointment-refunded'] { background-color: #2d1d45 !important; border-color: #a855f7 !important; color: #a855f7 !important; }
+.apt-page .status-badge[data-tone='badge-appointment-upcoming'] .status-badge__dot { background-color: #e5b84b !important; }
+.apt-page .status-badge[data-tone='badge-appointment-completed'] .status-badge__dot { background-color: #00c995 !important; }
+.apt-page .status-badge[data-tone='badge-appointment-cancelled'] .status-badge__dot { background-color: #ff5b65 !important; }
+.apt-page .status-badge[data-tone='badge-appointment-rescheduled'] .status-badge__dot { background-color: #4b9eff !important; }
+.apt-page .status-badge[data-tone='badge-appointment-refunded'] .status-badge__dot { background-color: #a855f7 !important; }
+
+body:has(.apt-page) .apt-appointment-modal,
+body:has(.apt-page) .apt-cancel-modal,
+body:has(.apt-page) .modal-card.apt-appointment-modal { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+body:has(.apt-page) .apt-appointment-modal .apt-drawer-head,
+body:has(.apt-page) .apt-appointment-modal .apt-drawer-body,
+body:has(.apt-page) .apt-cancel-modal > * { background-color: #111729 !important; color: #f5f5f5 !important; }
+body:has(.apt-page) .apt-appointment-modal .icon-btn,
+body:has(.apt-page) .apt-cancel-modal .icon-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+
+/* Atonement page dark palette — colors only, scoped to this page. */
+.app-shell--astrologer:has(.atonement-page) {
+  --surface: #111729;
+  --surface-strong: #111729;
+  --surface-soft: #151b2d;
+  --surface-border: #80602b;
+  --divider: #80602b;
+  --surface-overlay: #111729;
+  --ink: #f5f5f5;
+  --body: #f5f5f5;
+  --muted: #a5adbd;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a5adbd;
+  --primary: #e9a900;
+  --primary-dark: #c78d00;
+  --primary-bg: #151b2d;
+  --accent: #e5b84b;
+  --accent-dark: #e5b84b;
+  --success: #00c995;
+  --success-bg: #12372d;
+  --green-600: #00c995;
+  --danger: #ff5b65;
+  --danger-bg: #421e28;
+  --red-600: #ff5b65;
+  --warning: #e5b84b;
+  --warning-bg: #3c2d16;
+  --amber-600: #e5b84b;
+  --neutral-bg: #252b3a;
+}
+.app-shell--astrologer:has(.atonement-page) .main-column,
+.app-shell--astrologer:has(.atonement-page) .page-content,
+.app-shell--astrologer:has(.atonement-page) .page-transition,
+.app-shell--astrologer:has(.atonement-page) .atonement-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.atonement-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.atonement-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.atonement-page) .sidebar-link.active,
+.app-shell--astrologer:has(.atonement-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.atonement-page) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.atonement-page) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.atonement-page) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.atonement-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.atonement-page .page-title { color: #e5b84b !important; }
+.atonement-page .page-header-back button { background-color: #111729 !important; border-color: #80602b !important; color: #e5b84b !important; }
+.atonement-page .page-header-back button:hover { background-color: #151b2d !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-source-banner,
+.atonement-page .atonement-tabs,
+.atonement-page .atonement-tab-content,
+.atonement-page .atonement-create,
+.atonement-page .atonement-choose { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-source-banner { border-color: #80602b !important; }
+.atonement-page .atonement-source-banner strong,
+.atonement-page .atonement-source-banner button { color: #e5b84b !important; }
+.atonement-page .atonement-tabs,
+.atonement-page .atonement-choose-source-tabs { background-color: #151b2d !important; border-color: #80602b !important; }
+.atonement-page .atonement-tab,
+.atonement-page .atonement-source-tab { background-color: transparent !important; color: #a5adbd !important; }
+.atonement-page .atonement-tab:hover,
+.atonement-page .atonement-source-tab:hover { background-color: #111729 !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-tab.active,
+.atonement-page .atonement-source-tab.active { background-color: #e9a900 !important; color: #10131c !important; }
+
+.atonement-page .atonement-section,
+.atonement-page .atonement-inline-panel,
+.atonement-page .atonement-step,
+.atonement-page .atonement-material-row,
+.atonement-page .atonement-custom-section,
+.atonement-page .atonement-custom-material-row,
+.atonement-page .atonement-custom-detail-row { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-section-header { background-color: #111729 !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-section-header:hover { background-color: #151b2d !important; }
+.atonement-page .atonement-section-header-left svg,
+.atonement-page .atonement-section-number,
+.atonement-page .atonement-step-number,
+.atonement-page .atonement-step-name,
+.atonement-page .atonement-custom-section-head strong { color: #e5b84b !important; }
+.atonement-page .atonement-section-number,
+.atonement-page .atonement-step-number { background-color: #151b2d !important; }
+.atonement-page .atonement-section-body,
+.atonement-page .atonement-step-body { background-color: #101625 !important; border-top-color: #80602b !important; }
+.atonement-page .atonement-section-desc,
+.atonement-page .atonement-field,
+.atonement-page .atonement-field-error,
+.atonement-page .muted { color: #a5adbd !important; }
+.atonement-page .atonement-field-label,
+.atonement-page .atonement-toggle-row > span:last-child { color: #f5f5f5 !important; }
+.atonement-page .atonement-field input,
+.atonement-page .atonement-field select,
+.atonement-page .atonement-field textarea,
+.atonement-page .atonement-step-body .atonement-field input,
+.atonement-page .atonement-step-body .atonement-field textarea { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-field input::placeholder,
+.atonement-page .atonement-field textarea::placeholder { color: #a5adbd !important; }
+.atonement-page .atonement-field input:focus,
+.atonement-page .atonement-field select:focus,
+.atonement-page .atonement-field textarea:focus { border-color: #e5b84b !important; }
+.atonement-page .atonement-add-btn,
+.atonement-page .atonement-create-custom-btn { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+.atonement-page .atonement-add-btn:hover,
+.atonement-page .atonement-create-custom-btn:hover { background-color: #80602b !important; color: #10131c !important; }
+.atonement-page .atonement-checkbox,
+.atonement-page .atonement-proof-card { background-color: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.atonement-page .atonement-checkbox.checked,
+.atonement-page .atonement-proof-card.active { background-color: #101625 !important; border-color: #e5b84b !important; color: #e5b84b !important; }
+.atonement-page .atonement-checkbox-mark { background-color: #111729 !important; border-color: #80602b !important; }
+.atonement-page .atonement-checkbox.checked .atonement-checkbox-mark { background-color: #e9a900 !important; border-color: #e9a900 !important; color: #10131c !important; }
+.atonement-page .atonement-proof-card.required { background-color: #12372d !important; border-color: #00c995 !important; color: #00c995 !important; }
+.atonement-page .atonement-toggle { background-color: #252b3a !important; }
+.atonement-page .atonement-toggle.on { background-color: #e9a900 !important; }
+.atonement-page .atonement-toggle-knob { background-color: #f5f5f5 !important; }
+.atonement-page .atonement-form-actions { border-top-color: #80602b !important; }
+.atonement-page .btn-primary { background-color: #e9a900 !important; border-color: #e9a900 !important; color: #10131c !important; }
+.atonement-page .btn-outline { background-color: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.atonement-page .btn-outline:hover,
+.atonement-page .btn-primary:hover { background-color: #80602b !important; border-color: #e5b84b !important; color: #10131c !important; }
+
+body:has(.atonement-page) .atonement-modal-backdrop,
+body:has(.atonement-page) .atonement-proof-lightbox { background-color: rgba(8, 11, 20, .82) !important; }
+body:has(.atonement-page) .atonement-ritual-picker-modal,
+body:has(.atonement-page) .atonement-custom-modal,
+body:has(.atonement-page) .atonement-confirm-modal { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+body:has(.atonement-page) .atonement-ritual-picker-modal-header h3,
+body:has(.atonement-page) .atonement-custom-modal h3,
+body:has(.atonement-page) .atonement-confirm-modal h3 { color: #e5b84b !important; }
+body:has(.atonement-page) .atonement-ritual-picker-modal-header p,
+body:has(.atonement-page) .atonement-custom-modal p,
+body:has(.atonement-page) .atonement-confirm-modal p { color: #a5adbd !important; }
+body:has(.atonement-page) .atonement-ritual-option,
+body:has(.atonement-page) .atonement-custom-section { background-color: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+body:has(.atonement-page) .atonement-ritual-option:hover { background-color: #101625 !important; border-color: #e5b84b !important; }
+body:has(.atonement-page) .atonement-ritual-option-icon,
+body:has(.atonement-page) .atonement-modal-close { background-color: #151b2d !important; color: #e5b84b !important; border-color: #80602b !important; }
+
+/* Create Live dark palette — colors only, scoped to the live workspace. */
+.app-shell--astrologer:has(.live-workspace) {
+  --surface: #111729;
+  --surface-strong: #111729;
+  --surface-soft: #151b2d;
+  --surface-border: #80602b;
+  --surface-overlay: #111729;
+  --ink: #f5f5f5;
+  --body: #f5f5f5;
+  --muted: #a5adbd;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a5adbd;
+  --primary: #e9a900;
+  --primary-dark: #c78d00;
+  --primary-bg: #151b2d;
+  --accent: #e5b84b;
+  --accent-dark: #e5b84b;
+  --success: #00c995;
+  --success-bg: #12372d;
+  --green-600: #00c995;
+  --danger: #ff5b65;
+  --danger-bg: #421e28;
+  --red-600: #ff5b65;
+  --warning: #e5b84b;
+  --warning-bg: #3c2d16;
+  --amber-600: #e5b84b;
+  --neutral-bg: #252b3a;
+}
+.app-shell--astrologer:has(.live-workspace) .main-column,
+.app-shell--astrologer:has(.live-workspace) .page-content,
+.app-shell--astrologer:has(.live-workspace) .page-transition,
+.app-shell--astrologer:has(.live-workspace) .live-workspace { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.live-workspace) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.live-workspace) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.live-workspace) .sidebar-link.active,
+.app-shell--astrologer:has(.live-workspace) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.live-workspace) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.live-workspace) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.live-workspace) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.live-workspace) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+
+.live-workspace .ld-header__titles h1 { color: #e5b84b !important; }
+.live-workspace .ld-header__titles p,
+.live-workspace .live-eyebrow { color: #a5adbd !important; }
+.live-workspace .live-eyebrow { color: #e5b84b !important; }
+.live-workspace .live-text-button { background-color: #111729 !important; border: 1px solid #80602b !important; color: #e5b84b !important; }
+.live-workspace .live-text-button:hover { background-color: #151b2d !important; color: #f5f5f5 !important; }
+.live-workspace .ld-steps { border-bottom-color: #80602b !important; }
+.live-workspace .ld-step { color: #a5adbd !important; }
+.live-workspace .ld-step__dot { background-color: #151b2d !important; color: #a5adbd !important; }
+.live-workspace .ld-step__link { color: inherit !important; }
+.live-workspace .ld-step.is-current { color: #e5b84b !important; }
+.live-workspace .ld-step.is-current::after { background-color: #e9a900 !important; }
+.live-workspace .ld-step.is-current .ld-step__dot { background-color: #e9a900 !important; color: #10131c !important; }
+.live-workspace .ld-step.is-done { color: #f5f5f5 !important; }
+.live-workspace .ld-step.is-done .ld-step__dot { background-color: #12372d !important; color: #00c995 !important; }
+
+.live-workspace .ld-card,
+.live-workspace .live-guidelines-card,
+.live-workspace .live-tool-card,
+.live-workspace .live-feed-card,
+.live-workspace .live-chat-card { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.live-workspace .live-camera-preview { background: #101625 !important; border-color: #80602b !important; }
+.live-workspace .live-camera-placeholder { background-color: #101625 !important; color: #a5adbd !important; }
+.live-workspace .live-camera-placeholder strong,
+.live-workspace .live-section-heading,
+.live-workspace .live-section-heading h2,
+.live-workspace .live-section-heading h3 { color: #f5f5f5 !important; }
+.live-workspace .live-camera-placeholder svg,
+.live-workspace .live-section-heading svg,
+.live-workspace .live-panel-heading svg,
+.live-workspace .live-tool-heading svg { color: #e5b84b !important; }
+.live-workspace .live-camera-label,
+.live-workspace .live-camera-status { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.live-workspace .live-camera-status .is-good { color: #00c995 !important; }
+.live-workspace .live-camera-status .is-warning { color: #e5b84b !important; }
+.live-workspace .live-guidelines,
+.live-workspace .live-guidelines span { color: #a5adbd !important; }
+.live-workspace .live-guidelines span::before { color: #e5b84b !important; }
+.live-workspace .live-warning { background-color: #3c2d16 !important; color: #e5b84b !important; }
+.live-workspace .live-test-button { background-color: #151b2d !important; border-color: #80602b !important; color: #e5b84b !important; }
+.live-workspace .live-test-button:hover { background-color: #80602b !important; color: #10131c !important; }
+.live-workspace .live-go-button,
+.live-workspace .btn-primary { background: linear-gradient(135deg, #e9a900, #e5b84b) !important; border-color: #e9a900 !important; color: #10131c !important; }
+.live-workspace .live-go-button:hover,
+.live-workspace .btn-primary:hover { background: #80602b !important; border-color: #e5b84b !important; color: #10131c !important; }
+
+body:has(.live-workspace) .live-config-modal,
+body:has(.live-workspace) .live-access-popover,
+body:has(.live-workspace) .live-audience-popover { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+body:has(.live-workspace) .live-config-header,
+body:has(.live-workspace) .live-config-footer { background-color: #0b0f1b !important; border-color: #80602b !important; }
+body:has(.live-workspace) .live-config-body,
+body:has(.live-workspace) .live-verification,
+body:has(.live-workspace) .live-access-note { background-color: #151b2d !important; color: #a5adbd !important; }
+body:has(.live-workspace) .live-config-modal h2,
+body:has(.live-workspace) .live-config-modal legend,
+body:has(.live-workspace) .live-access-group > strong,
+body:has(.live-workspace) .live-audience-popover > strong { color: #e5b84b !important; }
+body:has(.live-workspace) .live-config-modal .text-input,
+body:has(.live-workspace) .live-config-modal select,
+body:has(.live-workspace) .live-config-modal textarea { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+
+/* Scheduled Live and Live History dark palette — colors only. */
+.app-shell--astrologer:has(.live-list-page) {
+  --surface: #111729;
+  --surface-strong: #111729;
+  --surface-soft: #151b2d;
+  --surface-border: #80602b;
+  --surface-overlay: #111729;
+  --ink: #f5f5f5;
+  --body: #f5f5f5;
+  --muted: #a5adbd;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a5adbd;
+  --primary: #e9a900;
+  --primary-dark: #c78d00;
+  --primary-bg: #151b2d;
+  --accent: #e5b84b;
+  --accent-dark: #e5b84b;
+  --success: #00c995;
+  --success-bg: #12372d;
+  --green-600: #00c995;
+  --danger: #ff5b65;
+  --danger-bg: #421e28;
+  --red-600: #ff5b65;
+  --warning: #e5b84b;
+  --warning-bg: #3c2d16;
+  --amber-600: #e5b84b;
+  --neutral-bg: #252b3a;
+}
+.app-shell--astrologer:has(.live-list-page) .main-column,
+.app-shell--astrologer:has(.live-list-page) .page-content,
+.app-shell--astrologer:has(.live-list-page) .page-transition,
+.app-shell--astrologer:has(.live-list-page) .live-list-page { background-color: #0b0f1b !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.live-list-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.live-list-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.live-list-page) .sidebar-link.active,
+.app-shell--astrologer:has(.live-list-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.live-list-page) .topbar-header { background-color: #0b0f1b !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.live-list-page) .topbar-header .icon-btn,
+.app-shell--astrologer:has(.live-list-page) .topbar-header .theme-toggle-btn,
+.app-shell--astrologer:has(.live-list-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.live-list-page .page-title,
+.live-list-page .live-list-section__title h2 { color: #e5b84b !important; }
+.live-list-page .page-header-back button { background-color: #111729 !important; border-color: #80602b !important; color: #e5b84b !important; }
+.live-list-page .page-header-back button:hover { background-color: #151b2d !important; color: #f5f5f5 !important; }
+.live-list-page .live-list-section__title { border-top-color: #80602b !important; }
+.live-list-page .live-list-section__title span { color: #a5adbd !important; }
+.live-list-page .btn-primary { background: linear-gradient(135deg, #e9a900, #e5b84b) !important; border-color: #e9a900 !important; color: #10131c !important; }
+.live-list-page .btn-primary:hover { background: #80602b !important; border-color: #e5b84b !important; color: #10131c !important; }
+.live-list-page .live-list-grid,
+.live-list-page .live-list-section,
+.live-list-page .live-list-empty { background-color: #0b0f1b !important; }
+.live-list-page .live-list-empty { border-color: #80602b !important; color: #f5f5f5 !important; }
+.live-list-page .live-list-empty svg { color: #e5b84b !important; }
+.live-list-page .live-list-empty strong { color: #f5f5f5 !important; }
+.live-list-page .live-list-empty p { color: #a5adbd !important; }
+.live-list-page .live-list-card { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.live-list-page .live-list-card:hover,
+.live-list-page .live-list-card:focus-visible { background-color: #151b2d !important; border-color: #e5b84b !important; }
+.live-list-page .live-list-card--green { border-top-color: #00c995 !important; }
+.live-list-page .live-list-card--yellow { border-top-color: #e5b84b !important; }
+.live-list-page .live-list-card--red { border-top-color: #ff5b65 !important; }
+.live-list-page .live-list-bubble--green { background-color: #12372d !important; color: #00c995 !important; }
+.live-list-page .live-list-bubble--yellow { background-color: #3c2d16 !important; color: #e5b84b !important; }
+.live-list-page .live-list-bubble--red { background-color: #421e28 !important; color: #ff5b65 !important; }
+.live-list-page .live-list-audience,
+.live-list-page .live-list-card__desc,
+.live-list-page .live-list-details dt,
+.live-list-page .live-list-card__date { color: #a5adbd !important; }
+.live-list-page .live-list-card h3,
+.live-list-page .live-list-card__title,
+.live-list-page .live-list-details dd,
+.live-list-page .live-list-card__viewers { color: #f5f5f5 !important; }
+.live-list-page .live-list-details,
+.live-list-page .live-list-card__footer { border-top-color: #80602b !important; }
+.live-list-page .live-list-card__viewers svg,
+.live-list-page .live-list-card__more { color: #e5b84b !important; }
+
+/* Final color precedence for the Text Based Questions page. */
+.app-shell--astrologer:has(.tbq-page) .main-column,
+.app-shell--astrologer:has(.tbq-page) .page-content,
+.app-shell--astrologer:has(.tbq-page) .page-transition,
+.app-shell--astrologer:has(.tbq-page) .tbq-page { background-color: #080b14 !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link.active, .app-shell--astrologer:has(.tbq-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header .icon-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .theme-toggle-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.tbq-page .page-eyebrow, .tbq-page .tbq-module-tabs, .tbq-page .tbq-module-tab, .tbq-page .search-bar { background: #111729 !important; border-color: #80602b !important; }
+.tbq-page .page-eyebrow, .tbq-page .page-title, .tbq-page .section-title, .tbq-page .page-header-row h1, .tbq-page .tbq-question-month__heading, .tbq-page .tbq-question-month__heading .tbq-question-month__name { color: #e5b84b !important; }
+.tbq-page .page-header-row > div > p, .tbq-page .muted, .tbq-page .tbq-question-month__heading .tbq-question-month__count { color: #a5adbd !important; }
+.tbq-page .tbq-module-tab { color: #f5f5f5 !important; }
+.tbq-page .tbq-module-tab:hover { background: #151b2d !important; color: #e5b84b !important; }
+.tbq-page .tbq-module-tab.is-active { background: #80602b !important; border-color: #e5b84b !important; color: #10131c !important; }
+.tbq-page .search-bar__input { background: transparent !important; color: #f5f5f5 !important; }
+.tbq-page .search-bar svg, .tbq-page .search-bar__input::placeholder { color: #a5adbd !important; }
+.tbq-page .btn-primary { background: #e9a900 !important; border-color: #e9a900 !important; color: #10131c !important; }
+.tbq-page .btn-outline { background: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.tbq-page .btn-outline:hover { background: #80602b !important; color: #10131c !important; }
+.tbq-page .btn-ghost { color: #e5b84b !important; }
+.tbq-page .tbq-question-card, .tbq-page .card, .tbq-page .question-list, .tbq-page .question-list-shell { background: #111729 !important; border-color: #80602b !important; color: #a5adbd !important; }
+.tbq-page .tbq-question-card:hover, .tbq-page .tbq-question-card:focus-visible { background: #151b2d !important; }
+.tbq-page .tbq-question-card__customer strong, .tbq-page .tbq-question-card__details strong, .tbq-page .tbq-question-card__details p, .tbq-page .tbq-question-card__deadline small { color: #f5f5f5 !important; }
+.tbq-page .tbq-question-card__details > span, .tbq-page .tbq-question-card__deadline, .tbq-page .tbq-question-card__deadline b, .tbq-page .tbq-question-card__dates { color: #a5adbd !important; }
+.tbq-page .status-badge[data-tone="badge-green"] { background-color: #12372d !important; color: #5ee0a8 !important; }
+.tbq-page .status-badge[data-tone="badge-blue"] { background-color: #142d4a !important; color: #72b7f2 !important; }
+.tbq-page .status-badge[data-tone="badge-amber"], .tbq-page .status-badge[data-tone="badge-violet"] { background-color: #3c2d16 !important; color: #e9a900 !important; }
+.tbq-page .status-badge[data-tone="badge-red"] { background-color: #421e28 !important; color: #ff7b82 !important; }
+.tbq-page .status-badge[data-tone="badge-gray"] { background-color: #252b3a !important; color: #a5adbd !important; }
+.tbq-page .status-badge { border-color: #80602b !important; }
+.tbq-page .tbq-question-card svg, .tbq-page .section-title svg, .tbq-page .tbq-question-month__heading svg { color: #e5b84b !important; }
+.tbq-page [style*="background"] { background: #111729 !important; }
+.tbq-page [style*="border:"] { border-color: #80602b !important; }
+.tbq-page [style*="color: var(--ink)"] { color: #f5f5f5 !important; }
+.tbq-page [style*="color: var(--muted)"] { color: #a5adbd !important; }
+
 /* ===== Login Sessions & Trusted Devices — premium dashboard ===== */
 .ses-info-banner { margin-top: 18px; padding: 14px 18px; }
 .ses-list { display: grid; gap: 11px; margin-top: 18px; }
@@ -18725,4 +19764,168 @@ html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
   .adash-hero-ring--1 { width: 78px; height: 78px; }
   .adash-hero-ring--2 { width: 56px; height: 56px; }
   .adash-hero-ring--3 { width: 38px; height: 38px; }
+}
+
+/* Keep the approved header treatment last so legacy topbar rules cannot compress it. */
+.app-shell--astrologer > .main-column > .topbar-header { min-height: 86px; height: auto; padding: 13px 28px; gap: 24px; background: #090c16; border-bottom: 1px solid rgba(218,174,61,.22); box-shadow: 0 10px 28px rgba(0,0,0,.2); }
+.app-shell--astrologer .astrologer-topbar-brand { flex: 0 0 auto; min-width: 204px; gap: 11px; }
+.app-shell--astrologer .astrologer-topbar-brand__mark { width: 38px; height: 38px; border-radius: 11px; background: #e8b83e; }
+.app-shell--astrologer .astrologer-topbar-brand__mark-img { width: 31px; height: 31px; }
+.app-shell--astrologer .astrologer-topbar-brand strong { color: #fff8e9; font: 700 18px Georgia, 'Times New Roman', serif; }
+.app-shell--astrologer .astrologer-topbar-brand small { color: #aeb5c6; font-size: 8px; letter-spacing: .12em; }
+.app-shell--astrologer .topbar-actions { flex-wrap: wrap; justify-content: flex-end; gap: 9px 12px; }
+.app-shell--astrologer .astrologer-topbar-metrics { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.app-shell--astrologer .astrologer-topbar-status { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 12px; border: 1px solid rgba(87,214,158,.28); border-radius: 10px; background: #101c1c; color: #74e0a7; font-size: 11px; font-weight: 800; }
+.app-shell--astrologer .astrologer-topbar-status i { width: 7px; height: 7px; border-radius: 50%; background: #50d18e; box-shadow: 0 0 0 3px rgba(80,209,142,.12); }
+.app-shell--astrologer .astrologer-topbar-status.is-off { color: #9da5b5; border-color: #31394a; background: #131722; }
+.app-shell--astrologer .astrologer-topbar-status.is-off i { background: #747d90; box-shadow: none; }
+.app-shell--astrologer .astrologer-topbar-switch { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 9px 0 11px; border: 1px solid #343c4d; border-radius: 10px; background: #131722; color: #c1c8d7; font: inherit; cursor: pointer; }
+.app-shell--astrologer .astrologer-topbar-switch span { font-size: 10px; font-weight: 700; }
+.app-shell--astrologer .astrologer-topbar-switch b { color: #9fa7b7; font-size: 9px; letter-spacing: .06em; }
+.app-shell--astrologer .astrologer-topbar-switch > i { position: relative; width: 25px; height: 14px; border-radius: 999px; background: #4b5362; }
+.app-shell--astrologer .astrologer-topbar-switch > i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #d1d5dc; transition: transform .18s ease; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on { border-color: rgba(65,207,147,.35); background: #10201d; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on b { color: #67dca1; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on > i { background: #1daa78; }
+.app-shell--astrologer .astrologer-topbar-switch.is-on > i::after { transform: translateX(11px); background: #f4fff9; }
+.app-shell--astrologer .astrologer-topbar-date, .app-shell--astrologer .astrologer-topbar-stat { display: grid; align-content: center; gap: 2px; min-height: 40px; padding: 0 12px; border-left: 1px solid #2b3242; }
+.app-shell--astrologer .astrologer-topbar-date small, .app-shell--astrologer .astrologer-topbar-stat small { color: #858da0; font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+.app-shell--astrologer .astrologer-topbar-date strong { color: #e7ebf2; font-size: 10px; white-space: nowrap; }
+.app-shell--astrologer .astrologer-topbar-stat strong { color: #67dca1; font-size: 16px; white-space: nowrap; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle { min-height: 40px; padding: 0 11px; gap: 7px; border-radius: 10px; background: #141925; border-color: #353d4e; color: #d0d6e2; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle span:last-child { display: inline-flex; gap: 5px; align-items: center; font-size: 10px; font-weight: 800; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle b { color: #9ca5b6; font-size: 9px; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle.is-active b { color: #ffcf6b; }
+@media (max-width: 1120px) { .app-shell--astrologer > .main-column > .topbar-header { align-items: flex-start; } .app-shell--astrologer .topbar-actions { flex: 1; } }
+@media (max-width: 760px) { .app-shell--astrologer > .main-column > .topbar-header { padding: 12px 16px; } .app-shell--astrologer .astrologer-topbar-brand { min-width: 100%; } .app-shell--astrologer .topbar-actions { justify-content: flex-start; } .app-shell--astrologer .astrologer-topbar-date { border-left: 0; padding-left: 0; } }
+
+/* Full-width welcome hero with restrained celestial artwork. */
+.app-shell--astrologer .astrologer-greeting-header { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: center; min-height: 176px; margin: 0 0 24px; padding: 34px 28px 32px; border: 1px solid #ad8a46; border-radius: 14px; background: linear-gradient(105deg, #101a31 0%, #17172a 47%, #351c2c 100%); box-shadow: 0 14px 32px rgba(0,0,0,.22); }
+.app-shell--astrologer .astrologer-greeting-header::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(9,15,30,.76), rgba(15,19,37,.12) 55%, rgba(53,28,44,.2)); }
+.app-shell--astrologer .astrologer-greeting-header__mandala { position: absolute; z-index: -1; left: 24px; top: 50%; width: 138px; height: 138px; border: 1px solid rgba(231,201,132,.25); border-radius: 50%; transform: translateY(-50%); opacity: .8; }
+.app-shell--astrologer .astrologer-greeting-header__mandala::before, .app-shell--astrologer .astrologer-greeting-header__mandala::after { content: ''; position: absolute; inset: 17px; border: 1px solid rgba(231,201,132,.24); transform: rotate(45deg); }
+.app-shell--astrologer .astrologer-greeting-header__mandala::after { inset: 34px; border-radius: 50%; transform: rotate(0); box-shadow: 0 0 0 12px rgba(231,201,132,.05), 0 0 0 24px rgba(231,201,132,.04); }
+.app-shell--astrologer .astrologer-greeting-header__temple { position: absolute; z-index: -1; right: 0; bottom: 0; width: 39%; height: 100%; background: linear-gradient(180deg, transparent 18%, rgba(247,180,91,.14)), url('/astrologer-temple-banner.png') right bottom / cover no-repeat; opacity: .64; mix-blend-mode: screen; }
+.app-shell--astrologer .astrologer-greeting-header h1, .app-shell--astrologer .astrologer-greeting-header p { position: relative; z-index: 1; }
+.app-shell--astrologer .astrologer-greeting-header h1 { justify-self: center; margin: 0; color: #fff8e9; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(25px, 2.6vw, 36px); letter-spacing: .015em; text-align: center; }
+.app-shell--astrologer .astrologer-greeting-header p { justify-self: center; max-width: 720px; margin: 13px 0 0; color: #efd18a; font-size: 16px; text-align: center; }
+.app-shell--astrologer .astrologer-greeting-header p strong { color: #f2c96d; }
+@media (max-width: 760px) { .app-shell--astrologer .astrologer-greeting-header { min-height: 150px; padding: 28px 18px; } .app-shell--astrologer .astrologer-greeting-header__mandala { left: -30px; width: 108px; height: 108px; opacity: .45; } .app-shell--astrologer .astrologer-greeting-header__temple { width: 58%; opacity: .38; } .app-shell--astrologer .astrologer-greeting-header p { font-size: 13px; } }
+
+/* Final alignment pass: reserve space for each header group and each hero area. */
+.app-shell--astrologer > .main-column > .topbar-header { gap: 16px; }
+.app-shell--astrologer > .main-column > .topbar-header > .topbar-actions { width: auto; flex: 1 1 auto; min-width: 0; gap: 8px; }
+.app-shell--astrologer .astrologer-topbar-metrics { flex: 1 1 auto; min-width: 0; justify-content: flex-end; gap: 8px; margin: 0; }
+.app-shell--astrologer .astrologer-topbar-date { min-width: 132px; padding-inline: 10px; }
+.app-shell--astrologer .astrologer-topbar-date strong { font-size: 11px; }
+.app-shell--astrologer .astrologer-topbar-stat { min-width: 104px; padding-inline: 10px; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle { min-width: 0; width: auto; padding: 0 10px; justify-content: center; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle::after { display: none; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle__dot { display: block; width: 7px; height: 7px; border-radius: 50%; background: #7f8797; }
+.app-shell--astrologer .topbar-actions .astrologer-dnd-toggle.is-active .astrologer-dnd-toggle__dot { background: #ffcf6b; }
+.app-shell--astrologer .astrologer-greeting-header { grid-template-columns: minmax(120px, .65fr) minmax(0, 2.1fr) minmax(180px, .85fr); column-gap: 18px; }
+.app-shell--astrologer .astrologer-greeting-header__mandala { left: 24px; top: 50%; width: 138px; height: 138px; border: 0; background: url('/astrologer-sun.png') center / contain no-repeat; opacity: .32; }
+.app-shell--astrologer .astrologer-greeting-header__mandala::before, .app-shell--astrologer .astrologer-greeting-header__mandala::after { display: none; }
+.app-shell--astrologer .astrologer-greeting-header__temple { width: auto; inset: 0 0 0 auto; z-index: -1; }
+.app-shell--astrologer .astrologer-greeting-header h1, .app-shell--astrologer .astrologer-greeting-header p { grid-column: 2; width: min(100%, 700px); }
+.app-shell--astrologer .astrologer-greeting-header h1 { justify-self: center; }
+.app-shell--astrologer .astrologer-greeting-header p { justify-self: center; }
+@media (max-width: 1180px) and (min-width: 761px) {
+  .app-shell--astrologer > .main-column > .topbar-header { align-items: flex-start; flex-wrap: wrap; }
+  .app-shell--astrologer .astrologer-topbar-brand { min-width: 204px; }
+  .app-shell--astrologer > .main-column > .topbar-header > .topbar-actions { flex-basis: 100%; justify-content: flex-start; }
+  .app-shell--astrologer .astrologer-topbar-metrics { justify-content: flex-start; }
+}
+@media (max-width: 760px) {
+  .app-shell--astrologer .astrologer-greeting-header { grid-template-columns: 1fr; row-gap: 8px; }
+  .app-shell--astrologer .astrologer-greeting-header h1, .app-shell--astrologer .astrologer-greeting-header p { grid-column: 1; }
+  .app-shell--astrologer .astrologer-greeting-header__mandala { left: -30px; opacity: .2; }
+  .app-shell--astrologer .astrologer-greeting-header__temple { width: 58%; }
+  .app-shell--astrologer .astrologer-topbar-metrics { justify-content: flex-start; }
+  .app-shell--astrologer .astrologer-topbar-date { min-width: auto; }
+}
+
+/* Ensure the page-local palette remains last in the cascade. */
+.app-shell--astrologer:has(.tbq-page) .main-column,
+.app-shell--astrologer:has(.tbq-page) .page-content,
+.app-shell--astrologer:has(.tbq-page) .page-transition,
+.app-shell--astrologer:has(.tbq-page) .tbq-page { background-color: #080b14 !important; color: #f5f5f5 !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar { background-color: #0a0d17 !important; border-right-color: #80602b !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link { color: #a5adbd !important; }
+.app-shell--astrologer:has(.tbq-page) .sidebar-link.active, .app-shell--astrologer:has(.tbq-page) .sidebar-link:hover { background-color: #151b2d !important; color: #e5b84b !important; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
+.app-shell--astrologer:has(.tbq-page) .topbar-header .icon-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .theme-toggle-btn, .app-shell--astrologer:has(.tbq-page) .topbar-header .avatar-chip { background-color: #111729 !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.tbq-page .page-eyebrow, .tbq-page .tbq-module-tabs, .tbq-page .tbq-module-tab, .tbq-page .search-bar { background: #111729 !important; border-color: #80602b !important; }
+.tbq-page .page-eyebrow, .tbq-page .page-title, .tbq-page .section-title, .tbq-page .page-header-row h1, .tbq-page .tbq-question-month__heading, .tbq-page .tbq-question-month__heading .tbq-question-month__name { color: #e5b84b !important; }
+.tbq-page .page-header-row > div > p, .tbq-page .muted, .tbq-page .tbq-question-month__heading .tbq-question-month__count { color: #a5adbd !important; }
+.tbq-page .tbq-module-tab { color: #f5f5f5 !important; }
+.tbq-page .tbq-module-tab:hover { background: #151b2d !important; color: #e5b84b !important; }
+.tbq-page .tbq-module-tab.is-active { background: #80602b !important; border-color: #e5b84b !important; color: #10131c !important; }
+.tbq-page .search-bar__input { background: transparent !important; color: #f5f5f5 !important; }
+.tbq-page .search-bar svg, .tbq-page .search-bar__input::placeholder { color: #a5adbd !important; }
+.tbq-page .btn-primary { background: #e9a900 !important; border-color: #e9a900 !important; color: #10131c !important; }
+.tbq-page .btn-outline { background: #151b2d !important; border-color: #80602b !important; color: #f5f5f5 !important; }
+.tbq-page .btn-outline:hover { background: #80602b !important; color: #10131c !important; }
+.tbq-page .btn-ghost { color: #e5b84b !important; }
+.tbq-page .tbq-question-card, .tbq-page .card, .tbq-page .question-list, .tbq-page .question-list-shell { background: #111729 !important; border-color: #80602b !important; color: #a5adbd !important; box-shadow: none !important; }
+.tbq-page .tbq-question-card:hover, .tbq-page .tbq-question-card:focus-visible { background: #151b2d !important; }
+.tbq-page .tbq-question-card__customer strong, .tbq-page .tbq-question-card__details strong, .tbq-page .tbq-question-card__details p, .tbq-page .tbq-question-card__deadline small { color: #f5f5f5 !important; }
+.tbq-page .tbq-question-card__details > span, .tbq-page .tbq-question-card__deadline, .tbq-page .tbq-question-card__deadline b, .tbq-page .tbq-question-card__dates { color: #a5adbd !important; }
+.tbq-page .status-badge[data-tone="badge-green"] { background-color: #12372d !important; color: #5ee0a8 !important; }
+.tbq-page .status-badge[data-tone="badge-blue"] { background-color: #142d4a !important; color: #72b7f2 !important; }
+.tbq-page .status-badge[data-tone="badge-amber"], .tbq-page .status-badge[data-tone="badge-violet"] { background-color: #3c2d16 !important; color: #e9a900 !important; }
+.tbq-page .status-badge[data-tone="badge-red"] { background-color: #421e28 !important; color: #ff7b82 !important; }
+.tbq-page .status-badge[data-tone="badge-gray"] { background-color: #252b3a !important; color: #a5adbd !important; }
+.tbq-page .status-badge { border-color: #80602b !important; }
+.tbq-page .tbq-question-card svg, .tbq-page .section-title svg, .tbq-page .tbq-question-month__heading svg { color: #e5b84b !important; }
+.tbq-page [style*="background"] { background: #111729 !important; }
+.tbq-page [style*="border:"] { border-color: #80602b !important; }
+.tbq-page [style*="color: var(--ink)"] { color: #f5f5f5 !important; }
+.tbq-page [style*="color: var(--muted)"] { color: #a5adbd !important; }
+
+/* Final dashboard typography overrides. */
+.app-shell--astrologer:has(.astrologer-greeting-header) .sidebar-link span { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-brand strong { font-size: 21px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-brand small { font-size: 10px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-status,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch span { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-switch b { font-size: 11px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-date strong { font-size: 12px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-topbar-stat strong { font-size: 18px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header h1 { font-size: clamp(32px, 3vw, 36px); line-height: 1.18; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header p { font-size: clamp(16px, 1.45vw, 18px); line-height: 1.5; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .section-title { font-size: 18px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .adash-quick-action-label { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .adash-quick-actions-section .adash-quick-action { min-height: 62px; height: auto; padding-block: 10px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card { min-height: 128px; padding: 18px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 15px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { margin: 10px 0 8px; font-size: clamp(28px, 2.4vw, 32px); line-height: 1.12; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card small { font-size: 13px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-reference-panel__heading h2 { font-size: 18px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-reference-panel__heading button,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-time,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-meta button { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event { min-height: 94px; padding: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event strong { font-size: 16px; line-height: 1.35; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-work-event small,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-event-meta { font-size: 13px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item { min-height: 66px; padding: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item strong { font-size: 14px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item small,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-activity-item em { font-size: 13px; line-height: 1.45; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-analytics-heading h2 { font-size: 17px; line-height: 1.4; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-analytics-heading small,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-heading small { font-size: 13px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-heading { font-size: 14px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person strong { font-size: 16px; }
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person small,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-person span,
+.app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-queue-actions button { font-size: 13px; line-height: 1.45; }
+@media (max-width: 760px) {
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header h1 { font-size: clamp(28px, 7vw, 32px); }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-greeting-header p { font-size: 16px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card { min-height: 122px; padding: 15px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 14px; }
+  .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { font-size: 28px; }
 }
