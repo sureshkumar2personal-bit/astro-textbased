@@ -409,7 +409,7 @@ export default function TrackQuestions({ embedded = false }) {
                         ) : (
                           <StatusBadge label={question.status} />
                         )}
-                        <span className="bg-purple-50 text-purple-600 text-[11px] px-3 py-0.5 rounded-full font-bold">
+                        <span className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[11px] px-3 py-0.5 rounded-full font-bold">
                           {question.type}
                         </span>
                         <span className="text-xs text-slate-400 font-semibold">
@@ -429,7 +429,7 @@ export default function TrackQuestions({ embedded = false }) {
                       type="button"
                       onClick={toggleExpand}
                       aria-label={isExpanded ? 'Collapse answer' : 'Expand answer'}
-                      className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 transition flex-shrink-0 cursor-pointer border-0"
+                      className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400 transition flex-shrink-0 cursor-pointer border-0"
                     >
                       <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                     </button>
@@ -441,7 +441,7 @@ export default function TrackQuestions({ embedded = false }) {
                       {isAnswered && (
                         <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                           <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
-                            <strong className="text-purple-600 dark:text-purple-400">Astrologer's Detailed Answer:</strong>{' '}
+                            <strong className="text-amber-700 dark:text-amber-400">Astrologer's Detailed Answer:</strong>{' '}
                             {question.answer || 'Your Saturn transit is currently shifting. Rest assured, by next Tuesday, your vitality will recover significantly. Perform Surya Namaskar daily.'}
                           </p>
 

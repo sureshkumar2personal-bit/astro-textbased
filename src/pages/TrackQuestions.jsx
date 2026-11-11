@@ -446,7 +446,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
             )}
             <span className={`text-[11px] px-3 py-0.5 rounded-full font-bold ${
               isPersonal
-                ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300'
+                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
             }`}>
               {typeLabel}
@@ -469,7 +469,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           type="button"
           onClick={onToggle}
           aria-label={isExpanded ? 'Collapse answer' : 'Expand answer'}
-          className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 transition flex-shrink-0 cursor-pointer border-0"
+          className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:text-amber-600 dark:hover:text-amber-400 transition flex-shrink-0 cursor-pointer border-0"
         >
           <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
         </button>
@@ -481,7 +481,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           {answered && (
             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
               <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
-                <strong className="text-purple-600 dark:text-purple-400">Astrologer's Detailed Answer:</strong>{' '}
+                <strong className="text-amber-700 dark:text-amber-400">Astrologer's Detailed Answer:</strong>{' '}
                 {question.answer || 'Your Saturn transit is currently shifting. Rest assured, by next Tuesday, your vitality will recover significantly. Perform Surya Namaskar daily.'}
               </p>
 
@@ -507,7 +507,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
               {/* Attachments */}
               <div className="flex items-center space-x-3 pt-1">
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Attachments:</span>
-                <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-indigo-600 dark:text-indigo-400 font-semibold flex items-center space-x-1">
+                <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-amber-700 dark:text-amber-400 font-semibold flex items-center space-x-1">
                   📄 <span>{question.horoscopeAttachment || question.attachmentNames?.[0] || 'Horoscope_Chart.pdf'}</span>
                 </span>
               </div>
@@ -517,7 +517,7 @@ function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpe
           {isWaiting && (
             <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 text-xs text-slate-600 dark:text-slate-300">
               <p>Astrologer has received your query. In line with the 30-day guarantee, your answer will be provided with extensive transit analysis.</p>
-              <div className="flex items-center space-x-2 text-xs text-purple-600 dark:text-purple-400 font-semibold">
+              <div className="flex items-center space-x-2 text-xs text-amber-600 dark:text-amber-400 font-semibold">
                 <Clock size={13} />
                 <span>Time Remaining: <strong>27 Days left</strong></span>
               </div>

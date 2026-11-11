@@ -279,7 +279,7 @@ export default function QuestionHistory() {
                         <span className="text-slate-500 dark:text-slate-400">{astrologerName(question)}</span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           isPersonal
-                            ? 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/40 dark:border-purple-800'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
                             : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
                         }`}>
                           {typeLabel}
@@ -302,7 +302,7 @@ export default function QuestionHistory() {
                       <button
                         type="button"
                         onClick={() => setOpenQuestionId(question.id)}
-                        className="px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-semibold transition"
+                        className="px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold transition"
                       >
                         View Details
                       </button>
