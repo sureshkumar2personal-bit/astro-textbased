@@ -1,14 +1,12 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, ChevronRight, List, Grid2X2, Filter } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, List, Grid2X2, Filter } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
 import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
-import Section from '../components/ui/Section.jsx'
-import SummaryCard from '../components/ui/SummaryCard.jsx'
 import SuccessAlert from '../components/ui/SuccessAlert.jsx'
 import RaiseDisputeModal from '../components/user/RaiseDisputeModal.jsx'
 import { mockAstrologers } from '../data/notificationData.js'
@@ -39,16 +37,6 @@ const DELETE_TIME_LIMIT_MS = 60 * 60 * 1000
 // Months offered by the selector. Track My Questions is always scoped to one
 // selected month, so this is a bounded navigation, not a history list.
 const MONTH_OPTION_LIMIT = 12
-
-// Stages that describe where a question sits right now. These are the app's own
-// lifecycle words; question.status and dispute.status remain the stored truth.
-const LIFECYCLE_STAGE_META = {
-  [STAGE_WAITING]: { background: 'var(--sky-bg)', color: 'var(--sky-600)', border: 'rgba(14, 165, 233, 0.28)', hint: 'Submitted, waiting for the astrologer' },
-  [STAGE_ANSWERED]: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answered, within the dispute window' },
-  [STAGE_DISPUTED]: { background: 'var(--danger-bg)', color: 'var(--red-600)', border: 'rgba(239, 68, 68, 0.24)', hint: 'Dispute in progress' },
-  [STAGE_RESOLVED]: { background: 'var(--amber-100)', color: 'var(--amber-600)', border: 'rgba(245, 158, 11, 0.30)', hint: 'Dispute resolved, closing soon' },
-  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Active questions this month' },
-}
 
 // Maps a lifecycle stage onto the CampaignCard tone palette for this screen.
 const STAGE_CARD_TONE = {
@@ -350,46 +338,163 @@ function LifecycleQuestionCard({ question, nowMs, onOpen, onRaiseDispute }) {
   )
 }
 
-function LifecycleQuestionListRow({ question, nowMs, onOpen, onRaiseDispute }) {
+function LifecycleQuestionListRow({ question, nowMs, isExpanded, onToggle, onOpen, onRaiseDispute }) {
   const stage = getQuestionLifecycleStage(question, nowMs)
   const answered = isQuestionAnswered(question)
   const canRaiseDispute = isDisputeWindowOpen(question, nowMs)
   const astrologerName = mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
   const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
   const typeLabel = getQuestionTypeLabel(question)
-  const openFromKeyboard = (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      onOpen()
-    }
-  }
+  const isPersonal = typeLabel === 'Personal'
+  const isWaiting = stage === STAGE_WAITING
+  const isDisputed = stage === STAGE_DISPUTED
+  const isResolved = stage === STAGE_RESOLVED
 
   return (
-    <article className="aq-question-list-row" role="button" tabIndex={0} onClick={onOpen} onKeyDown={openFromKeyboard}>
-      <span className="aq-question-list-row__icon" aria-hidden="true"><CircleHelp size={20} /></span>
-      <div className="aq-question-list-row__body">
-        <div className="aq-question-list-row__top">
-          <strong>{question.id}</strong>
-          <span className="aq-question-list-row__meta">{astrologerName} · {sourceLabel} · {typeLabel}</span>
+    <div className="glass-card rounded-2xl p-5 md:p-6 transition hover:shadow-md mb-3">
+      <div className="flex justify-between items-start gap-4 cursor-pointer" onClick={onToggle}>
+        <div className="space-y-1.5 flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-400">{question.id}</span>
+            {answered ? (
+              <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[11px] px-3 py-0.5 rounded-full font-bold dark:bg-emerald-950/40 dark:border-emerald-800">
+                🟢 Answered
+              </span>
+            ) : isWaiting ? (
+              <span className="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[11px] px-3 py-0.5 rounded-full font-bold dark:bg-indigo-950/40 dark:border-indigo-800">
+                🔵 Waiting for Answer
+              </span>
+            ) : isDisputed ? (
+              <span className="bg-rose-50 text-rose-600 border border-rose-200 text-[11px] px-3 py-0.5 rounded-full font-bold dark:bg-rose-950/40 dark:border-rose-800">
+                🔴 Disputed
+              </span>
+            ) : isResolved ? (
+              <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] px-3 py-0.5 rounded-full font-bold dark:bg-amber-950/40 dark:border-amber-800">
+                🟡 Resolved
+              </span>
+            ) : (
+              <StatusBadge label={question.status} />
+            )}
+            <span className={`text-[11px] px-3 py-0.5 rounded-full font-bold ${
+              isPersonal
+                ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300'
+                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {typeLabel}
+            </span>
+            <span className="text-xs text-slate-400 font-semibold">
+              Paid: {question.purchaseAmount ? `₹${question.purchaseAmount}` : (question.purchaseType || 'Free')}
+            </span>
+          </div>
+
+          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 line-clamp-2">
+            {question.question}
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {astrologerName} • {sourceLabel} • {formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '05 Nov 2026'}
+            {isWaiting && ' (Day 3 of 30 Guarantee)'}
+          </p>
         </div>
-        <p>{question.question}</p>
-        <div className="aq-question-list-row__details">
-          <span>{formatAnswerDate(getQuestionReceivedAt(question)) || question.raised || '—'}</span>
-          <span>{question.purchaseType || '—'}</span>
-          <span>{typeLabel}</span>
-        </div>
+
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={isExpanded ? 'Collapse answer' : 'Expand answer'}
+          className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-400 transition flex-shrink-0 cursor-pointer border-0"
+        >
+          <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+        </button>
       </div>
-      <div className="aq-question-list-row__right">
-        <span className={`aq-question-list-row__status aq-question-list-row__status--${stage.toLowerCase().replaceAll(' ', '-')}`}>{stage}</span>
-        <div className="aq-question-list-row__actions">
-          <button type="button" className="btn btn-outline" onClick={(event) => { event.stopPropagation(); onOpen() }}>
-            {answered ? 'View Answer' : 'View Question'}
-          </button>
-          {canRaiseDispute && <button type="button" className="btn aq-track-card__dispute-btn" onClick={(event) => { event.stopPropagation(); onRaiseDispute(question.id) }}><Gavel size={14} /> Raise a Dispute</button>}
+
+      {/* Dropdown Content */}
+      {isExpanded && (
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+          {answered && (
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+              <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">
+                <strong className="text-purple-600 dark:text-purple-400">Astrologer's Detailed Answer:</strong>{' '}
+                {question.answer || 'Your Saturn transit is currently shifting. Rest assured, by next Tuesday, your vitality will recover significantly. Perform Surya Namaskar daily.'}
+              </p>
+
+              {/* Audio Player Widget */}
+              <div className="flex items-center space-x-3 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <button
+                  type="button"
+                  className="w-8 h-8 rounded-full emerald-gradient text-white flex items-center justify-center text-xs shadow cursor-pointer border-0"
+                >
+                  ▶
+                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div className="w-1/2 h-full bg-emerald-500"></div>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                    <span>Voice Report (0:35)</span>
+                    <span>1:10</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attachments */}
+              <div className="flex items-center space-x-3 pt-1">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Attachments:</span>
+                <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1 rounded-lg text-indigo-600 dark:text-indigo-400 font-semibold flex items-center space-x-1">
+                  📄 <span>{question.horoscopeAttachment || question.attachmentNames?.[0] || 'Horoscope_Chart.pdf'}</span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {isWaiting && (
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+              <p>Astrologer has received your query. In line with the 30-day guarantee, your answer will be provided with extensive transit analysis.</p>
+              <div className="flex items-center space-x-2 text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                <Clock size={13} />
+                <span>Time Remaining: <strong>27 Days left</strong></span>
+              </div>
+            </div>
+          )}
+
+          {isDisputed && question.dispute && (
+            <div className="bg-rose-50/50 dark:bg-rose-950/30 p-4 rounded-2xl border border-rose-200 dark:border-rose-900/50 space-y-2 text-xs">
+              <div className="font-bold text-rose-700 dark:text-rose-400">Dispute Under Review · {question.dispute.status || 'Open'}</div>
+              <p className="text-slate-700 dark:text-slate-300">{question.dispute.reason}</p>
+              {question.dispute.description && <p className="text-slate-500 dark:text-slate-400">{question.dispute.description}</p>}
+            </div>
+          )}
+
+          <div className="flex flex-wrap justify-between items-center gap-2 pt-2">
+            <div className="flex items-center space-x-1 text-amber-500 text-xs">
+              ★ ★ ★ ★ ★ <span className="text-slate-400 ml-1">({question.answerRating ? `Rated ${question.answerRating}/5` : 'Rated 5/5'})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {canRaiseDispute && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onRaiseDispute(question.id)
+                  }}
+                  className="px-4 py-2 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  🚩 Raise a Dispute
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  onOpen()
+                }}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer border-0"
+              >
+                Full Details
+              </button>
+            </div>
+          </div>
         </div>
-        <ChevronRight className="aq-question-list-row__chevron" size={18} aria-hidden="true" />
-      </div>
-    </article>
+      )}
+    </div>
   )
 }
 
@@ -552,7 +657,7 @@ export default function TrackQuestions({ embedded = false }) {
     return id && questions.some((question) => question.id === id) ? id : null
   })
   const [detailsOpen, setDetailsOpen] = useState(() => Boolean(initialPreviewId))
-  const [timeElapsed, setTimeElapsed] = useState(0)
+  const [, setTick] = useState(0)
 
   const matchesSearchFilter = useCallback((question) => {
     const term = appliedSearch.trim().toLowerCase()
@@ -568,6 +673,17 @@ export default function TrackQuestions({ embedded = false }) {
   const [fullContent, setFullContent] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [viewMode, setViewMode] = useState('list')
+  const [expandedQuestionIds, setExpandedQuestionIds] = useState(() => new Set())
+
+  const toggleAccordion = (questionId, event) => {
+    event?.stopPropagation?.()
+    setExpandedQuestionIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(questionId)) next.delete(questionId)
+      else next.add(questionId)
+      return next
+    })
+  }
   // Raise Dispute opens inline on this screen. It is keyed by question id so the
   // same modal serves the lifecycle card button and the details-modal button.
   const [disputeQuestionId, setDisputeQuestionId] = useState(null)
@@ -677,7 +793,7 @@ const selectedQuestion = detailsOpen
   useEffect(() => {
     if (!visibleQuestions.some((q) => q.status === 'Pending' && q.submittedAt)) return
     const interval = setInterval(() => {
-      setTimeElapsed(Date.now())
+      setTick(Date.now())
     }, 1000)
     return () => clearInterval(interval)
   }, [visibleQuestions])
@@ -948,6 +1064,8 @@ const selectedQuestion = detailsOpen
                  key={question.id}
                  question={question}
                  nowMs={nowMs}
+                 isExpanded={expandedQuestionIds.has(question.id)}
+                 onToggle={(e) => toggleAccordion(question.id, e)}
                  onOpen={() => openQuestion(question.id)}
                  onRaiseDispute={(id) => openRaiseDispute(id)}
                />

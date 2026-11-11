@@ -6,11 +6,7 @@ import Section from '../../../components/ui/Section.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import PurchasedQuestionCard from '../../../components/user/PurchasedQuestionCard.jsx'
 import QuestionFormModal from '../../../components/user/QuestionFormModal.jsx'
-import CampaignCard, {
-  CampaignEmptyState,
-  CampaignStatusChip,
-} from '../../../components/campaigns/CampaignCard.jsx'
-import { campaignCardStatusStyle } from '../../../components/campaigns/campaignCardTokens.js'
+import { CampaignEmptyState } from '../../../components/campaigns/CampaignCard.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -326,42 +322,67 @@ export default function QuestionPurchased() {
           ) : (
             <>
               {visibleSlotCards.length > 0 && (
-                <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {visibleSlotCards.map((card) => {
                     const canUse = getSlotCardStatus(card) === QUESTION_CREDIT_AVAILABLE
-                    const cardStyle = campaignCardStatusStyle(canUse ? 'Active' : 'Completed')
+                    const isPersonal = card.type !== 'General'
+                    const slotId = `#SLOT-${String(card.key || '').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || '2026'}`
                     return (
-                      <CampaignCard
+                      <div
                         key={card.key}
-                        status={canUse ? 'Active' : 'Completed'}
-                        name={card.campaign.name}
-                        subtitle={card.astrologerName}
-                        description={card.campaign.shortDescription}
-                        chips={[
-                          <CampaignStatusChip key="type" style={{ background: cardStyle.softBg, color: cardStyle.accent, border: `1px solid ${cardStyle.border}` }}>
-                            {questionTypePillLabel(card.type)}
-                          </CampaignStatusChip>,
-                        ]}
-                        details={[
-                          { label: 'Purchased', value: `${card.purchased} slots` },
-                          { label: 'Used', value: `${card.used}` },
-                          { label: 'Remaining', value: `${card.remaining}` },
-                          { label: 'Paid', value: paidAmountLabel(card) },
-                          { label: 'Purchased on', value: purchasedOnLabel(card) },
-                          { label: 'Schedule', value: `${card.campaign.date} – ${card.campaign.endDate}` },
-                        ]}
-                        footer={(
-                          canUse ? (
-                            <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={() => openSlotForm(card)}>
-                              Use a Slot
-                            </button>
-                          ) : (
-                            <div className="muted" style={{ textAlign: 'center', fontSize: 13, fontWeight: 700 }}>
-                              All slots used
+                        className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-purple-500'} space-y-4 flex flex-col justify-between`}
+                      >
+                        <div>
+                          <div className="flex justify-between items-start mb-2">
+                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
+                              isPersonal
+                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
+                                : 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/40 dark:border-purple-800'
+                            }`}>
+                              {questionTypePillLabel(card.type)} Q&amp;A
+                            </span>
+                            <span className="text-xs font-bold text-slate-400">{slotId}</span>
+                          </div>
+
+                          <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">{card.astrologerName}</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">{card.campaign?.name || card.campaignName}</p>
+
+                          <div className="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1 text-xs mb-3">
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Remaining:</span>
+                              <span className="font-extrabold text-purple-600 dark:text-purple-400">{card.remaining} {card.remaining === 1 ? 'Question' : 'Questions'}</span>
                             </div>
-                          )
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Total Paid:</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-200">{paidAmountLabel(card)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Purchased:</span>
+                              <span className="font-semibold text-slate-700 dark:text-slate-200">{card.purchased} slots ({purchasedOnLabel(card)})</span>
+                            </div>
+                            {card.campaign?.date && card.campaign?.endDate && (
+                              <div className="flex justify-between">
+                                <span className="text-slate-500">Schedule:</span>
+                                <span className="font-semibold text-slate-700 dark:text-slate-200">{card.campaign.date} – {card.campaign.endDate}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {canUse ? (
+                          <button
+                            type="button"
+                            className="w-full py-2.5 emerald-gradient text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 hover:opacity-95 transition"
+                            onClick={() => openSlotForm(card)}
+                          >
+                            Use a Slot Now
+                          </button>
+                        ) : (
+                          <div className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl text-xs font-bold text-center">
+                            All slots used
+                          </div>
                         )}
-                      />
+                      </div>
                     )
                   })}
                 </div>

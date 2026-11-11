@@ -1,7 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { CircleHelp, History, ListChecks, Package } from 'lucide-react'
-import PageHeader from '../../../components/ui/PageHeader.jsx'
+import {
+  MessageSquare,
+  PlusCircle,
+  Ticket,
+  History,
+  ShieldCheck,
+} from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
 import { getRoleRoutes } from '../../../utils/roleRoutes.js'
@@ -29,15 +34,17 @@ export default function AskQuestionDashboard() {
     [purchasedSlots, currentUser],
   )
 
-  // The Ask a Question sections. The dashboard is navigation only: Ask New and
-  // My Questions render the pages that already implement those flows, and
-  // Purchased Questions / History render read-only views built from the same
-  // records. Disputes are managed inside My Questions, so they have no tab here.
+  const myQuestionsCount = useMemo(
+    () => getUserQuestions(questions, currentUser).length,
+    [questions, currentUser],
+  )
+
+  // 4 Main Navigation Tabs matching the Royal Emerald & Purple Edition
   const sections = [
-    { key: 'my-questions', label: 'My Questions', icon: ListChecks, to: `${routes.askQuestion}/my-questions`, count: getUserQuestions(questions, currentUser).length },
-    { key: 'new', label: 'Ask New', icon: CircleHelp, to: `${routes.askQuestion}/new`, count: 0 },
-    { key: 'purchased', label: 'Purchased Questions', icon: Package, to: `${routes.askQuestion}/purchased`, count: availablePurchasedCount },
-    { key: 'history', label: 'History', icon: History, to: `${routes.askQuestion}/history`, count: 0 },
+    { key: 'my-questions', label: 'My Questions', icon: MessageSquare, to: `${routes.askQuestion}/my-questions`, count: myQuestionsCount },
+    { key: 'new', label: 'Ask New', icon: PlusCircle, to: `${routes.askQuestion}/new`, count: 0 },
+    { key: 'purchased', label: 'Purchased Slots', icon: Ticket, to: `${routes.askQuestion}/purchased`, count: availablePurchasedCount },
+    { key: 'history', label: 'History & Invoices', icon: History, to: `${routes.askQuestion}/history`, count: 0 },
   ]
 
   const handleStepClick = useCallback((targetStep) => {
@@ -47,13 +54,35 @@ export default function AskQuestionDashboard() {
   }, [])
 
   return (
-    <div className="question-dashboard">
-      <PageHeader title="Ask a Question">
-        {isAskNew && (
-          <FlowSteps current={askStep} onStepClick={handleStepClick} />
-        )}
-      </PageHeader>
+    <div className="question-dashboard space-y-4">
+      {/* Royal Emerald & Purple Header Banner */}
+      <div className="purple-gradient rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full text-indigo-100">
+            Premium Astrological Suite
+          </span>
+          <h1 className="text-2xl md:text-3xl font-extrabold mt-2">Ask a Question Hub</h1>
+          <p className="text-indigo-100 text-xs mt-1">
+            Managed campaigns, active slots, and 30-day astrologer response guarantee.
+          </p>
+        </div>
+        <div className="flex items-center space-x-3 banner-shield-badge px-4 py-3 rounded-2xl">
+          <ShieldCheck className="text-emerald-400 w-7 h-7 flex-shrink-0" />
+          <div className="text-xs">
+            <p className="font-bold">100% Refund Guarantee</p>
+            <p className="text-indigo-200">Auto-refund on 30-day delay</p>
+          </div>
+        </div>
+      </div>
 
+      {/* Step Wizard indicator when inside 'Ask New' */}
+      {isAskNew && (
+        <div className="pt-1 pb-2">
+          <FlowSteps current={askStep} onStepClick={handleStepClick} />
+        </div>
+      )}
+
+      {/* 4 Main Navigation Tabs */}
       <nav className="question-dashboard-tabs" aria-label="Ask a Question sections">
         {sections.map((section) => {
           const Icon = section.icon
@@ -65,16 +94,21 @@ export default function AskQuestionDashboard() {
               to={section.to}
               end={section.key === 'new'}
               aria-current={isActive ? 'page' : undefined}
-              className={`question-dashboard-tab${isActive ? ' is-active' : ''}`}
+              className={`question-dashboard-tab ${isActive ? 'aq-tab-btn-active' : 'aq-tab-btn-inactive'}`}
             >
-              <Icon className="question-dashboard-tab-icon" size={18} strokeWidth={2.2} aria-hidden="true" />
-              <span className="question-dashboard-tab-label">{section.label}</span>
-              {section.count > 0 && <span className="question-dashboard-tab-count">{section.count}</span>}
+              <Icon size={15} strokeWidth={2.4} aria-hidden="true" />
+              <span>{section.label}</span>
+              {section.count > 0 && (
+                <span className={`question-dashboard-tab-count ${isActive ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'}`}>
+                  {section.count}
+                </span>
+              )}
             </NavLink>
           )
         })}
       </nav>
 
+      {/* Child tab content */}
       <Outlet context={{ askStep, setAskStep, stepActionsRef }} />
     </div>
   )

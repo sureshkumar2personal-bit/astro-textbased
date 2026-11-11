@@ -1,16 +1,14 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, ChevronDown, Filter, History, Search, X } from 'lucide-react'
-import CampaignCard, { CampaignStatusChip } from '../../../components/campaigns/CampaignCard.jsx'
-import { campaignCardStatusStyle, campaignCardToneStyle } from '../../../components/campaigns/campaignCardTokens.js'
+import { CalendarDays, ChevronDown, Filter, Search, X } from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
-import { formatAnswerDate, getAnswerSubmittedAtMs, getQuestionReceivedAt, getQuestionTypeLabel, isQuestionAnswered } from '../../../utils/answer.js'
-import { getMonthLabel, getQuestionMonthKey, getQuestionSourceLabel, isOpenQuestion } from '../../../utils/questions.js'
+import { formatAnswerDate, getAnswerSubmittedAtMs, getQuestionReceivedAt, getQuestionTypeLabel } from '../../../utils/answer.js'
+import { getMonthLabel, getQuestionMonthKey, getQuestionSourceLabel } from '../../../utils/questions.js'
 import {
   HISTORY_ALL_MONTHS,
   HISTORY_STATUS_FILTERS,
@@ -23,13 +21,6 @@ import {
   matchesHistorySearchFilter,
   matchesHistoryStatusFilter,
 } from '../../../utils/questionDashboard.js'
-
-// Same title-card treatment as the My Questions and Purchased Questions buckets.
-const STATUS_CARD_META = {
-  All: { background: 'var(--primary-bg)', color: 'var(--primary)', border: 'rgba(91, 33, 182, 0.20)', hint: 'Every archived question' },
-  Completed: { background: 'var(--success-bg)', color: 'var(--green-600)', border: 'rgba(16, 185, 129, 0.30)', hint: 'Answered and finished' },
-  Cancelled: { background: 'var(--neutral-bg)', color: 'var(--muted)', border: 'rgba(100, 116, 139, 0.24)', hint: 'Cancelled or expired' },
-}
 
 const EMPTY_DATE = '—'
 
@@ -57,83 +48,8 @@ function paymentLabel(payment) {
   return `${payment.label} · ₹${payment.paid.toLocaleString('en-IN')}`
 }
 
-// The refund status already stored on the record ("Refunded" / "Completed" /
-// "None"). A refund is shown on its own row; it is never used to reclassify a
-// completed question as cancelled.
-function refundStatusLabel(question) {
-  const status = String(question.refundStatus || '').trim()
-  if (status && status.toLowerCase() !== 'none') return status
-  return 'Refunded'
-}
-
 function astrologerName(question) {
   return mockAstrologers.find((item) => item.id === question.astrologerId)?.name || question.user || 'Astrologer'
-}
-
-// Attachments already stored on the record (read-only). Shown only when the
-// existing data actually carries them - nothing is fabricated.
-function attachmentCount(question) {
-  return Array.isArray(question.attachments) ? question.attachments.length : 0
-}
-
-const CHIP_STYLE = { background: 'var(--neutral-bg)', color: 'var(--muted)', border: '1px solid var(--surface-border)' }
-
-// One archived question, using the same CampaignCard design as My Questions. It
-// is deliberately read-only: the only action is View Details, which opens the
-// existing History details modal. No dispute, edit, submit or purchase actions
-// live here - those stay in My Questions.
-function HistoryQuestionCard({ question, nowMs, onOpen }) {
-  const cancelled = isHistoryCancelled(question, nowMs)
-  const tone = cancelled ? 'slate' : 'green'
-  const accentStyle = campaignCardToneStyle(tone) || campaignCardStatusStyle('Active')
-  const answered = isQuestionAnswered(question)
-  const payment = getQuestionPaymentSummary(question)
-  const typeLabel = getQuestionTypeLabel(question)
-  const sourceLabel = isOpenQuestion(question) ? 'Open Question' : getQuestionSourceLabel(question)
-  const files = attachmentCount(question)
-
-  const footer = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {answered ? (
-        <div className="aq-track-card__answer">
-          <div className="aq-track-card__answer-label">Astrologer&apos;s answer</div>
-          {question.answer || 'No answer text recorded.'}
-        </div>
-      ) : (
-        <div className="aq-track-card__note">This question closed without a delivered answer.</div>
-      )}
-      <div className="btn-row" style={{ marginTop: 4 }}>
-        <button type="button" className="btn btn-outline" onClick={onOpen}>View Details</button>
-      </div>
-    </div>
-  )
-
-  return (
-    <CampaignCard
-      status={getHistoryStatusLabel(question, nowMs)}
-      tone={tone}
-      icon={<History size={22} aria-hidden="true" />}
-      name={question.id}
-      subtitle={`${astrologerName(question)} · ${sourceLabel} · ${typeLabel}`}
-      description={question.question}
-      chips={[
-        <CampaignStatusChip key="type" style={{ background: accentStyle.softBg, color: accentStyle.accent, border: `1px solid ${accentStyle.border}` }}>{typeLabel}</CampaignStatusChip>,
-        <CampaignStatusChip key="source" style={CHIP_STYLE}>{sourceLabel}</CampaignStatusChip>,
-        question.category ? <CampaignStatusChip key="category" style={CHIP_STYLE}>{question.category}</CampaignStatusChip> : null,
-        files > 0 ? <CampaignStatusChip key="attachments" style={CHIP_STYLE}>{`${files} attachment${files === 1 ? '' : 's'}`}</CampaignStatusChip> : null,
-      ].filter(Boolean)}
-      details={[
-        { label: 'Asked', value: askedOn(question) },
-        { label: 'Completed', value: completedOn(question) },
-        { label: 'Payment', value: payment.label },
-        { label: 'Paid', value: `₹${payment.paid.toLocaleString('en-IN')}` },
-        ...(payment.refunded
-          ? [{ label: 'Refund', value: `₹${payment.refund.toLocaleString('en-IN')} · ${refundStatusLabel(question)}` }]
-          : []),
-      ]}
-      footer={footer}
-    />
-  )
 }
 
 function HistoryStatusSelector({ filter, counts, onChange }) {
@@ -306,8 +222,6 @@ export default function QuestionHistory() {
     [history, openQuestionId],
   )
 
-  const monthLabelText = monthKey === HISTORY_ALL_MONTHS ? 'All months' : getMonthLabel(monthKey)
-
   return (
     <div>
       <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -345,15 +259,58 @@ export default function QuestionHistory() {
             </div>
           </Card>
         ) : (
-          <div className="track-questions-grid">
-            {visibleHistory.map((question) => (
-              <HistoryQuestionCard
-                key={question.id}
-                question={question}
-                nowMs={nowMs}
-                onOpen={() => setOpenQuestionId(question.id)}
-              />
-            ))}
+          <div className="glass-card rounded-2xl p-6">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4">Completed Cycles &amp; Archivals</h3>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+              {visibleHistory.map((question) => {
+                const cancelled = isHistoryCancelled(question, nowMs)
+                const payment = getQuestionPaymentSummary(question)
+                const typeLabel = getQuestionTypeLabel(question)
+                const isPersonal = typeLabel === 'Personal'
+                const statusLabel = getHistoryStatusLabel(question, nowMs)
+                return (
+                  <div key={question.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="space-y-1 max-w-2xl">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-slate-800 dark:text-slate-100">{question.id}</span>
+                        <span className="text-slate-400">•</span>
+                        <span className="font-semibold text-slate-700 dark:text-slate-300">{question.category || 'General Guidance'}</span>
+                        <span className="text-slate-400">•</span>
+                        <span className="text-slate-500 dark:text-slate-400">{astrologerName(question)}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isPersonal
+                            ? 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-950/40 dark:border-purple-800'
+                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                        }`}>
+                          {typeLabel}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1">{question.question}</p>
+                      <p className="text-[11px] text-slate-400">
+                        Asked on {askedOn(question)} • Completed on {completedOn(question)} • {paymentLabel(payment)}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${
+                        cancelled
+                          ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                          : 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
+                      }`}>
+                        {statusLabel}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOpenQuestionId(question.id)}
+                        className="px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-xs font-semibold transition"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </Section>
