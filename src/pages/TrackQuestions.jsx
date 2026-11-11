@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, List, Grid2X2, Filter } from 'lucide-react'
+import { Search, X, Clock, AlertTriangle, Sparkles, ArrowRight, Star, Gavel, CircleHelp, ChevronDown, List, Grid2X2, Filter, History, CheckCircle2, AlertCircle, CheckCheck } from 'lucide-react'
 import StatusBadge from '../components/StatusBadge.jsx'
 import CampaignCard, { CampaignStatusChip } from '../components/campaigns/CampaignCard.jsx'
 import { campaignCardStatusStyle, campaignCardToneStyle } from '../components/campaigns/campaignCardTokens.js'
@@ -590,24 +590,73 @@ function MonthSelector({ monthKey, options, onChange }) {
   )
 }
 
-function StatusSelector({ filter, counts, onChange }) {
+function QuestionStatusStats({ filter, counts, onChange }) {
+  const statConfig = [
+    {
+      key: 'All',
+      label: 'Total Questions',
+      count: counts['All'] || 0,
+      tone: 'tone-violet',
+      icon: History,
+    },
+    {
+      key: STAGE_WAITING,
+      label: 'Waiting for Answer',
+      count: counts[STAGE_WAITING] || 0,
+      tone: 'tone-sky',
+      icon: Clock,
+    },
+    {
+      key: STAGE_ANSWERED,
+      label: 'Answered',
+      count: counts[STAGE_ANSWERED] || 0,
+      tone: 'tone-green',
+      icon: CheckCircle2,
+    },
+    {
+      key: STAGE_DISPUTED,
+      label: 'Disputed',
+      count: counts[STAGE_DISPUTED] || 0,
+      tone: 'tone-red',
+      icon: AlertCircle,
+    },
+    {
+      key: STAGE_RESOLVED,
+      label: 'Resolved',
+      count: counts[STAGE_RESOLVED] || 0,
+      tone: 'tone-amber',
+      icon: CheckCheck,
+    },
+  ]
+
   return (
-    <label className="aq-track-month">
-      <Filter size={15} aria-hidden="true" />
-      <select
-        className="select-input"
-        value={filter}
-        aria-label="Filter by question status"
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {LIFECYCLE_FILTERS.map((stage) => (
-          <option key={stage} value={stage}>
-            {stage} ({counts[stage] || 0})
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="aq-track-month__chevron" size={15} aria-hidden="true" />
-    </label>
+    <Card className="section question-summary-card">
+      <div className="section-title">
+        <History size={18} /> Question Status Overview
+      </div>
+      <div className="question-summary-grid">
+        {statConfig.map(({ key, label, count, tone, icon: Icon }) => {
+          const isActive = filter === key
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`stat-card-clickable ${isActive ? 'is-active' : ''}`}
+              onClick={() => onChange(key)}
+              aria-pressed={isActive}
+            >
+              <div className={`stat-icon ${tone}`}>
+                <Icon size={20} />
+              </div>
+              <div className="stat-card-body">
+                <div className="stat-value">{count}</div>
+                <div className="stat-label">{label}</div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </Card>
   )
 }
 
@@ -960,11 +1009,13 @@ const selectedQuestion = detailsOpen
 
   return (
     <div>
-      {/* Status dropdown on the left, Search & Month selector on the right */}
+      {/* Clickable Stat Cards - User Disputes Style */}
+      <QuestionStatusStats filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
+
+      {/* Search & Month selector row */}
       {embedded ? (
-        <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
+        <div className="aq-track-controls" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', marginLeft: 'auto' }}>
             <div ref={searchContainerRef} className="search-filter-row__group" style={{ margin: 0, gap: 0, display: 'flex', alignItems: 'center' }}>
               <div className="search-filter-row__heading"></div>
               <div
@@ -1082,7 +1133,6 @@ const selectedQuestion = detailsOpen
           backTo={routes.askQuestion}
           actions={
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <StatusSelector filter={lifecycleFilter} counts={lifecycleCounts} onChange={setLifecycleFilter} />
               <div className="search-bar" style={{ width: 280 }}>
                 <input
                   value={search}
