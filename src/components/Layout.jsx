@@ -32,7 +32,6 @@ import {
   Search,
   Headphones,
   Gavel,
-  Star,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
@@ -463,6 +462,12 @@ export default function Layout() {
     && (!item.userId || item.userId === currentUser?.id)
   ))
   const unreadNotificationCount = visibleNotifications.filter((item) => !item.read).length
+  const currentDateLabel = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date())
   const [panel, setPanel] = useState(null)
   const [activeChatRequestId, setActiveChatRequestId] = useState(null)
   const [consultationDetailsId, setConsultationDetailsId] = useState(null)
@@ -582,11 +587,35 @@ export default function Layout() {
       {!isAstrologer && <ActiveCallIndicator />}
       {shellIsAstrologer && (
         <div className="astrologer-topbar-metrics" aria-label="Astrologer workspace status">
-          <span className={`astrologer-topbar-pill astrologer-topbar-pill--online${astrologerServices.available ? '' : ' is-off'}`}><i /> {astrologerServices.available ? 'Online' : 'Offline'} <b>⌄</b></span>
-          <span className={`astrologer-topbar-pill${astrologerServices.chatAvailable ? ' is-on' : ' is-off'}`}><i /> Chat {astrologerServices.chatAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
-          <span className={`astrologer-topbar-pill${astrologerServices.callAvailable ? ' is-on' : ' is-off'}`}><i /> Call {astrologerServices.callAvailable ? 'ON' : 'OFF'} <b>⌄</b></span>
-          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹1,250</strong></span>
-          <span className="astrologer-topbar-stat astrologer-topbar-stat--rating"><small>AVERAGE RATING</small><strong><Star size={12} fill="currentColor" /> 4.9 / 5</strong></span>
+          <span className={`astrologer-topbar-status${astrologerServices.available ? '' : ' is-off'}`}><i /> {astrologerServices.available ? 'Online' : 'Offline'}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={astrologerServices.chatAvailable}
+            className={`astrologer-topbar-switch${astrologerServices.chatAvailable ? ' is-on' : ''}`}
+            onClick={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })}
+          >
+            <span>Chat</span><b>{astrologerServices.chatAvailable ? 'ON' : 'OFF'}</b><i aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={astrologerServices.callAvailable}
+            className={`astrologer-topbar-switch${astrologerServices.callAvailable ? ' is-on' : ''}`}
+            onClick={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })}
+          >
+            <span>Call</span><b>{astrologerServices.callAvailable ? 'ON' : 'OFF'}</b><i aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={`astrologer-dnd-toggle${astrologerServices.dndEnabled ? ' is-active' : ''}`}
+            aria-pressed={astrologerServices.dndEnabled}
+            onClick={handleDndToggle}
+          >
+            <span className="astrologer-dnd-toggle__dot" /> <span>DND Mode <b>{astrologerServices.dndEnabled ? 'ON' : 'OFF'}</b></span>
+          </button>
+          <span className="astrologer-topbar-date"><small>TODAY'S DATE</small><strong>{currentDateLabel}</strong></span>
+          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹5,420</strong></span>
         </div>
       )}
       {!shellIsAstrologer && (
@@ -619,16 +648,6 @@ export default function Layout() {
         {shellIsAstrologer ? <TempleDonationBoxIcon size={18} /> : <Wallet size={18} />}
       </button>
       <ThemeToggle />
-      {shellIsAstrologer && (
-        <button
-          type="button"
-          className={`astrologer-dnd-toggle${astrologerServices.dndEnabled ? ' is-active' : ''}`}
-          aria-pressed={astrologerServices.dndEnabled}
-          onClick={handleDndToggle}
-        >
-          <span className="astrologer-dnd-toggle__dot" /> DND Mode
-        </button>
-      )}
       <button
         type="button"
         className="avatar-chip"
@@ -745,7 +764,7 @@ export default function Layout() {
                     <span className="astrologer-topbar-brand__mark">
                       <img className="astrologer-topbar-brand__mark-img" src="/astro-connect-sun.png" alt="" aria-hidden="true" />
                     </span>
-                    <div><strong>Dr. Rani</strong><small>ASTROLOGER WORKSPACE</small></div>
+                    <div><strong>AstroConnect</strong><small>PROFESSIONAL ASTROLOGER PORTAL</small></div>
                   </div>
                   {globalActions}
                 </header>

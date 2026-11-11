@@ -15,20 +15,61 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../state/AuthContext.jsx'
 import { getRoleRoutes } from '../utils/roleRoutes.js'
+import { getInstantConsultations, subscribeToInstantConsultations, updateInstantConsultation } from '../utils/instantConsultation.js'
 
 const ASTROLOGER_GREETING_QUOTES = [
   'The stars impel, they do not compel. Guide your seekers with wisdom today.',
   'Every chart carries a story, and every choice can shape the next chapter.',
   'Let intuition guide the question, and wisdom guide the answer.',
 ]
+const INCOMING_CALL_TIMEOUT_MS = 60 * 1000
+
+function requestInitials(name) {
+  return String(name || 'User').split(' ').map((part) => part[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()
+}
+
+function requestBirthDetail(request, ...keys) {
+  for (const key of keys) {
+    if (request?.birthDetails?.[key]) return request.birthDetails[key]
+  }
+  return ''
+}
 
 export default function Dashboard() {
   const { isDark } = useTheme()
   const { currentUser } = useAuth()
   const [showInvitedPasswordPopup, setShowInvitedPasswordPopup] = useState(Boolean(currentUser?.requiresPasswordSetup))
   const [greetingQuoteIndex, setGreetingQuoteIndex] = useState(0)
+  const [instantConsultations, setInstantConsultations] = useState([])
   const routes = getRoleRoutes(currentUser?.role)
   const navigate = useNavigate()
+  const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
+
+  useEffect(() => {
+    const refreshConsultations = () => {
+      const now = Date.now()
+      const consultations = getInstantConsultations()
+      consultations
+        .filter((request) => request.type === 'call' && request.status === 'ringing' && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
+        .forEach((request) => updateInstantConsultation(request.id, { status: 'expired', expiredAt: new Date().toISOString() }))
+      setInstantConsultations(getInstantConsultations())
+    }
+
+    refreshConsultations()
+    const unsubscribe = subscribeToInstantConsultations(refreshConsultations)
+    const timer = window.setInterval(refreshConsultations, 1000)
+    return () => {
+      unsubscribe()
+      window.clearInterval(timer)
+    }
+  }, [])
+
+  const pendingCallRequests = instantConsultations.filter((request) => (
+    request.astrologerId === astrologerId
+    && request.type === 'call'
+    && request.status === 'ringing'
+    && Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS
+  ))
   const quickActions = [
     { icon: Sparkles, label: 'Generate Kundli', route: routes.myAccount, accent: 'orange' },
     { icon: Flame, label: 'Send Remedy', route: routes.atonement, accent: 'purple' },
@@ -47,25 +88,10 @@ export default function Dashboard() {
     <div>
       {showInvitedPasswordPopup && <InvitedPasswordPopup onComplete={() => setShowInvitedPasswordPopup(false)} />}
       <header className="astrologer-greeting-header">
+        <div className="astrologer-greeting-header__mandala" aria-hidden="true" />
+        <div className="astrologer-greeting-header__temple" aria-hidden="true" />
         <h1>GOOD AFTERNOON, {(currentUser?.name || 'Acharya Gurudev').toUpperCase()}! <span aria-hidden="true">✨</span></h1>
         <p><strong>“</strong> <em>{ASTROLOGER_GREETING_QUOTES[greetingQuoteIndex]}</em> <button type="button" aria-label="Show another greeting" title="Show another greeting" onClick={() => setGreetingQuoteIndex((index) => (index + 1) % ASTROLOGER_GREETING_QUOTES.length)}><RefreshCw size={18} aria-hidden="true" /></button></p>
-        <div className="astrologer-greeting-services" aria-label="Service availability">
-          <div className="astrologer-greeting-service is-enabled">
-            <span className="astrologer-greeting-service__icon"><MessageCircle size={18} /></span>
-            <span className="astrologer-greeting-service__copy"><strong>Instant Chat</strong><small>ACTIVE</small></span>
-            <span className="astrologer-greeting-service__switch" aria-hidden="true"><span /></span>
-          </div>
-          <div className="astrologer-greeting-service is-enabled">
-            <span className="astrologer-greeting-service__icon"><Sparkles size={18} /></span>
-            <span className="astrologer-greeting-service__copy"><strong>Instant Call</strong><small>ACTIVE</small></span>
-            <span className="astrologer-greeting-service__switch" aria-hidden="true"><span /></span>
-          </div>
-          <div className="astrologer-greeting-service astrologer-greeting-dnd">
-            <span className="astrologer-greeting-service__icon"><Flame size={18} /></span>
-            <span className="astrologer-greeting-service__copy"><strong>DND Mode</strong><small>OFF</small></span>
-            <span className="astrologer-greeting-service__switch" aria-hidden="true"><span /></span>
-          </div>
-        </div>
       </header>
       <Section title="Quick Actions" icon={Zap} sectionClassName="adash-quick-actions-section" action={<span className="adash-quick-actions-caption">Fast Shortcuts</span>}>
         <div className="adash-quick-actions">
@@ -92,10 +118,41 @@ export default function Dashboard() {
         <MetricCard label="Pending Questions" value="4 Queries" note="Requires attention" tone="rose" />
       </div>
 
+      {pendingCallRequests.length > 0 && (
+        <section className="astrologer-consultation-queue" aria-labelledby="consultation-queue-title">
+          <div className="astrologer-queue-heading">
+            <span id="consultation-queue-title">● LIVE CONSULTATION REQUEST QUEUE</span>
+            <small>{pendingCallRequests.length} Incoming Call{pendingCallRequests.length === 1 ? '' : 's'}</small>
+          </div>
+          {pendingCallRequests.map((request) => {
+            const rashi = requestBirthDetail(request, 'rashi', 'rashiName', 'sign')
+            const nakshatra = requestBirthDetail(request, 'nakshatra', 'nakshatraName')
+            const details = [rashi, nakshatra].filter(Boolean).join('  •  ')
+            const avatar = request.userAvatar || request.userPhoto || request.profileImage
+            return (
+              <div className="astrologer-queue-content" key={request.id}>
+                <div className="astrologer-queue-avatar">
+                  {avatar ? <img src={avatar} alt="" /> : requestInitials(request.userName)}
+                </div>
+                <div className="astrologer-queue-person">
+                  <strong>{request.userName || 'Astro Connect user'}</strong>
+                  <small>{details || 'Birth details not available'}  •  Instant Call</small>
+                  <span><b>Incoming:</b> {request.topic || 'Astrology consultation request'}  •  <b>Status:</b> Ringing</span>
+                </div>
+                <div className="astrologer-queue-actions">
+                  <button type="button" className="astrologer-queue-decline" onClick={() => updateInstantConsultation(request.id, { status: 'rejected', rejectedAt: new Date().toISOString() })}>Decline</button>
+                  <button type="button" className="astrologer-queue-accept" onClick={() => updateInstantConsultation(request.id, { status: 'accepted', startedAt: new Date().toISOString() })}>Accept Call (₹{request.pricePerMinute || 0}/min)</button>
+                </div>
+              </div>
+            )
+          })}
+        </section>
+      )}
+
       <div className="astrologer-reference-grid">
         <section className="astrologer-reference-panel" aria-labelledby="work-events-title">
           <div className="astrologer-reference-panel__heading">
-            <h2 id="work-events-title"><span aria-hidden="true">▣</span> NEXT 3 WORK EVENTS</h2>
+            <h2 id="work-events-title"><span aria-hidden="true">▣</span> APPOINTMENTS</h2>
             <button type="button" onClick={() => navigate(routes.appointments)}>View All</button>
           </div>
           <div className="astrologer-work-event">
@@ -125,18 +182,6 @@ export default function Dashboard() {
           <div className="astrologer-activity-item"><span className="astrologer-activity-icon">●</span><div><strong>Instant Chat Session ended with <b>Siddharth N.</b> (18 mins)</strong><small>42 mins ago  •  Career consultation completed</small></div><em>+₹540</em></div>
         </section>
       </div>
-
-      <section className="astrologer-consultation-queue" aria-labelledby="consultation-queue-title">
-        <div className="astrologer-queue-heading">
-          <span id="consultation-queue-title">● LIVE CONSULTATION REQUEST QUEUE</span>
-          <small>Incoming Call  •  Priority 1</small>
-        </div>
-        <div className="astrologer-queue-content">
-          <div className="astrologer-queue-avatar">SS</div>
-          <div className="astrologer-queue-person"><strong>Savitri Sundaram</strong><small>Scorpio (Vrishchika Rasi)  •  Anuradha Nakshatra</small><span><b>Query:</b> Career Promotion &amp; Sade Sati Pariharam</span></div>
-          <div className="astrologer-queue-actions"><button type="button" className="astrologer-queue-decline">Decline</button><button type="button" className="astrologer-queue-accept" onClick={() => navigate(routes.instantConsultation)}>Accept Call (₹40/min)</button></div>
-        </div>
-      </section>
 
       <div className="astrologer-analytics-grid">
         <section className="astrologer-analytics-panel" aria-labelledby="revenue-trend-title">
