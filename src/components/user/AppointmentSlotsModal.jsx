@@ -209,7 +209,6 @@ export default function AppointmentSlotsModal({
           <div className="appointment-slots-section-head">
             <div>
               <h3>Appointment Slots</h3>
-              <p>Select up to {maxAllowedToday} slot{maxAllowedToday === 1 ? '' : 's'} on this date ({selectedSlots.length}/{maxAllowedToday} selected)</p>
             </div>
             <span className="appointment-slots-status-badge"><i aria-hidden="true" />{summary.remaining} Available</span>
           </div>
