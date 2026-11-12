@@ -919,6 +919,29 @@ html[data-theme='dark'] .buy-slots-stepper {
   text-align: center;
 }
 
+.buy-slots-stepper__input {
+  width: 52px;
+  padding: 4px 6px;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #1e293b);
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.buy-slots-stepper__input::-webkit-outer-spin-button,
+.buy-slots-stepper__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+html[data-theme='dark'] .buy-slots-stepper__input {
+  color: var(--text-primary, #f1f5f9);
+}
+
 /* Summary Box */
 .buy-slots-summary-box {
   background: rgba(248, 250, 252, 0.8);

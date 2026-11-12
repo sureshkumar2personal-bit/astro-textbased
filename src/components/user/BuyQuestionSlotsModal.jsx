@@ -269,7 +269,22 @@ export default function BuyQuestionSlotsModal({
                 >
                   <Minus size={14} />
                 </button>
-                <span className="buy-slots-stepper__value">{quantity}</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={quantity}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10)
+                    setQuantity(Number.isNaN(val) ? '' : Math.max(1, Math.min(50, val)))
+                    setErrorMessage('')
+                  }}
+                  onBlur={() => {
+                    if (!quantity || quantity < 1) setQuantity(1)
+                  }}
+                  className="buy-slots-stepper__input"
+                  aria-label="Custom slot quantity"
+                />
                 <button
                   type="button"
                   className="buy-slots-stepper__btn"
