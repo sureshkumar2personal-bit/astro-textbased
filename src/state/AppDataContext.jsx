@@ -433,6 +433,30 @@ const initialCampaigns = [
 // honest "amount not recorded" legacy path (never a misleading ₹0).
 const initialPurchasedSlots = [
   {
+    id: 'slots-user-demo-active-dr-rani',
+    userId: 'user-demo',
+    campaignId: 'demo-active-marriage',
+    campaignName: 'Marriage & Relationships',
+    astrologerId: 'astrologer-demo',
+    astrologerName: 'Dr. Rani',
+    generalPurchased: 4,
+    generalUsed: 1,
+    personalPurchased: 2,
+    personalUsed: 0,
+    purchasedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 1495,
+      discountPercent: 10,
+      discountAmount: 150,
+      paidAmount: 1345,
+      purchasedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      packageName: 'Marriage & Relationships',
+      isDemo: true,
+    }),
+  },
+  {
     id: 'slots-user-demo-marriage',
     userId: 'user-demo',
     campaignId: 'demo-active-marriage',
@@ -3256,6 +3280,103 @@ export function AppDataProvider({ children }) {
             ]),
         ...prev,
       ])
+    },
+    buyQuestionSlots(payload) {
+      const {
+        userId,
+        userEmail,
+        astrologerId,
+        astrologerName,
+        campaignName,
+        questionType,
+        quantity,
+        unitPrice,
+        discountPercent = 0,
+        totalAmount,
+        paymentMethod = 'Wallet',
+      } = payload
+
+      const now = new Date()
+      const nowIso = now.toISOString()
+      const expiryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiryIso = expiryDate.toISOString()
+
+      const targetCampaign = campaigns.find((c) => c.astrologerId === astrologerId)
+        || campaigns.find((c) => c.id === `text-support-${astrologerId}`)
+        || campaigns[0]
+      const campaignId = targetCampaign?.id || `text-support-${astrologerId}`
+      const finalCampaignName = campaignName || targetCampaign?.name || `${astrologerName} Package`
+
+      const isGeneral = questionType === 'General'
+      const generalQty = isGeneral ? Number(quantity) : 0
+      const personalQty = !isGeneral ? Number(quantity) : 0
+
+      const pricing = buildSlotPricing({
+        generalQty,
+        personalQty,
+        generalPrice: isGeneral ? unitPrice : 0,
+        personalPrice: !isGeneral ? unitPrice : 0,
+        discountPercent,
+        paidAmount: totalAmount,
+        purchasedAt: nowIso,
+        packageName: finalCampaignName,
+        paymentStatus: 'Paid',
+        isDemo: false,
+      })
+
+      const newSlot = {
+        id: `slots-${crypto.randomUUID()}`,
+        userId: userId || 'user-demo',
+        userEmail: userEmail || 'user@example.com',
+        campaignId,
+        campaignName: finalCampaignName,
+        astrologerId: astrologerId || targetCampaign?.astrologerId || 'astrologer-demo',
+        astrologerName: astrologerName || targetCampaign?.astrologerName || 'Astrologer',
+        generalPurchased: generalQty,
+        generalUsed: 0,
+        personalPurchased: personalQty,
+        personalUsed: 0,
+        purchasedAt: nowIso,
+        expiresAt: expiryIso,
+        pricing,
+      }
+
+      setPurchasedSlots((prev) => [newSlot, ...prev])
+
+      if (paymentMethod === 'Wallet') {
+        setUserWallet((prev) => ({
+          ...prev,
+          balance: Math.max(0, prev.balance - totalAmount),
+          spent: (prev.spent || 0) + totalAmount,
+          transactions: [
+            {
+              id: crypto.randomUUID(),
+              label: `Purchased ${quantity} ${questionType} slot${quantity > 1 ? 's' : ''} (${astrologerName})`,
+              amount: `-₹${totalAmount.toLocaleString('en-IN')}`,
+              time: 'just now',
+              date: nowIso,
+              type: 'purchase',
+            },
+            ...prev.transactions,
+          ],
+        }))
+      }
+
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Question slots purchased',
+          detail: `Purchased ${quantity} ${questionType} slot(s) for ${astrologerName}. Valid for 7 days (until ${expiryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}). After 7 days, unused slots close permanently with no refund or re-schedule.`,
+          time: 'just now',
+          route: '/user/ask-question/purchased',
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+
+      return newSlot.id
     },
     // Viewing a question is an astrologer action worth remembering, but it
     // must never change the question's own business status (stays Pending

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronDown, Filter, Sparkles } from 'lucide-react'
+import { AlertTriangle, ChevronDown, Clock, Filter, Plus, Sparkles } from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import SuccessAlert from '../../../components/ui/SuccessAlert.jsx'
 import PurchasedQuestionCard from '../../../components/user/PurchasedQuestionCard.jsx'
 import QuestionFormModal from '../../../components/user/QuestionFormModal.jsx'
+import BuyQuestionSlotsModal from '../../../components/user/BuyQuestionSlotsModal.jsx'
 import { CampaignEmptyState } from '../../../components/campaigns/CampaignCard.jsx'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -22,8 +23,8 @@ import {
   readSavedHoroscope,
   validateHoroscopeSelection,
 } from '../../../utils/horoscope.js'
-import { formatSlotAmount, formatSlotPurchaseDate, getSlotTypeCards } from '../../../utils/purchasedSlots.js'
-import { QUESTION_CREDIT_AVAILABLE, getQuestionCreditsForUser } from '../../../utils/questionCredits.js'
+import { formatSlotAmount, formatSlotExpiryDate, formatSlotPurchaseDate, getSlotTypeCards } from '../../../utils/purchasedSlots.js'
+import { QUESTION_CREDIT_AVAILABLE, QUESTION_CREDIT_EXPIRED, getQuestionCreditsForUser } from '../../../utils/questionCredits.js'
 import {
   PURCHASED_FILTERS,
   filterPurchasedRecords,
@@ -94,11 +95,12 @@ function PurchasedStatusSelector({ filter, counts, onChange }) {
 
 export default function QuestionPurchased() {
   const navigate = useNavigate()
-  const { campaigns, purchasedSlots, actions } = useAppData()
+  const { campaigns, purchasedSlots, userWallet, actions } = useAppData()
   const { currentUser } = useAuth()
   const routes = getRoleRoutes(currentUser?.role)
   const [filter, setFilter] = useState('All')
   const [openSlotKey, setOpenSlotKey] = useState(null)
+  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false)
   const [slotQuestion, setSlotQuestion] = useState('')
   const [slotLanguage, setSlotLanguage] = useState('Tamil')
   const [slotRaisedFor, setSlotRaisedFor] = useState('Myself')
@@ -300,18 +302,40 @@ export default function QuestionPurchased() {
     <div>
       <div className="aq-track-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <PurchasedStatusSelector filter={filter} counts={counts} onChange={setFilter} />
+        <button
+          type="button"
+          className="btn btn-primary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 700 }}
+          onClick={() => setIsBuyModalOpen(true)}
+        >
+          <Plus size={16} />
+          <span>Buy Question Slots</span>
+        </button>
       </div>
 
       <Section>
         <div>
+          {/* Prominent 7-Day Validity Policy Banner */}
+          <div className="purchased-slots-policy-banner" role="note">
+            <div className="purchased-slots-policy-banner__icon">
+              <AlertTriangle size={18} />
+            </div>
+            <div className="purchased-slots-policy-banner__content">
+              <strong>7-Day Slot Validity Policy (Strict Rule)</strong>
+              <p>
+                Purchased question slots are available for <strong>7 days</strong> from the date of purchase. After 7 days, unused slots are permanently <strong>closed</strong>. <strong>No refund and no re-scheduling</strong> under any circumstance.
+              </p>
+            </div>
+          </div>
+
           {counts.All === 0 ? (
             <CampaignEmptyState
               icon={<Sparkles size={24} aria-hidden="true" />}
               title="No purchased slots"
               message="You have not bought a question package yet. A package banks General or Personal questions with an astrologer that you can submit any time."
               action={(
-                <button type="button" className="btn btn-primary" onClick={() => navigate(routes.purchasePackage)}>
-                  Purchase Question Package
+                <button type="button" className="btn btn-primary" onClick={() => setIsBuyModalOpen(true)}>
+                  Buy Question Slots
                 </button>
               )}
             />
@@ -324,7 +348,9 @@ export default function QuestionPurchased() {
               {visibleSlotCards.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {visibleSlotCards.map((card) => {
-                    const canUse = getSlotCardStatus(card) === QUESTION_CREDIT_AVAILABLE
+                    const cardStatus = getSlotCardStatus(card)
+                    const isExpired = cardStatus === QUESTION_CREDIT_EXPIRED || card.isExpired
+                    const canUse = cardStatus === QUESTION_CREDIT_AVAILABLE && !isExpired
                     const isPersonal = card.type !== 'General'
                     const slotId = `#SLOT-${String(card.key || '').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || '2026'}`
                     return (
@@ -333,14 +359,29 @@ export default function QuestionPurchased() {
                         className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-amber-500'} space-y-4 flex flex-col justify-between`}
                       >
                         <div>
-                          <div className="flex justify-between items-start mb-2">
-                            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
-                              isPersonal
-                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
-                                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
-                            }`}>
-                              {questionTypePillLabel(card.type)} Q&amp;A
-                            </span>
+                          <div className="flex justify-between items-start mb-2 gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
+                                isPersonal
+                                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
+                              }`}>
+                                {questionTypePillLabel(card.type)} Q&amp;A
+                              </span>
+                              {isExpired ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+                                  Closed · Expired
+                                </span>
+                              ) : card.remaining <= 0 ? (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400">
+                                  All Used
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300 flex items-center gap-1">
+                                  <Clock size={11} /> {card.daysRemaining}d left
+                                </span>
+                              )}
+                            </div>
                             <span className="text-xs font-bold text-slate-400">{slotId}</span>
                           </div>
 
@@ -350,7 +391,9 @@ export default function QuestionPurchased() {
                           <div className="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 space-y-1 text-xs mb-3">
                             <div className="flex justify-between">
                               <span className="text-slate-500">Remaining:</span>
-                              <span className="font-extrabold text-amber-600 dark:text-amber-400">{card.remaining} {card.remaining === 1 ? 'Question' : 'Questions'}</span>
+                              <span className={`font-extrabold ${isExpired ? 'text-slate-400 line-through' : 'text-amber-600 dark:text-amber-400'}`}>
+                                {card.remaining} {card.remaining === 1 ? 'Question' : 'Questions'}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">Total Paid:</span>
@@ -360,6 +403,12 @@ export default function QuestionPurchased() {
                               <span className="text-slate-500">Purchased:</span>
                               <span className="font-semibold text-slate-700 dark:text-slate-200">{card.purchased} slots ({purchasedOnLabel(card)})</span>
                             </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">{isExpired ? 'Expired On:' : 'Valid Until:'}</span>
+                              <span className={`font-semibold ${isExpired ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-200'}`}>
+                                {formatSlotExpiryDate(card.expiresAt)}
+                              </span>
+                            </div>
                             {card.campaign?.date && card.campaign?.endDate && (
                               <div className="flex justify-between">
                                 <span className="text-slate-500">Schedule:</span>
@@ -367,6 +416,27 @@ export default function QuestionPurchased() {
                               </div>
                             )}
                           </div>
+
+                          {/* Policy warning indicator on each card */}
+                          {isExpired ? (
+                            <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-700 dark:text-rose-300 space-y-0.5 mb-3">
+                              <div className="font-bold flex items-center gap-1.5">
+                                <AlertTriangle size={13} /> Closed after 7 Days
+                              </div>
+                              <p className="text-[10px] text-rose-600 dark:text-rose-400 leading-tight">
+                                7-day redemption window has passed. Slots are permanently closed. No refund, no re-schedule.
+                              </p>
+                            </div>
+                          ) : canUse ? (
+                            <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 mb-3">
+                              <div className="flex items-center gap-1.5 font-bold">
+                                <Clock size={13} /> {card.daysRemaining} {card.daysRemaining === 1 ? 'day' : 'days'} remaining
+                              </div>
+                              <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 leading-tight">
+                                Available for 7 days from purchase. Unused slots close permanently with no refund or re-schedule.
+                              </p>
+                            </div>
+                          ) : null}
                         </div>
 
                         {canUse ? (
@@ -376,6 +446,14 @@ export default function QuestionPurchased() {
                             onClick={() => openSlotForm(card)}
                           >
                             Use a Slot Now
+                          </button>
+                        ) : isExpired ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 cursor-not-allowed opacity-90"
+                          >
+                            <AlertTriangle size={13} /> Closed · Expired (No Refund)
                           </button>
                         ) : (
                           <div className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl text-xs font-bold text-center">
@@ -452,6 +530,19 @@ export default function QuestionPurchased() {
           onRemoveHoroscopeFile={() => { setSlotHoroscopeFile(null); setSlotHoroscopeError('') }}
           onClose={() => setOpenSlotKey(null)}
           onSubmit={submitSlotQuestion}
+        />
+      )}
+
+      {isBuyModalOpen && (
+        <BuyQuestionSlotsModal
+          currentUser={currentUser}
+          userWallet={userWallet}
+          actions={actions}
+          onClose={() => setIsBuyModalOpen(false)}
+          onSuccess={(info) => {
+            setIsBuyModalOpen(false)
+            setSlotSuccessMessage(`Successfully purchased ${info.quantity} ${info.type} slot(s) for ${info.astrologerName}! Valid for 7 days (until ${formatSlotExpiryDate(info.expiresAt)}).`)
+          }}
         />
       )}
     </div>

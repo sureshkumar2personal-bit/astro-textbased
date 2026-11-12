@@ -14,17 +14,23 @@ import {
   QUESTION_CREDIT_USED,
   getQuestionCreditStatus,
 } from './questionCredits.js'
+import { isSlotExpired } from './purchasedSlots.js'
 
 export const PURCHASED_FILTERS = ['All', 'Available', 'Used', 'Expired']
 
 // Entitlement status for one slot card, derived from the balance counters
-// (remaining = purchased - used, already clamped). Missing or non-numeric
-// remaining reads as fully consumed rather than silently Available.
-export function getSlotCardStatus(card = {}) {
+// (remaining = purchased - used, already clamped) and the 7-day validity window.
+// If 7 days have passed from purchase date, unused slots are closed/expired.
+export function getSlotCardStatus(card = {}, nowMs = Date.now()) {
   const remaining = Number(card?.remaining)
-  return Number.isFinite(remaining) && remaining > 0
-    ? QUESTION_CREDIT_AVAILABLE
-    : QUESTION_CREDIT_USED
+  if (!Number.isFinite(remaining) || remaining <= 0) {
+    return QUESTION_CREDIT_USED
+  }
+  const purchasedAt = card.purchasedAt || card.pricing?.purchasedAt || card.slot?.purchasedAt || card.slot?.pricing?.purchasedAt
+  if (card.isExpired || (purchasedAt && isSlotExpired(purchasedAt, nowMs, 7))) {
+    return QUESTION_CREDIT_EXPIRED
+  }
+  return QUESTION_CREDIT_AVAILABLE
 }
 
 // One list entry per purchase record: slot cards first (the order the tab

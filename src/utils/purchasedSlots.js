@@ -13,6 +13,36 @@ import { getDiscountPreview } from './questions.js'
 
 export const SLOT_STATUS_AVAILABLE = 'Available'
 export const SLOT_STATUS_USED = 'Used'
+export const SLOT_STATUS_EXPIRED = 'Expired'
+export const SLOT_VALIDITY_DAYS = 7
+export const DAY_MS = 24 * 60 * 60 * 1000
+
+export function getSlotExpiryDate(purchasedAt, days = SLOT_VALIDITY_DAYS) {
+  if (!purchasedAt) return null
+  const d = new Date(purchasedAt)
+  if (Number.isNaN(d.getTime())) return null
+  return new Date(d.getTime() + days * DAY_MS)
+}
+
+export function isSlotExpired(purchasedAt, nowMs = Date.now(), days = SLOT_VALIDITY_DAYS) {
+  if (!purchasedAt) return false
+  const expiry = getSlotExpiryDate(purchasedAt, days)
+  if (!expiry) return false
+  return nowMs >= expiry.getTime()
+}
+
+export function getSlotDaysRemaining(purchasedAt, nowMs = Date.now(), days = SLOT_VALIDITY_DAYS) {
+  const expiry = getSlotExpiryDate(purchasedAt, days)
+  if (!expiry) return SLOT_VALIDITY_DAYS
+  return Math.max(0, Math.ceil((expiry.getTime() - nowMs) / DAY_MS))
+}
+
+export function formatSlotExpiryDate(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 function toFiniteNumber(value) {
   if (value == null || value === '') return null
@@ -161,7 +191,7 @@ export function getPurchasedSlotsForUser(purchasedSlots = [], user) {
 // the astrologer-specific slot list, the consolidated dashboard view and the
 // Ask Question chooser step. `includeUsed` keeps fully-used slots visible with a
 // Used status instead of hiding them.
-export function getSlotTypeCards(purchasedSlots = [], user, { campaigns = [], astrologers = [], includeUsed = true } = {}) {
+export function getSlotTypeCards(purchasedSlots = [], user, { campaigns = [], astrologers = [], includeUsed = true, nowMs = Date.now() } = {}) {
   const campaignById = new Map((campaigns || []).map((campaign) => [campaign.id, campaign]))
   const astrologerById = new Map((astrologers || []).map((astrologer) => [astrologer.id, astrologer]))
 
@@ -174,6 +204,14 @@ export function getSlotTypeCards(purchasedSlots = [], user, { campaigns = [], as
       || 'Astrologer'
     const campaignName = campaign?.name || slot.campaignName || slot.campaignId || 'Question package'
     const pricing = getSlotPricingView(slot)
+    const purchasedAt = pricing?.purchasedAt || slot.purchasedAt || null
+    const expiresAt = slot.expiresAt || (purchasedAt ? getSlotExpiryDate(purchasedAt).toISOString() : null)
+    const isExpired = isSlotExpired(purchasedAt, nowMs)
+    const daysRemaining = getSlotDaysRemaining(purchasedAt, nowMs)
+    const status = totals.totalRemaining <= 0
+      ? SLOT_STATUS_USED
+      : (isExpired ? SLOT_STATUS_EXPIRED : SLOT_STATUS_AVAILABLE)
+
     const base = {
       slot,
       campaign,
@@ -182,9 +220,13 @@ export function getSlotTypeCards(purchasedSlots = [], user, { campaigns = [], as
       astrologerId: slot.astrologerId || campaign?.astrologerId || null,
       astrologerName,
       pricing,
+      purchasedAt,
+      expiresAt,
+      isExpired,
+      daysRemaining,
       demo: Boolean(slot.demo) || Boolean(pricing?.isDemo),
       schedule: campaign ? `${campaign.date} – ${campaign.endDate}` : '',
-      status: getSlotStatus(slot),
+      status,
     }
 
     const cards = []
