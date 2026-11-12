@@ -17,6 +17,7 @@ import {
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useInstantCall } from '../../state/InstantCallContext.jsx'
 import { getInstantConsultations, subscribeToInstantConsultations } from '../../utils/instantConsultation.js'
 import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import './instantConsultation.css'
@@ -42,6 +43,7 @@ function consultationPaid(session) {
 
 export default function InstantConsultation() {
   const { currentUser } = useAuth()
+  const { openInstantChat } = useInstantCall()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'call' | 'chat'
   const [searchQuery, setSearchQuery] = useState('')
@@ -128,7 +130,7 @@ export default function InstantConsultation() {
               type="button"
               className="btn btn-primary"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, padding: '7px 14px' }}
-              onClick={() => navigate('/user/instantchat')}
+              onClick={() => openInstantChat('astrologer-demo')}
             >
               <MessageCircle size={15} /> Start Instant Chat
             </button>

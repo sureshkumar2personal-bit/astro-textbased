@@ -33,27 +33,29 @@ import {
   updateInstantConsultation,
   createInstantConsultation,
   getInstantConsultations,
+  getConsultationSecondsLeft,
 } from '../../utils/instantConsultation.js'
 import './instantchatuser.css'
 
 const BIRTH_STORAGE_KEY = 'astroconnect-user-birth-details'
 
-function readSavedBirth(currentUser) {
+function readSavedBirth(currentUser, sessionBirth) {
   let saved = {}
   try {
     saved = JSON.parse(window.localStorage.getItem(BIRTH_STORAGE_KEY) || '{}') || {}
   } catch {
     saved = {}
   }
+  const source = { ...saved, ...(sessionBirth || {}) }
   return {
-    name: saved.name || currentUser?.name || 'Arjun Karthik',
-    gender: saved.gender || currentUser?.gender || 'Male',
-    place: saved.place || currentUser?.birthPlace || 'Chennai, TN',
-    dob: saved.dob || currentUser?.dateOfBirth || '14 Aug 1996',
-    time: saved.time || currentUser?.birthTime || '06:42 AM',
-    lagna: saved.lagna || 'Simha (Leo)',
-    rashi: saved.rashi || 'Mithuna (Gemini)',
-    nakshatra: saved.nakshatra || 'Punarvasu-3',
+    name: source.name || currentUser?.name || 'Arjun Karthik',
+    gender: source.gender || currentUser?.gender || 'Male',
+    place: source.place || currentUser?.birthPlace || 'Chennai, TN',
+    dob: source.dob || currentUser?.dateOfBirth || '14 Aug 1996',
+    time: source.time || currentUser?.birthTime || '06:42 AM',
+    lagna: source.lagna || 'Simha (Leo)',
+    rashi: source.rashi || 'Mithuna (Gemini)',
+    nakshatra: source.nakshatra || 'Punarvasu-3',
   }
 }
 
@@ -103,7 +105,7 @@ export default function InstantChatUser() {
 
   // Match astrologer from directory (defaults to Acharya Raghavan from Gemini prototype)
   const astrologer = useMemo(() => {
-    if (paramAstrologerId && paramAstrologerId !== 'astrologer-demo') {
+    if (paramAstrologerId) {
       const match = consultationAstrologers.find((a) => a.id === paramAstrologerId)
       if (match) return match
     }
@@ -123,8 +125,21 @@ export default function InstantChatUser() {
     }
   }, [paramAstrologerId])
 
+  // Look up active consultation session
+  const activeSession = useMemo(() => {
+    const list = getInstantConsultations()
+    const mine = list.filter(
+      (s) => s.userId === (currentUser?.id || 'guest') || (currentUser?.role === 'user' && s.userId === 'user-demo'),
+    )
+    return (
+      mine.find((s) => s.astrologerId === astrologer.id && s.type === 'chat' && s.status !== 'ended') ||
+      mine.find((s) => s.type === 'chat' && s.status !== 'ended') ||
+      null
+    )
+  }, [currentUser?.id, currentUser?.role, astrologer.id])
+
   // Birth details
-  const [birthDetails, setBirthDetails] = useState(() => readSavedBirth(currentUser))
+  const [birthDetails, setBirthDetails] = useState(() => readSavedBirth(currentUser, activeSession?.birthDetails))
   const [activeProfileTab, setActiveProfileTab] = useState('my-chart') // 'my-chart' | 'partner-chart'
 
   // Chart settings
@@ -144,8 +159,19 @@ export default function InstantChatUser() {
   // Wallet & Timer state
   const unitRate = Number(astrologer.chatRate || 15)
   const balance = Number(userWallet?.balance || 0)
-  const [sessionSeconds, setSessionSeconds] = useState(405) // ~6m 45s initially
-  const [spentThisSession, setSpentThisSession] = useState(98.25)
+  const [sessionSeconds, setSessionSeconds] = useState(() => {
+    if (activeSession) {
+      const left = getConsultationSecondsLeft(activeSession)
+      if (left > 0) return left
+      if (activeSession.durationMinutes) return Number(activeSession.durationMinutes) * 60
+    }
+    return 600
+  })
+  const [spentThisSession, setSpentThisSession] = useState(() => {
+    if (activeSession?.amountPaid) return Number(activeSession.amountPaid)
+    if (activeSession?.amount) return Number(activeSession.amount)
+    return 98.25
+  })
   const [isAudioPlaying, setIsAudioPlaying] = useState(false)
   const [isTransitSaved, setIsTransitSaved] = useState(false)
 
@@ -380,6 +406,18 @@ export default function InstantChatUser() {
       transactionId: `astro-connect:topup:${Date.now()}`,
     })
     setShowAddMoneyModal(false)
+  }
+
+  // End consultation
+  const handleEndConsultation = () => {
+    if (activeSession?.id) {
+      updateInstantConsultation(activeSession.id, {
+        status: 'ended',
+        endedAt: new Date().toISOString(),
+      })
+    }
+    setShowEndModal(false)
+    navigate('/user/instant-consultation')
   }
 
   return (
@@ -1146,8 +1184,7 @@ export default function InstantChatUser() {
               </button>
             </div>
             <p style={{ margin: 0, fontSize: 13, color: '#49365c' }}>
-              You have been in session with <strong>{astrologer.name}</strong> for{' '}
-              <strong>{Math.ceil((405 - sessionSeconds) / 60)} minutes</strong>.
+              You have been in session with <strong>{astrologer.name}</strong>.
             </p>
             <div style={{ padding: '12px 14px', borderRadius: 10, background: '#fef2f2', border: '1px solid #fecaca', fontSize: 13, color: '#b91c1c' }}>
               Total paid: <strong>₹{spentThisSession.toFixed(2)}</strong>. You can view transcript and remedies in your history.
@@ -1165,10 +1202,7 @@ export default function InstantChatUser() {
                 type="button"
                 className="ic-chat-end-btn"
                 style={{ flex: 1 }}
-                onClick={() => {
-                  setShowEndModal(false)
-                  navigate('/user/consultations/history')
-                }}
+                onClick={handleEndConsultation}
               >
                 Confirm End
               </button>

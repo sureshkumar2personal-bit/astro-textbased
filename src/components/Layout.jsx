@@ -97,12 +97,6 @@ const ROLE_CONFIG = {
         section: 'MAIN MENU',
       },
       {
-        label: 'Instant Chat',
-        to: 'instantchat',
-        icon: MessageCircle,
-        section: 'MAIN MENU',
-      },
-      {
         label: 'Instant consultation',
         to: 'instant-consultation',
         icon: Headphones,
@@ -228,8 +222,7 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
   const dashboardLabels = {
     'Ask a Question': 'Ask Question (Text)',
     Appointments: 'Book Appointment',
-    'Instant Chat': 'Instant Chat',
-    'Instant consultation': 'Instant Call & History',
+    'Instant consultation': 'Instant Call & Chat',
     Atonement: 'Atonement (Remedies)',
     Live: 'Live Streams',
     Disputes: 'Disputes & Support',

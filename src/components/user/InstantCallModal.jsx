@@ -117,6 +117,17 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     return () => window.clearTimeout(timer)
   }, [request?.id, request?.status])
 
+  // After astrologer confirms & connects for chat: navigate to the Gemini live consultation workspace
+  useEffect(() => {
+    if (request?.status === 'accepted' && !isCall) {
+      const timer = window.setTimeout(() => {
+        onClose?.()
+        navigate(`/user/instantchat/${astrologer.id}`)
+      }, 700)
+      return () => window.clearTimeout(timer)
+    }
+  }, [request?.status, isCall, astrologer.id, navigate, onClose])
+
   const startChat = () => {
     if (balance < price) {
       setError(`You need ${money(price - balance)} more to book this consultation.`)
@@ -296,8 +307,23 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
                 <strong>{formatTime(remaining)}</strong>
               </div>
               <p className="instant-call-handover">
-                {isCall ? 'Connected. This call continues in the corner panel.' : 'Connected. This chat continues in the corner panel.'}
+                {isCall
+                  ? 'Connected. This call continues in the corner panel.'
+                  : 'Connected! Loading your horoscope chart & consultation workspace…'}
               </p>
+              {!isCall && (
+                <button
+                  type="button"
+                  className="instant-call-primary"
+                  style={{ marginTop: 10 }}
+                  onClick={() => {
+                    onClose?.()
+                    navigate(`/user/instantchat/${astrologer.id}`)
+                  }}
+                >
+                  Enter Chat Room →
+                </button>
+              )}
             </div>
           )}
 

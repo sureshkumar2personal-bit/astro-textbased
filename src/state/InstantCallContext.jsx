@@ -57,14 +57,7 @@ export function InstantCallProvider({ children }) {
   }, [])
 
   const openInstantCall = useCallback((astrologerId) => openSession('call', astrologerId), [openSession])
-  const openInstantChat = useCallback((astrologerId) => {
-    const targetId = astrologerId || 'astrologer-demo'
-    if (navigate) {
-      navigate(`/user/instantchat/${targetId}`)
-    } else if (typeof window !== 'undefined') {
-      window.location.href = `/user/instantchat/${targetId}`
-    }
-  }, [navigate])
+  const openInstantChat = useCallback((astrologerId) => openSession('chat', astrologerId), [openSession])
 
   const closePopup = useCallback(() => setPopup(null), [])
 
@@ -91,6 +84,22 @@ export function InstantCallProvider({ children }) {
     // `id` may be a session id or the astrologer the popup was opened for.
     setPopup((current) => (current && (current.sessionId === id || current.astrologerId === id) ? null : current))
   }, [])
+
+  // After astrologer confirms/accepts an instant chat consultation:
+  // automatically transition from ringing popup to the live Gemini consultation workspace
+  useEffect(() => {
+    if (active && active.status === 'accepted' && active.type === 'chat') {
+      const targetAstrologerId = active.astrologerId || 'astrologer-demo'
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/user/instantchat')) {
+        setPopup(null)
+        if (navigate) {
+          navigate(`/user/instantchat/${targetAstrologerId}`)
+        } else {
+          window.location.href = `/user/instantchat/${targetAstrologerId}`
+        }
+      }
+    }
+  }, [active?.id, active?.status, active?.type, active?.astrologerId, navigate])
 
     const value = useMemo(
     () => ({
