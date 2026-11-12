@@ -233,10 +233,6 @@ export default function AppointmentSlotsModal({
               )
             })}
           </div>
-
-          <p className="appointment-slots-hint">
-            {summary.remaining ? `${summary.remaining} of ${summary.total} slots still open on this date. Maximum 4 slots per day.` : 'All slots on this date are booked or closed.'}
-          </p>
         </div>
 
         <div className="appointment-slots-modal__foot">
