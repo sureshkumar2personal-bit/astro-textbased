@@ -1,3 +1,4 @@
+import { AlertTriangle, Clock } from 'lucide-react'
 import {
   QUESTION_CREDIT_AVAILABLE,
   QUESTION_CREDIT_EXPIRED,
@@ -33,6 +34,7 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
   // flag, so an entitlement that expired is still blocked even if its stored
   // status is stale, and a used credit stays Used.
   const status = getQuestionCreditStatus(credit)
+  const isExpired = status === QUESTION_CREDIT_EXPIRED
   const isAvailable = status === QUESTION_CREDIT_AVAILABLE
   const isUsed = status === QUESTION_CREDIT_USED
   const isPersonal = credit.questionType !== 'General'
@@ -42,14 +44,29 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
   return (
     <div className={`glass-card p-5 rounded-2xl border-l-4 ${isPersonal ? 'border-l-emerald-500' : 'border-l-amber-500'} space-y-4 flex flex-col justify-between`}>
       <div>
-        <div className="flex justify-between items-start mb-2">
-          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
-            isPersonal
-              ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
-              : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
-          }`}>
-            {isPersonal ? 'Personal Q&A' : 'General Q&A'}
-          </span>
+        <div className="flex justify-between items-start mb-2 gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
+              isPersonal
+                ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
+                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
+            }`}>
+              {isPersonal ? 'Personal Q&A' : 'General Q&A'}
+            </span>
+            {isExpired ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300">
+                Closed · Expired
+              </span>
+            ) : isUsed ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400">
+                Used
+              </span>
+            ) : (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300 flex items-center gap-1">
+                <Clock size={11} /> {daysLeft}d left
+              </span>
+            )}
+          </div>
           <span className="text-xs font-bold text-slate-400">{STATUS_LABEL[status] || 'Available'}</span>
         </div>
 
@@ -75,13 +92,26 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">{isAvailable ? 'Expires:' : isUsed ? 'Used on:' : 'Expired:'}</span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">
+            <span className={`font-semibold ${isExpired ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-200'}`}>
               {isUsed
                 ? formatPurchasedQuestionDate(credit.usedAt)
                 : `${formatPurchasedQuestionDate(credit.expiresAt)}${isAvailable ? ` (${daysLeft}d left)` : ''}`}
             </span>
           </div>
         </div>
+
+        {/* 7-day validity indicator */}
+        {isExpired ? (
+          <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-700 dark:text-rose-300 mb-3 flex items-center gap-1.5 font-semibold">
+            <AlertTriangle size={12} className="shrink-0" />
+            <span>Closed after 7 days (non-refundable)</span>
+          </div>
+        ) : isAvailable ? (
+          <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-1.5 font-semibold">
+            <Clock size={12} className="shrink-0" />
+            <span>{daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining (non-refundable)</span>
+          </div>
+        ) : null}
       </div>
 
       {isAvailable ? (
@@ -92,11 +122,17 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
         >
           {actionLabel === 'Ask Your Question' ? 'Use a Slot Now' : actionLabel}
         </button>
+      ) : isExpired ? (
+        <button
+          type="button"
+          disabled
+          className="w-full py-2.5 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5 cursor-not-allowed opacity-90"
+        >
+          <AlertTriangle size={13} /> Closed · Expired (No Refund)
+        </button>
       ) : (
-        <div className="w-full py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl text-xs font-bold text-center">
-          {isUsed
-            ? 'Used — this question has already been submitted.'
-            : 'Expired — this question can no longer be submitted.'}
+        <div className="w-full py-2 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl text-xs font-bold text-center">
+          Used — this question has already been submitted.
         </div>
       )}
     </div>

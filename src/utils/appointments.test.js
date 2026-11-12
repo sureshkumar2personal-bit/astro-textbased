@@ -323,7 +323,7 @@ describe('appointment availability engine (weekly schedule)', () => {
         },
       ],
     }
-    const summary = getAppointmentSlotSummary({ template: multi, date: DATE })
+    const summary = getAppointmentSlotSummary({ template: multi, date: DATE, now: NOW })
     // 14 + 7 = 21 slots exactly as the requirement example.
     expect(summary.total).toBe(21)
   })
@@ -655,6 +655,7 @@ describe('published availability snapshots', () => {
       template: snapshot,
       date: '2026-09-14', // two Mondays after 2026-08-31 (Sep 7, 14, 21...)
       availabilityPeriod: snapshot.publishedAvailabilityPeriod || snapshot.availabilityPeriod,
+      now: new Date('2026-09-01T08:00:00+05:30'),
     })
     expect(slots.length).toBeGreaterThan(0)
     expect(slots.every((s) => s.endMin - s.startMin === 30)).toBe(true)

@@ -126,4 +126,32 @@ describe('getSlotTypeCards', () => {
     expect(getPurchasedSlotsForUser([slot(), other], USER)).toHaveLength(1)
     expect(getSlotTypeCards([other], USER, { includeUsed: true })).toHaveLength(0)
   })
+
+  it('enforces strict 7-day validity: slots within 7 days are Available; after 7 days they are Expired', () => {
+    const nowMs = new Date('2026-11-12T12:00:00Z').getTime()
+    const recentPurchase = new Date(nowMs - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
+    const expiredPurchase = new Date(nowMs - 8 * 24 * 60 * 60 * 1000).toISOString() // 8 days ago
+
+    const activeSlot = slot({
+      id: 'slot-active',
+      purchasedAt: recentPurchase,
+      pricing: { purchasedAt: recentPurchase },
+    })
+    const expiredSlot = slot({
+      id: 'slot-expired',
+      purchasedAt: expiredPurchase,
+      pricing: { purchasedAt: expiredPurchase },
+    })
+
+    const activeCards = getSlotTypeCards([activeSlot], USER, { campaigns, astrologers, includeUsed: true, nowMs })
+    const expiredCards = getSlotTypeCards([expiredSlot], USER, { campaigns, astrologers, includeUsed: true, nowMs })
+
+    expect(activeCards[0].isExpired).toBe(false)
+    expect(activeCards[0].status).toBe('Available')
+    expect(activeCards[0].daysRemaining).toBe(5)
+
+    expect(expiredCards[0].isExpired).toBe(true)
+    expect(expiredCards[0].status).toBe('Expired')
+    expect(expiredCards[0].daysRemaining).toBe(0)
+  })
 })

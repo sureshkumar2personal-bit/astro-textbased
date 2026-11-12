@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import FlowSteps, { FLOW_STEPS } from '../components/user/FlowSteps.jsx'
-import { X, Clock, AlertTriangle, Languages, Layers, Sparkles, Star, Check, ChevronDown, ChevronUp, UserRound, CheckCircle2, Heart, GraduationCap, Briefcase, Activity, Home, Sun, Baby, Package } from 'lucide-react'
+import { X, Clock, AlertTriangle, Languages, Layers, Sparkles, Star, Check, ChevronDown, ChevronUp, UserRound, CheckCircle2, Heart, GraduationCap, Briefcase, Activity, Home, Sun, Baby, Package, Minus, Plus } from 'lucide-react'
 import Card from '../components/ui/Card.jsx'
 import QuestionFormModal from '../components/user/QuestionFormModal.jsx'
 import Section from '../components/ui/Section.jsx'
@@ -38,7 +38,8 @@ import {
   findQuestionCreditForSubmission,
   getQuestionCreditsForUser,
 } from '../utils/questionCredits.js'
-import { getSlotPricingView } from '../utils/purchasedSlots.js'
+import { getSlotPricingView, isSlotExpired } from '../utils/purchasedSlots.js'
+import { getMonthlyDiscountStatus } from '../utils/monthlyDiscounts.js'
 import { paginateViewMore } from '../utils/pagination.js'
 import './askquestion-astrologers.css'
 
@@ -418,11 +419,17 @@ function getDemoFirstQuestionOffer(demoIndex = 0) {
 // never changes what the user is charged, and the "First Question" wording
 // keeps it clear the discount is a one-time offer, not a repeatable one.
 function getAstrologerOfferBadge(astrologerId, { campaigns = [], subscriptions = [], userId, demoIndex = 0 } = {}) {
-  const hasDiscountQuestion = subscriptions.some((subscription) => (
-    subscription.userId === userId
-    && subscription.astrologerId === astrologerId
-    && (subscription.discountQuestions || []).some((item) => item.status === 'Available')
-  ))
+  const discountInfo = getMonthlyDiscountStatus(subscriptions, userId, astrologerId)
+
+  // If user is subscribed and has already used their 1 monthly discount question
+  if (discountInfo.isSubscribed && discountInfo.status === 'Used') {
+    return {
+      label: 'Original Rate · Monthly Discount Used',
+      tone: 'used',
+      hint: 'Monthly 1-question discount used this month. Additional questions are at original rate.',
+      isUsed: true,
+    }
+  }
 
   const offer = campaigns.find((campaign) => (
     campaign.astrologerId === astrologerId
@@ -431,33 +438,32 @@ function getAstrologerOfferBadge(astrologerId, { campaigns = [], subscriptions =
     && (Number(campaign.discountPercent) || 0) > 0
   ))
 
-  const offerPercent = offer ? Number(offer.discountPercent) : getDemoFirstQuestionOffer(demoIndex)
-  const label = `${offerPercent}% OFF on First Question`
+  const offerPercent = discountInfo.hasAvailableDiscount
+    ? discountInfo.discountPercent
+    : (offer ? Number(offer.discountPercent) : getDemoFirstQuestionOffer(demoIndex))
 
-  if (hasDiscountQuestion) {
+  const label = `${offerPercent}% OFF · 1 Monthly Discount`
+
+  if (discountInfo.hasAvailableDiscount) {
     return {
       label,
       tone: 'first',
-      hint: offer
-        ? `First-question offer · live on ${offer.name}`
-        : `${offerPercent}% off your first question with this astrologer`,
-      demo: offer ? undefined : true,
+      hint: `Monthly 1-question discount available: ${offerPercent}% OFF. Next purchase at original rate.`,
     }
   }
 
   if (offer) {
     return {
-      label,
+      label: `${offerPercent}% OFF`,
       tone: 'offer',
-      hint: `First-question offer · live on ${offer.name}`,
+      hint: `Campaign offer · live on ${offer.name}`,
     }
   }
 
   return {
-    label,
+    label: 'Standard Rate',
     tone: 'demo',
-    hint: `${offerPercent}% off your first question with this astrologer`,
-    demo: true,
+    hint: 'Questions charged at standard rate',
   }
 }
 
@@ -574,26 +580,98 @@ function QuestionTypeBox({ type, label, hint, price, offerText, isSelected = fal
 // whole grid. The selection is a single source + question type, and the bar
 // summarises both (plus the offer) so multiple cards can never leave the
 // purchase state ambiguous.
-function PurchaseActionBar({ summary, onAskNow, onPayLater, onCancel }) {
+function PurchaseActionBar({
+  summary,
+  quantity = 1,
+  onQuantityChange,
+  showQuantity = false,
+  unitPrice = 0,
+  onAskNow,
+  onPayLater,
+  onCancel,
+  isMonthlyDiscountAvailable,
+  isMonthlyDiscountUsed,
+}) {
+  const numQty = Number(quantity) || 1
   return (
     <div className="aq-purchase-bar">
       <div className="aq-purchase-bar__summary">
         <span className="aq-purchase-bar__selected">Selected</span>
         <span className="aq-purchase-bar__source">{summary.sourceName}</span>
-        <span className="aq-purchase-bar__type">{summary.typeLabel}</span>
+        <span className="aq-purchase-bar__type">
+          {summary.typeLabel}
+          {numQty > 1 ? ` (${numQty} slots)` : ''}
+        </span>
         <span className="aq-purchase-bar__price">You pay ₹{summary.paidPrice}</span>
-        {summary.offerText ? <span className="aq-purchase-bar__offer">{summary.offerText}</span> : null}
-        <span className="aq-purchase-bar__note">Ask now, or pay now and write the question later within {QUESTION_CREDIT_WINDOW_DAYS} days.</span>
+        {summary.offerText ? (
+          <span className="aq-purchase-bar__offer">{summary.offerText}</span>
+        ) : isMonthlyDiscountUsed ? (
+          <span className="aq-purchase-bar__original-pill">Original Rate</span>
+        ) : null}
+
+        {/* Quantity Increase / Decrease + Direct Typing (shown after monthly discount question used) */}
+        {showQuantity && isMonthlyDiscountUsed && onQuantityChange ? (
+          <div className="aq-purchase-bar__qty-box">
+            <span className="aq-purchase-bar__qty-label">Quantity:</span>
+            <div className="aq-qty-stepper">
+              <button
+                type="button"
+                className="aq-qty-stepper__btn"
+                onClick={() => onQuantityChange(Math.max(1, (Number(quantity) || 1) - 1))}
+                disabled={numQty <= 1}
+                aria-label="Decrease question quantity"
+              >
+                <Minus size={13} />
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={quantity}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10)
+                  onQuantityChange(Number.isNaN(val) ? '' : Math.max(1, Math.min(50, val)))
+                }}
+                onBlur={() => {
+                  if (!quantity || quantity < 1) onQuantityChange(1)
+                }}
+                className="aq-qty-stepper__input"
+                aria-label="Question quantity input"
+              />
+              <button
+                type="button"
+                className="aq-qty-stepper__btn"
+                onClick={() => onQuantityChange(Math.min(50, (Number(quantity) || 1) + 1))}
+                aria-label="Increase question quantity"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+            {numQty > 1 && unitPrice ? (
+              <span className="aq-purchase-bar__qty-unit">
+                ({numQty} × ₹{unitPrice})
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
+        <span className="aq-purchase-bar__note">
+          {isMonthlyDiscountAvailable
+            ? `Monthly 1-question discount applied. Next time you buy questions, they will be at the original rate. Valid for ${QUESTION_CREDIT_WINDOW_DAYS} days.`
+            : isMonthlyDiscountUsed
+              ? `Monthly 1-question discount already used this month. Charged at standard original rate (${numQty} slot${numQty > 1 ? 's' : ''} valid for ${QUESTION_CREDIT_WINDOW_DAYS} days).`
+              : `Ask now, or pay now and write the question later within ${QUESTION_CREDIT_WINDOW_DAYS} days.`}
+        </span>
       </div>
       <div className="aq-purchase-bar__actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>
         <button type="button" className="btn btn-outline" onClick={onPayLater}>
           <Clock size={14} aria-hidden="true" />
-          Pay &amp; Ask Later
+          {numQty > 1 ? `Pay & Save ${numQty} Slots` : 'Pay & Ask Later'}
         </button>
         <button type="button" className="btn btn-primary" onClick={onAskNow}>
           <CheckCircle2 size={14} aria-hidden="true" />
-          Ask This Question
+          {numQty > 1 ? `Ask 1 & Save ${numQty - 1} Later` : 'Ask This Question'}
         </button>
       </div>
     </div>
@@ -671,6 +749,7 @@ export default function AskQuestion({ embedded = false }) {
   // "Review & Payment" screen that never charges real money. null = not active,
   // 'review' = payment breakdown shown, 'success' = demo payment simulated.
   const [demoPaymentStep, setDemoPaymentStep] = useState(null)
+  const [completedReceipt, setCompletedReceipt] = useState(null)
   // Which purchase the demo payment is confirming: 'ask' completes a question
   // now, 'later' records a paid-but-unwritten credit. Both go through the same
   // explicit Review & Payment confirmation, so neither can finalise silently.
@@ -685,6 +764,7 @@ export default function AskQuestion({ embedded = false }) {
   // between "Ask Now" and "Pay & Ask Later". Only a reference to data that is
   // already loaded - no payment or question state is held here.
   const [pendingPurchase, setPendingPurchase] = useState(null)
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1)
 
   const subscribedAstrologerIds = useMemo(
     () => new Set(
@@ -820,11 +900,18 @@ export default function AskQuestion({ embedded = false }) {
   const viewingQuestionAstrologer = viewingQuestion?.astrologerId ? mockAstrologers.find((a) => a.id === viewingQuestion.astrologerId) : null
 
   // Once an astrologer is chosen in step 1, the slot list narrows to that
-  // astrologer so the next step is unambiguous.
+  // astrologer so the next step is unambiguous. Expired slots are ignored.
   const purchasedCampaigns = useMemo(() => campaigns.map((campaign) => {
-    const balance = purchasedSlots.find((slot) => slot.userId === currentUser?.id && slot.campaignId === campaign.id)
+    const validSlots = purchasedSlots.filter((slot) => (
+      slot.userId === currentUser?.id &&
+      slot.campaignId === campaign.id &&
+      !isSlotExpired(slot.purchasedAt || slot.pricing?.purchasedAt)
+    ))
+    if (!validSlots.length) return null
+    const balance = chosenAstrologerId
+      ? validSlots.find((slot) => slot.astrologerId === chosenAstrologerId)
+      : validSlots[0]
     if (!balance) return null
-    if (chosenAstrologerId && balance.astrologerId !== chosenAstrologerId) return null
     const generalPurchased = Number(balance.generalPurchased) || 0
     const generalUsed = Number(balance.generalUsed) || 0
     const personalPurchased = Number(balance.personalPurchased) || 0
@@ -848,6 +935,17 @@ export default function AskQuestion({ embedded = false }) {
     }
   }).filter(Boolean), [campaigns, currentUser?.id, purchasedSlots, chosenAstrologerId])
 
+  const monthlyDiscountInfo = useMemo(() => {
+    if (!chosenAstrologerId || !currentUser?.id) return null
+    return actions.getMonthlyAstrologerDiscount
+      ? actions.getMonthlyAstrologerDiscount(currentUser.id, chosenAstrologerId)
+      : getMonthlyDiscountStatus(subscriptions, currentUser.id, chosenAstrologerId)
+  }, [actions, chosenAstrologerId, currentUser?.id, subscriptions])
+
+  const isSubscribedToChosen = Boolean(monthlyDiscountInfo?.isSubscribed)
+  const isMonthlyDiscountAvailable = Boolean(monthlyDiscountInfo?.hasAvailableDiscount)
+  const isMonthlyDiscountUsed = Boolean(isSubscribedToChosen && monthlyDiscountInfo?.status === 'Used')
+
   // Step 2: the chosen astrologer's Active Astro Ledger campaigns plus a
   // presentation-only set of demo topic campaigns, so every astrologer shows a
   // realistic 7-8 topied cards. Open Question is offered through the same
@@ -856,37 +954,55 @@ export default function AskQuestion({ embedded = false }) {
   // pricing from the existing campaign / open-question configuration.
   const questionSources = useMemo(() => {
     if (!chosenAstrologerId) return []
+    // 1 question discount per month for subscribed astrologer; after that, questions are at the original rate!
+    const effectiveOfferEnabled = isSubscribedToChosen ? isMonthlyDiscountAvailable : true
+    const subscriberDiscountPercent = isSubscribedToChosen
+      ? (isMonthlyDiscountAvailable ? (monthlyDiscountInfo?.discountPercent || 60) : 0)
+      : null
+
     const realActive = campaigns
       .filter((campaign) => campaign.astrologerId === chosenAstrologerId)
       .filter((campaign) => getEffectiveCampaignStatus(campaign) === 'Active')
-      .map((campaign) => ({
-        id: campaign.id,
-        campaign,
-        isOpenQuestion: false,
-        isDemoCampaign: false,
-        name: campaign.name,
-        subtitle: `${campaign.date} – ${campaign.endDate}`,
-        description: campaign.shortDescription || campaign.description || '',
-        offerEnabled: campaign.offerEnabled !== false,
-        discountPercent: Number(campaign.discountPercent) || 0,
-        questionTypes: getCampaignQuestionTypes(campaign),
-      }))
+      .map((campaign) => {
+        const discountVal = subscriberDiscountPercent !== null
+          ? subscriberDiscountPercent
+          : (Number(campaign.discountPercent) || 0)
+        const canOffer = effectiveOfferEnabled && (campaign.offerEnabled !== false) && discountVal > 0
+        return {
+          id: campaign.id,
+          campaign,
+          isOpenQuestion: false,
+          isDemoCampaign: false,
+          name: campaign.name,
+          subtitle: `${campaign.date} – ${campaign.endDate}`,
+          description: campaign.shortDescription || campaign.description || '',
+          offerEnabled: canOffer,
+          discountPercent: canOffer ? discountVal : 0,
+          questionTypes: getCampaignQuestionTypes(campaign),
+        }
+      })
 
     const demoCampaigns = pickDemoTopicCampaigns(chosenAstrologerId, realActive.map((source) => source.campaign))
     const sources = [
       ...realActive,
-      ...demoCampaigns.map((campaign) => ({
-        id: campaign.id,
-        campaign,
-        isOpenQuestion: false,
-        isDemoCampaign: true,
-        name: campaign.name,
-        subtitle: `${campaign.date} – ${campaign.endDate}`,
-        description: campaign.shortDescription || campaign.description || '',
-        offerEnabled: campaign.offerEnabled !== false,
-        discountPercent: Number(campaign.discountPercent) || 0,
-        questionTypes: getCampaignQuestionTypes(campaign),
-      })),
+      ...demoCampaigns.map((campaign) => {
+        const discountVal = subscriberDiscountPercent !== null
+          ? subscriberDiscountPercent
+          : (Number(campaign.discountPercent) || 0)
+        const canOffer = effectiveOfferEnabled && (campaign.offerEnabled !== false) && discountVal > 0
+        return {
+          id: campaign.id,
+          campaign,
+          isOpenQuestion: false,
+          isDemoCampaign: true,
+          name: campaign.name,
+          subtitle: `${campaign.date} – ${campaign.endDate}`,
+          description: campaign.shortDescription || campaign.description || '',
+          offerEnabled: canOffer,
+          discountPercent: canOffer ? discountVal : 0,
+          questionTypes: getCampaignQuestionTypes(campaign),
+        }
+      }),
     ]
 
     const openTypes = [
@@ -894,6 +1010,10 @@ export default function AskQuestion({ embedded = false }) {
       openQuestionSettings.personalEnabled === false ? null : 'Personal',
     ].filter(Boolean)
     if (openTypes.length) {
+      const openDiscount = subscriberDiscountPercent !== null
+        ? subscriberDiscountPercent
+        : (Number(openQuestionSettings.discountPercent) || 0)
+      const canOffer = effectiveOfferEnabled && Boolean(openQuestionSettings.offerEnabled) && openDiscount > 0
       sources.push({
         id: '',
         campaign: null,
@@ -901,13 +1021,13 @@ export default function AskQuestion({ embedded = false }) {
         name: ASK_ANYTHING_LABEL,
         subtitle: 'Any topic · no campaign needed',
         description: 'Ask any question about any topic.',
-        offerEnabled: Boolean(openQuestionSettings.offerEnabled),
-        discountPercent: Number(openQuestionSettings.discountPercent) || 0,
+        offerEnabled: canOffer,
+        discountPercent: canOffer ? openDiscount : 0,
         questionTypes: openTypes,
       })
     }
     return sources
-  }, [campaigns, chosenAstrologerId, openQuestionSettings])
+  }, [campaigns, chosenAstrologerId, isMonthlyDiscountAvailable, isSubscribedToChosen, monthlyDiscountInfo?.discountPercent, openQuestionSettings])
 
   const questionTypePrice = (source, type) => {
     const settings = source.isOpenQuestion ? openQuestionSettings : source.campaign
@@ -941,9 +1061,13 @@ export default function AskQuestion({ embedded = false }) {
     }
     const settings = selectedCampaign || openQuestionSettings
     const price = Number(type === 'General' ? settings?.generalPrice : settings?.personalPrice) || 0
-    const offerEnabled = selectedCampaign ? selectedCampaign.offerEnabled !== false : Boolean(openQuestionSettings.offerEnabled)
-    const discountPercent = Number(selectedCampaign ? selectedCampaign.discountPercent : openQuestionSettings.discountPercent) || 0
-    const pricing = getQuestionPricing({ price, discountPercent, offerEnabled })
+    const effectiveOfferEnabled = isSubscribedToChosen
+      ? isMonthlyDiscountAvailable
+      : (selectedCampaign ? selectedCampaign.offerEnabled !== false : Boolean(openQuestionSettings.offerEnabled))
+    const discountPercent = isSubscribedToChosen
+      ? (isMonthlyDiscountAvailable ? (monthlyDiscountInfo?.discountPercent || 60) : 0)
+      : Number(selectedCampaign ? selectedCampaign.discountPercent : openQuestionSettings.discountPercent) || 0
+    const pricing = getQuestionPricing({ price, discountPercent, offerEnabled: effectiveOfferEnabled })
     return {
       astrologerName: selectedAstrologerName,
       sourceLabel: selectedCampaign ? selectedCampaign.name : ASK_ANYTHING_LABEL,
@@ -954,7 +1078,7 @@ export default function AskQuestion({ embedded = false }) {
         ? { discountPercent: pricing.discountPercent, discountAmount: pricing.discountAmount, offerPrice: pricing.payablePrice }
         : null,
     }
-  }, [discountActive, discountPrice, questionType, selectedAstrologerName, selectedCampaign, openQuestionSettings])
+  }, [discountActive, discountPrice, isMonthlyDiscountAvailable, isSubscribedToChosen, monthlyDiscountInfo?.discountPercent, openQuestionSettings, questionType, selectedAstrologerName, selectedCampaign])
 
   const editTimeRemaining = useMemo(() => {
     if (!viewingQuestionSubmittedAt) return 0
@@ -1031,6 +1155,7 @@ export default function AskQuestion({ embedded = false }) {
   const changeAstrologer = () => {
     setShowAstrologerStep(true)
     setPendingPurchase(null)
+    setPurchaseQuantity(1)
   }
 
   // "Ask This Question" from the purchase action bar: pay first. It commits the
@@ -1324,6 +1449,9 @@ export default function AskQuestion({ embedded = false }) {
         creditCampaignId: selectedCampaign?.id || null,
       })
       if (isPaidByCredit) setSearchParams({}, { replace: true })
+      if (selectedQuestionSummary.offer && (selectedAstrologerId || selectedCampaign?.astrologerId)) {
+        actions.useMonthlyAstrologerDiscount(currentUser?.id, selectedAstrologerId || selectedCampaign?.astrologerId)
+      }
       setShowQuestionForm(false)
       navigate(`${routes.askQuestion}/my-questions`, {
         state: {
@@ -1351,18 +1479,74 @@ export default function AskQuestion({ embedded = false }) {
   // "Pay & Ask Later" this is the moment the paid-but-unwritten credit is
   // recorded - never before, so an abandoned checkout leaves no purchase.
   const confirmDemoPayment = () => {
+    const summary = selectedQuestionSummary
+    const qty = isMonthlyDiscountUsed ? Math.max(1, Number(purchaseQuantity) || 1) : 1
+    const unitPrice = summary.offer?.offerPrice ?? summary.price
+    const totalPaid = unitPrice * qty
+    const receipt = {
+      astrologerName: summary.astrologerName || chosenAstrologer?.name,
+      sourceLabel: summary.sourceLabel,
+      typeLabel: summary.typeLabel,
+      price: summary.price,
+      quantity: qty,
+      unitPrice,
+      amountPaid: totalPaid,
+      hadDiscount: Boolean(summary.offer),
+      discountPercent: summary.offer?.percent || 0,
+    }
+    setCompletedReceipt(receipt)
+
     if (demoPaymentIntent === 'later') {
-      const creditId = createQuestionCredit(pendingPurchase?.source, pendingPurchase?.type, chosenAstrologer)
-      if (!creditId) return
+      if (qty > 1) {
+        actions.buyQuestionSlots({
+          userId: currentUser?.id || 'user-demo',
+          userEmail: currentUser?.email || 'user@example.com',
+          astrologerId: chosenAstrologer.id,
+          astrologerName: chosenAstrologer.name,
+          campaignName: pendingPurchase?.source?.campaign?.name || `${chosenAstrologer.name} Package`,
+          questionType: pendingPurchase?.type,
+          quantity: qty,
+          unitPrice: summary.price,
+          discountPercent: 0,
+          totalAmount: totalPaid,
+          paymentMethod: 'Wallet',
+        })
+      } else {
+        const creditId = createQuestionCredit(pendingPurchase?.source, pendingPurchase?.type, chosenAstrologer)
+        if (!creditId) return
+        if (pendingPurchase?.source?.offerEnabled && (pendingPurchase?.source?.discountPercent > 0) && chosenAstrologer?.id) {
+          actions.useMonthlyAstrologerDiscount(currentUser?.id, chosenAstrologer.id)
+        }
+      }
       setPendingPurchase(null)
+      setPurchaseQuantity(1)
       setDemoPaymentStep('success')
       return
+    }
+
+    if (qty > 1) {
+      actions.buyQuestionSlots({
+        userId: currentUser?.id || 'user-demo',
+        userEmail: currentUser?.email || 'user@example.com',
+        astrologerId: chosenAstrologer.id,
+        astrologerName: chosenAstrologer.name,
+        campaignName: pendingPurchase?.source?.campaign?.name || `${chosenAstrologer.name} Package`,
+        questionType: pendingPurchase?.type,
+        quantity: qty - 1,
+        unitPrice: summary.price,
+        discountPercent: 0,
+        totalAmount: summary.price * (qty - 1),
+        paymentMethod: 'Wallet',
+      })
     }
     setDemoPaymentStep('success')
   }
 
   // Close the demo payment screen and return to the untouched form.
-  const closeDemoPayment = () => setDemoPaymentStep(null)
+  const closeDemoPayment = () => {
+    setDemoPaymentStep(null)
+    setCompletedReceipt(null)
+  }
 
   // Demo payment confirmed: open the question form so the user can write the
   // question, pick a language and attach a horoscope. Nothing is submitted here -
@@ -1551,6 +1735,38 @@ export default function AskQuestion({ embedded = false }) {
           icon={Layers}
           titleRight={<button type="button" className="btn btn-ghost" onClick={() => changeAstrologer()}>Change Astrologer</button>}
         >
+          {isSubscribedToChosen && isMonthlyDiscountAvailable && (
+            <div className="aq-monthly-discount-banner aq-monthly-discount-banner--available" role="status">
+              <div>
+                <strong className="block text-sm font-bold text-amber-900">
+                  ⭐ 1 Monthly Question Discount Active ({monthlyDiscountInfo?.discountPercent || 60}% OFF)
+                </strong>
+                <p className="text-xs text-amber-800 mt-0.5">
+                  As a subscriber to {chosenAstrologer.name}, you get 1 discounted question this month. Next time you buy questions, they will be charged at the original rate.
+                </p>
+              </div>
+              <span className="badge badge-warning text-xs font-bold px-3 py-1 rounded-full">
+                1st Question Discount Available
+              </span>
+            </div>
+          )}
+
+          {isSubscribedToChosen && isMonthlyDiscountUsed && (
+            <div className="aq-monthly-discount-banner aq-monthly-discount-banner--used" role="status">
+              <div>
+                <strong className="block text-sm font-bold text-slate-800">
+                  ℹ️ Monthly 1-Question Discount Already Used
+                </strong>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  You have already used your 1 monthly discounted question for {chosenAstrologer.name} this month. Additional questions and slot packages are at the original rate (renews next month).
+                </p>
+              </div>
+              <span className="badge badge-neutral text-xs font-bold px-3 py-1 rounded-full border border-slate-300">
+                Original Rate Active
+              </span>
+            </div>
+          )}
+
           {questionSources.length > 0 ? (
             <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {questionSources.map((source) => {
@@ -1612,26 +1828,87 @@ export default function AskQuestion({ embedded = false }) {
                     chips={chips}
                     details={details}
                     footer={(
-                      <QuestionTypePicker
-                        sourceName={source.name}
-                        types={source.questionTypes}
-                        renderPill={(type, label, hint) => {
-                          const { price, discountPercent, discountAmount, offerPrice } = preview(type)
-                          const hasOffer = Number.isFinite(discountPercent) && discountPercent > 0
+                      <>
+                        <QuestionTypePicker
+                          sourceName={source.name}
+                          types={source.questionTypes}
+                          renderPill={(type, label, hint) => {
+                            const { price, discountPercent, discountAmount, offerPrice } = preview(type)
+                            const hasOffer = Number.isFinite(discountPercent) && discountPercent > 0
+                            return (
+                              <QuestionTypeBox
+                                key={type}
+                                type={type}
+                                label={label}
+                                hint={source.isOpenQuestion ? openQuestionPillHint(type) : hint}
+                                price={`₹${offerPrice ?? price}`}
+                                offerText={hasOffer ? `${discountPercent}% off · saves ₹${discountAmount}` : ''}
+                                isSelected={pendingPurchase?.source === source && pendingPurchase?.type === type}
+                                onSelect={() => {
+                                  setPurchaseQuantity(1)
+                                  setPendingPurchase({ source, type })
+                                }}
+                              />
+                            )
+                          }}
+                        />
+                        {pendingPurchase?.source === source && isMonthlyDiscountUsed && (() => {
+                          const unitPrice = questionTypePrice(source, pendingPurchase.type)
+                          const numQty = Math.max(1, Number(purchaseQuantity) || 1)
                           return (
-                            <QuestionTypeBox
-                              key={type}
-                              type={type}
-                              label={label}
-                              hint={source.isOpenQuestion ? openQuestionPillHint(type) : hint}
-                              price={`₹${offerPrice ?? price}`}
-                              offerText={hasOffer ? `${discountPercent}% off · saves ₹${discountAmount}` : ''}
-                              isSelected={pendingPurchase?.source === source && pendingPurchase?.type === type}
-                              onSelect={() => setPendingPurchase({ source, type })}
-                            />
+                            <div className="aq-type-qty-banner">
+                              <div className="aq-type-qty-banner__text">
+                                <span className="aq-type-qty-banner__heading">
+                                  Selected: <strong>{questionTypePillLabel(pendingPurchase.type)}</strong> · Original Rate (₹{unitPrice}/slot)
+                                </span>
+                                <span className="aq-type-qty-banner__hint">
+                                  Choose quantity to buy multiple question slots. Unused slots valid for {QUESTION_CREDIT_WINDOW_DAYS} days.
+                                </span>
+                              </div>
+                              <div className="aq-type-qty-banner__stepper">
+                                <span className="aq-type-qty-banner__label">Quantity:</span>
+                                <div className="aq-qty-stepper">
+                                  <button
+                                    type="button"
+                                    className="aq-qty-stepper__btn"
+                                    onClick={() => setPurchaseQuantity((q) => Math.max(1, (Number(q) || 1) - 1))}
+                                    disabled={purchaseQuantity <= 1}
+                                    aria-label="Decrease quantity"
+                                  >
+                                    <Minus size={13} />
+                                  </button>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="50"
+                                    value={purchaseQuantity}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value, 10)
+                                      setPurchaseQuantity(Number.isNaN(val) ? '' : Math.max(1, Math.min(50, val)))
+                                    }}
+                                    onBlur={() => {
+                                      if (!purchaseQuantity || purchaseQuantity < 1) setPurchaseQuantity(1)
+                                    }}
+                                    className="aq-qty-stepper__input"
+                                    aria-label="Question quantity input"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="aq-qty-stepper__btn"
+                                    onClick={() => setPurchaseQuantity((q) => Math.min(50, (Number(q) || 1) + 1))}
+                                    aria-label="Increase quantity"
+                                  >
+                                    <Plus size={13} />
+                                  </button>
+                                </div>
+                                <span className="aq-type-qty-banner__total">
+                                  Total: <strong>₹{(unitPrice * numQty).toLocaleString('en-IN')}</strong>
+                                </span>
+                              </div>
+                            </div>
                           )
-                        }}
-                      />
+                        })()}
+                      </>
                     )}
                   />
                 )
@@ -1657,19 +1934,30 @@ export default function AskQuestion({ embedded = false }) {
               discountPercent: source.discountPercent,
               offerEnabled: source.offerEnabled,
             })
+            const numQty = isMonthlyDiscountUsed ? Math.max(1, Number(purchaseQuantity) || 1) : 1
+            const payableTotal = pricing.payablePrice * numQty
             return (
               <PurchaseActionBar
                 summary={{
                   sourceName: source.name,
                   typeLabel: questionTypePillLabel(type),
-                  paidPrice: pricing.payablePrice.toLocaleString('en-IN'),
+                  paidPrice: payableTotal.toLocaleString('en-IN'),
                   offerText: pricing.discountAmount > 0
                     ? `${pricing.discountPercent}% OFF · saves ₹${pricing.discountAmount}`
                     : '',
                 }}
+                quantity={purchaseQuantity}
+                onQuantityChange={setPurchaseQuantity}
+                showQuantity={isMonthlyDiscountUsed}
+                unitPrice={pricing.originalPrice}
+                isMonthlyDiscountAvailable={isMonthlyDiscountAvailable}
+                isMonthlyDiscountUsed={isMonthlyDiscountUsed}
                 onAskNow={askNowWithPendingPurchase}
                 onPayLater={payNowAndAskLater}
-                onCancel={() => setPendingPurchase(null)}
+                onCancel={() => {
+                  setPendingPurchase(null)
+                  setPurchaseQuantity(1)
+                }}
               />
             )
           })()}
@@ -1684,8 +1972,10 @@ export default function AskQuestion({ embedded = false }) {
               credit or payment - it only opens the purchase page. */}
           <div className="aq-packages">
             <div className="aq-packages__label">
-              Available Question Packages
-              <span className="aq-packages__note">Buy through the existing purchase flow</span>
+              Available Question Packages (Many Purchasing)
+              <span className="aq-packages__note">
+                Slot packages are priced from standard original rates. (The 1-question monthly subscription discount applies to single question bookings only).
+              </span>
             </div>
             <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {DEMO_QUESTION_PACKAGES.map((pkg) => {
@@ -1878,6 +2168,12 @@ export default function AskQuestion({ embedded = false }) {
                   <div className="aq-summary-row"><span>Astrologer</span><strong>{selectedQuestionSummary.astrologerName || '—'}</strong></div>
                   <div className="aq-summary-row"><span>Source</span><strong>{selectedQuestionSummary.sourceLabel}</strong></div>
                   <div className="aq-summary-row"><span>Question Type</span><strong>{selectedQuestionSummary.typeLabel}</strong></div>
+                  {isMonthlyDiscountUsed && (
+                    <div className="aq-summary-row">
+                      <span>Quantity</span>
+                      <strong>{Math.max(1, Number(purchaseQuantity) || 1)} Slot{Math.max(1, Number(purchaseQuantity) || 1) > 1 ? 's' : ''}</strong>
+                    </div>
+                  )}
                 </div>
               </section>
 
@@ -1896,29 +2192,54 @@ export default function AskQuestion({ embedded = false }) {
                 <h2 className="aq-form-section__title">Payment Summary</h2>
                 <div className="aq-summary">
                   <div className="aq-summary-row">
-                    <span>{selectedQuestionSummary.isOpenQuestion ? 'Ask Anything Price' : 'Campaign Price'}</span>
+                    <span>{selectedQuestionSummary.isOpenQuestion ? 'Ask Anything Price' : 'Rate per Question'}</span>
                     <strong>₹{selectedQuestionSummary.price}</strong>
                   </div>
-                  {selectedQuestionSummary.offer && (
+                  {isMonthlyDiscountUsed && Math.max(1, Number(purchaseQuantity) || 1) > 1 && (
                     <div className="aq-summary-row">
-                      <span>Offer ({selectedQuestionSummary.offer.discountPercent}% off)</span>
-                      <strong>-₹{selectedQuestionSummary.offer.discountAmount}</strong>
+                      <span>Quantity Selected</span>
+                      <strong>{Math.max(1, Number(purchaseQuantity) || 1)} slots</strong>
                     </div>
                   )}
+                  {selectedQuestionSummary.offer ? (
+                    <div className="aq-summary-row">
+                      <span>Monthly Subscriber Offer ({selectedQuestionSummary.offer.discountPercent}% off)</span>
+                      <strong>-₹{selectedQuestionSummary.offer.discountAmount}</strong>
+                    </div>
+                  ) : isMonthlyDiscountUsed ? (
+                    <div className="aq-summary-row">
+                      <span className="text-xs text-muted">Monthly Discount Status</span>
+                      <strong className="text-xs font-semibold text-amber-700">Used this month · Original Rate</strong>
+                    </div>
+                  ) : null}
                   <div className="aq-summary-rule" />
                   <div className="aq-summary-row aq-summary-row--total">
                     <span>Payable Amount</span>
-                    <strong>₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}</strong>
+                    <strong>
+                      ₹{(
+                        (selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price) *
+                        (isMonthlyDiscountUsed ? Math.max(1, Number(purchaseQuantity) || 1) : 1)
+                      ).toLocaleString('en-IN')}
+                    </strong>
                   </div>
                 </div>
-                <p className="aq-review-modal__note">Secure checkout · instant confirmation.</p>
+                <p className="aq-review-modal__note">
+                  {selectedQuestionSummary.offer
+                    ? '1 monthly discount question applied. Next time you buy questions, they will be charged at original rate.'
+                    : isMonthlyDiscountUsed
+                      ? `Original rate charged for ${Math.max(1, Number(purchaseQuantity) || 1)} slot${Math.max(1, Number(purchaseQuantity) || 1) > 1 ? 's' : ''}. Unused slots are valid for ${QUESTION_CREDIT_WINDOW_DAYS} days.`
+                      : 'Secure checkout · instant confirmation.'}
+                </p>
               </section>
             </div>
 
             <div className="user-modal-card__footer">
               <button type="button" className="btn btn-ghost" onClick={closeDemoPayment}>Back</button>
               <button type="button" className="btn btn-primary" onClick={confirmDemoPayment}>
-                Pay ₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}
+                Pay ₹{(
+                  (selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price) *
+                  (isMonthlyDiscountUsed ? Math.max(1, Number(purchaseQuantity) || 1) : 1)
+                ).toLocaleString('en-IN')}
               </button>
             </div>
           </div>
@@ -1950,19 +2271,24 @@ export default function AskQuestion({ embedded = false }) {
                 </h2>
               </div>
               <p className="aq-success-modal__message">
-                {demoPaymentIntent === 'later'
-                  ? `Your paid question is saved. Write the question from Purchased Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.`
-                  : 'Your question payment has been confirmed successfully.'}
+                {completedReceipt?.quantity > 1
+                  ? `Your payment of ₹${completedReceipt.amountPaid.toLocaleString('en-IN')} for ${completedReceipt.quantity} ${completedReceipt.typeLabel} slots has been confirmed. Unused slots are saved in Purchased Questions, valid for ${QUESTION_CREDIT_WINDOW_DAYS} days.`
+                  : demoPaymentIntent === 'later'
+                    ? `Your paid question is saved. Write the question from Purchased Questions within ${QUESTION_CREDIT_WINDOW_DAYS} days.${(completedReceipt?.hadDiscount ?? selectedQuestionSummary.offer) ? ' Note: Your 1 monthly discount question with this astrologer has now been used. Next time questions are at the original rate.' : ''}`
+                    : `Your question payment has been confirmed successfully.${(completedReceipt?.hadDiscount ?? selectedQuestionSummary.offer) ? ' Note: Your 1 monthly discount question with this astrologer has now been used. Next time questions are at the original rate.' : ''}`}
               </p>
 
               <div className="aq-summary aq-success-modal__summary">
-                <div className="aq-summary-row"><span>Astrologer</span><strong>{selectedQuestionSummary.astrologerName || '—'}</strong></div>
-                <div className="aq-summary-row"><span>Source</span><strong>{selectedQuestionSummary.sourceLabel}</strong></div>
-                <div className="aq-summary-row"><span>Question Type</span><strong>{selectedQuestionSummary.typeLabel}</strong></div>
+                <div className="aq-summary-row"><span>Astrologer</span><strong>{completedReceipt?.astrologerName || selectedQuestionSummary.astrologerName || '—'}</strong></div>
+                <div className="aq-summary-row"><span>Source</span><strong>{completedReceipt?.sourceLabel || selectedQuestionSummary.sourceLabel}</strong></div>
+                <div className="aq-summary-row"><span>Question Type</span><strong>{completedReceipt?.typeLabel || selectedQuestionSummary.typeLabel}</strong></div>
+                {completedReceipt?.quantity > 1 ? (
+                  <div className="aq-summary-row"><span>Quantity</span><strong>{completedReceipt.quantity} slots</strong></div>
+                ) : null}
                 <div className="aq-summary-rule" />
                 <div className="aq-summary-row aq-summary-row--total">
                   <span>Amount Paid</span>
-                  <strong>₹{selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price}</strong>
+                  <strong>₹{completedReceipt ? completedReceipt.amountPaid.toLocaleString('en-IN') : (selectedQuestionSummary.offer?.offerPrice ?? selectedQuestionSummary.price)}</strong>
                 </div>
               </div>
             </div>

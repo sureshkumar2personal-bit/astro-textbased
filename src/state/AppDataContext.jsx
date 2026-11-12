@@ -24,6 +24,7 @@ import {
 import { ANSWER_DEADLINE_EXCEEDED_REASON, applyAnswerDeadlineCancellation, applyAnswerEdit, applyAnswerSubmit, applyQuestionDraft } from '../utils/answer.js'
 import { QUESTION_CREDIT_WINDOW_DAYS, consumeQuestionCreditInSlots, createQuestionCreditRecord, upsertQuestionCreditInSlots } from '../utils/questionCredits.js'
 import { buildSlotPricing, mergeSlotPricing } from '../utils/purchasedSlots.js'
+import { getMonthlyDiscountStatus, useMonthlyDiscountRecord } from '../utils/monthlyDiscounts.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -432,6 +433,30 @@ const initialCampaigns = [
 // Health package which is intentionally left without pricing to exercise the
 // honest "amount not recorded" legacy path (never a misleading ₹0).
 const initialPurchasedSlots = [
+  {
+    id: 'slots-user-demo-active-dr-rani',
+    userId: 'user-demo',
+    campaignId: 'demo-active-marriage',
+    campaignName: 'Marriage & Relationships',
+    astrologerId: 'astrologer-demo',
+    astrologerName: 'Dr. Rani',
+    generalPurchased: 4,
+    generalUsed: 1,
+    personalPurchased: 2,
+    personalUsed: 0,
+    purchasedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    demo: true,
+    pricing: buildSlotPricing({
+      originalAmount: 1495,
+      discountPercent: 10,
+      discountAmount: 150,
+      paidAmount: 1345,
+      purchasedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      packageName: 'Marriage & Relationships',
+      isDemo: true,
+    }),
+  },
   {
     id: 'slots-user-demo-marriage',
     userId: 'user-demo',
@@ -1923,6 +1948,7 @@ const FOLLOWED_ASTROLOGERS_STORAGE_KEY = 'astroconnect-followed-astrologers'
 const SUBSCRIPTIONS_STORAGE_KEY = 'astroconnect-user-subscriptions'
 const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
 const ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY = 'astroconnect-astrologer-activity-log'
+const PURCHASED_SLOTS_STORAGE_KEY = 'astroconnect-purchased-slots'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -2328,17 +2354,31 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
 
 function createDefaultUserSubscriptions(user) {
   if (user?.role !== ROLES.USER || !user?.id) return []
-  return subscribedAstrologers.map((astrologer, index) => ({
-    id: `demo-subscription-${astrologer.id}`,
-    userId: user.id,
-    userName: user.name || user.id,
-    astrologerId: astrologer.id,
-    astrologerName: astrologer.name,
-    tier: index % 3 === 0 ? 'Gold' : 'Silver',
-    subscribedAt: new Date().toISOString(),
-    expiresAt: addDaysMs(30),
-    discountQuestions: [],
-  }))
+  const monthKey = startOfMonthKey()
+  return subscribedAstrologers.map((astrologer, index) => {
+    const tier = index % 3 === 0 ? 'Gold' : 'Silver'
+    const discountPercent = tier === 'Gold' ? 75 : 60
+    return {
+      id: `demo-subscription-${astrologer.id}`,
+      userId: user.id,
+      userName: user.name || user.id,
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      tier,
+      subscribedAt: new Date().toISOString(),
+      expiresAt: addDaysMs(30),
+      discountQuestions: [
+        {
+          id: `dq-${astrologer.id}-${user.id}-${monthKey}`,
+          status: 'Available',
+          grantedAt: Date.now(),
+          validUntil: addDaysMs(30),
+          monthKey,
+          discountPercent,
+        },
+      ],
+    }
+  })
 }
 
 export function AppDataProvider({ children }) {
@@ -2394,7 +2434,11 @@ export function AppDataProvider({ children }) {
   })
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
-  const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [purchasedSlots, setPurchasedSlots] = useState(() => {
+    const stored = loadFromStorage(PURCHASED_SLOTS_STORAGE_KEY, null)
+    if (Array.isArray(stored) && stored.length) return stored
+    return initialPurchasedSlots
+  })
   const [payoutMethods, setPayoutMethods] = useState(() => loadFromStorage(ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY, initialPayoutMethods))
   const [activityLog, setActivityLog] = useState(() => loadFromStorage(ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY, []))
   const [consultationHistory] = useState(initialConsultationHistory)
@@ -2521,6 +2565,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(ASTROLOGER_POSTS_STORAGE_KEY, astrologerPosts)
   }, [astrologerPosts])
+
+  useEffect(() => {
+    saveToStorage(PURCHASED_SLOTS_STORAGE_KEY, purchasedSlots)
+  }, [purchasedSlots])
 
   useEffect(() => {
     const userKey = currentUser?.id || 'guest'
@@ -3257,6 +3305,103 @@ export function AppDataProvider({ children }) {
         ...prev,
       ])
     },
+    buyQuestionSlots(payload) {
+      const {
+        userId,
+        userEmail,
+        astrologerId,
+        astrologerName,
+        campaignName,
+        questionType,
+        quantity,
+        unitPrice,
+        discountPercent = 0,
+        totalAmount,
+        paymentMethod = 'Wallet',
+      } = payload
+
+      const now = new Date()
+      const nowIso = now.toISOString()
+      const expiryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const expiryIso = expiryDate.toISOString()
+
+      const targetCampaign = campaigns.find((c) => c.astrologerId === astrologerId)
+        || campaigns.find((c) => c.id === `text-support-${astrologerId}`)
+        || campaigns[0]
+      const campaignId = targetCampaign?.id || `text-support-${astrologerId}`
+      const finalCampaignName = campaignName || targetCampaign?.name || `${astrologerName} Package`
+
+      const isGeneral = questionType === 'General'
+      const generalQty = isGeneral ? Number(quantity) : 0
+      const personalQty = !isGeneral ? Number(quantity) : 0
+
+      const pricing = buildSlotPricing({
+        generalQty,
+        personalQty,
+        generalPrice: isGeneral ? unitPrice : 0,
+        personalPrice: !isGeneral ? unitPrice : 0,
+        discountPercent,
+        paidAmount: totalAmount,
+        purchasedAt: nowIso,
+        packageName: finalCampaignName,
+        paymentStatus: 'Paid',
+        isDemo: false,
+      })
+
+      const newSlot = {
+        id: `slots-${crypto.randomUUID()}`,
+        userId: userId || 'user-demo',
+        userEmail: userEmail || 'user@example.com',
+        campaignId,
+        campaignName: finalCampaignName,
+        astrologerId: astrologerId || targetCampaign?.astrologerId || 'astrologer-demo',
+        astrologerName: astrologerName || targetCampaign?.astrologerName || 'Astrologer',
+        generalPurchased: generalQty,
+        generalUsed: 0,
+        personalPurchased: personalQty,
+        personalUsed: 0,
+        purchasedAt: nowIso,
+        expiresAt: expiryIso,
+        pricing,
+      }
+
+      setPurchasedSlots((prev) => [newSlot, ...prev])
+
+      if (paymentMethod === 'Wallet') {
+        setUserWallet((prev) => ({
+          ...prev,
+          balance: Math.max(0, prev.balance - totalAmount),
+          spent: (prev.spent || 0) + totalAmount,
+          transactions: [
+            {
+              id: crypto.randomUUID(),
+              label: `Purchased ${quantity} ${questionType} slot${quantity > 1 ? 's' : ''} (${astrologerName})`,
+              amount: `-₹${totalAmount.toLocaleString('en-IN')}`,
+              time: 'just now',
+              date: nowIso,
+              type: 'purchase',
+            },
+            ...prev.transactions,
+          ],
+        }))
+      }
+
+      setNotifications((prev) => [
+        {
+          id: crypto.randomUUID(),
+          title: 'Question slots purchased',
+          detail: `Purchased ${quantity} ${questionType} slot(s) for ${astrologerName}. Valid for 7 days (until ${expiryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}). After 7 days, unused slots close permanently with no refund or re-schedule.`,
+          time: 'just now',
+          route: '/user/ask-question/purchased',
+          audience: ROLES.USER,
+          category: 'questions',
+          read: false,
+        },
+        ...prev,
+      ])
+
+      return newSlot.id
+    },
     // Viewing a question is an astrologer action worth remembering, but it
     // must never change the question's own business status (stays Pending
     // until an answer is actually submitted).
@@ -3435,6 +3580,9 @@ if (question) {
       if (!credit.userId) return null
 
       setPurchasedSlots((prev) => upsertQuestionCreditInSlots(prev, credit))
+      if (payload.astrologerId && (Number(payload.discountPercent) > 0 || payload.appliedMonthlyDiscount)) {
+        setSubscriptions((prev) => useMonthlyDiscountRecord(prev, payload.userId, payload.astrologerId))
+      }
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -3533,6 +3681,9 @@ if (question) {
             questionId: nextId,
           },
         ))
+      }
+      if (payload.astrologerId && (Number(payload.discountPercent) > 0 || payload.appliedMonthlyDiscount)) {
+        setSubscriptions((prev) => useMonthlyDiscountRecord(prev, payload.userId, payload.astrologerId))
       }
       setQuestionPreviewId(nextId)
       setNotifications((prev) => [
@@ -4656,6 +4807,12 @@ if (question) {
         }),
       )
       return used
+    },
+    getMonthlyAstrologerDiscount(userId, astrologerId, now = new Date()) {
+      return getMonthlyDiscountStatus(subscriptions, userId, astrologerId, now)
+    },
+    useMonthlyAstrologerDiscount(userId, astrologerId, now = new Date()) {
+      setSubscriptions((prev) => useMonthlyDiscountRecord(prev, userId, astrologerId, now))
     },
     getDiscountPrice(campaignId, categoryName) {
       const campaign = campaigns.find((c) => c.id === campaignId)

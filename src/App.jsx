@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation, useParams } from 'react-router-dom'
+import { Navigate, Outlet, Route, BrowserRouter, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import { AppDataProvider } from './state/AppDataContext.jsx'
 import { AuthProvider, useAuth } from './state/AuthContext.jsx'
@@ -168,6 +168,23 @@ function RequireEditorPermission({ group, permission }) {
   return (isSessionValid(currentUser.editorId || currentUser.id) && hasEditorPermission(currentEditor || currentUser, group, permission)) ? <Outlet /> : <EditorAccessDenied />
 }
 
+function AskQuestionIndexRedirect() {
+  const [searchParams] = useSearchParams()
+  const hasNewParams = searchParams.has('redeemCreditId') ||
+    searchParams.has('astrologerId') ||
+    searchParams.has('useDiscount') ||
+    searchParams.has('discountQuestionId') ||
+    searchParams.has('useSlotCampaignId') ||
+    searchParams.has('editQuestionId') ||
+    searchParams.has('campaignId')
+
+  if (hasNewParams) {
+    return <Navigate to={`new?${searchParams.toString()}`} replace />
+  }
+  const search = searchParams.toString()
+  return <Navigate to={`my-questions${search ? `?${search}` : ''}`} replace />
+}
+
 function NotFoundRedirect() {
   const { currentUser } = useAuth()
 
@@ -257,7 +274,7 @@ function UserRoutes() {
         {/* Ask a Question dashboard: the sidebar entry opens the "My Questions" tab and the
             sections live inside this one module instead of separate sidebar items. */}
         <Route path="/user/ask-question" element={<AskQuestionDashboard />}>
-          <Route index element={<Navigate to="my-questions" replace />} />
+          <Route index element={<AskQuestionIndexRedirect />} />
           <Route path="new" element={<AskQuestion embedded />} />
           <Route path="my-questions" element={<TrackQuestions embedded />} />
           <Route path="purchased" element={<QuestionPurchased />} />

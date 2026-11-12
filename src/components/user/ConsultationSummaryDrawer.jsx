@@ -33,7 +33,7 @@ function fullUserName(user) {
   return combined || user?.fullName || user?.name || 'User'
 }
 
-export default function ConsultationSummaryDrawer({ astrologer, slot, walletBalance, user, onClose, onProceed }) {
+export default function ConsultationSummaryDrawer({ astrologer, slot, slots = [], walletBalance, user, onClose, onProceed }) {
   const [preview, setPreview] = useState(null)
   const [uploadedHoroscope, setUploadedHoroscope] = useState(null)
   const [consultationFor, setConsultationFor] = useState('')
@@ -43,7 +43,9 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
   const [birthDate, setBirthDate] = useState(() => user?.dateOfBirth || user?.dob || user?.profile?.dateOfBirth || user?.horoscope?.dateOfBirth || '')
   const [validationError, setValidationError] = useState('')
   const horoscopeInputRef = useRef(null)
-  const amount = Number(slot?.price || 0)
+
+  const slotList = slots && slots.length ? slots : (slot?.slotsList && slot.slotsList.length ? slot.slotsList : (slot ? [slot] : []))
+  const amount = Number(slot?.price || slotList.reduce((sum, s) => sum + Number(s.price || 0), 0) || 0)
   const balance = Number(walletBalance || 0)
   const sufficient = balance >= amount
   const mode = slot.type || APPOINTMENT_CONFIG.mode
@@ -59,11 +61,19 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
     return () => { document.body.style.overflow = previous }
   }, [])
 
+  const timeDisplay = slotList.length > 1
+    ? `${slotList.length} Slots (${slotList.map((s) => s.timeLabel).join(', ')})`
+    : `${slot.timeLabel} – ${slot.endLabel}`
+
+  const durationDisplay = slotList.length > 1
+    ? `${slot.duration} per slot (${slotList.length} slots)`
+    : slot.duration
+
   const appointmentRows = [
     ['Astrologer', astrologer.name],
     ['Date', shortDayDate(slot.date)],
-    ['Time', `${slot.timeLabel} – ${slot.endLabel}`],
-    ['Duration', slot.duration],
+    ['Time', timeDisplay],
+    ['Duration', durationDisplay],
     ['Type', mode],
   ]
   const submitSummary = () => {
@@ -150,7 +160,7 @@ export default function ConsultationSummaryDrawer({ astrologer, slot, walletBala
               </div>
             ))}
             <div className="consultation-summary-row consultation-summary-row--amount">
-              <span>Amount</span>
+              <span>Total Amount {slotList.length > 1 ? `(${slotList.length} slots)` : ''}</span>
               <strong>₹{amount.toLocaleString('en-IN')}</strong>
             </div>
           </div>

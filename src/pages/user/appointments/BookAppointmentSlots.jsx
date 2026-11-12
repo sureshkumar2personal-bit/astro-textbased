@@ -93,6 +93,7 @@ export default function BookAppointmentSlots() {
   const [summaryOpen, setSummaryOpen] = useState(false)
   const [bookingOpen, setBookingOpen] = useState(false)
   const [bookingSlot, setBookingSlot] = useState(null)
+  const [bookingSlots, setBookingSlots] = useState([])
   const [bookingDetails, setBookingDetails] = useState(null)
   const [detailsAppointment, setDetailsAppointment] = useState(null)
   const editDate = location.state?.initialDate || ''
@@ -138,17 +139,32 @@ export default function BookAppointmentSlots() {
     setSlotsDate(dayKey)
   }
 
-  const continueSlots = (slot) => {
-    setBookingSlot({
+  const continueSlots = (selected) => {
+    const list = Array.isArray(selected) ? selected : [selected]
+    if (!list.length) return
+    const primarySlot = list[0]
+    const slotDuration = slotsSnapshot?.appointmentDuration ? `${slotsSnapshot.appointmentDuration} Minutes` : APPOINTMENT_CONFIG.durationLabel
+    const formattedSlots = list.map((slot) => ({
       key: slot.key,
       date: slot.date,
       time: slot.time,
       timeLabel: slot.timeLabel,
       endLabel: slot.endLabel,
-      duration: slotsSnapshot?.appointmentDuration ? `${slotsSnapshot.appointmentDuration} Minutes` : APPOINTMENT_CONFIG.durationLabel,
+      duration: slotDuration,
       type: CONSULTATION_TYPE,
       package: CONSULTATION_PACKAGE,
       price: slotsPrice,
+    }))
+    setBookingSlots(formattedSlots)
+    setBookingSlot({
+      ...primarySlot,
+      duration: slotDuration,
+      type: CONSULTATION_TYPE,
+      package: CONSULTATION_PACKAGE,
+      price: slotsPrice * formattedSlots.length,
+      unitPrice: slotsPrice,
+      slotsCount: formattedSlots.length,
+      slotsList: formattedSlots,
     })
     setSlotsDate('')
     setSummaryOpen(true)
@@ -254,6 +270,7 @@ export default function BookAppointmentSlots() {
           durationMinutes={slotsSnapshot?.appointmentDuration}
           bufferMinutes={slotsSnapshot?.appointmentBuffer}
           dateKey={slotsDate}
+          currentUser={currentUser}
           onClose={() => setSlotsDate('')}
           onContinue={continueSlots}
         />
@@ -263,6 +280,7 @@ export default function BookAppointmentSlots() {
         <ConsultationSummaryDrawer
           astrologer={astrologer}
           slot={bookingSlot}
+          slots={bookingSlots}
           walletBalance={userWallet?.balance}
           user={currentUser}
           onClose={() => setSummaryOpen(false)}
@@ -281,8 +299,8 @@ export default function BookAppointmentSlots() {
           actions={actions}
           routes={routes}
           initialDate={bookingSlot.date}
-          initialSelectedSlots={[bookingSlot]}
-          pricePerSlot={astrologerPrice}
+          initialSelectedSlots={bookingSlots.length ? bookingSlots : [bookingSlot]}
+          pricePerSlot={slotsPrice}
           slotDuration={bookingSlot.duration}
           initialStep="review"
           initialDetails={bookingDetails}

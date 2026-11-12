@@ -293,7 +293,7 @@ describe('campaign creation status placement', () => {
   it('Save Draft creates a Draft campaign visible under the Draft card', () => {
     const record = createCampaignRecord({ ...base, status: 'Draft' }, { id: 'draft-1' })
     expect(record.status).toBe('Draft')
-    expect(filterCampaignsByStatus([record], 'Draft')).toContain(record)
+    expect(filterCampaignsByStatus([record], 'Draft', '2026-09', new Date('2026-09-23T10:00:00+05:30'))).toContain(record)
   })
 
   it('Schedule creates a Scheduled campaign visible under the Scheduled card', () => {
@@ -303,8 +303,8 @@ describe('campaign creation status placement', () => {
       scheduledPublishAt: '2026-10-01T10:00:00+05:30',
     }, { id: 'scheduled-1' })
     expect(record.status).toBe('Scheduled')
-    expect(filterCampaignsByStatus([record], 'Scheduled')).toContain(record)
-    expect(filterCampaignsByStatus([record], 'Draft')).not.toContain(record)
+    expect(filterCampaignsByStatus([record], 'Scheduled', '2026-09', new Date('2026-09-23T10:00:00+05:30'))).toContain(record)
+    expect(filterCampaignsByStatus([record], 'Draft', '2026-09', new Date('2026-09-23T10:00:00+05:30'))).not.toContain(record)
   })
 
   it('Publish Now creates an Active campaign visible under the Active card', () => {
