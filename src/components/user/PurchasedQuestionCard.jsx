@@ -102,13 +102,9 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
 
         {/* 7-day validity indicator */}
         {isExpired ? (
-          <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-700 dark:text-rose-300 space-y-0.5 mb-3">
-            <div className="font-bold flex items-center gap-1.5">
-              <AlertTriangle size={12} /> Closed after 7 Days
-            </div>
-            <p className="text-[10px] text-rose-600 dark:text-rose-400 leading-tight">
-              7-day window expired. Slots closed (non-refundable).
-            </p>
+          <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-700 dark:text-rose-300 mb-3 flex items-center gap-1.5 font-semibold">
+            <AlertTriangle size={12} className="shrink-0" />
+            <span>Closed after 7 days (non-refundable)</span>
           </div>
         ) : isAvailable ? (
           <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 mb-3">
