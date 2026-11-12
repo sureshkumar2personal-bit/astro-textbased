@@ -326,12 +326,25 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
   const uploadedCount = days.filter((d) => d.proof).length
   const requirements = atonement.proofRequirements || []
 
+  const attachAllSampleProofs = () => {
+    days.forEach((dayItem, dIdx) => {
+      if (!dayItem.proof) {
+        onSaveProof(dIdx, {
+          name: `Day-${dIdx + 1}-pooja-proof.jpg`,
+          type: 'image/jpeg',
+          dataUrl: '/astrologer-temple-banner.png',
+          addedAt: new Date().toISOString(),
+        })
+      }
+    })
+  }
+
   return (
     <div
       className="atonement-all-proofs"
       style={{
-        marginTop: 16,
-        padding: '18px 20px',
+        marginTop: 14,
+        padding: '16px 18px',
         borderRadius: 14,
         background: '#faf8fd',
         border: '1.5px solid rgba(115, 70, 163, 0.2)',
@@ -343,11 +356,11 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 14,
+          alignItems: 'center',
+          gap: 12,
           flexWrap: 'wrap',
           borderBottom: '1px solid rgba(115, 70, 163, 0.12)',
-          paddingBottom: 12,
+          paddingBottom: 10,
         }}
       >
         <div>
@@ -356,7 +369,7 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
             <h4
               style={{
                 margin: 0,
-                fontSize: '1.05rem',
+                fontSize: '1.02rem',
                 fontWeight: 800,
                 color: '#30263b',
               }}
@@ -364,17 +377,19 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
               Day-by-Day Proof Attachments
             </h4>
           </div>
-          <p style={{ margin: 0, color: '#6f667b', fontSize: 13 }}>
-            Please add proof attachments for each completed day of your {days.length}-day pooja.
+          <p style={{ margin: 0, color: '#6f667b', fontSize: 12.5 }}>
+            {days.length === 1
+              ? 'Please attach proof for your completed pooja before completing.'
+              : `Please add proof attachments for each completed day of your ${days.length}-day pooja before final completion.`}
           </p>
           {requirements.length > 0 && (
             <small
               style={{
                 display: 'block',
-                marginTop: 6,
+                marginTop: 4,
                 color: 'var(--primary, #7346a3)',
                 fontWeight: 600,
-                fontSize: 12,
+                fontSize: 11.5,
               }}
             >
               Astrologer asks for:{' '}
@@ -385,24 +400,45 @@ function AllDaysProofSection({ atonement, onSaveProof }) {
           )}
         </div>
 
-        <div
-          className="am-proof-count-badge"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '5px 12px',
-            borderRadius: 999,
-            background: uploadedCount === days.length ? '#ecfaf1' : '#f3ebff',
-            color: uploadedCount === days.length ? '#15803d' : 'var(--primary, #7346a3)',
-            fontWeight: 700,
-            fontSize: 12.5,
-          }}
-        >
-          {uploadedCount === days.length ? <Check size={14} /> : <Paperclip size={13} />}
-          <span>
-            {uploadedCount}/{days.length} Proofs Attached
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {uploadedCount < days.length && (
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              style={{
+                fontSize: 11.5,
+                padding: '5px 10px',
+                height: 'auto',
+                borderRadius: 8,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+              }}
+              onClick={attachAllSampleProofs}
+              title="Attach demo proof photos for all pending days"
+            >
+              <Sparkles size={13} /> Demo All Proofs
+            </button>
+          )}
+          <div
+            className="am-proof-count-badge"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '5px 12px',
+              borderRadius: 999,
+              background: uploadedCount === days.length ? '#ecfaf1' : '#f3ebff',
+              color: uploadedCount === days.length ? '#15803d' : 'var(--primary, #7346a3)',
+              fontWeight: 700,
+              fontSize: 12,
+            }}
+          >
+            {uploadedCount === days.length ? <Check size={14} /> : <Paperclip size={13} />}
+            <span>
+              {uploadedCount}/{days.length} Proofs Attached
+            </span>
+          </div>
         </div>
       </div>
 
@@ -427,7 +463,8 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
   const firstOpen = atonement.days.findIndex((day) => !day.completed)
   const [selected, setSelected] = useState(firstOpen === -1 ? Math.max(0, atonement.days.length - 1) : firstOpen)
   const index = Math.min(selected, atonement.days.length - 1)
-  const isFinalDay = index === atonement.days.length - 1
+  const totalDays = atonement.days.length
+  const isFinalDay = index === totalDays - 1
   const today = localDateIso()
   const isFuture = (item) => !item.completed && Boolean(item.date) && item.date > today
   const day = atonement.days[index]
@@ -435,10 +472,12 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
   const locked = waiting || isFuture(day)
   const actionable = isAtonementDayActionable(atonement, index)
   const includedRituals = (method?.rituals || []).filter((ritual) => ritual?.enabled !== false)
-  const { rituals, materials } = ritualsForDay(method, index, atonement.days.length)
+  const { rituals, materials } = ritualsForDay(method, index, totalDays)
   const god = day.god || day.deity
   const thingItems = [...materials.map(materialText), ...listItems(day.things)]
   const purpose = method?.purpose || method?.shortDescription || method?.detailedDescription || method?.description
+  const uploadedCount = atonement.days.filter((d) => d.proof).length
+  const allProofsAttached = uploadedCount === totalDays
 
   const steps = [
     ...rituals.map((ritual, i) => ({
@@ -460,7 +499,7 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
       <h2>{method?.title || method?.name || atonement.summary}</h2>
       {purpose && <p>{purpose}</p>}
       <div className="jr-meta">
-        <span><Clock3 size={14} /> {atonement.days.length} {atonement.days.length === 1 ? 'Day' : 'Days'}</span>
+        <span><Clock3 size={14} /> {totalDays} {totalDays === 1 ? 'Day' : 'Days'}</span>
         <span><Check size={14} /> {progress.completed}/{progress.total} Days Completed</span>
         <span className={`jr-status ${allCompleted ? 'is-done' : 'is-active'}`}>{allCompleted ? 'Completed' : 'In Progress'}</span>
       </div>
@@ -500,31 +539,36 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
         </li>)}
         {!steps.length && <li className="jr-step"><span className="jr-step-node"><ATONEMENT_ICONS.instruction size={16} /></span><div className="jr-step-body"><small>No instructions were provided for this day.</small></div></li>}
 
-        <li className={`jr-step jr-proof-step${day.proof ? ' is-completed' : ''}`}>
-          <span className="jr-step-node">
-            {day.proof ? <Check size={16} /> : <Paperclip size={16} />}
-          </span>
-          <div className="jr-step-body">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
-              <strong style={{ fontSize: 15 }}>
-                {isFinalDay && atonement.days.length === 1 ? 'Pooja Proof Attachment' : `Day ${index + 1} Proof Attachment`}
-              </strong>
-              {day.proof ? (
-                <span style={{ color: '#16a34a', fontSize: 11.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <Check size={13} /> Proof Attached
-                </span>
-              ) : (
-                <span style={{ color: '#d97706', fontSize: 11.5, fontWeight: 700 }}>
-                  Upload Proof Before Complete
-                </span>
-              )}
+        {/* Proof attachments are submitted on the final day of the pooja before complete */}
+        {isFinalDay && (
+          <li className={`jr-step jr-proof-step${allProofsAttached ? ' is-completed' : ''}`}>
+            <span className="jr-step-node">
+              {allProofsAttached ? <Check size={16} /> : <Paperclip size={16} />}
+            </span>
+            <div className="jr-step-body">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                <strong style={{ fontSize: 15 }}>
+                  {totalDays === 1 ? 'Pooja Proof Attachment' : `Pooja Proof Attachments (All ${totalDays} Days)`}
+                </strong>
+                {allProofsAttached ? (
+                  <span style={{ color: '#16a34a', fontSize: 11.5, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <Check size={13} /> All {totalDays} Proofs Attached
+                  </span>
+                ) : (
+                  <span style={{ color: '#d97706', fontSize: 11.5, fontWeight: 700 }}>
+                    {uploadedCount}/{totalDays} Attached · Required Before Complete
+                  </span>
+                )}
+              </div>
+              <p style={{ margin: '0 0 10px', fontSize: 12.5, color: '#6f667b' }}>
+                {totalDays === 1
+                  ? 'Please attach photo, video, or audio proof of your pooja before completing.'
+                  : `As this is the final day of your pooja, please attach proofs for all ${totalDays} days before completing.`}
+              </p>
+              <AllDaysProofSection atonement={atonement} onSaveProof={onSaveProof} />
             </div>
-            <p style={{ margin: '0 0 10px', fontSize: 12.5, color: '#6f667b' }}>
-              Please attach photo, video, or audio proof of your ritual/pooja before marking as completed.
-            </p>
-            <DayProofItem day={day} dayIndex={index} onSaveProof={onSaveProof} />
-          </div>
-        </li>
+          </li>
+        )}
 
         <li className={`jr-step jr-final${day.completed ? ' is-completed' : ''}`}>
           <span className="jr-step-node">{day.completed ? <Check size={16} /> : null}</span>
@@ -534,57 +578,50 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
                 <>
                   <span className="jr-done-label">Completed</span>
                   <strong>
-                    {atonement.days.length === 1
+                    {totalDays === 1
                       ? 'Pooja completed successfully'
-                      : `Pooja completed successfully · All ${atonement.days.length} days done`}
+                      : `Pooja completed successfully · All ${totalDays} days done`}
                   </strong>
                   {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
                   <small style={{ color: '#16a34a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                    <Check size={13} /> Completed with verified proof attached.
+                    <Check size={13} /> Completed with verified proof attachments.
                   </small>
-                  {atonement.days.length > 1 && <AllDaysProofSection atonement={atonement} onSaveProof={onSaveProof} />}
                 </>
               ) : (
                 <>
                   <span className="jr-pending-label">Last Day Status</span>
                   <strong>
-                    {atonement.days.length === 1
+                    {totalDays === 1
                       ? 'Pooja Not Completed'
-                      : `Day ${index + 1} of ${atonement.days.length} (Last Day of Pooja)`}
+                      : `Day ${index + 1} of ${totalDays} (Final Day of Pooja)`}
                   </strong>
-
-                  {atonement.days.length > 1 && (
-                    <div style={{ marginTop: 10, marginBottom: 8 }}>
-                      <AllDaysProofSection atonement={atonement} onSaveProof={onSaveProof} />
-                    </div>
-                  )}
 
                   <button
                     type="button"
                     className="btn btn-primary jr-mark"
-                    disabled={!actionable || !day.proof}
+                    disabled={!actionable || !allProofsAttached}
                     onClick={() => {
-                      if (!day.proof) {
-                        window.alert('Please attach proof above before completing your pooja.')
+                      if (!allProofsAttached) {
+                        window.alert(`Please attach proofs for all ${totalDays} days above before completing your pooja (${uploadedCount}/${totalDays} attached).`)
                         return
                       }
                       onToggleDay(index)
                     }}
-                    title={!day.proof ? 'Please attach proof above to complete' : ''}
+                    title={!allProofsAttached ? `Please attach proofs for all ${totalDays} days above to complete` : ''}
                   >
                     <Check size={15} /> Complete Pooja
                   </button>
 
                   {waiting && <small className="atonement-availability-note">Complete Day {index} first.</small>}
                   {isFuture(day) && <small className="atonement-availability-note">Unlocks on {formatLongDate(day.date)}</small>}
-                  {actionable && !day.proof && (
+                  {actionable && !allProofsAttached && (
                     <small style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontWeight: 600 }}>
-                      ⚠️ Please attach proof above before completing your pooja.
+                      ⚠️ Please add proofs for all {totalDays} days above before completing your pooja ({uploadedCount}/{totalDays} attached).
                     </small>
                   )}
-                  {actionable && day.proof && (
+                  {actionable && allProofsAttached && (
                     <small style={{ color: '#16a34a', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontWeight: 600 }}>
-                      ✓ Proof attached. You can now complete your pooja.
+                      ✓ All proofs attached. You can now complete your pooja.
                     </small>
                   )}
                 </>
@@ -595,40 +632,28 @@ export default function AtonementDayFlow({ atonement, onToggleDay, onSaveProof }
                   <span className="jr-done-label">Completed</span>
                   <strong>Day {index + 1} completed successfully</strong>
                   {day.completedAt && <small>{formatCompleted(day.completedAt)}</small>}
-                  <small style={{ color: '#16a34a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
-                    <Check size={13} /> Day completed with verified proof attached.
+                  <small style={{ color: '#8b8295', fontSize: 12, marginTop: 4, display: 'block' }}>
+                    Rituals completed. Proofs for all days are submitted together on Day {totalDays}.
                   </small>
                 </>
               ) : (
                 <>
                   <span className="jr-pending-label">Status</span>
-                  <strong>Not Completed</strong>
+                  <strong>Day {index + 1} of {totalDays}</strong>
                   <button
                     type="button"
                     className="btn btn-primary jr-mark"
-                    disabled={!actionable || !day.proof}
-                    onClick={() => {
-                      if (!day.proof) {
-                        window.alert(`Please attach proof for Day ${index + 1} before marking as completed.`)
-                        return
-                      }
-                      onToggleDay(index)
-                    }}
-                    title={!day.proof ? 'Please attach proof above to complete' : ''}
+                    disabled={!actionable}
+                    onClick={() => onToggleDay(index)}
                   >
                     <Check size={15} /> Mark Day as Completed
                   </button>
 
                   {waiting && <small className="atonement-availability-note">Complete Day {index} first.</small>}
                   {isFuture(day) && <small className="atonement-availability-note">Unlocks on {formatLongDate(day.date)}</small>}
-                  {actionable && !day.proof && (
-                    <small style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontWeight: 600 }}>
-                      ⚠️ Please attach proof above before marking Day {index + 1} as completed.
-                    </small>
-                  )}
-                  {actionable && day.proof && (
-                    <small style={{ color: '#16a34a', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontWeight: 600 }}>
-                      ✓ Proof attached. You can now mark Day {index + 1} as completed.
+                  {actionable && (
+                    <small style={{ color: '#8b8295', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontSize: 12 }}>
+                      Perform today's rituals and mark completed. Proofs are submitted on Day {totalDays}.
                     </small>
                   )}
                 </>
