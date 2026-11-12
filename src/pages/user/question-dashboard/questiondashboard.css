@@ -1057,3 +1057,173 @@ html[data-theme='dark'] .buy-slots-payment-radio.is-selected {
   font-size: 12px;
   color: #dc2626;
 }
+
+/* =========================================================================
+   Question History Rows & Detailed View Modal
+   ========================================================================= */
+
+.history-row-card {
+  border: 1px solid var(--border-subtle, rgba(226, 232, 240, 0.9));
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.history-row-card:hover {
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow: 0 4px 14px rgba(180, 135, 75, 0.08);
+}
+
+html[data-theme='dark'] .history-row-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(30, 21, 16, 0.5);
+}
+
+html[data-theme='dark'] .history-row-card:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* History Detail Modal */
+.history-detail-modal {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+html[data-theme='dark'] .history-detail-modal {
+  background: #1e1510;
+  border-color: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+}
+
+.history-detail-modal__head {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(180deg, rgba(254, 243, 199, 0.25) 0%, transparent 100%);
+}
+
+html[data-theme='dark'] .history-detail-modal__head {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+}
+
+.history-detail-modal__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+}
+
+html[data-theme='dark'] .history-detail-modal__eyebrow {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.history-detail-modal__body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.history-metric-card {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+html[data-theme='dark'] .history-metric-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.history-metric-card__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+html[data-theme='dark'] .history-metric-card__label {
+  color: #94a3b8;
+}
+
+.history-metric-card__value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+html[data-theme='dark'] .history-metric-card__value {
+  color: #f1f5f9;
+}
+
+.history-modal-question-card {
+  border-radius: 14px;
+  padding: 16px;
+  background: #fffdfa;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+html[data-theme='dark'] .history-modal-question-card {
+  background: rgba(245, 158, 11, 0.05);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.history-modal-answer-card {
+  border-radius: 14px;
+  padding: 16px;
+  background: #f0fdf4;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+html[data-theme='dark'] .history-modal-answer-card {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.history-modal-cancelled-banner {
+  border-radius: 14px;
+  padding: 16px;
+  background: #fff1f2;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: #9f1239;
+}
+
+html[data-theme='dark'] .history-modal-cancelled-banner {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.25);
+  color: #fecdd3;
+}

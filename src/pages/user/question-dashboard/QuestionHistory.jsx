@@ -1,13 +1,34 @@
 import { createPortal } from 'react-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, ChevronDown, Filter, Search, X } from 'lucide-react'
+import {
+  CalendarDays,
+  ChevronDown,
+  Filter,
+  Search,
+  X,
+  Eye,
+  User,
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  Wallet,
+  HelpCircle,
+  FileText,
+  AlertCircle,
+} from 'lucide-react'
 import Card from '../../../components/ui/Card.jsx'
 import Section from '../../../components/ui/Section.jsx'
 import StatusBadge from '../../../components/StatusBadge.jsx'
 import { mockAstrologers } from '../../../data/notificationData.js'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
-import { formatAnswerDate, getAnswerSubmittedAtMs, getQuestionReceivedAt, getQuestionTypeLabel } from '../../../utils/answer.js'
+import {
+  formatAnswerDate,
+  getAnswerSubmittedAtMs,
+  getQuestionReceivedAt,
+  getQuestionTypeLabel,
+  isQuestionAnswered,
+} from '../../../utils/answer.js'
 import { getMonthLabel, getQuestionMonthKey, getQuestionSourceLabel } from '../../../utils/questions.js'
 import {
   HISTORY_ALL_MONTHS,
@@ -110,57 +131,174 @@ function HistoryDetailModal({ question, onClose }) {
   }, [onClose])
 
   const payment = getQuestionPaymentSummary(question)
+  const isCancelled = question.status === 'Cancelled' || Boolean(question.cancelledAt)
 
   return createPortal(
     <div className="modal-overlay user-modal-overlay" onClick={onClose}>
       <div
-        className="modal-card modal-card--scroll user-modal-card user-modal-card--scroll"
-        style={{ width: 'min(760px, calc(100vw - 32px))' }}
+        className="history-detail-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Question history details"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="modal-card__header user-modal-card__header flex items-center justify-between gap-4">
-          <div style={{ minWidth: 0 }}>
-            <div className="section-title" style={{ marginBottom: 0 }}>Question</div>
-            <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>{getQuestionSourceLabel(question)} · {question.id}</div>
+        <div className="history-detail-modal__head">
+          <div>
+            <div className="history-detail-modal__eyebrow">
+              <Sparkles size={11} />
+              <span>Archived Consultation</span>
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
+                {question.category || 'Astrology Consultation'}
+              </h3>
+              <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800">
+                {question.id}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {getQuestionSourceLabel(question)} · Consultation with {astrologerName(question)}
+            </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div className="flex items-center gap-3 shrink-0">
             <StatusBadge label={question.status} />
-            <button type="button" className="icon-btn" aria-label="Close question details" onClick={onClose}>
-              <X size={16} />
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Close question details"
+              onClick={onClose}
+            >
+              <X size={18} />
             </button>
           </div>
         </div>
 
-        <div className="modal-card__content user-modal-card__content" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div>
-            <div className="field-label-top" style={{ marginBottom: 8 }}>Your Question</div>
-            <div className="qd-full-content-box">
+        <div className="history-detail-modal__body">
+          {/* Quick Metrics Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="history-metric-card">
+              <span className="history-metric-card__label">
+                <User size={12} /> Astrologer
+              </span>
+              <strong className="history-metric-card__value truncate">{astrologerName(question)}</strong>
+            </div>
+
+            <div className="history-metric-card">
+              <span className="history-metric-card__label">
+                <Sparkles size={12} /> Category
+              </span>
+              <strong className="history-metric-card__value truncate">{question.category || 'General'}</strong>
+            </div>
+
+            <div className="history-metric-card">
+              <span className="history-metric-card__label">
+                <HelpCircle size={12} /> Type
+              </span>
+              <strong className="history-metric-card__value">{getQuestionTypeLabel(question)} Q&amp;A</strong>
+            </div>
+
+            <div className="history-metric-card">
+              <span className="history-metric-card__label">
+                <Wallet size={12} /> Payment
+              </span>
+              <strong className="history-metric-card__value truncate">{paymentLabel(payment)}</strong>
+            </div>
+          </div>
+
+          {/* User's Question Card */}
+          <div className="history-modal-question-card">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-200/40 dark:border-amber-800/40">
+              <div className="flex items-center gap-2">
+                <User size={15} className="text-amber-600 dark:text-amber-400" />
+                <span className="font-bold text-xs uppercase tracking-wide text-amber-900 dark:text-amber-200">
+                  Your Submitted Question
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <Clock size={12} /> Asked on {askedOn(question)}
+              </span>
+            </div>
+            <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
               {question.question || EMPTY_DATE}
-            </div>
+            </p>
+            {question.attachments && question.attachments.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-amber-200/40 dark:border-amber-800/40 flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Attachments:</span>
+                {question.attachments.map((file, idx) => (
+                  <span key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-white/90 dark:bg-slate-800 border border-stone-200 dark:border-stone-700 text-slate-700 dark:text-slate-300">
+                    <FileText size={12} className="text-amber-600 dark:text-amber-400" />
+                    {file}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div>
-            <div className="field-label-top" style={{ marginBottom: 8 }}>Astrologer&apos;s Answer</div>
-            <div className="qd-full-content-box">
-              {question.answer || 'No answer was provided for this question.'}
+          {/* Astrologer's Answer Card or Cancellation Banner */}
+          {isCancelled ? (
+            <div className="history-modal-cancelled-banner">
+              <AlertCircle size={20} className="shrink-0 text-rose-500" />
+              <div>
+                <strong className="block text-rose-900 dark:text-rose-200 font-bold mb-1">
+                  Consultation Cancelled
+                </strong>
+                <p className="text-xs text-rose-700 dark:text-rose-300 leading-relaxed">
+                  This question was not answered within the required window or was cancelled. Any applicable consultation fee has been refunded back to your wallet.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="history-modal-answer-card">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-emerald-200/40 dark:border-emerald-800/40">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={15} className="text-emerald-600 dark:text-emerald-400" />
+                  <span className="font-bold text-xs uppercase tracking-wide text-emerald-900 dark:text-emerald-200">
+                    Astrologer&apos;s Consultation Answer
+                  </span>
+                </div>
+                <span className="text-[11px] text-emerald-700 dark:text-emerald-400 flex items-center gap-1 font-medium">
+                  <CheckCircle2 size={12} /> Delivered on {completedOn(question)}
+                </span>
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-wrap">
+                {question.answer || 'No answer was provided for this question.'}
+              </p>
+            </div>
+          )}
+
+          {/* Consultation Summary & Lifecycle Metadata */}
+          <div className="p-4 rounded-xl border border-stone-200/80 dark:border-stone-800/80 bg-stone-50/60 dark:bg-slate-900/40">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+              Consultation &amp; Lifecycle Details
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 text-xs">
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Asked Date</span>
+                <strong className="text-slate-700 dark:text-slate-200">{askedOn(question)}</strong>
+              </div>
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">{isCancelled ? 'Cancelled Date' : 'Completed Date'}</span>
+                <strong className="text-slate-700 dark:text-slate-200">{completedOn(question)}</strong>
+              </div>
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Consultation Mode</span>
+                <strong className="text-slate-700 dark:text-slate-200">Text-Based Q&amp;A</strong>
+              </div>
+              <div>
+                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Question For</span>
+                <strong className="text-slate-700 dark:text-slate-200">{question.questionFor || 'Self'}</strong>
+              </div>
             </div>
           </div>
-
-          <Card style={{ padding: 14, display: 'grid', gap: 10 }}>
-            <div className="section-title" style={{ marginBottom: 2 }}>Summary</div>
-            <div><strong>Category</strong><div className="muted">{question.category}</div></div>
-            <div><strong>Question Type</strong><div className="muted">{getQuestionTypeLabel(question)}</div></div>
-            <div><strong>Asked On</strong><div className="muted">{askedOn(question)}</div></div>
-            <div><strong>Answered On</strong><div className="muted">{answeredOn(question)}</div></div>
-            <div><strong>Payment</strong><div className="muted">{paymentLabel(payment)}</div></div>
-          </Card>
         </div>
 
-        <div className="modal-card__footer user-modal-card__footer">
-          <button type="button" className="btn btn-primary" onClick={onClose}>Close</button>
+        <div className="modal-card__footer user-modal-card__footer flex items-center justify-between">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Archived record · Read only
+          </span>
+          <button type="button" className="btn btn-primary" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>,
@@ -259,9 +397,11 @@ export default function QuestionHistory() {
             </div>
           </Card>
         ) : (
-          <div className="glass-card rounded-2xl p-6">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4">Completed Cycles &amp; Archivals</h3>
-            <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              Completed Cycles &amp; Archivals
+            </h3>
+            <div className="space-y-3">
               {visibleHistory.map((question) => {
                 const cancelled = isHistoryCancelled(question, nowMs)
                 const payment = getQuestionPaymentSummary(question)
@@ -269,14 +409,24 @@ export default function QuestionHistory() {
                 const isPersonal = typeLabel === 'Personal'
                 const statusLabel = getHistoryStatusLabel(question, nowMs)
                 return (
-                  <div key={question.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div className="space-y-1 max-w-2xl">
+                  <div
+                    key={question.id}
+                    className="history-row-card p-4 rounded-xl border border-stone-200/90 dark:border-stone-800/90 bg-white/90 dark:bg-slate-900/70 shadow-xs hover:border-amber-400/80 dark:hover:border-amber-600/70 hover:shadow-sm transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5"
+                  >
+                    <div className="space-y-1.5 max-w-2xl">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-800 dark:text-slate-100">{question.id}</span>
-                        <span className="text-slate-400">•</span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">{question.category || 'General Guidance'}</span>
-                        <span className="text-slate-400">•</span>
-                        <span className="text-slate-500 dark:text-slate-400">{astrologerName(question)}</span>
+                        <span className="font-mono text-xs font-bold text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 border border-amber-200/80 dark:border-amber-800/60">
+                          {question.id}
+                        </span>
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <span className="font-semibold text-xs text-slate-800 dark:text-slate-200">
+                          {question.category || 'General Guidance'}
+                        </span>
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                          <User size={12} className="text-slate-400" />
+                          {astrologerName(question)}
+                        </span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           isPersonal
                             ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-300'
@@ -285,26 +435,39 @@ export default function QuestionHistory() {
                           {typeLabel}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1">{question.question}</p>
-                      <p className="text-[11px] text-slate-400">
-                        Asked on {askedOn(question)} • Completed on {completedOn(question)} • {paymentLabel(payment)}
+                      <p className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                        {question.question}
                       </p>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <CalendarDays size={12} className="text-slate-400" /> Asked {askedOn(question)}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 size={12} className="text-slate-400" /> Completed {completedOn(question)}
+                        </span>
+                        <span>•</span>
+                        <span className="flex items-center gap-1">
+                          <Wallet size={12} className="text-slate-400" /> {paymentLabel(payment)}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${
+                    <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                         cancelled
-                          ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-                          : 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800'
+                          ? 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300'
                       }`}>
                         {statusLabel}
                       </span>
                       <button
                         type="button"
                         onClick={() => setOpenQuestionId(question.id)}
-                        className="px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-xs font-semibold transition"
+                        className="px-3 py-1.5 rounded-xl border border-amber-300/80 dark:border-amber-700/80 text-amber-800 dark:text-amber-300 bg-amber-50/50 hover:bg-amber-100/70 dark:bg-amber-950/30 dark:hover:bg-amber-900/50 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs"
                       >
-                        View Details
+                        <Eye size={13} />
+                        <span>View Details</span>
                       </button>
                     </div>
                   </div>
