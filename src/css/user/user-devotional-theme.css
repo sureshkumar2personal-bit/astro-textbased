@@ -1776,6 +1776,12 @@ html[data-theme='dark'] .app-shell--user .jr-step-node {
   color: #FBBF24 !important;
 }
 
+html[data-theme='dark'] .app-shell--user .jr-final.is-completed .jr-step-node,
+html[data-theme='dark'] .app-shell--user .jr-proof-step.is-completed .jr-step-node {
+  background: #15803d !important;
+  color: #FFFFFF !important;
+}
+
 html[data-theme='dark'] .app-shell--user .jr-step-body > strong {
   color: #FFFDF9 !important;
 }
