@@ -111,6 +111,7 @@ export function createInstantConsultation(payload) {
     extraMinutes: 0,
     amountPaid: Number(payload.amount) || calculateInstantAmount(durationMinutes, pricePerMinute),
     birthDetails: payload.birthDetails || null,
+    userAvatar: payload.userAvatar || '',
     userPhone: payload.userPhone || '',
     language: payload.language || '',
     topic: payload.topic || '',
@@ -120,16 +121,43 @@ export function createInstantConsultation(payload) {
     updatedAt: now,
     messages: [],
   }
+  const stored = readAll()
+  // One waiting request per user and astrologer: repeating the request returns the one already queued.
+  const duplicate = stored.find((entry) => entry.status === 'ringing' && entry.userId === request.userId && entry.astrologerId === request.astrologerId && entry.type === request.type)
+  if (duplicate) return duplicate
   // Retain terminal sessions for the profile and Activity history views.
-  writeAll([request, ...readAll()])
+  writeAll([request, ...stored])
   return request
+}
+
+function mergeMessages(stored = [], incoming = []) {
+  const seen = new Set()
+  return [...stored, ...incoming]
+    .filter((message) => message?.id && !seen.has(message.id) && seen.add(message.id))
+    .sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
+}
+
+/** Appends one message to the latest stored session (never to a stale copy). `sender` is 'user' or 'astrologer'. */
+export function appendConsultationMessage(id, sender, text) {
+  const value = String(text || '').trim()
+  if (!value) return null
+  return updateInstantConsultation(id, { messages: [{ id: crypto.randomUUID(), sender, text: value, sentAt: new Date().toISOString() }] })
 }
 
 export function updateInstantConsultation(id, patch) {
   let updated = null
-  const requests = readAll().map((request) => {
+  const all = readAll()
+  const accepting = patch.status === 'accepted' ? all.find((request) => request.id === id) : null
+  const requests = all.map((request) => {
+    // A user who connects with one astrologer leaves every other astrologer's waiting queue.
+    if (accepting && request.id !== id && request.status === 'ringing' && request.userId === accepting.userId) {
+      return { ...request, status: 'cancelled', cancelledAt: new Date().toISOString(), cancelReason: 'connected-elsewhere', updatedAt: new Date().toISOString() }
+    }
     if (request.id !== id) return request
-    updated = { ...request, ...patch, updatedAt: new Date().toISOString() }
+    // Merge messages by id with what is stored now: a sender holding a stale copy must never drop
+    // (or duplicate) a message the other side has just written.
+    const messages = patch.messages ? mergeMessages(request.messages, patch.messages) : request.messages
+    updated = { ...request, ...patch, ...(messages ? { messages } : {}), updatedAt: new Date().toISOString() }
     return updated
   })
   if (updated) writeAll(requests)

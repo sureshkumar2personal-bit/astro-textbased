@@ -743,6 +743,10 @@ export function AstrologerLiveSessionSetup() {
           </button>
         </Card>
         <div className="ld-side">
+          <div className="live-monthly-limit" role="note">
+            <strong>Monthly Participation Limit</strong>
+            <p>Each astrologer is allowed to attend only ONE Live Stream session per month. Your next participation will be available from the next calendar month.</p>
+          </div>
           <Card className="live-guidelines-card ld-card">
             <div className="live-section-heading">
               <ShieldCheck size={20} />
@@ -752,6 +756,7 @@ export function AstrologerLiveSessionSetup() {
               <span>Maintain an ethical code of conduct.</span>
               <span>Do not share personal contact or bank details.</span>
               <span>Ensure lighting is bright and your audio is clear.</span>
+              <span><strong>Monthly Live Stream Limit:</strong> You can attend only ONE Live Stream session per month. Once you have attended a session, you must wait until the next calendar month to participate again.</span>
             </div>
             {(mediaStatus.warning || !mediaStatus.camera || !mediaStatus.audio) && (
               <div className="live-warning">
