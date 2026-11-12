@@ -107,13 +107,9 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
             <span>Closed after 7 days (non-refundable)</span>
           </div>
         ) : isAvailable ? (
-          <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 mb-3">
-            <div className="flex items-center gap-1.5 font-bold">
-              <Clock size={12} /> {daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining
-            </div>
-            <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 leading-tight">
-              Valid for 7 days from purchase. Non-refundable.
-            </p>
+          <div className="p-2 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 text-[11px] text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-1.5 font-semibold">
+            <Clock size={12} className="shrink-0" />
+            <span>{daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining (non-refundable)</span>
           </div>
         ) : null}
       </div>
