@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   PhoneCall,
   MessageCircle,
@@ -11,6 +12,7 @@ import {
   ChevronRight,
   Headphones,
   Compass,
+  Sparkles,
 } from 'lucide-react'
 import PageHeader from '../../components/ui/PageHeader.jsx'
 import Card from '../../components/ui/Card.jsx'
@@ -40,6 +42,7 @@ function consultationPaid(session) {
 
 export default function InstantConsultation() {
   const { currentUser } = useAuth()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'call' | 'chat'
   const [searchQuery, setSearchQuery] = useState('')
   const [instantConsultations, setInstantConsultations] = useState(() => getInstantConsultations())
@@ -121,6 +124,14 @@ export default function InstantConsultation() {
           </div>
 
           <div className="instant-consult-filters">
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, padding: '7px 14px' }}
+              onClick={() => navigate('/user/instantchat')}
+            >
+              <MessageCircle size={15} /> Start Instant Chat
+            </button>
             <div className="instant-consult-search">
               <Search size={14} className="instant-consult-search-icon" />
               <input
@@ -370,7 +381,21 @@ export default function InstantConsultation() {
                 </div>
               </div>
 
-              <footer className="user-profile-consultation-modal__footer">
+              <footer className="user-profile-consultation-modal__footer" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                {selectedInstantConsultation.type === 'chat' && (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    onClick={() => {
+                      const astroId = selectedInstantConsultation.astrologerId || 'astrologer-demo'
+                      setSelectedInstantConsultation(null)
+                      navigate(`/user/instantchat/${astroId}`)
+                    }}
+                  >
+                    <MessageCircle size={15} /> Open Live Chat Room →
+                  </button>
+                )}
                 <button
                   type="button"
                   className="user-profile-consultation-modal__close-action"

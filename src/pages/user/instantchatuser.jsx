@@ -46,11 +46,11 @@ function readSavedBirth(currentUser) {
     saved = {}
   }
   return {
-    name: saved.name || currentUser?.name || 'Priya V.',
-    gender: saved.gender || currentUser?.gender || 'Female',
-    place: saved.place || currentUser?.birthPlace || 'Theni, Tamil Nadu, India',
-    dob: saved.dob || currentUser?.dateOfBirth || '1995-03-12',
-    time: saved.time || currentUser?.birthTime || '07:05',
+    name: saved.name || currentUser?.name || 'Arjun Karthik',
+    gender: saved.gender || currentUser?.gender || 'Male',
+    place: saved.place || currentUser?.birthPlace || 'Chennai, TN',
+    dob: saved.dob || currentUser?.dateOfBirth || '14 Aug 1996',
+    time: saved.time || currentUser?.birthTime || '06:42 AM',
     lagna: saved.lagna || 'Simha (Leo)',
     rashi: saved.rashi || 'Mithuna (Gemini)',
     nakshatra: saved.nakshatra || 'Punarvasu-3',
@@ -101,13 +101,26 @@ export default function InstantChatUser() {
   const { userWallet, actions } = useAppData()
   const { dismissPanel } = useInstantCall()
 
-  // Match astrologer from directory
+  // Match astrologer from directory (defaults to Acharya Raghavan from Gemini prototype)
   const astrologer = useMemo(() => {
-    return (
-      consultationAstrologers.find(
-        (a) => a.id === paramAstrologerId || a.id === 'astrologer-demo' || a.id.includes('raghavan') || a.id.includes('rani'),
-      ) || consultationAstrologers[0]
-    )
+    if (paramAstrologerId && paramAstrologerId !== 'astrologer-demo') {
+      const match = consultationAstrologers.find((a) => a.id === paramAstrologerId)
+      if (match) return match
+    }
+    return {
+      id: 'acharya-raghavan',
+      name: 'Acharya Raghavan',
+      specialization: 'Vedic & Nadi Astrologer',
+      experience: '18 Yrs Exp',
+      languages: ['Tamil', 'English'],
+      rating: 4.9,
+      reviewsCount: 384,
+      chatRate: 15,
+      callRate: 20,
+      chatStatus: 'Available',
+      callStatus: 'Available',
+      photo: '/astrologer-photos/acharya-raghavan.png',
+    }
   }, [paramAstrologerId])
 
   // Birth details
@@ -439,6 +452,16 @@ export default function InstantChatUser() {
             >
               Partner Chart (Kavya S.)
             </button>
+            <button
+              type="button"
+              className="ic-profile-tab ic-profile-tab--edit"
+              onClick={() => {
+                setTempBirth(birthDetails)
+                setShowEditBirthModal(true)
+              }}
+            >
+              Edit Birth Details
+            </button>
           </div>
 
           {/* User Birth Details Card */}
@@ -711,6 +734,7 @@ export default function InstantChatUser() {
                 <div className="ic-chat-astrologer-name-row">
                   <h1 className="ic-chat-astrologer-name">{astrologer.name}</h1>
                   <span className="ic-chat-astrologer-rating">★ 4.9</span>
+                  <span className="ic-chat-astrologer-status-tag">Online • In Session</span>
                 </div>
                 <p className="ic-chat-astrologer-sub">
                   Vedic &amp; Nadi Astrologer • 18 Yrs Exp • Tamil / English
@@ -729,7 +753,7 @@ export default function InstantChatUser() {
                 onClick={() => setShowRemediesModal(true)}
               >
                 <Sparkles size={14} /> Remedies{' '}
-                <span className="ic-chat-remedies-count">{isTransitSaved ? '2' : '1'}</span>
+                <span className="ic-chat-remedies-count">{isTransitSaved ? '3' : '2'}</span>
               </button>
               <button type="button" className="ic-chat-end-btn" onClick={() => setShowEndModal(true)}>
                 End Chat
@@ -776,7 +800,7 @@ export default function InstantChatUser() {
                           <h4 className="ic-transit-card__title">
                             <Sparkles size={16} color="#7346a3" /> {msg.title}
                           </h4>
-                          <span className="ic-transit-card__window">{msg.window}</span>
+                          <span className="ic-transit-card__window">Favorable Window: {msg.window}</span>
                         </div>
                         <div className="ic-transit-card__chips">
                           {msg.chips?.map((c, i) => (

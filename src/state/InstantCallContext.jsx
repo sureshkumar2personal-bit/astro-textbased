@@ -1,5 +1,6 @@
 /* oxlint-disable react/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import InstantCallModal from '../components/user/InstantCallModal.jsx'
 import FloatingConsultationPanel from '../components/user/FloatingConsultationPanel.jsx'
 import { useAuth } from './AuthContext.jsx'
@@ -19,6 +20,13 @@ const InstantCallContext = createContext(null)
  */
 export function InstantCallProvider({ children }) {
   const { currentUser } = useAuth()
+  let navigate = null
+  try {
+    navigate = useNavigate()
+  } catch {
+    // Safe when mounted outside BrowserRouter
+  }
+
   const [popup, setPopup] = useState(null)
   const [dismissed, setDismissed] = useState(null)
   const [hiddenChips, setHiddenChips] = useState({})
@@ -49,7 +57,14 @@ export function InstantCallProvider({ children }) {
   }, [])
 
   const openInstantCall = useCallback((astrologerId) => openSession('call', astrologerId), [openSession])
-  const openInstantChat = useCallback((astrologerId) => openSession('chat', astrologerId), [openSession])
+  const openInstantChat = useCallback((astrologerId) => {
+    const targetId = astrologerId || 'astrologer-demo'
+    if (navigate) {
+      navigate(`/user/instantchat/${targetId}`)
+    } else if (typeof window !== 'undefined') {
+      window.location.href = `/user/instantchat/${targetId}`
+    }
+  }, [navigate])
 
   const closePopup = useCallback(() => setPopup(null), [])
 

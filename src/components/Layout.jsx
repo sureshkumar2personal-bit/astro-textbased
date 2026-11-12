@@ -97,6 +97,12 @@ const ROLE_CONFIG = {
         section: 'MAIN MENU',
       },
       {
+        label: 'Instant Chat',
+        to: 'instantchat',
+        icon: MessageCircle,
+        section: 'MAIN MENU',
+      },
+      {
         label: 'Instant consultation',
         to: 'instant-consultation',
         icon: Headphones,
@@ -193,6 +199,7 @@ const PAGE_META = {
     '/user/appointment-details': { title: 'Appointment Details', sub: 'Consultation schedule and status' },
     '/user/appointments/book': { title: 'Book Appointment', sub: 'Find an astrologer and schedule your appointment' },
     '/user/appointments/my': { title: 'My Appointments', sub: 'Your upcoming and past appointments' },
+    '/user/instantchat': { title: 'Instant Chat Consultation', sub: 'Live astrological consultation with interactive birth chart & real-time guidance' },
     '/user/instant-consultation': { title: 'Instant Consultation', sub: 'Your instant call and instant chat consultations with astrologers' },
     '/user/pooja-details': { title: 'Pooja Details', sub: 'Booking, live status, and prasadam updates' },
     '/user/live-session': { title: 'Live Session', sub: 'Watch or join a live astrology session' },
@@ -221,7 +228,8 @@ function NavGroup({ links, basePath, showRewardBadge = false, rewardCount = 0 })
   const dashboardLabels = {
     'Ask a Question': 'Ask Question (Text)',
     Appointments: 'Book Appointment',
-    'Instant consultation': 'Instant Call & Chat',
+    'Instant Chat': 'Instant Chat',
+    'Instant consultation': 'Instant Call & History',
     Atonement: 'Atonement (Remedies)',
     Live: 'Live Streams',
     Disputes: 'Disputes & Support',

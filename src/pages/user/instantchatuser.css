@@ -212,6 +212,20 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+.ic-profile-tab--edit {
+  background: transparent;
+  color: #7346a3;
+  border: 1px dashed rgba(115, 70, 163, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.ic-profile-tab--edit:hover {
+  background: rgba(115, 70, 163, 0.08);
+  border-color: #7346a3;
+}
+
 /* User Birth Details Card */
 .ic-birth-info-card {
   background: #ffffff;
@@ -680,6 +694,19 @@
   background: #fef3c7;
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+.ic-chat-astrologer-status-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ic-chat-astrologer-sub {
@@ -1359,6 +1386,17 @@ html[data-theme='dark'] .ic-composer-wrap {
 
 html[data-theme='dark'] .ic-chat-astrologer-name {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-chat-astrologer-status-tag {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+html[data-theme='dark'] .ic-profile-tab--edit {
+  color: #c084fc;
+  border-color: rgba(192, 132, 252, 0.4);
 }
 
 html[data-theme='dark'] .ic-chat-timer-badge {
