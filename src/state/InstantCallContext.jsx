@@ -98,7 +98,8 @@ export function InstantCallProvider({ children }) {
   // rather than leaving two surfaces on screen.
   const isAccepted = Boolean(active && active.status === 'accepted')
   const popupHandled = Boolean(popup && isAccepted && active.astrologerId === popup.astrologerId && active.type === popup.type)
-  const panel = isAccepted && dismissed !== active.id ? active : null
+  const isInstantChatRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/user/instantchat')
+  const panel = isAccepted && dismissed !== active.id && !isInstantChatRoute ? active : null
 
   return (
     <InstantCallContext.Provider value={value}>
