@@ -154,15 +154,6 @@ export default function AppointmentSlotsModal({
                     {selectedSlots.length} of {maxAllowedToday} Selected
                   </span>
                 </div>
-                <p className="appointment-slots-limit-banner__text">
-                  {isDailyLimitReachedAlready
-                    ? `You have already booked the maximum of ${MAX_SLOTS_PER_DAY} slots for this date (${formatDate(dateKey)}). Additional bookings on this day are not allowed.`
-                    : existingBookedTodayCount > 0
-                    ? `You have ${existingBookedTodayCount} existing appointment${existingBookedTodayCount > 1 ? 's' : ''} on this day. You can select up to ${maxAllowedToday} more slot${maxAllowedToday > 1 ? 's' : ''} (Maximum ${MAX_SLOTS_PER_DAY} slots per day).`
-                    : selectedSlots.length >= MAX_SLOTS_PER_DAY
-                    ? `Maximum daily limit of ${MAX_SLOTS_PER_DAY} slots reached. Click a selected slot to deselect if you wish to change times.`
-                    : `You can book a maximum of ${MAX_SLOTS_PER_DAY} slots per day. Click available slots to select or deselect.`}
-                </p>
               </div>
             </div>
 
@@ -250,19 +241,13 @@ export default function AppointmentSlotsModal({
 
         <div className="appointment-slots-modal__foot">
           <div className="appointment-slots-modal__meta-group">
-            {selectedSlots.length > 0 ? (
+            {selectedSlots.length > 0 && (
               <p className="appointment-slots-modal__meta">
                 <strong>Selected {selectedSlots.length} slot{selectedSlots.length > 1 ? 's' : ''}</strong>
                 <span> · </span>
                 <span>₹{totalPrice.toLocaleString('en-IN')}{selectedSlots.length > 1 ? ` (${selectedSlots.length} × ₹${slotPrice.toLocaleString('en-IN')})` : ''}</span>
                 <span> · </span>
                 <span className="appointment-slots-modal__meta-limit">Max 4 slots/day</span>
-              </p>
-            ) : (
-              <p className="appointment-slots-modal__meta">
-                {isDailyLimitReachedAlready
-                  ? 'Daily booking limit reached (4/4 slots booked)'
-                  : `Select up to ${maxAllowedToday} slot${maxAllowedToday > 1 ? 's' : ''} on this day · Maximum 4 slots per day`}
               </p>
             )}
           </div>
