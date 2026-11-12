@@ -1147,6 +1147,177 @@
   color: #fff;
 }
 
+.appointment-slot-card__order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #C2410C;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-slot-card.is-limit-blocked {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Daily Booking Policy & 4-Slot Limit Banner */
+.appointment-slots-limit-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+  margin: 16px 0 14px;
+  border-radius: var(--radius-m, 12px);
+  background: #FFF7ED;
+  border: 1px solid rgba(234, 88, 12, 0.28);
+  color: #1E1B24;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.05);
+  transition: all 0.2s ease;
+}
+
+.appointment-slots-limit-banner.is-limit-reached {
+  background: #FEF3C7;
+  border-color: rgba(217, 119, 6, 0.45);
+}
+
+.appointment-slots-limit-banner.is-blocked {
+  background: #FEF2F2;
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #991B1B;
+}
+
+.appointment-slots-limit-banner__left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.appointment-slots-limit-banner__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #FFEDD5;
+  color: #EA580C;
+  flex-shrink: 0;
+}
+
+.appointment-slots-limit-banner.is-limit-reached .appointment-slots-limit-banner__icon {
+  background: #FDE68A;
+  color: #D97706;
+}
+
+.appointment-slots-limit-banner.is-blocked .appointment-slots-limit-banner__icon {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.appointment-slots-limit-banner__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.appointment-slots-limit-banner__title strong {
+  font-size: 13px;
+  font-weight: 800;
+  color: #1E1B24;
+}
+
+.appointment-slots-limit-banner__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #FFEDD5;
+  color: #C2410C;
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+.appointment-slots-limit-banner.is-limit-reached .appointment-slots-limit-banner__pill {
+  background: #F59E0B;
+  color: #FFFFFF;
+  border-color: #D97706;
+}
+
+.appointment-slots-limit-banner__text {
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5C4B40;
+}
+
+.appointment-slots-limit-banner__slots-indicators {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.appointment-slots-limit-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(234, 88, 12, 0.35);
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.appointment-slots-limit-dot.is-selected {
+  background: #EA580C;
+  border-color: #EA580C;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.25);
+}
+
+.appointment-slots-limit-dot.is-booked {
+  background: #9CA3AF;
+  border-color: #6B7280;
+}
+
+/* Alert notice when exceeding limit */
+.appointment-slots-alert-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 0 0 14px;
+  border-radius: 8px;
+  background: #FEF2F2;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #B91C1C;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+
+.appointment-slots-modal__meta-group {
+  display: grid;
+  gap: 2px;
+}
+
+.appointment-slots-modal__meta-limit {
+  color: #C2410C;
+  font-weight: 700;
+}
+
 .appointment-slots-hint {
   margin: 14px 0 2px;
   color: var(--muted);

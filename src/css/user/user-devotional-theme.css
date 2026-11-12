@@ -3661,6 +3661,7 @@ html[data-theme='dark'] .app-shell--user .user-live-row__category {
 .user-dispute-modal-card,
 .raise-dispute-modal,
 .appointment-booking-modal,
+.appointment-slots-modal,
 .question-form-modal,
 .instant-call-modal,
 .user-modal {
@@ -3673,6 +3674,7 @@ html[data-theme='dark'] .app-shell--user .user-live-row__category {
 .user-modal-card__header,
 .user-modal__header,
 .appointment-booking-modal__header,
+.appointment-slots-modal__head,
 .aq-review-modal__header {
   background: #FAF7F2 !important;
   border-bottom: 1px solid #EFE7DA !important;
@@ -3698,7 +3700,8 @@ html[data-theme='dark'] .app-shell--user .user-live-row__category {
 
 .user-modal-card__footer,
 .user-modal__footer,
-.appointment-booking-modal__footer {
+.appointment-booking-modal__footer,
+.appointment-slots-modal__foot {
   background: #FAF7F2 !important;
   border-top: 1px solid #EFE7DA !important;
 }
@@ -3801,6 +3804,7 @@ html[data-theme='dark'] .user-modal-card,
 html[data-theme='dark'] .user-dispute-modal-card,
 html[data-theme='dark'] .raise-dispute-modal,
 html[data-theme='dark'] .appointment-booking-modal,
+html[data-theme='dark'] .appointment-slots-modal,
 html[data-theme='dark'] .question-form-modal,
 html[data-theme='dark'] .instant-call-modal,
 html[data-theme='dark'] .user-modal {
@@ -3813,6 +3817,7 @@ html[data-theme='dark'] .user-modal {
 html[data-theme='dark'] .user-modal-card__header,
 html[data-theme='dark'] .user-modal__header,
 html[data-theme='dark'] .appointment-booking-modal__header,
+html[data-theme='dark'] .appointment-slots-modal__head,
 html[data-theme='dark'] .aq-review-modal__header {
   background: #231C18 !important;
   border-bottom: 1px solid #3D3028 !important;
@@ -3838,9 +3843,120 @@ html[data-theme='dark'] .appointment-booking-modal .modal-card__content {
 
 html[data-theme='dark'] .user-modal-card__footer,
 html[data-theme='dark'] .user-modal__footer,
+html[data-theme='dark'] .appointment-slots-modal__foot,
 html[data-theme='dark'] .appointment-booking-modal__footer {
   background: #231C18 !important;
   border-top: 1px solid #3D3028 !important;
+}
+
+/* Appointment Slots Modal Devotional Palette Overrides */
+.app-shell--user .appointment-slot-card.is-selected,
+.appointment-slots-modal .appointment-slot-card.is-selected {
+  border-color: #EA580C !important;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.3) !important;
+}
+
+.app-shell--user .appointment-slot-card.is-selected .appointment-slot-card__range,
+.app-shell--user .appointment-slot-card.is-selected .appointment-slot-card__status,
+.appointment-slots-modal .appointment-slot-card.is-selected .appointment-slot-card__range,
+.appointment-slots-modal .appointment-slot-card.is-selected .appointment-slot-card__status {
+  color: #FFFFFF !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner {
+  background: #2A1F18 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner.is-limit-reached {
+  background: #332214 !important;
+  border-color: #F59E0B !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner.is-blocked {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #FCA5A5 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner__icon {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #FBBF24 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner__title strong {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner__pill {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #FDE68A !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-banner__text {
+  color: #D6C7B2 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-dot {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  background: #1B1512 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-dot.is-selected {
+  background: #F59E0B !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme='dark'] .appointment-slots-limit-dot.is-booked {
+  background: #4B5563 !important;
+  border-color: #6B7280 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-alert-notice {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #FCA5A5 !important;
+}
+
+html[data-theme='dark'] .appointment-slot-card__order {
+  background: #FFFDF9 !important;
+  color: #B45309 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slots-summary__card {
+  background: #231C18 !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slots-summary__value {
+  color: #FFFDF9 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slots-summary__label {
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slot-card {
+  background: #231C18 !important;
+  border-color: #3D3028 !important;
+  color: #C8B79B !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slot-card.is-available {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #34D399 !important;
+}
+
+html[data-theme='dark'] .appointment-slots-modal .appointment-slot-card.is-selected {
+  border-color: #F59E0B !important;
+  background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%) !important;
+  color: #FFFFFF !important;
 }
 
 html[data-theme='dark'] .user-modal-card input,
