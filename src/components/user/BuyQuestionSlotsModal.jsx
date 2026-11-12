@@ -144,9 +144,9 @@ export default function BuyQuestionSlotsModal({
               <AlertTriangle size={20} />
             </div>
             <div className="buy-slots-policy-warning__copy">
-              <strong>7-Day Slot Validity Notice (Strict Policy)</strong>
+              <strong>7-Day Slot Validity</strong>
               <p>
-                Purchased slots are available for <strong>7 days</strong> from the purchase date. After 7 days, unused slots are permanently <strong>closed</strong>. <strong>No refund and no re-schedule</strong> under any circumstance.
+                Slots are valid for 7 days from purchase. Expired slots cannot be refunded or rescheduled.
               </p>
             </div>
           </div>

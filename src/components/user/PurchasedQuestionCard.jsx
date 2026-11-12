@@ -107,7 +107,7 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
               <AlertTriangle size={12} /> Closed after 7 Days
             </div>
             <p className="text-[10px] text-rose-600 dark:text-rose-400 leading-tight">
-              7-day validity expired. Unused slots close permanently (No refund, no re-schedule).
+              7-day window expired. Slots closed (non-refundable).
             </p>
           </div>
         ) : isAvailable ? (
@@ -116,7 +116,7 @@ export default function PurchasedQuestionCard({ credit, onAsk, actionLabel = 'As
               <Clock size={12} /> {daysLeft} {daysLeft === 1 ? 'day' : 'days'} remaining
             </div>
             <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 leading-tight">
-              Valid for 7 days from purchase. Unused question closes with no refund or re-schedule.
+              Valid for 7 days from purchase. Non-refundable.
             </p>
           </div>
         ) : null}

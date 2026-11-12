@@ -321,9 +321,9 @@ export default function QuestionPurchased() {
               <AlertTriangle size={18} />
             </div>
             <div className="purchased-slots-policy-banner__content">
-              <strong>7-Day Slot Validity Policy (Strict Rule)</strong>
+              <strong>7-Day Slot Validity</strong>
               <p>
-                Purchased question slots are available for <strong>7 days</strong> from the date of purchase. After 7 days, unused slots are permanently <strong>closed</strong>. <strong>No refund and no re-scheduling</strong> under any circumstance.
+                Slots are valid for 7 days from purchase. Expired slots cannot be refunded or rescheduled.
               </p>
             </div>
           </div>
@@ -424,7 +424,7 @@ export default function QuestionPurchased() {
                                 <AlertTriangle size={13} /> Closed after 7 Days
                               </div>
                               <p className="text-[10px] text-rose-600 dark:text-rose-400 leading-tight">
-                                7-day redemption window has passed. Slots are permanently closed. No refund, no re-schedule.
+                                7-day window expired. Slots closed (non-refundable).
                               </p>
                             </div>
                           ) : canUse ? (
@@ -433,7 +433,7 @@ export default function QuestionPurchased() {
                                 <Clock size={13} /> {card.daysRemaining} {card.daysRemaining === 1 ? 'day' : 'days'} remaining
                               </div>
                               <p className="text-[10px] text-amber-700 dark:text-amber-400 mt-0.5 leading-tight">
-                                Available for 7 days from purchase. Unused slots close permanently with no refund or re-schedule.
+                                Valid for 7 days from purchase. Non-refundable.
                               </p>
                             </div>
                           ) : null}
