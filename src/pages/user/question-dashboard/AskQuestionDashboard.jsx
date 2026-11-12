@@ -5,7 +5,6 @@ import {
   PlusCircle,
   Ticket,
   History,
-  ShieldCheck,
 } from 'lucide-react'
 import { useAppData } from '../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../state/AuthContext.jsx'
@@ -65,13 +64,6 @@ export default function AskQuestionDashboard() {
           <p className="aq-hero-desc text-xs mt-1">
             Managed campaigns, active slots, and 30-day astrologer response guarantee.
           </p>
-        </div>
-        <div className="flex items-center space-x-3 banner-shield-badge px-4 py-3 rounded-2xl">
-          <ShieldCheck className="banner-shield-icon w-7 h-7 flex-shrink-0" />
-          <div className="text-xs">
-            <p className="banner-shield-title font-bold">100% Refund Guarantee</p>
-            <p className="banner-shield-sub">Auto-refund on 30-day delay</p>
-          </div>
         </div>
       </div>
 
