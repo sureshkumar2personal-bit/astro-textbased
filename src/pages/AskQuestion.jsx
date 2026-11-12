@@ -38,7 +38,7 @@ import {
   findQuestionCreditForSubmission,
   getQuestionCreditsForUser,
 } from '../utils/questionCredits.js'
-import { getSlotPricingView } from '../utils/purchasedSlots.js'
+import { getSlotPricingView, isSlotExpired } from '../utils/purchasedSlots.js'
 import { paginateViewMore } from '../utils/pagination.js'
 import './askquestion-astrologers.css'
 
@@ -820,11 +820,18 @@ export default function AskQuestion({ embedded = false }) {
   const viewingQuestionAstrologer = viewingQuestion?.astrologerId ? mockAstrologers.find((a) => a.id === viewingQuestion.astrologerId) : null
 
   // Once an astrologer is chosen in step 1, the slot list narrows to that
-  // astrologer so the next step is unambiguous.
+  // astrologer so the next step is unambiguous. Expired slots are ignored.
   const purchasedCampaigns = useMemo(() => campaigns.map((campaign) => {
-    const balance = purchasedSlots.find((slot) => slot.userId === currentUser?.id && slot.campaignId === campaign.id)
+    const validSlots = purchasedSlots.filter((slot) => (
+      slot.userId === currentUser?.id &&
+      slot.campaignId === campaign.id &&
+      !isSlotExpired(slot.purchasedAt || slot.pricing?.purchasedAt)
+    ))
+    if (!validSlots.length) return null
+    const balance = chosenAstrologerId
+      ? validSlots.find((slot) => slot.astrologerId === chosenAstrologerId)
+      : validSlots[0]
     if (!balance) return null
-    if (chosenAstrologerId && balance.astrologerId !== chosenAstrologerId) return null
     const generalPurchased = Number(balance.generalPurchased) || 0
     const generalUsed = Number(balance.generalUsed) || 0
     const personalPurchased = Number(balance.personalPurchased) || 0

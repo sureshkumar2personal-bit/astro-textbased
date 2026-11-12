@@ -212,7 +212,7 @@ export default function QuestionPurchased() {
   // Reuses the existing redemption deep link: AskQuestion restores this credit's
   // astrologer, campaign and question type, then opens the normal question form.
   const askYourQuestion = (credit) => {
-    navigate(`${routes.askQuestion}?redeemCreditId=${encodeURIComponent(credit.id)}`)
+    navigate(`${routes.askQuestion}/new?redeemCreditId=${encodeURIComponent(credit.id)}`)
   }
 
   const submitSlotQuestion = () => {

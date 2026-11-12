@@ -1947,6 +1947,7 @@ const FOLLOWED_ASTROLOGERS_STORAGE_KEY = 'astroconnect-followed-astrologers'
 const SUBSCRIPTIONS_STORAGE_KEY = 'astroconnect-user-subscriptions'
 const ATONEMENTS_STORAGE_KEY = 'astroconnect-atonements'
 const ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY = 'astroconnect-astrologer-activity-log'
+const PURCHASED_SLOTS_STORAGE_KEY = 'astroconnect-purchased-slots'
 
 const APPOINTMENT_WEEKDAYS = [
   { dayIndex: 0, label: 'Sun' },
@@ -2418,7 +2419,11 @@ export function AppDataProvider({ children }) {
   })
   const [blockedUserIds, setBlockedUserIds] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
-  const [purchasedSlots, setPurchasedSlots] = useState(initialPurchasedSlots)
+  const [purchasedSlots, setPurchasedSlots] = useState(() => {
+    const stored = loadFromStorage(PURCHASED_SLOTS_STORAGE_KEY, null)
+    if (Array.isArray(stored) && stored.length) return stored
+    return initialPurchasedSlots
+  })
   const [payoutMethods, setPayoutMethods] = useState(() => loadFromStorage(ASTROLOGER_PAYOUT_METHODS_STORAGE_KEY, initialPayoutMethods))
   const [activityLog, setActivityLog] = useState(() => loadFromStorage(ASTROLOGER_ACTIVITY_LOG_STORAGE_KEY, []))
   const [consultationHistory] = useState(initialConsultationHistory)
@@ -2545,6 +2550,10 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(ASTROLOGER_POSTS_STORAGE_KEY, astrologerPosts)
   }, [astrologerPosts])
+
+  useEffect(() => {
+    saveToStorage(PURCHASED_SLOTS_STORAGE_KEY, purchasedSlots)
+  }, [purchasedSlots])
 
   useEffect(() => {
     const userKey = currentUser?.id || 'guest'
