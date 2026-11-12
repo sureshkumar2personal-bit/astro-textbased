@@ -24,6 +24,7 @@ import {
 import { ANSWER_DEADLINE_EXCEEDED_REASON, applyAnswerDeadlineCancellation, applyAnswerEdit, applyAnswerSubmit, applyQuestionDraft } from '../utils/answer.js'
 import { QUESTION_CREDIT_WINDOW_DAYS, consumeQuestionCreditInSlots, createQuestionCreditRecord, upsertQuestionCreditInSlots } from '../utils/questionCredits.js'
 import { buildSlotPricing, mergeSlotPricing } from '../utils/purchasedSlots.js'
+import { getMonthlyDiscountStatus, useMonthlyDiscountRecord } from '../utils/monthlyDiscounts.js'
 import { useAuth } from './AuthContext.jsx'
 import { recordUserActivity } from '../utils/userActivityLog.js'
 
@@ -2353,17 +2354,31 @@ export function getEffectiveAstrologerServices(settings, presenceActive = undefi
 
 function createDefaultUserSubscriptions(user) {
   if (user?.role !== ROLES.USER || !user?.id) return []
-  return subscribedAstrologers.map((astrologer, index) => ({
-    id: `demo-subscription-${astrologer.id}`,
-    userId: user.id,
-    userName: user.name || user.id,
-    astrologerId: astrologer.id,
-    astrologerName: astrologer.name,
-    tier: index % 3 === 0 ? 'Gold' : 'Silver',
-    subscribedAt: new Date().toISOString(),
-    expiresAt: addDaysMs(30),
-    discountQuestions: [],
-  }))
+  const monthKey = startOfMonthKey()
+  return subscribedAstrologers.map((astrologer, index) => {
+    const tier = index % 3 === 0 ? 'Gold' : 'Silver'
+    const discountPercent = tier === 'Gold' ? 75 : 60
+    return {
+      id: `demo-subscription-${astrologer.id}`,
+      userId: user.id,
+      userName: user.name || user.id,
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      tier,
+      subscribedAt: new Date().toISOString(),
+      expiresAt: addDaysMs(30),
+      discountQuestions: [
+        {
+          id: `dq-${astrologer.id}-${user.id}-${monthKey}`,
+          status: 'Available',
+          grantedAt: Date.now(),
+          validUntil: addDaysMs(30),
+          monthKey,
+          discountPercent,
+        },
+      ],
+    }
+  })
 }
 
 export function AppDataProvider({ children }) {
@@ -3565,6 +3580,9 @@ if (question) {
       if (!credit.userId) return null
 
       setPurchasedSlots((prev) => upsertQuestionCreditInSlots(prev, credit))
+      if (payload.astrologerId && (Number(payload.discountPercent) > 0 || payload.appliedMonthlyDiscount)) {
+        setSubscriptions((prev) => useMonthlyDiscountRecord(prev, payload.userId, payload.astrologerId))
+      }
       setNotifications((prev) => [
         {
           id: crypto.randomUUID(),
@@ -3663,6 +3681,9 @@ if (question) {
             questionId: nextId,
           },
         ))
+      }
+      if (payload.astrologerId && (Number(payload.discountPercent) > 0 || payload.appliedMonthlyDiscount)) {
+        setSubscriptions((prev) => useMonthlyDiscountRecord(prev, payload.userId, payload.astrologerId))
       }
       setQuestionPreviewId(nextId)
       setNotifications((prev) => [
@@ -4786,6 +4807,12 @@ if (question) {
         }),
       )
       return used
+    },
+    getMonthlyAstrologerDiscount(userId, astrologerId, now = new Date()) {
+      return getMonthlyDiscountStatus(subscriptions, userId, astrologerId, now)
+    },
+    useMonthlyAstrologerDiscount(userId, astrologerId, now = new Date()) {
+      setSubscriptions((prev) => useMonthlyDiscountRecord(prev, userId, astrologerId, now))
     },
     getDiscountPrice(campaignId, categoryName) {
       const campaign = campaigns.find((c) => c.id === campaignId)

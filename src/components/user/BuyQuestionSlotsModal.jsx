@@ -151,6 +151,14 @@ export default function BuyQuestionSlotsModal({
             </div>
           </div>
 
+          {/* Many Purchasing Original Rate Notice */}
+          <div className="rounded-xl border border-sky-200 bg-sky-50/80 p-3 text-xs text-sky-950 flex items-start gap-2.5" style={{ marginTop: 10, marginBottom: 14 }}>
+            <span className="text-sky-600 font-bold" aria-hidden="true">ℹ️</span>
+            <div>
+              <strong>Multi-Slot Original Rate Policy (Many Purchasing):</strong> All question slots in quantity packages are priced at standard original rates. (The 1-question monthly subscription discount applies to single question bookings only).
+            </div>
+          </div>
+
           {/* Select Astrologer */}
           <div className="buy-slots-field">
             <label className="field-label-top">
