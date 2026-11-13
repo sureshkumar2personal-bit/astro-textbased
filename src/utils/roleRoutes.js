@@ -28,6 +28,7 @@ export function getRoleRoutes(role) {
     textBasedQuestionHistory: `${base}/text-based-question-history`,
     disputeManagement: `${base}/dispute-management`,
     activity: `${base}/activity`,
+    atonement: role === ROLES.USER ? `${base}/atonements` : `${base}/atonement`,
     appointments: `${base}/appointments`,
     appointmentBook: `${base}/appointments/book`,
     myAppointments: `${base}/appointments/my`,

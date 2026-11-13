@@ -165,3 +165,7 @@
 .live-list-empty strong { color: var(--text-primary); font-size: 15px; }
 .live-list-empty p { margin: 0; font-size: 13px; }
 @media (max-width: 640px) { .live-list-cta { align-items: flex-start; flex-direction: column; }.live-list-details { grid-template-columns: 1fr 1fr; }.live-list-hero { flex-wrap: wrap; }.live-list-hero .btn { margin-left: 0; width: 100%; justify-content: center; } }
+.live-monthly-limit { margin-bottom: 14px; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 12px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+.live-monthly-limit strong { display: block; margin-bottom: 4px; color: var(--accent); font-size: 14px; }
+.live-monthly-limit p { margin: 0; }
+.live-guidelines strong { color: var(--text-primary, inherit); }

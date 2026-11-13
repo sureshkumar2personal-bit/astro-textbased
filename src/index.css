@@ -5543,7 +5543,8 @@ html[data-theme='dark'] .border-white\/90 {
   font-weight: 600;
 }
 .app-shell--astrologer .adash-quick-actions-section .adash-quick-action-arrow { display: none; }
-.app-shell--astrologer .adash-quick-action--blue { --qa-icon-bg: #102b58; --qa-icon-color: #55a3ff; --qa-border-hover: #6a9ed6; }
+.app-shell--astrologer .adash-quick-action--blue { --qa-icon-bg: #f5b400; --qa-icon-color: #f5b400; --qa-border-hover: #6a9ed6; }
+.app-shell--astrologer .adash-quick-action--blue .adash-quick-action-icon { color: #080808; }
 .app-shell--astrologer .action-card--compact {
   background: #fffdf8;
   border-color: #ead6b1;
@@ -16797,6 +16798,7 @@ body:has(.dispute-management-page) .modal-card .icon-btn { background-color: #15
 .app-shell--astrologer:has(.apt-page) .sidebar-link { color: #a5adbd !important; }
 .app-shell--astrologer:has(.apt-page) .sidebar-link.active { background-color: #f5b400 !important; color: #080808 !important; }
 .app-shell--astrologer:has(.apt-page) .sidebar-link:not(.active):hover { background-color: #2a2416 !important; color: #f5b82e !important; }
+.app-shell--astrologer:has(.apt-page) .sidebar-active-pill { background: #f5b400 !important; }
 .app-shell--astrologer:has(.apt-page) .topbar-header { background-color: #0b0e19 !important; border-bottom-color: #80602b !important; }
 .app-shell--astrologer:has(.apt-page) .topbar-header .icon-btn,
 .app-shell--astrologer:has(.apt-page) .topbar-header .theme-toggle-btn,
@@ -19980,3 +19982,71 @@ html[data-theme='dark'] .user-modal-card .muted { color: #94a3b8; }
   .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card span { font-size: 14px; }
   .app-shell--astrologer:has(.astrologer-greeting-header) .astrologer-metric-card strong { font-size: 28px; }
 }
+
+/* Greeting banner: keep opening quote mark snug against the quote text */
+.app-shell--astrologer .astrologer-greeting-header p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 6px;
+  text-align: center;
+}
+.app-shell--astrologer .astrologer-greeting-header p strong { flex: 0 0 auto; }
+.app-shell--astrologer .astrologer-greeting-header p em { flex: 0 1 auto; min-width: 0; text-align: center; }
+.app-shell--astrologer .astrologer-greeting-header p button { flex: 0 0 auto; align-self: center; }
+
+/* Consultations card: four-item breakdown (2 columns, wraps cleanly on mobile) */
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 12px;
+}
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown span {
+  font-size: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Live pages: Back/Close button — snug padding so the border hugs icon + text */
+.live-workspace .live-text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px 6px 10px;
+  border-radius: 999px;
+  line-height: 1;
+  box-sizing: border-box;
+}
+.live-workspace .live-text-button svg { flex: 0 0 auto; display: block; }
+
+/* Consultations card breakdown: accent colors from the existing dashboard card palette */
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown span:nth-child(1) { color: #4fd1a4; }
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown span:nth-child(2) { color: #f2cc4f; }
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown span:nth-child(3) { color: #4dcbd7; }
+.app-shell--astrologer .astrologer-metric-card .astrologer-metric-breakdown span:nth-child(4) { color: #ec8ca9; }
+
+/* Astrologer dashboard chart hover tooltips */
+.app-shell--astrologer .astrologer-chart-plot { cursor: crosshair; touch-action: pan-y; }
+.app-shell--astrologer .trend-guide { position: absolute; top: 0; bottom: 18px; width: 1px; background: rgba(243, 162, 12, .35); pointer-events: none; transform: translateX(-.5px); }
+.app-shell--astrologer .trend-dot { position: absolute; width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; border: 2px solid #111728; border-radius: 50%; background: #f3a20c; box-shadow: 0 0 0 4px rgba(243, 162, 12, .25); pointer-events: none; }
+.app-shell--astrologer .astrologer-chart-x-axis span { transition: color .15s ease; }
+.app-shell--astrologer .astrologer-chart-x-axis span.is-active { color: #f3c260; }
+.app-shell--astrologer .chart-tooltip { position: absolute; z-index: 5; display: grid; gap: 4px; min-width: 132px; padding: 9px 12px; border: 1px solid #3a3320; border-radius: 10px; background: rgba(10, 14, 27, .96); box-shadow: 0 8px 22px rgba(0, 0, 0, .45); color: #c1c7d4; font-size: 11px; line-height: 1.3; white-space: nowrap; pointer-events: none; transform: translate(-50%, calc(-100% - 14px)); animation: chart-tooltip-in .14s ease-out; }
+.app-shell--astrologer .chart-tooltip.is-below { transform: translate(-50%, 14px); }
+.app-shell--astrologer .chart-tooltip.is-left { transform: translate(calc(-100% + 18px), calc(-100% - 14px)); }
+.app-shell--astrologer .chart-tooltip.is-right { transform: translate(-18px, calc(-100% - 14px)); }
+.app-shell--astrologer .chart-tooltip.is-below.is-left { transform: translate(calc(-100% + 18px), 14px); }
+.app-shell--astrologer .chart-tooltip.is-below.is-right { transform: translate(-18px, 14px); }
+.app-shell--astrologer .chart-tooltip strong { color: #f3c260; font-size: 11.5px; }
+.app-shell--astrologer .chart-tooltip div { display: flex; justify-content: space-between; gap: 16px; }
+.app-shell--astrologer .chart-tooltip b { color: #fff; font-weight: 700; }
+.app-shell--astrologer .chart-tooltip strong i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; }
+.app-shell--astrologer .chart-tooltip--donut { transform: translate(14px, calc(-100% - 10px)); }
+.app-shell--astrologer .chart-tooltip--donut.is-flip { transform: translate(calc(-100% - 14px), calc(-100% - 10px)); }
+.app-shell--astrologer .astrologer-donut { position: relative; cursor: pointer; touch-action: pan-y; }
+.app-shell--astrologer .donut-highlight { position: absolute; inset: 0; border-radius: 50%; filter: brightness(1.18); mask: radial-gradient(circle, transparent 51px, #000 52px); -webkit-mask: radial-gradient(circle, transparent 51px, #000 52px); transform: scale(1.06); pointer-events: none; animation: chart-tooltip-in .16s ease-out; }
+@keyframes chart-tooltip-in { from { opacity: 0; } to { opacity: 1; } }

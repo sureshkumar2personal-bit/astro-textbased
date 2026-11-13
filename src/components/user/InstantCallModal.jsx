@@ -43,7 +43,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   const chatRate = Number(astrologer.chatRate || 0)
 
   const [duration, setDuration] = useState(10)
-  const [step, setStep] = useState(isCall ? 'select' : 'birth')
+  const [step, setStep] = useState('birth')
   const [birthDetails, setBirthDetails] = useState(null)
   const [request, setRequest] = useState(null)
   const [endedRequest, setEndedRequest] = useState(null)
@@ -64,7 +64,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   // Reset per astrologer so reopening the popup always starts clean.
   useEffect(() => {
     setDuration(10)
-    setStep(isCall ? 'select' : 'birth')
+    setStep('birth')
     setBirthDetails(null)
     setRequest(null)
     setEndedRequest(null)
@@ -102,21 +102,6 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     return () => window.clearInterval(timer)
   }, [request])
 
-  // Automatically accept the consultation 3 seconds after ringing begins
-  useEffect(() => {
-    if (!request || request.status !== 'ringing') return undefined
-    const timer = window.setTimeout(() => {
-      const current = getInstantConsultations().find((entry) => entry.id === request.id)
-      if (current && current.status === 'ringing') {
-        updateInstantConsultation(request.id, {
-          status: 'accepted',
-          startedAt: new Date().toISOString(),
-        })
-      }
-    }, 3000)
-    return () => window.clearTimeout(timer)
-  }, [request?.id, request?.status])
-
   const startChat = () => {
     if (balance < price) {
       setError(`You need ${money(price - balance)} more to book this consultation.`)
@@ -137,7 +122,9 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
       astrologerName: astrologer.name,
       durationMinutes: duration,
       amount: price,
+      pricePerMinute: unitRate,
       birthDetails: birthDetails || null,
+      userAvatar: currentUser?.avatar || currentUser?.photo || currentUser?.profileImage || '',
     })
     setError('')
     setStep('pay')
@@ -229,17 +216,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
                     {isCall ? <Phone size={17} /> : <MessageCircle size={17} />} Continue
                   </button>
 
-                  {!isCall && (
-                    <button type="button" className="instant-call-secondary" onClick={() => setStep('birth')}>
-                      Back to birth details
-                    </button>
-                  )}
+                  <button type="button" className="instant-call-secondary" onClick={() => setStep('birth')}>
+                    Back to birth details
+                  </button>
                 </>
               )}
 
               {step === 'pay' && (
                 <section className="instant-call-payment">
-                  {!isCall && birthDetails && (
+                  {birthDetails && (
                     <dl>
                       <div className="is-total"><dt>Birth details</dt><dd className="instant-call-payment__birth">Saved</dd></div>
                     </dl>
