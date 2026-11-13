@@ -109,10 +109,11 @@ export default function Dashboard() {
     }
   }, [])
 
-  // TEMPORARY dev-only test request (flagged isTestRequest). Tree-shaken from production builds.
+  // Demo/dev test request (flagged isTestRequest, local to this browser, never synced). The Vercel host is a
+  // demo site, so this also runs there; set VITE_DEMO_MODE=false to turn it off. See docs/DEMO_DEPLOYMENT.md.
   // Remove with `window.clearTestIncomingCall()` in the console, or delete src/dev and this effect.
   useEffect(() => {
-    if (!import.meta.env.DEV) return
+    if (!import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'false') return
     import('../dev/testIncomingCall.js').then((module) => {
       module.seedTestIncomingCall(astrologerId)
     })

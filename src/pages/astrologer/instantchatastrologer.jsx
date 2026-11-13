@@ -1,9 +1,8 @@
-import { Check, Clock3, Info, MessageCircle, Send, X } from 'lucide-react'
+import { Clock3, Info, Send } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../state/AuthContext.jsx'
 import {
   getConsultationSecondsLeft,
-  getConsultationTotalMinutes,
   getInstantConsultations,
   subscribeToInstantConsultations,
   appendConsultationMessage,
@@ -32,7 +31,7 @@ export default function InstantChatAstrologer() {
     [astrologerId, requests],
   )
 
-  const pending = useMemo(() => chats.find((request) => request.status === 'ringing'), [chats])
+  // Incoming (ringing) requests are not shown here: they are answered from the Waiting Users dropdown / request queue.
   const active = useMemo(() => chats.find((request) => request.status === 'accepted'), [chats])
 
   // Counts down to zero and stops there, so a paid extension can be bought
@@ -45,9 +44,6 @@ export default function InstantChatAstrologer() {
     return () => window.clearInterval(timer)
   }, [active])
 
-  const accept = () => pending && updateInstantConsultation(pending.id, { status: 'accepted', startedAt: new Date().toISOString() })
-  const reject = () => pending && updateInstantConsultation(pending.id, { status: 'rejected', rejectedAt: new Date().toISOString() })
-
   const sendMessage = (event) => {
     event.preventDefault()
     if (!active || !message.trim()) return
@@ -55,37 +51,10 @@ export default function InstantChatAstrologer() {
     setMessage('')
   }
 
-  if (!pending && !active) return null
+  if (!active) return null
 
   return (
     <aside className="instant-chat-astrologer-panel" aria-live="polite">
-      {pending && (
-        <section className="instant-chat-astrologer-request">
-          <div className="instant-chat-astrologer-icon"><MessageCircle size={22} /></div>
-          <span>INSTANT CHAT REQUEST</span>
-          <h2>{pending.userName}</h2>
-          <p>Wants to chat for {getConsultationTotalMinutes(pending)} minutes.</p>
-          {pending.birthDetails && (
-            <button type="button" className="instant-chat-astrologer-birth-toggle" onClick={() => setShowBirth((value) => !value)}>
-              <Info size={14} /> {showBirth ? 'Hide' : 'View'} birth details
-            </button>
-          )}
-          {showBirth && pending.birthDetails && (
-            <dl className="instant-chat-astrologer-birth">
-              <div><dt>Name</dt><dd>{pending.birthDetails.name || '—'}</dd></div>
-              <div><dt>Gender</dt><dd>{pending.birthDetails.gender || '—'}</dd></div>
-              <div><dt>Date of birth</dt><dd>{pending.birthDetails.dob || '—'}</dd></div>
-              <div><dt>Time of birth</dt><dd>{pending.birthDetails.time || '—'}</dd></div>
-              <div><dt>Place of birth</dt><dd>{pending.birthDetails.place || '—'}</dd></div>
-            </dl>
-          )}
-          <div className="instant-chat-astrologer-actions">
-            <button type="button" onClick={accept}><Check size={16} /> Accept</button>
-            <button type="button" onClick={reject}><X size={16} /> Reject</button>
-          </div>
-        </section>
-      )}
-
       {active && (
         <section className="instant-chat-astrologer-active">
           <header>

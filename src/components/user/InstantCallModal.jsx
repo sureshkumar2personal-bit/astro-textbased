@@ -102,19 +102,25 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     return () => window.clearInterval(timer)
   }, [request])
 
-  // Automatically accept the consultation 3 seconds after ringing begins
+  // Demo auto-accept: 3 seconds after ringing begins. It never accepts while that astrologer is already in a
+  // live consultation: the request stays queued (ringing) so the astrologer's Waiting Users list shows it,
+  // and it connects once the astrologer is free (or the astrologer accepts it by hand).
   useEffect(() => {
     if (!request || request.status !== 'ringing') return undefined
-    const timer = window.setTimeout(() => {
-      const current = getInstantConsultations().find((entry) => entry.id === request.id)
-      if (current && current.status === 'ringing') {
-        updateInstantConsultation(request.id, {
-          status: 'accepted',
-          startedAt: new Date().toISOString(),
-        })
-      }
-    }, 3000)
-    return () => window.clearTimeout(timer)
+    const tryAccept = () => {
+      const all = getInstantConsultations()
+      const current = all.find((entry) => entry.id === request.id)
+      if (!current || current.status !== 'ringing') return
+      if (Date.now() - new Date(current.createdAt).getTime() < 3000) return
+      const astrologerBusy = all.some((entry) => entry.id !== current.id && entry.astrologerId === current.astrologerId && entry.status === 'accepted')
+      if (astrologerBusy) return
+      updateInstantConsultation(request.id, {
+        status: 'accepted',
+        startedAt: new Date().toISOString(),
+      })
+    }
+    const timer = window.setInterval(tryAccept, 500)
+    return () => window.clearInterval(timer)
   }, [request?.id, request?.status])
 
   // After astrologer confirms & connects for chat: navigate to the Gemini live consultation workspace
