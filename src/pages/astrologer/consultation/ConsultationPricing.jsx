@@ -36,24 +36,21 @@ export default function ConsultationPricing() {
   }
 
   return (
-    <form className="consult-card" onSubmit={save} noValidate>
-      <h2 className="consult-card__title">Consultation Pricing</h2>
-      <div className="consult-price-grid">
+    <form className="rate-card" onSubmit={save} noValidate aria-labelledby="rate-card-title">
+      <h2 id="rate-card-title" className="rate-card__title">Consultation Rate Settings</h2>
+      <p className="rate-card__desc">Update your per-minute rates for Instant Voice Calls and Instant Chat. Changes apply to new incoming requests immediately.</p>
+      <div className="rate-card__row">
         {FIELDS.map(({ key, label }) => (
-          <div className="consult-price" key={key}>
-            <h3>{label}</h3>
-            <p className="consult-price__current">Current Price: <strong>₹{current[key]}/min</strong></p>
-            <label className="consult-price__field">
-              <span className="consult-price__prefix">₹</span>
-              <input type="number" min="1" step="1" inputMode="numeric" value={draft[key]} onChange={(event) => change(key, event.target.value)} aria-label={`${label} price per minute`} />
-              <span className="consult-price__suffix">/ minute</span>
-            </label>
+          <div className="rate-card__field" key={key}>
+            <label htmlFor={`rate-${key}`}>{label} Rate (₹ / minute)</label>
+            <input id={`rate-${key}`} type="number" min="1" step="1" inputMode="numeric" value={draft[key]} onChange={(event) => change(key, event.target.value)} aria-describedby={`rate-${key}-current`} />
+            <small id={`rate-${key}-current`}>Current: ₹{current[key]}/min</small>
           </div>
         ))}
+        <button type="submit" className="rate-card__save">Save Rate</button>
       </div>
       {error && <p className="consult-message consult-message--error" role="alert">{error}</p>}
-      {saved && <p className="consult-message consult-message--ok" role="status"><Check size={14} /> Pricing saved.</p>}
-      <button type="submit" className="btn btn-primary consult-save">Save Pricing</button>
+      {saved && <p className="consult-message consult-message--ok" role="status"><Check size={14} /> Rates saved.</p>}
     </form>
   )
 }

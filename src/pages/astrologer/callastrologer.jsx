@@ -55,9 +55,9 @@ export default function CallAstrologer() {
     setMessage('')
   }
 
-  // The Dashboard (/astrologer) shows the request queue and the live consultation workspace
-  // for calls, so this floating panel would duplicate them there.
-  if (pathname === '/astrologer') return null
+  // The Dashboard (/astrologer) and the Instant Call Console show the request queue and the live call
+  // workspace themselves, so this floating panel would duplicate them there.
+  if (pathname === '/astrologer' || pathname.startsWith('/astrologer/consultation/instant-call')) return null
   if (!active) return null
 
   return (

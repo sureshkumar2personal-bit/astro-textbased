@@ -76,7 +76,7 @@ function stopSync() {
 
 function demoConsultations() {
   const now = Date.now()
-  const session = (id, type, astrologerName, durationMinutes, daysAgo, messages = []) => {
+  const session = (id, type, astrologerName, durationMinutes, daysAgo, messages = [], topic) => {
     const startedAt = new Date(now - daysAgo * 24 * 60 * 60 * 1000).toISOString()
     return {
       id,
@@ -91,7 +91,7 @@ function demoConsultations() {
       amount: durationMinutes * (type === 'chat' ? 15 : 25),
       userPhone: '+91 98765 43210',
       language: 'Tamil',
-      topic: type === 'chat' ? 'Career guidance' : 'Marriage timing',
+      topic: topic || (type === 'chat' ? 'Career guidance' : 'Marriage timing'),
       paymentMethod: 'Wallet',
       transactionId: `TXN-${id.toUpperCase()}`,
       createdAt: startedAt,
@@ -102,9 +102,9 @@ function demoConsultations() {
     }
   }
   return [
-    session('instant-call-2026-001', 'call', 'Dr. Rani', 15, 1),
+    session('instant-call-2026-001', 'call', 'Dr. Rani', 15, 1, [], 'Relationship & Marriage'),
     session('instant-chat-2026-001', 'chat', 'Dr. Rani', 20, 2, [{ id: 'instant-chat-2026-001-message', sender: 'astrologer', text: 'Your chart shows a positive period for steady career progress.', sentAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString() }]),
-    session('instant-call-2026-002', 'call', 'Dr. Rani', 10, 3),
+    session('instant-call-2026-002', 'call', 'Dr. Rani', 10, 3, [], 'Career Growth'),
     session('instant-chat-2026-002', 'chat', 'Dr. Rani', 30, 4, [{ id: 'instant-chat-2026-002-message', sender: 'user', text: 'I would like guidance about my next step.', sentAt: new Date(now - 4 * 24 * 60 * 60 * 1000).toISOString() }]),
     session('instant-chat-2026-003', 'chat', 'Dr. Rani', 15, 5, [{ id: 'instant-chat-2026-003-message', sender: 'astrologer', text: 'Focus on consistency and give this decision time to develop.', sentAt: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString() }]),
   ]

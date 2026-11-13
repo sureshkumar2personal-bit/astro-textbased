@@ -95,7 +95,7 @@ export default function Dashboard() {
       const now = Date.now()
       const consultations = getInstantConsultations()
       consultations
-        .filter((request) => request.type === 'call' && request.status === 'ringing' && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
+        .filter((request) => request.type === 'call' && request.status === 'ringing' && !request.isSimulated && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
         .forEach((request) => updateInstantConsultation(request.id, { status: 'expired', expiredAt: new Date().toISOString() }))
       setInstantConsultations(getInstantConsultations())
     }
@@ -123,7 +123,7 @@ export default function Dashboard() {
     request.astrologerId === astrologerId
     && request.type === 'call'
     && request.status === 'ringing'
-    && Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS
+    && (request.isSimulated || Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS)
   ))
   const { questions: allQuestions, consultations: allConsultations, atonements: allAtonements } = useAppData()
   const analyticsSources = { instant: instantConsultations, consultations: allConsultations, questions: allQuestions, astrologerId }
