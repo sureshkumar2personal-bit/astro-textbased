@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { searchPlaces } from '../../utils/geocode.js'
 
 const BIRTH_DETAILS_STORAGE_KEY = 'astroconnect-user-birth-details'
 
@@ -16,7 +17,76 @@ function readSavedDetails(currentUser) {
     place: saved.place || currentUser?.birthPlace || '',
     dob: saved.dob || currentUser?.dateOfBirth || '',
     time: saved.time || currentUser?.birthTime || '',
+    // Partner details are per call only; never read from or written to the shared saved-horoscope key.
+    partner: { name: '', dob: '', time: '', place: '' },
+    // Coordinates/zone saved with the profile are valid only for the profile's own birthplace text.
+    latitude: currentUser?.latitude ?? '',
+    longitude: currentUser?.longitude ?? '',
+    timezone: currentUser?.timezone || '',
+    coordsPlace: currentUser?.birthPlace || '',
   }
+}
+
+const same = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase()
+const hasCoords = (entry) => entry && entry.latitude !== '' && entry.latitude != null && entry.longitude !== '' && entry.longitude != null && entry.timezone && same(entry.coordsPlace, entry.place)
+
+/** Drops coordinates that no longer belong to the typed place; keeps them when they do. */
+function resolveCoords(entry) {
+  const { latitude, longitude, timezone, coordsPlace, ...rest } = entry
+  return hasCoords(entry)
+    ? { ...rest, latitude: Number(latitude), longitude: Number(longitude), timezone, coordsPlace }
+    : rest
+}
+
+/**
+ * Place input with an explicit "Find location" lookup. The user picks one of the returned
+ * places, so coordinates and time zone are never guessed.
+ */
+function PlaceField({ label, value, onChange, onPick, located, placeholder, wide = false, testId }) {
+  const [results, setResults] = useState([])
+  const [state, setState] = useState('idle')
+  const [message, setMessage] = useState('')
+
+  const find = async () => {
+    setState('loading')
+    setMessage('')
+    try {
+      const found = await searchPlaces(value)
+      setResults(found)
+      setState('done')
+      if (!found.length) setMessage('No matching place found. Try adding the state or country.')
+    } catch {
+      setResults([])
+      setState('error')
+      setMessage('Location lookup is unavailable right now (network or service limit). Try again shortly.')
+    }
+  }
+
+  return (
+    <div className={`field-group${wide ? ' instant-call-birth__grid--wide' : ''}`} data-testid={testId}>
+      <span className="field-label-top">{label}</span>
+      <div className="instant-call-place">
+        <input className="text-input" value={value} onChange={(event) => { onChange(event.target.value); setResults([]); setState('idle') }} placeholder={placeholder} />
+        <button type="button" className="instant-call-secondary instant-call-place__find" onClick={find} disabled={state === 'loading' || String(value).trim().length < 2}>
+          {state === 'loading' ? 'Searching…' : 'Find location'}
+        </button>
+      </div>
+      {located && <small className="instant-call-place__ok" data-testid="place-located">📍 {located}</small>}
+      {message && <small className="instant-call-place__msg" role="status">{message}</small>}
+      {results.length > 0 && (
+        <ul className="instant-call-place__results" role="listbox" aria-label="Matching places">
+          {results.map((result) => (
+            <li key={result.id}>
+              <button type="button" role="option" onClick={() => { onPick(result); setResults([]); setState('idle') }}>
+                <strong>{result.label}</strong>
+                <small>{result.latitude.toFixed(4)}, {result.longitude.toFixed(4)} · {result.timeZone}{result.type ? ` · ${result.type}` : ''}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
 }
 
 const REQUIRED = ['name', 'dob', 'time', 'place', 'gender']
@@ -35,6 +105,10 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
   }, [initial])
 
   const update = (field, value) => setDetails((current) => ({ ...current, [field]: value }))
+  const pickPlace = (result) => setDetails((current) => ({ ...current, place: result.label, latitude: result.latitude, longitude: result.longitude, timezone: result.timeZone, coordsPlace: result.label }))
+  const pickPartnerPlace = (result) => setDetails((current) => ({ ...current, partner: { ...(current.partner || {}), place: result.label, latitude: result.latitude, longitude: result.longitude, timezone: result.timeZone, coordsPlace: result.label } }))
+  const partner = details.partner || { name: '', dob: '', time: '', place: '' }
+  const updatePartner = (field, value) => setDetails((current) => ({ ...current, partner: { ...(current.partner || {}), [field]: value } }))
 
   const proceed = () => {
     if (!REQUIRED.every((field) => String(details[field] || '').trim())) {
@@ -43,11 +117,15 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
     }
     setError('')
     try {
-      window.localStorage.setItem(BIRTH_DETAILS_STORAGE_KEY, JSON.stringify(details))
+      // Persist only the user's own birth details (the shape other pages already read).
+      const { name, gender, place, dob, time } = details
+      window.localStorage.setItem(BIRTH_DETAILS_STORAGE_KEY, JSON.stringify({ name, gender, place, dob, time }))
     } catch {
       // Storage is optional; the details still travel on the session record.
     }
-    onContinue(details)
+    const partnerFilled = ['name', 'dob', 'time', 'place'].some((field) => String(details.partner?.[field] || '').trim())
+    const own = resolveCoords(details)
+    onContinue({ ...own, partner: partnerFilled ? resolveCoords(details.partner) : null })
   }
 
   return (
@@ -66,10 +144,16 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
             {['Female', 'Male', 'Other'].map((value) => <option key={value}>{value}</option>)}
           </select>
         </label>
-        <label className="field-group instant-call-birth__grid--wide">
-          <span className="field-label-top">Place of Birth</span>
-          <input className="text-input" value={details.place} onChange={(event) => update('place', event.target.value)} placeholder="City, State, Country" />
-        </label>
+        <PlaceField
+          label="Place of Birth"
+          wide
+          testId="own-place"
+          value={details.place}
+          onChange={(value) => update('place', value)}
+          onPick={pickPlace}
+          placeholder="City, State, Country"
+          located={hasCoords(details) ? `${Number(details.latitude).toFixed(4)}, ${Number(details.longitude).toFixed(4)} · ${details.timezone}` : ''}
+        />
         <label className="field-group">
           <span className="field-label-top">Date of Birth</span>
           <input className="text-input" type="date" value={details.dob} onChange={(event) => update('dob', event.target.value)} />
@@ -77,6 +161,32 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
         <label className="field-group">
           <span className="field-label-top">Time of Birth</span>
           <input className="text-input" type="time" value={details.time} onChange={(event) => update('time', event.target.value)} />
+        </label>
+      </div>
+
+      <h3>Partner birth details <small>(optional)</small></h3>
+      <p className="instant-call-birth__hint">Add these only if you want your astrologer to match charts with a partner.</p>
+      <div className="instant-call-birth__grid" data-testid="partner-fields">
+        <label className="field-group">
+          <span className="field-label-top">Partner Name</span>
+          <input className="text-input" value={partner.name || ''} onChange={(event) => updatePartner('name', event.target.value)} placeholder="Partner's name" />
+        </label>
+        <PlaceField
+          label="Partner Birth Place"
+          testId="partner-place"
+          value={partner.place || ''}
+          onChange={(value) => updatePartner('place', value)}
+          onPick={pickPartnerPlace}
+          placeholder="City, State, Country"
+          located={hasCoords(partner) ? `${Number(partner.latitude).toFixed(4)}, ${Number(partner.longitude).toFixed(4)} · ${partner.timezone}` : ''}
+        />
+        <label className="field-group">
+          <span className="field-label-top">Partner Date of Birth</span>
+          <input className="text-input" type="date" value={partner.dob || ''} onChange={(event) => updatePartner('dob', event.target.value)} />
+        </label>
+        <label className="field-group">
+          <span className="field-label-top">Partner Birth Time</span>
+          <input className="text-input" type="time" value={partner.time || ''} onChange={(event) => updatePartner('time', event.target.value)} />
         </label>
       </div>
 

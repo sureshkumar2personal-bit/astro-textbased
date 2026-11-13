@@ -62,12 +62,12 @@ const ROLE_CONFIG = {
       { to: '', label: 'Dashboard', icon: TempleArchIcon, end: true },
       { to: 'text-based-questions', label: 'Text Questions', icon: TempleScrollIcon },
       { to: 'appointments', label: 'Appointments', icon: CalendarDays },
-      { to: 'consultation', label: 'Instant Call', icon: Headphones },
-      { to: 'instant-consultation', label: 'Instant Chat', icon: MessageCircle },
+      { to: 'consultation/instant-call', label: 'Instant Call', icon: Headphones, activeWhen: ['consultation/pricing'] },
+      { to: 'consultation/instant-chat', label: 'Instant Chat', icon: MessageCircle },
       { to: 'atonement', label: 'Atonements (Pariharam)', icon: Flame },
       { to: 'live-session', label: 'Live Stream', icon: Radio },
-      { to: 'my-account', label: 'Profiles', icon: UserRound },
-      { to: '', label: 'Quick Actions', icon: Sparkles },
+      { to: 'profile', label: 'Profiles', icon: UserRound },
+      { to: '', label: 'Quick Actions', icon: Sparkles, end: true, noHighlight: true, hash: 'quick-actions' },
       { to: 'activity', label: 'Analytics & Graphs', icon: TrendingUp },
       { to: 'dispute-management', label: 'Disputes & Support', icon: Gavel },
       { to: 'my-account', label: 'Settings & Account', icon: SlidersHorizontal },
@@ -345,7 +345,8 @@ function AstrologerNav({ links, basePath }) {
       {links.map((link) => {
         if (!link.children) {
           const route = `${basePath}/${link.to}`.replace(/\/$/, '')
-          return <SidebarItem key={route} to={route} end={link.end} icon={link.icon} label={link.label} />
+          const activeWhen = (link.activeWhen || []).map((suffix) => `${basePath}/${suffix}`)
+          return <SidebarItem key={`${link.label}:${route}`} to={link.hash ? `${route}#${link.hash}` : route} end={link.end} icon={link.icon} label={link.label} activeWhen={activeWhen} noHighlight={link.noHighlight} />
         }
 
         const isOpen = Boolean(openSections[link.label])

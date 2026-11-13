@@ -1,9 +1,11 @@
 import { Check, Clock3, MessageCircle, Phone, PhoneOff } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext.jsx'
 import {
   getConsultationSecondsLeft,
   getConsultationTotalMinutes,
+  getInstantConsultation,
   getInstantConsultations,
   subscribeToInstantConsultations,
   updateInstantConsultation,
@@ -14,6 +16,7 @@ const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, 
 
 export default function CallAstrologer() {
   const { currentUser } = useAuth()
+  const { pathname } = useLocation()
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const [requests, setRequests] = useState([])
   const [remaining, setRemaining] = useState(0)
@@ -43,8 +46,10 @@ export default function CallAstrologer() {
     return () => window.clearInterval(timer)
   }, [active])
 
-  const accept = () => pending && updateInstantConsultation(pending.id, { status: 'accepted', startedAt: new Date().toISOString() })
-  const reject = () => pending && updateInstantConsultation(pending.id, { status: 'rejected', rejectedAt: new Date().toISOString() })
+  // Re-read the stored request so an already accepted/declined/expired call is never answered twice.
+  const stillRinging = (request) => getInstantConsultation(request.id)?.status === 'ringing'
+  const accept = () => pending && stillRinging(pending) && updateInstantConsultation(pending.id, { status: 'accepted', startedAt: new Date().toISOString() })
+  const reject = () => pending && stillRinging(pending) && updateInstantConsultation(pending.id, { status: 'rejected', rejectedAt: new Date().toISOString() })
   const end = () => active && updateInstantConsultation(active.id, { status: 'ended', endedAt: new Date().toISOString() })
 
   const sendMessage = () => {
@@ -55,6 +60,9 @@ export default function CallAstrologer() {
     setMessage('')
   }
 
+  // The Dashboard (/astrologer) shows the request queue and the live consultation workspace
+  // for calls, so this floating panel would duplicate them there.
+  if (pathname === '/astrologer') return null
   if (!pending && !active) return null
 
   return (

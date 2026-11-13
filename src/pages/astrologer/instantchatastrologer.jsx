@@ -6,6 +6,7 @@ import {
   getConsultationTotalMinutes,
   getInstantConsultations,
   subscribeToInstantConsultations,
+  appendConsultationMessage,
   updateInstantConsultation,
 } from '../../utils/instantConsultation.js'
 import './instantchatastrologer.css'
@@ -50,9 +51,7 @@ export default function InstantChatAstrologer() {
   const sendMessage = (event) => {
     event.preventDefault()
     if (!active || !message.trim()) return
-    updateInstantConsultation(active.id, {
-      messages: [...(active.messages || []), { id: crypto.randomUUID(), sender: 'astrologer', text: message.trim(), sentAt: new Date().toISOString() }],
-    })
+    appendConsultationMessage(active.id, 'astrologer', message)
     setMessage('')
   }
 

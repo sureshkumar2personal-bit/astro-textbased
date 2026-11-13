@@ -11,6 +11,7 @@ import {
   getConsultationTotalMinutes,
   getInstantConsultation,
   subscribeToInstantConsultations,
+  appendConsultationMessage,
   updateInstantConsultation,
 } from '../../utils/instantConsultation.js'
 import './floatingconsultationpanel.css'
@@ -69,9 +70,7 @@ export default function FloatingConsultationPanel({ session, onDismiss, onEnded 
     event.preventDefault()
     const text = draft.trim()
     if (!text || request?.status !== 'accepted') return
-    updateInstantConsultation(request.id, {
-      messages: [...(request.messages || []), { id: crypto.randomUUID(), sender: 'user', text, sentAt: new Date().toISOString() }],
-    })
+    appendConsultationMessage(request.id, 'user', text)
     setDraft('')
   }
 
