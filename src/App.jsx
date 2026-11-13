@@ -292,6 +292,7 @@ function UserRoutes() {
         <Route path="/user/followed-astrologers" element={<FollowedAstrologersFull />} />
         <Route path="/user/suggested-astrologers" element={<SuggestedAstrologers />} />
         <Route path="/user/call/:astrologerId" element={<CallUser />} />
+        <Route path="/user/instantchat" element={<InstantChatUser />} />
         <Route path="/user/instantchat/:astrologerId" element={<InstantChatUser />} />
         <Route path="/user/chat-details" element={<ChatDetails />} />
         <Route path="/user/discount-questions" element={<DiscountQuestions />} />

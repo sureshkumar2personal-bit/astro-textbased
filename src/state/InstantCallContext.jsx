@@ -1,5 +1,6 @@
 /* oxlint-disable react/only-export-components */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import InstantCallModal from '../components/user/InstantCallModal.jsx'
 import FloatingConsultationPanel from '../components/user/FloatingConsultationPanel.jsx'
 import { useAuth } from './AuthContext.jsx'
@@ -19,6 +20,13 @@ const InstantCallContext = createContext(null)
  */
 export function InstantCallProvider({ children }) {
   const { currentUser } = useAuth()
+  let navigate = null
+  try {
+    navigate = useNavigate()
+  } catch {
+    // Safe when mounted outside BrowserRouter
+  }
+
   const [popup, setPopup] = useState(null)
   const [dismissed, setDismissed] = useState(null)
   const [hiddenChips, setHiddenChips] = useState({})
@@ -77,6 +85,22 @@ export function InstantCallProvider({ children }) {
     setPopup((current) => (current && (current.sessionId === id || current.astrologerId === id) ? null : current))
   }, [])
 
+  // After astrologer confirms/accepts an instant chat consultation:
+  // automatically transition from ringing popup to the live Gemini consultation workspace
+  useEffect(() => {
+    if (active && active.status === 'accepted' && active.type === 'chat') {
+      const targetAstrologerId = active.astrologerId || 'astrologer-demo'
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/user/instantchat')) {
+        setPopup(null)
+        if (navigate) {
+          navigate(`/user/instantchat/${targetAstrologerId}`)
+        } else {
+          window.location.href = `/user/instantchat/${targetAstrologerId}`
+        }
+      }
+    }
+  }, [active?.id, active?.status, active?.type, active?.astrologerId, navigate])
+
     const value = useMemo(
     () => ({
       popup,
@@ -98,7 +122,8 @@ export function InstantCallProvider({ children }) {
   // rather than leaving two surfaces on screen.
   const isAccepted = Boolean(active && active.status === 'accepted')
   const popupHandled = Boolean(popup && isAccepted && active.astrologerId === popup.astrologerId && active.type === popup.type)
-  const panel = isAccepted && dismissed !== active.id ? active : null
+  const isInstantChatRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/user/instantchat')
+  const panel = isAccepted && dismissed !== active.id && !isInstantChatRoute ? active : null
 
   return (
     <InstantCallContext.Provider value={value}>

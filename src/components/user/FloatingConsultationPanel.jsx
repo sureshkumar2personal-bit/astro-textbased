@@ -1,4 +1,4 @@
-import { Clock3, MessageCircle, Phone, PhoneOff, Plus, Send, Volume2, Wallet, X } from 'lucide-react'
+import { Clock3, Maximize2, MessageCircle, Phone, PhoneOff, Plus, Send, Volume2, Wallet, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
@@ -99,6 +99,28 @@ export default function FloatingConsultationPanel({ session, onDismiss, onEnded 
   return createPortal(
     <aside className="floating-consult-panel" aria-live="polite">
       <section className={`floating-consult-card${ringing ? ' is-ringing' : ''}${timeUp ? ' is-timeup' : ''}`}>
+        {!isCall && request?.status === 'accepted' && (
+          <button
+            type="button"
+            className="floating-consult-card__expand"
+            onClick={() => navigate(`/user/instantchat/${astrologer.id}`)}
+            aria-label="Expand to full workspace"
+            title="Expand to full workspace"
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 36,
+              background: 'transparent',
+              border: 'none',
+              color: '#7346a3',
+              cursor: 'pointer',
+              display: 'grid',
+              placeItems: 'center',
+            }}
+          >
+            <Maximize2 size={14} />
+          </button>
+        )}
         <button
           type="button"
           className="floating-consult-card__dismiss"
