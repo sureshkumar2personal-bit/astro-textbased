@@ -1,9 +1,9 @@
 // Shared by the browser (src/utils/instantConsultation.js) and the API route (api/consultations.js).
 
-/** Local-only records are never synced: built-in demo history and flagged dev test requests. */
+/** Local-only records are never synced: built-in demo history and flagged dev test and simulated requests. */
 export function isSyncable(request) {
   if (!request || typeof request.id !== 'string' || !request.id) return false
-  if (request.isTestRequest === true) return false
+  if (request.isTestRequest === true || request.isSimulated === true) return false
   if (request.id.startsWith('instant-demo-')) return false
   if (/^instant-(call|chat)-2026-\d{3}$/.test(request.id)) return false
   return true

@@ -336,7 +336,7 @@ function useWaitingRequests(session) {
         && request.userId !== session.userId
         && request.astrologerId === session.astrologerId
         && request.status === 'ringing'
-        && (request.type !== 'call' || now - new Date(request.createdAt).getTime() < WAITING_RING_MS)
+        && (request.type !== 'call' || request.isSimulated || now - new Date(request.createdAt).getTime() < WAITING_RING_MS)
       ))
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       .filter((request) => !seen.has(request.userId) && seen.add(request.userId)) // one entry per user

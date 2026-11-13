@@ -36,6 +36,8 @@ import {
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
 import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
+import useTodaysInstantEarnings from '../state/useTodaysInstantEarnings.js'
+import { formatRupees } from '../utils/instantCallConsole.js'
 import InstantChatAstrologer from '../pages/astrologer/instantchatastrologer.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import ActiveCallIndicator from './user/ActiveCallIndicator.jsx'
@@ -430,6 +432,9 @@ function UserConsultationDetails({ consultation, history, onSelect, onComplete, 
   )
 }
 
+// Demo base for the header's "Today's Earnings"; completed instant calls/chats are added on top.
+const BASE_TODAYS_EARNINGS = 5420
+
 export default function Layout() {
   const location = useLocation()
   // Captured per render so AnimatePresence keeps the OLD route's element while it fades out.
@@ -486,6 +491,8 @@ export default function Layout() {
   const [consultationDetailsId, setConsultationDetailsId] = useState(null)
   const actionRef = useRef(null)
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
+  // The header's demo base figure plus whatever instant calls/chats were completed today.
+  const todaysEarnings = BASE_TODAYS_EARNINGS + useTodaysInstantEarnings(astrologerId)
   const pendingRequests = incomingRequests.filter((request) => request.astrologerId === astrologerId && request.status === 'pending')
   const activeChatRequest = incomingRequests.find((request) => request.id === activeChatRequestId && request.astrologerId === astrologerId)
   const chatPreviewRequest = pendingRequests.find((request) => request.type === 'chat' && !request.notificationsSaved && Date.now() - new Date(request.createdAt).getTime() < 5000)
@@ -630,7 +637,7 @@ export default function Layout() {
             }}
           ><i /> Call</span>
           <span className="astrologer-topbar-date"><small>TODAY'S DATE</small><strong>{currentDateLabel}</strong></span>
-          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>₹5,420</strong></span>
+          <span className="astrologer-topbar-stat"><small>TODAY'S EARNINGS</small><strong>{formatRupees(todaysEarnings)}</strong></span>
         </div>
       )}
       {!shellIsAstrologer && (

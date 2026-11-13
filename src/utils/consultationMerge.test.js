@@ -7,6 +7,7 @@ describe('isSyncable', () => {
   it('skips demo history and flagged test requests', () => {
     expect(isSyncable({ id: 'instant-call-2026-001' })).toBe(false)
     expect(isSyncable({ id: 'abc', isTestRequest: true })).toBe(false)
+    expect(isSyncable({ id: 'abc', isSimulated: true })).toBe(false)
     expect(isSyncable({ id: 'abc' })).toBe(true)
     expect(isSyncable({})).toBe(false)
   })
