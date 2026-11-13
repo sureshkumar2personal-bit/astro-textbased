@@ -1,4 +1,5 @@
 import { calculateInstantAmount, getInstantRate } from './consultationPricing.js'
+import { isSyncable, mergeLists } from './consultationMerge.js'
 
 export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultations'
 
@@ -6,6 +7,72 @@ export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultati
 // A later successful write clears this fallback and restores persistence.
 let volatileConsultations = null
 let volatileStorage = null
+
+// ---- Cross-device sync (Upstash Redis behind /api/consultations) ----------------------------------
+// localStorage stays the source the UI reads synchronously. Local changes are pushed to the shared
+// store, and while something is subscribed the store is polled and merged back into localStorage.
+// Without the API (e.g. plain `vite dev`) everything keeps working locally.
+const SYNC_URL = '/api/consultations'
+const SYNC_INTERVAL_MS = 2000
+const SYNC_BACKOFF_MS = 30000
+let syncPausedUntil = 0
+let pushQueue = new Set()
+let pushTimer = null
+let pollTimer = null
+let subscriberCount = 0
+let syncing = false
+
+function applyRemote(remote) {
+  if (!Array.isArray(remote)) return
+  const { merged, changed } = mergeLists(readAll(), remote)
+  if (changed) writeAll(merged)
+}
+
+async function callSync(options) {
+  if (typeof fetch === 'undefined' || Date.now() < syncPausedUntil) return
+  try {
+    const response = await fetch(SYNC_URL, { cache: 'no-store', ...options })
+    if (!response.ok) throw new Error(`sync ${response.status}`)
+    applyRemote((await response.json()).requests)
+  } catch {
+    // API missing or offline: stay local and retry later.
+    syncPausedUntil = Date.now() + SYNC_BACKOFF_MS
+  }
+}
+
+export function pullInstantConsultations() {
+  if (syncing || (typeof document !== 'undefined' && document.hidden)) return Promise.resolve()
+  syncing = true
+  return callSync().finally(() => { syncing = false })
+}
+
+function schedulePush(ids) {
+  ids.forEach((id) => pushQueue.add(id))
+  if (pushTimer || typeof window === 'undefined') return
+  // Deferred so callers that flag/adjust a record right after creating it are pushed in final form.
+  pushTimer = setTimeout(() => {
+    pushTimer = null
+    const ids = [...pushQueue]
+    pushQueue = new Set()
+    const requests = readAll().filter((request) => ids.includes(request.id) && isSyncable(request))
+    if (requests.length) callSync({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requests }) })
+  }, 0)
+}
+
+function startSync() {
+  if (typeof window === 'undefined' || pollTimer) return
+  pullInstantConsultations()
+  pollTimer = setInterval(pullInstantConsultations, SYNC_INTERVAL_MS)
+  document.addEventListener('visibilitychange', pullInstantConsultations)
+}
+
+function stopSync() {
+  if (!pollTimer) return
+  clearInterval(pollTimer)
+  pollTimer = null
+  document.removeEventListener('visibilitychange', pullInstantConsultations)
+}
+// ---------------------------------------------------------------------------------------------------
 
 function demoConsultations() {
   const now = Date.now()
@@ -127,6 +194,7 @@ export function createInstantConsultation(payload) {
   if (duplicate) return duplicate
   // Retain terminal sessions for the profile and Activity history views.
   writeAll([request, ...stored])
+  schedulePush([request.id])
   return request
 }
 
@@ -146,11 +214,13 @@ export function appendConsultationMessage(id, sender, text) {
 
 export function updateInstantConsultation(id, patch) {
   let updated = null
+  const touched = [id]
   const all = readAll()
   const accepting = patch.status === 'accepted' ? all.find((request) => request.id === id) : null
   const requests = all.map((request) => {
     // A user who connects with one astrologer leaves every other astrologer's waiting queue.
     if (accepting && request.id !== id && request.status === 'ringing' && request.userId === accepting.userId) {
+      touched.push(request.id)
       return { ...request, status: 'cancelled', cancelledAt: new Date().toISOString(), cancelReason: 'connected-elsewhere', updatedAt: new Date().toISOString() }
     }
     if (request.id !== id) return request
@@ -160,7 +230,10 @@ export function updateInstantConsultation(id, patch) {
     updated = { ...request, ...patch, ...(messages ? { messages } : {}), updatedAt: new Date().toISOString() }
     return updated
   })
-  if (updated) writeAll(requests)
+  if (updated) {
+    writeAll(requests)
+    schedulePush(touched)
+  }
   return updated
 }
 
@@ -194,9 +267,13 @@ export function subscribeToInstantConsultations(listener) {
   const notify = () => listener(getInstantConsultations())
   window.addEventListener('storage', notify)
   window.addEventListener('astroconnect:instant-consultation', notify)
+  subscriberCount += 1
+  startSync()
   return () => {
     window.removeEventListener('storage', notify)
     window.removeEventListener('astroconnect:instant-consultation', notify)
+    subscriberCount -= 1
+    if (subscriberCount <= 0) { subscriberCount = 0; stopSync() }
   }
 }
 
