@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Hourglass, LayoutGrid, Users, PhoneOff, Paperclip, X, Send, ShieldAlert, Smile, Sparkles, UserRound, Wallet } from 'lucide-react'
+import { CheckCircle2, XCircle, ChevronRight, Hourglass, LayoutGrid, Users, PhoneOff, Paperclip, Send, ShieldAlert, Smile, Sparkles, UserRound, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   appendConsultationMessage,
@@ -448,20 +448,20 @@ function WaitingUsers({ session }) {
                     <small>{request.type === 'chat' ? 'Chat' : 'Call'} • Waiting {formatWait(now - new Date(request.createdAt).getTime())}</small>
                   </span>
                   <em className="lcw-waiting-status">Waiting</em>
-                </div>
-                <div className="lcw-waiting-actions">
-                  {/* One call workspace is open at a time: a second call can be declined but only accepted after this one ends. */}
-                  {(() => {
-                    const callBlocked = request.type === 'call' && session.type === 'call'
-                    return (
-                      <button type="button" className="lcw-waiting-accept" disabled={Boolean(busy[request.id]) || callBlocked} title={callBlocked ? 'Finish the current call before accepting another call' : undefined} onClick={() => respond(request, 'accept')}>
-                        <Check size={14} aria-hidden="true" /> {busy[request.id] === 'accept' ? 'Accepting…' : 'Accept'}
-                      </button>
-                    )
-                  })()}
-                  <button type="button" className="lcw-waiting-decline" disabled={Boolean(busy[request.id])} onClick={() => respond(request, 'decline')}>
-                    <X size={14} aria-hidden="true" /> {busy[request.id] === 'decline' ? 'Declining…' : 'Decline'}
-                  </button>
+                  <span className="lcw-waiting-actions">
+                    {/* One call workspace is open at a time: a second call can be declined but only accepted after this one ends. */}
+                    {(() => {
+                      const callBlocked = request.type === 'call' && session.type === 'call'
+                      return (
+                        <button type="button" className="lcw-waiting-accept" disabled={Boolean(busy[request.id]) || callBlocked} title={callBlocked ? 'Finish the current call before accepting another call' : undefined} onClick={() => respond(request, 'accept')}>
+                          <CheckCircle2 size={14} aria-hidden="true" /> {busy[request.id] === 'accept' ? 'Accepting…' : 'Accept'}
+                        </button>
+                      )
+                    })()}
+                    <button type="button" className="lcw-waiting-decline" disabled={Boolean(busy[request.id])} onClick={() => respond(request, 'decline')}>
+                      <XCircle size={14} aria-hidden="true" /> {busy[request.id] === 'decline' ? 'Declining…' : 'Decline'}
+                    </button>
+                  </span>
                 </div>
                 {errors[request.id] && <p className="lcw-waiting-error" role="alert">{errors[request.id]}</p>}
               </li>
