@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw, Layers, Compass, ShieldCheck, HeartHandshake, Award, Flame, Gem, MessageSquareText, ThumbsUp, CheckCircle2, MessageSquarePlus } from 'lucide-react'
+import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, PhoneOff, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw, Layers, Compass, ShieldCheck, HeartHandshake, Award, Flame, Gem, MessageSquareText, ThumbsUp, CheckCircle2, MessageSquarePlus } from 'lucide-react'
 import { getPublicAstrologer } from '../utils/publicAstrologerProfile.js'
 import { mockAstrologerAvailability, mockAstrologerPosts, mockAstrologers, mockLiveSessions } from '../data/notificationData.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
@@ -14,6 +14,7 @@ import PageHeader from '../components/ui/PageHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
 import { BOOKING_OVERRIDES } from './user/appointments/bookingAstrologerData.js'
+import { useAstrologerLiveStatus } from '../utils/instantConsultation.js'
 import '../css/user/astrologer-profile.css'
 
 const APPOINTMENT_TYPE = 'Audio Call'
@@ -381,6 +382,11 @@ export default function AstrologerProfile() {
     return consultationAstrologers.find((a) => a.id === astrologer.id) || {}
   }, [astrologer.id])
 
+  const liveCall = useAstrologerLiveStatus(astrologer, 'call')
+  const liveChat = useAstrologerLiveStatus(astrologer, 'chat')
+  const isBusy = liveCall.isBusy || liveChat.isBusy
+  const waitMinutes = liveCall.isBusy ? liveCall.waitMinutes : liveChat.waitMinutes
+
   const astrologerPhoto = astrologer.photo || astrologer.profileImage || consultationInfo.profileImage || ''
 
   const isChatAvailable = useMemo(() => {
@@ -707,8 +713,11 @@ export default function AstrologerProfile() {
                         astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
                       )}
                     </div>
-                    <span className="astro-online-indicator" title="Astrologer Online">
-                      <span className="astro-online-pulse" />
+                    <span
+                      className={`astro-online-indicator ${isBusy ? 'astro-busy-indicator' : ''}`}
+                      title={isBusy ? `Line Busy · ~wait for ${waitMinutes} mins` : 'Astrologer Online'}
+                    >
+                      <span className={isBusy ? 'astro-busy-pulse' : 'astro-online-pulse'} />
                     </span>
                   </div>
 
@@ -718,6 +727,11 @@ export default function AstrologerProfile() {
                       <span className="astro-verified-badge">
                         <BadgeCheck size={13} /> Verified Astrologer
                       </span>
+                      {isBusy && (
+                        <span className="astro-hero-busy-badge" title={`Estimated wait: ~${waitMinutes} mins`}>
+                          ● Wait ~{waitMinutes}m
+                        </span>
+                      )}
                     </div>
                     <div className="astro-hero-subtitle">
                       <span>{astrologer.specialization}</span>
@@ -855,21 +869,21 @@ export default function AstrologerProfile() {
               </button>
               <button
                 type="button"
-                className={`btn astro-consult-action-btn ${isCallAvailable ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'}`}
-                disabled={!isCallAvailable}
-                title={isCallAvailable ? 'Online & Available for Instant Call' : 'Currently Unavailable for Instant Call'}
-                onClick={() => isCallAvailable && openInstantCall(astrologer.id)}
+                className={`btn astro-consult-action-btn ${isCallAvailable || liveCall.isBusy ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'} ${liveCall.isBusy ? 'astro-consult-action-btn--busy' : ''}`}
+                disabled={!isCallAvailable && !liveCall.isBusy}
+                title={liveCall.isBusy ? `Line Busy · ${liveCall.waitLabel}` : isCallAvailable ? 'Online & Available for Instant Call' : 'Currently Unavailable for Instant Call'}
+                onClick={() => (isCallAvailable || liveCall.isBusy) && openInstantCall(astrologer.id)}
               >
-                <PhoneCall size={16} /> Instant Call
+                {liveCall.isBusy ? <PhoneOff size={16} /> : <PhoneCall size={16} />} {liveCall.isBusy ? `Wait ~${liveCall.waitMinutes}m` : 'Instant Call'}
               </button>
               <button
                 type="button"
-                className={`btn astro-consult-action-btn ${isChatAvailable ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'}`}
-                disabled={!isChatAvailable}
-                title={isChatAvailable ? 'Online & Available for Instant Chat' : 'Currently Unavailable for Instant Chat'}
-                onClick={() => isChatAvailable && openInstantChat(astrologer.id)}
+                className={`btn astro-consult-action-btn ${isChatAvailable || liveChat.isBusy ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'} ${liveChat.isBusy ? 'astro-consult-action-btn--busy' : ''}`}
+                disabled={!isChatAvailable && !liveChat.isBusy}
+                title={liveChat.isBusy ? `Busy in chat · ${liveChat.waitLabel}` : isChatAvailable ? 'Online & Available for Instant Chat' : 'Currently Unavailable for Instant Chat'}
+                onClick={() => (isChatAvailable || liveChat.isBusy) && openInstantChat(astrologer.id)}
               >
-                <MessageCircle size={16} /> Instant Chat
+                {liveChat.isBusy ? <Clock3 size={16} /> : <MessageCircle size={16} />} {liveChat.isBusy ? `Wait ~${liveChat.waitMinutes}m` : 'Instant Chat'}
               </button>
             </div>
             {!canBookAppointment && (

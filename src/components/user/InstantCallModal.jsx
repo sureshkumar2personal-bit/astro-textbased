@@ -14,6 +14,7 @@ import {
   getInstantConsultations,
   subscribeToInstantConsultations,
   updateInstantConsultation,
+  useAstrologerLiveStatus,
 } from '../../utils/instantConsultation.js'
 import './instantcallmodal.css'
 
@@ -49,6 +50,11 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   const [endedRequest, setEndedRequest] = useState(null)
   const [remaining, setRemaining] = useState(0)
   const [error, setError] = useState('')
+
+  const liveStatus = useAstrologerLiveStatus(astrologer, type)
+  const isAstrologerBusy = liveStatus.isLineBusy || (request && getInstantConsultations().some(
+    (entry) => entry.id !== request.id && entry.astrologerId === astrologer.id && entry.status === 'accepted'
+  ))
 
   const userId = currentUser?.id || 'guest'
   const balance = Number(userWallet?.balance || 0)
@@ -195,9 +201,35 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
             )}
           </div>
           <div className="instant-call-modal__identity">
-            <span className={`instant-call-status instant-call-status--${request?.status || 'idle'}`}>
-              {isCall ? <Phone size={13} /> : <MessageCircle size={13} />}
-              {request?.status === 'accepted' ? 'Connected' : request?.status === 'ringing' ? 'Ringing…' : request?.status === 'rejected' ? 'Declined' : isCall ? astrologer.callStatus : astrologer.chatStatus}
+            <span
+              className={`instant-call-status instant-call-status--${
+                request?.status === 'accepted'
+                  ? 'accepted'
+                  : request?.status === 'rejected'
+                    ? 'rejected'
+                    : (request?.status === 'ringing' && isAstrologerBusy) || (!request && liveStatus.isBusy)
+                      ? 'busy'
+                      : request?.status || 'idle'
+              }`}
+            >
+              {((request?.status === 'ringing' && isAstrologerBusy) || (!request && liveStatus.isBusy)) ? (
+                <PhoneOff size={13} />
+              ) : isCall ? (
+                <Phone size={13} />
+              ) : (
+                <MessageCircle size={13} />
+              )}
+              {request?.status === 'accepted'
+                ? 'Connected'
+                : request?.status === 'ringing'
+                  ? (isAstrologerBusy ? `Line Busy · ${liveStatus.waitLabel || '~wait for 3 mins'}` : 'Ringing…')
+                  : request?.status === 'rejected'
+                    ? 'Declined'
+                    : liveStatus.isBusy
+                      ? `Line Busy · ${liveStatus.waitLabel}`
+                      : isCall
+                        ? astrologer.callStatus
+                        : astrologer.chatStatus}
             </span>
             <h2 id="instant-call-heading">{astrologer.name}</h2>
             <p>{astrologer.specialization}</p>
@@ -208,6 +240,17 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
         </header>
 
         <div className="instant-call-modal__body">
+          {liveStatus.isBusy && !request && !endedRequest && (
+            <div className="instant-call-busy-banner">
+              <div className="instant-call-busy-banner__icon">
+                <Clock3 size={16} />
+              </div>
+              <div className="instant-call-busy-banner__text">
+                <strong>Line Busy · {liveStatus.waitLabel}</strong>
+                <p>{astrologer.name} is currently consulting with another client. You can book now to join the waiting queue.</p>
+              </div>
+            </div>
+          )}
           {!request && !endedRequest && (
             <>
               {step === 'birth' && (
@@ -294,14 +337,34 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
           )}
 
           {request?.status === 'ringing' && (
-            <div className="instant-call-waiting">
-              <span className="instant-call-pulse" />
-              <strong>Waiting for response…</strong>
-              <p>Connecting with {astrologer.name}…</p>
-              <button type="button" className="instant-call-secondary" onClick={endCall}>
-                <PhoneOff size={16} /> Cancel Request
-              </button>
-            </div>
+            isAstrologerBusy ? (
+              <div className="instant-call-waiting instant-call-waiting--queue">
+                <div className="instant-call-queue-badge">
+                  <PhoneOff size={13} /> Line Busy
+                </div>
+                <span className="instant-call-pulse instant-call-pulse--busy" />
+                <strong className="instant-call-queue-title">You are in queue for {astrologer.name}</strong>
+                <div className="instant-call-queue-estimate">
+                  <Clock3 size={15} />
+                  <span>Estimated wait: <strong>{liveStatus.waitLabel || '~wait for 3 mins'}</strong></span>
+                </div>
+                <p className="instant-call-queue-hint">
+                  {astrologer.name} is currently in consultation with another user. Your call will connect automatically as soon as the line is free!
+                </p>
+                <button type="button" className="instant-call-secondary" onClick={endCall}>
+                  <PhoneOff size={16} /> Cancel Waiting
+                </button>
+              </div>
+            ) : (
+              <div className="instant-call-waiting">
+                <span className="instant-call-pulse" />
+                <strong>Waiting for response…</strong>
+                <p>Connecting with {astrologer.name}…</p>
+                <button type="button" className="instant-call-secondary" onClick={endCall}>
+                  <PhoneOff size={16} /> Cancel Request
+                </button>
+              </div>
+            )
           )}
 
           {request?.status === 'rejected' && (

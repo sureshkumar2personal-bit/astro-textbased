@@ -94,6 +94,8 @@
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action-divider{display:none}
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action{height:34px;border:1px solid #a9e7c7;border-radius:9px;background:#eafbf1;color:#15915a;font-size:11px}
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action:last-of-type{border-color:#f2a126;background:#ff9517;color:#fff;box-shadow:0 4px 9px rgba(237,137,18,.22)}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy{border-color:#fde68a !important;background:#fef3c7 !important;color:#b45309 !important;box-shadow:none !important}
+.app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy:hover{background:#fde047 !important;color:#78350f !important}
 
 @media (max-width:760px){
   .app-shell--user:has(.user-dashboard-page) .page-content{padding:14px 16px 24px}

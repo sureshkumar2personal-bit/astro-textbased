@@ -1,7 +1,8 @@
-import { MessageCircle, Phone } from 'lucide-react'
+import { Clock3, MessageCircle, Phone, PhoneOff } from 'lucide-react'
 import Card from '../ui/Card.jsx'
 import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
+import { useAstrologerLiveStatus } from '../../utils/instantConsultation.js'
 
 function formatCount(count) {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
@@ -15,12 +16,20 @@ function formatExperience(experience) {
 export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'chat', onInstant, onViewProfile }) {
   usePricingVersion()
   const astrologer = withSavedRates(baseAstrologer)
+  const liveStatus = useAstrologerLiveStatus(astrologer, kind)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
-  const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
   const photo = astrologer.photo || astrologer.profileImage || getAstrologerPhoto(astrologer)
 
   return (
-    <Card hover className="astrologer-card consultation-directory-astrologer-card">
+    <Card hover className={`astrologer-card consultation-directory-astrologer-card ${liveStatus.isBusy ? 'is-busy' : ''}`}>
+      {liveStatus.isBusy && (
+        <span
+          className="astrologer-card__busy-badge"
+          title={kind === 'call' ? `Line Busy · ${liveStatus.waitLabel}` : `Busy · ${liveStatus.waitLabel}`}
+        >
+          ● Wait ~{liveStatus.waitMinutes}m
+        </span>
+      )}
       <span className="astrologer-card__rate" aria-label={`Consultation rate: ${rate} rupees per minute`}>
         ₹{rate}/min
       </span>
@@ -36,9 +45,13 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
           </div>
           <span
             className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white ${
-              status === 'Available' ? 'bg-[color:var(--success)]' : 'bg-[color:var(--muted)]'
+              liveStatus.isBusy
+                ? 'bg-amber-500 shadow-sm astrologer-card__status--busy'
+                : liveStatus.status === 'Available'
+                  ? 'bg-[color:var(--success)]'
+                  : 'bg-[color:var(--muted)]'
             }`}
-            aria-label={status === 'Available' ? 'Online' : status}
+            aria-label={liveStatus.isBusy ? `Line Busy · ${liveStatus.waitLabel}` : liveStatus.status === 'Available' ? 'Online' : liveStatus.status}
           />
         </div>
 
@@ -62,10 +75,29 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
 
       <div className="astrologer-card__stats">
         <div className="astrologer-card__actions astrologer-card__actions--chat" aria-label={`Contact ${astrologer.name}`}>
-          {onInstant && <button type="button" className="astrologer-card__action astrologer-card__action--primary" onClick={() => onInstant(astrologer)}>
-            {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
-            <span>Instant {kind === 'call' ? 'Call' : 'Chat'}</span>
-          </button>}
+          {onInstant && (
+            liveStatus.isBusy ? (
+              <button
+                type="button"
+                className="astrologer-card__action astrologer-card__action--busy"
+                onClick={() => onInstant(astrologer)}
+                aria-label={`${kind === 'call' ? 'Call' : 'Chat'} ${astrologer.name} (Line Busy, ${liveStatus.waitLabel})`}
+                title={kind === 'call' ? `Line Busy · ${liveStatus.waitLabel}` : `Busy · ${liveStatus.waitLabel}`}
+              >
+                {kind === 'call' ? <PhoneOff size={14} aria-hidden="true" /> : <Clock3 size={14} aria-hidden="true" />}
+                <span>Wait ~{liveStatus.waitMinutes}m</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="astrologer-card__action astrologer-card__action--primary"
+                onClick={() => onInstant(astrologer)}
+              >
+                {kind === 'call' ? <Phone size={15} aria-hidden="true" /> : <MessageCircle size={15} aria-hidden="true" />}
+                <span>Instant {kind === 'call' ? 'Call' : 'Chat'}</span>
+              </button>
+            )
+          )}
         </div>
       </div>
 

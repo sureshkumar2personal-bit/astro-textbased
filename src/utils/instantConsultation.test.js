@@ -7,6 +7,7 @@ import {
   getConsultationTotalMinutes,
   getInstantConsultation,
   getInstantConsultations,
+  getAstrologerLiveStatus,
   updateInstantConsultation,
 } from './instantConsultation.js'
 
@@ -210,3 +211,110 @@ describe('reopening a previously consulted astrologer', () => {
     expect(getInstantConsultation(second.id).status).toBe('ringing')
   })
 })
+
+describe('getAstrologerLiveStatus', () => {
+  it('calculates line busy with ~wait for 3 mins when astrologer has 3 mins left on active call', () => {
+    const now = 1000000000000
+    const startedAt = new Date(now - 7 * 60 * 1000).toISOString() // 7 mins ago on 10 min call = 3 mins left
+    const consultations = [
+      {
+        id: 'call-1',
+        astrologerId: 'dr-rani',
+        type: 'call',
+        status: 'accepted',
+        startedAt,
+        durationMinutes: 10,
+        extraMinutes: 0,
+      },
+    ]
+
+    const status = getAstrologerLiveStatus({ id: 'dr-rani', callStatus: 'Available' }, 'call', now, consultations)
+    expect(status.status).toBe('Busy')
+    expect(status.isLineBusy).toBe(true)
+    expect(status.label).toBe('Line Busy')
+    expect(status.waitMinutes).toBe(3)
+    expect(status.waitLabel).toBe('~wait for 3 mins')
+  })
+
+  it('accumulates waiting callers ahead to the estimated wait time', () => {
+    const now = 1000000000000
+    const startedAt = new Date(now - 7 * 60 * 1000).toISOString() // 3 mins left
+    const consultations = [
+      {
+        id: 'call-active',
+        astrologerId: 'dr-rani',
+        type: 'call',
+        status: 'accepted',
+        startedAt,
+        durationMinutes: 10,
+        extraMinutes: 0,
+      },
+      {
+        id: 'call-waiting-1',
+        astrologerId: 'dr-rani',
+        type: 'call',
+        status: 'ringing',
+        durationMinutes: 5,
+      },
+    ]
+
+    const status = getAstrologerLiveStatus({ id: 'dr-rani', callStatus: 'Available' }, 'call', now, consultations)
+    expect(status.status).toBe('Busy')
+    expect(status.isLineBusy).toBe(true)
+    expect(status.waitMinutes).toBe(8) // 3 mins from active + 5 mins waiting
+    expect(status.waitLabel).toBe('~wait for 8 mins')
+  })
+
+  it('uses static responseTime when astrologer has static Busy status and no active call in store', () => {
+    const astrologer = { id: 'astro-busy', callStatus: 'Busy', responseTime: '5 min' }
+    const status = getAstrologerLiveStatus(astrologer, 'call', Date.now(), [])
+
+    expect(status.status).toBe('Busy')
+    expect(status.isLineBusy).toBe(true)
+    expect(status.waitMinutes).toBe(5)
+    expect(status.waitLabel).toBe('~wait for 5 mins')
+  })
+
+  it('defaults to ~wait for 3 mins when static Busy has no responseTime', () => {
+    const astrologer = { id: 'astro-busy', callStatus: 'Busy' }
+    const status = getAstrologerLiveStatus(astrologer, 'call', Date.now(), [])
+
+    expect(status.status).toBe('Busy')
+    expect(status.isLineBusy).toBe(true)
+    expect(status.waitMinutes).toBe(3)
+    expect(status.waitLabel).toBe('~wait for 3 mins')
+  })
+
+  it('reports Available when astrologer is free', () => {
+    const astrologer = { id: 'dr-rani', callStatus: 'Available' }
+    const status = getAstrologerLiveStatus(astrologer, 'call', Date.now(), [])
+
+    expect(status.status).toBe('Available')
+    expect(status.isBusy).toBe(false)
+    expect(status.isLineBusy).toBe(false)
+  })
+
+  it('reports Offline when astrologer is offline', () => {
+    const astrologer = { id: 'dr-rani', callStatus: 'Offline' }
+    const status = getAstrologerLiveStatus(astrologer, 'call', Date.now(), [])
+
+    expect(status.status).toBe('Offline')
+    expect(status.isBusy).toBe(false)
+    expect(status.isLineBusy).toBe(false)
+  })
+
+  it('resolves consultation status from directory when base astrologer has no explicit status fields', () => {
+    // astrologer-21 (Bhavana Joshi) has chatStatus: 'Busy', responseTime: '6 min'
+    const chatStatus = getAstrologerLiveStatus({ id: 'astrologer-21', name: 'Bhavana Joshi' }, 'chat', Date.now(), [])
+    expect(chatStatus.isBusy).toBe(true)
+    expect(chatStatus.waitMinutes).toBe(6)
+    expect(chatStatus.waitLabel).toBe('~wait for 6 mins')
+
+    // astrologer-demo-3 (Arjun Sharma) has callStatus: 'Busy', responseTime: '12 min'
+    const callStatus = getAstrologerLiveStatus({ id: 'astrologer-demo-3', name: 'Arjun Sharma' }, 'call', Date.now(), [])
+    expect(callStatus.isBusy).toBe(true)
+    expect(callStatus.waitMinutes).toBe(12)
+    expect(callStatus.waitLabel).toBe('~wait for 12 mins')
+  })
+})
+

@@ -110,11 +110,25 @@
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
 }
 
+.astro-online-indicator.astro-busy-indicator {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35);
+}
+
 .astro-online-pulse {
   position: absolute;
   inset: -2px;
   border-radius: 50%;
   background: #10b981;
+  opacity: 0.6;
+  animation: astroPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.astro-busy-pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: #f59e0b;
   opacity: 0.6;
   animation: astroPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -157,6 +171,19 @@
   font-size: 11px;
   font-weight: 700;
   border: 1px solid rgba(143, 77, 255, 0.2);
+}
+
+.astro-hero-busy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #fde68a;
 }
 
 .astro-hero-subtitle {
@@ -1413,6 +1440,30 @@ html[data-theme='dark'] .astro-btn-grayed:disabled {
   background: rgba(255, 255, 255, 0.07) !important;
   color: #64748b !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.astro-consult-action-btn--busy {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.astro-consult-action-btn--busy::after {
+  display: none !important;
+}
+
+.astro-consult-action-btn--busy:hover {
+  background: #fde68a !important;
+  color: #92400e !important;
+}
+
+html[data-theme='dark'] .astro-consult-action-btn--busy {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
 }
 
 @media (max-width: 768px) {

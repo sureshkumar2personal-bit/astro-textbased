@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { calculateInstantAmount, getInstantRate } from './consultationPricing.js'
 import { isSyncable, mergeLists } from './consultationMerge.js'
+import { consultationAstrologers } from '../data/consultationAstrologers.js'
 
 export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultations'
 
@@ -289,3 +291,148 @@ export function getSessionCode(session, all = []) {
   const index = Math.max(0, sameDay.findIndex((item) => item.id === session.id)) + 1
   return `${session.type === 'chat' ? 'CH' : 'IC'}${day}-${String(index).padStart(3, '0')}`
 }
+
+/**
+ * Calculates live availability and wait time for an astrologer.
+ * An astrologer is considered busy if:
+ * 1. They have an active consultation in progress (status === 'accepted')
+ * 2. They have waiting consultation requests queued (status === 'ringing')
+ * 3. Or their base profile status is marked 'Busy'
+ */
+export function getAstrologerLiveStatus(astrologer, kind = 'call', now = Date.now(), allConsultations = null) {
+  const astrologerId = typeof astrologer === 'object' ? astrologer?.id : astrologer
+  const consultations = allConsultations || (typeof window !== 'undefined' ? getInstantConsultations() : [])
+
+  // Check for an active session with this astrologer
+  const active = consultations.find(
+    (c) => c.astrologerId === astrologerId && c.status === 'accepted'
+  )
+
+  // Check for waiting/ringing requests for this astrologer
+  const waiting = consultations.filter(
+    (c) => c.astrologerId === astrologerId && c.status === 'ringing' && (!active || c.id !== active.id)
+  )
+
+  if (active) {
+    const endsAt = getConsultationEndsAt(active)
+    const secondsLeft = endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : 0
+    const activeMinutes = secondsLeft > 0 ? Math.max(1, Math.ceil(secondsLeft / 60)) : 1
+    const waitingMinutes = waiting.reduce((sum, item) => sum + (Number(item.durationMinutes) || 0), 0)
+    const waitMinutes = activeMinutes + waitingMinutes
+    const waitLabel = waitMinutes === 1 ? '~wait for 1 min' : `~wait for ${waitMinutes} mins`
+    return {
+      status: 'Busy',
+      isBusy: true,
+      isLineBusy: true,
+      label: 'Line Busy',
+      waitMinutes,
+      waitLabel,
+      queueCount: waiting.length + 1,
+      activeType: active.type,
+      activeSession: active,
+    }
+  }
+
+  if (waiting.length > 0) {
+    const waitMinutes = Math.max(1, waiting.reduce((sum, item) => sum + (Number(item.durationMinutes) || 0), 0))
+    const waitLabel = waitMinutes === 1 ? '~wait for 1 min' : `~wait for ${waitMinutes} mins`
+    return {
+      status: 'Busy',
+      isBusy: true,
+      isLineBusy: true,
+      label: 'Line Busy',
+      waitMinutes,
+      waitLabel,
+      queueCount: waiting.length,
+      activeType: waiting[0].type,
+      activeSession: null,
+    }
+  }
+
+  // Fallback to static astrologer metadata if available
+  const meta = typeof astrologer === 'object' && (astrologer.callStatus || astrologer.chatStatus)
+    ? astrologer
+    : consultationAstrologers.find((a) => a.id === astrologerId) || (typeof astrologer === 'object' ? astrologer : null)
+
+  const rawStatus = meta
+    ? (kind === 'call' ? meta.callStatus : meta.chatStatus)
+    : 'Available'
+
+  if (rawStatus === 'Busy') {
+    const responseMatch = meta ? String(meta.responseTime || '').match(/\d+/) : null
+    const waitMinutes = responseMatch ? Number(responseMatch[0]) : 3
+    const waitLabel = waitMinutes === 1 ? '~wait for 1 min' : `~wait for ${waitMinutes} mins`
+    return {
+      status: 'Busy',
+      isBusy: true,
+      isLineBusy: true,
+      label: 'Line Busy',
+      waitMinutes,
+      waitLabel,
+      queueCount: 1,
+      activeType: kind,
+      activeSession: null,
+    }
+  }
+
+  if (rawStatus === 'Offline') {
+    return {
+      status: 'Offline',
+      isBusy: false,
+      isLineBusy: false,
+      label: 'Offline',
+      waitMinutes: 0,
+      waitLabel: '',
+      queueCount: 0,
+      activeType: null,
+      activeSession: null,
+    }
+  }
+
+  return {
+    status: 'Available',
+    isBusy: false,
+    isLineBusy: false,
+    label: 'Available',
+    waitMinutes: 0,
+    waitLabel: '',
+    queueCount: 0,
+    activeType: null,
+    activeSession: null,
+  }
+}
+
+/** React hook for tracking live availability of a single astrologer */
+export function useAstrologerLiveStatus(astrologer, kind = 'call') {
+  const [consultations, setConsultations] = useState(() => (typeof window !== 'undefined' ? getInstantConsultations() : []))
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    return subscribeToInstantConsultations(setConsultations)
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  return getAstrologerLiveStatus(astrologer, kind, now, consultations)
+}
+
+/** React hook for ticking clock & live consultations store shared across lists of astrologers */
+export function useConsultationsClock() {
+  const [consultations, setConsultations] = useState(() => (typeof window !== 'undefined' ? getInstantConsultations() : []))
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    return subscribeToInstantConsultations(setConsultations)
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  return { consultations, now }
+}
+
