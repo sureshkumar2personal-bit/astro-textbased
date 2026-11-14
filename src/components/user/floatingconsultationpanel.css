@@ -745,3 +745,15 @@
 .floating-consult-footer-controls {
   margin-top: 10px;
 }
+
+.floating-consult-card.is-ended-rating {
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.floating-consult-card.is-ended-rating .consultation-rating-card {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 12px 6px;
+}

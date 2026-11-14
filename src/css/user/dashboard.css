@@ -96,6 +96,9 @@
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action:last-of-type{border-color:#f2a126;background:#ff9517;color:#fff;box-shadow:0 4px 9px rgba(237,137,18,.22)}
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy{border-color:#fde68a !important;background:#fef3c7 !important;color:#b45309 !important;box-shadow:none !important}
 .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy:hover{background:#fde047 !important;color:#78350f !important}
+html[data-theme='dark'] .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__busy-badge{border-color:rgba(245,158,11,0.45) !important;background:rgba(245,158,11,0.18) !important;color:#fbbf24 !important}
+html[data-theme='dark'] .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy{border-color:rgba(245,158,11,0.45) !important;background:rgba(245,158,11,0.18) !important;background-image:none !important;color:#fbbf24 !important;box-shadow:none !important}
+html[data-theme='dark'] .app-shell--user:has(.user-dashboard-page) .dashboard-recommended-grid .explore-astrologer-card__action.explore-astrologer-card__action--busy:hover{background:rgba(245,158,11,0.28) !important;color:#fde68a !important;border-color:#f59e0b !important}
 
 @media (max-width:760px){
   .app-shell--user:has(.user-dashboard-page) .page-content{padding:14px 16px 24px}

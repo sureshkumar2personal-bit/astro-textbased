@@ -128,9 +128,19 @@
   line-height: 1.2;
 }
 
+html[data-theme='dark'] .explore-astrologer-card__busy-badge {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
 .explore-astrologer-card__status.is-busy {
   background: #f59e0b;
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(245, 158, 11, 0.35);
+}
+
+html[data-theme='dark'] .explore-astrologer-card__status.is-busy {
+  box-shadow: 0 0 0 2px #1f1610, 0 0 0 4px rgba(245, 158, 11, 0.4) !important;
 }
 
 .explore-astrologer-card__action--busy {
@@ -141,9 +151,22 @@
   padding: 3px 7px;
 }
 
+html[data-theme='dark'] .explore-astrologer-card__action--busy {
+  background: rgba(245, 158, 11, 0.18) !important;
+  background-image: none !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
 .explore-astrologer-card__action--busy:hover {
   background: #fde68a;
   color: #92400e !important;
+}
+
+html[data-theme='dark'] .explore-astrologer-card__action--busy:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  color: #fde68a !important;
+  border-color: #f59e0b !important;
 }
 
 @media (max-width: 1279px) { .explore-astrologers .astrologer-list-section__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .explore-astrologer-card { width: 100%; } }

@@ -94,7 +94,7 @@ const D9_HOUSES = [
  * gets on their side. Attached by InstantCallProvider the moment a session is
  * accepted, so it follows the user across pages.
  */
-export default function FloatingConsultationPanel({ session, onDismiss, onEnded }) {
+export default function FloatingConsultationPanel({ session, onDismiss, onEnded, onRate }) {
   const { currentUser } = useAuth()
   const { userWallet, actions } = useAppData()
   const navigate = useNavigate()
@@ -157,7 +157,14 @@ export default function FloatingConsultationPanel({ session, onDismiss, onEnded 
     return () => window.clearInterval(timer)
   }, [request])
 
-  const end = () => request && updateInstantConsultation(request.id, { status: 'ended', endedAt: new Date().toISOString() })
+  const end = () => {
+    if (!request) return
+    const updated = updateInstantConsultation(request.id, { status: 'ended', endedAt: new Date().toISOString() })
+    const finished = updated || { ...request, status: 'ended' }
+    onRate?.(finished)
+    onEnded?.(request.id)
+    onDismiss?.(request.id)
+  }
 
   const send = (event) => {
     event.preventDefault()

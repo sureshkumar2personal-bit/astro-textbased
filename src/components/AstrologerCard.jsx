@@ -46,14 +46,6 @@ export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfi
 
   return (
     <Card hover className="explore-astrologer-card">
-      {isBusy && (
-        <span
-          className="explore-astrologer-card__busy-badge"
-          title={liveCallStatus.isBusy ? `Line Busy · ${liveCallStatus.waitLabel}` : `Busy · ${liveChatStatus.waitLabel}`}
-        >
-          ● Wait ~{liveCallStatus.isBusy ? liveCallStatus.waitMinutes : liveChatStatus.waitMinutes}m
-        </span>
-      )}
       {rate && <span className="explore-astrologer-card__price" aria-label={`Consultation rate: ${rate} rupees per minute`}>₹{rate}/min</span>}
 
       <div className="explore-astrologer-card__main">

@@ -1214,7 +1214,7 @@
   padding:15px;
   border:1px solid var(--surface-border);
   border-radius:13px;
-  background:#fff;
+  background:var(--surface, #fff);
 }
 .astrologer-post-card--coral {
   border-top:3px solid #fb7185;

@@ -7,6 +7,7 @@ import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
 import ChatBirthDetailsStep from './ChatBirthDetailsStep.jsx'
+import ConsultationRatingView from './ConsultationRatingView.jsx'
 import {
   createInstantConsultation,
   getConsultationSecondsLeft,
@@ -404,16 +405,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
           )}
 
           {!request && endedRequest && (
-            <div className="instant-call-result">
-              <Check size={24} />
-              <strong>{isCall ? 'Call' : 'Chat'} ended</strong>
-              <p>{getConsultationTotalMinutes(endedRequest)} minutes with {astrologer.name}.</p>
-              {endedRequest.amountPaid ? <p className="instant-call-result__amount">{money(endedRequest.amountPaid)} paid</p> : null}
-              <button type="button" className="instant-call-primary" onClick={() => { setEndedRequest(null); setStep('select') }}>
-                Start Again
-              </button>
-              <button type="button" className="instant-call-secondary" onClick={onClose}>Close</button>
-            </div>
+            <ConsultationRatingView
+              session={endedRequest}
+              astrologer={astrologer}
+              onClose={() => {
+                setEndedRequest(null)
+                setStep('select')
+                onClose?.()
+              }}
+            />
           )}
         </div>
       </section>
