@@ -59,7 +59,7 @@ export default function UserDashboard() {
   const liveSessions = useMemo(() => astrologerLiveSessions.filter((session) => session.status === 'Live now' || session.status === 'Upcoming').slice(0, 3), [astrologerLiveSessions])
   const userAtonementEvents = useMemo(() => atonements.filter((item) => (!item.userId || item.userId === currentUser?.id) && !/gemstone/i.test(item.title || item.name || '')).slice(0, 1), [atonements, currentUser?.id])
   const recommendedAstrologers = useMemo(() => {
-    const preferred = ['Meera Desai', 'Ishita Sen', 'Aditi Menon', 'Bhavana Joshi']
+    const preferred = ['Meera Desai', 'Bhavana Joshi', 'Ishita Sen', 'Aditi Menon']
     const byName = new Map(getPublicAstrologers().map((astrologer) => [astrologer.name, astrologer]))
     return preferred.map((name) => byName.get(name)).filter(Boolean).slice(0, 3)
   }, [])
