@@ -757,3 +757,336 @@
   border: none !important;
   padding: 12px 6px;
 }
+
+/* --------------------------------------------------------------------------
+   DARK THEME REFINEMENTS FOR CONVERSATION PANEL
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .floating-consult-card {
+  background: #231c18;
+  border-color: #3d3028;
+  color: #f8fafc;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.65);
+}
+
+html[data-theme='dark'] .floating-consult-card__dismiss {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-card__dismiss:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f87171;
+}
+
+html[data-theme='dark'] .floating-consult-card__expand {
+  color: #c084fc !important;
+}
+
+html[data-theme='dark'] .floating-consult-card__expand:hover {
+  color: #e9d5ff !important;
+}
+
+html[data-theme='dark'] .floating-consult-active header {
+  color: #4ade80;
+}
+
+html[data-theme='dark'] .floating-consult-person h2 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-person p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-avatar {
+  background: rgba(143, 77, 255, 0.25);
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-topic-tag {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-timeup {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+/* Tabs Navigation */
+html[data-theme='dark'] .floating-consult-tabs-nav {
+  background: #181310;
+  border: 1px solid #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-tab {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-tab:hover {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-tab.is-active {
+  background: #2a201b;
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Tab 1: Call Conversation & Composer */
+html[data-theme='dark'] .floating-consult-conversation {
+  background: #181310;
+  border: 1px solid #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-message {
+  background: #143522;
+  color: #86efac;
+}
+
+html[data-theme='dark'] .floating-consult-message--user {
+  background: #2f2520;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-conversation small {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-hint {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-composer input {
+  background: #1c1510;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-composer input:focus {
+  border-color: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-consult-speaker {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-speaker:hover {
+  background: #332722;
+  border-color: #4b3b32;
+}
+
+html[data-theme='dark'] .floating-consult-speaker.is-active {
+  background: rgba(22, 163, 74, 0.2);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
+html[data-theme='dark'] .floating-consult-extend-link {
+  background: #2a201b;
+  border-color: #4b3b32;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .floating-consult-extend-link:hover {
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-extension {
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-durations button {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-durations button small {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-durations button.is-selected {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-cancel {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+/* Tab 2: Kundli & Birth Form */
+html[data-theme='dark'] .floating-consult-birth-card {
+  background: #181310;
+  border-color: #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-birth-head strong {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-birth-head p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-edit-btn:hover {
+  background: #332722;
+  border-color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-birth-pill {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-birth-pill em {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form {
+  background: #181310;
+  border-color: #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form h4 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form label span {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form .text-input {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-cancel-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-chart-head h5 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-toggle-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-toggle-btn.is-active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .floating-consult-south-grid {
+  background: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-chart-box {
+  background: #1c1510;
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+html[data-theme='dark'] .floating-chart-box:hover {
+  background: #2a1d15;
+}
+
+html[data-theme='dark'] .floating-chart-box.is-selected {
+  background: #332318;
+  outline-color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-chart-box__sign {
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-chart-box__planets {
+  color: #fca5a5;
+}
+
+html[data-theme='dark'] .floating-chart-box__house {
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .floating-chart-center {
+  background: linear-gradient(135deg, #2a1d15 0%, #1f1610 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+html[data-theme='dark'] .floating-chart-center strong {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-chart-center span {
+  color: #e5d5c0;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail__head strong {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail__head small {
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail p {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .floating-consult-house-aspect {
+  color: #94a3b8 !important;
+}
+
+/* Ringing State */
+html[data-theme='dark'] .floating-consult-card.is-ringing {
+  border-top-color: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-consult-icon {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-badge {
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-request h2 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-request p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-topic-pill {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c084fc;
+}
