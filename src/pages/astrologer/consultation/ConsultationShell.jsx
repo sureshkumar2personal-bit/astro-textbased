@@ -1,11 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { IndianRupee, MessageCircle } from 'lucide-react'
+import { Headphones, IndianRupee } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import '../../../css/astrologer/wallet-dashboard.css'
 import './consultation.css'
 
 const TABS = [
-  { to: 'instant-chat', label: 'Instant Chat', icon: MessageCircle },
+  { to: 'instant-call', label: 'Instant Call', icon: Headphones },
   { to: 'pricing', label: 'Pricing', icon: IndianRupee },
 ]
 
@@ -13,6 +13,7 @@ export default function ConsultationShell() {
   return (
     <div className="consult-page">
       <PageHeader eyebrow="Astrologer Workspace" title="Consultation" showBack backTo="/astrologer/dashboard" backLabel="Back" />
+      <div className="consult-tabbar">
       <div className="wd-tabs" role="tablist" aria-label="Consultation sections">
         {TABS.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end role="tab" className={({ isActive }) => `wd-tab${isActive ? ' is-active' : ''}`}>
@@ -20,6 +21,9 @@ export default function ConsultationShell() {
             {label}
           </NavLink>
         ))}
+      </div>
+      {/* Pages can portal page-level actions here (e.g. Instant Call's "Simulate Incoming Call"). */}
+      <div id="consult-tab-actions" className="consult-tab-actions" />
       </div>
       <Outlet />
     </div>

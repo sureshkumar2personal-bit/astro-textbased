@@ -66,8 +66,7 @@
 
 /* ---- Pricing: Consultation Rate Settings card ---- */
 .rate-card { padding: 36px 36px 40px; border: 1px solid #3E2D1C; border-radius: 24px; background: #241A10; color: #FFF8EC; }
-.rate-card__title { margin: 0 0 18px; color: #FFF8EC; font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
-.rate-card__desc { max-width: 620px; margin: 0 0 24px; color: #9a8870; font-size: 17px; line-height: 1.55; }
+.rate-card__title { margin: 0 0 28px; color: #FFF8EC; font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
 .rate-card__row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px 18px; }
 .rate-card__field { display: grid; gap: 10px; }
 .rate-card__field label { color: #CDBFA9; font-size: 16px; font-weight: 600; }
@@ -83,7 +82,12 @@
 @media (max-width: 720px) {
   .rate-card { padding: 22px 18px 26px; border-radius: 18px; }
   .rate-card__title { font-size: 23px; }
-  .rate-card__desc { font-size: 15px; }
   .rate-card__field, .rate-card__field input { width: 100%; }
   .rate-card__save { width: 100%; margin-top: 4px; }
 }
+
+/* Tab row: tabs on the left, optional page actions on the right, one divider underneath */
+.consult-tabbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin: 4px 0 8px; border-bottom: 1px solid #3E2D1C; }
+.consult-tabbar .wd-tabs { flex: 1 1 auto; margin: 0; border-bottom: 0; }
+.consult-tab-actions { display: flex; align-items: center; padding: 6px 0; }
+.consult-tab-actions:empty { display: none; }

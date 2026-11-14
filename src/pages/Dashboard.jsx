@@ -125,6 +125,11 @@ export default function Dashboard() {
     && request.status === 'ringing'
     && (request.isSimulated || Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS)
   ))
+    // First come, first served: the caller who has waited longest is next (id breaks exact ties).
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt) || String(a.id).localeCompare(String(b.id)))
+  // The queue card shows ONE request at a time. Everyone else stays in the stored queue and is shown
+  // only after this request is accepted or declined (the next one then becomes the head).
+  const nextCallRequest = pendingCallRequests[0] || null
   const { questions: allQuestions, consultations: allConsultations, atonements: allAtonements } = useAppData()
   const analyticsSources = { instant: instantConsultations, consultations: allConsultations, questions: allQuestions, astrologerId }
   const weeklyTrend = buildWeeklyTrend(analyticsSources)
@@ -198,13 +203,13 @@ export default function Dashboard() {
         <h1>{GREETING_PERIODS[greetingPeriod].greeting}, {(currentUser?.name || 'Acharya Gurudev').toUpperCase()}! <span aria-hidden="true">✨</span></h1>
         <p><strong>“</strong> <em>{greetingQuotes[greetingQuoteIndex % greetingQuotes.length]}</em> <button type="button" aria-label="Show another greeting" title="Show another greeting" onClick={() => setGreetingQuoteIndex((index) => (index + 1) % greetingQuotes.length)}><RefreshCw size={18} aria-hidden="true" /></button></p>
       </header>
-      {pendingCallRequests.length > 0 && (
+      {nextCallRequest && (
         <section className="astrologer-consultation-queue" aria-labelledby="consultation-queue-title">
           <div className="astrologer-queue-heading">
             <span id="consultation-queue-title">● LIVE CONSULTATION REQUEST QUEUE</span>
-            <small>{pendingCallRequests.length} Incoming Call{pendingCallRequests.length === 1 ? '' : 's'}</small>
+            <small>1 Incoming Call</small>
           </div>
-          {pendingCallRequests.map((request) => {
+          {[nextCallRequest].map((request) => {
             // Rashi / Nakshatra are calculated from the caller's real birth details (not stored on the request).
             const queueChart = request.birthDetails ? computeChart(request.birthDetails) : null
             const moon = queueChart?.ok ? queueChart.planets.find((planet) => planet.key === 'moon') : null
