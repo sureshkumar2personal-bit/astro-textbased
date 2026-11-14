@@ -1,6 +1,7 @@
-import { ArrowRight, MessageCircle, Phone, Star, UserRound } from 'lucide-react'
+import { ArrowRight, Clock3, MessageCircle, Phone, PhoneOff, Star, UserRound } from 'lucide-react'
 import { usePricingVersion, withSavedRates } from '../utils/consultationPricing.js'
 import { getStartingRate } from '../utils/publicAstrologerProfile.js'
+import { useAstrologerLiveStatus } from '../utils/instantConsultation.js'
 import Card from './ui/Card.jsx'
 
 const MAX_EXPERTISE = 3
@@ -35,10 +36,13 @@ function TagRow({ items, limit, className, label, tone = 'soft' }) {
 export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfile, onCall, onChat }) {
   usePricingVersion()
   const astrologer = withSavedRates(baseAstrologer)
+  const liveCallStatus = useAstrologerLiveStatus(astrologer, 'call')
+  const liveChatStatus = useAstrologerLiveStatus(astrologer, 'chat')
   const rate = getStartingRate(astrologer) ?? astrologer.consultationRate ?? null
   const initials = astrologer.name.split(' ').map((part) => part[0]).slice(0, 2).join('')
   const photo = astrologer.photo || astrologer.profileImage
-  const online = astrologer.availability === 'Online'
+  const isBusy = liveCallStatus.isBusy || liveChatStatus.isBusy
+  const online = !isBusy && astrologer.availability === 'Online'
 
   return (
     <Card hover className="explore-astrologer-card">
@@ -49,7 +53,19 @@ export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfi
           <div className="explore-astrologer-card__avatar">
             {photo ? <img src={photo} alt={`${astrologer.name} profile`} /> : initials}
           </div>
-          <span className={`explore-astrologer-card__status${online ? ' is-online' : ''}`} role="img" aria-label={online ? 'Online' : 'Offline'} />
+          <span
+            className={`explore-astrologer-card__status ${isBusy ? 'is-busy' : online ? 'is-online' : ''}`}
+            role="img"
+            aria-label={
+              liveCallStatus.isBusy
+                ? `Line Busy · ${liveCallStatus.waitLabel}`
+                : liveChatStatus.isBusy
+                  ? `Busy · ${liveChatStatus.waitLabel}`
+                  : online
+                    ? 'Online'
+                    : 'Offline'
+            }
+          />
         </div>
 
         <div className="explore-astrologer-card__details">
@@ -72,12 +88,26 @@ export default function AstrologerCard({ astrologer: baseAstrologer, onViewProfi
       </div>
 
       <div className="explore-astrologer-card__actions" aria-label={`Contact ${astrologer.name}`}>
-        <button type="button" className="explore-astrologer-card__action" disabled={astrologer.voiceEnabled === false} onClick={(event) => { event.stopPropagation(); onCall?.(astrologer.id) }}>
-          <Phone size={17} aria-hidden="true" /> <span>Call</span>
+        <button
+          type="button"
+          className={`explore-astrologer-card__action ${liveCallStatus.isBusy ? 'explore-astrologer-card__action--busy' : ''}`}
+          disabled={astrologer.voiceEnabled === false}
+          onClick={(event) => { event.stopPropagation(); onCall?.(astrologer.id) }}
+          title={liveCallStatus.isBusy ? `Line Busy · ${liveCallStatus.waitLabel}` : 'Instant Call'}
+        >
+          {liveCallStatus.isBusy ? <PhoneOff size={14} aria-hidden="true" /> : <Phone size={16} aria-hidden="true" />}
+          <span>{liveCallStatus.isBusy ? `Wait ~${liveCallStatus.waitMinutes}m` : 'Call'}</span>
         </button>
         <span className="explore-astrologer-card__action-divider" aria-hidden="true" />
-        <button type="button" className="explore-astrologer-card__action" disabled={astrologer.chatEnabled === false} onClick={(event) => { event.stopPropagation(); onChat?.(astrologer.id) }}>
-          <MessageCircle size={17} aria-hidden="true" /> <span>Chat</span>
+        <button
+          type="button"
+          className={`explore-astrologer-card__action ${liveChatStatus.isBusy ? 'explore-astrologer-card__action--busy' : ''}`}
+          disabled={astrologer.chatEnabled === false}
+          onClick={(event) => { event.stopPropagation(); onChat?.(astrologer.id) }}
+          title={liveChatStatus.isBusy ? `Busy · ${liveChatStatus.waitLabel}` : 'Instant Chat'}
+        >
+          {liveChatStatus.isBusy ? <Clock3 size={14} aria-hidden="true" /> : <MessageCircle size={16} aria-hidden="true" />}
+          <span>{liveChatStatus.isBusy ? `Wait ~${liveChatStatus.waitMinutes}m` : 'Chat'}</span>
         </button>
         {onViewProfile && <button type="button" className="explore-astrologer-card__profile" onClick={() => onViewProfile(astrologer.id)}>View Profile <ArrowRight size={16} aria-hidden="true" /></button>}
       </div>

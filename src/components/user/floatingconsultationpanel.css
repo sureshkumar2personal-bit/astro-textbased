@@ -334,10 +334,759 @@
   margin-top: 7px;
   padding: 8px;
   border: 1px solid #e5e7eb;
-  border-radius: 9px;
+  border-radius: 999px;
   background: #fff;
   color: #6b7280;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
+}
+
+/* Expanded panel when viewing Kundli & Horoscope */
+.floating-consult-panel.has-kundli-view {
+  width: min(440px, calc(100vw - 32px));
+}
+
+.floating-consult-card.is-expanded-kundli {
+  max-height: min(85vh, 740px);
+  overflow-y: auto;
+}
+
+/* Topic tags */
+.floating-consult-topic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f5f3ff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.floating-consult-person__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.floating-consult-topic-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+/* Sub-Tab Navigation */
+.floating-consult-tabs-nav {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 14px;
+  padding: 3px;
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.floating-consult-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.floating-consult-tab:hover {
+  color: #1e293b;
+}
+
+.floating-consult-tab.is-active {
+  background: #ffffff;
+  color: #7c3aed;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Kundli & Horoscope Body */
+.floating-consult-kundli-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Birth Card */
+.floating-consult-birth-card {
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.floating-consult-birth-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.floating-consult-birth-head strong {
+  display: block;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.floating-consult-birth-head p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.floating-consult-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.floating-consult-edit-btn:hover {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.floating-consult-birth-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.floating-consult-birth-pill {
+  padding: 2px 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.floating-consult-birth-pill em {
+  font-style: normal;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+/* Edit Birth Form */
+.floating-consult-edit-form {
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.floating-consult-edit-form h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.floating-consult-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.floating-consult-edit-form label span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.floating-consult-edit-form .text-input {
+  padding: 6px 9px;
+  font-size: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.floating-consult-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.floating-consult-edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.floating-consult-save-btn {
+  flex: 1;
+  padding: 8px;
+  border: 0;
+  border-radius: 7px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.floating-consult-cancel-btn {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Chart Section */
+.floating-consult-chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.floating-consult-chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+}
+
+.floating-consult-chart-head h5 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.floating-consult-chart-head small {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.floating-consult-chart-toggles {
+  display: flex;
+  gap: 4px;
+}
+
+.floating-consult-toggle-btn {
+  padding: 2px 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.floating-consult-toggle-btn.is-active {
+  border-color: #7c3aed;
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+/* South Indian 4x4 Grid */
+.floating-consult-south-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 52px);
+  gap: 3px;
+  background: #cbd5e1;
+  padding: 3px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.floating-chart-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+  background: #ffffff;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  overflow: hidden;
+}
+
+.floating-chart-box:hover {
+  background: #f8fafc;
+}
+
+.floating-chart-box.is-selected {
+  background: #f5f3ff;
+  outline: 2px solid #7c3aed;
+}
+
+.floating-chart-box__sign {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating-chart-box__planets {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #7c3aed;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floating-chart-box__house {
+  font-size: 8px;
+  color: #94a3b8;
+}
+
+.floating-chart-center {
+  grid-column: 2 / 4;
+  grid-row: 2 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 4px;
+  text-align: center;
+  padding: 4px;
+}
+
+.floating-chart-center strong {
+  font-size: 11px;
+  color: #0f172a;
+}
+
+.floating-chart-center span {
+  font-size: 9px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Inspected House Detail */
+.floating-consult-house-detail {
+  padding: 8px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.floating-consult-house-detail__head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.floating-consult-house-detail__head strong {
+  color: #0f172a;
+  font-size: 11.5px;
+}
+
+.floating-consult-house-detail__head small {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.floating-consult-house-detail p {
+  margin: 2px 0 0;
+  color: #475569;
+}
+
+.floating-consult-house-aspect {
+  font-size: 10px;
+  color: #64748b !important;
+  font-style: italic;
+}
+
+/* Footer Controls */
+.floating-consult-footer-controls {
+  margin-top: 10px;
+}
+
+.floating-consult-card.is-ended-rating {
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.floating-consult-card.is-ended-rating .consultation-rating-card {
+  box-shadow: none !important;
+  border: none !important;
+  padding: 12px 6px;
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME REFINEMENTS FOR CONVERSATION PANEL
+   -------------------------------------------------------------------------- */
+html[data-theme='dark'] .floating-consult-card {
+  background: #231c18;
+  border-color: #3d3028;
+  color: #f8fafc;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.65);
+}
+
+html[data-theme='dark'] .floating-consult-card__dismiss {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-card__dismiss:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f87171;
+}
+
+html[data-theme='dark'] .floating-consult-card__expand {
+  color: #c084fc !important;
+}
+
+html[data-theme='dark'] .floating-consult-card__expand:hover {
+  color: #e9d5ff !important;
+}
+
+html[data-theme='dark'] .floating-consult-active header {
+  color: #4ade80;
+}
+
+html[data-theme='dark'] .floating-consult-person h2 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-person p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-avatar {
+  background: rgba(143, 77, 255, 0.25);
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-topic-tag {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-timeup {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+/* Tabs Navigation */
+html[data-theme='dark'] .floating-consult-tabs-nav {
+  background: #181310;
+  border: 1px solid #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-tab {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-tab:hover {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-tab.is-active {
+  background: #2a201b;
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Tab 1: Call Conversation & Composer */
+html[data-theme='dark'] .floating-consult-conversation {
+  background: #181310;
+  border: 1px solid #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-message {
+  background: #143522;
+  color: #86efac;
+}
+
+html[data-theme='dark'] .floating-consult-message--user {
+  background: #2f2520;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-conversation small {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-hint {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-composer input {
+  background: #1c1510;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-composer input:focus {
+  border-color: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-consult-speaker {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-speaker:hover {
+  background: #332722;
+  border-color: #4b3b32;
+}
+
+html[data-theme='dark'] .floating-consult-speaker.is-active {
+  background: rgba(22, 163, 74, 0.2);
+  border-color: #22c55e;
+  color: #4ade80;
+}
+
+html[data-theme='dark'] .floating-consult-extend-link {
+  background: #2a201b;
+  border-color: #4b3b32;
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .floating-consult-extend-link:hover {
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-extension {
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-durations button {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-durations button small {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-durations button.is-selected {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-cancel {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+/* Tab 2: Kundli & Birth Form */
+html[data-theme='dark'] .floating-consult-birth-card {
+  background: #181310;
+  border-color: #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-birth-head strong {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-birth-head p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-edit-btn:hover {
+  background: #332722;
+  border-color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-birth-pill {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-birth-pill em {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form {
+  background: #181310;
+  border-color: #3d3028;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form h4 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form label span {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-edit-form .text-input {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-cancel-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-chart-head h5 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-toggle-btn {
+  background: #2a201b;
+  border-color: #3d3028;
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-toggle-btn.is-active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .floating-consult-south-grid {
+  background: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-chart-box {
+  background: #1c1510;
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+html[data-theme='dark'] .floating-chart-box:hover {
+  background: #2a1d15;
+}
+
+html[data-theme='dark'] .floating-chart-box.is-selected {
+  background: #332318;
+  outline-color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-chart-box__sign {
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-chart-box__planets {
+  color: #fca5a5;
+}
+
+html[data-theme='dark'] .floating-chart-box__house {
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .floating-chart-center {
+  background: linear-gradient(135deg, #2a1d15 0%, #1f1610 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+html[data-theme='dark'] .floating-chart-center strong {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-chart-center span {
+  color: #e5d5c0;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail__head strong {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail__head small {
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .floating-consult-house-detail p {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .floating-consult-house-aspect {
+  color: #94a3b8 !important;
+}
+
+/* Ringing State */
+html[data-theme='dark'] .floating-consult-card.is-ringing {
+  border-top-color: #f59e0b;
+}
+
+html[data-theme='dark'] .floating-consult-icon {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-badge {
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .floating-consult-request h2 {
+  color: #f8fafc;
+}
+
+html[data-theme='dark'] .floating-consult-request p {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .floating-consult-topic-pill {
+  background: rgba(167, 139, 250, 0.2);
+  color: #c084fc;
 }

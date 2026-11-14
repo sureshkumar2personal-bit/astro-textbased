@@ -9,6 +9,7 @@ import { useAuth } from '../../state/AuthContext.jsx'
 import { checkInstantAvailability } from '../../utils/availabilityStore.js'
 import { UNAVAILABLE_REASON } from '../../utils/astrologerAvailability.js'
 import ChatBirthDetailsStep from './ChatBirthDetailsStep.jsx'
+import ConsultationRatingView from './ConsultationRatingView.jsx'
 import {
   createInstantConsultation,
   getConsultationSecondsLeft,
@@ -16,6 +17,7 @@ import {
   getInstantConsultations,
   subscribeToInstantConsultations,
   updateInstantConsultation,
+  useAstrologerLiveStatus,
 } from '../../utils/instantConsultation.js'
 import './instantcallmodal.css'
 
@@ -52,6 +54,8 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   const [endedRequest, setEndedRequest] = useState(null)
   const [remaining, setRemaining] = useState(0)
   const [error, setError] = useState('')
+
+  const liveStatus = useAstrologerLiveStatus(astrologer, type)
 
   const userId = currentUser?.id || 'guest'
   const balance = Number(userWallet?.balance || 0)
@@ -174,6 +178,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
       pricePerMinute: unitRate,
       birthDetails: birthDetails || null,
       userAvatar: currentUser?.avatar || currentUser?.photo || currentUser?.profileImage || '',
+      topic: birthDetails?.topic || 'Career',
     })
     setError('')
     setStep('pay')
@@ -212,9 +217,41 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
             )}
           </div>
           <div className="instant-call-modal__identity">
-            <span className={`instant-call-status instant-call-status--${request?.status || 'idle'}`}>
-              {isCall ? <Phone size={13} /> : <MessageCircle size={13} />}
-              {request?.status === 'accepted' ? 'Connected' : request?.status === 'ringing' ? 'Ringing…' : request?.status === 'rejected' ? 'Declined' : isCall ? astrologer.callStatus : astrologer.chatStatus}
+            <span
+              className={`instant-call-status instant-call-status--${
+                request?.status === 'accepted'
+                  ? 'accepted'
+                  : request?.status === 'rejected'
+                    ? 'rejected'
+                    : request?.status === 'ringing'
+                      ? 'ringing'
+                      : liveStatus.isBusy
+                        ? 'busy'
+                        : 'idle'
+              }`}
+            >
+              {request?.status === 'accepted' ? (
+                <Check size={13} />
+              ) : request?.status === 'ringing' ? (
+                isCall ? <Phone size={13} /> : <MessageCircle size={13} />
+              ) : liveStatus.isBusy && !request ? (
+                <PhoneOff size={13} />
+              ) : isCall ? (
+                <Phone size={13} />
+              ) : (
+                <MessageCircle size={13} />
+              )}
+              {request?.status === 'accepted'
+                ? 'Connected'
+                : request?.status === 'ringing'
+                  ? 'Ringing…'
+                  : request?.status === 'rejected'
+                    ? 'Declined'
+                    : liveStatus.isBusy
+                      ? `Line Busy · ${liveStatus.waitLabel}`
+                      : isCall
+                        ? astrologer.callStatus
+                        : astrologer.chatStatus}
             </span>
             <h2 id="instant-call-heading">{astrologer.name}</h2>
             <p>{astrologer.specialization}</p>
@@ -225,10 +262,22 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
         </header>
 
         <div className="instant-call-modal__body">
+          {liveStatus.isBusy && !request && !endedRequest && (
+            <div className="instant-call-busy-banner">
+              <div className="instant-call-busy-banner__icon">
+                <Clock3 size={16} />
+              </div>
+              <div className="instant-call-busy-banner__text">
+                <strong>Line Busy · {liveStatus.waitLabel}</strong>
+                <p>{astrologer.name} is currently consulting with another client. You can book now to join the waiting queue.</p>
+              </div>
+            </div>
+          )}
           {!request && !endedRequest && (
             <>
               {step === 'birth' && (
                 <ChatBirthDetailsStep
+                  type={type}
                   currentUser={currentUser}
                   initial={birthDetails}
                   onBack={() => setStep('select')}
@@ -276,6 +325,12 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
                   {birthDetails && (
                     <dl>
                       <div className="is-total"><dt>Birth details</dt><dd className="instant-call-payment__birth">Saved</dd></div>
+                      {birthDetails.topic && (
+                        <div>
+                          <dt>Purpose of {isCall ? 'Call' : 'Chat'}</dt>
+                          <dd style={{ color: 'var(--primary, #7c3aed)', fontWeight: 650 }}>{birthDetails.topic}</dd>
+                        </div>
+                      )}
                     </dl>
                   )}
                   <dl>
@@ -360,16 +415,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
           )}
 
           {!request && endedRequest && (
-            <div className="instant-call-result">
-              <Check size={24} />
-              <strong>{isCall ? 'Call' : 'Chat'} ended</strong>
-              <p>{getConsultationTotalMinutes(endedRequest)} minutes with {astrologer.name}.</p>
-              {endedRequest.amountPaid ? <p className="instant-call-result__amount">{money(endedRequest.amountPaid)} paid</p> : null}
-              <button type="button" className="instant-call-primary" onClick={() => { setEndedRequest(null); setStep('select') }}>
-                Start Again
-              </button>
-              <button type="button" className="instant-call-secondary" onClick={onClose}>Close</button>
-            </div>
+            <ConsultationRatingView
+              session={endedRequest}
+              astrologer={astrologer}
+              onClose={() => {
+                setEndedRequest(null)
+                setStep('select')
+                onClose?.()
+              }}
+            />
           )}
         </div>
       </section>

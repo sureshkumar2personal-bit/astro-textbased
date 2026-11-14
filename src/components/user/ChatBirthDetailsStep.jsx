@@ -96,8 +96,21 @@ const REQUIRED = ['name', 'dob', 'time', 'place', 'gender']
  * replacing the old standalone ChatBirthDetails page. Persists to the same
  * localStorage key so the astrologer sees them on the session.
  */
-export default function ChatBirthDetailsStep({ currentUser, initial, onContinue, onBack }) {
+export default function ChatBirthDetailsStep({ currentUser, initial, onContinue, onBack, type = 'call' }) {
   const [details, setDetails] = useState(() => initial || readSavedDetails(currentUser))
+  const [topic, setTopic] = useState(() => {
+    if (initial?.topic) {
+      if (['Career', 'Business', 'Marriage'].includes(initial.topic)) return initial.topic
+      return 'Others'
+    }
+    return 'Career'
+  })
+  const [customTopic, setCustomTopic] = useState(() => {
+    if (initial?.topic && !['Career', 'Business', 'Marriage'].includes(initial.topic)) {
+      return initial.topic.slice(0, 25)
+    }
+    return ''
+  })
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -125,7 +138,8 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
     }
     const partnerFilled = ['name', 'dob', 'time', 'place'].some((field) => String(details.partner?.[field] || '').trim())
     const own = resolveCoords(details)
-    onContinue({ ...own, partner: partnerFilled ? resolveCoords(details.partner) : null })
+    const finalTopic = topic === 'Others' ? (customTopic.trim() || 'Others') : topic
+    onContinue({ ...own, topic: finalTopic, partner: partnerFilled ? resolveCoords(details.partner) : null })
   }
 
   return (
@@ -162,6 +176,59 @@ export default function ChatBirthDetailsStep({ currentUser, initial, onContinue,
           <span className="field-label-top">Time of Birth</span>
           <input className="text-input" type="time" value={details.time} onChange={(event) => update('time', event.target.value)} />
         </label>
+      </div>
+
+      <div className="instant-call-purpose-section">
+        <h3>Purpose of {type === 'chat' ? 'Consultation' : 'Call'}</h3>
+        <p className="instant-call-birth__hint">Choose what you want to consult with Guruji about:</p>
+        <div className="instant-call-purpose-options" role="radiogroup" aria-label={`Purpose of ${type}`}>
+          {['Career', 'Business', 'Marriage', 'Others'].map((item) => {
+            const isSelected = topic === item
+            return (
+              <button
+                key={item}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                className={`instant-call-purpose-pill ${isSelected ? 'is-selected' : ''}`}
+                onClick={() => {
+                  setTopic(item)
+                  if (item !== 'Others') setCustomTopic('')
+                }}
+              >
+                <span className="instant-call-purpose-pill__icon">
+                  {item === 'Career' && '💼 '}
+                  {item === 'Business' && '📈 '}
+                  {item === 'Marriage' && '💍 '}
+                  {item === 'Others' && '✨ '}
+                </span>
+                <span>{item}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {topic === 'Others' && (
+          <div className="instant-call-custom-purpose-box">
+            <label className="field-group">
+              <span className="field-label-top">
+                Specify purpose <small>(max 25 characters)</small>
+              </span>
+              <input
+                type="text"
+                className="text-input"
+                placeholder="e.g. Health, Relocation"
+                maxLength={25}
+                value={customTopic}
+                onChange={(e) => setCustomTopic(e.target.value.slice(0, 25))}
+                autoFocus
+              />
+            </label>
+            <div className="instant-call-char-counter">
+              {25 - customTopic.length} characters left
+            </div>
+          </div>
+        )}
       </div>
 
       <h3>Partner birth details <small>(optional)</small></h3>

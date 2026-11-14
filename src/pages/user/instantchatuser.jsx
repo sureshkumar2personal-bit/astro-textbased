@@ -35,6 +35,7 @@ import {
   getInstantConsultations,
   getConsultationSecondsLeft,
 } from '../../utils/instantConsultation.js'
+import ConsultationRatingModal from '../../components/user/ConsultationRatingModal.jsx'
 import './instantchatuser.css'
 
 const BIRTH_STORAGE_KEY = 'astroconnect-user-birth-details'
@@ -154,6 +155,7 @@ export default function InstantChatUser() {
   const [showAddMoneyModal, setShowAddMoneyModal] = useState(false)
   const [showRemediesModal, setShowRemediesModal] = useState(false)
   const [showEndModal, setShowEndModal] = useState(false)
+  const [ratingSession, setRatingSession] = useState(null)
   const [tempBirth, setTempBirth] = useState(birthDetails)
 
   // Wallet & Timer state
@@ -410,14 +412,30 @@ export default function InstantChatUser() {
 
   // End consultation
   const handleEndConsultation = () => {
+    let endedRecord = null
     if (activeSession?.id) {
-      updateInstantConsultation(activeSession.id, {
+      endedRecord = updateInstantConsultation(activeSession.id, {
         status: 'ended',
         endedAt: new Date().toISOString(),
       })
     }
     setShowEndModal(false)
-    navigate('/user/instant-consultation')
+    const sessionToRate = endedRecord || {
+      id: activeSession?.id || `ended-chat-${Date.now()}`,
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      astrologerSpecialization: astrologer.specialization || 'Vedic Astrology',
+      astrologerPhoto: astrologer.photo,
+      type: 'chat',
+      topic: activeSession?.topic || 'Career guidance',
+      durationMinutes: activeSession?.durationMinutes || Math.max(1, Math.round(spentThisSession / unitRate)),
+      amountPaid: spentThisSession || activeSession?.amountPaid || unitRate,
+      userId: currentUser?.id || 'guest',
+      userName: currentUser?.name || 'You',
+      status: 'ended',
+      endedAt: new Date().toISOString(),
+    }
+    setRatingSession(sessionToRate)
   }
 
   return (
@@ -810,8 +828,8 @@ export default function InstantChatUser() {
             {messages.map((msg) => {
               if (msg.sender === 'system') {
                 return (
-                  <div key={msg.id} style={{ textAlign: 'center', margin: '4px 0' }}>
-                    <span style={{ fontSize: 11.5, color: '#8b8295', background: '#f4edfc', padding: '3px 10px', borderRadius: 999 }}>
+                  <div key={msg.id} className="ic-chat-system-notice-wrap">
+                    <span className="ic-chat-system-notice">
                       {msg.text}
                     </span>
                   </div>
@@ -836,7 +854,7 @@ export default function InstantChatUser() {
                       <div className="ic-transit-card">
                         <div className="ic-transit-card__head">
                           <h4 className="ic-transit-card__title">
-                            <Sparkles size={16} color="#7346a3" /> {msg.title}
+                            <Sparkles size={16} className="ic-transit-sparkle" /> {msg.title}
                           </h4>
                           <span className="ic-transit-card__window">Favorable Window: {msg.window}</span>
                         </div>
@@ -1008,7 +1026,7 @@ export default function InstantChatUser() {
 
             <div style={{ display: 'grid', gap: 12 }}>
               <label style={{ display: 'grid', gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Full Name</span>
+                <span className="ic-modal-form-label">Full Name</span>
                 <input
                   type="text"
                   className="ic-composer-input"
@@ -1019,7 +1037,7 @@ export default function InstantChatUser() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <label style={{ display: 'grid', gap: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Date of Birth</span>
+                  <span className="ic-modal-form-label">Date of Birth</span>
                   <input
                     type="date"
                     className="ic-composer-input"
@@ -1028,7 +1046,7 @@ export default function InstantChatUser() {
                   />
                 </label>
                 <label style={{ display: 'grid', gap: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Time of Birth</span>
+                  <span className="ic-modal-form-label">Time of Birth</span>
                   <input
                     type="time"
                     className="ic-composer-input"
@@ -1039,7 +1057,7 @@ export default function InstantChatUser() {
               </div>
 
               <label style={{ display: 'grid', gap: 4 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Place of Birth</span>
+                <span className="ic-modal-form-label">Place of Birth</span>
                 <input
                   type="text"
                   className="ic-composer-input"
@@ -1050,7 +1068,7 @@ export default function InstantChatUser() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <label style={{ display: 'grid', gap: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Lagna</span>
+                  <span className="ic-modal-form-label">Lagna</span>
                   <input
                     type="text"
                     className="ic-composer-input"
@@ -1059,7 +1077,7 @@ export default function InstantChatUser() {
                   />
                 </label>
                 <label style={{ display: 'grid', gap: 4 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Rashi</span>
+                  <span className="ic-modal-form-label">Rashi</span>
                   <input
                     type="text"
                     className="ic-composer-input"
@@ -1094,7 +1112,7 @@ export default function InstantChatUser() {
                 <X size={16} />
               </button>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+            <p className="ic-modal-subtext">
               Current balance: <strong>₹{balance.toFixed(2)}</strong>. Chat rate is <strong>₹{unitRate}/min</strong>.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -1102,16 +1120,7 @@ export default function InstantChatUser() {
                 <button
                   key={amt}
                   type="button"
-                  style={{
-                    padding: '14px',
-                    borderRadius: 10,
-                    border: '1.5px solid #7346a3',
-                    background: '#f4edfc',
-                    color: '#7346a3',
-                    fontSize: 16,
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                  }}
+                  className="ic-modal-topup-btn"
                   onClick={() => handleTopUp(amt)}
                 >
                   +₹{amt}
@@ -1143,19 +1152,19 @@ export default function InstantChatUser() {
               </button>
             </div>
             <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ padding: '12px 14px', borderRadius: 10, background: '#faf8fd', border: '1px solid rgba(115,70,163,0.18)' }}>
-                <strong style={{ display: 'block', fontSize: 13.5, color: '#1e1b24' }}>
+              <div className="ic-modal-remedy-card">
+                <strong className="ic-modal-remedy-title">
                   1. Guru Preeti Pariharam
                 </strong>
-                <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#49365c' }}>
+                <p className="ic-modal-remedy-desc">
                   Chant Guru Gayatri 108 times on Thursdays and offer yellow flowers to Lord Dakshinamurthy.
                 </p>
               </div>
-              <div style={{ padding: '12px 14px', borderRadius: 10, background: '#faf8fd', border: '1px solid rgba(115,70,163,0.18)' }}>
-                <strong style={{ display: 'block', fontSize: 13.5, color: '#1e1b24' }}>
+              <div className="ic-modal-remedy-card">
+                <strong className="ic-modal-remedy-title">
                   2. Shani Shanti Sesame Deepam
                 </strong>
-                <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#49365c' }}>
+                <p className="ic-modal-remedy-desc">
                   Light sesame oil lamp on Saturdays at Shiva/Shani shrine for smooth career progression.
                 </p>
               </div>
@@ -1183,10 +1192,10 @@ export default function InstantChatUser() {
                 <X size={16} />
               </button>
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: '#49365c' }}>
+            <p className="ic-modal-subtext">
               You have been in session with <strong>{astrologer.name}</strong>.
             </p>
-            <div style={{ padding: '12px 14px', borderRadius: 10, background: '#fef2f2', border: '1px solid #fecaca', fontSize: 13, color: '#b91c1c' }}>
+            <div className="ic-modal-cost-alert">
               Total paid: <strong>₹{spentThisSession.toFixed(2)}</strong>. You can view transcript and remedies in your history.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
@@ -1209,6 +1218,25 @@ export default function InstantChatUser() {
             </div>
           </div>
         </div>
+      )}
+      {/* ====================================================================
+          MODAL: Consultation Rating & Review After Ending Chat
+          ==================================================================== */}
+      {ratingSession && (
+        <ConsultationRatingModal
+          session={ratingSession}
+          astrologer={astrologer}
+          onClose={() => {
+            setRatingSession(null)
+            navigate(`/user/astrologer/${astrologer.id}`)
+          }}
+          onSubmitted={() => {
+            setTimeout(() => {
+              setRatingSession(null)
+              navigate(`/user/astrologer/${astrologer.id}`)
+            }, 1200)
+          }}
+        />
       )}
     </div>
   )

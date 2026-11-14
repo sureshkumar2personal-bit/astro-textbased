@@ -2313,6 +2313,151 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   margin: 0 10px 8px;
 }
 
+/* Consultation Directory Availability Tabs */
+.consultation-dir-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: var(--radius-m, 12px);
+}
+
+.consultation-dir-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: var(--radius-s, 8px);
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.consultation-dir-pill:hover {
+  color: var(--text-primary, #0f172a);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.consultation-dir-pill.is-active {
+  background: #ffffff;
+  color: var(--primary, #7c3aed);
+  font-weight: 750;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.consultation-dir-pill-count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.consultation-dir-pill.is-active .consultation-dir-pill-count {
+  background: rgba(124, 58, 237, 0.12);
+  color: var(--primary, #7c3aed);
+}
+
+.consultation-dir-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.consultation-dir-dot--available {
+  background: var(--success, #16a34a);
+}
+
+.consultation-dir-dot--busy {
+  background: #f59e0b;
+}
+
+/* Astrologer Card Busy Indicator & Badge */
+.astrologer-card.is-busy {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.astrologer-card__status--busy {
+  background: #f59e0b !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(245, 158, 11, 0.35) !important;
+}
+
+.astrologer-card__busy-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+html[data-theme='dark'] .astrologer-card__busy-badge {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme='dark'] .astrologer-card.is-busy {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+html[data-theme='dark'] .astrologer-card__status--busy {
+  background: #f59e0b !important;
+  box-shadow: 0 0 0 2px #1f1610, 0 0 0 4px rgba(245, 158, 11, 0.4) !important;
+}
+
+.astrologer-card__action--busy {
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  border-radius: 8px;
+  font-weight: 700 !important;
+}
+
+html[data-theme='dark'] .astrologer-card__action--busy {
+  background: rgba(245, 158, 11, 0.18) !important;
+  background-image: none !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.astrologer-card__action--busy:hover {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #f59e0b !important;
+}
+
+html[data-theme='dark'] .astrologer-card__action--busy:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  color: #fde68a !important;
+  border-color: #f59e0b !important;
+}
+
+.explore-astrologer-card__status.is-busy {
+  background: #f59e0b;
+}
+
+.explore-astrologer-card__action--busy {
+  color: #b45309 !important;
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .astrologer-card__rate {
     animation: none;
@@ -6517,14 +6662,14 @@ html[data-theme='dark'] .border-white\/90 {
 .astrologer-footer-tabs button { display:inline-flex; align-items:center; gap:6px; padding:10px 12px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--text-secondary); font-size:12px; font-weight:800; cursor:pointer; }
 .astrologer-footer-tabs button.is-active { border-bottom-color:var(--primary); color:var(--primary); }
 .astrologer-post-list { display:grid; gap:12px; }
-.astrologer-post-card { padding:15px; border:1px solid var(--surface-border); border-radius:13px; background:#fff; }
+.astrologer-post-card { padding:15px; border:1px solid var(--surface-border); border-radius:13px; background:var(--surface, #fff); }
 .astrologer-post-card--violet { border-top:3px solid #8b5cf6; }.astrologer-post-card--coral { border-top:3px solid #fb7185; }.astrologer-post-card--gold { border-top:3px solid #f59e0b; }
 .astrologer-post-card h3 { margin:14px 0 5px; color:var(--ink); font-size:15px; }.astrologer-post-card > p { margin:0; color:var(--text-secondary); font-size:12px; line-height:1.6; }
 .astrologer-post-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; padding-top:10px; border-top:1px solid var(--surface-border); }
 .astrologer-post-actions button { display:inline-flex; align-items:center; gap:5px; padding:6px 8px; border:0; border-radius:7px; background:transparent; color:var(--text-secondary); font-size:11px; cursor:pointer; }.astrologer-post-actions button:hover,.astrologer-post-actions button.is-active { background:var(--violet-50); color:var(--primary); }
 .astrologer-post-comments { margin-top:10px; padding-top:10px; border-top:1px solid var(--surface-border); }.astrologer-post-comments__list { display:grid; gap:6px; }.astrologer-post-comments__list p { margin:0; color:var(--text-secondary); font-size:11px; line-height:1.5; }.astrologer-post-comments__list b { color:var(--ink); }
 .astrologer-post-comment-form { display:flex; gap:6px; margin-top:9px; }.astrologer-post-comment-form input { min-width:0; flex:1; padding:7px 9px; border:1px solid var(--surface-border); border-radius:7px; font-size:11px; }.astrologer-post-comment-form .btn { min-height:30px; padding:6px 9px; font-size:11px; }
-.astrologer-live-groups { display:grid; gap:16px; }.astrologer-live-group h3 { margin:0 0 8px; color:var(--ink); font-size:13px; }.astrologer-live-group__list { display:grid; gap:8px; }.astrologer-live-card { padding:12px; border:1px solid var(--surface-border); border-radius:11px; background:#fff; }.astrologer-live-card h4 { margin:8px 0 3px; color:var(--ink); font-size:13px; }.astrologer-live-card p { margin:0; color:var(--text-secondary); font-size:11px; }.astrologer-post-empty { display:grid; justify-items:center; gap:6px; padding:30px 14px; text-align:center; color:var(--primary); }.astrologer-post-empty h3 { margin:0; color:var(--ink); font-size:15px; }.astrologer-post-empty p { margin:0; color:var(--text-secondary); font-size:11px; }.astrologer-share-feedback { position:absolute; right:18px; bottom:14px; padding:7px 10px; border-radius:8px; background:var(--ink); color:#fff; font-size:11px; }
+.astrologer-live-groups { display:grid; gap:16px; }.astrologer-live-group h3 { margin:0 0 8px; color:var(--ink); font-size:13px; }.astrologer-live-group__list { display:grid; gap:8px; }.astrologer-live-card { padding:12px; border:1px solid var(--surface-border); border-radius:11px; background:var(--surface, #fff); }.astrologer-live-card h4 { margin:8px 0 3px; color:var(--ink); font-size:13px; }.astrologer-live-card p { margin:0; color:var(--text-secondary); font-size:11px; }.astrologer-post-empty { display:grid; justify-items:center; gap:6px; padding:30px 14px; text-align:center; color:var(--primary); }.astrologer-post-empty h3 { margin:0; color:var(--ink); font-size:15px; }.astrologer-post-empty p { margin:0; color:var(--text-secondary); font-size:11px; }.astrologer-share-feedback { position:absolute; right:18px; bottom:14px; padding:7px 10px; border-radius:8px; background:var(--ink); color:#fff; font-size:11px; }
 @media (max-width:600px) { .astrologer-footer-tabs { overflow-x:auto; }.astrologer-footer-tabs button { white-space:nowrap; }.astrologer-share-feedback { position:static; width:max-content; margin:10px 0 0 auto; } }
 .appointment-booking-modal { width:min(480px,calc(100vw - 32px)); max-height:min(92vh,720px); overflow:hidden; border:1px solid rgba(112,73,180,.16); border-radius:18px; box-shadow:0 24px 70px rgba(30,18,58,.24); }
 .appointment-booking-modal__header { padding:20px 24px 16px; border-bottom:1px solid var(--surface-border); }.appointment-booking-modal__header .section-title { font-size:18px; }.appointment-booking-modal__header p { margin:0; color:var(--text-secondary); font-size:12px; }

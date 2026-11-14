@@ -6,6 +6,7 @@ import { useAuth } from '../../state/AuthContext.jsx'
 import { calculateInstantAmount, getInstantRate } from '../../utils/consultationPricing.js'
 import { checkInstantAvailability } from '../../utils/availabilityStore.js'
 import { createInstantConsultation, getInstantConsultations, subscribeToInstantConsultations, updateInstantConsultation } from '../../utils/instantConsultation.js'
+import ConsultationRatingView from '../../components/user/ConsultationRatingView.jsx'
 import './instantcalluser.css'
 
 const durations = [5, 10, 15, 30]
@@ -76,7 +77,13 @@ export default function InstantCallUser() {
       {request?.status === 'cancelled' && <div className="instant-call-user-result"><PhoneOff size={24} /><strong>Astrologer unavailable</strong><p>This astrologer is not accepting instant calls right now.</p><button type="button" className="instant-call-user-secondary" onClick={() => setRequest(null)}>OK</button></div>}
       {request?.status === 'rejected' && <div className="instant-call-user-result"><PhoneOff size={24} /><strong>Call rejected</strong><p>The astrologer is not available right now.</p><button type="button" className="instant-call-user-secondary" onClick={() => setRequest(null)}>Try Again</button></div>}
       {request?.status === 'accepted' && <div className="instant-call-user-connected"><div className="instant-call-user-session-meta"><span><Clock3 size={15} /> Duration: {request.durationMinutes} min</span><strong>{formatTime(remaining)}</strong></div><p>Voice conversation with {astrologer.name}</p><div className="instant-call-user-controls"><button type="button" className={speaker ? 'is-active' : ''} onClick={() => setSpeaker((value) => !value)}><Volume2 size={17} /> Speaker</button><button type="button" className="instant-call-user-end" onClick={endCall}><PhoneOff size={17} /> End Call</button></div></div>}
-      {request?.status === 'ended' && <div className="instant-call-user-result"><Check size={24} /><strong>Call ended</strong><p>Thanks for using instant consultation.</p><button type="button" className="instant-call-user-primary" onClick={() => navigate('/user/call-astrologers')}>Back to Astrologers</button></div>}
+      {request?.status === 'ended' && (
+        <ConsultationRatingView
+          session={request}
+          astrologer={astrologer}
+          onClose={() => navigate('/user/call-astrologers')}
+        />
+      )}
     </section>
   </main>
 }
