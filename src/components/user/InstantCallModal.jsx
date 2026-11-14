@@ -150,6 +150,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
       pricePerMinute: unitRate,
       birthDetails: birthDetails || null,
       userAvatar: currentUser?.avatar || currentUser?.photo || currentUser?.profileImage || '',
+      topic: birthDetails?.topic || 'Career',
     })
     setError('')
     setStep('pay')
@@ -205,6 +206,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
             <>
               {step === 'birth' && (
                 <ChatBirthDetailsStep
+                  type={type}
                   currentUser={currentUser}
                   initial={birthDetails}
                   onBack={() => setStep('select')}
@@ -252,6 +254,12 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
                   {birthDetails && (
                     <dl>
                       <div className="is-total"><dt>Birth details</dt><dd className="instant-call-payment__birth">Saved</dd></div>
+                      {birthDetails.topic && (
+                        <div>
+                          <dt>Purpose of {isCall ? 'Call' : 'Chat'}</dt>
+                          <dd style={{ color: 'var(--primary, #7c3aed)', fontWeight: 650 }}>{birthDetails.topic}</dd>
+                        </div>
+                      )}
                     </dl>
                   )}
                   <dl>
