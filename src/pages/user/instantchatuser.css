@@ -874,6 +874,22 @@
   margin-top: 2px;
 }
 
+.ic-chat-system-notice-wrap {
+  text-align: center;
+  margin: 6px 0;
+}
+
+.ic-chat-system-notice {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6b21a8;
+  background: #f4edfc;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(115, 70, 163, 0.15);
+}
+
 /* Astrologer Transit / Analysis Card in Chat */
 .ic-transit-card {
   background: linear-gradient(135deg, #fdfbfe 0%, #f7f2fc 100%);
@@ -902,6 +918,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.ic-transit-sparkle {
+  color: #7346a3;
+  flex-shrink: 0;
 }
 
 .ic-transit-card__window {
@@ -1225,6 +1246,64 @@
   cursor: pointer;
 }
 
+.ic-modal-form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.ic-modal-subtext {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ic-modal-topup-btn {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1.5px solid #7346a3;
+  background: #f4edfc;
+  color: #7346a3;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ic-modal-topup-btn:hover {
+  background: #ecd9fa;
+  transform: translateY(-1px);
+}
+
+.ic-modal-remedy-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #faf8fd;
+  border: 1px solid rgba(115, 70, 163, 0.18);
+}
+
+.ic-modal-remedy-title {
+  display: block;
+  font-size: 13.5px;
+  color: #1e1b24;
+}
+
+.ic-modal-remedy-desc {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #49365c;
+  line-height: 1.45;
+}
+
+.ic-modal-cost-alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
 /* --------------------------------------------------------------------------
    DARK THEME OVERRIDES
    -------------------------------------------------------------------------- */
@@ -1275,6 +1354,12 @@ html[data-theme='dark'] .ic-wallet-card__subtext {
   color: #c8b79b;
 }
 
+html[data-theme='dark'] .ic-wallet-card__timeleft {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
 html[data-theme='dark'] .ic-wallet-add-btn {
   background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
   color: #ffffff;
@@ -1304,13 +1389,41 @@ html[data-theme='dark'] .ic-dasha-card__name {
   color: #fffdf9;
 }
 
+html[data-theme='dark'] .ic-birth-info-card__edit-btn {
+  background: #2a1d15 !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html[data-theme='dark'] .ic-birth-info-card__edit-btn:hover {
+  background: #38251b !important;
+  border-color: #f59e0b !important;
+}
+
 html[data-theme='dark'] .ic-birth-pill {
   background: #251b14;
   border-color: rgba(245, 158, 11, 0.15);
 }
 
+html[data-theme='dark'] .ic-birth-pill__label {
+  color: #a89a8c;
+}
+
 html[data-theme='dark'] .ic-birth-pill__val {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-chart-toggle-btn {
+  background: #251b14;
+  color: #c8b79b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+html[data-theme='dark'] .ic-chart-toggle-btn.is-active {
+  background: #f59e0b;
+  color: #1c1510;
+  border-color: #f59e0b;
+  font-weight: 800;
 }
 
 html[data-theme='dark'] .ic-south-indian-grid {
@@ -1344,6 +1457,14 @@ html[data-theme='dark'] .ic-chart-box__planets {
   color: #fca5a5;
 }
 
+html[data-theme='dark'] .ic-chart-box__house {
+  color: #c084fc;
+}
+
+html[data-theme='dark'] .ic-chart-box.is-lagna .ic-chart-box__house {
+  color: #f87171;
+}
+
 html[data-theme='dark'] .ic-chart-center {
   background: linear-gradient(135deg, #2a1d15 0%, #1f1610 100%);
   border-color: rgba(245, 158, 11, 0.35);
@@ -1361,6 +1482,10 @@ html[data-theme='dark'] .ic-chart-center__sub {
   color: #e5d5c0;
 }
 
+html[data-theme='dark'] .ic-chart-center__star {
+  color: #fbbf24;
+}
+
 html[data-theme='dark'] .ic-house-inspector {
   background: #251b14;
   border-color: rgba(245, 158, 11, 0.25);
@@ -1368,6 +1493,12 @@ html[data-theme='dark'] .ic-house-inspector {
 
 html[data-theme='dark'] .ic-house-inspector__title {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-house-inspector__badge {
+  background: rgba(192, 132, 252, 0.18);
+  color: #d8b4fe;
+  border: 1px solid rgba(192, 132, 252, 0.35);
 }
 
 html[data-theme='dark'] .ic-house-inspector__desc {
@@ -1399,10 +1530,36 @@ html[data-theme='dark'] .ic-chat-astrologer-name {
   color: #fffdf9;
 }
 
+html[data-theme='dark'] .ic-chat-astrologer-rating {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
 html[data-theme='dark'] .ic-chat-astrologer-status-tag {
   background: rgba(16, 185, 129, 0.15);
   border-color: rgba(16, 185, 129, 0.3);
   color: #34d399;
+}
+
+html[data-theme='dark'] .ic-chat-astrologer-sub {
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .ic-chat-remedies-btn {
+  background: #2a1d15;
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+html[data-theme='dark'] .ic-chat-remedies-btn:hover {
+  background: #38251b;
+  border-color: #f59e0b;
+}
+
+html[data-theme='dark'] .ic-chat-remedies-count {
+  background: #f59e0b;
+  color: #1c1510;
 }
 
 html[data-theme='dark'] .ic-profile-tab--edit {
@@ -1422,10 +1579,31 @@ html[data-theme='dark'] .ic-chat-shared-banner {
   border-color: rgba(245, 158, 11, 0.2);
 }
 
+html[data-theme='dark'] .ic-chat-system-notice {
+  color: #fbbf24;
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html[data-theme='dark'] .ic-message-row--user .ic-message-bubble {
+  background: #6b21a8;
+  color: #ffffff;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
 html[data-theme='dark'] .ic-message-row--astrologer .ic-message-bubble {
   background: #221811;
   color: #fffdf9;
   border-color: rgba(245, 158, 11, 0.2);
+}
+
+html[data-theme='dark'] .ic-message-time {
+  color: #a89a8c;
+  opacity: 0.9;
+}
+
+html[data-theme='dark'] .ic-message-row--user .ic-message-time {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 html[data-theme='dark'] .ic-transit-card {
@@ -1433,8 +1611,18 @@ html[data-theme='dark'] .ic-transit-card {
   border-color: rgba(245, 158, 11, 0.3);
 }
 
+html[data-theme='dark'] .ic-transit-sparkle {
+  color: #fbbf24;
+}
+
 html[data-theme='dark'] .ic-transit-card__title {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-transit-card__window {
+  background: rgba(192, 132, 252, 0.18) !important;
+  color: #e9d5ff !important;
+  border: 1px solid rgba(192, 132, 252, 0.4) !important;
 }
 
 html[data-theme='dark'] .ic-transit-chip {
@@ -1443,8 +1631,31 @@ html[data-theme='dark'] .ic-transit-chip {
   color: #e5d5c0;
 }
 
+html[data-theme='dark'] .ic-transit-chip--accent {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  color: #fde68a !important;
+}
+
 html[data-theme='dark'] .ic-transit-card__text {
   color: #e5d5c0;
+}
+
+html[data-theme='dark'] .ic-transit-card__action {
+  background: #7e22ce;
+  border-color: #a855f7;
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .ic-transit-card__action:hover {
+  background: #9333ea;
+  border-color: #c084fc;
+}
+
+html[data-theme='dark'] .ic-transit-card__action.is-saved {
+  background: #15803d;
+  border-color: #22c55e;
+  color: #ffffff;
 }
 
 html[data-theme='dark'] .ic-audio-card {
@@ -1452,8 +1663,21 @@ html[data-theme='dark'] .ic-audio-card {
   border-color: rgba(245, 158, 11, 0.25);
 }
 
+html[data-theme='dark'] .ic-audio-play-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: #ffffff;
+}
+
 html[data-theme='dark'] .ic-audio-title {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-wave-bar {
+  background: #fbbf24;
+}
+
+html[data-theme='dark'] .ic-audio-duration {
+  color: #c8b79b;
 }
 
 html[data-theme='dark'] .ic-quick-chip-btn {
@@ -1467,15 +1691,39 @@ html[data-theme='dark'] .ic-quick-chip-btn:hover {
   border-color: #f59e0b;
 }
 
+html[data-theme='dark'] .ic-composer-btn-attach {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .ic-composer-btn-attach:hover {
+  background: #2e2017;
+  border-color: #f59e0b;
+}
+
 html[data-theme='dark'] .ic-composer-input {
   background: #221811;
   border-color: rgba(245, 158, 11, 0.25);
   color: #fffdf9;
 }
 
+html[data-theme='dark'] .ic-composer-input::placeholder {
+  color: #8c7d6e;
+}
+
 html[data-theme='dark'] .ic-composer-input:focus {
   border-color: #f59e0b;
   background: #2a1d15;
+}
+
+html[data-theme='dark'] .ic-composer-send-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .ic-composer-send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
 }
 
 html[data-theme='dark'] .ic-modal-card {
@@ -1486,6 +1734,49 @@ html[data-theme='dark'] .ic-modal-card {
 
 html[data-theme='dark'] .ic-modal-head h3 {
   color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-modal-close-btn {
+  background: #2a1d15;
+  color: #fbbf24;
+}
+
+html[data-theme='dark'] .ic-modal-form-label {
+  color: #c8b79b !important;
+}
+
+html[data-theme='dark'] .ic-modal-subtext {
+  color: #c8b79b !important;
+}
+
+html[data-theme='dark'] .ic-modal-topup-btn {
+  background: #251b14 !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .ic-modal-topup-btn:hover {
+  background: #332318;
+  border-color: #f59e0b;
+}
+
+html[data-theme='dark'] .ic-modal-remedy-card {
+  background: #251b14;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+html[data-theme='dark'] .ic-modal-remedy-title {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .ic-modal-remedy-desc {
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .ic-modal-cost-alert {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
 }
 
 /* --------------------------------------------------------------------------
