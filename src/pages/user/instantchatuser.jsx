@@ -35,6 +35,7 @@ import {
   getInstantConsultations,
   getConsultationSecondsLeft,
 } from '../../utils/instantConsultation.js'
+import ConsultationRatingModal from '../../components/user/ConsultationRatingModal.jsx'
 import './instantchatuser.css'
 
 const BIRTH_STORAGE_KEY = 'astroconnect-user-birth-details'
@@ -154,6 +155,7 @@ export default function InstantChatUser() {
   const [showAddMoneyModal, setShowAddMoneyModal] = useState(false)
   const [showRemediesModal, setShowRemediesModal] = useState(false)
   const [showEndModal, setShowEndModal] = useState(false)
+  const [ratingSession, setRatingSession] = useState(null)
   const [tempBirth, setTempBirth] = useState(birthDetails)
 
   // Wallet & Timer state
@@ -410,14 +412,30 @@ export default function InstantChatUser() {
 
   // End consultation
   const handleEndConsultation = () => {
+    let endedRecord = null
     if (activeSession?.id) {
-      updateInstantConsultation(activeSession.id, {
+      endedRecord = updateInstantConsultation(activeSession.id, {
         status: 'ended',
         endedAt: new Date().toISOString(),
       })
     }
     setShowEndModal(false)
-    navigate('/user/instant-consultation')
+    const sessionToRate = endedRecord || {
+      id: activeSession?.id || `ended-chat-${Date.now()}`,
+      astrologerId: astrologer.id,
+      astrologerName: astrologer.name,
+      astrologerSpecialization: astrologer.specialization || 'Vedic Astrology',
+      astrologerPhoto: astrologer.photo,
+      type: 'chat',
+      topic: activeSession?.topic || 'Career guidance',
+      durationMinutes: activeSession?.durationMinutes || Math.max(1, Math.round(spentThisSession / unitRate)),
+      amountPaid: spentThisSession || activeSession?.amountPaid || unitRate,
+      userId: currentUser?.id || 'guest',
+      userName: currentUser?.name || 'You',
+      status: 'ended',
+      endedAt: new Date().toISOString(),
+    }
+    setRatingSession(sessionToRate)
   }
 
   return (
@@ -1209,6 +1227,25 @@ export default function InstantChatUser() {
             </div>
           </div>
         </div>
+      )}
+      {/* ====================================================================
+          MODAL: Consultation Rating & Review After Ending Chat
+          ==================================================================== */}
+      {ratingSession && (
+        <ConsultationRatingModal
+          session={ratingSession}
+          astrologer={astrologer}
+          onClose={() => {
+            setRatingSession(null)
+            navigate(`/user/astrologer/${astrologer.id}`)
+          }}
+          onSubmitted={() => {
+            setTimeout(() => {
+              setRatingSession(null)
+              navigate(`/user/astrologer/${astrologer.id}`)
+            }, 1200)
+          }}
+        />
       )}
     </div>
   )
