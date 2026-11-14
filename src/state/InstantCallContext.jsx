@@ -1,8 +1,9 @@
 /* oxlint-disable react/only-export-components */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import InstantCallModal from '../components/user/InstantCallModal.jsx'
 import FloatingConsultationPanel from '../components/user/FloatingConsultationPanel.jsx'
+import ConsultationRatingModal from '../components/user/ConsultationRatingModal.jsx'
 import { useAuth } from './AuthContext.jsx'
 import { getInstantConsultations, subscribeToInstantConsultations } from '../utils/instantConsultation.js'
 
@@ -31,8 +32,17 @@ export function InstantCallProvider({ children }) {
   const [dismissed, setDismissed] = useState(null)
   const [hiddenChips, setHiddenChips] = useState({})
   const [active, setActive] = useState(null)
+  const [ratingSession, setRatingSession] = useState(null)
+  const lastAcceptedRef = useRef(null)
 
   const userId = currentUser?.id || 'guest'
+
+  useEffect(() => {
+    if (active && active.status === 'accepted') {
+      setPopup(null)
+      lastAcceptedRef.current = active
+    }
+  }, [active])
 
   // Track the one live session this user has, so the panel can attach itself
   // the moment it is accepted — regardless of which page they're on.
@@ -44,10 +54,24 @@ export function InstantCallProvider({ children }) {
       const call = mine.find((entry) => entry.type === 'call') || null
       const chat = mine.find((entry) => entry.type === 'chat') || null
       setActive(chat || call || null)
+
+      // If active call was accepted and transitioned to ended without a rating yet
+      if (lastAcceptedRef.current) {
+        const endedMatch = requests.find(
+          (entry) =>
+            entry.id === lastAcceptedRef.current.id &&
+            entry.status === 'ended' &&
+            !entry.rating &&
+            !entry.skippedRating,
+        )
+        if (endedMatch && !ratingSession) {
+          setRatingSession(endedMatch)
+        }
+      }
     }
     refresh()
     return subscribeToInstantConsultations(refresh)
-  }, [userId])
+  }, [userId, ratingSession])
 
   // One live session at a time, but no interruption dialog: the newest request
   // simply takes over the visible surface.
@@ -109,6 +133,7 @@ export function InstantCallProvider({ children }) {
       isChipHidden: Boolean(active && hiddenChips[active.id]),
       openInstantCall,
       openInstantChat,
+      openRating: (session) => setRatingSession(session),
       closePopup,
       dismissPanel,
       hideChip,
@@ -141,6 +166,20 @@ export function InstantCallProvider({ children }) {
           session={panel}
           onDismiss={dismissPanel}
           onEnded={forgetSession}
+          onRate={(endedRecord) => setRatingSession(endedRecord)}
+        />
+      )}
+      {ratingSession && (
+        <ConsultationRatingModal
+          session={ratingSession}
+          onClose={() => {
+            forgetSession(ratingSession.id)
+            setRatingSession(null)
+          }}
+          onSubmitted={() => {
+            forgetSession(ratingSession.id)
+            setTimeout(() => setRatingSession(null), 1200)
+          }}
         />
       )}
     </InstantCallContext.Provider>

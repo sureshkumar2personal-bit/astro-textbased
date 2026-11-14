@@ -15,6 +15,7 @@ import Card from '../components/ui/Card.jsx'
 import { useInstantCall } from '../state/InstantCallContext.jsx'
 import { BOOKING_OVERRIDES } from './user/appointments/bookingAstrologerData.js'
 import { useAstrologerLiveStatus } from '../utils/instantConsultation.js'
+import { getStoredAstrologerReviews, subscribeToAstrologerReviews } from '../utils/astrologerReviews.js'
 import '../css/user/astrologer-profile.css'
 
 const APPOINTMENT_TYPE = 'Audio Call'
@@ -372,6 +373,18 @@ export default function AstrologerProfile() {
   const [commentDrafts, setCommentDrafts] = useState({})
   const [shareMessage, setShareMessage] = useState('')
   const [servicesModalOpen, setServicesModalOpen] = useState(false)
+  const [storedReviews, setStoredReviews] = useState(() => getStoredAstrologerReviews(astrologer.id))
+
+  useEffect(() => {
+    const refresh = () => setStoredReviews(getStoredAstrologerReviews(astrologer.id))
+    refresh()
+    return subscribeToAstrologerReviews(refresh)
+  }, [astrologer.id])
+
+  const allReviews = useMemo(() => {
+    const custom = storedReviews || []
+    return [...custom, ...ASTROLOGER_REVIEWS_MOCK]
+  }, [storedReviews])
 
   const bookingPrice = BOOKING_OVERRIDES[astrologer.id]?.price || 499
   const chatRate = astrologer.chatRate || 20
@@ -1156,7 +1169,7 @@ export default function AstrologerProfile() {
                 </div>
 
                 <div className="astro-reviews-cards-list">
-                  {ASTROLOGER_REVIEWS_MOCK.map((review) => (
+                  {allReviews.map((review) => (
                     <div className="astro-review-entry-card" key={review.id}>
                       <div className="astro-review-entry-head">
                         <div className="astro-review-entry-user">
