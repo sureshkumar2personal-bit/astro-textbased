@@ -52,7 +52,7 @@ function walletBadge(request) {
 }
 
 export default function IncomingCallCard({ request, now, busy, error, onAccept, onDecline }) {
-  const waited = (now - new Date(request.createdAt).getTime()) / 1000
+  const waited = (now - new Date(request.waitFrom || request.createdAt).getTime()) / 1000
   const who = demographics(request.birthDetails)
   return (
     <section className="icc-card icc-incoming" aria-label="Incoming instant call" aria-live="polite">
@@ -68,11 +68,11 @@ export default function IncomingCallCard({ request, now, busy, error, onAccept, 
           <span><Sparkles size={16} aria-hidden="true" /> Topic: <b>{request.topic || 'Not specified'}</b></span>
           <span><CalendarClock size={16} aria-hidden="true" /> DOB: {dobLine(request.birthDetails)}</span>
         </div>
-        <div className="icc-incoming__actions">
-          <button type="button" className="icc-btn icc-btn--decline" disabled={busy} onClick={onDecline}><PhoneOff size={17} /> {busy === 'decline' ? 'Declining…' : 'Decline'}</button>
-          <button type="button" className="icc-btn icc-btn--accept" disabled={busy} onClick={onAccept}><Phone size={17} fill="currentColor" /> {busy === 'accept' ? 'Connecting…' : 'Accept Call'}</button>
-        </div>
         {error && <p className="icc-error" role="alert">{error}</p>}
+      </div>
+      <div className="icc-incoming__actions">
+        <button type="button" className="icc-btn icc-btn--decline" disabled={busy} onClick={onDecline}><PhoneOff size={17} /> {busy === 'decline' ? 'Declining…' : 'Decline'}</button>
+        <button type="button" className="icc-btn icc-btn--accept" disabled={busy} onClick={onAccept}><Phone size={17} fill="currentColor" /> {busy === 'accept' ? 'Connecting…' : 'Accept Call'}</button>
       </div>
     </section>
   )

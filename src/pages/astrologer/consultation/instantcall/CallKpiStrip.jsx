@@ -1,48 +1,28 @@
-import { Check, Clock3, IndianRupee, PencilLine, PhoneCall, PhoneIncoming, Timer, X } from 'lucide-react'
-import { useState } from 'react'
+import { IndianRupee, PencilLine, PhoneCall, Timer } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { formatRupees } from '../../../../utils/instantCallConsole.js'
 
-function RateCard({ rate, onSave }) {
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-  const [error, setError] = useState('')
+// The pencil opens the existing Pricing tab at the Call Rate field; the rate is edited there, not on this card.
+const CALL_RATE_PRICING_PATH = '/astrologer/consultation/pricing#call-rate'
 
-  const open = () => { setDraft(String(rate)); setError(''); setEditing(true) }
-  const submit = (event) => {
-    event.preventDefault()
-    const value = Number(draft)
-    if (draft.trim() === '' || !Number.isFinite(value) || value <= 0) { setError('Enter a rate above ₹0'); return }
-    onSave(value)
-    setEditing(false)
-  }
-
+function RateCard({ rate }) {
+  const navigate = useNavigate()
   return (
     <article className="icc-kpi">
       <span className="icc-kpi__icon"><IndianRupee size={18} /></span>
       <div className="icc-kpi__body">
         <small>Call Rate</small>
-        {editing ? (
-          <form className="icc-rate-form" onSubmit={submit} noValidate>
-            <span>₹</span>
-            <input type="number" min="1" step="1" inputMode="numeric" autoFocus value={draft} aria-label="Call rate per minute" aria-invalid={Boolean(error)} onChange={(event) => { setDraft(event.target.value); setError('') }} />
-            <button type="submit" className="icc-icon-btn is-ok" aria-label="Save rate"><Check size={14} /></button>
-            <button type="button" className="icc-icon-btn" aria-label="Cancel" onClick={() => setEditing(false)}><X size={14} /></button>
-          </form>
-        ) : (
-          <strong>{formatRupees(rate)} <em>/ min</em></strong>
-        )}
-        {error && <span className="icc-kpi__error" role="alert">{error}</span>}
+        <strong>{formatRupees(rate)} <em>/ min</em></strong>
       </div>
-      {!editing && <button type="button" className="icc-icon-btn" aria-label="Edit call rate" title="Edit call rate" onClick={open}><PencilLine size={14} /></button>}
+      <button type="button" className="icc-icon-btn" aria-label="Edit call rate" title="Edit call rate" onClick={() => navigate(CALL_RATE_PRICING_PATH)}><PencilLine size={14} /></button>
     </article>
   )
 }
 
-export default function CallKpiStrip({ rate, onSaveRate, stats, waitingCount, onCall, onSimulate, canSimulate = true }) {
-  const queue = onCall ? { tone: 'is-gold', label: waitingCount ? `On a Call • ${waitingCount} waiting` : 'On a Call' } : waitingCount ? { tone: 'is-gold', label: `${waitingCount} ${waitingCount === 1 ? 'Caller' : 'Callers'} Waiting` } : { tone: 'is-green', label: 'Available' }
+export default function CallKpiStrip({ rate, stats }) {
   return (
     <section className="icc-kpis" aria-label="Instant call summary">
-      <RateCard rate={rate} onSave={onSaveRate} />
+      <RateCard rate={rate} />
       <article className="icc-kpi">
         <span className="icc-kpi__icon"><PhoneCall size={18} /></span>
         <div className="icc-kpi__body">
@@ -56,14 +36,6 @@ export default function CallKpiStrip({ rate, onSaveRate, stats, waitingCount, on
           <small>Avg. Call Duration</small>
           <strong>{stats.avgMinutes == null ? '—' : <>{stats.avgMinutes.toFixed(1)} <em>mins</em></>}</strong>
         </div>
-      </article>
-      <article className="icc-kpi icc-kpi--queue">
-        <span className="icc-kpi__icon"><PhoneIncoming size={18} /></span>
-        <div className="icc-kpi__body">
-          <small>Queue Status</small>
-          <span className={`icc-pill ${queue.tone}${waitingCount && !onCall ? ' is-pulsing' : ''}`} role="status">{queue.label}</span>
-        </div>
-        <button type="button" className="icc-btn icc-btn--ghost" disabled={!canSimulate} onClick={onSimulate}><Clock3 size={14} /> Simulate Incoming Call</button>
       </article>
     </section>
   )

@@ -3,7 +3,8 @@
 import { calculateInstantAmount } from './consultationPricing.js'
 
 export const INCOMING_CALL_RING_MS = 60 * 1000 // same ring window the dashboard uses
-// Demo callers the console can queue. The first three are queued by default (Arjun K. rings, the other two wait).
+// Demo callers the console can queue. The first three are queued by default (Arjun K. rings, the other two wait);
+// "Simulate Incoming Call" rings the next unused one.
 const chennai = { latitude: 13.0827, longitude: 80.2707, timezone: 'Asia/Kolkata' }
 export const SIMULATED_CALLERS = [
   { userId: 'simulated-arjun-k', userName: 'Arjun K.', topic: 'Career & Job Change', language: 'Tamil', walletBalance: 625, durationMinutes: 10, queuedSecondsAgo: 18,
@@ -12,11 +13,14 @@ export const SIMULATED_CALLERS = [
     birthDetails: { name: 'Sneha M.', gender: 'Female', dob: '1996-03-02', time: '09:15', place: 'Coimbatore, Tamil Nadu, India', latitude: 11.0168, longitude: 76.9558, timezone: 'Asia/Kolkata' } },
   { userId: 'simulated-vikram-r', userName: 'Vikram R.', topic: 'Finance & Business', language: 'Tamil', walletBalance: 500, durationMinutes: 15, queuedSecondsAgo: 6,
     birthDetails: { name: 'Vikram R.', gender: 'Male', dob: '1989-11-21', time: '17:40', place: 'Madurai, Tamil Nadu, India', latitude: 9.9252, longitude: 78.1198, timezone: 'Asia/Kolkata' } },
+  { userId: 'simulated-karthik-s', userName: 'Karthik S.', topic: 'Career & Job Change', language: 'Tamil', walletBalance: 625, durationMinutes: 10,
+    birthDetails: { name: 'Karthik S.', gender: 'Male', dob: '1997-08-14', time: '06:42', place: 'Chennai, Tamil Nadu, India', ...chennai } },
   { userId: 'simulated-meena-s', userName: 'Meena S.', topic: 'Health & Wellbeing', language: 'Tamil', walletBalance: 450, durationMinutes: 10,
     birthDetails: { name: 'Meena S.', gender: 'Female', dob: '1991-06-09', time: '04:50', place: 'Chennai, Tamil Nadu, India', ...chennai } },
-  { userId: 'simulated-karthik-p', userName: 'Karthik P.', topic: 'Education & Higher Studies', language: 'Tamil', walletBalance: 600, durationMinutes: 15,
-    birthDetails: { name: 'Karthik P.', gender: 'Male', dob: '1999-01-27', time: '12:10', place: 'Madurai, Tamil Nadu, India', latitude: 9.9252, longitude: 78.1198, timezone: 'Asia/Kolkata' } },
 ]
+
+/** createdAt that puts a simulated call at the head of the queue (just ahead of whoever is waiting longest). */
+export const headOfQueueTime = (waiting, now = Date.now()) => new Date(waiting.length ? Math.min(...waiting.map((item) => new Date(item.createdAt).getTime())) - 1 : now).toISOString()
 
 /** The next demo caller that is not already waiting or on the call (null when all of them are in use). */
 export const nextSimulatedCaller = (inUseUserIds = []) => SIMULATED_CALLERS.find((caller) => !inUseUserIds.includes(caller.userId)) || null
@@ -118,6 +122,17 @@ export function queueWaitMinutes({ active, waiting, now = Date.now() }) {
     ahead += Number(request.durationMinutes) || 0
   })
   return waits
+}
+
+/** Users who already completed a call with this astrologer (shown as "Repeat" in the waiting queue). */
+export const repeatCallerIds = (sessions, astrologerId) => new Set(
+  callsFor(sessions, astrologerId).filter(isCompleted).map((item) => item.userId).filter(Boolean),
+)
+
+/** Minutes of talk time a waiting caller can pay for: from their wallet when known, else what they booked. */
+export function callerMinutes(request) {
+  const fromWallet = maxMinutesForWallet(request.walletBalance, request.pricePerMinute)
+  return fromWallet != null ? { minutes: fromWallet, label: 'bal' } : { minutes: (Number(request.durationMinutes) || 0) + (Number(request.extraMinutes) || 0), label: 'booked' }
 }
 
 export const activeCall = (sessions, astrologerId) => callsFor(sessions, astrologerId).find((item) => item.status === 'accepted') || null

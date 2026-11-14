@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   billableSeconds, buildCallCompletion, buildHistoryCsv, earningsForSeconds, filterHistoryRows, formatRupees,
-  historyRows, maxMinutesForWallet, nextSimulatedCaller, queueWaitMinutes, staleRingingCalls, todaysCallStats, todaysInstantEarnings, waitingCalls,
+  callerMinutes, headOfQueueTime, historyRows, maxMinutesForWallet, repeatCallerIds, nextSimulatedCaller, queueWaitMinutes, staleRingingCalls, todaysCallStats, todaysInstantEarnings, waitingCalls,
 } from './instantCallConsole.js'
 
 const NOW = new Date('2026-11-13T12:00:00').getTime()
@@ -118,15 +118,43 @@ describe('waiting queue', () => {
   it('picks the next demo caller that is not already in use', () => {
     expect(nextSimulatedCaller([]).userName).toBe('Arjun K.')
     expect(nextSimulatedCaller(['simulated-arjun-k']).userName).toBe('Sneha M.')
-    expect(nextSimulatedCaller(['simulated-arjun-k', 'simulated-sneha-m', 'simulated-vikram-r', 'simulated-meena-s']).userName).toBe('Karthik P.')
+    expect(nextSimulatedCaller(['simulated-arjun-k', 'simulated-sneha-m', 'simulated-vikram-r']).userName).toBe('Karthik S.')
   })
   it('stops offering callers once every demo caller is queued', () => {
-    const all = ['simulated-arjun-k', 'simulated-sneha-m', 'simulated-vikram-r', 'simulated-meena-s', 'simulated-karthik-p']
+    const all = ['simulated-arjun-k', 'simulated-sneha-m', 'simulated-vikram-r', 'simulated-karthik-s', 'simulated-meena-s']
     expect(nextSimulatedCaller(all)).toBeNull()
   })
   it('keeps unanswered dev test rings out of the history', () => {
     const rows = historyRows([call({ id: 't', status: 'expired', isTestRequest: true, startedAt: undefined }), call({ id: 'm', status: 'expired', startedAt: undefined })], 'a1')
     expect(rows.map((row) => row.item.id)).toEqual(['m'])
+  })
+})
+
+describe('queue caller details', () => {
+  it('marks only users with a completed call as repeat callers', () => {
+    const ids = repeatCallerIds([
+      call({ id: '1', userId: 'u-done' }),
+      call({ id: '2', userId: 'u-declined', status: 'rejected', startedAt: undefined }),
+      call({ id: '3', userId: 'u-other-astro', astrologerId: 'other' }),
+      call({ id: '4', userId: 'u-chat', type: 'chat' }),
+    ], 'a1')
+    expect([...ids]).toEqual(['u-done'])
+  })
+  it('shows wallet minutes when known and booked minutes otherwise', () => {
+    expect(callerMinutes({ walletBalance: 800, pricePerMinute: 25, durationMinutes: 20 })).toEqual({ minutes: 32, label: 'bal' })
+    expect(callerMinutes({ pricePerMinute: 25, durationMinutes: 15, extraMinutes: 5 })).toEqual({ minutes: 20, label: 'booked' })
+  })
+})
+
+describe('simulated call at the head of the queue', () => {
+  it('goes just ahead of whoever has waited longest, so it becomes the incoming call', () => {
+    const waiting = [call({ id: 'a', status: 'ringing', createdAt: iso(-18000) }), call({ id: 'b', status: 'ringing', createdAt: iso(-6000) })]
+    const t = new Date(headOfQueueTime(waiting, NOW)).getTime()
+    expect(t).toBe(new Date(iso(-18000)).getTime() - 1)
+    expect(waitingCalls([...waiting.map((w) => ({ ...w, isSimulated: true })), call({ id: 'new', status: 'ringing', isSimulated: true, createdAt: new Date(t).toISOString() })], 'a1', NOW)[0].id).toBe('new')
+  })
+  it('uses the current time when nobody is waiting', () => {
+    expect(headOfQueueTime([], NOW)).toBe(new Date(NOW).toISOString())
   })
 })
 

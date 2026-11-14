@@ -1,5 +1,5 @@
 import { createInstantConsultation, updateInstantConsultation } from '../../../../utils/instantConsultation.js'
-import { SIMULATED_CALLERS, nextSimulatedCaller } from '../../../../utils/instantCallConsole.js'
+import { SIMULATED_CALLERS, headOfQueueTime, nextSimulatedCaller } from '../../../../utils/instantCallConsole.js'
 
 /** Queues one demo caller. Flagged so it is never synced, never expires and is never mistaken for a paid request. */
 export function queueCaller(caller, astrologerId, astrologerName) {
@@ -14,10 +14,16 @@ export function queueCaller(caller, astrologerId, astrologerName) {
   return updateInstantConsultation(created.id, patch)
 }
 
-/** Adds the next demo caller that is not already in use; returns null when every demo caller is already queued. */
-export function addSimulatedCaller(astrologerId, astrologerName, inUseUserIds) {
+/**
+ * "Simulate Incoming Call": the next unused sample caller rings now, as the incoming call (whoever was ringing goes back
+ * to the front of the waiting queue). Returns the request, or null when every sample caller is already in use.
+ */
+export function simulateIncomingCall(astrologerId, astrologerName, waiting, inUseUserIds) {
   const caller = nextSimulatedCaller(inUseUserIds)
-  return caller ? queueCaller(caller, astrologerId, astrologerName) : null
+  if (!caller) return null
+  const request = queueCaller({ ...caller, queuedSecondsAgo: 0 }, astrologerId, astrologerName)
+  // Ordered ahead of the others, but its own waiting timer starts now (not at the older request's time).
+  return updateInstantConsultation(request.id, { createdAt: headOfQueueTime(waiting), waitFrom: new Date().toISOString() })
 }
 
 /** First visit: Arjun K. (ringing) plus Sneha M. and Vikram R. waiting behind. */
