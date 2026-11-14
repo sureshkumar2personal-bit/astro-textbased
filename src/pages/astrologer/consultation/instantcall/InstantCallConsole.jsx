@@ -1,28 +1,31 @@
 import { CheckCircle2, PhoneOff } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppData } from '../../../../state/AppDataContext.jsx'
 import { useAuth } from '../../../../state/AuthContext.jsx'
-import { getSavedRate, saveConsultationPricing, usePricingVersion } from '../../../../utils/consultationPricing.js'
+import { getSavedRate, usePricingVersion } from '../../../../utils/consultationPricing.js'
 import { getInstantConsultation, getInstantConsultations, updateInstantConsultation } from '../../../../utils/instantConsultation.js'
-import { activeCall, buildCallCompletion, formatRupees, nextSimulatedCaller, queueWaitMinutes, todaysCallStats, waitingCalls } from '../../../../utils/instantCallConsole.js'
+import { activeCall, buildCallCompletion, formatRupees, queueWaitMinutes, repeatCallerIds, todaysCallStats, waitingCalls } from '../../../../utils/instantCallConsole.js'
 import ActiveCallWorkspace from './ActiveCallWorkspace.jsx'
 import CallHistoryTable from './CallHistoryTable.jsx'
 import CallKpiStrip from './CallKpiStrip.jsx'
 import IncomingCallCard from './IncomingCallCard.jsx'
-import { addSimulatedCaller, claimDefaultCallerSeed, defaultCallerEnabled, seedDefaultQueue } from './simulateCaller.js'
+import { claimDefaultCallerSeed, defaultCallerEnabled, seedDefaultQueue, simulateIncomingCall } from './simulateCaller.js'
 import useInstantCalls, { isStillRinging } from './useInstantCalls.js'
+import CallToast from './CallToast.jsx'
+import SimulateCallButton from './SimulateCallButton.jsx'
 import WaitingQueuePanel from './WaitingQueuePanel.jsx'
 import './instantCallConsole.css'
 
 export default function InstantCallConsole() {
   const { currentUser } = useAuth()
-  const { astrologerServices, actions } = useAppData()
+  const { astrologerServices } = useAppData()
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   usePricingVersion()
   const { sessions, now, waiting, active } = useInstantCalls(astrologerId)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [toast, setToast] = useState(null)
 
   const rate = getSavedRate(astrologerId, 'call') ?? astrologerServices.callPricePerMinute
   const incoming = active ? null : waiting[0] || null
@@ -30,7 +33,7 @@ export default function InstantCallConsole() {
   const queue = active ? waiting : waiting.slice(1)
   const waits = queueWaitMinutes({ active, waiting, now })
   const inUseIds = [...waiting.map((request) => request.userId), active?.userId].filter(Boolean)
-  const canAdd = nextSimulatedCaller(inUseIds) != null
+  const repeatIds = repeatCallerIds(sessions, astrologerId)
   const stats = todaysCallStats(sessions, astrologerId, now)
 
   useEffect(() => {
@@ -39,17 +42,20 @@ export default function InstantCallConsole() {
     return () => window.clearTimeout(timer)
   }, [notice])
 
-  const saveRate = (value) => {
-    // Same two writes the Pricing tab makes, so both screens always agree.
-    const chat = getSavedRate(astrologerId, 'chat') ?? astrologerServices.chatPricePerMinute
-    saveConsultationPricing(astrologerId, { call: value, chat })
-    actions.updateAstrologerServices({ callPricePerMinute: value })
-  }
+  const showToast = (message) => setToast({ id: Date.now(), message })
+  const dismissToast = useCallback(() => setToast(null), [])
+  const lastSimulatedAt = useRef(0)
 
-  // Adds the next demo caller; with nobody waiting they ring straight away, otherwise they join the back of the queue.
-  const addCaller = () => {
+  // "Simulate Incoming Call": rings the next sample caller as the incoming call. It never places a real call,
+  // never touches a wallet or payment, and is ignored while a call is in progress or on a rapid double click.
+  const simulateCall = () => {
     setError('')
-    addSimulatedCaller(astrologerId, currentUser?.name, inUseIds)
+    if (active) { showToast('Finish the current call before simulating another.'); return }
+    if (Date.now() - lastSimulatedAt.current < 1200) return
+    const request = simulateIncomingCall(astrologerId, currentUser?.name, waiting, inUseIds)
+    if (!request) { showToast('All sample callers are already waiting.'); return }
+    lastSimulatedAt.current = Date.now()
+    showToast(`Incoming call from ${request.userName}`)
   }
 
   // First visit in a browser session: Arjun K. rings and Sneha M. / Vikram R. wait behind, so the live console is visible straight away.
@@ -93,7 +99,9 @@ export default function InstantCallConsole() {
 
   return (
     <div className="icc">
-      <CallKpiStrip rate={rate} onSaveRate={saveRate} stats={stats} waitingCount={waiting.length} onCall={Boolean(active)} onSimulate={addCaller} canSimulate={canAdd} />
+      <SimulateCallButton onClick={simulateCall} />
+      <CallToast toast={toast} onDismiss={dismissToast} />
+      <CallKpiStrip rate={rate} stats={stats} />
       {notice && <p className="icc-notice" role="status"><CheckCircle2 size={15} /> {notice}</p>}
       <div className="icc-split">
         <div className="icc-split__main">
@@ -104,7 +112,7 @@ export default function InstantCallConsole() {
               : <section className="icc-card icc-idle" aria-label="No incoming calls"><PhoneOff size={22} aria-hidden="true" /><div><strong>No incoming calls</strong><p className="icc-muted">You&apos;re available. New callers appear here the moment they request a call.</p></div></section>}
           {active && error && <p className="icc-error" role="alert">{error}</p>}
         </div>
-        <WaitingQueuePanel queue={queue} waits={waits} canAdd={canAdd} onAdd={addCaller} />
+        <WaitingQueuePanel queue={queue} waits={waits} repeatIds={repeatIds} />
       </div>
       <CallHistoryTable sessions={sessions} astrologerId={astrologerId} />
     </div>
