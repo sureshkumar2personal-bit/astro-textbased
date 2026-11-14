@@ -1,11 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Headphones, IndianRupee } from 'lucide-react'
+import { IndianRupee, MessageCircle } from 'lucide-react'
 import PageHeader from '../../../components/ui/PageHeader.jsx'
 import '../../../css/astrologer/wallet-dashboard.css'
 import './consultation.css'
 
 const TABS = [
-  { to: 'instant-call', label: 'Instant Call', icon: Headphones },
+  { to: 'instant-chat', label: 'Instant Chat', icon: MessageCircle },
   { to: 'pricing', label: 'Pricing', icon: IndianRupee },
 ]
 

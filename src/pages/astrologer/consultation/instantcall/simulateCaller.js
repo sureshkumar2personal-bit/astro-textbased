@@ -5,7 +5,7 @@ import { SIMULATED_CALLERS, headOfQueueTime, nextSimulatedCaller } from '../../.
 export function queueCaller(caller, astrologerId, astrologerName) {
   const created = createInstantConsultation({
     type: 'call', userId: caller.userId, userName: caller.userName, astrologerId, astrologerName: astrologerName || 'Astrologer',
-    durationMinutes: caller.durationMinutes, language: caller.language, topic: caller.topic, birthDetails: caller.birthDetails,
+    durationMinutes: caller.durationMinutes, language: caller.language, topic: caller.topic, birthDetails: caller.birthDetails, bypassAvailability: true,
   })
   const patch = { isSimulated: true, walletBalance: caller.walletBalance, paymentMethod: 'SIMULATED – no payment', amountPaid: 0, transactionId: `SIM-${created.id.slice(0, 8)}` }
   // Seeded callers look like they have already been waiting a few seconds, in a fixed order.

@@ -30,9 +30,9 @@ export function clearTestIncomingCall() {
 }
 
 const WAITING_DEMO_USERS = [
-  { id: 'test-waiting-anitha', name: 'Anitha R.' },
-  { id: 'test-waiting-divya', name: 'Divya M.' },
-  { id: 'test-waiting-kumar', name: 'Kumar S.' },
+  { id: 'test-waiting-anitha', name: 'Anitha R.', birth: { gender: 'Female', dob: '1992-04-18', time: '07:20', place: 'Madurai, Tamil Nadu, India', latitude: 9.9252, longitude: 78.1198, timezone: 'Asia/Kolkata' } },
+  { id: 'test-waiting-divya', name: 'Divya M.', birth: { gender: 'Female', dob: '1996-11-03', time: '21:10', place: 'Coimbatore, Tamil Nadu, India', latitude: 11.0168, longitude: 76.9558, timezone: 'Asia/Kolkata' } },
+  { id: 'test-waiting-kumar', name: 'Kumar S.', birth: { gender: 'Male', dob: '1989-09-27', time: '05:45', place: 'Chennai, Tamil Nadu, India', latitude: 13.0827, longitude: 80.2707, timezone: 'Asia/Kolkata' } },
 ]
 
 /** Keeps a few flagged chat requests ringing so the "Users Waiting to Connect" banner shows in the live workspace. */
@@ -40,7 +40,7 @@ function seedWaitingUsers(astrologerId) {
   const live = getInstantConsultations().filter((request) => isTest(request) && request.type === 'chat' && request.status === 'ringing')
   WAITING_DEMO_USERS.forEach((user) => {
     if (live.some((request) => request.userId === user.id)) return
-    const created = createInstantConsultation({ type: 'chat', userId: user.id, userName: user.name, astrologerId, astrologerName: 'Dr. Rani', durationMinutes: 10, language: 'Tamil', topic: 'Career guidance' })
+    const created = createInstantConsultation({ type: 'chat', userId: user.id, userName: user.name, astrologerId, astrologerName: 'Dr. Rani', durationMinutes: 10, language: 'Tamil', topic: 'Career guidance', birthDetails: { name: user.name, ...user.birth, coordsPlace: user.birth.place }, bypassAvailability: true })
     updateInstantConsultation(created.id, { isTestRequest: true, paymentMethod: 'TEST – no payment', amountPaid: 0, transactionId: `TEST-${created.id.slice(0, 8)}` })
   })
 }
@@ -56,6 +56,7 @@ export function seedTestIncomingCall(astrologerId) {
   if (!user) return null
   const created = createInstantConsultation({
     type: 'call',
+    bypassAvailability: true, // demo seed for the astrologer's own dashboard; not a customer request
     userId: user.id,
     userName: user.name,
     astrologerId,

@@ -1,0 +1,17 @@
+.fcd { position: fixed; right: 24px; bottom: 24px; z-index: 60; display: flex; flex-direction: column; width: 328px; max-height: 420px; overflow: hidden; border: 1px solid #2e2923; border-radius: 14px; background: #0b0f1e; color: #e8ebf0; box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.35); }
+.fcd__head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #1c2133; background: #070914; color: #e5ac38; cursor: pointer; }
+.fcd__avatar { position: relative; display: grid; place-items: center; flex: 0 0 auto; width: 34px; height: 34px; border: 1.5px solid #e5ac38; border-radius: 50%; background: linear-gradient(145deg, #6d3b27, #172944); color: #f8df8a; font-size: 12px; font-weight: 800; }
+.fcd__avatar i { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border: 2px solid #070914; border-radius: 50%; background: #1cc7ad; }
+.fcd__who { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
+.fcd__who strong { overflow: hidden; color: #f1f3f8; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.fcd__who small { color: #8fa0b8; font-size: 11px; }
+.fcd__messages { display: flex; flex: 1 1 auto; flex-direction: column; gap: 6px; min-height: 140px; padding: 12px; overflow-y: auto; cursor: pointer; }
+.fcd__msg { max-width: 82%; margin: 0; padding: 7px 11px; border-radius: 16px; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
+.fcd__msg--in { align-self: flex-start; background: #151d37; }
+.fcd__msg--out { align-self: flex-end; background: #44321d; color: #fbeccb; }
+.fcd__empty { margin: auto; color: #8fa0b8; font-size: 12px; text-align: center; }
+.fcd__composer { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid #1c2133; }
+.fcd__composer input { flex: 1 1 auto; min-width: 0; height: 36px; padding: 0 14px; border: 1px solid #2a3148; border-radius: 18px; background: #0f1426; color: #e8ebf0; font-size: 13px; }
+.fcd__composer button { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #e5ac38; color: #1a1305; cursor: pointer; }
+.fcd__composer button:disabled { opacity: 0.4; cursor: default; }
+@media (max-width: 560px) { .fcd { right: 8px; left: 8px; width: auto; } }

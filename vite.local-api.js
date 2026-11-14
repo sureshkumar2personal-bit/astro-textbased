@@ -16,6 +16,7 @@ const MAX_BODY_BYTES = 1024 * 1024
 // Each entry is a list of alternatives; at least one variable of every group must be set.
 const REQUIRED_ENV = {
   consultations: [['KV_REST_API_URL', 'UPSTASH_REDIS_REST_URL'], ['KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_TOKEN']],
+  availability: [['KV_REST_API_URL', 'UPSTASH_REDIS_REST_URL'], ['KV_REST_API_TOKEN', 'UPSTASH_REDIS_REST_TOKEN']],
 }
 
 function readBody(req) {

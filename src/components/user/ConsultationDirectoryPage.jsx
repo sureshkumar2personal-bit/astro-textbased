@@ -6,6 +6,7 @@ import Section from '../ui/Section.jsx'
 import Card from '../ui/Card.jsx'
 import FilterBar from './FilterBar.jsx'
 import AstrologerCard from './AstrologerCard.jsx'
+import { liveServiceStatus, useAvailabilityVersion } from '../../utils/availabilityStore.js'
 import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 import { consultationAstrologers, getConsultationAvailabilityLabel } from '../../data/consultationAstrologers.js'
 import { getRoleRoutes } from '../../utils/roleRoutes.js'
@@ -47,9 +48,12 @@ export default function ConsultationDirectoryPage({ kind = 'chat' }) {
     ? 'Choose an astrologer who is currently available for a voice call.'
     : 'Choose an astrologer who is currently available for live chat.'
   const availabilityLabel = getConsultationAvailabilityLabel(kind)
+  // Chat / Call / DND switched off by the astrologer show as Offline here immediately (and the list refreshes itself).
+  const availabilityVersion = useAvailabilityVersion()
   const uniqueConsultationAstrologers = useMemo(
-    () => [...new Map(consultationAstrologers.map((astrologer) => [astrologer.id, astrologer])).values()],
-    [],
+    () => [...new Map(consultationAstrologers.map((astrologer) => [astrologer.id, astrologer])).values()]
+      .map((astrologer) => ({ ...astrologer, chatStatus: liveServiceStatus(astrologer.id, 'chat', astrologer.chatStatus), callStatus: liveServiceStatus(astrologer.id, 'call', astrologer.callStatus) })),
+    [availabilityVersion],
   )
 
   const availableAstrologers = useMemo(

@@ -90,6 +90,7 @@ import AstrologerLiveSessionShell, {
   AstrologerLiveSessionSummary,
 } from './pages/astrologer/live/AstrologerLiveSession.jsx'
 import { ScheduledLive, LiveHistory } from './pages/astrologer/live/LiveSessionLists.jsx'
+import ActiveChatConsultation from './pages/astrologer/consultation/ActiveChatConsultation.jsx'
 import ConsultationShell from './pages/astrologer/consultation/ConsultationShell.jsx'
 import InstantCallHistory from './pages/astrologer/consultation/InstantCallHistory.jsx'
 import InstantChatHistory from './pages/astrologer/consultation/InstantChatHistory.jsx'
@@ -230,6 +231,7 @@ function AstrologerRoutes() {
         <Route path="/astrologer/dispute-management" element={<DisputeManagement />} />
         <Route path="/astrologer/dispute-management/complaint/:complaintId" element={<ComplaintDetails />} />
         <Route path="/astrologer/activity" element={<AstrologerActivity />} />
+        <Route path="/astrologer/instant-chat/:sessionId" element={<ActiveChatConsultation />} />
         <Route path="/astrologer/consultation-history" element={<ConsultationHistory />} />
         <Route path="/astrologer/consultation" element={<ConsultationShell />}>
           <Route index element={<Navigate to="instant-call" replace />} />

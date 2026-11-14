@@ -20,7 +20,7 @@ import { SIGNS, computeChart } from '../utils/vedicChart.js'
 import { WeeklyTrendChart, ServicesDonut } from '../components/astrologer/AnalyticsCharts.jsx'
 import { buildServiceMix, buildWeeklyTrend } from '../utils/dashboardAnalytics.js'
 import { useAppData } from '../state/AppDataContext.jsx'
-import LiveConsultationWorkspace from './astrologer/consultation/LiveConsultationWorkspace.jsx'
+import FloatingChatDock from '../components/astrologer/FloatingChatDock.jsx'
 
 const GREETING_PERIODS = {
   morning: {
@@ -121,7 +121,7 @@ export default function Dashboard() {
 
   const pendingCallRequests = instantConsultations.filter((request) => (
     request.astrologerId === astrologerId
-    && request.type === 'call'
+    && (request.type === 'call' || request.type === 'chat')
     && request.status === 'ringing'
     && (request.isSimulated || Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS)
   ))
@@ -134,11 +134,6 @@ export default function Dashboard() {
   const analyticsSources = { instant: instantConsultations, consultations: allConsultations, questions: allQuestions, astrologerId }
   const weeklyTrend = buildWeeklyTrend(analyticsSources)
   const serviceMix = buildServiceMix({ ...analyticsSources, atonements: allAtonements })
-  const activeCallSession = instantConsultations.find((request) => (
-    request.astrologerId === astrologerId
-    && request.type === 'call'
-    && request.status === 'accepted'
-  )) || null
 
   // Re-read the stored request so a request that was already accepted, declined, cancelled or
   // expired can never be accepted (or declined) a second time.
@@ -146,6 +141,8 @@ export default function Dashboard() {
     const latest = getInstantConsultation(requestId)
     if (!latest || latest.status !== 'ringing') return
     updateInstantConsultation(requestId, { status: 'accepted', startedAt: new Date().toISOString() })
+    // Accepted chats open their own consultation page (refresh-safe by id). Accepted calls continue in the existing Instant Call page; the Dashboard never grows.
+    navigate(latest.type === 'chat' ? `/astrologer/instant-chat/${encodeURIComponent(requestId)}` : '/astrologer/consultation/instant-call')
   }
   const declineCall = (requestId) => {
     const latest = getInstantConsultation(requestId)
@@ -207,9 +204,10 @@ export default function Dashboard() {
         <section className="astrologer-consultation-queue" aria-labelledby="consultation-queue-title">
           <div className="astrologer-queue-heading">
             <span id="consultation-queue-title">● LIVE CONSULTATION REQUEST QUEUE</span>
-            <small>1 Incoming Call</small>
+            <small>1 Incoming {nextCallRequest.type === 'chat' ? 'Chat' : 'Call'}</small>
           </div>
           {[nextCallRequest].map((request) => {
+            const isChat = request.type === 'chat'
             // Rashi / Nakshatra are calculated from the caller's real birth details (not stored on the request).
             const queueChart = request.birthDetails ? computeChart(request.birthDetails) : null
             const moon = queueChart?.ok ? queueChart.planets.find((planet) => planet.key === 'moon') : null
@@ -218,25 +216,26 @@ export default function Dashboard() {
             const details = [rashi, nakshatra].filter(Boolean).join('  •  ')
             const avatar = request.userAvatar || request.userPhoto || request.profileImage
             return (
-              <div className="astrologer-queue-content" key={request.id}>
+              <div className={`astrologer-queue-content${isChat ? ' astrologer-queue-content--chat' : ''}`} key={request.id} data-request-type={request.type}>
                 <div className="astrologer-queue-avatar">
                   {avatar ? <img src={avatar} alt="" /> : requestInitials(request.userName)}
+                  {isChat && <span className="astrologer-queue-type-icon" aria-hidden="true"><MessageCircle size={11} /></span>}
                 </div>
                 <div className="astrologer-queue-person">
                   <strong>{request.userName || 'Astro Connect user'}</strong>
-                  <small>{details || 'Birth details not available'}  •  Instant Call</small>
-                  <span><b>Incoming:</b> {request.topic || 'Astrology consultation request'}  •  <b>Status:</b> Ringing</span>
+                  <small>{details || 'Birth details not available'}  •  {isChat ? 'Instant Chat' : 'Instant Call'}</small>
+                  <span><b>Incoming:</b> {request.topic || 'Astrology consultation request'}  •  <b>Status:</b> {isChat ? 'Chatting' : 'Ringing'}</span>
                 </div>
                 <div className="astrologer-queue-actions">
                   <button type="button" className="astrologer-queue-decline" onClick={() => declineCall(request.id)}>Decline</button>
-                  <button type="button" className="astrologer-queue-accept" onClick={() => acceptCall(request.id)}>Accept Call (₹{request.pricePerMinute || 0}/min)</button>
+                  <button type="button" className="astrologer-queue-accept" onClick={() => acceptCall(request.id)}>{isChat ? 'Accept Chat' : 'Accept Call'} (₹{request.pricePerMinute || 0}/min)</button>
                 </div>
               </div>
             )
           })}
         </section>
       )}
-      {activeCallSession && <LiveConsultationWorkspace key={activeCallSession.id} session={activeCallSession} />}
+      <FloatingChatDock astrologerId={astrologerId} />
       <Section id="quick-actions" title="Quick Actions" icon={Zap} sectionClassName="adash-quick-actions-section">
         <div className="adash-quick-actions">
           {quickActions.map(({ icon: Icon, label, route, onClick, accent }) => (
@@ -304,7 +303,6 @@ export default function Dashboard() {
         <section className="astrologer-analytics-panel astrologer-services-chart" aria-labelledby="services-mix-title">
           <div className="astrologer-analytics-heading"><h2 id="services-mix-title">CONSULTATION SERVICES MIX</h2></div>
           <ServicesDonut segments={serviceMix} />
-          <div className="astrologer-donut-legend"><span><i className="legend-call" />Instant Call</span><span><i className="legend-chat" />Instant Chat</span><span><i className="legend-text" />Text Answers</span><span><i className="legend-pooja" />Atonements</span></div>
         </section>
       </div>
 

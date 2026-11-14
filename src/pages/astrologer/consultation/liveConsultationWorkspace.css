@@ -216,3 +216,11 @@
 .lcw-waiting-all { flex: 0 0 auto; padding: 9px; border: 0; border-top: 1px solid #1c2133; background: transparent; color: #f5c451; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 @media (max-width: 1500px) { .lcw-waiting { gap: 9px; padding: 4px 10px; font-size: 13px; } .lcw-waiting::before, .lcw-waiting::after { display: none; } }
 @media (max-width: 760px) { .lcw-waiting__text { display: none; } .lcw-waiting-error { margin-left: 8px; } }
+
+/* Dedicated chat page: fit the viewport so the page never scrolls; only the message list does. */
+.active-chat-page .lcw { height: calc(100vh - 290px); min-height: 520px; margin-bottom: 0; }
+.active-chat-page .lcw-chat-header { position: sticky; top: 0; z-index: 3; }
+@media (max-width: 1100px) {
+  .active-chat-page .lcw { height: auto; }
+  .active-chat-page .lcw-right { height: calc(100vh - 140px); min-height: 520px; }
+}
