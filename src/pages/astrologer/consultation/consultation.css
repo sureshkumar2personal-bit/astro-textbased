@@ -38,3 +38,52 @@
 }
 .consult-row { cursor: pointer; }
 .consult-row:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* Warm dark-brown shell for the Consultation section (Instant Call / Instant Chat / Pricing). */
+.app-shell--astrologer:has(.consult-page) .main-column,
+.app-shell--astrologer:has(.consult-page) .page-content { background-color: #0E0C0A; }
+.app-shell--astrologer:has(.consult-page) .sidebar { background: #16100A; border-right: 1px solid #3E2D1C; }
+.consult-page .page-title { color: #FFFFFF; }
+.consult-page .page-header-back button { color: #E5E7EB; }
+.consult-page .wd-tab.is-active { color: #F5A623; }
+.consult-page .wd-tab.is-active::after { height: 2px; background: #F5A623; }
+
+/* ---- Contrast + consistency refinements for the warm dark theme ---- */
+.consult-page .page-title { color: #FFFFFF; -webkit-text-fill-color: #FFFFFF; background: none; text-shadow: none; opacity: 1; }
+.consult-page .page-header-back button { min-height: 38px; padding: 0 16px; border: 1px solid #3E2D1C; border-radius: 10px; background: transparent; color: #FFFFFF; }
+.consult-page .page-header-back button:hover { border-color: #F5A623; background: rgba(245, 166, 35, .12); color: #FFFFFF; transform: none; }
+.app-shell--astrologer:has(.consult-page) .sidebar-link { color: #E6D9C6; }
+.app-shell--astrologer:has(.consult-page) .sidebar-link svg { color: #F0C987; stroke: currentColor; }
+.app-shell--astrologer:has(.consult-page) .sidebar-link:not(.active):hover { background: rgba(245, 166, 35, .12); color: #FFFFFF; }
+.app-shell--astrologer:has(.consult-page) .sidebar-link:not(.active):hover svg { color: #F5A623; }
+.app-shell--astrologer:has(.consult-page) .sidebar-link.active { background: linear-gradient(135deg, #F5A623 0%, #D98A06 100%); color: #1A1208; font-weight: 800; box-shadow: 0 4px 16px rgba(245, 166, 35, .3); }
+.app-shell--astrologer:has(.consult-page) .sidebar-link.active svg { color: #1A1208; }
+.app-shell--astrologer:has(.consult-page) .astrologer-dnd-toggle { border-color: #3E2D1C; background: #1D160E; color: #F3ECE2; }
+.consult-page .wd-tab { color: #D9CBB5; }
+.consult-page .wd-tab:hover { color: #FFFFFF; }
+.consult-page .wd-tab.is-active { color: #F5A623; }
+.consult-page .wd-tabs { border-bottom-color: #3E2D1C; }
+
+/* ---- Pricing: Consultation Rate Settings card ---- */
+.rate-card { padding: 36px 36px 40px; border: 1px solid #3E2D1C; border-radius: 24px; background: #241A10; color: #FFF8EC; }
+.rate-card__title { margin: 0 0 18px; color: #FFF8EC; font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
+.rate-card__desc { max-width: 620px; margin: 0 0 24px; color: #9a8870; font-size: 17px; line-height: 1.55; }
+.rate-card__row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px 18px; }
+.rate-card__field { display: grid; gap: 10px; }
+.rate-card__field label { color: #CDBFA9; font-size: 16px; font-weight: 600; }
+.rate-card__field input { width: 216px; max-width: 100%; height: 56px; padding: 0 18px; border: 1px solid #3E2D1C; border-radius: 16px; background: #16100A; color: #FFF8EC; font: inherit; font-size: 20px; font-weight: 800; color-scheme: dark; }
+.rate-card__field input:focus { outline: 2px solid #F5A623; outline-offset: 2px; border-color: #F5A623; }
+.rate-card__field small { color: #8f7e66; font-size: 12.5px; }
+.rate-card__save { align-self: flex-start; margin-top: 36px; height: 48px; padding: 0 26px; border: 0; border-radius: 14px; background: linear-gradient(180deg, #F8B02B 0%, #E08E12 100%); color: #1A1208; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 6px 22px rgba(245, 166, 35, .38); cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+.rate-card__save:hover { filter: brightness(1.07); transform: translateY(-1px); box-shadow: 0 8px 26px rgba(245, 166, 35, .5); }
+.rate-card__save:focus-visible { outline: 2px solid #FFF8EC; outline-offset: 3px; }
+.rate-card .consult-message { margin-top: 20px; }
+.rate-card .consult-message--ok { color: #4ADE80; }
+.rate-card .consult-message--error { color: #F87171; }
+@media (max-width: 720px) {
+  .rate-card { padding: 22px 18px 26px; border-radius: 18px; }
+  .rate-card__title { font-size: 23px; }
+  .rate-card__desc { font-size: 15px; }
+  .rate-card__field, .rate-card__field input { width: 100%; }
+  .rate-card__save { width: 100%; margin-top: 4px; }
+}

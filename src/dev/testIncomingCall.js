@@ -1,4 +1,4 @@
-// TEMPORARY, development-only. Seeds one flagged test request into the existing instant-consultation
+// Demo/dev only (also runs on the Vercel demo host; see docs/DEMO_DEPLOYMENT.md). Seeds one flagged test request into the existing instant-consultation
 // store so the real Live Consultation Request Queue shows a card and the real Accept Call handler
 // opens the real workspace. It never touches the wallet or payments, and it only ever creates,
 // replaces or removes records flagged `isTestRequest`.
@@ -29,11 +29,27 @@ export function clearTestIncomingCall() {
   return all.length - kept.length
 }
 
+const WAITING_DEMO_USERS = [
+  { id: 'test-waiting-anitha', name: 'Anitha R.' },
+  { id: 'test-waiting-divya', name: 'Divya M.' },
+  { id: 'test-waiting-kumar', name: 'Kumar S.' },
+]
+
+/** Keeps a few flagged chat requests ringing so the "Users Waiting to Connect" banner shows in the live workspace. */
+function seedWaitingUsers(astrologerId) {
+  const live = getInstantConsultations().filter((request) => isTest(request) && request.type === 'chat' && request.status === 'ringing')
+  WAITING_DEMO_USERS.forEach((user) => {
+    if (live.some((request) => request.userId === user.id)) return
+    const created = createInstantConsultation({ type: 'chat', userId: user.id, userName: user.name, astrologerId, astrologerName: 'Dr. Rani', durationMinutes: 10, language: 'Tamil', topic: 'Career guidance' })
+    updateInstantConsultation(created.id, { isTestRequest: true, paymentMethod: 'TEST – no payment', amountPaid: 0, transactionId: `TEST-${created.id.slice(0, 8)}` })
+  })
+}
+
 /** Seeds one ringing test call for the astrologer unless a live test request already exists. */
 export function seedTestIncomingCall(astrologerId) {
   if (astrologerId !== ASTROLOGER_ID) return null
   const live = getInstantConsultations().find((request) => isTest(request) && (request.status === 'accepted' || (request.status === 'ringing' && Date.now() - new Date(request.createdAt).getTime() < RING_MS)))
-  if (live) return live
+  if (live) { seedWaitingUsers(astrologerId); return live }
   clearTestIncomingCall() // drop finished/expired test records so history stays clean
 
   const user = readUsers().find((entry) => entry.id === TEST_USER_ID)
@@ -58,7 +74,9 @@ export function seedTestIncomingCall(astrologerId) {
     },
   })
   // Flag it as test data. Nothing was debited: createInstantConsultation is a pure record write.
-  return updateInstantConsultation(created.id, { isTestRequest: true, paymentMethod: 'TEST – no payment', amountPaid: 0, transactionId: `TEST-${created.id.slice(0, 8)}` })
+  const flagged = updateInstantConsultation(created.id, { isTestRequest: true, paymentMethod: 'TEST – no payment', amountPaid: 0, transactionId: `TEST-${created.id.slice(0, 8)}` })
+  seedWaitingUsers(astrologerId)
+  return flagged
 }
 
 if (typeof window !== 'undefined') window.clearTestIncomingCall = clearTestIncomingCall

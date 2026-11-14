@@ -29,3 +29,5 @@ this is for the test
 __pycache__/
 *.pyc
 monitor_*.py
+.vercel
+.env*

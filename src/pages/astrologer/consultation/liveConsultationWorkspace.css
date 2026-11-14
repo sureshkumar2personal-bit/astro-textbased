@@ -191,25 +191,28 @@
 .lcw-waiting__avatars .lcw-avatar:first-child { margin-left: 0; }
 @keyframes lcw-waiting-pulse { 0%, 100% { box-shadow: 0 0 14px rgba(245, 183, 47, .35), inset 0 0 12px rgba(245, 183, 47, .12); } 50% { box-shadow: 0 0 0 6px rgba(245, 183, 47, .25), 0 0 26px rgba(245, 183, 47, .7), inset 0 0 12px rgba(245, 183, 47, .2); } }
 @media (prefers-reduced-motion: reduce) { .lcw-waiting.is-new { animation: none; } }
-.lcw-waiting-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; display: flex; flex-direction: column; width: min(380px, calc(100vw - 32px)); overflow: hidden; border: 1px solid #3a3320; border-radius: 12px; background: #0a0d18; box-shadow: 0 12px 28px rgba(0, 0, 0, .5); }
+.lcw-waiting-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; display: flex; flex-direction: column; width: min(480px, calc(100vw - 32px)); overflow: hidden; border: 1px solid #5a4a24; border-radius: 12px; background: #0a0d18; box-shadow: 0 12px 28px rgba(0, 0, 0, .5); }
 .lcw-waiting-panel header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #1c2133; }
 .lcw-waiting-panel header strong { color: #fde08d; font-size: 13px; letter-spacing: .04em; }
 .lcw-waiting-panel header span { min-width: 22px; padding: 1px 8px; border-radius: 999px; background: #3a2f12; color: #fde08d; font-size: 12px; font-weight: 700; text-align: center; }
 .lcw-waiting-list { flex: 1 1 auto; min-height: 0; margin: 0; padding: 6px; overflow-y: auto; overscroll-behavior: contain; list-style: none; }
 .lcw-waiting-list li { border-radius: 8px; }
+.lcw-waiting-list li + li { border-top: 1px solid #1c2133; }
 .lcw-waiting-list li:hover { background: #12162a; }
-.lcw-waiting-row { display: flex; align-items: center; gap: 10px; padding: 8px; }
-.lcw-waiting-row__main { flex: 1 1 auto; min-width: 0; }
+.lcw-waiting-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 8px; }
+.lcw-waiting-row__main { flex: 1 1 110px; min-width: 0; }
 .lcw-waiting-row__main strong { display: block; overflow: hidden; color: #fff; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .lcw-waiting-row__main small { color: #98a0b3; font-size: 11.5px; }
 .lcw-waiting-status { flex: 0 0 auto; padding: 2px 8px; border: 1px solid #5a4a24; border-radius: 999px; background: #362d1e; color: #fde08d; font-size: 10.5px; font-style: normal; font-weight: 700; }
-.lcw-waiting-actions { display: flex; gap: 8px; margin: 0 8px 8px 52px; }
-.lcw-waiting-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-width: 0; height: 30px; padding: 0 10px; border: 1px solid transparent; border-radius: 8px; font-size: 12.5px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: filter .15s ease, opacity .15s ease; }
+.lcw-waiting-actions { display: flex; flex: 0 0 auto; gap: 6px; }
+.lcw-waiting-actions button { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 5px; height: 28px; padding: 0 10px; border: 1px solid transparent; border-radius: 8px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: filter .15s ease, opacity .15s ease; }
 .lcw-waiting-actions button:hover:not(:disabled) { filter: brightness(1.12); }
 .lcw-waiting-actions button:disabled { opacity: .55; cursor: not-allowed; }
-.lcw-waiting-accept { border-color: #1f9d55; background: #16a34a; color: #fff; }
-.lcw-waiting-decline { border-color: #b42323; background: #dc2626; color: #fff; }
+.lcw-waiting-actions .lcw-waiting-accept { border-color: #16a34a; background: #16a34a; color: #fff; }
+.lcw-waiting-actions .lcw-waiting-accept:hover:not(:disabled) { border-color: #15803d; background: #15803d; filter: none; }
+.lcw-waiting-actions .lcw-waiting-decline { border-color: #dc2626; background: #dc2626; color: #fff; }
+.lcw-waiting-actions .lcw-waiting-decline:hover:not(:disabled) { border-color: #b91c1c; background: #b91c1c; filter: none; }
 .lcw-waiting-error { margin: -2px 8px 8px 52px; color: #fca5a5; font-size: 11.5px; }
 .lcw-waiting-all { flex: 0 0 auto; padding: 9px; border: 0; border-top: 1px solid #1c2133; background: transparent; color: #f5c451; font-size: 12.5px; font-weight: 700; cursor: pointer; }
 @media (max-width: 1500px) { .lcw-waiting { gap: 9px; padding: 4px 10px; font-size: 13px; } .lcw-waiting::before, .lcw-waiting::after { display: none; } }
-@media (max-width: 760px) { .lcw-waiting__text { display: none; } .lcw-waiting-status { display: none; } .lcw-waiting-actions, .lcw-waiting-error { margin-left: 8px; } }
+@media (max-width: 760px) { .lcw-waiting__text { display: none; } .lcw-waiting-error { margin-left: 8px; } }

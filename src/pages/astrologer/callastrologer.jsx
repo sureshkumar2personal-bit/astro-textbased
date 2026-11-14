@@ -1,11 +1,10 @@
-import { Check, Clock3, MessageCircle, Phone, PhoneOff } from 'lucide-react'
+import { Clock3, MessageCircle, PhoneOff } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext.jsx'
 import {
   getConsultationSecondsLeft,
   getConsultationTotalMinutes,
-  getInstantConsultation,
   getInstantConsultations,
   subscribeToInstantConsultations,
   updateInstantConsultation,
@@ -33,7 +32,7 @@ export default function CallAstrologer() {
     [astrologerId, requests],
   )
 
-  const pending = useMemo(() => calls.find((request) => request.status === 'ringing'), [calls])
+  // Ringing calls get no floating card: they are answered from the dashboard request queue / Waiting Users list.
   const active = useMemo(() => calls.find((request) => request.status === 'accepted'), [calls])
 
   // Counts down to zero and stops there. The call is deliberately left open at
@@ -46,10 +45,6 @@ export default function CallAstrologer() {
     return () => window.clearInterval(timer)
   }, [active])
 
-  // Re-read the stored request so an already accepted/declined/expired call is never answered twice.
-  const stillRinging = (request) => getInstantConsultation(request.id)?.status === 'ringing'
-  const accept = () => pending && stillRinging(pending) && updateInstantConsultation(pending.id, { status: 'accepted', startedAt: new Date().toISOString() })
-  const reject = () => pending && stillRinging(pending) && updateInstantConsultation(pending.id, { status: 'rejected', rejectedAt: new Date().toISOString() })
   const end = () => active && updateInstantConsultation(active.id, { status: 'ended', endedAt: new Date().toISOString() })
 
   const sendMessage = () => {
@@ -60,26 +55,13 @@ export default function CallAstrologer() {
     setMessage('')
   }
 
-  // The Dashboard (/astrologer) shows the request queue and the live consultation workspace
-  // for calls, so this floating panel would duplicate them there.
-  if (pathname === '/astrologer') return null
-  if (!pending && !active) return null
+  // The Dashboard (/astrologer) and the Instant Call Console show the request queue and the live call
+  // workspace themselves, so this floating panel would duplicate them there.
+  if (pathname === '/astrologer' || pathname.startsWith('/astrologer/consultation/instant-call')) return null
+  if (!active) return null
 
   return (
     <aside className="call-astrologer-panel" aria-live="polite">
-      {pending && (
-        <section className="call-astrologer-request">
-          <div className="call-astrologer-icon"><Phone size={22} /></div>
-          <span className="call-astrologer-badge">INSTANT CALL</span>
-          <h2>{pending.userName} is calling</h2>
-          <p><Clock3 size={14} /> {getConsultationTotalMinutes(pending)} min booked</p>
-          <div className="call-astrologer-actions">
-            <button type="button" className="call-astrologer-accept" onClick={accept}><Check size={17} /> Accept</button>
-            <button type="button" className="call-astrologer-reject" onClick={reject}><PhoneOff size={17} /> Reject</button>
-          </div>
-        </section>
-      )}
-
       {active && (
         <section className="call-astrologer-active">
           <header>

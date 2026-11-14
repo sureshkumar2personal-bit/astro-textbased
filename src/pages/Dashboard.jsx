@@ -95,7 +95,7 @@ export default function Dashboard() {
       const now = Date.now()
       const consultations = getInstantConsultations()
       consultations
-        .filter((request) => request.type === 'call' && request.status === 'ringing' && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
+        .filter((request) => request.type === 'call' && request.status === 'ringing' && !request.isSimulated && now - new Date(request.createdAt).getTime() >= INCOMING_CALL_TIMEOUT_MS)
         .forEach((request) => updateInstantConsultation(request.id, { status: 'expired', expiredAt: new Date().toISOString() }))
       setInstantConsultations(getInstantConsultations())
     }
@@ -109,10 +109,11 @@ export default function Dashboard() {
     }
   }, [])
 
-  // TEMPORARY dev-only test request (flagged isTestRequest). Tree-shaken from production builds.
+  // Demo/dev test request (flagged isTestRequest, local to this browser, never synced). The Vercel host is a
+  // demo site, so this also runs there; set VITE_DEMO_MODE=false to turn it off. See docs/DEMO_DEPLOYMENT.md.
   // Remove with `window.clearTestIncomingCall()` in the console, or delete src/dev and this effect.
   useEffect(() => {
-    if (!import.meta.env.DEV) return
+    if (!import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'false') return
     import('../dev/testIncomingCall.js').then((module) => {
       module.seedTestIncomingCall(astrologerId)
     })
@@ -122,7 +123,7 @@ export default function Dashboard() {
     request.astrologerId === astrologerId
     && request.type === 'call'
     && request.status === 'ringing'
-    && Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS
+    && (request.isSimulated || Date.now() - new Date(request.createdAt).getTime() < INCOMING_CALL_TIMEOUT_MS)
   ))
   const { questions: allQuestions, consultations: allConsultations, atonements: allAtonements } = useAppData()
   const analyticsSources = { instant: instantConsultations, consultations: allConsultations, questions: allQuestions, astrologerId }
