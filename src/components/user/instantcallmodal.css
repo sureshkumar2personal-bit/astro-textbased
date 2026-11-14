@@ -653,6 +653,98 @@ html[data-theme='dark'] .instant-call-pulse--busy {
   background: #f59e0b !important;
 }
 
+/* Dark theme support for topbar active call indicator chip */
+html[data-theme='dark'] .active-call-chip {
+  background: #231c18;
+  border-color: #3d3028;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme='dark'] .active-call-chip__pulse {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+html[data-theme='dark'] .active-call-chip__text strong {
+  color: #fffdf9;
+}
+
+html[data-theme='dark'] .active-call-chip__text small {
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .active-call-chip__reopen:hover {
+  background: #2f2520;
+}
+
+html[data-theme='dark'] .active-call-chip__close {
+  border-left-color: #3d3028;
+  color: #c8b79b;
+}
+
+html[data-theme='dark'] .active-call-chip__close:hover {
+  background: #2f2520;
+  color: #f87171;
+}
+
+/* Time Up State in Dark Mode */
+html[data-theme='dark'] .active-call-chip.is-timeup {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: #2a1e16 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-timeup .active-call-chip__pulse {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-timeup .active-call-chip__text strong {
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-timeup .active-call-chip__text small {
+  color: #e5d5c0 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-timeup .active-call-chip__close {
+  border-left-color: rgba(245, 158, 11, 0.3) !important;
+  color: #c8b79b !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-timeup .active-call-chip__close:hover {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #f87171 !important;
+}
+
+/* Ringing State in Dark Mode */
+html[data-theme='dark'] .active-call-chip.is-ringing {
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: #2a1e16 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-ringing .active-call-chip__pulse {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-ringing .active-call-chip__text strong {
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-ringing .active-call-chip__text small {
+  color: #e5d5c0 !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-ringing .active-call-chip__close {
+  border-left-color: rgba(245, 158, 11, 0.3) !important;
+  color: #c8b79b !important;
+}
+
+html[data-theme='dark'] .active-call-chip.is-ringing .active-call-chip__close:hover {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #f87171 !important;
+}
+
 @keyframes pulse-busy {
   0% {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
