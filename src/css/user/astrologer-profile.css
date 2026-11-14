@@ -186,6 +186,12 @@
   border: 1px solid #fde68a;
 }
 
+html[data-theme='dark'] .astro-hero-busy-badge {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
 .astro-hero-subtitle {
   font-size: 14px;
   color: var(--muted, #64748b);
@@ -1320,8 +1326,40 @@ html[data-theme='dark'] .astro-hero-bio-snippet,
 html[data-theme='dark'] .astro-consult-desc,
 html[data-theme='dark'] .astro-service-desc,
 html[data-theme='dark'] .astro-about-text,
-html[data-theme='dark'] .astro-review-text {
-  color: #cbd5e1;
+html[data-theme='dark'] .astro-review-text,
+html[data-theme='dark'] .astro-review-entry-card p,
+html[data-theme='dark'] .astro-about-card p {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme='dark'] .astro-stat-label,
+html[data-theme='dark'] .astro-hero-subtitle,
+html[data-theme='dark'] .astro-hero-meta-row,
+html[data-theme='dark'] .appointment-subscription-hint {
+  color: #94a3b8 !important;
+}
+
+html[data-theme='dark'] .astro-hero-meta-row strong {
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .astro-tab-pill-btn {
+  color: #94a3b8 !important;
+}
+
+html[data-theme='dark'] .astro-tab-pill-btn:hover {
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme='dark'] .astro-tab-pill-btn.is-active {
+  background: rgba(143, 77, 255, 0.18) !important;
+  color: #c084fc !important;
+}
+
+html[data-theme='dark'] .astro-tab-badge {
+  background: rgba(143, 77, 255, 0.25) !important;
+  color: #d8b4fe !important;
 }
 
 html[data-theme='dark'] .astro-pill-tag {
@@ -1444,8 +1482,9 @@ html[data-theme='dark'] .astro-btn-grayed:disabled {
 
 .astro-consult-action-btn--busy {
   background: #fef3c7 !important;
+  background-image: none !important;
   color: #b45309 !important;
-  border: 1px solid #fde68a !important;
+  border: 1.5px solid #fde68a !important;
   font-weight: 700 !important;
   box-shadow: none !important;
   animation: none !important;
@@ -1457,13 +1496,29 @@ html[data-theme='dark'] .astro-btn-grayed:disabled {
 
 .astro-consult-action-btn--busy:hover {
   background: #fde68a !important;
+  background-image: none !important;
   color: #92400e !important;
 }
 
 html[data-theme='dark'] .astro-consult-action-btn--busy {
-  background: rgba(245, 158, 11, 0.15) !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  background-image: none !important;
   color: #fbbf24 !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15) !important;
+}
+
+html[data-theme='dark'] .astro-consult-action-btn--busy:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  background-image: none !important;
+  color: #fde68a !important;
+  border-color: #f59e0b !important;
+}
+
+html[data-theme='dark'] .astro-online-indicator.astro-busy-indicator {
+  background: #f59e0b !important;
+  border-color: #181326 !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.4) !important;
 }
 
 @media (max-width: 768px) {

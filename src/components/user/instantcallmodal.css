@@ -614,6 +614,45 @@
   animation: pulse-busy 1.6s infinite;
 }
 
+html[data-theme='dark'] .instant-call-status--busy {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme='dark'] .instant-call-waiting--queue {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+html[data-theme='dark'] .instant-call-queue-badge {
+  background: rgba(245, 158, 11, 0.22) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme='dark'] .instant-call-queue-title {
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .instant-call-queue-estimate {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+  color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .instant-call-queue-estimate strong {
+  color: #fef08a !important;
+}
+
+html[data-theme='dark'] .instant-call-queue-hint {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme='dark'] .instant-call-pulse--busy {
+  background: #f59e0b !important;
+}
+
 @keyframes pulse-busy {
   0% {
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);

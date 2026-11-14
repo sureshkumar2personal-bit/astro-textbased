@@ -2407,6 +2407,21 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   line-height: 1.2;
 }
 
+html[data-theme='dark'] .astrologer-card__busy-badge {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+html[data-theme='dark'] .astrologer-card.is-busy {
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+html[data-theme='dark'] .astrologer-card__status--busy {
+  background: #f59e0b !important;
+  box-shadow: 0 0 0 2px #1f1610, 0 0 0 4px rgba(245, 158, 11, 0.4) !important;
+}
+
 .astrologer-card__action--busy {
   background: #fffbeb !important;
   color: #b45309 !important;
@@ -2415,9 +2430,22 @@ button.user-profile-astro-row { width: 100%; font: inherit; text-align: left; cu
   font-weight: 700 !important;
 }
 
+html[data-theme='dark'] .astrologer-card__action--busy {
+  background: rgba(245, 158, 11, 0.18) !important;
+  background-image: none !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
 .astrologer-card__action--busy:hover {
   background: #fef3c7 !important;
   color: #92400e !important;
+  border-color: #f59e0b !important;
+}
+
+html[data-theme='dark'] .astrologer-card__action--busy:hover {
+  background: rgba(245, 158, 11, 0.28) !important;
+  color: #fde68a !important;
   border-color: #f59e0b !important;
 }
 

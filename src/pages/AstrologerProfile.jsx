@@ -869,7 +869,13 @@ export default function AstrologerProfile() {
               </button>
               <button
                 type="button"
-                className={`btn astro-consult-action-btn ${isCallAvailable || liveCall.isBusy ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'} ${liveCall.isBusy ? 'astro-consult-action-btn--busy' : ''}`}
+                className={`btn astro-consult-action-btn ${
+                  liveCall.isBusy
+                    ? 'astro-consult-action-btn--busy'
+                    : isCallAvailable
+                      ? 'btn-primary astro-btn-shining-border'
+                      : 'astro-btn-grayed'
+                }`}
                 disabled={!isCallAvailable && !liveCall.isBusy}
                 title={liveCall.isBusy ? `Line Busy · ${liveCall.waitLabel}` : isCallAvailable ? 'Online & Available for Instant Call' : 'Currently Unavailable for Instant Call'}
                 onClick={() => (isCallAvailable || liveCall.isBusy) && openInstantCall(astrologer.id)}
@@ -878,7 +884,13 @@ export default function AstrologerProfile() {
               </button>
               <button
                 type="button"
-                className={`btn astro-consult-action-btn ${isChatAvailable || liveChat.isBusy ? 'btn-primary astro-btn-shining-border' : 'astro-btn-grayed'} ${liveChat.isBusy ? 'astro-consult-action-btn--busy' : ''}`}
+                className={`btn astro-consult-action-btn ${
+                  liveChat.isBusy
+                    ? 'astro-consult-action-btn--busy'
+                    : isChatAvailable
+                      ? 'btn-primary astro-btn-shining-border'
+                      : 'astro-btn-grayed'
+                }`}
                 disabled={!isChatAvailable && !liveChat.isBusy}
                 title={liveChat.isBusy ? `Busy in chat · ${liveChat.waitLabel}` : isChatAvailable ? 'Online & Available for Instant Chat' : 'Currently Unavailable for Instant Chat'}
                 onClick={() => (isChatAvailable || liveChat.isBusy) && openInstantChat(astrologer.id)}
