@@ -1273,6 +1273,194 @@ html[data-theme='dark'] .astro-hero-busy-badge {
 }
 
 /* --------------------------------------------------------------------------
+   7b. Astrologer Posts & Feed Elements
+   -------------------------------------------------------------------------- */
+.astrologer-post-card {
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border, rgba(0, 0, 0, 0.08));
+  background: var(--surface, #ffffff);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.astrologer-post-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.astrologer-post-card--violet {
+  border-top: 3.5px solid #8b5cf6 !important;
+}
+
+.astrologer-post-card--coral {
+  border-top: 3.5px solid #fb7185 !important;
+}
+
+.astrologer-post-card--gold {
+  border-top: 3.5px solid #f59e0b !important;
+}
+
+.astrologer-post-card h3 {
+  margin: 12px 0 6px;
+  color: var(--ink, #1f1b2d);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.astrologer-post-card > p {
+  margin: 0;
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.astrologer-content-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.astrologer-content-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary, #8f4dff), #6d28d9);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.astrologer-content-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.astrologer-content-card__top span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.astrologer-content-card__top b {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink, #1f1b2d);
+}
+
+.astrologer-content-card__top small {
+  font-size: 11px;
+  color: var(--muted, #94a3b8);
+}
+
+.astrologer-post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-border, rgba(0, 0, 0, 0.07));
+}
+
+.astrologer-post-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--text-secondary, #64748b);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.astrologer-post-actions button:hover {
+  background: var(--violet-50, rgba(143, 77, 255, 0.08));
+  color: var(--primary, #8f4dff);
+  border-color: rgba(143, 77, 255, 0.25);
+}
+
+.astrologer-post-actions button.is-active {
+  background: rgba(143, 77, 255, 0.12);
+  color: var(--primary, #8f4dff);
+  border-color: rgba(143, 77, 255, 0.3);
+}
+
+.astrologer-comment-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-border, rgba(0, 0, 0, 0.08));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.astrologer-comment {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-soft, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--surface-border, rgba(0, 0, 0, 0.06));
+}
+
+.astrologer-comment strong {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink, #1f1b2d);
+  margin-bottom: 2px;
+}
+
+.astrologer-comment p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-secondary, #64748b);
+}
+
+.astrologer-comment-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.astrologer-comment-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border, #cbd5e1);
+  background: var(--surface, #ffffff);
+  color: var(--ink, #1f1b2d);
+  font-size: 11.5px;
+}
+
+.astrologer-comment-input button {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--primary, #8f4dff);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.astrologer-comment-input button:hover {
+  filter: brightness(1.1);
+}
+
+/* --------------------------------------------------------------------------
    8. Dark Mode Refinements
    -------------------------------------------------------------------------- */
 html[data-theme='dark'] .astro-hero-card,
@@ -1282,9 +1470,12 @@ html[data-theme='dark'] .astro-service-card,
 html[data-theme='dark'] .astro-about-card,
 html[data-theme='dark'] .astro-reviews-summary-card,
 html[data-theme='dark'] .astro-review-entry-card,
-html[data-theme='dark'] .astro-segmented-tabs-bar {
-  background: var(--surface, #181326);
-  border-color: rgba(255, 255, 255, 0.08);
+html[data-theme='dark'] .astro-segmented-tabs-bar,
+html[data-theme='dark'] .astrologer-post-card,
+html[data-theme='dark'] .astrologer-live-card,
+html[data-theme='dark'] .astrologer-post-empty {
+  background: var(--surface, #181326) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 html[data-theme='dark'] .astro-hero-cover {
@@ -1373,6 +1564,91 @@ html[data-theme='dark'] .astro-share-btn {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.1);
   color: #f1f5f9;
+}
+
+html[data-theme='dark'] .astrologer-post-card--violet {
+  border-top-color: #a78bfa !important;
+}
+
+html[data-theme='dark'] .astrologer-post-card--coral {
+  border-top-color: #fb7185 !important;
+}
+
+html[data-theme='dark'] .astrologer-post-card--gold {
+  border-top-color: #fbbf24 !important;
+}
+
+html[data-theme='dark'] .astrologer-content-card__top b,
+html[data-theme='dark'] .astrologer-post-card h3,
+html[data-theme='dark'] .astrologer-comment strong,
+html[data-theme='dark'] .astrologer-post-empty h3,
+html[data-theme='dark'] .astrologer-live-card h4,
+html[data-theme='dark'] .astrologer-live-group h3 {
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .astrologer-post-card > p,
+html[data-theme='dark'] .astrologer-comment p,
+html[data-theme='dark'] .astrologer-post-actions button:not(.is-active),
+html[data-theme='dark'] .astrologer-live-card p {
+  color: #cbd5e1 !important;
+}
+
+html[data-theme='dark'] .astrologer-content-card__top small,
+html[data-theme='dark'] .astrologer-post-empty p {
+  color: #94a3b8 !important;
+}
+
+html[data-theme='dark'] .astrologer-post-actions {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme='dark'] .astrologer-post-actions button:not(.is-active) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html[data-theme='dark'] .astrologer-post-actions button:hover:not(.is-active) {
+  background: rgba(143, 77, 255, 0.15) !important;
+  color: #c084fc !important;
+  border-color: rgba(143, 77, 255, 0.3) !important;
+}
+
+html[data-theme='dark'] .astrologer-post-actions button.is-active {
+  background: rgba(143, 77, 255, 0.22) !important;
+  color: #d8b4fe !important;
+  border-color: rgba(143, 77, 255, 0.45) !important;
+}
+
+html[data-theme='dark'] .astrologer-comment-section {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme='dark'] .astrologer-comment {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme='dark'] .astrologer-comment-input input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme='dark'] .astrologer-comment-input input::placeholder {
+  color: #64748b !important;
+}
+
+html[data-theme='dark'] .astrologer-comment-input button {
+  background: var(--primary, #8f4dff) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme='dark'] .astrologer-share-feedback {
+  background: #1e1b2e !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* --------------------------------------------------------------------------

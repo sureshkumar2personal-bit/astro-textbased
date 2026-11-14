@@ -22,14 +22,6 @@ export default function AstrologerCard({ astrologer: baseAstrologer, kind = 'cha
 
   return (
     <Card hover className={`astrologer-card consultation-directory-astrologer-card ${liveStatus.isBusy ? 'is-busy' : ''}`}>
-      {liveStatus.isBusy && (
-        <span
-          className="astrologer-card__busy-badge"
-          title={kind === 'call' ? `Line Busy · ${liveStatus.waitLabel}` : `Busy · ${liveStatus.waitLabel}`}
-        >
-          ● Wait ~{liveStatus.waitMinutes}m
-        </span>
-      )}
       <span className="astrologer-card__rate" aria-label={`Consultation rate: ${rate} rupees per minute`}>
         ₹{rate}/min
       </span>
