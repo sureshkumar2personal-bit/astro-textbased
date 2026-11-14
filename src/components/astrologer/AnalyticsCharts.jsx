@@ -59,44 +59,69 @@ export function WeeklyTrendChart({ days }) {
   )
 }
 
-const COLORS = { call: '#18bf8a', chat: '#17b5d1', text: '#f5a10b', atonement: '#a348eb' }
+const COLORS = { call: '#36AFA0', chat: '#399DB8', text: '#D99A38', atonement: '#9871C7' }
 
+const RING_R = 80
+const RING_W = 12
+const CIRC = 2 * Math.PI * RING_R
+const GAP = 14 // visible space between segments (the round caps use RING_W of it)
+
+/** Thin minimal donut: rounded segments, "Total Services" in the centre, compact legend underneath. */
 export function ServicesDonut({ segments }) {
   const [hover, setHover] = useState(null)
+  const [selected, setSelected] = useState(null) // key of the clicked segment; clicking it again clears it
   const total = segments.reduce((sum, segment) => sum + segment.count, 0)
+  const visible = segments.filter((segment) => segment.count > 0)
   let cursor = 0
-  const arcs = segments.map((segment) => {
-    const from = cursor
-    cursor += total ? (segment.count / total) * 360 : 0
-    return { ...segment, from, to: cursor }
+  const arcs = visible.map((segment) => {
+    const share = segment.count / total
+    const start = cursor
+    cursor += share
+    const length = visible.length === 1 ? CIRC : Math.max(0.5, share * CIRC - GAP - RING_W)
+    return { ...segment, length, offset: -(start * CIRC + (visible.length === 1 ? 0 : (GAP + RING_W) / 2)) }
   })
-  const stops = total ? arcs.filter((arc) => arc.to > arc.from).map((arc) => `${COLORS[arc.key]} ${arc.from}deg ${arc.to}deg`).join(', ') : '#283249 0deg 360deg'
+  const focusKey = hover?.key ?? selected
   const hovered = hover && arcs.find((arc) => arc.key === hover.key)
 
-  const onMove = (event) => {
-    if (!total) return
-    const rect = event.currentTarget.getBoundingClientRect()
-    const dx = event.clientX - (rect.left + rect.width / 2)
-    const dy = event.clientY - (rect.top + rect.height / 2)
-    const radius = Math.hypot(dx, dy)
-    const outer = rect.width / 2
-    if (radius > outer || radius < outer * 0.5) { setHover(null); return }
-    const angle = ((Math.atan2(dx, -dy) * 180) / Math.PI + 360) % 360
-    const arc = arcs.find((item) => item.count > 0 && angle >= item.from && angle < item.to) || arcs.filter((item) => item.count > 0).at(-1)
-    setHover({ key: arc.key, x: event.clientX - rect.left, y: event.clientY - rect.top, flip: dx > 0 })
+  const track = (event, key) => {
+    const rect = event.currentTarget.ownerSVGElement.parentElement.getBoundingClientRect()
+    setHover({ key, x: event.clientX - rect.left, y: event.clientY - rect.top })
   }
+  const toggle = (key) => setSelected((current) => (current === key ? null : key))
 
   return (
-    <div className="astrologer-donut" role="img" aria-label="Consultation services mix chart" style={{ background: `conic-gradient(${stops})` }} onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
-      <span />
-      {hovered && <i className="donut-highlight" style={{ background: `conic-gradient(transparent 0deg ${hovered.from}deg, ${COLORS[hovered.key]} ${hovered.from}deg ${hovered.to}deg, transparent ${hovered.to}deg 360deg)` }} />}
-      {hovered && (
-        <div className={`chart-tooltip chart-tooltip--donut${hover.flip ? ' is-flip' : ''}`} style={{ left: hover.x, top: hover.y }} role="status">
-          <strong><i style={{ background: COLORS[hovered.key] }} />{hovered.label}</strong>
-          <div>Consultations <b>{hovered.count}</b></div>
-          <div>Share <b>{formatPercent(hovered.percent)}</b></div>
-        </div>
-      )}
+    <div className="services-donut">
+      <div className="services-donut__chart">
+        <svg viewBox="0 0 200 200" role="img" aria-label="Consultation services mix chart">
+          <circle cx="100" cy="100" r={RING_R} className="services-donut__track" strokeWidth={RING_W} />
+          <g transform="rotate(-90 100 100)">
+            {arcs.map((arc) => {
+              const active = focusKey === arc.key
+              return (
+                <circle
+                  key={arc.key}
+                  cx="100" cy="100" r={RING_R} fill="none" stroke={COLORS[arc.key]}
+                  strokeWidth={active ? RING_W + 3 : RING_W}
+                  strokeLinecap={arcs.length === 1 ? 'butt' : 'round'}
+                  strokeDasharray={`${arc.length} ${CIRC}`} strokeDashoffset={arc.offset}
+                  className={`services-donut__arc${active ? ' is-active' : ''}${focusKey && !active ? ' is-dim' : ''}`}
+                  tabIndex={0} role="button" aria-pressed={selected === arc.key} aria-label={`${arc.label}: ${formatPercent(arc.percent)}`}
+                  onPointerEnter={(event) => track(event, arc.key)} onPointerMove={(event) => track(event, arc.key)} onPointerLeave={() => setHover(null)}
+                  onClick={() => toggle(arc.key)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggle(arc.key) } }}
+                />
+              )
+            })}
+          </g>
+          <text x="100" y="94" textAnchor="middle" className="services-donut__label">Total Services</text>
+          <text x="100" y="124" textAnchor="middle" className="services-donut__total">{total}</text>
+        </svg>
+        {hovered && <div className="services-donut__tip" style={{ left: hover.x, top: hover.y }} role="status"><i style={{ background: COLORS[hovered.key] }} />{hovered.label} <b>{formatPercent(hovered.percent)}</b></div>}
+      </div>
+      <ul className="services-donut__legend">
+        {segments.map((segment) => (
+          <li key={segment.key} className={focusKey && focusKey !== segment.key ? 'is-dim' : ''}><i style={{ background: COLORS[segment.key] }} />{segment.label}</li>
+        ))}
+      </ul>
     </div>
   )
 }

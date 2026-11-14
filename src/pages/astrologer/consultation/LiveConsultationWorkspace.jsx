@@ -1,5 +1,6 @@
 import { CheckCircle2, XCircle, ChevronRight, Hourglass, LayoutGrid, Users, PhoneOff, Paperclip, Send, ShieldAlert, Smile, Sparkles, UserRound, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   appendConsultationMessage,
   getConsultationSecondsLeft,
@@ -323,6 +324,7 @@ function HoroscopePanel({ session, onAskGuruji }) {
   )
 }
 
+const MAX_WAITING = 3
 const WAITING_RING_MS = 60 * 1000 // same ring window the dashboard uses for incoming calls
 
 /** Other users with a live, unanswered request to this astrologer (oldest first). Read from the same store the dashboard queue uses. */
@@ -355,7 +357,8 @@ function useWaitingRequests(session) {
 const formatWait = (ms) => { const total = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(total / 60)}m ${String(total % 60).padStart(2, '0')}s` }
 
 function WaitingUsers({ session }) {
-  const { waiting, now } = useWaitingRequests(session)
+  const { waiting: queued, now } = useWaitingRequests(session)
+  const waiting = queued.slice(0, MAX_WAITING) // only the first three (oldest) are listed; the rest move up as these are answered
   // Same patches the existing chat/call request handlers use (Dashboard.acceptCall/declineCall, InstantChatAstrologer).
   const respond = async (request, action) => {
     if (busy[request.id]) return
@@ -375,7 +378,6 @@ function WaitingUsers({ session }) {
     }
   }
   const [open, setOpen] = useState(false)
-  const [showAll, setShowAll] = useState(false)
   const [busy, setBusy] = useState({}) // requestId -> 'accept' | 'decline' while the action runs
   const [errors, setErrors] = useState({}) // requestId -> message
   const [pulse, setPulse] = useState(false)
@@ -423,16 +425,15 @@ function WaitingUsers({ session }) {
     return () => window.removeEventListener('resize', fit)
   }, [open, waiting.length])
 
-  useEffect(() => { if (!waiting.length) { setOpen(false); setShowAll(false) } }, [waiting.length])
+  useEffect(() => { if (!waiting.length) { setOpen(false) } }, [waiting.length])
   if (!waiting.length) return null
-  const shown = waiting.slice(0, 3)
-  const rows = showAll ? waiting : shown
+  const rows = waiting
   return (
     <div className="lcw-waiting-wrap" ref={wrapRef}>
       <button type="button" className={`lcw-waiting${pulse ? ' is-new' : ''}`} aria-expanded={open} aria-haspopup="true" onClick={() => setOpen((value) => !value)}>
         <Users size={26} aria-hidden="true" />
         <span className="lcw-waiting__text">{waiting.length} {waiting.length === 1 ? 'User' : 'Users'} Waiting to Connect</span>
-        <span className="lcw-waiting__avatars">{shown.map((request) => <Avatar key={request.id} name={request.userName} src={request.userAvatar} size={32} round />)}</span>
+        <span className="lcw-waiting__avatars">{waiting.map((request) => <Avatar key={request.id} name={request.userName} src={request.userAvatar} size={32} round />)}</span>
         <ChevronRight size={20} aria-hidden="true" className="lcw-waiting__arrow" />
       </button>
       {open && (
@@ -467,7 +468,6 @@ function WaitingUsers({ session }) {
               </li>
             ))}
           </ul>
-          {waiting.length > 3 && <button type="button" className="lcw-waiting-all" onClick={() => setShowAll((value) => !value)}>{showAll ? 'Show Less' : `View All (${waiting.length})`}</button>}
         </div>
       )}
     </div>
@@ -480,7 +480,9 @@ function ChatPanel({ session, draft, setDraft, inputRef }) {
   const listRef = useRef(null)
   const stickRef = useRef(true)
   const fileRef = useRef(null)
+  const navigate = useNavigate()
   const messages = session.messages || []
+  const ended = session.status !== 'accepted' // ended / declined sessions stay readable but cannot be written to
 
   useEffect(() => {
     const tick = () => setRemaining(getConsultationSecondsLeft(session))
@@ -506,7 +508,7 @@ function ChatPanel({ session, draft, setDraft, inputRef }) {
 
   const send = (text) => {
     const value = String(text || '').trim()
-    if (!value) return
+    if (!value || ended) return
     // Always read-modify-write against the latest stored session so no message is lost or crossed.
     appendConsultationMessage(session.id, 'astrologer', value)
     stickRef.current = true
@@ -523,27 +525,30 @@ function ChatPanel({ session, draft, setDraft, inputRef }) {
           <span className="lcw-chat-avatar"><Avatar name={session.userName} src={session.userAvatar} size={58} round /><i className="lcw-online" /></span>
           <div className="lcw-chat-header__who">
             <strong data-testid="chat-contact">{session.userName}</strong>
-            <span className="lcw-status-pill">Online</span>
-            <small>{['Connected', session.language, session.topic].filter(Boolean).join(' • ')}</small>
+            <span className="lcw-status-pill">{ended ? 'Ended' : 'Online'}</span>
+            <small>{[ended ? 'Session ended' : 'Connected', session.language, session.topic].filter(Boolean).join(' • ')}</small>
           </div>
           <WaitingUsers session={session} />
         </div>
         <div className="lcw-chat-header__row">
-          <span className="lcw-timer" data-testid="chat-timer"><i className="lcw-online lcw-online--dot" /> Time left: <b>{formatTimer(remaining)}</b></span>
+          <span className="lcw-timer" data-testid="chat-timer"><i className="lcw-online lcw-online--dot" /> {ended ? <>Chat ended <b>{session.endedAt ? formatSessionDateTime(session.endedAt) : ''}</b></> : <>Time left: <b>{formatTimer(remaining)}</b></>}</span>
           <span className="lcw-rate" data-testid="chat-rate"><Wallet size={15} /> <b>₹{Number(session.pricePerMinute) || 0}</b> <small>/min · {getConsultationTotalMinutes(session)} min</small></span>
           <button
             type="button"
             className="lcw-end"
-            onClick={() => updateInstantConsultation(session.id, { status: 'ended', endedAt: new Date().toISOString() })}
+            onClick={() => {
+              if (!ended) updateInstantConsultation(session.id, { status: 'ended', endedAt: new Date().toISOString() })
+              if (session.type === 'chat') navigate('/astrologer') // chat sessions have their own page: leave it once closed
+            }}
           >
-            <PhoneOff size={15} /> End Chat
+            <PhoneOff size={15} /> {ended && session.type === 'chat' ? 'Back to Dashboard' : 'End Chat'}
           </button>
         </div>
       </header>
 
       <div className="lcw-messages" aria-live="polite" ref={listRef} onScroll={onScroll}>
         <p className="lcw-system">
-          Session {session.id.slice(0, 8).toUpperCase()} · call received {formatSessionDateTime(session.createdAt)}
+          Session {session.id.slice(0, 8).toUpperCase()} · {session.type === 'chat' ? 'chat' : 'call'} received {formatSessionDateTime(session.createdAt)}
           {session.startedAt ? ` · accepted ${formatSessionDateTime(session.startedAt)}` : ''}
         </p>
         {session.topic && <p className="lcw-system">Topic: {session.topic}</p>}
@@ -560,20 +565,20 @@ function ChatPanel({ session, draft, setDraft, inputRef }) {
       </div>
 
       <div className="lcw-suggestions">
-        {suggestions.map(([icon, question]) => <button key={question} type="button" onClick={() => send(question)}><span aria-hidden="true">{icon}</span> {question}</button>)}
+        {suggestions.map(([icon, question]) => <button key={question} type="button" disabled={ended} onClick={() => send(question)}><span aria-hidden="true">{icon}</span> {question}</button>)}
       </div>
 
       <form className="lcw-composer" onSubmit={(event) => { event.preventDefault(); send(draft) }}>
         <input ref={fileRef} type="file" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) send(`📎 ${file.name}`); event.target.value = '' }} />
-        <button type="button" className="lcw-attach" aria-label="Attach file" onClick={() => fileRef.current?.click()}><Paperclip size={20} /></button>
+        <button type="button" className="lcw-attach" aria-label="Attach file" disabled={ended} onClick={() => fileRef.current?.click()}><Paperclip size={20} /></button>
         <div className="lcw-input">
-          <input ref={inputRef} value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={`Ask about ${session.userName}'s chart…`} aria-label="Message" />
+          <input ref={inputRef} value={draft} disabled={ended} onChange={(event) => setDraft(event.target.value)} placeholder={ended ? 'This chat has ended' : `Ask about ${session.userName}'s chart…`} aria-label="Message" />
           <span className="lcw-emoji-wrap">
             <button type="button" className="lcw-icon" aria-label="Emoji" onClick={() => setEmojiOpen((open) => !open)}><Smile size={20} /></button>
             {emojiOpen && <div className="lcw-emoji-pop">{EMOJIS.map((emoji) => <button key={emoji} type="button" onClick={() => setDraft((current) => `${current}${emoji}`)}>{emoji}</button>)}</div>}
           </span>
         </div>
-        <button type="submit" className="lcw-send" aria-label="Send message" disabled={!draft.trim()}>Send <Send size={17} /></button>
+        <button type="submit" className="lcw-send" aria-label="Send message" disabled={ended || !draft.trim()}>Send <Send size={17} /></button>
       </form>
     </section>
   )

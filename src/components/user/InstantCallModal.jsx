@@ -6,6 +6,8 @@ import { consultationAstrologers } from '../../data/consultationAstrologers.js'
 import { getAstrologerPhoto } from '../../data/astrologerPhotos.js'
 import { useAppData } from '../../state/AppDataContext.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { checkInstantAvailability } from '../../utils/availabilityStore.js'
+import { UNAVAILABLE_REASON } from '../../utils/astrologerAvailability.js'
 import ChatBirthDetailsStep from './ChatBirthDetailsStep.jsx'
 import ConsultationRatingView from './ConsultationRatingView.jsx'
 import {
@@ -48,6 +50,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   const [step, setStep] = useState('birth')
   const [birthDetails, setBirthDetails] = useState(null)
   const [request, setRequest] = useState(null)
+  const [unavailable, setUnavailable] = useState('')
   const [endedRequest, setEndedRequest] = useState(null)
   const [remaining, setRemaining] = useState(0)
   const [error, setError] = useState('')
@@ -71,6 +74,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     setStep('birth')
     setBirthDetails(null)
     setRequest(null)
+    setUnavailable('')
     setEndedRequest(null)
     setRemaining(0)
     setError('')
@@ -82,7 +86,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
       const mine = requests.filter(
         (entry) => entry.userId === userId && entry.astrologerId === astrologer.id && entry.type === type,
       )
-      const active = mine.find((entry) => entry.status !== 'ended') || null
+      const active = mine.find((entry) => !['ended', 'cancelled'].includes(entry.status)) || null
+
+      // The server refused this request after payment (astrologer switched Chat/Call/DND off in the meantime): return the money.
+      const refused = mine.find((entry) => entry.status === 'cancelled' && entry.cancelReason === UNAVAILABLE_REASON && !entry.refunded && Date.now() - new Date(entry.cancelledAt || 0).getTime() < 60000)
+      if (refused) {
+        updateInstantConsultation(refused.id, { refunded: true })
+        if (Number(refused.amountPaid) > 0) actions.topUpUserWallet(Number(refused.amountPaid))
+        setUnavailable(`${astrologer.name} is not accepting instant ${isCall ? 'calls' : 'chats'} right now. Your payment was returned to your wallet.`)
+      }
 
       if (openedOnLiveSession.current === null) openedOnLiveSession.current = Boolean(active)
 
@@ -96,7 +108,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
     }
     refresh()
     return subscribeToInstantConsultations(refresh)
-  }, [astrologer.id, type, userId, onEnded])
+  }, [astrologer.id, type, userId, onEnded, actions, isCall, astrologer.name])
 
   useEffect(() => {
     if (request?.status !== 'accepted') return undefined
@@ -137,9 +149,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
       return () => window.clearTimeout(timer)
     }
   }, [request?.status, isCall, astrologer.id, navigate, onClose])
-  const startChat = () => {
+  const startChat = async () => {
     if (balance < price) {
       setError(`You need ${money(price - balance)} more to book this consultation.`)
+      return
+    }
+    // Checked before any payment: DND / Chat / Call switches are enforced again by the server when the request is stored.
+    const availability = await checkInstantAvailability(astrologer.id, type)
+    if (!availability.ok) {
+      setError(availability.message)
       return
     }
     actions.debitUserWallet({
@@ -348,6 +366,15 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
               <button type="button" className="instant-call-secondary" onClick={endCall}>
                 <PhoneOff size={16} /> Cancel Request
               </button>
+            </div>
+          )}
+
+          {unavailable && !request && (
+            <div className="instant-call-result">
+              <PhoneOff size={24} />
+              <strong>Astrologer unavailable</strong>
+              <p>{unavailable}</p>
+              <button type="button" className="instant-call-secondary" onClick={() => { setUnavailable(''); setStep('birth') }}>OK</button>
             </div>
           )}
 

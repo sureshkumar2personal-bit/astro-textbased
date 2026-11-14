@@ -1,3 +1,4 @@
+import { liveServiceStatus, useAstrologerAvailability } from '../../utils/availabilityStore.js'
 import { usePricingVersion, withSavedRates } from '../../utils/consultationPricing.js'
 import AvailabilityBadge from './AvailabilityBadge.jsx'
 import Rating from './Rating.jsx'
@@ -10,7 +11,8 @@ function formatExperience(experience) {
 export default function ProfileHeader({ astrologer: baseAstrologer, kind, note, action, secondaryAction }) {
   usePricingVersion()
   const astrologer = withSavedRates(baseAstrologer)
-  const status = kind === 'call' ? astrologer.callStatus : astrologer.chatStatus
+  useAstrologerAvailability(baseAstrologer.id) // re-render when the astrologer switches Chat / Call / DND
+  const status = liveServiceStatus(astrologer.id, kind, kind === 'call' ? astrologer.callStatus : astrologer.chatStatus)
   const rate = kind === 'call' ? astrologer.callRate : astrologer.chatRate
   const statusLabel = kind === 'call' ? 'Available for Call' : 'Available for Chat'
 

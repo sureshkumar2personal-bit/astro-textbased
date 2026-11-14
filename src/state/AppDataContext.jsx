@@ -4,6 +4,7 @@ import { sortByDateDesc } from '../utils/date.js'
 import { availabilitySnapshotForDate, generateAppointmentSlots, isCancelledStatus, parseTimeToMinutes } from '../utils/appointments.js'
 import { applyRunningBalances, buildSeedAstrologerWallet, computeWalletSummary, payoutDisplayLabel } from '../utils/wallet.js'
 import { ROLES } from '../utils/roleRoutes.js'
+import { fetchAvailability, getCachedAvailability, publishAvailability } from '../utils/availabilityStore.js'
 import { mockAppointments, mockAppointmentHistory, mockConsultations, mockAstrologerPosts, mockAstrologers, mockLiveSessions, mockPoojas, subscribedAstrologers } from '../data/notificationData.js'
 import { TIER_PRICES } from '../data/audienceMembers.js'
 import { initialAtonements } from '../data/atonementData.js'
@@ -2561,6 +2562,28 @@ export function AppDataProvider({ children }) {
   useEffect(() => {
     saveToStorage(ASTROLOGER_SERVICES_STORAGE_KEY, astrologerServices)
   }, [astrologerServices])
+
+  // Chat / Call / DND live on the server (api/availability.js) so customers are gated even if this tab is closed, and the
+  // choice survives refresh, logout and login. On sign-in the saved server copy wins; only then are local changes published.
+  const availabilityAstrologerId = currentUser?.role === ROLES.ASTROLOGER ? (currentUser.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser.id) : null
+  const [availabilityHydratedFor, setAvailabilityHydratedFor] = useState(null)
+  useEffect(() => {
+    if (!availabilityAstrologerId) { setAvailabilityHydratedFor(null); return undefined }
+    let cancelled = false
+    fetchAvailability(availabilityAstrologerId).then((remote) => {
+      if (cancelled) return
+      if (remote?.updatedAt) setAstrologerServices((previous) => normalizeAstrologerServices({ ...previous, chatEnabled: remote.chatEnabled, callEnabled: remote.callEnabled, dndEnabled: remote.dndEnabled }))
+      setAvailabilityHydratedFor(availabilityAstrologerId)
+    })
+    return () => { cancelled = true }
+  }, [availabilityAstrologerId])
+  useEffect(() => {
+    if (!availabilityAstrologerId || availabilityHydratedFor !== availabilityAstrologerId) return
+    const cached = getCachedAvailability(availabilityAstrologerId)
+    const { chatEnabled, callEnabled, dndEnabled } = astrologerServices
+    if (cached && cached.chatEnabled === chatEnabled && cached.callEnabled === callEnabled && cached.dndEnabled === dndEnabled) return
+    publishAvailability(availabilityAstrologerId, { chatEnabled, callEnabled, dndEnabled })
+  }, [availabilityAstrologerId, availabilityHydratedFor, astrologerServices.chatEnabled, astrologerServices.callEnabled, astrologerServices.dndEnabled])
 
   useEffect(() => {
     saveToStorage(ASTROLOGER_POSTS_STORAGE_KEY, astrologerPosts)

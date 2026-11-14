@@ -35,10 +35,8 @@ import {
   Gavel,
 } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext.jsx'
-import CallAstrologer from '../pages/astrologer/callastrologer.jsx'
 import useTodaysInstantEarnings from '../state/useTodaysInstantEarnings.js'
 import { formatRupees } from '../utils/instantCallConsole.js'
-import InstantChatAstrologer from '../pages/astrologer/instantchatastrologer.jsx'
 import { useAuth } from '../state/AuthContext.jsx'
 import ActiveCallIndicator from './user/ActiveCallIndicator.jsx'
 import { getRoleBasePath, ROLES } from '../utils/roleRoutes.js'
@@ -594,9 +592,27 @@ export default function Layout() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Short status line after any availability change. Only new instant requests are affected: active chats/calls and
+  // confirmed appointments are never interrupted by these switches.
+  const [availabilityNotice, setAvailabilityNotice] = useState('')
+  useEffect(() => {
+    if (!availabilityNotice) return undefined
+    const timer = window.setTimeout(() => setAvailabilityNotice(''), 4000)
+    return () => window.clearTimeout(timer)
+  }, [availabilityNotice])
+  const toggleService = (key) => {
+    const on = !astrologerServices[key]
+    const name = key === 'chatEnabled' ? 'Instant Chat' : 'Instant Call'
+    actions.updateAstrologerServices({ [key]: on })
+    setAvailabilityNotice(on
+      ? `${name} is ON. ${astrologerServices.dndEnabled ? 'DND is still on, so no new requests will arrive until it is turned off.' : 'New requests can reach you.'}`
+      : `${name} is OFF. New requests are blocked; active sessions and appointments continue.`)
+  }
+
   const handleDndToggle = () => {
     if (astrologerServices.dndEnabled) {
       actions.updateAstrologerServices({ dndEnabled: false })
+      setAvailabilityNotice('DND is OFF. New requests follow your Chat and Call switches.')
       return
     }
     setDndConfirmOpen(true)
@@ -614,11 +630,11 @@ export default function Layout() {
             tabIndex={0}
             aria-pressed={astrologerServices.chatEnabled}
             aria-label={`Chat ${astrologerServices.chatEnabled ? 'on' : 'off'}`}
-            onClick={() => actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })}
+            onClick={() => toggleService('chatEnabled')}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
-                actions.updateAstrologerServices({ chatEnabled: !astrologerServices.chatEnabled })
+                toggleService('chatEnabled')
               }
             }}
           ><i /> Chat</span>
@@ -628,11 +644,11 @@ export default function Layout() {
             tabIndex={0}
             aria-pressed={astrologerServices.callEnabled}
             aria-label={`Call ${astrologerServices.callEnabled ? 'on' : 'off'}`}
-            onClick={() => actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })}
+            onClick={() => toggleService('callEnabled')}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault()
-                actions.updateAstrologerServices({ callEnabled: !astrologerServices.callEnabled })
+                toggleService('callEnabled')
               }
             }}
           ><i /> Call</span>
@@ -824,8 +840,6 @@ export default function Layout() {
                 </AnimatePresence>
               </div>
               <IncomingRequestOverlay chatPreviewRequest={chatPreviewRequest} chatRequest={activeChatRequest} actions={actions} onOpenChat={setActiveChatRequestId} onCloseChat={() => setActiveChatRequestId(null)} />
-              <CallAstrologer />
-              <InstantChatAstrologer />
             </div>
           </>
         ) : (
@@ -861,6 +875,7 @@ export default function Layout() {
             </div>
           </div>
         )}
+      {availabilityNotice && <div className="availability-toast" role="status">{availabilityNotice}</div>}
       {dndConfirmOpen && (
         <div className="modal-overlay astrologer-dnd-confirm-overlay" role="presentation" onClick={() => setDndConfirmOpen(false)}>
           <section
@@ -879,6 +894,7 @@ export default function Layout() {
                 className="btn btn-primary"
                 onClick={() => {
                   actions.updateAstrologerServices({ dndEnabled: true })
+                  setAvailabilityNotice('DND is ON. New instant chats and calls are blocked and you are hidden as available. Active sessions and appointments continue.')
                   setDndConfirmOpen(false)
                 }}
               >

@@ -1,5 +1,6 @@
 import { Clock3, Info, Send } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext.jsx'
 import {
   getConsultationSecondsLeft,
@@ -14,6 +15,7 @@ const formatTime = (seconds) => `${String(Math.floor(seconds / 60)).padStart(2, 
 
 export default function InstantChatAstrologer() {
   const { currentUser } = useAuth()
+  const { pathname } = useLocation()
   const astrologerId = currentUser?.id === 'astrologer-demo-alias' ? 'astrologer-demo' : currentUser?.id
   const [requests, setRequests] = useState([])
   const [remaining, setRemaining] = useState(0)
@@ -51,6 +53,8 @@ export default function InstantChatAstrologer() {
     setMessage('')
   }
 
+  // The Consultation section (Instant Chat workspace, Instant Call console, Pricing) has its own chat UI; the floating panel is not shown there.
+  if (pathname.startsWith('/astrologer/consultation')) return null
   if (!active) return null
 
   return (

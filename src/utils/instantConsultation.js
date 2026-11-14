@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { calculateInstantAmount, getInstantRate } from './consultationPricing.js'
 import { isSyncable, mergeLists } from './consultationMerge.js'
+import { UNAVAILABLE_REASON, canStartInstant } from './astrologerAvailability.js'
+import { getCachedAvailability } from './availabilityStore.js'
 import { consultationAstrologers } from '../data/consultationAstrologers.js'
 
 export const INSTANT_CONSULTATION_STORAGE_KEY = 'astroconnect-instant-consultations'
@@ -30,12 +32,24 @@ function applyRemote(remote) {
   if (changed) writeAll(merged)
 }
 
+/** The server refused these new requests (astrologer unavailable, duplicate, ...): cancel them here so no UI keeps ringing. */
+function cancelRefused(rejected) {
+  if (!Array.isArray(rejected)) return
+  const stored = readAll()
+  rejected.forEach(({ id, reason }) => {
+    const local = stored.find((request) => request.id === id)
+    if (local && ['ringing', 'accepted'].includes(local.status)) updateInstantConsultation(id, { status: 'cancelled', cancelledAt: new Date().toISOString(), cancelReason: reason || 'refused' })
+  })
+}
+
 async function callSync(options) {
   if (typeof fetch === 'undefined' || Date.now() < syncPausedUntil) return
   try {
     const response = await fetch(SYNC_URL, { cache: 'no-store', ...options })
     if (!response.ok) throw new Error(`sync ${response.status}`)
-    applyRemote((await response.json()).requests)
+    const data = await response.json()
+    applyRemote(data.requests)
+    cancelRefused(data.rejected)
   } catch {
     // API missing or offline: stay local and retry later.
     syncPausedUntil = Date.now() + SYNC_BACKOFF_MS
@@ -189,6 +203,15 @@ export function createInstantConsultation(payload) {
     createdAt: now,
     updatedAt: now,
     messages: [],
+  }
+  // The astrologer's Chat / Call / DND switches (cached from the server) gate every new request. The request is kept as
+  // 'cancelled' so the customer UI can say why; the server applies the same rule again when it is stored. The astrologer's own
+  // demo simulators pass bypassAvailability.
+  const availability = payload.bypassAvailability ? null : getCachedAvailability(payload.astrologerId)
+  if (availability && !canStartInstant(availability, type)) {
+    Object.assign(request, { status: 'cancelled', cancelledAt: now, cancelReason: UNAVAILABLE_REASON })
+    writeAll([request, ...readAll()])
+    return request
   }
   const stored = readAll()
   // One waiting request per user and astrologer: repeating the request returns the one already queued.

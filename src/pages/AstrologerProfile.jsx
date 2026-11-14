@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useAstrologerAvailability } from '../utils/availabilityStore.js'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { UserPlus, UserCheck, Star, CalendarPlus, CalendarClock, BadgeCheck, Bookmark, Heart, X, Grid3X3, Info, MessageCircle, PhoneCall, PhoneOff, Radio, MapPin, Languages, Pencil, Share2, Users, Check, ChevronLeft, ChevronRight, Clock3, WalletCards, CircleAlert, Copy, Sparkles, FileText, RefreshCw, Layers, Compass, ShieldCheck, HeartHandshake, Award, Flame, Gem, MessageSquareText, ThumbsUp, CheckCircle2, MessageSquarePlus } from 'lucide-react'
@@ -402,17 +403,18 @@ export default function AstrologerProfile() {
 
   const astrologerPhoto = astrologer.photo || astrologer.profileImage || consultationInfo.profileImage || ''
 
+  const liveAvailability = useAstrologerAvailability(astrologer.id)
   const isChatAvailable = useMemo(() => {
-    if (astrologer.chatEnabled === false) return false
+    if (astrologer.chatEnabled === false || !liveAvailability.chatAvailable) return false
     if (consultationInfo.chatStatus) return consultationInfo.chatStatus === 'Available'
     return astrologer.availability === 'Online' || astrologer.isOnline
-  }, [astrologer, consultationInfo])
+  }, [astrologer, consultationInfo, liveAvailability.chatAvailable])
 
   const isCallAvailable = useMemo(() => {
-    if (astrologer.voiceEnabled === false) return false
+    if (astrologer.voiceEnabled === false || !liveAvailability.callAvailable) return false
     if (consultationInfo.callStatus) return consultationInfo.callStatus === 'Available'
     return astrologer.availability === 'Online' || astrologer.isOnline
-  }, [astrologer, consultationInfo])
+  }, [astrologer, consultationInfo, liveAvailability.callAvailable])
 
   const shareProfile = () => {
     const shareUrl = window.location.href
