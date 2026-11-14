@@ -53,9 +53,6 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
   const [error, setError] = useState('')
 
   const liveStatus = useAstrologerLiveStatus(astrologer, type)
-  const isAstrologerBusy = liveStatus.isLineBusy || (request && getInstantConsultations().some(
-    (entry) => entry.id !== request.id && entry.astrologerId === astrologer.id && entry.status === 'accepted'
-  ))
 
   const userId = currentUser?.id || 'guest'
   const balance = Number(userWallet?.balance || 0)
@@ -208,12 +205,18 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
                   ? 'accepted'
                   : request?.status === 'rejected'
                     ? 'rejected'
-                    : (request?.status === 'ringing' && isAstrologerBusy) || (!request && liveStatus.isBusy)
-                      ? 'busy'
-                      : request?.status || 'idle'
+                    : request?.status === 'ringing'
+                      ? 'ringing'
+                      : liveStatus.isBusy
+                        ? 'busy'
+                        : 'idle'
               }`}
             >
-              {((request?.status === 'ringing' && isAstrologerBusy) || (!request && liveStatus.isBusy)) ? (
+              {request?.status === 'accepted' ? (
+                <Check size={13} />
+              ) : request?.status === 'ringing' ? (
+                isCall ? <Phone size={13} /> : <MessageCircle size={13} />
+              ) : liveStatus.isBusy && !request ? (
                 <PhoneOff size={13} />
               ) : isCall ? (
                 <Phone size={13} />
@@ -223,7 +226,7 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
               {request?.status === 'accepted'
                 ? 'Connected'
                 : request?.status === 'ringing'
-                  ? (isAstrologerBusy ? `Line Busy · ${liveStatus.waitLabel || '~wait for 3 mins'}` : 'Ringing…')
+                  ? 'Ringing…'
                   : request?.status === 'rejected'
                     ? 'Declined'
                     : liveStatus.isBusy
@@ -338,34 +341,14 @@ export default function InstantCallModal({ type = 'call', astrologerId, onClose,
           )}
 
           {request?.status === 'ringing' && (
-            isAstrologerBusy ? (
-              <div className="instant-call-waiting instant-call-waiting--queue">
-                <div className="instant-call-queue-badge">
-                  <PhoneOff size={13} /> Line Busy
-                </div>
-                <span className="instant-call-pulse instant-call-pulse--busy" />
-                <strong className="instant-call-queue-title">You are in queue for {astrologer.name}</strong>
-                <div className="instant-call-queue-estimate">
-                  <Clock3 size={15} />
-                  <span>Estimated wait: <strong>{liveStatus.waitLabel || '~wait for 3 mins'}</strong></span>
-                </div>
-                <p className="instant-call-queue-hint">
-                  {astrologer.name} is currently in consultation with another user. Your call will connect automatically as soon as the line is free!
-                </p>
-                <button type="button" className="instant-call-secondary" onClick={endCall}>
-                  <PhoneOff size={16} /> Cancel Waiting
-                </button>
-              </div>
-            ) : (
-              <div className="instant-call-waiting">
-                <span className="instant-call-pulse" />
-                <strong>Waiting for response…</strong>
-                <p>Connecting with {astrologer.name}…</p>
-                <button type="button" className="instant-call-secondary" onClick={endCall}>
-                  <PhoneOff size={16} /> Cancel Request
-                </button>
-              </div>
-            )
+            <div className="instant-call-waiting">
+              <span className="instant-call-pulse" />
+              <strong>Waiting for response…</strong>
+              <p>Connecting with {astrologer.name}…</p>
+              <button type="button" className="instant-call-secondary" onClick={endCall}>
+                <PhoneOff size={16} /> Cancel Request
+              </button>
+            </div>
           )}
 
           {request?.status === 'rejected' && (
