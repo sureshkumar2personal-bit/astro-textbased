@@ -333,22 +333,6 @@ export function getAstrologerLiveStatus(astrologer, kind = 'call', now = Date.no
     }
   }
 
-  if (waiting.length > 0) {
-    const waitMinutes = Math.max(1, waiting.reduce((sum, item) => sum + (Number(item.durationMinutes) || 0), 0))
-    const waitLabel = waitMinutes === 1 ? '~wait for 1 min' : `~wait for ${waitMinutes} mins`
-    return {
-      status: 'Busy',
-      isBusy: true,
-      isLineBusy: true,
-      label: 'Line Busy',
-      waitMinutes,
-      waitLabel,
-      queueCount: waiting.length,
-      activeType: waiting[0].type,
-      activeSession: null,
-    }
-  }
-
   // Fallback to static astrologer metadata if available
   const meta = typeof astrologer === 'object' && (astrologer.callStatus || astrologer.chatStatus)
     ? astrologer
